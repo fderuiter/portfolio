@@ -8,8 +8,6 @@
 
 > **formatBytes**(`bytes`, `decimals?`): `string`
 
-Defined in: [lib/neuro/progress-bus.ts:57](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/progress-bus.ts#L57)
-
 Format raw byte counts into human-readable string (B, KB, MB, GB).
 
 ## Parameters

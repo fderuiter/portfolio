@@ -8,6 +8,4 @@
 
 > `const` **ContactResponseSchema**: `ZodObject`\<\{ `message`: `ZodString`; `messageId`: `ZodOptional`\<`ZodString`\>; `simulated`: `ZodOptional`\<`ZodBoolean`\>; `success`: `ZodBoolean`; \}, `$strip`\>
 
-Defined in: [lib/schemas.ts:294](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L294)
-
 Schema for Contact submission API response

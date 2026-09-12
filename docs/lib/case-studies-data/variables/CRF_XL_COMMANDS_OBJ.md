@@ -7,5 +7,3 @@
 # Variable: CRF\_XL\_COMMANDS\_OBJ
 
 > `const` **CRF\_XL\_COMMANDS\_OBJ**: [`CaseStudyCommands`](../type-aliases/CaseStudyCommands.md)
-
-Defined in: [lib/case-studies-data.ts:425](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L425)

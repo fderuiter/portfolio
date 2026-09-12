@@ -8,8 +8,6 @@
 
 > **getOncologyPresetSync**(): [`StudyProtocol`](../../../types/interfaces/StudyProtocol.md)
 
-Defined in: [lib/crf/presets/loader.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/crf/presets/loader.ts#L17)
-
 ## Returns
 
 [`StudyProtocol`](../../../types/interfaces/StudyProtocol.md)

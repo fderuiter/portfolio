@@ -8,8 +8,6 @@
 
 > **parsePrecisionDate**(`raw`): [`ParsedPrecisionDate`](../interfaces/ParsedPrecisionDate.md)
 
-Defined in: [lib/crf/precision-date.ts:47](https://github.com/fderuiter/portfolio/blob/main/lib/crf/precision-date.ts#L47)
-
 Parses an ISO 8601 date, partial date, or null flavor into structured parts.
 Supported patterns:
 - YYYY-MM-DD (Full date: e.g. 2026-08-19)

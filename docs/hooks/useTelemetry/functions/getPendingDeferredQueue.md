@@ -8,8 +8,6 @@
 
 > **getPendingDeferredQueue**(): [`PendingDeferredTask`](../interfaces/PendingDeferredTask.md)[]
 
-Defined in: [hooks/useTelemetry.ts:229](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L229)
-
 Gets currently pending deferred telemetry tasks.
 
 ## Returns

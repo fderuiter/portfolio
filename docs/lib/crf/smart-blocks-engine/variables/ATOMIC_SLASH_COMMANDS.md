@@ -7,5 +7,3 @@
 # Variable: ATOMIC\_SLASH\_COMMANDS
 
 > `const` **ATOMIC\_SLASH\_COMMANDS**: [`SlashCommandItem`](../interfaces/SlashCommandItem.md)[]
-
-Defined in: [lib/crf/smart-blocks-engine.ts:1353](https://github.com/fderuiter/portfolio/blob/main/lib/crf/smart-blocks-engine.ts#L1353)

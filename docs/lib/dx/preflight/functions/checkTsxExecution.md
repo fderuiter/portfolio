@@ -8,8 +8,6 @@
 
 > **checkTsxExecution**(`root`): [`PreflightCheckResult`](../interfaces/PreflightCheckResult.md)
 
-Defined in: [lib/dx/preflight.ts:158](https://github.com/fderuiter/portfolio/blob/main/lib/dx/preflight.ts#L158)
-
 Probes whether this repository's TypeScript scripts can actually
 execute in the current environment, using `node --import tsx` -- the
 same compatible invocation `package.json`'s own scripts rely on --

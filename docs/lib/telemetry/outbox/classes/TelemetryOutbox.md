@@ -6,8 +6,6 @@
 
 # Class: TelemetryOutbox
 
-Defined in: [lib/telemetry/outbox.ts:109](https://github.com/fderuiter/portfolio/blob/main/lib/telemetry/outbox.ts#L109)
-
 Pure, framework-agnostic telemetry outbox buffer.
 Provides FIFO bounded capacity, exponential backoff retries on 5xx/network errors,
 targeted rollback on HTTP 429 rate limits, storage serialization, and unload keepalive beacons.
@@ -17,8 +15,6 @@ targeted rollback on HTTP 429 rate limits, storage serialization, and unload kee
 ### Constructor
 
 > **new TelemetryOutbox**(`config?`): `TelemetryOutbox`
-
-Defined in: [lib/telemetry/outbox.ts:126](https://github.com/fderuiter/portfolio/blob/main/lib/telemetry/outbox.ts#L126)
 
 #### Parameters
 
@@ -38,8 +34,6 @@ Defined in: [lib/telemetry/outbox.ts:126](https://github.com/fderuiter/portfolio
 
 > **get** **isDestroyed**(): `boolean`
 
-Defined in: [lib/telemetry/outbox.ts:429](https://github.com/fderuiter/portfolio/blob/main/lib/telemetry/outbox.ts#L429)
-
 Returns true if the outbox instance has been destroyed.
 
 ##### Returns
@@ -53,8 +47,6 @@ Returns true if the outbox instance has been destroyed.
 #### Get Signature
 
 > **get** **isEmpty**(): `boolean`
-
-Defined in: [lib/telemetry/outbox.ts:422](https://github.com/fderuiter/portfolio/blob/main/lib/telemetry/outbox.ts#L422)
 
 Returns true if the outbox queue is currently empty.
 
@@ -70,8 +62,6 @@ Returns true if the outbox queue is currently empty.
 
 > **get** **size**(): `number`
 
-Defined in: [lib/telemetry/outbox.ts:415](https://github.com/fderuiter/portfolio/blob/main/lib/telemetry/outbox.ts#L415)
-
 Gets the current number of queued items.
 
 ##### Returns
@@ -83,8 +73,6 @@ Gets the current number of queued items.
 ### clear()
 
 > **clear**(): `void`
-
-Defined in: [lib/telemetry/outbox.ts:450](https://github.com/fderuiter/portfolio/blob/main/lib/telemetry/outbox.ts#L450)
 
 Synchronously clears all items from the queue and storage and cancels any pending retry timer.
 
@@ -98,8 +86,6 @@ Synchronously clears all items from the queue and storage and cancels any pendin
 
 > **destroy**(): `void`
 
-Defined in: [lib/telemetry/outbox.ts:462](https://github.com/fderuiter/portfolio/blob/main/lib/telemetry/outbox.ts#L462)
-
 Cleans up all event listeners, cancels pending timers, and destroys the outbox instance.
 
 #### Returns
@@ -111,8 +97,6 @@ Cleans up all event listeners, cancels pending timers, and destroys the outbox i
 ### enqueue()
 
 > **enqueue**(`item`): `void`
-
-Defined in: [lib/telemetry/outbox.ts:295](https://github.com/fderuiter/portfolio/blob/main/lib/telemetry/outbox.ts#L295)
 
 Enqueues an item directly into the outbox buffer, applying FIFO capacity eviction if needed.
 
@@ -133,8 +117,6 @@ Telemetry item to enqueue.
 ### flush()
 
 > **flush**(`options?`): `Promise`\<`void`\>
-
-Defined in: [lib/telemetry/outbox.ts:316](https://github.com/fderuiter/portfolio/blob/main/lib/telemetry/outbox.ts#L316)
 
 Flushes all queued items immediately through the configured transport.
 
@@ -158,8 +140,6 @@ Optional options such as keepalive beacon flag.
 
 > **getCapacity**(): `number`
 
-Defined in: [lib/telemetry/outbox.ts:408](https://github.com/fderuiter/portfolio/blob/main/lib/telemetry/outbox.ts#L408)
-
 Gets the current maximum queue capacity.
 
 #### Returns
@@ -171,8 +151,6 @@ Gets the current maximum queue capacity.
 ### getQueue()
 
 > **getQueue**(): [`TelemetryOutboxItem`](../interfaces/TelemetryOutboxItem.md)[]
-
-Defined in: [lib/telemetry/outbox.ts:436](https://github.com/fderuiter/portfolio/blob/main/lib/telemetry/outbox.ts#L436)
 
 Returns a shallow copy of the current queue items.
 
@@ -186,8 +164,6 @@ Returns a shallow copy of the current queue items.
 
 > **peek**(): [`TelemetryOutboxItem`](../interfaces/TelemetryOutboxItem.md) \| `undefined`
 
-Defined in: [lib/telemetry/outbox.ts:443](https://github.com/fderuiter/portfolio/blob/main/lib/telemetry/outbox.ts#L443)
-
 Returns the oldest item at the front of the queue without removing it.
 
 #### Returns
@@ -199,8 +175,6 @@ Returns the oldest item at the front of the queue without removing it.
 ### send()
 
 > **send**(`item`): `Promise`\<`boolean`\>
-
-Defined in: [lib/telemetry/outbox.ts:252](https://github.com/fderuiter/portfolio/blob/main/lib/telemetry/outbox.ts#L252)
 
 Attempts immediate dispatch of a single telemetry item.
 If delivery fails with a retryable error, the item is buffered into the outbox.
@@ -224,8 +198,6 @@ True if successfully dispatched, false otherwise.
 ### setCapacity()
 
 > **setCapacity**(`capacity`): `void`
-
-Defined in: [lib/telemetry/outbox.ts:396](https://github.com/fderuiter/portfolio/blob/main/lib/telemetry/outbox.ts#L396)
 
 Sets a new maximum capacity limit on the queue, trimming oldest entries if needed.
 

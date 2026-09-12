@@ -8,8 +8,6 @@
 
 > **generateBlinkBrowseRoom**(): [`DungeonRoom`](../../types/interfaces/DungeonRoom.md)
 
-Defined in: [lib/dungeon/generator.ts:552](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/generator.ts#L552)
-
 Creates Room 3: BlinkBrowse (Eye-tracking / Cursor Steering)
 
 ## Returns

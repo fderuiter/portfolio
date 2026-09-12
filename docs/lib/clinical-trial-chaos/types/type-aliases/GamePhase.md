@@ -7,5 +7,3 @@
 # Type Alias: GamePhase
 
 > **GamePhase** = `1` \| `2` \| `3`
-
-Defined in: [lib/clinical-trial-chaos/types.ts:104](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L104)

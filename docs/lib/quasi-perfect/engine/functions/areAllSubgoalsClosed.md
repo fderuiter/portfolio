@@ -8,8 +8,6 @@
 
 > **areAllSubgoalsClosed**(`subgoals`): `boolean`
 
-Defined in: [lib/quasi-perfect/engine.ts:330](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/engine.ts#L330)
-
 Checks whether all subgoals are completed.
 
 ## Parameters

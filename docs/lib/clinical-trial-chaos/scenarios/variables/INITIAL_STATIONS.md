@@ -7,5 +7,3 @@
 # Variable: INITIAL\_STATIONS
 
 > `const` **INITIAL\_STATIONS**: [`StationConfig`](../../types/interfaces/StationConfig.md)[]
-
-Defined in: [lib/clinical-trial-chaos/scenarios.ts:630](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/scenarios.ts#L630)

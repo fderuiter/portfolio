@@ -7,5 +7,3 @@
 # Type Alias: UniversalCrfBranding
 
 > **UniversalCrfBranding** = `z.infer`\<*typeof* [`UniversalCrfBrandingSchema`](../variables/UniversalCrfBrandingSchema.md)\>
-
-Defined in: [lib/crf/universal-schema.ts:243](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L243)

@@ -6,15 +6,11 @@
 
 # Interface: CyberdeckProfile
 
-Defined in: [lib/dungeon/types.ts:293](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L293)
-
 ## Properties
 
 ### firmwareUpgrades
 
 > **firmwareUpgrades**: `object`
-
-Defined in: [lib/dungeon/types.ts:299](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L299)
 
 #### exploitRadiusTier
 
@@ -38,15 +34,11 @@ Defined in: [lib/dungeon/types.ts:299](https://github.com/fderuiter/portfolio/bl
 
 > **highScore**: `number`
 
-Defined in: [lib/dungeon/types.ts:295](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L295)
-
 ***
 
 ### runsCompleted
 
 > **runsCompleted**: `number`
-
-Defined in: [lib/dungeon/types.ts:296](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L296)
 
 ***
 
@@ -54,20 +46,14 @@ Defined in: [lib/dungeon/types.ts:296](https://github.com/fderuiter/portfolio/bl
 
 > **selectedClass**: [`CyberdeckClassId`](../type-aliases/CyberdeckClassId.md)
 
-Defined in: [lib/dungeon/types.ts:298](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L298)
-
 ***
 
 ### totalCrypto
 
 > **totalCrypto**: `number`
 
-Defined in: [lib/dungeon/types.ts:294](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L294)
-
 ***
 
 ### unlockedClasses
 
 > **unlockedClasses**: [`CyberdeckClassId`](../type-aliases/CyberdeckClassId.md)[]
-
-Defined in: [lib/dungeon/types.ts:297](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L297)

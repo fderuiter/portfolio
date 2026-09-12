@@ -8,8 +8,6 @@
 
 > **generateClientConnectionHashSync**(`input`): `string`
 
-Defined in: [lib/services/privacy-service.ts:79](https://github.com/fderuiter/portfolio/blob/main/lib/services/privacy-service.ts#L79)
-
 Synchronous SHA-256 connection hash helper using native platform crypto,
 preserving legacy synchronous signatures without custom JS crypto logic.
 

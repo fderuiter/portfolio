@@ -8,8 +8,6 @@
 
 > **safeSetItem**\<`T`\>(`key`, `value`, `options?`): `boolean`
 
-Defined in: [lib/safe-storage.ts:506](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L506)
-
 ## Type Parameters
 
 ### T

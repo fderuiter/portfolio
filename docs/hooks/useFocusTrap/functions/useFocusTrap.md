@@ -8,8 +8,6 @@
 
 > **useFocusTrap**\<`T`\>(`active`, `options?`): `RefObject`\<`T` \| `null`\>
 
-Defined in: [hooks/useFocusTrap.ts:64](https://github.com/fderuiter/portfolio/blob/main/hooks/useFocusTrap.ts#L64)
-
 Custom hook to trap keyboard focus within a container element for modal dialogs and drawers.
 
 Implements WCAG 2.1 Focus Order and Keyboard Navigation compliance.

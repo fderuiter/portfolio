@@ -6,15 +6,11 @@
 
 # Interface: EscapeXmlOptions
 
-Defined in: [lib/utils.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/utils.ts#L15)
-
 ## Properties
 
 ### singleQuoteEntity?
 
 > `optional` **singleQuoteEntity?**: `boolean` \| `"&apos;"` \| `"&#39;"`
-
-Defined in: [lib/utils.ts:21](https://github.com/fderuiter/portfolio/blob/main/lib/utils.ts#L21)
 
 Entity format for single quote escaping.
 - '&apos;' for standard XML (default)

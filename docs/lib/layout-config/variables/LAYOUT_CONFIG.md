@@ -8,8 +8,6 @@
 
 > `const` **LAYOUT\_CONFIG**: `object`
 
-Defined in: [lib/layout-config.ts:4](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L4)
-
 ## Type Declaration
 
 ### BREAKPOINTS

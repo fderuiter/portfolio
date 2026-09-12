@@ -8,8 +8,6 @@
 
 > **exportStudyToUsdm**(`study`, `pretty?`): `string`
 
-Defined in: [lib/crf/usdm-adapter.ts:446](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L446)
-
 Serializes a StudyProtocol into standard CDISC USDM JSON string.
 
 ## Parameters

@@ -8,8 +8,6 @@
 
 > **instantiateAtomicField**(`commandId`, `indexOffset?`): [`CRFField`](../../types/interfaces/CRFField.md)
 
-Defined in: [lib/crf/smart-blocks-engine.ts:1687](https://github.com/fderuiter/portfolio/blob/main/lib/crf/smart-blocks-engine.ts#L1687)
-
 Instantiates an atomic CRF Field from a slash command
 
 ## Parameters

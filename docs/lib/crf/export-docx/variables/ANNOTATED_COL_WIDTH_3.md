@@ -7,5 +7,3 @@
 # Variable: ANNOTATED\_COL\_WIDTH\_3
 
 > `const` **ANNOTATED\_COL\_WIDTH\_3**: `2621` = `2621`
-
-Defined in: [lib/crf/export-docx.ts:46](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-docx.ts#L46)

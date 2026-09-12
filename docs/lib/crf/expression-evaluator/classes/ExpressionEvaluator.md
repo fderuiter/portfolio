@@ -6,15 +6,11 @@
 
 # Class: ExpressionEvaluator
 
-Defined in: [lib/crf/expression-evaluator.ts:97](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L97)
-
 ## Constructors
 
 ### Constructor
 
 > **new ExpressionEvaluator**(`tokens`, `context`): `ExpressionEvaluator`
-
-Defined in: [lib/crf/expression-evaluator.ts:102](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L102)
 
 #### Parameters
 
@@ -35,8 +31,6 @@ Defined in: [lib/crf/expression-evaluator.ts:102](https://github.com/fderuiter/p
 ### parse()
 
 > **parse**(): `number` \| `null`
-
-Defined in: [lib/crf/expression-evaluator.ts:130](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L130)
 
 #### Returns
 

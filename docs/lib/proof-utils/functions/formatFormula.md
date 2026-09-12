@@ -8,8 +8,6 @@
 
 > **formatFormula**(`ast`): `string`
 
-Defined in: [lib/proof-utils.ts:352](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L352)
-
 Formats a PropAst into mathematical unicode string.
 
 ## Parameters

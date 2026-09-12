@@ -8,8 +8,6 @@
 
 > **computeSyntheticVolume**(`scenarioId`): `Promise`\<[`SyntheticVolume`](../../volume-generator/interfaces/SyntheticVolume.md)\>
 
-Defined in: [lib/neuro/loader.ts:18](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/loader.ts#L18)
-
 ## Parameters
 
 ### scenarioId

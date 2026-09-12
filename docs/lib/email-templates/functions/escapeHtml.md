@@ -8,8 +8,6 @@
 
 > **escapeHtml**(`input`): `string`
 
-Defined in: [lib/email-templates.ts:6](https://github.com/fderuiter/portfolio/blob/main/lib/email-templates.ts#L6)
-
 Escapes raw strings for safe inclusion in HTML templates.
 
 ## Parameters

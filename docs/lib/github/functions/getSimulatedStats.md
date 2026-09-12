@@ -8,8 +8,6 @@
 
 > **getSimulatedStats**(`language`, `identifier?`): [`GitHubStats`](../interfaces/GitHubStats.md)
 
-Defined in: [lib/github.ts:617](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L617)
-
 ## Parameters
 
 ### language

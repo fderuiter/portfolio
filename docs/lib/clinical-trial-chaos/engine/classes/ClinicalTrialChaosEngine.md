@@ -6,8 +6,6 @@
 
 # Class: ClinicalTrialChaosEngine
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:877](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L877)
-
 Base abstract class and typed EventBus for all headless arcade game engines.
 Zero framework dependencies. Testable in pure Node.js/Vitest.
 
@@ -20,8 +18,6 @@ Zero framework dependencies. Testable in pure Node.js/Vitest.
 ### Constructor
 
 > **new ClinicalTrialChaosEngine**(`initialProtocol?`): `ClinicalTrialChaosEngine`
-
-Defined in: [lib/clinical-trial-chaos/engine.ts:881](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L881)
 
 #### Parameters
 
@@ -43,8 +39,6 @@ Defined in: [lib/clinical-trial-chaos/engine.ts:881](https://github.com/fderuite
 
 > `protected` **cachedSnapshot**: [`ClinicalTrialChaosSnapshot`](../interfaces/ClinicalTrialChaosSnapshot.md) \| `null` = `null`
 
-Defined in: [lib/arcade/core/engine.ts:8](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L8)
-
 #### Inherited from
 
 [`ArcadeEngine`](../../../arcade/core/engine/classes/ArcadeEngine.md).[`cachedSnapshot`](../../../arcade/core/engine/classes/ArcadeEngine.md#cachedsnapshot)
@@ -55,8 +49,6 @@ Defined in: [lib/arcade/core/engine.ts:8](https://github.com/fderuiter/portfolio
 
 > `protected` **state**: [`ClinicalTrialChaosState`](../interfaces/ClinicalTrialChaosState.md)
 
-Defined in: [lib/arcade/core/engine.ts:7](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L7)
-
 #### Inherited from
 
 [`ArcadeEngine`](../../../arcade/core/engine/classes/ArcadeEngine.md).[`state`](../../../arcade/core/engine/classes/ArcadeEngine.md#state)
@@ -66,8 +58,6 @@ Defined in: [lib/arcade/core/engine.ts:7](https://github.com/fderuiter/portfolio
 ### activatePowerUp()
 
 > **activatePowerUp**(`id`, `force?`): `void`
-
-Defined in: [lib/clinical-trial-chaos/engine.ts:1083](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L1083)
 
 #### Parameters
 
@@ -88,8 +78,6 @@ Defined in: [lib/clinical-trial-chaos/engine.ts:1083](https://github.com/fderuit
 ### addAuditLog()
 
 > **addAuditLog**(`message`, `level?`, `suspicionDelta?`): `void`
-
-Defined in: [lib/clinical-trial-chaos/engine.ts:931](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L931)
 
 #### Parameters
 
@@ -115,8 +103,6 @@ Defined in: [lib/clinical-trial-chaos/engine.ts:931](https://github.com/fderuite
 
 > **addSubject**(`subject`): `void`
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:926](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L926)
-
 #### Parameters
 
 ##### subject
@@ -132,8 +118,6 @@ Defined in: [lib/clinical-trial-chaos/engine.ts:926](https://github.com/fderuite
 ### createSnapshot()
 
 > **createSnapshot**(): [`ClinicalTrialChaosSnapshot`](../interfaces/ClinicalTrialChaosSnapshot.md)
-
-Defined in: [lib/clinical-trial-chaos/engine.ts:1219](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L1219)
 
 Generates a fresh immutable state snapshot.
 
@@ -151,8 +135,6 @@ Generates a fresh immutable state snapshot.
 
 > **destroy**(): `void`
 
-Defined in: [lib/arcade/core/engine.ts:60](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L60)
-
 Cleans up engine timers, event subscriptions, and resources.
 
 #### Returns
@@ -168,8 +150,6 @@ Cleans up engine timers, event subscriptions, and resources.
 ### emit()
 
 > **emit**\<`T`\>(`event`, `payload`): `void`
-
-Defined in: [lib/arcade/core/engine.ts:117](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L117)
 
 Emits a typed event to registered listeners.
 
@@ -203,8 +183,6 @@ Emits a typed event to registered listeners.
 
 > **getSnapshot**(): [`ClinicalTrialChaosSnapshot`](../interfaces/ClinicalTrialChaosSnapshot.md)
 
-Defined in: [lib/arcade/core/engine.ts:43](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L43)
-
 Returns a cached immutable state snapshot for React useSyncExternalStore.
 Reference is preserved until notifySubscribers() is explicitly called.
 
@@ -222,8 +200,6 @@ Reference is preserved until notifySubscribers() is explicitly called.
 
 > **init**(): `void`
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:897](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L897)
-
 Initializes engine resources, object pools, and audio bindings.
 
 #### Returns
@@ -239,8 +215,6 @@ Initializes engine resources, object pools, and audio bindings.
 ### invalidateSnapshot()
 
 > **invalidateSnapshot**(): `void`
-
-Defined in: [lib/arcade/core/engine.ts:78](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L78)
 
 Invalidates cached snapshot so the next getSnapshot() recomputes fresh state.
 
@@ -258,8 +232,6 @@ Invalidates cached snapshot so the next getSnapshot() recomputes fresh state.
 
 > **isModalPaused**(): `boolean`
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:922](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L922)
-
 #### Returns
 
 `boolean`
@@ -269,8 +241,6 @@ Defined in: [lib/clinical-trial-chaos/engine.ts:922](https://github.com/fderuite
 ### notifySubscribers()
 
 > **notifySubscribers**(): `void`
-
-Defined in: [lib/arcade/core/engine.ts:85](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L85)
 
 Invalidates cached snapshot and broadcasts a state change to subscribers.
 
@@ -287,8 +257,6 @@ Invalidates cached snapshot and broadcasts a state change to subscribers.
 ### on()
 
 > **on**\<`T`\>(`event`, `callback`): () => `void`
-
-Defined in: [lib/arcade/core/engine.ts:95](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L95)
 
 Subscribes to a typed one-shot action event (e.g. sfx, haptic, screen shake).
 
@@ -322,8 +290,6 @@ Subscribes to a typed one-shot action event (e.g. sfx, haptic, screen shake).
 
 > **render**(`ctx`, `_alpha`): `void`
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:1197](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L1197)
-
 Renders in-world graphics to the 2D canvas with sub-frame alpha interpolation.
 
 #### Parameters
@@ -349,8 +315,6 @@ Renders in-world graphics to the 2D canvas with sub-frame alpha interpolation.
 ### resize()
 
 > **resize**(`_width`, `_height`, `_dpr`): `void`
-
-Defined in: [lib/arcade/core/engine.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L53)
 
 Handles canvas dimension and device pixel ratio resize events.
 
@@ -381,8 +345,6 @@ Handles canvas dimension and device pixel ratio resize events.
 ### resolveObservation()
 
 > **resolveObservation**(`subjectId`, `obsId`, `choice`): `object`
-
-Defined in: [lib/clinical-trial-chaos/engine.ts:942](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L942)
 
 #### Parameters
 
@@ -416,8 +378,6 @@ Defined in: [lib/clinical-trial-chaos/engine.ts:942](https://github.com/fderuite
 
 > **setModalPause**(`paused`): `void`
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:917](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L917)
-
 #### Parameters
 
 ##### paused
@@ -434,8 +394,6 @@ Defined in: [lib/clinical-trial-chaos/engine.ts:917](https://github.com/fderuite
 
 > **setPaused**(`paused`): `void`
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:912](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L912)
-
 #### Parameters
 
 ##### paused
@@ -451,8 +409,6 @@ Defined in: [lib/clinical-trial-chaos/engine.ts:912](https://github.com/fderuite
 ### subscribe()
 
 > **subscribe**(`callback`): () => `void`
-
-Defined in: [lib/arcade/core/engine.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L68)
 
 Subscribes a listener to snapshot state updates (React useSyncExternalStore).
 
@@ -476,8 +432,6 @@ Subscribes a listener to snapshot state updates (React useSyncExternalStore).
 
 > **update**(`dt`): `void`
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:1117](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L1117)
-
 Advances deterministic simulation physics by fixed delta time dt (in seconds).
 
 #### Parameters
@@ -499,8 +453,6 @@ Advances deterministic simulation physics by fixed delta time dt (in seconds).
 ### verifyAndSubmit()
 
 > **verifyAndSubmit**(`subjectId`, `reason`, `targetStation`): `object`
-
-Defined in: [lib/clinical-trial-chaos/engine.ts:1008](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L1008)
 
 #### Parameters
 

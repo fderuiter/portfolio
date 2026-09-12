@@ -10,8 +10,6 @@
 
 > **createApiHandler**\<`TSchema`\>(`handler`, `options`): [`ApiRouteHandler`](../type-aliases/ApiRouteHandler.md)
 
-Defined in: [lib/route-wrapper.ts:48](https://github.com/fderuiter/portfolio/blob/main/lib/route-wrapper.ts#L48)
-
 Higher-order API route handler wrapper.
 Provides automated Zod request schema validation, uniform error transformation,
 Sentry exception logging, error sanitization, and security header enforcement.
@@ -39,8 +37,6 @@ Sentry exception logging, error sanitization, and security header enforcement.
 ## Call Signature
 
 > **createApiHandler**(`handler`, `options?`): [`ApiRouteHandler`](../type-aliases/ApiRouteHandler.md)
-
-Defined in: [lib/route-wrapper.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/route-wrapper.ts#L53)
 
 Higher-order API route handler wrapper.
 Provides automated Zod request schema validation, uniform error transformation,

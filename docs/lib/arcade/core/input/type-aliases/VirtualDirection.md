@@ -7,5 +7,3 @@
 # Type Alias: VirtualDirection
 
 > **VirtualDirection** = `"up"` \| `"down"` \| `"left"` \| `"right"` \| `"neutral"`
-
-Defined in: [lib/arcade/core/input.ts:23](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/input.ts#L23)

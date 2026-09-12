@@ -6,15 +6,11 @@
 
 # Class: ArcadeViewport
 
-Defined in: [lib/arcade/core/viewport.ts:34](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/viewport.ts#L34)
-
 ## Constructors
 
 ### Constructor
 
 > **new ArcadeViewport**(`config`): `ArcadeViewport`
-
-Defined in: [lib/arcade/core/viewport.ts:40](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/viewport.ts#L40)
 
 #### Parameters
 
@@ -31,8 +27,6 @@ Defined in: [lib/arcade/core/viewport.ts:40](https://github.com/fderuiter/portfo
 ### applyTransform()
 
 > **applyTransform**(`ctx`, `metrics`): `void`
-
-Defined in: [lib/arcade/core/viewport.ts:101](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/viewport.ts#L101)
 
 Applies the transformation matrix to a 2D canvas context.
 
@@ -55,8 +49,6 @@ Applies the transformation matrix to a 2D canvas context.
 ### calculateMetrics()
 
 > **calculateMetrics**(`containerWidth`, `containerHeight`, `rawDpr?`): [`ViewportMetrics`](../interfaces/ViewportMetrics.md)
-
-Defined in: [lib/arcade/core/viewport.ts:50](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/viewport.ts#L50)
 
 Calculates viewport metrics based on container dimensions and physical pixel ratio.
 

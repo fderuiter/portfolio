@@ -8,8 +8,6 @@
 
 > **scaffoldCdashDomain**(`domainCode`): [`CRFForm`](../../types/interfaces/CRFForm.md)
 
-Defined in: [lib/crf/cdash-domain-templates.ts:123](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cdash-domain-templates.ts#L123)
-
 1-Click CDASH Domain Auto-Scaffolder Generator
 
 ## Parameters

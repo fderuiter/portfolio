@@ -6,8 +6,6 @@
 
 # Class: ArcadeGameLoop
 
-Defined in: [lib/arcade/core/game-loop.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/game-loop.ts#L14)
-
 Deterministic Game Loop utilizing requestAnimationFrame, fixed physics timestep,
 accumulator clamping against frame spikes, and sub-frame alpha render interpolation.
 
@@ -16,8 +14,6 @@ accumulator clamping against frame spikes, and sub-frame alpha render interpolat
 ### Constructor
 
 > **new ArcadeGameLoop**(`engine`, `getContext?`, `options?`): `ArcadeGameLoop`
-
-Defined in: [lib/arcade/core/game-loop.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/game-loop.ts#L26)
 
 #### Parameters
 
@@ -43,8 +39,6 @@ Defined in: [lib/arcade/core/game-loop.ts:26](https://github.com/fderuiter/portf
 
 > **isPaused**(): `boolean`
 
-Defined in: [lib/arcade/core/game-loop.ts:99](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/game-loop.ts#L99)
-
 #### Returns
 
 `boolean`
@@ -55,8 +49,6 @@ Defined in: [lib/arcade/core/game-loop.ts:99](https://github.com/fderuiter/portf
 
 > **isRunning**(): `boolean`
 
-Defined in: [lib/arcade/core/game-loop.ts:95](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/game-loop.ts#L95)
-
 #### Returns
 
 `boolean`
@@ -66,8 +58,6 @@ Defined in: [lib/arcade/core/game-loop.ts:95](https://github.com/fderuiter/portf
 ### pause()
 
 > **pause**(): `void`
-
-Defined in: [lib/arcade/core/game-loop.ts:82](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/game-loop.ts#L82)
 
 Pauses simulation updates without tearing down the loop.
 
@@ -81,8 +71,6 @@ Pauses simulation updates without tearing down the loop.
 
 > **resume**(): `void`
 
-Defined in: [lib/arcade/core/game-loop.ts:89](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/game-loop.ts#L89)
-
 Resumes simulation updates and resets frame timestamps to prevent jump spikes.
 
 #### Returns
@@ -94,8 +82,6 @@ Resumes simulation updates and resets frame timestamps to prevent jump spikes.
 ### setContextGetter()
 
 > **setContextGetter**(`getter`): `void`
-
-Defined in: [lib/arcade/core/game-loop.ts:40](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/game-loop.ts#L40)
 
 Updates the context getter delegate.
 
@@ -115,8 +101,6 @@ Updates the context getter delegate.
 
 > **start**(): `void`
 
-Defined in: [lib/arcade/core/game-loop.ts:47](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/game-loop.ts#L47)
-
 Starts the game loop and invokes engine.init().
 
 #### Returns
@@ -128,8 +112,6 @@ Starts the game loop and invokes engine.init().
 ### stepOnce()
 
 > **stepOnce**(): `void`
-
-Defined in: [lib/arcade/core/game-loop.ts:106](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/game-loop.ts#L106)
 
 Manually steps the simulation forward by 1 frame (useful for debugging and tests).
 
@@ -143,8 +125,6 @@ Manually steps the simulation forward by 1 frame (useful for debugging and tests
 
 > **stop**(): `void`
 
-Defined in: [lib/arcade/core/game-loop.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/game-loop.ts#L67)
-
 Stops the game loop and cancels active requestAnimationFrames.
 
 #### Returns
@@ -156,8 +136,6 @@ Stops the game loop and cancels active requestAnimationFrames.
 ### tick()
 
 > **tick**(`deltaMs`): `void`
-
-Defined in: [lib/arcade/core/game-loop.ts:117](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/game-loop.ts#L117)
 
 Drives the accumulator and update steps by an explicit delta time in milliseconds.
 

@@ -8,8 +8,6 @@
 
 > **safeClear**(): `void`
 
-Defined in: [lib/safe-storage.ts:515](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L515)
-
 ## Returns
 
 `void`

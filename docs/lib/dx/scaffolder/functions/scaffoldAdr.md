@@ -8,8 +8,6 @@
 
 > **scaffoldAdr**(`root`, `rawName`, `dryRun?`): [`GeneratedFile`](../interfaces/GeneratedFile.md)[]
 
-Defined in: [lib/dx/scaffolder.ts:377](https://github.com/fderuiter/portfolio/blob/main/lib/dx/scaffolder.ts#L377)
-
 Scaffold Architecture Decision Record (ADR)
 
 ## Parameters

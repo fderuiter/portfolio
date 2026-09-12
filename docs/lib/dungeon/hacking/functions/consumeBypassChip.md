@@ -8,8 +8,6 @@
 
 > **consumeBypassChip**(`puzzle`): [`HexMatrixPuzzle`](../../types/interfaces/HexMatrixPuzzle.md)
 
-Defined in: [lib/dungeon/hacking.ts:174](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/hacking.ts#L174)
-
 Instantly solves the puzzle using a hardware bypass chip.
 
 ## Parameters

@@ -6,15 +6,11 @@
 
 # Interface: Obstacle
 
-Defined in: [lib/garmin-engine.ts:122](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L122)
-
 ## Properties
 
 ### height
 
 > **height**: `number`
-
-Defined in: [lib/garmin-engine.ts:127](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L127)
 
 ***
 
@@ -22,15 +18,11 @@ Defined in: [lib/garmin-engine.ts:127](https://github.com/fderuiter/portfolio/bl
 
 > **id**: `number`
 
-Defined in: [lib/garmin-engine.ts:123](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L123)
-
 ***
 
 ### label
 
 > **label**: `string`
-
-Defined in: [lib/garmin-engine.ts:129](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L129)
 
 ***
 
@@ -38,15 +30,11 @@ Defined in: [lib/garmin-engine.ts:129](https://github.com/fderuiter/portfolio/bl
 
 > **speed**: `number`
 
-Defined in: [lib/garmin-engine.ts:130](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L130)
-
 ***
 
 ### type
 
 > **type**: [`ObstacleType`](../type-aliases/ObstacleType.md)
-
-Defined in: [lib/garmin-engine.ts:128](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L128)
 
 ***
 
@@ -54,15 +42,11 @@ Defined in: [lib/garmin-engine.ts:128](https://github.com/fderuiter/portfolio/bl
 
 > `optional` **variablePayload?**: [`VariableType`](../type-aliases/VariableType.md)
 
-Defined in: [lib/garmin-engine.ts:131](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L131)
-
 ***
 
 ### width
 
 > **width**: `number`
-
-Defined in: [lib/garmin-engine.ts:126](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L126)
 
 ***
 
@@ -70,12 +54,8 @@ Defined in: [lib/garmin-engine.ts:126](https://github.com/fderuiter/portfolio/bl
 
 > **x**: `number`
 
-Defined in: [lib/garmin-engine.ts:124](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L124)
-
 ***
 
 ### y
 
 > **y**: `number`
-
-Defined in: [lib/garmin-engine.ts:125](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L125)

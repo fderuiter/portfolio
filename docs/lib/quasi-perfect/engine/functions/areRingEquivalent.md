@@ -8,8 +8,6 @@
 
 > **areRingEquivalent**(`a`, `b`): `boolean`
 
-Defined in: [lib/quasi-perfect/engine.ts:462](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/engine.ts#L462)
-
 Checks if two AST expressions are equivalent under commutative ring axioms.
 
 ## Parameters

@@ -7,5 +7,3 @@
 # Type Alias: WebVitalRating
 
 > **WebVitalRating** = `"good"` \| `"needs-improvement"` \| `"poor"`
-
-Defined in: [lib/dx/page-bench.ts:182](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L182)

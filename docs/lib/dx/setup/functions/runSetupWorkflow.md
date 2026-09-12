@@ -8,8 +8,6 @@
 
 > **runSetupWorkflow**(`options?`): `Promise`\<[`SetupResult`](../interfaces/SetupResult.md)\>
 
-Defined in: [lib/dx/setup.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib/dx/setup.ts#L72)
-
 Run Interactive DX Setup Routine
 
 ## Parameters

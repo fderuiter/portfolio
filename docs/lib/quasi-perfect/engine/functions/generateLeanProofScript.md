@@ -8,8 +8,6 @@
 
 > **generateLeanProofScript**(`level`, `steps`, `isComplete`): `string`
 
-Defined in: [lib/quasi-perfect/engine.ts:482](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/engine.ts#L482)
-
 Generates an accurate, clean Lean 4 proof script for the given level and executed steps.
 
 ## Parameters

@@ -8,8 +8,6 @@
 
 > **setQueueCapacity**(`cap`): `void`
 
-Defined in: [hooks/useTelemetry.ts:276](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L276)
-
 Sets maximum capacity of the telemetry retry queue.
 
 ## Parameters

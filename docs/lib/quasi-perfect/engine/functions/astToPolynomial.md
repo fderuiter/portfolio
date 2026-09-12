@@ -8,8 +8,6 @@
 
 > **astToPolynomial**(`node`): [`MonomialMap`](../type-aliases/MonomialMap.md) \| `null`
 
-Defined in: [lib/quasi-perfect/engine.ts:413](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/engine.ts#L413)
-
 Converts an arithmetic/algebraic AST node into a canonical polynomial representation.
 
 ## Parameters

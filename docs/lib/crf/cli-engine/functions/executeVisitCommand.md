@@ -8,8 +8,6 @@
 
 > **executeVisitCommand**(`study`, `action`, `args`, `options?`): [`CliCommandResult`](../interfaces/CliCommandResult.md)
 
-Defined in: [lib/crf/cli-engine.ts:376](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cli-engine.ts#L376)
-
 Add / Remove / Assign Visits
 
 ## Parameters

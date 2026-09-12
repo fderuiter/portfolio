@@ -8,8 +8,6 @@
 
 > **parseMarkdownToRichItems**(`text`, `baseFont`, `boldFont`, `italicFont`, `codeFont`): [`ExtendedRichInlineItem`](../interfaces/ExtendedRichInlineItem.md)[]
 
-Defined in: [lib/pretext-block-parser.ts:18](https://github.com/fderuiter/portfolio/blob/main/lib/pretext-block-parser.ts#L18)
-
 Tokenizes markdown-like inline text (**bold**, *italic*, `code`) into RichInlineItem arrays.
 
 ## Parameters

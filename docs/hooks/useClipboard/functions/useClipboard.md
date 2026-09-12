@@ -8,8 +8,6 @@
 
 > **useClipboard**(`options?`): `object`
 
-Defined in: [hooks/useClipboard.ts:15](https://github.com/fderuiter/portfolio/blob/main/hooks/useClipboard.ts#L15)
-
 ## Parameters
 
 ### options?

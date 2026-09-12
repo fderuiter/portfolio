@@ -8,6 +8,4 @@
 
 > `const` **DEFAULT\_BASE\_DELAY\_MS**: `1000` = `1000`
 
-Defined in: [lib/telemetry/outbox.ts:11](https://github.com/fderuiter/portfolio/blob/main/lib/telemetry/outbox.ts#L11)
-
 Default base backoff delay in milliseconds.

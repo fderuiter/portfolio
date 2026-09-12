@@ -8,8 +8,6 @@
 
 > **executeRemoveFormCommand**(`study`, `domainOrFormId`, `options?`): [`CliCommandResult`](../interfaces/CliCommandResult.md)
 
-Defined in: [lib/crf/cli-engine.ts:240](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cli-engine.ts#L240)
-
 Remove Form
 
 ## Parameters

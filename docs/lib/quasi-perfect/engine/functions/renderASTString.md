@@ -8,8 +8,6 @@
 
 > **renderASTString**(`node`): `string`
 
-Defined in: [lib/quasi-perfect/engine.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/engine.ts#L67)
-
 Formats an AST node to human-readable mathematical notation string.
 
 ## Parameters

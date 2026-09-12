@@ -8,8 +8,6 @@
 
 > **createMeshGroupFromBuffers**(`buffers`, `THREEModule`, `options?`): `Group`\<`Object3DEventMap`\>
 
-Defined in: [lib/neuro/engine-loader.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/engine-loader.ts#L72)
-
 Assemble GPU scene meshes from raw geometry array buffers.
 
 ## Parameters

@@ -8,8 +8,6 @@
 
 > **renderTable**(`columns`, `rows`): `string`
 
-Defined in: [lib/dx/utils.ts:79](https://github.com/fderuiter/portfolio/blob/main/lib/dx/utils.ts#L79)
-
 ## Parameters
 
 ### columns

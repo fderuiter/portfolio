@@ -8,8 +8,6 @@
 
 > **checkNodeVersion**(`root`): [`PreflightCheckResult`](../interfaces/PreflightCheckResult.md)
 
-Defined in: [lib/dx/preflight.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/dx/preflight.ts#L53)
-
 Verifies the running Node.js version satisfies this repository's
 declared `engines.node` requirement in `package.json`.
 

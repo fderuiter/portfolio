@@ -8,8 +8,6 @@
 
 > **checkTouchTargetDimensions**(`root`, `fix?`): [`DiagnosticCheckResult`](../interfaces/DiagnosticCheckResult.md)
 
-Defined in: [lib/dx/doctor.ts:1750](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1750)
-
 Check Minimum Touch Target Dimensions Guard (ADR-0003 & ADR-0019)
 
 IMPORTANT: this is a static source-text heuristic only. It scans JSX for

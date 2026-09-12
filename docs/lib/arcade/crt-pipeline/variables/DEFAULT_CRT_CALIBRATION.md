@@ -7,5 +7,3 @@
 # Variable: DEFAULT\_CRT\_CALIBRATION
 
 > `const` **DEFAULT\_CRT\_CALIBRATION**: [`CRTCalibrationConfig`](../interfaces/CRTCalibrationConfig.md)
-
-Defined in: [lib/arcade/crt-pipeline.ts:157](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/crt-pipeline.ts#L157)

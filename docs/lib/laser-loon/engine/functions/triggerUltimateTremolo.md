@@ -8,8 +8,6 @@
 
 > **triggerUltimateTremolo**(`targets`, `fromX`, `fromY`, `canvasWidth?`, `canvasHeight?`, `nextShockwaveId?`): `object`
 
-Defined in: [lib/laser-loon/engine.ts:520](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L520)
-
 ## Parameters
 
 ### targets

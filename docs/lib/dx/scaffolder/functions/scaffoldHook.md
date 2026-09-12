@@ -8,8 +8,6 @@
 
 > **scaffoldHook**(`root`, `rawName`, `dryRun?`): [`GeneratedFile`](../interfaces/GeneratedFile.md)[]
 
-Defined in: [lib/dx/scaffolder.ts:618](https://github.com/fderuiter/portfolio/blob/main/lib/dx/scaffolder.ts#L618)
-
 Scaffold Custom React Hook
 
 ## Parameters

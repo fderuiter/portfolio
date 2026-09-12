@@ -7,5 +7,3 @@
 # Type Alias: InteractHazardInput
 
 > **InteractHazardInput** = `z.input`\<*typeof* [`InteractHazardInputSchema`](../variables/InteractHazardInputSchema.md)\>
-
-Defined in: [lib/services/duck/interact-hazard/spec.ts:19](https://github.com/fderuiter/portfolio/blob/main/lib/services/duck/interact-hazard/spec.ts#L19)

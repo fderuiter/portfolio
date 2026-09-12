@@ -8,8 +8,6 @@
 
 > `const` **OG\_IMAGE\_SIZE**: `object`
 
-Defined in: [lib/og-image.tsx:3](https://github.com/fderuiter/portfolio/blob/main/lib/og-image.tsx#L3)
-
 ## Type Declaration
 
 ### height

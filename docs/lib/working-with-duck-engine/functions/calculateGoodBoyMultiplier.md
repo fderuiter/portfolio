@@ -8,8 +8,6 @@
 
 > **calculateGoodBoyMultiplier**(`naughtyVsGood`): `number`
 
-Defined in: [lib/working-with-duck-engine.ts:696](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L696)
-
 Calculate Good Boy multiplier from the tug-of-war scale
 
 ## Parameters

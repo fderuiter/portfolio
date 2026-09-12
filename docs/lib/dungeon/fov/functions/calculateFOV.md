@@ -8,8 +8,6 @@
 
 > **calculateFOV**(`grid`, `px`, `py`, `radius?`, `existingExplored?`): [`FOVResult`](../interfaces/FOVResult.md)
 
-Defined in: [lib/dungeon/fov.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/fov.ts#L14)
-
 Calculates field of view using raycasting algorithm from a player origin (px, py).
 Updates explored matrix permanently and visible matrix for current frame.
 

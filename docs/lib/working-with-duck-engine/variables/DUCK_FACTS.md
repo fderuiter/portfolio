@@ -7,5 +7,3 @@
 # Variable: DUCK\_FACTS
 
 > `const` **DUCK\_FACTS**: [`DuckFact`](../interfaces/DuckFact.md)[]
-
-Defined in: [lib/working-with-duck-engine.ts:174](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L174)

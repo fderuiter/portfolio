@@ -7,5 +7,3 @@
 # Type Alias: PlayState
 
 > **PlayState** = `"idle"` \| `"playing"` \| `"paused"` \| `"phase_cleared"` \| `"game_over"`
-
-Defined in: [lib/clinical-trial-chaos/types.ts:106](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L106)

@@ -8,8 +8,6 @@
 
 > **benchmarkASTEvaluator**(`iterations?`): [`BenchmarkResult`](../interfaces/BenchmarkResult.md)[]
 
-Defined in: [lib/dx/bench.ts:283](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L283)
-
 Benchmark Clinical AST Rule Evaluation & Formula Linting
 
 ## Parameters

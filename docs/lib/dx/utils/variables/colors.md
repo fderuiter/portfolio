@@ -8,8 +8,6 @@
 
 > `const` **colors**: `object`
 
-Defined in: [lib/dx/utils.ts:6](https://github.com/fderuiter/portfolio/blob/main/lib/dx/utils.ts#L6)
-
 Terminal UI & Formatting Utilities for DX Tooling
 Zero-dependency ANSI formatting and table rendering
 

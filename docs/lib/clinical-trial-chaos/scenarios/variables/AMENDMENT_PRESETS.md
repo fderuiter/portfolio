@@ -7,5 +7,3 @@
 # Variable: AMENDMENT\_PRESETS
 
 > `const` **AMENDMENT\_PRESETS**: [`ProtocolAmendment`](../../types/interfaces/ProtocolAmendment.md)[]
-
-Defined in: [lib/clinical-trial-chaos/scenarios.ts:645](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/scenarios.ts#L645)

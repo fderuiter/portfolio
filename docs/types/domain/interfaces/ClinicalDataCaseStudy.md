@@ -6,8 +6,6 @@
 
 # Interface: ClinicalDataCaseStudy
 
-Defined in: [types/domain.ts:27](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L27)
-
 ## Extends
 
 - [`BaseCaseStudy`](BaseCaseStudy.md)
@@ -17,8 +15,6 @@ Defined in: [types/domain.ts:27](https://github.com/fderuiter/portfolio/blob/mai
 ### architectural\_narrative
 
 > **architectural\_narrative**: `string`
-
-Defined in: [types/domain.ts:8](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L8)
 
 #### Inherited from
 
@@ -30,8 +26,6 @@ Defined in: [types/domain.ts:8](https://github.com/fderuiter/portfolio/blob/main
 
 > `optional` **commands\_json?**: `string` \| `null`
 
-Defined in: [types/domain.ts:12](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L12)
-
 #### Inherited from
 
 [`BaseCaseStudy`](BaseCaseStudy.md).[`commands_json`](BaseCaseStudy.md#commands_json)
@@ -41,8 +35,6 @@ Defined in: [types/domain.ts:12](https://github.com/fderuiter/portfolio/blob/mai
 ### created\_at
 
 > **created\_at**: `Date`
-
-Defined in: [types/domain.ts:14](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L14)
 
 #### Inherited from
 
@@ -54,8 +46,6 @@ Defined in: [types/domain.ts:14](https://github.com/fderuiter/portfolio/blob/mai
 
 > **editorial\_content**: `string`
 
-Defined in: [types/domain.ts:7](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L7)
-
 #### Inherited from
 
 [`BaseCaseStudy`](BaseCaseStudy.md).[`editorial_content`](BaseCaseStudy.md#editorial_content)
@@ -65,8 +55,6 @@ Defined in: [types/domain.ts:7](https://github.com/fderuiter/portfolio/blob/main
 ### github\_url?
 
 > `optional` **github\_url?**: `string` \| `null`
-
-Defined in: [types/domain.ts:6](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L6)
 
 #### Inherited from
 
@@ -78,8 +66,6 @@ Defined in: [types/domain.ts:6](https://github.com/fderuiter/portfolio/blob/main
 
 > **id**: `string`
 
-Defined in: [types/domain.ts:2](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L2)
-
 #### Inherited from
 
 [`BaseCaseStudy`](BaseCaseStudy.md).[`id`](BaseCaseStudy.md#id)
@@ -90,15 +76,11 @@ Defined in: [types/domain.ts:2](https://github.com/fderuiter/portfolio/blob/main
 
 > **parsing\_mechanisms**: `"SAX_STREAMING"` \| `"DOM_PARSING"`
 
-Defined in: [types/domain.ts:29](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L29)
-
 ***
 
 ### playback\_json?
 
 > `optional` **playback\_json?**: `string` \| `null`
-
-Defined in: [types/domain.ts:13](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L13)
 
 #### Inherited from
 
@@ -110,8 +92,6 @@ Defined in: [types/domain.ts:13](https://github.com/fderuiter/portfolio/blob/mai
 
 > **primary\_language**: `string`
 
-Defined in: [types/domain.ts:5](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L5)
-
 #### Inherited from
 
 [`BaseCaseStudy`](BaseCaseStudy.md).[`primary_language`](BaseCaseStudy.md#primary_language)
@@ -121,8 +101,6 @@ Defined in: [types/domain.ts:5](https://github.com/fderuiter/portfolio/blob/main
 ### published
 
 > **published**: `boolean`
-
-Defined in: [types/domain.ts:9](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L9)
 
 #### Inherited from
 
@@ -134,15 +112,11 @@ Defined in: [types/domain.ts:9](https://github.com/fderuiter/portfolio/blob/main
 
 > **regulatory\_targets**: (`"FDA"` \| `"PMDA"` \| `"EMA"`)[]
 
-Defined in: [types/domain.ts:30](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L30)
-
 ***
 
 ### simulated\_telemetry
 
 > **simulated\_telemetry**: `boolean`
-
-Defined in: [types/domain.ts:10](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L10)
 
 #### Inherited from
 
@@ -154,8 +128,6 @@ Defined in: [types/domain.ts:10](https://github.com/fderuiter/portfolio/blob/mai
 
 > **slug**: `string`
 
-Defined in: [types/domain.ts:3](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L3)
-
 #### Inherited from
 
 [`BaseCaseStudy`](BaseCaseStudy.md).[`slug`](BaseCaseStudy.md#slug)
@@ -166,15 +138,11 @@ Defined in: [types/domain.ts:3](https://github.com/fderuiter/portfolio/blob/main
 
 > **standards\_validated**: (`"CDISC_ODM"` \| `"CDISC_SDTM"`)[]
 
-Defined in: [types/domain.ts:28](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L28)
-
 ***
 
 ### tags
 
 > **tags**: `string`
-
-Defined in: [types/domain.ts:11](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L11)
 
 #### Inherited from
 
@@ -186,8 +154,6 @@ Defined in: [types/domain.ts:11](https://github.com/fderuiter/portfolio/blob/mai
 
 > **title**: `string`
 
-Defined in: [types/domain.ts:4](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L4)
-
 #### Inherited from
 
 [`BaseCaseStudy`](BaseCaseStudy.md).[`title`](BaseCaseStudy.md#title)
@@ -197,8 +163,6 @@ Defined in: [types/domain.ts:4](https://github.com/fderuiter/portfolio/blob/main
 ### updated\_at
 
 > **updated\_at**: `Date`
-
-Defined in: [types/domain.ts:15](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L15)
 
 #### Inherited from
 

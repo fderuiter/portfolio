@@ -6,8 +6,6 @@
 
 # Class: RetroLabyrinthEngine
 
-Defined in: [lib/retro-labyrinth/engine.ts:88](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L88)
-
 Base abstract class and typed EventBus for all headless arcade game engines.
 Zero framework dependencies. Testable in pure Node.js/Vitest.
 
@@ -20,8 +18,6 @@ Zero framework dependencies. Testable in pure Node.js/Vitest.
 ### Constructor
 
 > **new RetroLabyrinthEngine**(`config?`): `RetroLabyrinthEngine`
-
-Defined in: [lib/retro-labyrinth/engine.ts:94](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L94)
 
 #### Parameters
 
@@ -43,8 +39,6 @@ Defined in: [lib/retro-labyrinth/engine.ts:94](https://github.com/fderuiter/port
 
 > `protected` **cachedSnapshot**: [`RetroLabyrinthSnapshot`](../interfaces/RetroLabyrinthSnapshot.md) \| `null` = `null`
 
-Defined in: [lib/arcade/core/engine.ts:8](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L8)
-
 #### Inherited from
 
 [`ArcadeEngine`](../../../arcade/core/engine/classes/ArcadeEngine.md).[`cachedSnapshot`](../../../arcade/core/engine/classes/ArcadeEngine.md#cachedsnapshot)
@@ -55,8 +49,6 @@ Defined in: [lib/arcade/core/engine.ts:8](https://github.com/fderuiter/portfolio
 
 > `protected` **state**: [`RetroLabyrinthState`](../interfaces/RetroLabyrinthState.md)
 
-Defined in: [lib/arcade/core/engine.ts:7](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L7)
-
 #### Inherited from
 
 [`ArcadeEngine`](../../../arcade/core/engine/classes/ArcadeEngine.md).[`state`](../../../arcade/core/engine/classes/ArcadeEngine.md#state)
@@ -66,8 +58,6 @@ Defined in: [lib/arcade/core/engine.ts:7](https://github.com/fderuiter/portfolio
 ### createSnapshot()
 
 > **createSnapshot**(): [`RetroLabyrinthSnapshot`](../interfaces/RetroLabyrinthSnapshot.md)
-
-Defined in: [lib/retro-labyrinth/engine.ts:277](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L277)
 
 Generates a fresh immutable state snapshot.
 
@@ -85,8 +75,6 @@ Generates a fresh immutable state snapshot.
 
 > **destroy**(): `void`
 
-Defined in: [lib/arcade/core/engine.ts:60](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L60)
-
 Cleans up engine timers, event subscriptions, and resources.
 
 #### Returns
@@ -102,8 +90,6 @@ Cleans up engine timers, event subscriptions, and resources.
 ### emit()
 
 > **emit**\<`T`\>(`event`, `payload`): `void`
-
-Defined in: [lib/arcade/core/engine.ts:117](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L117)
 
 Emits a typed event to registered listeners.
 
@@ -137,8 +123,6 @@ Emits a typed event to registered listeners.
 
 > **fireActiveWeapon**(): `void`
 
-Defined in: [lib/retro-labyrinth/engine.ts:327](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L327)
-
 #### Returns
 
 `void`
@@ -148,8 +132,6 @@ Defined in: [lib/retro-labyrinth/engine.ts:327](https://github.com/fderuiter/por
 ### getSnapshot()
 
 > **getSnapshot**(): [`RetroLabyrinthSnapshot`](../interfaces/RetroLabyrinthSnapshot.md)
-
-Defined in: [lib/arcade/core/engine.ts:43](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L43)
 
 Returns a cached immutable state snapshot for React useSyncExternalStore.
 Reference is preserved until notifySubscribers() is explicitly called.
@@ -168,8 +150,6 @@ Reference is preserved until notifySubscribers() is explicitly called.
 
 > **init**(): `void`
 
-Defined in: [lib/retro-labyrinth/engine.ts:168](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L168)
-
 Initializes engine resources, object pools, and audio bindings.
 
 #### Returns
@@ -186,8 +166,6 @@ Initializes engine resources, object pools, and audio bindings.
 
 > **invalidateSnapshot**(): `void`
 
-Defined in: [lib/arcade/core/engine.ts:78](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L78)
-
 Invalidates cached snapshot so the next getSnapshot() recomputes fresh state.
 
 #### Returns
@@ -203,8 +181,6 @@ Invalidates cached snapshot so the next getSnapshot() recomputes fresh state.
 ### move()
 
 > **move**(`dx`, `dy`): `boolean`
-
-Defined in: [lib/retro-labyrinth/engine.ts:298](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L298)
 
 #### Parameters
 
@@ -226,8 +202,6 @@ Defined in: [lib/retro-labyrinth/engine.ts:298](https://github.com/fderuiter/por
 
 > **notifySubscribers**(): `void`
 
-Defined in: [lib/arcade/core/engine.ts:85](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L85)
-
 Invalidates cached snapshot and broadcasts a state change to subscribers.
 
 #### Returns
@@ -243,8 +217,6 @@ Invalidates cached snapshot and broadcasts a state change to subscribers.
 ### on()
 
 > **on**\<`T`\>(`event`, `callback`): () => `void`
-
-Defined in: [lib/arcade/core/engine.ts:95](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L95)
 
 Subscribes to a typed one-shot action event (e.g. sfx, haptic, screen shake).
 
@@ -278,8 +250,6 @@ Subscribes to a typed one-shot action event (e.g. sfx, haptic, screen shake).
 
 > **render**(`ctx`, `_alpha`): `void`
 
-Defined in: [lib/retro-labyrinth/engine.ts:219](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L219)
-
 Renders in-world graphics to the 2D canvas with sub-frame alpha interpolation.
 
 #### Parameters
@@ -306,8 +276,6 @@ Renders in-world graphics to the 2D canvas with sub-frame alpha interpolation.
 
 > **resetGame**(): `void`
 
-Defined in: [lib/retro-labyrinth/engine.ts:354](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L354)
-
 #### Returns
 
 `void`
@@ -317,8 +285,6 @@ Defined in: [lib/retro-labyrinth/engine.ts:354](https://github.com/fderuiter/por
 ### resize()
 
 > **resize**(`_width`, `_height`, `_dpr`): `void`
-
-Defined in: [lib/arcade/core/engine.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L53)
 
 Handles canvas dimension and device pixel ratio resize events.
 
@@ -350,8 +316,6 @@ Handles canvas dimension and device pixel ratio resize events.
 
 > **selectWeapon**(`index`): `void`
 
-Defined in: [lib/retro-labyrinth/engine.ts:341](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L341)
-
 #### Parameters
 
 ##### index
@@ -368,8 +332,6 @@ Defined in: [lib/retro-labyrinth/engine.ts:341](https://github.com/fderuiter/por
 
 > **setCrtTheme**(`themeId`): `void`
 
-Defined in: [lib/retro-labyrinth/engine.ts:349](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L349)
-
 #### Parameters
 
 ##### themeId
@@ -385,8 +347,6 @@ Defined in: [lib/retro-labyrinth/engine.ts:349](https://github.com/fderuiter/por
 ### subscribe()
 
 > **subscribe**(`callback`): () => `void`
-
-Defined in: [lib/arcade/core/engine.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L68)
 
 Subscribes a listener to snapshot state updates (React useSyncExternalStore).
 
@@ -409,8 +369,6 @@ Subscribes a listener to snapshot state updates (React useSyncExternalStore).
 ### update()
 
 > **update**(`dt`): `void`
-
-Defined in: [lib/retro-labyrinth/engine.ts:172](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L172)
 
 Advances deterministic simulation physics by fixed delta time dt (in seconds).
 

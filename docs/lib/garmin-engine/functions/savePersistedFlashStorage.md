@@ -8,8 +8,6 @@
 
 > **savePersistedFlashStorage**(`flashVars`): `void`
 
-Defined in: [lib/garmin-engine.ts:111](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L111)
-
 ## Parameters
 
 ### flashVars

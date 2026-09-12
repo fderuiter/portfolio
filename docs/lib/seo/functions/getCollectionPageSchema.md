@@ -8,8 +8,6 @@
 
 > **getCollectionPageSchema**(`name`, `description`, `url`, `items`, `options?`): `string`
 
-Defined in: [lib/seo.ts:426](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L426)
-
 Returns a Schema.org CollectionPage schema for hub and directory views.
 
 ## Parameters

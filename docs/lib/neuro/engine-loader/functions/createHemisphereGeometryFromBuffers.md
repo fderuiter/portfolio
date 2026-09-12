@@ -8,8 +8,6 @@
 
 > **createHemisphereGeometryFromBuffers**(`buf`, `THREEModule?`): `BufferGeometry`\<`NormalBufferAttributes`, `BufferGeometryEventMap`\>
 
-Defined in: [lib/neuro/engine-loader.ts:59](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/engine-loader.ts#L59)
-
 Construct Three.js BufferGeometry from HemisphereBufferTransfer.
 
 ## Parameters

@@ -8,8 +8,6 @@
 
 > **getDeclaredEnvKeys**(): `object`
 
-Defined in: [lib/dx/env-guard.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/dx/env-guard.ts#L9)
-
 Extract all declared keys from Zod object schemas.
 
 ## Returns

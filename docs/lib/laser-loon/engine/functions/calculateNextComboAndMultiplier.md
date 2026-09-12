@@ -8,8 +8,6 @@
 
 > **calculateNextComboAndMultiplier**(`currentCombo`, `lastComboTime`, `currentTime`): `object`
 
-Defined in: [lib/laser-loon/engine.ts:570](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L570)
-
 ## Parameters
 
 ### currentCombo

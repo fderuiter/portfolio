@@ -6,15 +6,11 @@
 
 # Class: SafeStorageAdapter
 
-Defined in: [lib/safe-storage.ts:28](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L28)
-
 ## Constructors
 
 ### Constructor
 
 > **new SafeStorageAdapter**(): `SafeStorageAdapter`
-
-Defined in: [lib/safe-storage.ts:31](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L31)
 
 #### Returns
 
@@ -28,8 +24,6 @@ Defined in: [lib/safe-storage.ts:31](https://github.com/fderuiter/portfolio/blob
 
 > **get** **length**(): `number`
 
-Defined in: [lib/safe-storage.ts:295](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L295)
-
 Gets total number of stored keys.
 
 ##### Returns
@@ -41,8 +35,6 @@ Gets total number of stored keys.
 ### clear()
 
 > **clear**(): `void`
-
-Defined in: [lib/safe-storage.ts:263](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L263)
 
 Clears all items from storage and memory cache.
 
@@ -56,8 +48,6 @@ Clears all items from storage and memory cache.
 
 > **clearCache**(): `void`
 
-Defined in: [lib/safe-storage.ts:88](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L88)
-
 Clear all internal memory cache entries.
 
 #### Returns
@@ -69,8 +59,6 @@ Clear all internal memory cache entries.
 ### getEnvelope()
 
 > **getEnvelope**\<`T`\>(`key`): [`StorageEnvelope`](../interfaces/StorageEnvelope.md)\<`T`\> \| `null`
-
-Defined in: [lib/safe-storage.ts:309](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L309)
 
 Gets the metadata envelope for a key if present or constructs default metadata.
 
@@ -95,8 +83,6 @@ Gets the metadata envelope for a key if present or constructs default metadata.
 ### getItem()
 
 > **getItem**\<`T`\>(`key`, `defaultValue?`): `T` \| `null`
-
-Defined in: [lib/safe-storage.ts:96](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L96)
 
 Reads an item from storage or memory fallback cache.
 Updates lastAccessedAt timestamp and auto-evicts expired items.
@@ -127,8 +113,6 @@ Updates lastAccessedAt timestamp and auto-evicts expired items.
 
 > **invalidateCacheKey**(`key`): `void`
 
-Defined in: [lib/safe-storage.ts:70](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L70)
-
 Invalidate memory cache key if raw storage content differs.
 
 #### Parameters
@@ -147,8 +131,6 @@ Invalidate memory cache key if raw storage content differs.
 
 > **isAvailable**(): `boolean`
 
-Defined in: [lib/safe-storage.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L53)
-
 Safely checks whether localStorage API is accessible in the current environment.
 
 #### Returns
@@ -160,8 +142,6 @@ Safely checks whether localStorage API is accessible in the current environment.
 ### key()
 
 > **key**(`index`): `string` \| `null`
-
-Defined in: [lib/safe-storage.ts:281](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L281)
 
 Returns key at specified index.
 
@@ -181,8 +161,6 @@ Returns key at specified index.
 
 > **pruneExpired**(): `number`
 
-Defined in: [lib/safe-storage.ts:343](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L343)
-
 Prunes all expired keys across storage and memory cache.
 Returns count of pruned entries.
 
@@ -195,8 +173,6 @@ Returns count of pruned entries.
 ### removeItem()
 
 > **removeItem**(`key`): `void`
-
-Defined in: [lib/safe-storage.ts:242](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L242)
 
 Removes an item from storage and memory cache.
 
@@ -215,8 +191,6 @@ Removes an item from storage and memory cache.
 ### setItem()
 
 > **setItem**\<`T`\>(`key`, `value`, `options?`): `boolean`
-
-Defined in: [lib/safe-storage.ts:185](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L185)
 
 Writes an item wrapped in a metadata envelope to storage.
 Handles QuotaExceededError by triggering LRU metadata eviction.

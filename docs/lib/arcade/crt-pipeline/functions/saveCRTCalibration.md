@@ -8,8 +8,6 @@
 
 > **saveCRTCalibration**(`config`): `void`
 
-Defined in: [lib/arcade/crt-pipeline.ts:220](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/crt-pipeline.ts#L220)
-
 Saves CRT calibration configuration to localStorage.
 
 ## Parameters

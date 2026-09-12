@@ -8,8 +8,6 @@
 
 > **createSuccess**\<`T`\>(`data`): [`ServiceSuccess`](../interfaces/ServiceSuccess.md)\<`T`\>
 
-Defined in: [lib/services/service-result.ts:30](https://github.com/fderuiter/portfolio/blob/main/lib/services/service-result.ts#L30)
-
 Creates a type-safe successful ServiceResult envelope.
 
 ## Type Parameters

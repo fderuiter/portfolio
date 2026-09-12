@@ -8,8 +8,6 @@
 
 > **sanitizeError**(`error`): `unknown`
 
-Defined in: [lib/error-sanitization.ts:32](https://github.com/fderuiter/portfolio/blob/main/lib/error-sanitization.ts#L32)
-
 ## Parameters
 
 ### error

@@ -7,5 +7,3 @@
 # Type Alias: VendorSystem
 
 > **VendorSystem** = `"iMednet"` \| `"Veeva Vault"` \| `"OpenClinica"` \| `"Medidata Rave"` \| `"Oracle InForm"`
-
-Defined in: [lib/clinical-trial-chaos/types.ts:47](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L47)

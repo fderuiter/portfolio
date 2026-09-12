@@ -8,8 +8,6 @@
 
 > **getFieldOptions**(`field`, `study`): [`CodelistOption`](../../types/interfaces/CodelistOption.md)[]
 
-Defined in: [lib/crf/export-sas.ts:52](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L52)
-
 Retrieves field options from custom options or referenced codelists.
 
 ## Parameters

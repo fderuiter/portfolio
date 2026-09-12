@@ -7,5 +7,3 @@
 # Variable: STANDARD\_COL\_WIDTH\_2
 
 > `const` **STANDARD\_COL\_WIDTH\_2**: `5429` = `5429`
-
-Defined in: [lib/crf/export-docx.ts:39](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-docx.ts#L39)

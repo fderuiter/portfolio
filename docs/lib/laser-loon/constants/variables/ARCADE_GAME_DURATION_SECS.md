@@ -7,5 +7,3 @@
 # Variable: ARCADE\_GAME\_DURATION\_SECS
 
 > `const` **ARCADE\_GAME\_DURATION\_SECS**: `45` = `45`
-
-Defined in: [lib/laser-loon/constants.ts:244](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/constants.ts#L244)

@@ -8,8 +8,6 @@
 
 > **ApiRouteHandler** = \{(`req?`, `routeParams?`): `Promise`\<`NextResponse`\<`unknown`\>\>; (`req`, `routeContext`): `Promise`\<`NextResponse`\<`unknown`\>\>; \}
 
-Defined in: [lib/route-wrapper.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/route-wrapper.ts#L26)
-
 ## Call Signature
 
 > (`req?`, `routeParams?`): `Promise`\<`NextResponse`\<`unknown`\>\>

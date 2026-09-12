@@ -8,8 +8,6 @@
 
 > **generateSubcorticalBuffers**(`hemiFilter?`): [`RawGeometryBuffer`](../../types/interfaces/RawGeometryBuffer.md)[]
 
-Defined in: [lib/neuro/mesh-generator.ts:376](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/mesh-generator.ts#L376)
-
 Generate subcortical structure geometry buffers (Ventricles, Thalamus, Caudate, Putamen, Hippocampus, Amygdala, Brainstem)
 
 ## Parameters

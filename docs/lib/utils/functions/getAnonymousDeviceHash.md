@@ -8,8 +8,6 @@
 
 > **getAnonymousDeviceHash**(`reqOrHeaders?`, `includeUserAgent?`): `string`
 
-Defined in: [lib/utils.ts:77](https://github.com/fderuiter/portfolio/blob/main/lib/utils.ts#L77)
-
 Computes an anonymous device hash incorporating trimmed proxy IP and optional User-Agent.
 Utility alias wrapper forwarding callers to standard privacy service hashing primitives.
 

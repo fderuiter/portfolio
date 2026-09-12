@@ -8,8 +8,6 @@
 
 > **useDebouncedDiagnostics**(`study`, `options?`): [`UseDebouncedDiagnosticsResult`](../interfaces/UseDebouncedDiagnosticsResult.md)
 
-Defined in: [hooks/useDebouncedDiagnostics.ts:27](https://github.com/fderuiter/portfolio/blob/main/hooks/useDebouncedDiagnostics.ts#L27)
-
 Custom hook to calculate aggregate form issue counts for the studio header badge.
 Defers heavy linting calculations during active typing using trailing-edge idle scheduling
 and React transition wrappers (startTransition) to keep the main UI thread responsive (60fps).

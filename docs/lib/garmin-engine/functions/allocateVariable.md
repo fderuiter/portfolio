@@ -8,8 +8,6 @@
 
 > **allocateVariable**(`state`, `type`, `name?`): `object`
 
-Defined in: [lib/garmin-engine.ts:337](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L337)
-
 Allocate a new variable into the heap
 
 ## Parameters

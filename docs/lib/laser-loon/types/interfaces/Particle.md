@@ -6,15 +6,11 @@
 
 # Interface: Particle
 
-Defined in: [lib/laser-loon/types.ts:99](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L99)
-
 ## Properties
 
 ### alpha
 
 > **alpha**: `number`
-
-Defined in: [lib/laser-loon/types.ts:106](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L106)
 
 ***
 
@@ -22,15 +18,11 @@ Defined in: [lib/laser-loon/types.ts:106](https://github.com/fderuiter/portfolio
 
 > **color**: `string`
 
-Defined in: [lib/laser-loon/types.ts:105](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L105)
-
 ***
 
 ### decay
 
 > **decay**: `number`
-
-Defined in: [lib/laser-loon/types.ts:107](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L107)
 
 ***
 
@@ -38,15 +30,11 @@ Defined in: [lib/laser-loon/types.ts:107](https://github.com/fderuiter/portfolio
 
 > **radius**: `number`
 
-Defined in: [lib/laser-loon/types.ts:104](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L104)
-
 ***
 
 ### rotation?
 
 > `optional` **rotation?**: `number`
-
-Defined in: [lib/laser-loon/types.ts:109](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L109)
 
 ***
 
@@ -54,15 +42,11 @@ Defined in: [lib/laser-loon/types.ts:109](https://github.com/fderuiter/portfolio
 
 > `optional` **shape?**: `"circle"` \| `"crystal"` \| `"star"` \| `"smoke"`
 
-Defined in: [lib/laser-loon/types.ts:108](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L108)
-
 ***
 
 ### vx
 
 > **vx**: `number`
-
-Defined in: [lib/laser-loon/types.ts:102](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L102)
 
 ***
 
@@ -70,20 +54,14 @@ Defined in: [lib/laser-loon/types.ts:102](https://github.com/fderuiter/portfolio
 
 > **vy**: `number`
 
-Defined in: [lib/laser-loon/types.ts:103](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L103)
-
 ***
 
 ### x
 
 > **x**: `number`
 
-Defined in: [lib/laser-loon/types.ts:100](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L100)
-
 ***
 
 ### y
 
 > **y**: `number`
-
-Defined in: [lib/laser-loon/types.ts:101](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L101)

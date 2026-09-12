@@ -7,5 +7,3 @@
 # Variable: VALID\_NODE\_IDS
 
 > `const` **VALID\_NODE\_IDS**: `string`[]
-
-Defined in: [lib/proof-utils.ts:229](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L229)

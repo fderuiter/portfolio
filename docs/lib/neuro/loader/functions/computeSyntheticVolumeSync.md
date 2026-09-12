@@ -8,8 +8,6 @@
 
 > **computeSyntheticVolumeSync**(`scenarioId`): [`SyntheticVolume`](../../volume-generator/interfaces/SyntheticVolume.md)
 
-Defined in: [lib/neuro/loader.ts:43](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/loader.ts#L43)
-
 ## Parameters
 
 ### scenarioId

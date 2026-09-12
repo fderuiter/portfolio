@@ -8,8 +8,6 @@
 
 > **calculateSummary**(`values`): [`MetricSummary`](../interfaces/MetricSummary.md)
 
-Defined in: [lib/dx/page-bench.ts:217](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L217)
-
 ## Parameters
 
 ### values

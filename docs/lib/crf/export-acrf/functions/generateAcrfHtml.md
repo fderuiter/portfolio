@@ -8,8 +8,6 @@
 
 > **generateAcrfHtml**(`form`, `study`, `options?`): `string`
 
-Defined in: [lib/crf/export-acrf.ts:70](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-acrf.ts#L70)
-
 Generates an HTML printable document with optional annotated SDTM/CDASH tags overlaid for a single form.
 
 ## Parameters

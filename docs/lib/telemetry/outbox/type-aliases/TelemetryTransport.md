@@ -8,8 +8,6 @@
 
 > **TelemetryTransport** = (`item`, `options?`) => `Promise`\<[`TelemetryTransportResponse`](../interfaces/TelemetryTransportResponse.md) \| `Response`\>
 
-Defined in: [lib/telemetry/outbox.ts:57](https://github.com/fderuiter/portfolio/blob/main/lib/telemetry/outbox.ts#L57)
-
 Function contract for dispatching telemetry payloads over the network.
 
 ## Parameters

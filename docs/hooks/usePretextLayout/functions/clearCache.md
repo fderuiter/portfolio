@@ -8,8 +8,6 @@
 
 > **clearCache**(): `void`
 
-Defined in: node\_modules/@chenglou/pretext/dist/layout.d.ts:68
-
 ## Returns
 
 `void`

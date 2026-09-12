@@ -8,8 +8,6 @@
 
 > **filterFuzzySearch**\<`T`\>(`query`, `items`): `T`[]
 
-Defined in: [lib/search-utils.ts:7](https://github.com/fderuiter/portfolio/blob/main/lib/search-utils.ts#L7)
-
 ## Type Parameters
 
 ### T

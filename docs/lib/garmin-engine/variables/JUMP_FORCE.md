@@ -7,5 +7,3 @@
 # Variable: JUMP\_FORCE
 
 > `const` **JUMP\_FORCE**: `-10.5` = `-10.5`
-
-Defined in: [lib/garmin-engine.ts:193](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L193)

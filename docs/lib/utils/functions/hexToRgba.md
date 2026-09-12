@@ -8,8 +8,6 @@
 
 > **hexToRgba**(`hex`, `alpha`): `string`
 
-Defined in: [lib/utils.ts:8](https://github.com/fderuiter/portfolio/blob/main/lib/utils.ts#L8)
-
 ## Parameters
 
 ### hex

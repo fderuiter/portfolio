@@ -8,8 +8,6 @@
 
 > **computeFormHealthMetrics**(`form`): [`FormHealthMetrics`](../interfaces/FormHealthMetrics.md)
 
-Defined in: [lib/crf/form-health.ts:29](https://github.com/fderuiter/portfolio/blob/main/lib/crf/form-health.ts#L29)
-
 Computes live health and CDASH 2.2 conformance telemetry metrics for a CRF form.
 
 ## Parameters

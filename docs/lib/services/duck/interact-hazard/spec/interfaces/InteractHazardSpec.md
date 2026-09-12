@@ -6,15 +6,11 @@
 
 # Interface: InteractHazardSpec
 
-Defined in: [lib/services/duck/interact-hazard/spec.ts:42](https://github.com/fderuiter/portfolio/blob/main/lib/services/duck/interact-hazard/spec.ts#L42)
-
 ## Methods
 
 ### execute()
 
 > **execute**(`input`): [`InteractHazardResult`](../type-aliases/InteractHazardResult.md)
-
-Defined in: [lib/services/duck/interact-hazard/spec.ts:43](https://github.com/fderuiter/portfolio/blob/main/lib/services/duck/interact-hazard/spec.ts#L43)
 
 #### Parameters
 

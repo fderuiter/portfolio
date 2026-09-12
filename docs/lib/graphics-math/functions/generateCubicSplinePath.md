@@ -8,8 +8,6 @@
 
 > **generateCubicSplinePath**(`points`, `heightForArea?`): `object`
 
-Defined in: [lib/graphics-math.ts:141](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-math.ts#L141)
-
 Computes cubic Bezier curves connecting a series of points using midpoint control points.
 Generates an SVG path string ('d' attribute) for the line and an optional closed area path.
 

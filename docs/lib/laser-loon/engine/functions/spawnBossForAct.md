@@ -8,8 +8,6 @@
 
 > **spawnBossForAct**(`actNumber`, `nextId`, `canvasWidth?`, `canvasHeight?`): `object`
 
-Defined in: [lib/laser-loon/engine.ts:164](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L164)
-
 ## Parameters
 
 ### actNumber

@@ -6,15 +6,11 @@
 
 # Interface: CRTThemeConfig
 
-Defined in: [lib/dungeon/types.ts:318](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L318)
-
 ## Properties
 
 ### accentColor
 
 > **accentColor**: `string`
-
-Defined in: [lib/dungeon/types.ts:322](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L322)
 
 ***
 
@@ -22,15 +18,11 @@ Defined in: [lib/dungeon/types.ts:322](https://github.com/fderuiter/portfolio/bl
 
 > **bgDark**: `string`
 
-Defined in: [lib/dungeon/types.ts:323](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L323)
-
 ***
 
 ### glowColor
 
 > **glowColor**: `string`
-
-Defined in: [lib/dungeon/types.ts:324](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L324)
 
 ***
 
@@ -38,15 +30,11 @@ Defined in: [lib/dungeon/types.ts:324](https://github.com/fderuiter/portfolio/bl
 
 > **id**: [`CRTThemeId`](../type-aliases/CRTThemeId.md)
 
-Defined in: [lib/dungeon/types.ts:319](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L319)
-
 ***
 
 ### name
 
 > **name**: `string`
-
-Defined in: [lib/dungeon/types.ts:320](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L320)
 
 ***
 
@@ -54,20 +42,14 @@ Defined in: [lib/dungeon/types.ts:320](https://github.com/fderuiter/portfolio/bl
 
 > **primaryColor**: `string`
 
-Defined in: [lib/dungeon/types.ts:321](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L321)
-
 ***
 
 ### scanlineAlpha
 
 > **scanlineAlpha**: `number`
 
-Defined in: [lib/dungeon/types.ts:326](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L326)
-
 ***
 
 ### textColor
 
 > **textColor**: `string`
-
-Defined in: [lib/dungeon/types.ts:325](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L325)

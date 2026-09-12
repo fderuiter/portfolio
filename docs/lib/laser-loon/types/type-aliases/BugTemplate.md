@@ -7,5 +7,3 @@
 # Type Alias: BugTemplate
 
 > **BugTemplate** = [`EnemyTemplate`](../interfaces/EnemyTemplate.md)
-
-Defined in: [lib/laser-loon/types.ts:49](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L49)

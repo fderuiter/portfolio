@@ -8,8 +8,6 @@
 
 > **validateScaffoldName**(`name`): `object`
 
-Defined in: [lib/dx/scaffolder.ts:719](https://github.com/fderuiter/portfolio/blob/main/lib/dx/scaffolder.ts#L719)
-
 ## Parameters
 
 ### name

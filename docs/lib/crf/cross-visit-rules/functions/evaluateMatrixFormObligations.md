@@ -8,8 +8,6 @@
 
 > **evaluateMatrixFormObligations**(`visits`, `rules`, `fieldValues`): [`StudyVisit`](../../types/interfaces/StudyVisit.md)[]
 
-Defined in: [lib/crf/cross-visit-rules.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cross-visit-rules.ts#L13)
-
 Resolves form requirements per visit schedule based on subject treatment arm or clinical criteria.
 
 ## Parameters

@@ -8,8 +8,6 @@
 
 > **parseCliArgs**(`argv`): [`ParsedCliArgs`](../interfaces/ParsedCliArgs.md)
 
-Defined in: [lib/dx/cli-parser.ts:91](https://github.com/fderuiter/portfolio/blob/main/lib/dx/cli-parser.ts#L91)
-
 Robust Zero-Dependency CLI Argument Tokenizer
 
 ## Parameters

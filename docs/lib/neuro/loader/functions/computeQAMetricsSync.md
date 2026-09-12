@@ -8,8 +8,6 @@
 
 > **computeQAMetricsSync**(`scenario`, `vol`, `pts`, `edits`): [`QAMetrics`](../../types/interfaces/QAMetrics.md)
 
-Defined in: [lib/neuro/loader.ts:47](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/loader.ts#L47)
-
 ## Parameters
 
 ### scenario

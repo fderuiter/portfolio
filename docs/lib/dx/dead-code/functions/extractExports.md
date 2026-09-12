@@ -8,8 +8,6 @@
 
 > **extractExports**(`filePath`, `content`): [`ExportItem`](../interfaces/ExportItem.md)[]
 
-Defined in: [lib/dx/dead-code.ts:128](https://github.com/fderuiter/portfolio/blob/main/lib/dx/dead-code.ts#L128)
-
 Extract exported symbols from TypeScript/TSX code using regex parsing.
 
 ## Parameters

@@ -7,5 +7,3 @@
 # Type Alias: UniversalCrfSection
 
 > **UniversalCrfSection** = `z.infer`\<*typeof* [`UniversalCrfSectionSchema`](../variables/UniversalCrfSectionSchema.md)\>
-
-Defined in: [lib/crf/universal-schema.ts:191](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L191)

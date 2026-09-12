@@ -8,8 +8,6 @@
 
 > **evaluateBooleanExpression**(`node`): `boolean` \| `null`
 
-Defined in: [lib/quasi-perfect/engine.ts:182](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/engine.ts#L182)
-
 Evaluates concrete boolean/relational expressions (e.g. 2 * 3 = 6 ∧ 10 > 5).
 
 ## Parameters

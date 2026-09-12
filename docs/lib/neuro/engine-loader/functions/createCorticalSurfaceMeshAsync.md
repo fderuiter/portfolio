@@ -8,8 +8,6 @@
 
 > **createCorticalSurfaceMeshAsync**(`mode?`, `wireframe?`, `hemiFilter?`): `Promise`\<`Group`\<`Object3DEventMap`\>\>
 
-Defined in: [lib/neuro/engine-loader.ts:148](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/engine-loader.ts#L148)
-
 Asynchronous mesh construction helper using raw geometry buffers.
 
 ## Parameters

@@ -6,8 +6,6 @@
 
 # Class: EvaluateFormulaHandler
 
-Defined in: [lib/services/crf-evaluator/evaluate-formula/handler.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/services/crf-evaluator/evaluate-formula/handler.ts#L9)
-
 ## Implements
 
 - [`EvaluateFormulaSpec`](../../spec/interfaces/EvaluateFormulaSpec.md)
@@ -27,8 +25,6 @@ Defined in: [lib/services/crf-evaluator/evaluate-formula/handler.ts:9](https://g
 ### execute()
 
 > **execute**(`input`): [`EvaluateFormulaResult`](../../spec/type-aliases/EvaluateFormulaResult.md)
-
-Defined in: [lib/services/crf-evaluator/evaluate-formula/handler.ts:10](https://github.com/fderuiter/portfolio/blob/main/lib/services/crf-evaluator/evaluate-formula/handler.ts#L10)
 
 #### Parameters
 

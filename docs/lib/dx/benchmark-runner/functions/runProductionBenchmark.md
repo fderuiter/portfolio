@@ -8,8 +8,6 @@
 
 > **runProductionBenchmark**(`options`, `dependencies`): `Promise`\<[`BenchmarkEvidence`](../../benchmark-evidence/interfaces/BenchmarkEvidence.md)\>
 
-Defined in: [lib/dx/benchmark-runner.ts:74](https://github.com/fderuiter/portfolio/blob/main/lib/dx/benchmark-runner.ts#L74)
-
 Builds, owns, measures, validates, and always cleans up a production server.
 It intentionally has no path for reusing an arbitrary responding server.
 

@@ -6,8 +6,6 @@
 
 # Class: CaseStudyService
 
-Defined in: [lib/services/case-study-service.ts:56](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L56)
-
 ## Constructors
 
 ### Constructor
@@ -24,8 +22,6 @@ Defined in: [lib/services/case-study-service.ts:56](https://github.com/fderuiter
 
 > `static` **getAllPublishedCaseStudies**(): `Promise`\<[`CaseStudyData`](../../../case-studies-data/interfaces/CaseStudyData.md)[]\>
 
-Defined in: [lib/services/case-study-service.ts:61](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L61)
-
 Retrieves all published case studies combining database records with static fallbacks.
 Prioritizes live database records and seamlessly appends missing static case studies.
 
@@ -39,8 +35,6 @@ Prioritizes live database records and seamlessly appends missing static case stu
 
 > `static` **getAllPublishedSlugs**(): `Promise`\<`string`[]\>
 
-Defined in: [lib/services/case-study-service.ts:159](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L159)
-
 Retrieves all published case study slugs for static route generation and sitemaps.
 
 #### Returns
@@ -52,8 +46,6 @@ Retrieves all published case study slugs for static route generation and sitemap
 ### getCaseStudyBySlug()
 
 > `static` **getCaseStudyBySlug**(`slug`): `Promise`\<[`CaseStudyData`](../../../case-studies-data/interfaces/CaseStudyData.md) \| `null`\>
-
-Defined in: [lib/services/case-study-service.ts:116](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L116)
 
 Retrieves a single published case study by slug, falling back to static data if absent from database.
 Returns null if not found in database or static fallbacks.
@@ -73,8 +65,6 @@ Returns null if not found in database or static fallbacks.
 ### getFeedback()
 
 > `static` **getFeedback**(`slug`, `connectionHash`): `Promise`\<\{ `caseStudySlug`: `string`; `feedback`: `object`[]; `hasSubmitted`: `boolean`; `success`: `boolean`; `totalFeedback`: `number`; \} \| \{ `caseStudySlug`: `string`; `feedback`: `object`[]; `hasSubmitted`: `boolean`; `success`: `boolean`; `totalFeedback`: `number`; \}\>
-
-Defined in: [lib/services/case-study-service.ts:247](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L247)
 
 Fetches user feedback for a given case study slug.
 
@@ -98,8 +88,6 @@ Fetches user feedback for a given case study slug.
 
 > `static` **getPublishedCaseStudies**(): `Promise`\<`object`[]\>
 
-Defined in: [lib/services/case-study-service.ts:167](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L167)
-
 Retrieves all published case studies for public search/discovery.
 
 #### Returns
@@ -111,8 +99,6 @@ Retrieves all published case studies for public search/discovery.
 ### getReactions()
 
 > `static` **getReactions**(`slug`, `connectionHash`): `Promise`\<\{ `caseStudySlug`: `string`; `counts`: `Record`\<`string`, `number`\>; `success`: `boolean`; `userReactions`: `string`[]; \}\>
-
-Defined in: [lib/services/case-study-service.ts:382](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L382)
 
 Gets aggregated reactions for a case study.
 
@@ -136,8 +122,6 @@ Gets aggregated reactions for a case study.
 
 > `static` **submitCaseStudy**(`input`): `Promise`\<\{ `architectural_narrative`: `string`; `commands_json`: `string` \| `null`; `created_at`: `Date`; `editorial_content`: `string`; `github_url`: `string` \| `null`; `id`: `string`; `playback_json`: `string` \| `null`; `primary_language`: `string`; `published`: `boolean`; `simulated_telemetry`: `boolean`; `slug`: `string`; `tags`: `string`; `title`: `string`; `updated_at`: `Date`; \}\>
 
-Defined in: [lib/services/case-study-service.ts:214](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L214)
-
 Sanitizes rich text / HTML content submissions and persists draft case study.
 
 #### Parameters
@@ -155,8 +139,6 @@ Sanitizes rich text / HTML content submissions and persists draft case study.
 ### submitFeedback()
 
 > `static` **submitFeedback**(`input`, `connectionHash`): `Promise`\<\{ `feedback?`: `undefined`; `message`: `string`; `rateLimited`: `boolean`; `success?`: `undefined`; \} \| \{ `feedback`: \{ `caseStudySlug`: `string`; `comments`: `string`; `createdAt`: `Date`; `id`: `string`; `takeaways`: `string`[]; \}; `message`: `string`; `rateLimited`: `boolean`; `success`: `boolean`; \} \| \{ `feedback`: \{ `caseStudySlug`: `string`; `comments`: `string`; `createdAt`: `string`; `id`: `string`; `takeaways`: `string`[]; \}; `message`: `string`; `rateLimited`: `boolean`; `success`: `boolean`; \}\>
-
-Defined in: [lib/services/case-study-service.ts:300](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L300)
 
 Submits feedback for a case study with duplicate rate-limiting.
 
@@ -179,8 +161,6 @@ Submits feedback for a case study with duplicate rate-limiting.
 ### submitReaction()
 
 > `static` **submitReaction**(`input`, `connectionHash`): `Promise`\<\{ `counts`: `Record`\<`string`, `number`\>; `reactionType`: `string`; `success`: `boolean`; `userReactions`: `string`[]; \}\>
-
-Defined in: [lib/services/case-study-service.ts:431](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L431)
 
 Submits a reaction for a case study.
 

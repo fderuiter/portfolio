@@ -8,8 +8,6 @@
 
 > **isAnyFocusTrapActive**(): `boolean`
 
-Defined in: [hooks/useFocusTrap.ts:39](https://github.com/fderuiter/portfolio/blob/main/hooks/useFocusTrap.ts#L39)
-
 True while at least one useFocusTrap instance is currently active.
 
 ## Returns

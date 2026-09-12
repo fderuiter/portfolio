@@ -6,8 +6,6 @@
 
 # Class: GarbageCollectHandler
 
-Defined in: [lib/services/garmin/garbage-collect/handler.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/services/garmin/garbage-collect/handler.ts#L9)
-
 ## Implements
 
 - [`GarbageCollectSpec`](../../spec/interfaces/GarbageCollectSpec.md)
@@ -27,8 +25,6 @@ Defined in: [lib/services/garmin/garbage-collect/handler.ts:9](https://github.co
 ### execute()
 
 > **execute**(`input`): [`GarbageCollectResult`](../../spec/type-aliases/GarbageCollectResult.md)
-
-Defined in: [lib/services/garmin/garbage-collect/handler.ts:10](https://github.com/fderuiter/portfolio/blob/main/lib/services/garmin/garbage-collect/handler.ts#L10)
 
 #### Parameters
 

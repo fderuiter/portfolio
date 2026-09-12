@@ -8,8 +8,6 @@
 
 > `const` **CDISC\_NULL\_FLAVORS**: `object`
 
-Defined in: [lib/crf/precision-date.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/crf/precision-date.ts#L9)
-
 Standard CDISC / HL7 Null Flavor definitions
 
 ## Type Declaration

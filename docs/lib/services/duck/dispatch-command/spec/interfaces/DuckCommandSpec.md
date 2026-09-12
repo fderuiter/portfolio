@@ -6,15 +6,11 @@
 
 # Interface: DuckCommandSpec
 
-Defined in: [lib/services/duck/dispatch-command/spec.ts:89](https://github.com/fderuiter/portfolio/blob/main/lib/services/duck/dispatch-command/spec.ts#L89)
-
 ## Methods
 
 ### execute()
 
 > **execute**(`input`): [`DuckCommandResult`](../type-aliases/DuckCommandResult.md)
-
-Defined in: [lib/services/duck/dispatch-command/spec.ts:90](https://github.com/fderuiter/portfolio/blob/main/lib/services/duck/dispatch-command/spec.ts#L90)
 
 #### Parameters
 

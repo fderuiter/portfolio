@@ -6,8 +6,6 @@
 
 # Class: LRUCache\<K, V\>
 
-Defined in: [lib/graphics-math.ts:23](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-math.ts#L23)
-
 ## Type Parameters
 
 ### K
@@ -23,8 +21,6 @@ Defined in: [lib/graphics-math.ts:23](https://github.com/fderuiter/portfolio/blo
 ### Constructor
 
 > **new LRUCache**\<`K`, `V`\>(`capacity`): `LRUCache`\<`K`, `V`\>
-
-Defined in: [lib/graphics-math.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-math.ts#L25)
 
 #### Parameters
 
@@ -44,8 +40,6 @@ Defined in: [lib/graphics-math.ts:25](https://github.com/fderuiter/portfolio/blo
 
 > **get** **size**(): `number`
 
-Defined in: [lib/graphics-math.ts:47](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-math.ts#L47)
-
 ##### Returns
 
 `number`
@@ -56,8 +50,6 @@ Defined in: [lib/graphics-math.ts:47](https://github.com/fderuiter/portfolio/blo
 
 > **clear**(): `void`
 
-Defined in: [lib/graphics-math.ts:44](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-math.ts#L44)
-
 #### Returns
 
 `void`
@@ -67,8 +59,6 @@ Defined in: [lib/graphics-math.ts:44](https://github.com/fderuiter/portfolio/blo
 ### get()
 
 > **get**(`key`): `V` \| `undefined`
-
-Defined in: [lib/graphics-math.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-math.ts#L26)
 
 #### Parameters
 
@@ -85,8 +75,6 @@ Defined in: [lib/graphics-math.ts:26](https://github.com/fderuiter/portfolio/blo
 ### set()
 
 > **set**(`key`, `value`): `void`
-
-Defined in: [lib/graphics-math.ts:33](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-math.ts#L33)
 
 #### Parameters
 

@@ -8,8 +8,6 @@
 
 > **formatRelativeTime**(`date?`): `string`
 
-Defined in: [lib/utils.ts:170](https://github.com/fderuiter/portfolio/blob/main/lib/utils.ts#L170)
-
 Formats a date relative to now (e.g. 'Just now', '5m ago', '2h ago', '3d ago').
 
 ## Parameters

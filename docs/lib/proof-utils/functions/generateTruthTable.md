@@ -8,8 +8,6 @@
 
 > **generateTruthTable**(`premises`, `conclusion`): `object`
 
-Defined in: [lib/proof-utils.ts:564](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L564)
-
 Dynamically synthesizes all combinatorial truth table valuations for a set of premises and a conclusion.
 
 ## Parameters

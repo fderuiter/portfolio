@@ -8,8 +8,6 @@
 
 > **enqueueOfflineRequest**\<`T`\>(`request`): [`QueuedRequest`](../interfaces/QueuedRequest.md)\<`T`\>
 
-Defined in: [hooks/useOfflineQueue.ts:129](https://github.com/fderuiter/portfolio/blob/main/hooks/useOfflineQueue.ts#L129)
-
 Enqueue a request to be executed when online.
 
 ## Type Parameters

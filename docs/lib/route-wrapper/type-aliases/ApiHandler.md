@@ -8,8 +8,6 @@
 
 > **ApiHandler**\<`TData`\> = (`req`, `context`) => `Promise`\<`NextResponse`\>
 
-Defined in: [lib/route-wrapper.ts:18](https://github.com/fderuiter/portfolio/blob/main/lib/route-wrapper.ts#L18)
-
 ## Type Parameters
 
 ### TData

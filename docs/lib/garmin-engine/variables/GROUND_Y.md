@@ -7,5 +7,3 @@
 # Variable: GROUND\_Y
 
 > `const` **GROUND\_Y**: `205` = `205`
-
-Defined in: [lib/garmin-engine.ts:188](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L188)

@@ -6,15 +6,11 @@
 
 # Interface: FogPoint
 
-Defined in: [lib/garmin-engine.ts:151](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L151)
-
 ## Properties
 
 ### radius
 
 > **radius**: `number`
-
-Defined in: [lib/garmin-engine.ts:154](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L154)
 
 ***
 
@@ -22,12 +18,8 @@ Defined in: [lib/garmin-engine.ts:154](https://github.com/fderuiter/portfolio/bl
 
 > **x**: `number`
 
-Defined in: [lib/garmin-engine.ts:152](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L152)
-
 ***
 
 ### y
 
 > **y**: `number`
-
-Defined in: [lib/garmin-engine.ts:153](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L153)

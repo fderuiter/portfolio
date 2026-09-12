@@ -8,8 +8,6 @@
 
 > **runPreflight**(`root`): [`PreflightReport`](../interfaces/PreflightReport.md)
 
-Defined in: [lib/dx/preflight.ts:214](https://github.com/fderuiter/portfolio/blob/main/lib/dx/preflight.ts#L214)
-
 Runs every preflight probe and reports whether the environment is
 ready for real work. Intended to be run once, cheaply, before an
 agent or developer starts an expensive verification pass (tests,

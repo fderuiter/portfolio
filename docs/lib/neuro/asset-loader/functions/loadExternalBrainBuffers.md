@@ -8,8 +8,6 @@
 
 > **loadExternalBrainBuffers**(`modelUrl`, `mode?`, `hemiFilter?`): `Promise`\<[`RawGeometryBuffer`](../../types/interfaces/RawGeometryBuffer.md)[]\>
 
-Defined in: [lib/neuro/asset-loader.ts:37](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/asset-loader.ts#L37)
-
 Load external 3D brain model (.glb, .gltf, or .obj) and extract raw vertex and index data buffers.
 Stores raw geometry buffers in persistent module memory rather than live engine scene objects.
 

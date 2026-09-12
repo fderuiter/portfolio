@@ -8,8 +8,6 @@
 
 > **useTimelineState**(): `object`
 
-Defined in: [hooks/useTimelineState.ts:7](https://github.com/fderuiter/portfolio/blob/main/hooks/useTimelineState.ts#L7)
-
 ## Returns
 
 `object`

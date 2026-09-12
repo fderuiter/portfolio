@@ -8,8 +8,6 @@
 
 > **createGeometryFromBuffer**(`buf`, `THREEModule`): `BufferGeometry`\<`NormalBufferAttributes`, `BufferGeometryEventMap`\>
 
-Defined in: [lib/neuro/engine-loader.ts:37](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/engine-loader.ts#L37)
-
 Construct Three.js BufferGeometry from raw binary geometry buffer.
 
 ## Parameters

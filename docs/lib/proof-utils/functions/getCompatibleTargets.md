@@ -8,8 +8,6 @@
 
 > **getCompatibleTargets**(`sourceId`, `theoremId?`, `edges?`): [`CompatibleTargetInfo`](../interfaces/CompatibleTargetInfo.md)[]
 
-Defined in: [lib/proof-utils.ts:2846](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L2846)
-
 Returns all compatible target nodes and corresponding rule annotations for a source node.
 
 ## Parameters

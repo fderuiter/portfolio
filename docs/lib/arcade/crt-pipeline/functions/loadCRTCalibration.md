@@ -8,8 +8,6 @@
 
 > **loadCRTCalibration**(): [`CRTCalibrationConfig`](../interfaces/CRTCalibrationConfig.md)
 
-Defined in: [lib/arcade/crt-pipeline.ts:165](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/crt-pipeline.ts#L165)
-
 Loads persisted CRT calibration from localStorage or returns default.
 
 ## Returns

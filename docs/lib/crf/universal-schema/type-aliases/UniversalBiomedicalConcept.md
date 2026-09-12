@@ -7,5 +7,3 @@
 # Type Alias: UniversalBiomedicalConcept
 
 > **UniversalBiomedicalConcept** = `z.infer`\<*typeof* [`BiomedicalConceptSchema`](../variables/BiomedicalConceptSchema.md)\>
-
-Defined in: [lib/crf/universal-schema.ts:137](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L137)

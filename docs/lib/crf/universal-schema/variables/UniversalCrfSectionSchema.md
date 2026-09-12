@@ -7,5 +7,3 @@
 # Variable: UniversalCrfSectionSchema
 
 > `const` **UniversalCrfSectionSchema**: `ZodObject`\<\{ `collapsible`: `ZodOptional`\<`ZodBoolean`\>; `description`: `ZodOptional`\<`ZodString`\>; `fields`: `ZodDefault`\<`ZodArray`\<`ZodType`\<[`UniversalCrfField`](../type-aliases/UniversalCrfField.md), `unknown`, `$ZodTypeInternals`\<[`UniversalCrfField`](../type-aliases/UniversalCrfField.md), `unknown`\>\>\>\>; `id`: `ZodString`; `isRepeating`: `ZodOptional`\<`ZodBoolean`\>; `title`: `ZodString`; \}, `$strip`\>
-
-Defined in: [lib/crf/universal-schema.ts:183](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L183)

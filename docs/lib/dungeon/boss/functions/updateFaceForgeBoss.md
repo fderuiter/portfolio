@@ -8,8 +8,6 @@
 
 > **updateFaceForgeBoss**(`boss`, `playerX`, `playerY`, `nowMs`, `gridWidth`, `gridHeight`): `object`
 
-Defined in: [lib/dungeon/boss.ts:269](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/boss.ts#L269)
-
 Updates boss animations, attack patterns, and projectile trajectories.
 
 ## Parameters

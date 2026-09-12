@@ -8,8 +8,6 @@
 
 > **validatePackageManager**(): `object`
 
-Defined in: [lib/dx/setup.ts:39](https://github.com/fderuiter/portfolio/blob/main/lib/dx/setup.ts#L39)
-
 Validate npm package manager enforcement
 
 ## Returns

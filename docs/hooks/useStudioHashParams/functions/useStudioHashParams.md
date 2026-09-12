@@ -8,8 +8,6 @@
 
 > **useStudioHashParams**(): `object`
 
-Defined in: [hooks/useStudioHashParams.ts:147](https://github.com/fderuiter/portfolio/blob/main/hooks/useStudioHashParams.ts#L147)
-
 Custom hook for synchronizing active studio tab and state with URL hash parameters.
 Built with useSyncExternalStore for zero tearing and SSR hydration safety.
 

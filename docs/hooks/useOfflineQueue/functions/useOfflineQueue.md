@@ -8,8 +8,6 @@
 
 > **useOfflineQueue**(`options?`): `object`
 
-Defined in: [hooks/useOfflineQueue.ts:342](https://github.com/fderuiter/portfolio/blob/main/hooks/useOfflineQueue.ts#L342)
-
 Custom hook providing access to the persistent offline request queue and online status.
 Uses useSyncExternalStore for hydration-safe, referentially stable, cross-tab synchronized state.
 

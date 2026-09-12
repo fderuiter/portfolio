@@ -7,5 +7,3 @@
 # Variable: AllocateGarminMemoryInputSchema
 
 > `const` **AllocateGarminMemoryInputSchema**: `ZodObject`\<\{ `name`: `ZodOptional`\<`ZodString`\>; `state`: `ZodCustom`\<[`GameEngineState`](../../../../../garmin-engine/interfaces/GameEngineState.md), [`GameEngineState`](../../../../../garmin-engine/interfaces/GameEngineState.md)\>; `type`: `ZodEnum`\<\{ `array`: `"array"`; `float`: `"float"`; `int`: `"int"`; `string`: `"string"`; \}\>; \}, `$strip`\>
-
-Defined in: [lib/services/garmin/allocate-memory/spec.ts:7](https://github.com/fderuiter/portfolio/blob/main/lib/services/garmin/allocate-memory/spec.ts#L7)

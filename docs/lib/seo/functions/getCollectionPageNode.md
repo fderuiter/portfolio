@@ -8,8 +8,6 @@
 
 > **getCollectionPageNode**(`name`, `description`, `url`, `items`, `options?`): `Record`\<`string`, `unknown`\>
 
-Defined in: [lib/seo.ts:387](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L387)
-
 Returns a CollectionPage entity node.
 
 ## Parameters

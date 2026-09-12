@@ -8,8 +8,6 @@
 
 > **executeListCommand**(`study`, `category`, `options?`): [`CliCommandResult`](../interfaces/CliCommandResult.md)
 
-Defined in: [lib/crf/cli-engine.ts:515](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cli-engine.ts#L515)
-
 List Catalogs Command (domains, presets, forms, visits)
 
 ## Parameters

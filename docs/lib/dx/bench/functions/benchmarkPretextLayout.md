@@ -8,8 +8,6 @@
 
 > **benchmarkPretextLayout**(`iterations?`): [`BenchmarkResult`](../interfaces/BenchmarkResult.md)[]
 
-Defined in: [lib/dx/bench.ts:153](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L153)
-
 Benchmark Pretext Rich Inline Text Measurement and Layout
 
 ## Parameters

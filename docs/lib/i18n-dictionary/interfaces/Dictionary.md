@@ -6,15 +6,11 @@
 
 # Interface: Dictionary
 
-Defined in: [lib/i18n-dictionary.ts:19](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L19)
-
 ## Properties
 
 ### bio
 
 > **bio**: `object`
-
-Defined in: [lib/i18n-dictionary.ts:20](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L20)
 
 #### description
 
@@ -34,8 +30,6 @@ Defined in: [lib/i18n-dictionary.ts:20](https://github.com/fderuiter/portfolio/b
 
 > **domains**: `object`
 
-Defined in: [lib/i18n-dictionary.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L25)
-
 #### items
 
 > **items**: [`DomainItem`](DomainItem.md)[]
@@ -49,5 +43,3 @@ Defined in: [lib/i18n-dictionary.ts:25](https://github.com/fderuiter/portfolio/b
 ### timeline
 
 > **timeline**: [`TimelineItem`](TimelineItem.md)[]
-
-Defined in: [lib/i18n-dictionary.ts:29](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L29)

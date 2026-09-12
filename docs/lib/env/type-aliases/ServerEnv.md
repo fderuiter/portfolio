@@ -7,5 +7,3 @@
 # Type Alias: ServerEnv
 
 > **ServerEnv** = `z.infer`\<*typeof* [`serverEnvSchema`](../variables/serverEnvSchema.md)\>
-
-Defined in: [lib/env.ts:75](https://github.com/fderuiter/portfolio/blob/main/lib/env.ts#L75)

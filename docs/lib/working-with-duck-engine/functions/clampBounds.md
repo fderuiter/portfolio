@@ -8,8 +8,6 @@
 
 > **clampBounds**(`x`, `y`): `object`
 
-Defined in: [lib/working-with-duck-engine.ts:519](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L519)
-
 ## Parameters
 
 ### x

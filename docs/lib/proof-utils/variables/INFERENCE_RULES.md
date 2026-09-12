@@ -7,5 +7,3 @@
 # Variable: INFERENCE\_RULES
 
 > `const` **INFERENCE\_RULES**: [`RuleDefinition`](../interfaces/RuleDefinition.md)[]
-
-Defined in: [lib/proof-utils.ts:145](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L145)

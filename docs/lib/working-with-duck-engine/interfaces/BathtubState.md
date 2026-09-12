@@ -6,15 +6,11 @@
 
 # Interface: BathtubState
 
-Defined in: [lib/working-with-duck-engine.ts:390](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L390)
-
 ## Properties
 
 ### bubbles
 
 > **bubbles**: `object`[]
-
-Defined in: [lib/working-with-duck-engine.ts:395](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L395)
 
 #### alpha
 
@@ -42,15 +38,11 @@ Defined in: [lib/working-with-duck-engine.ts:395](https://github.com/fderuiter/p
 
 > **rinseLevel**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:393](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L393)
-
 ***
 
 ### scrubCount
 
 > **scrubCount**: `number`
-
-Defined in: [lib/working-with-duck-engine.ts:394](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L394)
 
 ***
 
@@ -58,12 +50,8 @@ Defined in: [lib/working-with-duck-engine.ts:394](https://github.com/fderuiter/p
 
 > **soapLather**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:392](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L392)
-
 ***
 
 ### status
 
 > **status**: `"idle"` \| `"soap"` \| `"scrub"` \| `"rinse"` \| `"clean"`
-
-Defined in: [lib/working-with-duck-engine.ts:391](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L391)

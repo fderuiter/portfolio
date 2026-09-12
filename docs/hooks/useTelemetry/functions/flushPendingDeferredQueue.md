@@ -8,8 +8,6 @@
 
 > **flushPendingDeferredQueue**(): `void`
 
-Defined in: [hooks/useTelemetry.ts:253](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L253)
-
 Immediately flushes pending deferred tasks with keepalive transport.
 
 ## Returns

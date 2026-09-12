@@ -8,8 +8,6 @@
 
 > **exportUniversalCrfJson**(`study`, `pretty?`): `string`
 
-Defined in: [lib/crf/universal-schema.ts:324](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L324)
-
 Serializes a StudyProtocol to Universal CRF JSON string.
 
 ## Parameters

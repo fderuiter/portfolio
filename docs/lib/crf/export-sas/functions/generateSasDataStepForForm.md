@@ -8,8 +8,6 @@
 
 > **generateSasDataStepForForm**(`form`, `study`, `options?`): `string`
 
-Defined in: [lib/crf/export-sas.ts:535](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L535)
-
 Generates a SAS DATA Step for a specific CRFForm.
 
 ## Parameters
