@@ -8,6 +8,16 @@
 
 ## Properties
 
+### compareFieldId?
+
+> `optional` **compareFieldId?**: `string`
+
+Field/field discrepancy check (#540): compares fieldId's value against
+this OTHER field's value instead of the literal `value`. Takes
+precedence over `value` when set.
+
+***
+
 ### crossVisitId?
 
 > `optional` **crossVisitId?**: `string`
@@ -22,7 +32,7 @@
 
 ### operator
 
-> **operator**: `"eq"` \| `"neq"` \| `"gt"` \| `"gte"` \| `"lt"` \| `"lte"` \| `"in"` \| `"contains"` \| `"is_empty"` \| `"is_not_empty"`
+> **operator**: [`AstOperator`](../type-aliases/AstOperator.md)
 
 ***
 

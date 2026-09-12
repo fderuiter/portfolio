@@ -16,6 +16,8 @@ import {
   CodelistDefinition,
   CodelistOption,
   EditCheckRule,
+  AstCondition,
+  ConditionGroup,
 } from "./types";
 import { validateUniversalCrf } from "./universal-schema";
 import { STANDARD_CODELISTS } from "./cdisc-controlled-terminology";
@@ -145,11 +147,16 @@ export interface UsdmDocument {
 /**
  * Normalizes USDM graph ValueSet or CodeList objects/references into a CRF Studio CodelistDefinition.
  */
-export function extractCodelistFromUsdmObject(raw: unknown): CodelistDefinition | null {
+export function extractCodelistFromUsdmObject(
+  raw: unknown
+): CodelistDefinition | null {
   if (!raw || typeof raw !== "object") return null;
   const obj = raw as Record<string, unknown>;
 
-  const target = (obj.codeList || obj.valueSet || obj.codelist || obj) as Record<string, unknown>;
+  const target = (obj.codeList ||
+    obj.valueSet ||
+    obj.codelist ||
+    obj) as Record<string, unknown>;
 
   const id =
     target.id ||
@@ -157,12 +164,17 @@ export function extractCodelistFromUsdmObject(raw: unknown): CodelistDefinition 
     target.valueSetId ||
     target.nciCodelistCode ||
     target.code ||
-    (target.name ? `cl_${String(target.name).toLowerCase().replace(/[^a-z0-9]/g, "_")}` : null);
+    (target.name
+      ? `cl_${String(target.name)
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, "_")}`
+      : null);
 
   if (!id) return null;
 
   const name = target.name || target.label || target.title || id;
-  const nciCodelistCode = target.nciCodelistCode || target.nciCode || target.cCode;
+  const nciCodelistCode =
+    target.nciCodelistCode || target.nciCode || target.cCode;
 
   const rawOpts =
     target.options ||
@@ -185,10 +197,22 @@ export function extractCodelistFromUsdmObject(raw: unknown): CodelistDefinition 
           };
         }
         const o = (opt || {}) as Record<string, unknown>;
-        const code = String(o.code ?? o.value ?? o.id ?? o.name ?? o.term ?? idx + 1);
-        const label = String(o.label ?? o.decode ?? o.name ?? o.text ?? o.description ?? code);
-        const nciCode = (o.nciCode || o.cCode || o.conceptId || (code.match(/^C\d+$/) ? code : undefined)) as string | undefined;
-        const order = typeof o.order === "number" ? o.order : typeof o.sequenceNumber === "number" ? o.sequenceNumber : idx + 1;
+        const code = String(
+          o.code ?? o.value ?? o.id ?? o.name ?? o.term ?? idx + 1
+        );
+        const label = String(
+          o.label ?? o.decode ?? o.name ?? o.text ?? o.description ?? code
+        );
+        const nciCode = (o.nciCode ||
+          o.cCode ||
+          o.conceptId ||
+          (code.match(/^C\d+$/) ? code : undefined)) as string | undefined;
+        const order =
+          typeof o.order === "number"
+            ? o.order
+            : typeof o.sequenceNumber === "number"
+              ? o.sequenceNumber
+              : idx + 1;
         return {
           code,
           label,
@@ -232,13 +256,19 @@ export interface UsdmDiffSummary {
  * Maps linear visit target days to epoch-based encounter schedules.
  */
 export function exportStudyToUsdmObject(study: StudyProtocol): UsdmDocument {
-  const biomedicalConcepts: UsdmBiomedicalConcept[] = (study.biomedicalConcepts || []).map((bc) => ({
+  const biomedicalConcepts: UsdmBiomedicalConcept[] = (
+    study.biomedicalConcepts || []
+  ).map((bc) => ({
     id: bc.id,
     name: bc.name,
     conceptId: bc.conceptId || bc.code || bc.id,
     code: bc.code,
     domain: bc.domain,
-    synonyms: bc.synonyms || [bc.variableName || bc.id, bc.label || bc.name].filter((s): s is string => Boolean(s)),
+    synonyms:
+      bc.synonyms ||
+      [bc.variableName || bc.id, bc.label || bc.name].filter((s): s is string =>
+        Boolean(s)
+      ),
     properties: bc.properties || {},
     variableName: bc.variableName,
     dataType: bc.dataType,
@@ -250,7 +280,10 @@ export function exportStudyToUsdmObject(study: StudyProtocol): UsdmDocument {
   const domainVarMap = new Map<string, UsdmBiomedicalConcept>();
   biomedicalConcepts.forEach((bc) => {
     if (bc.domain && bc.variableName) {
-      domainVarMap.set(`${bc.domain.toUpperCase()}_${bc.variableName.toUpperCase()}`, bc);
+      domainVarMap.set(
+        `${bc.domain.toUpperCase()}_${bc.variableName.toUpperCase()}`,
+        bc
+      );
     }
   });
 
@@ -299,7 +332,10 @@ export function exportStudyToUsdmObject(study: StudyProtocol): UsdmDocument {
           };
           biomedicalConcepts.push(newConcept);
           if (form.domain && field.variableName) {
-            domainVarMap.set(`${form.domain.toUpperCase()}_${field.variableName.toUpperCase()}`, newConcept);
+            domainVarMap.set(
+              `${form.domain.toUpperCase()}_${field.variableName.toUpperCase()}`,
+              newConcept
+            );
           }
         }
       });
@@ -448,13 +484,129 @@ export function exportStudyToUsdm(study: StudyProtocol, pretty = true): string {
   return pretty ? JSON.stringify(usdmObj, null, 2) : JSON.stringify(usdmObj);
 }
 
+function isPlainConditionShape(value: unknown): value is AstCondition {
+  if (!value || typeof value !== "object") return false;
+  const v = value as Record<string, unknown>;
+  return typeof v.fieldId === "string" && typeof v.operator === "string";
+}
+
+function isPlainConditionGroupShape(value: unknown): value is ConditionGroup {
+  if (!value || typeof value !== "object") return false;
+  const v = value as Record<string, unknown>;
+  return (
+    (v.logicalOperator === "AND" || v.logicalOperator === "OR") &&
+    Array.isArray(v.conditions) &&
+    v.conditions.every(isPlainConditionShape)
+  );
+}
+
+/**
+ * A USDM document is untrusted JSON at runtime regardless of what the
+ * `EditCheckRule` cast at each call site below claims: an imported rule's
+ * `conditions`/`conditionGroups` may not match the shape this evaluator
+ * actually understands (a hand-edited file, a different tool's export, a
+ * future/foreign expression form). Rather than passing such a rule
+ * through untouched - which looks like a normal rule but, with an empty
+ * or malformed conditions array, defaults to always-true (#540) - preserve
+ * the original payload verbatim via `unsupportedExpression` so it is
+ * surfaced for review instead of silently mis-firing or mis-simplifying.
+ */
+function normalizeImportedRule(raw: unknown): EditCheckRule {
+  const candidate = (
+    raw && typeof raw === "object" ? raw : {}
+  ) as Partial<EditCheckRule> & Record<string, unknown>;
+
+  const conditionsValid =
+    Array.isArray(candidate.conditions) &&
+    candidate.conditions.every(isPlainConditionShape);
+  const groupsValid =
+    Array.isArray(candidate.conditionGroups) &&
+    candidate.conditionGroups.every(isPlainConditionGroupShape);
+  const groupsFieldAbsent = candidate.conditionGroups === undefined;
+  const conditionsFieldAbsent = candidate.conditions === undefined;
+
+  // A rule is understood only when at least one of conditions/
+  // conditionGroups is actually present as a valid array - a rule missing
+  // BOTH fields entirely is exactly as unsupported as one with a
+  // malformed conditions array; it just happens to reach here via a
+  // different foreign shape (no rule-expression content this evaluator
+  // recognizes at all) rather than a broken one.
+  const understood =
+    (conditionsValid && (groupsFieldAbsent || groupsValid)) ||
+    (groupsValid && (conditionsFieldAbsent || conditionsValid));
+
+  const base: EditCheckRule = {
+    id:
+      typeof candidate.id === "string"
+        ? candidate.id
+        : `rule_imported_${Math.random().toString(36).slice(2)}`,
+    name: typeof candidate.name === "string" ? candidate.name : "Imported Rule",
+    description:
+      typeof candidate.description === "string" ? candidate.description : "",
+    triggerFieldIds: Array.isArray(candidate.triggerFieldIds)
+      ? (candidate.triggerFieldIds as string[])
+      : [],
+    actionType:
+      (candidate.actionType as EditCheckRule["actionType"]) || "raise_query",
+    targetFieldId:
+      typeof candidate.targetFieldId === "string"
+        ? candidate.targetFieldId
+        : "",
+    conditions: conditionsValid ? (candidate.conditions as AstCondition[]) : [],
+    logicalOperator: candidate.logicalOperator === "OR" ? "OR" : "AND",
+    conditionGroups: groupsValid
+      ? (candidate.conditionGroups as ConditionGroup[])
+      : undefined,
+    groupLogicalOperator:
+      candidate.groupLogicalOperator === "OR" ||
+      candidate.groupLogicalOperator === "AND"
+        ? candidate.groupLogicalOperator
+        : undefined,
+    querySeverity: candidate.querySeverity as EditCheckRule["querySeverity"],
+    queryMessage:
+      typeof candidate.queryMessage === "string"
+        ? candidate.queryMessage
+        : undefined,
+    formulaExpression:
+      typeof candidate.formulaExpression === "string"
+        ? candidate.formulaExpression
+        : undefined,
+  };
+
+  if (!understood) {
+    return {
+      ...base,
+      unsupportedExpression: {
+        raw,
+        reason:
+          !conditionsValid && !groupsValid
+            ? "neither conditions nor conditionGroups matched a recognized rule expression shape"
+            : conditionsValid
+              ? "conditionGroups did not match the expected {logicalOperator, conditions[]} shape"
+              : "conditions did not match the expected {fieldId, operator, value|compareFieldId} shape",
+      },
+    };
+  }
+
+  return base;
+}
+
+function normalizeImportedRules(raw: unknown): EditCheckRule[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.map(normalizeImportedRule);
+}
+
 /**
  * Imports a CDISC USDM JSON document or object into an internal CRF Studio StudyProtocol.
  * Reassembles linear encounter schedules into visit sequences, extracts valueSets and codeList references into study codelists,
  * maps windowBefore and windowAfter visit tolerances to constrain study schedule rules, and resolves decoupled BiomedicalConcept definitions.
  */
-export function importStudyFromUsdm(usdmInput: string | UsdmDocument | Record<string, unknown>): StudyProtocol {
-  const doc = (typeof usdmInput === "string" ? JSON.parse(usdmInput) : usdmInput) as Record<string, unknown> & UsdmDocument;
+export function importStudyFromUsdm(
+  usdmInput: string | UsdmDocument | Record<string, unknown>
+): StudyProtocol {
+  const doc = (
+    typeof usdmInput === "string" ? JSON.parse(usdmInput) : usdmInput
+  ) as Record<string, unknown> & UsdmDocument;
 
   // Support direct StudyProtocol JSON fallback if user pasted a Universal CRF JSON
   if (doc.forms && doc.visits && doc.protocolNumber) {
@@ -463,11 +615,13 @@ export function importStudyFromUsdm(usdmInput: string | UsdmDocument | Record<st
   }
 
   const studyObj = (doc.study || doc) as UsdmStudy & Record<string, unknown>;
-  const primaryDesign = ((studyObj.studyDesigns && studyObj.studyDesigns[0]) || {}) as UsdmStudyDesign & Record<string, unknown>;
+  const primaryDesign = ((studyObj.studyDesigns && studyObj.studyDesigns[0]) ||
+    {}) as UsdmStudyDesign & Record<string, unknown>;
 
   const arms: StudyArm[] = primaryDesign.arms || studyObj.arms || [];
   const epochs: StudyEpoch[] = primaryDesign.epochs || studyObj.epochs || [];
-  const cohorts: StudyCohort[] = primaryDesign.cohorts || studyObj.cohorts || [];
+  const cohorts: StudyCohort[] =
+    primaryDesign.cohorts || studyObj.cohorts || [];
 
   const rawConcepts: UsdmBiomedicalConcept[] =
     primaryDesign.biomedicalConcepts || studyObj.biomedicalConcepts || [];
@@ -489,7 +643,8 @@ export function importStudyFromUsdm(usdmInput: string | UsdmDocument | Record<st
     unit: bc.unit,
   }));
 
-  const rawEncounters: UsdmEncounter[] = primaryDesign.encounters || studyObj.encounters || [];
+  const rawEncounters: UsdmEncounter[] =
+    primaryDesign.encounters || studyObj.encounters || [];
   const visits: StudyVisit[] = rawEncounters.map((enc) => ({
     id: enc.id,
     oid: enc.oid || `SE.${enc.id.toUpperCase()}`,
@@ -507,16 +662,28 @@ export function importStudyFromUsdm(usdmInput: string | UsdmDocument | Record<st
     repeatMax: enc.repeatMax,
   }));
 
-  const rawActivities: UsdmActivity[] = primaryDesign.activities || studyObj.activities || (studyObj.forms as unknown as UsdmActivity[]) || [];
+  const rawActivities: UsdmActivity[] =
+    primaryDesign.activities ||
+    studyObj.activities ||
+    (studyObj.forms as unknown as UsdmActivity[]) ||
+    [];
   const forms: CRFForm[] = rawActivities.map((act) => {
     const sections: CRFSection[] = (act.sections || []).map((sec) => ({
       ...sec,
       fields: (sec.fields || []).map((fld: CRFField) => {
-        const matchingConcept = fld.conceptId ? conceptMap.get(fld.conceptId) : undefined;
+        const matchingConcept = fld.conceptId
+          ? conceptMap.get(fld.conceptId)
+          : undefined;
         return {
           ...fld,
-          variableName: fld.variableName || matchingConcept?.variableName || fld.id,
-          label: fld.label || matchingConcept?.label || matchingConcept?.name || fld.variableName || fld.id,
+          variableName:
+            fld.variableName || matchingConcept?.variableName || fld.id,
+          label:
+            fld.label ||
+            matchingConcept?.label ||
+            matchingConcept?.name ||
+            fld.variableName ||
+            fld.id,
           dataType: fld.dataType || matchingConcept?.dataType || "text",
           unit: fld.unit || matchingConcept?.unit,
         };
@@ -530,7 +697,7 @@ export function importStudyFromUsdm(usdmInput: string | UsdmDocument | Record<st
       description: act.description || "",
       version: act.version || "1.0",
       sections,
-      rules: act.rules || [],
+      rules: normalizeImportedRules(act.rules),
       isLogForm: act.isLogForm,
     };
   });
@@ -548,7 +715,10 @@ export function importStudyFromUsdm(usdmInput: string | UsdmDocument | Record<st
     const cl = extractCodelistFromUsdmObject(candidate);
     if (cl && cl.id) {
       const existing = codelistMap.get(cl.id);
-      if (!existing || (existing.options.length === 0 && cl.options.length > 0)) {
+      if (
+        !existing ||
+        (existing.options.length === 0 && cl.options.length > 0)
+      ) {
         codelistMap.set(cl.id, cl);
       }
     }
@@ -574,11 +744,20 @@ export function importStudyFromUsdm(usdmInput: string | UsdmDocument | Record<st
 
   rawConcepts.forEach((bc) => {
     const bcObj = bc as unknown as Record<string, unknown>;
-    registerCodelistCandidate(bcObj.codeList || bcObj.valueSet || bcObj.codelist);
+    registerCodelistCandidate(
+      bcObj.codeList || bcObj.valueSet || bcObj.codelist
+    );
     if (bc.properties && typeof bc.properties === "object") {
       const props = bc.properties as Record<string, unknown>;
-      registerCodelistCandidate(props.codeList || props.valueSet || props.codelist);
-      const clId = (props.codelistId || props.codeListId || props.valueSetId || bcObj.codelistId || bcObj.codeListId || bcObj.valueSetId) as string | undefined;
+      registerCodelistCandidate(
+        props.codeList || props.valueSet || props.codelist
+      );
+      const clId = (props.codelistId ||
+        props.codeListId ||
+        props.valueSetId ||
+        bcObj.codelistId ||
+        bcObj.codeListId ||
+        bcObj.valueSetId) as string | undefined;
       if (clId && (props.customOptions || props.options || props.terms)) {
         registerCodelistCandidate({
           id: clId,
@@ -593,8 +772,13 @@ export function importStudyFromUsdm(usdmInput: string | UsdmDocument | Record<st
     (act.sections || []).forEach((sec) => {
       (sec.fields || []).forEach((fld) => {
         const fldObj = fld as unknown as Record<string, unknown>;
-        registerCodelistCandidate(fldObj.codeList || fldObj.valueSet || fldObj.codelist);
-        const clId = fld.codelistId || (fldObj.codeListId as string | undefined) || (fldObj.valueSetId as string | undefined);
+        registerCodelistCandidate(
+          fldObj.codeList || fldObj.valueSet || fldObj.codelist
+        );
+        const clId =
+          fld.codelistId ||
+          (fldObj.codeListId as string | undefined) ||
+          (fldObj.valueSetId as string | undefined);
         if (clId && (fld.customOptions || fldObj.options)) {
           registerCodelistCandidate({
             id: clId,
@@ -611,7 +795,13 @@ export function importStudyFromUsdm(usdmInput: string | UsdmDocument | Record<st
   rawConcepts.forEach((bc) => {
     const props = (bc.properties || {}) as Record<string, unknown>;
     const bcObj = bc as unknown as Record<string, unknown>;
-    const id = props.codelistId || props.codeListId || props.valueSetId || bcObj.codelistId || bcObj.codeListId || bcObj.valueSetId;
+    const id =
+      props.codelistId ||
+      props.codeListId ||
+      props.valueSetId ||
+      bcObj.codelistId ||
+      bcObj.codeListId ||
+      bcObj.valueSetId;
     if (id) allReferencedCodelistIds.add(String(id));
   });
 
@@ -627,22 +817,26 @@ export function importStudyFromUsdm(usdmInput: string | UsdmDocument | Record<st
 
   allReferencedCodelistIds.forEach((id) => {
     if (!codelistMap.has(id)) {
-      const std = STANDARD_CODELISTS.find((sc) => sc.id === id || sc.nciCodelistCode === id);
+      const std = STANDARD_CODELISTS.find(
+        (sc) => sc.id === id || sc.nciCodelistCode === id
+      );
       if (std) {
         codelistMap.set(id, std);
       }
     }
   });
 
-  const extractedCodelists: CodelistDefinition[] = Array.from(codelistMap.values());
+  const extractedCodelists: CodelistDefinition[] = Array.from(
+    codelistMap.values()
+  );
 
   // Map windowBefore and windowAfter visit tolerances to constrain study schedule rules
   const primaryDesignObj = primaryDesign as unknown as Record<string, unknown>;
   const explicitRules: EditCheckRule[] = [
-    ...((doc.rules as EditCheckRule[]) || []),
-    ...((studyObj.rules as EditCheckRule[]) || []),
-    ...((primaryDesign.rules as EditCheckRule[]) || []),
-    ...((primaryDesignObj.scheduleRules as EditCheckRule[]) || []),
+    ...normalizeImportedRules(doc.rules),
+    ...normalizeImportedRules(studyObj.rules),
+    ...normalizeImportedRules(primaryDesign.rules),
+    ...normalizeImportedRules(primaryDesignObj.scheduleRules),
   ];
 
   const scheduleRules: EditCheckRule[] = visits.map((v) => {
@@ -682,7 +876,8 @@ export function importStudyFromUsdm(usdmInput: string | UsdmDocument | Record<st
   const rules: EditCheckRule[] = Array.from(ruleMap.values());
 
   const protocol: StudyProtocol = {
-    $schema: "https://www.deruiter.dev/schemas/crf/v1/universal-crf.schema.json",
+    $schema:
+      "https://www.deruiter.dev/schemas/crf/v1/universal-crf.schema.json",
     schemaVersion: "1.0.0",
     id: studyObj.id || "imported_usdm_study",
     protocolNumber: studyObj.protocolNumber || studyObj.name || "USDM-STUDY",
@@ -694,7 +889,10 @@ export function importStudyFromUsdm(usdmInput: string | UsdmDocument | Record<st
     lastModified: studyObj.lastModified || new Date().toISOString(),
     forms,
     visits,
-    codelists: extractedCodelists.length > 0 ? extractedCodelists : (studyObj.codelists as StudyProtocol["codelists"]) || [],
+    codelists:
+      extractedCodelists.length > 0
+        ? extractedCodelists
+        : (studyObj.codelists as StudyProtocol["codelists"]) || [],
     rules,
     branding: studyObj.branding as StudyProtocol["branding"],
     arms,
@@ -717,8 +915,13 @@ export function diffUsdmProtocols(
   const studyA = importStudyFromUsdm(usdmAInput);
   const studyB = importStudyFromUsdm(usdmBInput);
 
-  const docB = (typeof usdmBInput === "string" ? JSON.parse(usdmBInput) : usdmBInput) as Record<string, unknown> & UsdmDocument;
-  const protocolNumber = studyB.protocolNumber || (docB?.study?.protocolNumber as string) || "USDM-STUDY";
+  const docB = (
+    typeof usdmBInput === "string" ? JSON.parse(usdmBInput) : usdmBInput
+  ) as Record<string, unknown> & UsdmDocument;
+  const protocolNumber =
+    studyB.protocolNumber ||
+    (docB?.study?.protocolNumber as string) ||
+    "USDM-STUDY";
 
   const armsA = new Set((studyA.arms || []).map((a) => a.id));
   const armsB = new Set((studyB.arms || []).map((a) => a.id));
@@ -735,8 +938,12 @@ export function diffUsdmProtocols(
   const addedCohorts = [...cohortsB].filter((c) => !cohortsA.has(c));
   const removedCohorts = [...cohortsA].filter((c) => !cohortsB.has(c));
 
-  const conceptMapA = new Map((studyA.biomedicalConcepts || []).map((c) => [c.id, c]));
-  const conceptMapB = new Map((studyB.biomedicalConcepts || []).map((c) => [c.id, c]));
+  const conceptMapA = new Map(
+    (studyA.biomedicalConcepts || []).map((c) => [c.id, c])
+  );
+  const conceptMapB = new Map(
+    (studyB.biomedicalConcepts || []).map((c) => [c.id, c])
+  );
   const addedConcepts: string[] = [];
   const removedConcepts: string[] = [];
   const modifiedConcepts: string[] = [];
@@ -780,8 +987,10 @@ export function diffUsdmProtocols(
         vA.windowBefore !== vB.windowBefore ||
         vA.windowAfter !== vB.windowAfter ||
         vA.epochId !== vB.epochId ||
-        JSON.stringify(vA.assignedFormIds) !== JSON.stringify(vB.assignedFormIds) ||
-        JSON.stringify(vA.armFormAssignments) !== JSON.stringify(vB.armFormAssignments)
+        JSON.stringify(vA.assignedFormIds) !==
+          JSON.stringify(vB.assignedFormIds) ||
+        JSON.stringify(vA.armFormAssignments) !==
+          JSON.stringify(vB.armFormAssignments)
       ) {
         modifiedEncounters.push(id);
       }
@@ -795,8 +1004,12 @@ export function diffUsdmProtocols(
 
   const formMapA = new Map((studyA.forms || []).map((f) => [f.id, f]));
   const formMapB = new Map((studyB.forms || []).map((f) => [f.id, f]));
-  const addedActivities = [...formMapB.keys()].filter((id) => !formMapA.has(id));
-  const removedActivities = [...formMapA.keys()].filter((id) => !formMapB.has(id));
+  const addedActivities = [...formMapB.keys()].filter(
+    (id) => !formMapA.has(id)
+  );
+  const removedActivities = [...formMapA.keys()].filter(
+    (id) => !formMapB.has(id)
+  );
 
   const hasChanges =
     addedArms.length > 0 ||

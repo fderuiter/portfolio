@@ -62,6 +62,24 @@ Re-exports [ClinicalFormulaPreset](../formula-presets/interfaces/ClinicalFormula
 
 ***
 
+### combineConditionResults
+
+Re-exports [combineConditionResults](../expression-evaluator/functions/combineConditionResults.md)
+
+***
+
+### ConditionExplanation
+
+Re-exports [ConditionExplanation](../expression-evaluator/interfaces/ConditionExplanation.md)
+
+***
+
+### describeCondition
+
+Re-exports [describeCondition](../expression-evaluator/functions/describeCondition.md)
+
+***
+
 ### DiagnosticItem
 
 Re-exports [DiagnosticItem](../form-linter/interfaces/DiagnosticItem.md)
@@ -74,6 +92,12 @@ Re-exports [evaluateCondition](../expression-evaluator/functions/evaluateConditi
 
 ***
 
+### evaluateConditionResult
+
+Re-exports [evaluateConditionResult](../expression-evaluator/functions/evaluateConditionResult.md)
+
+***
+
 ### evaluateFormula
 
 Re-exports [evaluateFormula](../expression-evaluator/functions/evaluateFormula.md)
@@ -83,6 +107,18 @@ Re-exports [evaluateFormula](../expression-evaluator/functions/evaluateFormula.m
 ### evaluateRule
 
 Re-exports [evaluateRule](../expression-evaluator/functions/evaluateRule.md)
+
+***
+
+### evaluateRuleResult
+
+Re-exports [evaluateRuleResult](../expression-evaluator/functions/evaluateRuleResult.md)
+
+***
+
+### explainRule
+
+Re-exports [explainRule](../expression-evaluator/functions/explainRule.md)
 
 ***
 
@@ -107,6 +143,18 @@ Re-exports [FormulaLintResult](../formula-linter/interfaces/FormulaLintResult.md
 ### FormulaTokenType
 
 Re-exports [FormulaTokenType](../formula-linter/type-aliases/FormulaTokenType.md)
+
+***
+
+### getRuleGroups
+
+Re-exports [getRuleGroups](../expression-evaluator/functions/getRuleGroups.md)
+
+***
+
+### GroupExplanation
+
+Re-exports [GroupExplanation](../expression-evaluator/interfaces/GroupExplanation.md)
 
 ***
 
@@ -149,6 +197,12 @@ Re-exports [mapPresetToFormVariables](../formula-presets/functions/mapPresetToFo
 ### NUMERIC\_DATA\_TYPES
 
 Re-exports [NUMERIC_DATA_TYPES](../formula-linter/variables/NUMERIC_DATA_TYPES.md)
+
+***
+
+### RuleExplanation
+
+Re-exports [RuleExplanation](../expression-evaluator/interfaces/RuleExplanation.md)
 
 ***
 

@@ -56,6 +56,12 @@ Re-exports [AstConditionSchema](universal-schema/variables/AstConditionSchema.md
 
 ***
 
+### AstOperator
+
+Re-exports [AstOperator](types/type-aliases/AstOperator.md)
+
+***
+
 ### ATOMIC\_SLASH\_COMMANDS
 
 Re-exports [ATOMIC_SLASH_COMMANDS](smart-blocks-engine/variables/ATOMIC_SLASH_COMMANDS.md)
@@ -284,6 +290,12 @@ Re-exports [CodelistOptionSchema](universal-schema/variables/CodelistOptionSchem
 
 ***
 
+### combineConditionResults
+
+Re-exports [combineConditionResults](expression-evaluator/functions/combineConditionResults.md)
+
+***
+
 ### ComplianceSeverity
 
 Re-exports [ComplianceSeverity](types/type-aliases/ComplianceSeverity.md)
@@ -299,6 +311,24 @@ Re-exports [ComplianceViolation](types/interfaces/ComplianceViolation.md)
 ### computeFormHealthMetrics
 
 Re-exports [computeFormHealthMetrics](form-health/functions/computeFormHealthMetrics.md)
+
+***
+
+### ConditionExplanation
+
+Re-exports [ConditionExplanation](expression-evaluator/interfaces/ConditionExplanation.md)
+
+***
+
+### ConditionGroup
+
+Re-exports [ConditionGroup](types/interfaces/ConditionGroup.md)
+
+***
+
+### ConditionResult
+
+Re-exports [ConditionResult](types/type-aliases/ConditionResult.md)
 
 ***
 
@@ -329,6 +359,12 @@ Re-exports [daysInMonth](precision-date/functions/daysInMonth.md)
 ### DEFAULT\_STUDY\_BRANDING
 
 Re-exports [DEFAULT_STUDY_BRANDING](branding-defaults/variables/DEFAULT_STUDY_BRANDING.md)
+
+***
+
+### describeCondition
+
+Re-exports [describeCondition](expression-evaluator/functions/describeCondition.md)
 
 ***
 
@@ -422,6 +458,12 @@ Re-exports [evaluateCondition](expression-evaluator/functions/evaluateCondition.
 
 ***
 
+### evaluateConditionResult
+
+Re-exports [evaluateConditionResult](expression-evaluator/functions/evaluateConditionResult.md)
+
+***
+
 ### evaluateFormula
 
 Re-exports [evaluateFormula](expression-evaluator/functions/evaluateFormula.md)
@@ -431,6 +473,12 @@ Re-exports [evaluateFormula](expression-evaluator/functions/evaluateFormula.md)
 ### evaluateRule
 
 Re-exports [evaluateRule](expression-evaluator/functions/evaluateRule.md)
+
+***
+
+### evaluateRuleResult
+
+Re-exports [evaluateRuleResult](expression-evaluator/functions/evaluateRuleResult.md)
 
 ***
 
@@ -515,6 +563,12 @@ Re-exports [executeVisitCommand](cli-engine/functions/executeVisitCommand.md)
 ### ExpandedRField
 
 Re-exports [ExpandedRField](export-r/interfaces/ExpandedRField.md)
+
+***
+
+### explainRule
+
+Re-exports [explainRule](expression-evaluator/functions/explainRule.md)
 
 ***
 
@@ -764,6 +818,12 @@ Re-exports [getPresetByIdSync](presets/loader/functions/getPresetByIdSync.md)
 
 ***
 
+### getRuleGroups
+
+Re-exports [getRuleGroups](expression-evaluator/functions/getRuleGroups.md)
+
+***
+
 ### getSasFormatName
 
 Re-exports [getSasFormatName](export-sas/functions/getSasFormatName.md)
@@ -785,6 +845,12 @@ Re-exports [getStudyPresets](presets/loader/functions/getStudyPresets.md)
 ### getStudyPresetsSync
 
 Re-exports [getStudyPresetsSync](presets/loader/functions/getStudyPresetsSync.md)
+
+***
+
+### GroupExplanation
+
+Re-exports [GroupExplanation](expression-evaluator/interfaces/GroupExplanation.md)
 
 ***
 
@@ -929,6 +995,12 @@ Re-exports [PresetCatalogItem](presets/interfaces/PresetCatalogItem.md)
 ### ProtocolDiffSummary
 
 Re-exports [ProtocolDiffSummary](universal-schema/interfaces/ProtocolDiffSummary.md)
+
+***
+
+### RuleExplanation
+
+Re-exports [RuleExplanation](expression-evaluator/interfaces/RuleExplanation.md)
 
 ***
 

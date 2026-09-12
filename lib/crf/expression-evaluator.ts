@@ -1,4 +1,12 @@
-import { AstCondition, EditCheckRule, CRFField } from "./types";
+import {
+  AstCondition,
+  AstOperator,
+  ClinicalDataType,
+  ConditionGroup,
+  ConditionResult,
+  EditCheckRule,
+  CRFField,
+} from "./types";
 import { isCdiscNullFlavor } from "./precision-date";
 
 /**
@@ -19,7 +27,8 @@ export function isMissingOrNullFlavor(val: unknown): boolean {
  * Tokenizer & Safe Recursive Descent Parser for Clinical Expressions
  * Avoids any use of `eval()` or `Function()` constructor.
  */
-export type TokenType = "NUMBER" | "IDENTIFIER" | "OP" | "LPAREN" | "RPAREN" | "COMMA";
+export type TokenType =
+  "NUMBER" | "IDENTIFIER" | "OP" | "LPAREN" | "RPAREN" | "COMMA";
 
 export interface Token {
   type: TokenType;
@@ -59,14 +68,24 @@ function tokenize(input: string): Token[] {
       continue;
     }
 
-    if (ch === "+" || ch === "-" || ch === "*" || ch === "/" || ch === "%" || ch === "^") {
+    if (
+      ch === "+" ||
+      ch === "-" ||
+      ch === "*" ||
+      ch === "/" ||
+      ch === "%" ||
+      ch === "^"
+    ) {
       tokens.push({ type: "OP", value: ch });
       i++;
       continue;
     }
 
     // Numbers (integers or decimals)
-    if (/[0-9]/.test(ch) || (ch === "." && i + 1 < s.length && /[0-9]/.test(s[i + 1]))) {
+    if (
+      /[0-9]/.test(ch) ||
+      (ch === "." && i + 1 < s.length && /[0-9]/.test(s[i + 1]))
+    ) {
       let numStr = "";
       while (i < s.length && (/[0-9]/.test(s[i]) || s[i] === ".")) {
         numStr += s[i];
@@ -115,7 +134,9 @@ export class ExpressionEvaluator {
       throw new Error("Unexpected end of expression");
     }
     if (expectedType && token.type !== expectedType) {
-      throw new Error(`Expected token ${expectedType} but got ${token.type} (${token.value})`);
+      throw new Error(
+        `Expected token ${expectedType} but got ${token.type} (${token.value})`
+      );
     }
     return token;
   }
@@ -143,7 +164,11 @@ export class ExpressionEvaluator {
 
     while (this.pos < this.tokens.length) {
       const next = this.peek();
-      if (next && next.type === "OP" && (next.value === "+" || next.value === "-")) {
+      if (
+        next &&
+        next.type === "OP" &&
+        (next.value === "+" || next.value === "-")
+      ) {
         const op = this.consume().value;
         const right = this.parseMul();
         if (left === null || right === null) {
@@ -165,7 +190,11 @@ export class ExpressionEvaluator {
 
     while (this.pos < this.tokens.length) {
       const next = this.peek();
-      if (next && next.type === "OP" && (next.value === "*" || next.value === "/" || next.value === "%")) {
+      if (
+        next &&
+        next.type === "OP" &&
+        (next.value === "*" || next.value === "/" || next.value === "%")
+      ) {
         const op = this.consume().value;
         const right = this.parsePow();
         if (left === null || right === null) {
@@ -329,7 +358,8 @@ export function evaluateFormula(
     if (isMissingOrNullFlavor(rawVal)) {
       context[k.toLowerCase()] = null;
     } else {
-      const num = typeof rawVal === "number" ? rawVal : parseFloat(String(rawVal));
+      const num =
+        typeof rawVal === "number" ? rawVal : parseFloat(String(rawVal));
       context[k.toLowerCase()] = Number.isFinite(num) ? num : null;
     }
   });
@@ -346,7 +376,8 @@ export function evaluateFormula(
     const varKey = f.variableName.toLowerCase();
 
     if (!isMissingOrNullFlavor(rawVal)) {
-      const num = typeof rawVal === "number" ? rawVal : parseFloat(String(rawVal));
+      const num =
+        typeof rawVal === "number" ? rawVal : parseFloat(String(rawVal));
       const safeNum = Number.isFinite(num) ? num : null;
       context[idKey] = safeNum;
       context[varKey] = safeNum;
@@ -368,7 +399,10 @@ export function evaluateFormula(
 /**
  * Calculates Body Mass Index (BMI) in kg/m^2.
  */
-export function calculateBMI(weightKg: number, heightCm: number): number | null {
+export function calculateBMI(
+  weightKg: number,
+  heightCm: number
+): number | null {
   if (heightCm <= 0) return null;
   const heightM = heightCm / 100;
   return Math.round((weightKg / (heightM * heightM)) * 10) / 10;
@@ -377,7 +411,10 @@ export function calculateBMI(weightKg: number, heightCm: number): number | null 
 /**
  * Calculates Mosteller Body Surface Area (BSA) in m^2.
  */
-export function calculateMostellerBSA(heightCm: number, weightKg: number): number | null {
+export function calculateMostellerBSA(
+  heightCm: number,
+  weightKg: number
+): number | null {
   if (heightCm <= 0 || weightKg < 0) return null;
   return Math.round(Math.sqrt((heightCm * weightKg) / 3600) * 100) / 100;
 }
@@ -385,7 +422,10 @@ export function calculateMostellerBSA(heightCm: number, weightKg: number): numbe
 /**
  * Calculates DuBois & DuBois Body Surface Area (BSA) in m^2.
  */
-export function calculateDuboisBSA(heightCm: number, weightKg: number): number | null {
+export function calculateDuboisBSA(
+  heightCm: number,
+  weightKg: number
+): number | null {
   if (heightCm <= 0 || weightKg < 0) return null;
   const bsa = 0.007184 * Math.pow(heightCm, 0.725) * Math.pow(weightKg, 0.425);
   return Math.round(bsa * 100) / 100;
@@ -417,7 +457,10 @@ export function calculateBazettQTc(qtMs: number, rrSec: number): number | null {
 /**
  * Calculates Fridericia Corrected QT interval (QTcF) in milliseconds.
  */
-export function calculateFridericiaQTc(qtMs: number, rrSec: number): number | null {
+export function calculateFridericiaQTc(
+  qtMs: number,
+  rrSec: number
+): number | null {
   if (rrSec <= 0) return null;
   return Math.round(qtMs / Math.cbrt(rrSec));
 }
@@ -425,10 +468,82 @@ export function calculateFridericiaQTc(qtMs: number, rrSec: number): number | nu
 /**
  * Calculates RECIST 1.1 Sum of Longest Diameters percentage change from baseline.
  */
-export function calculateRecistSldChange(baselineSldMm: number, currentSldMm: number): number | null {
+export function calculateRecistSldChange(
+  baselineSldMm: number,
+  currentSldMm: number
+): number | null {
   if (baselineSldMm <= 0) return null;
   const diff = currentSldMm - baselineSldMm;
   return Math.round((diff / baselineSldMm) * 1000) / 10;
+}
+
+/**
+ * Resolves a field's effective value, honoring cross-visit / visit-scoped
+ * lookup keys and the field's active CDISC null-flavor fallback. Shared by
+ * evaluateCondition (fieldId) and evaluateConditionResult (fieldId and,
+ * for field/field checks, compareFieldId), so the two never drift apart on
+ * how a field's value is actually looked up.
+ */
+function resolveFieldValue(
+  fieldId: string,
+  fieldValues: Record<string, string | number | boolean | null | undefined>,
+  fieldsList: CRFField[],
+  visitContext?: string,
+  crossVisitId?: string
+): string | number | boolean | null | undefined {
+  const targetField = fieldsList.find(
+    (f) => f.id === fieldId || f.variableName === fieldId
+  );
+
+  let actualVal: string | number | boolean | null | undefined;
+  if (crossVisitId) {
+    const crossKey = `${crossVisitId}_${fieldId}`;
+    const crossVarKey = targetField
+      ? `${crossVisitId}_${targetField.id}`
+      : crossKey;
+    const crossNameKey = targetField
+      ? `${crossVisitId}_${targetField.variableName}`
+      : crossKey;
+    actualVal =
+      fieldValues[crossKey] ??
+      fieldValues[crossVarKey] ??
+      fieldValues[crossNameKey] ??
+      fieldValues[fieldId] ??
+      (targetField
+        ? (fieldValues[targetField.id] ?? fieldValues[targetField.variableName])
+        : undefined);
+  } else if (visitContext) {
+    const scopedKey = `${visitContext}_${fieldId}`;
+    const scopedVarKey = targetField
+      ? `${visitContext}_${targetField.id}`
+      : scopedKey;
+    const scopedNameKey = targetField
+      ? `${visitContext}_${targetField.variableName}`
+      : scopedKey;
+    actualVal =
+      fieldValues[scopedKey] ??
+      fieldValues[scopedVarKey] ??
+      fieldValues[scopedNameKey] ??
+      fieldValues[fieldId] ??
+      (targetField
+        ? (fieldValues[targetField.id] ?? fieldValues[targetField.variableName])
+        : undefined);
+  } else {
+    actualVal =
+      fieldValues[fieldId] ??
+      (targetField
+        ? (fieldValues[targetField.id] ?? fieldValues[targetField.variableName])
+        : undefined);
+  }
+
+  if (
+    (actualVal === undefined || actualVal === null || actualVal === "") &&
+    targetField?.nullFlavorValue
+  ) {
+    actualVal = targetField.nullFlavorValue;
+  }
+
+  return actualVal;
 }
 
 /**
@@ -440,42 +555,13 @@ export function evaluateCondition(
   fieldsList: CRFField[],
   visitContext?: string
 ): boolean {
-  const targetField = fieldsList.find(
-    (f) => f.id === condition.fieldId || f.variableName === condition.fieldId
+  const actualVal = resolveFieldValue(
+    condition.fieldId,
+    fieldValues,
+    fieldsList,
+    visitContext,
+    condition.crossVisitId
   );
-
-  // Check cross-visit / visit-level lookup key if present
-  let actualVal: string | number | boolean | null | undefined;
-  if (condition.crossVisitId) {
-    const crossKey = `${condition.crossVisitId}_${condition.fieldId}`;
-    const crossVarKey = targetField ? `${condition.crossVisitId}_${targetField.id}` : crossKey;
-    const crossNameKey = targetField ? `${condition.crossVisitId}_${targetField.variableName}` : crossKey;
-    actualVal =
-      fieldValues[crossKey] ??
-      fieldValues[crossVarKey] ??
-      fieldValues[crossNameKey] ??
-      fieldValues[condition.fieldId] ??
-      (targetField ? (fieldValues[targetField.id] ?? fieldValues[targetField.variableName]) : undefined);
-  } else if (visitContext) {
-    const scopedKey = `${visitContext}_${condition.fieldId}`;
-    const scopedVarKey = targetField ? `${visitContext}_${targetField.id}` : scopedKey;
-    const scopedNameKey = targetField ? `${visitContext}_${targetField.variableName}` : scopedKey;
-    actualVal =
-      fieldValues[scopedKey] ??
-      fieldValues[scopedVarKey] ??
-      fieldValues[scopedNameKey] ??
-      fieldValues[condition.fieldId] ??
-      (targetField ? (fieldValues[targetField.id] ?? fieldValues[targetField.variableName]) : undefined);
-  } else {
-    actualVal =
-      fieldValues[condition.fieldId] ??
-      (targetField ? (fieldValues[targetField.id] ?? fieldValues[targetField.variableName]) : undefined);
-  }
-
-  // Fallback to field's active nullFlavorValue if actualVal is missing
-  if ((actualVal === undefined || actualVal === null || actualVal === "") && targetField?.nullFlavorValue) {
-    actualVal = targetField.nullFlavorValue;
-  }
 
   const actMissing = isMissingOrNullFlavor(actualVal);
 
@@ -488,46 +574,90 @@ export function evaluateCondition(
       const condMissing = isMissingOrNullFlavor(condition.value);
       if (actMissing && condMissing) return true;
       if (actMissing || condMissing) return false;
-      return String(actualVal).toLowerCase() === String(condition.value).toLowerCase();
+      return (
+        String(actualVal).toLowerCase() ===
+        String(condition.value).toLowerCase()
+      );
     }
     case "neq": {
       const condMissing = isMissingOrNullFlavor(condition.value);
       if (actMissing && condMissing) return false;
       if (actMissing || condMissing) return true;
-      return String(actualVal).toLowerCase() !== String(condition.value).toLowerCase();
+      return (
+        String(actualVal).toLowerCase() !==
+        String(condition.value).toLowerCase()
+      );
     }
     case "gt": {
       if (actMissing || isMissingOrNullFlavor(condition.value)) return false;
-      const numAct = typeof actualVal === "number" ? actualVal : parseFloat(String(actualVal));
-      const numCond = typeof condition.value === "number" ? condition.value : parseFloat(String(condition.value));
-      return Number.isFinite(numAct) && Number.isFinite(numCond) && numAct > numCond;
+      const numAct =
+        typeof actualVal === "number"
+          ? actualVal
+          : parseFloat(String(actualVal));
+      const numCond =
+        typeof condition.value === "number"
+          ? condition.value
+          : parseFloat(String(condition.value));
+      return (
+        Number.isFinite(numAct) && Number.isFinite(numCond) && numAct > numCond
+      );
     }
     case "gte": {
       if (actMissing || isMissingOrNullFlavor(condition.value)) return false;
-      const numAct = typeof actualVal === "number" ? actualVal : parseFloat(String(actualVal));
-      const numCond = typeof condition.value === "number" ? condition.value : parseFloat(String(condition.value));
-      return Number.isFinite(numAct) && Number.isFinite(numCond) && numAct >= numCond;
+      const numAct =
+        typeof actualVal === "number"
+          ? actualVal
+          : parseFloat(String(actualVal));
+      const numCond =
+        typeof condition.value === "number"
+          ? condition.value
+          : parseFloat(String(condition.value));
+      return (
+        Number.isFinite(numAct) && Number.isFinite(numCond) && numAct >= numCond
+      );
     }
     case "lt": {
       if (actMissing || isMissingOrNullFlavor(condition.value)) return false;
-      const numAct = typeof actualVal === "number" ? actualVal : parseFloat(String(actualVal));
-      const numCond = typeof condition.value === "number" ? condition.value : parseFloat(String(condition.value));
-      return Number.isFinite(numAct) && Number.isFinite(numCond) && numAct < numCond;
+      const numAct =
+        typeof actualVal === "number"
+          ? actualVal
+          : parseFloat(String(actualVal));
+      const numCond =
+        typeof condition.value === "number"
+          ? condition.value
+          : parseFloat(String(condition.value));
+      return (
+        Number.isFinite(numAct) && Number.isFinite(numCond) && numAct < numCond
+      );
     }
     case "lte": {
       if (actMissing || isMissingOrNullFlavor(condition.value)) return false;
-      const numAct = typeof actualVal === "number" ? actualVal : parseFloat(String(actualVal));
-      const numCond = typeof condition.value === "number" ? condition.value : parseFloat(String(condition.value));
-      return Number.isFinite(numAct) && Number.isFinite(numCond) && numAct <= numCond;
+      const numAct =
+        typeof actualVal === "number"
+          ? actualVal
+          : parseFloat(String(actualVal));
+      const numCond =
+        typeof condition.value === "number"
+          ? condition.value
+          : parseFloat(String(condition.value));
+      return (
+        Number.isFinite(numAct) && Number.isFinite(numCond) && numAct <= numCond
+      );
     }
     case "contains": {
       if (actMissing || isMissingOrNullFlavor(condition.value)) return false;
-      return String(actualVal).toLowerCase().includes(String(condition.value).toLowerCase());
+      return String(actualVal)
+        .toLowerCase()
+        .includes(String(condition.value).toLowerCase());
     }
     case "in": {
       if (actMissing) return false;
       if (Array.isArray(condition.value)) {
-        return condition.value.some((v) => !isMissingOrNullFlavor(v) && String(v).toLowerCase() === String(actualVal).toLowerCase());
+        return condition.value.some(
+          (v) =>
+            !isMissingOrNullFlavor(v) &&
+            String(v).toLowerCase() === String(actualVal).toLowerCase()
+        );
       }
       return false;
     }
@@ -548,8 +678,459 @@ export function evaluateRule(
   if (!rule.conditions || rule.conditions.length === 0) return true;
 
   if (rule.logicalOperator === "OR") {
-    return rule.conditions.some((cond) => evaluateCondition(cond, fieldValues, fieldsList, visitContext));
+    return rule.conditions.some((cond) =>
+      evaluateCondition(cond, fieldValues, fieldsList, visitContext)
+    );
   } else {
-    return rule.conditions.every((cond) => evaluateCondition(cond, fieldValues, fieldsList, visitContext));
+    return rule.conditions.every((cond) =>
+      evaluateCondition(cond, fieldValues, fieldsList, visitContext)
+    );
   }
+}
+
+// --- Grouped, field/field-aware, four-valued discrepancy checks (#540) ---
+//
+// evaluateCondition/evaluateRule above stay exactly as they were: they
+// return a plain boolean, treat any indeterminate case as false, and only
+// ever compare a field against a literal. They remain the API for every
+// existing caller.
+//
+// The functions below add what #540 asks for on top, without changing
+// that existing behavior: field/field operands (`compareFieldId`),
+// explicit two-level AND/OR grouping (`conditionGroups`), and a fourth
+// "incompatible" result distinct from "missing" - a genuine type mismatch
+// or an operator this evaluator doesn't recognize (as can arrive via
+// import) is never silently reported as a confident false.
+
+const ORDERING_OPERATORS = new Set<AstOperator>(["gt", "gte", "lt", "lte"]);
+const KNOWN_OPERATORS = new Set<AstOperator>([
+  "eq",
+  "neq",
+  "gt",
+  "gte",
+  "lt",
+  "lte",
+  "in",
+  "contains",
+  "is_empty",
+  "is_not_empty",
+]);
+
+type DataTypeFamily = "numeric" | "date" | "time" | "text" | "unknown";
+
+function getDataTypeFamily(
+  dataType: ClinicalDataType | undefined
+): DataTypeFamily {
+  switch (dataType) {
+    case "number":
+    case "integer":
+    case "vas_scale":
+    case "nrs_scale":
+    case "calculated":
+      return "numeric";
+    case "date":
+    case "partial_date":
+    case "precision_date":
+    case "datetime":
+      return "date";
+    case "time":
+      return "time";
+    case "text":
+    case "textarea":
+    case "single_select":
+    case "multi_select":
+    case "radio":
+    case "checkbox":
+    case "repeating_table":
+    case "signature":
+      return "text";
+    default:
+      return "unknown";
+  }
+}
+
+function describeField(fieldId: string, fieldsList: CRFField[]): string {
+  const field = fieldsList.find(
+    (f) => f.id === fieldId || f.variableName === fieldId
+  );
+  return field ? field.variableName : fieldId;
+}
+
+/**
+ * Evaluate a single AST condition to a four-valued result: "true", "false",
+ * "missing" (an operand has no value), or "incompatible" (a type mismatch,
+ * or an operator this evaluator doesn't recognize - defensive against an
+ * imported expression using a shape this app never authors itself).
+ */
+export function evaluateConditionResult(
+  condition: AstCondition,
+  fieldValues: Record<string, string | number | boolean | null | undefined>,
+  fieldsList: CRFField[],
+  visitContext?: string
+): ConditionResult {
+  if (!KNOWN_OPERATORS.has(condition.operator)) {
+    return "incompatible";
+  }
+
+  const targetField = fieldsList.find(
+    (f) => f.id === condition.fieldId || f.variableName === condition.fieldId
+  );
+  const actualVal = resolveFieldValue(
+    condition.fieldId,
+    fieldValues,
+    fieldsList,
+    visitContext,
+    condition.crossVisitId
+  );
+  const actMissing = isMissingOrNullFlavor(actualVal);
+
+  let comparedField: CRFField | undefined;
+  let comparedVal: string | number | boolean | string[] | null | undefined;
+  if (condition.compareFieldId) {
+    comparedField = fieldsList.find(
+      (f) =>
+        f.id === condition.compareFieldId ||
+        f.variableName === condition.compareFieldId
+    );
+    comparedVal = resolveFieldValue(
+      condition.compareFieldId,
+      fieldValues,
+      fieldsList,
+      visitContext
+    );
+  } else {
+    comparedVal = condition.value;
+  }
+  const condMissing = isMissingOrNullFlavor(comparedVal);
+
+  // Type compatibility (#540): a field/field check compares two real
+  // types directly; a field/literal ordering comparison only makes sense
+  // against a numeric, date, or time field.
+  if (condition.compareFieldId && comparedField) {
+    const familyA = getDataTypeFamily(targetField?.dataType);
+    const familyB = getDataTypeFamily(comparedField.dataType);
+    if (familyA !== "unknown" && familyB !== "unknown" && familyA !== familyB) {
+      return "incompatible";
+    }
+  } else if (ORDERING_OPERATORS.has(condition.operator)) {
+    const family = getDataTypeFamily(targetField?.dataType);
+    if (
+      family !== "unknown" &&
+      family !== "numeric" &&
+      family !== "date" &&
+      family !== "time"
+    ) {
+      return "incompatible";
+    }
+  }
+
+  switch (condition.operator) {
+    case "is_empty":
+      return actMissing ? "true" : "false";
+    case "is_not_empty":
+      return actMissing ? "false" : "true";
+    case "eq": {
+      if (actMissing && condMissing) return "true";
+      if (actMissing || condMissing) return "missing";
+      return String(actualVal).toLowerCase() ===
+        String(comparedVal).toLowerCase()
+        ? "true"
+        : "false";
+    }
+    case "neq": {
+      if (actMissing && condMissing) return "false";
+      if (actMissing || condMissing) return "missing";
+      return String(actualVal).toLowerCase() !==
+        String(comparedVal).toLowerCase()
+        ? "true"
+        : "false";
+    }
+    case "gt":
+    case "gte":
+    case "lt":
+    case "lte": {
+      if (actMissing || condMissing) return "missing";
+      const numAct =
+        typeof actualVal === "number"
+          ? actualVal
+          : parseFloat(String(actualVal));
+      const numCmp =
+        typeof comparedVal === "number"
+          ? comparedVal
+          : parseFloat(String(comparedVal));
+      if (!Number.isFinite(numAct) || !Number.isFinite(numCmp))
+        return "incompatible";
+      if (condition.operator === "gt")
+        return numAct > numCmp ? "true" : "false";
+      if (condition.operator === "gte")
+        return numAct >= numCmp ? "true" : "false";
+      if (condition.operator === "lt")
+        return numAct < numCmp ? "true" : "false";
+      return numAct <= numCmp ? "true" : "false";
+    }
+    case "contains": {
+      if (actMissing || condMissing) return "missing";
+      return String(actualVal)
+        .toLowerCase()
+        .includes(String(comparedVal).toLowerCase())
+        ? "true"
+        : "false";
+    }
+    case "in": {
+      if (actMissing) return "missing";
+      if (!Array.isArray(comparedVal)) return "incompatible";
+      return comparedVal.some(
+        (v) =>
+          !isMissingOrNullFlavor(v) &&
+          String(v).toLowerCase() === String(actualVal).toLowerCase()
+      )
+        ? "true"
+        : "false";
+    }
+    default:
+      return "incompatible";
+  }
+}
+
+/**
+ * Combines four-valued results under AND/OR. Definite answers (true for
+ * OR, false for AND) short-circuit first, exactly as two-valued logic
+ * would. When neither operand is decisive, "incompatible" is reported
+ * ahead of "missing": a type mismatch or unrecognized operator is a
+ * defect to fix, which is a more actionable diagnostic than "no value
+ * entered yet" when both are present in the same group.
+ */
+export function combineConditionResults(
+  operator: "AND" | "OR",
+  results: ConditionResult[]
+): ConditionResult {
+  if (results.length === 0) return "true";
+
+  if (operator === "AND") {
+    if (results.includes("false")) return "false";
+    if (results.includes("incompatible")) return "incompatible";
+    if (results.includes("missing")) return "missing";
+    return "true";
+  }
+
+  if (results.includes("true")) return "true";
+  if (results.includes("incompatible")) return "incompatible";
+  if (results.includes("missing")) return "missing";
+  return "false";
+}
+
+/**
+ * Normalizes a rule's conditions into explicit groups: `conditionGroups`
+ * when present (#540), otherwise the legacy flat `conditions`/
+ * `logicalOperator` wrapped as a single group, so evaluation and
+ * explanation only ever need to handle one shape.
+ */
+export function getRuleGroups(rule: EditCheckRule): {
+  groups: ConditionGroup[];
+  groupLogicalOperator: "AND" | "OR";
+} {
+  if (rule.conditionGroups && rule.conditionGroups.length > 0) {
+    return {
+      groups: rule.conditionGroups,
+      groupLogicalOperator: rule.groupLogicalOperator ?? "AND",
+    };
+  }
+  return {
+    groups: [
+      {
+        id: `${rule.id}_legacy_group`,
+        logicalOperator: rule.logicalOperator,
+        conditions: rule.conditions || [],
+      },
+    ],
+    groupLogicalOperator: "AND",
+  };
+}
+
+/**
+ * Four-valued equivalent of evaluateRule: supports conditionGroups,
+ * field/field operands, and reports a preserved unsupportedExpression (an
+ * imported shape this evaluator couldn't map at all) as incompatible
+ * rather than silently treating it as always-true or always-false.
+ */
+export function evaluateRuleResult(
+  rule: EditCheckRule,
+  fieldValues: Record<string, string | number | boolean | null | undefined>,
+  fieldsList: CRFField[],
+  visitContext?: string
+): ConditionResult {
+  if (rule.unsupportedExpression) return "incompatible";
+
+  const { groups, groupLogicalOperator } = getRuleGroups(rule);
+  const groupResults = groups.map((group) =>
+    combineConditionResults(
+      group.logicalOperator,
+      group.conditions.map((cond) =>
+        evaluateConditionResult(cond, fieldValues, fieldsList, visitContext)
+      )
+    )
+  );
+
+  return combineConditionResults(groupLogicalOperator, groupResults);
+}
+
+const OPERATOR_LABELS: Partial<Record<AstOperator, string>> = {
+  eq: "equals",
+  neq: "does not equal",
+  gt: "is greater than",
+  gte: "is greater than or equal to",
+  lt: "is less than",
+  lte: "is less than or equal to",
+  in: "is one of",
+  contains: "contains",
+  is_empty: "is empty",
+  is_not_empty: "is not empty",
+};
+
+function formatValueForDisplay(val: unknown): string {
+  if (val === undefined || val === null || val === "") return "no value";
+  if (Array.isArray(val)) return `[${val.join(", ")}]`;
+  return String(val);
+}
+
+function resultLabel(result: ConditionResult): string {
+  switch (result) {
+    case "true":
+      return "TRUE";
+    case "false":
+      return "FALSE";
+    case "missing":
+      return "MISSING (no value entered)";
+    case "incompatible":
+      return "INCOMPATIBLE (cannot be compared)";
+  }
+}
+
+/** One human-readable, truth-table-style sentence for a single leaf condition (#540). */
+export function describeCondition(
+  condition: AstCondition,
+  fieldValues: Record<string, string | number | boolean | null | undefined>,
+  fieldsList: CRFField[],
+  result: ConditionResult,
+  visitContext?: string
+): string {
+  const fieldLabel = describeField(condition.fieldId, fieldsList);
+  const actualVal = resolveFieldValue(
+    condition.fieldId,
+    fieldValues,
+    fieldsList,
+    visitContext,
+    condition.crossVisitId
+  );
+  const operatorLabel =
+    OPERATOR_LABELS[condition.operator] ??
+    `(unsupported operator "${condition.operator}")`;
+
+  let base: string;
+  if (
+    condition.operator === "is_empty" ||
+    condition.operator === "is_not_empty"
+  ) {
+    base = `${fieldLabel} (${formatValueForDisplay(actualVal)}) ${operatorLabel}`;
+  } else {
+    const comparedDescription = condition.compareFieldId
+      ? describeField(condition.compareFieldId, fieldsList)
+      : formatValueForDisplay(condition.value);
+    base = `${fieldLabel} (${formatValueForDisplay(actualVal)}) ${operatorLabel} ${comparedDescription}`;
+  }
+
+  return `${base} → ${resultLabel(result)}`;
+}
+
+export interface ConditionExplanation {
+  condition: AstCondition;
+  result: ConditionResult;
+  sentence: string;
+}
+
+export interface GroupExplanation {
+  group: ConditionGroup;
+  result: ConditionResult;
+  conditionExplanations: ConditionExplanation[];
+  sentence: string;
+}
+
+export interface RuleExplanation {
+  result: ConditionResult;
+  groupExplanations: GroupExplanation[];
+  summary: string;
+}
+
+/**
+ * Full truth-table-style explanation of a rule's evaluation (#540):
+ * every leaf condition's own sentence and result, each group's combined
+ * result, and an overall summary sentence - including the Raise Query
+ * message when the rule fires and is configured to raise one.
+ */
+export function explainRule(
+  rule: EditCheckRule,
+  fieldValues: Record<string, string | number | boolean | null | undefined>,
+  fieldsList: CRFField[],
+  visitContext?: string
+): RuleExplanation {
+  if (rule.unsupportedExpression) {
+    return {
+      result: "incompatible",
+      groupExplanations: [],
+      summary: `This rule contains an imported expression this evaluator does not support (${rule.unsupportedExpression.reason}) and has been preserved without changes. It will not fire automatically until reviewed.`,
+    };
+  }
+
+  const { groups, groupLogicalOperator } = getRuleGroups(rule);
+
+  const groupExplanations: GroupExplanation[] = groups.map((group) => {
+    const conditionExplanations: ConditionExplanation[] = group.conditions.map(
+      (condition) => {
+        const result = evaluateConditionResult(
+          condition,
+          fieldValues,
+          fieldsList,
+          visitContext
+        );
+        return {
+          condition,
+          result,
+          sentence: describeCondition(
+            condition,
+            fieldValues,
+            fieldsList,
+            result,
+            visitContext
+          ),
+        };
+      }
+    );
+    const groupResult = combineConditionResults(
+      group.logicalOperator,
+      conditionExplanations.map((c) => c.result)
+    );
+    const joiner = group.logicalOperator === "AND" ? " AND " : " OR ";
+    const sentence =
+      conditionExplanations.length === 0
+        ? "(no conditions - always true)"
+        : `(${conditionExplanations.map((c) => c.sentence).join(joiner)})`;
+    return { group, result: groupResult, conditionExplanations, sentence };
+  });
+
+  const result = combineConditionResults(
+    groupLogicalOperator,
+    groupExplanations.map((g) => g.result)
+  );
+
+  const groupJoiner = groupLogicalOperator === "AND" ? " AND " : " OR ";
+  let summary = `${groupExplanations.map((g) => g.sentence).join(groupJoiner)} → ${resultLabel(result)}`;
+  if (
+    result === "true" &&
+    rule.actionType === "raise_query" &&
+    rule.queryMessage
+  ) {
+    summary += ` — Raise Query: "${rule.queryMessage}"`;
+  }
+
+  return { result, groupExplanations, summary };
 }
