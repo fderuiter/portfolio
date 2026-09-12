@@ -9,6 +9,7 @@ import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { LiveEdcSimulator } from "@/components/crf/Modes/LiveEdcSimulator";
 import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets";
+import { StudyProtocol } from "@/lib/crf/types";
 
 describe("Live 21 CFR Part 11 EDC Simulation Suite", () => {
   let container: HTMLDivElement;
@@ -147,5 +148,99 @@ describe("Live 21 CFR Part 11 EDC Simulation Suite", () => {
 
     // Verify form is now locked with digital signature badge
     expect(container.textContent).toContain("Locked (PI)");
+  });
+
+  it("does not carry a form's signed/locked status over to the same form at a different visit (#663)", async () => {
+    const studyTwoVisitsSameForm: StudyProtocol = {
+      ...ONCOLOGY_RECIST_PRESET,
+      forms: [
+        {
+          id: "form_shared",
+          name: "Shared Vitals Form",
+          domain: "VS",
+          description: "Reused across visits",
+          version: "1.0",
+          rules: [],
+          sections: [
+            {
+              id: "sec_1",
+              title: "Vitals",
+              fields: [
+                {
+                  id: "f_hr",
+                  variableName: "HR",
+                  label: "Heart Rate",
+                  dataType: "number",
+                  columnSpan: 6,
+                  required: false,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      visits: [
+        {
+          id: "visit_a",
+          oid: "SE.A",
+          name: "Visit A",
+          visitType: "Scheduled",
+          targetDay: 1,
+          windowBefore: 0,
+          windowAfter: 0,
+          assignedFormIds: ["form_shared"],
+        },
+        {
+          id: "visit_b",
+          oid: "SE.B",
+          name: "Visit B",
+          visitType: "Scheduled",
+          targetDay: 22,
+          windowBefore: 0,
+          windowAfter: 0,
+          assignedFormIds: ["form_shared"],
+        },
+      ],
+    };
+
+    await act(async () => {
+      root.render(<LiveEdcSimulator study={studyTwoVisitsSameForm} />);
+    });
+
+    const piRoleBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.trim() === "Principal Investigator"
+    );
+    await act(async () => {
+      piRoleBtn?.click();
+    });
+
+    // Visit selector is the second <select> in the Patient Form Entry view
+    // (Subject, then Protocol Visit, then CRF Form).
+    const visitSelect = container.querySelectorAll(
+      "select"
+    )[1] as HTMLSelectElement;
+    expect(visitSelect).toBeTruthy();
+    expect(visitSelect.value).toBe("visit_a");
+
+    const lockBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Lock & Sign (PI)")
+    );
+    expect(lockBtn).toBeDefined();
+
+    await act(async () => {
+      lockBtn?.click();
+    });
+
+    expect(container.textContent).toContain("Locked (PI)");
+    expect(container.textContent).toContain("Signed");
+
+    // Switch to Visit B — the same form there has never been locked/signed.
+    await act(async () => {
+      visitSelect.value = "visit_b";
+      visitSelect.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+
+    expect(container.textContent).not.toContain("Locked (PI)");
+    expect(container.textContent).not.toContain("Signed");
   });
 });
