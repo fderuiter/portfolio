@@ -222,4 +222,33 @@ describe("CRFStudioContainer Component", () => {
 
     expect(container.textContent).toContain("Phase II");
   });
+
+  it("does not hijack Ctrl/Cmd+Z from a focused form control (#658)", async () => {
+    await act(async () => {
+      root = createRoot(container);
+      root.render(<CRFStudioContainer />);
+    });
+
+    const selectEl = container.querySelector("select") as HTMLSelectElement;
+    expect(selectEl).toBeTruthy();
+    selectEl.focus();
+    expect(document.activeElement).toBe(selectEl);
+
+    let event!: KeyboardEvent;
+    await act(async () => {
+      event = new KeyboardEvent("keydown", {
+        key: "z",
+        ctrlKey: true,
+        bubbles: true,
+        cancelable: true,
+      });
+      selectEl.dispatchEvent(event);
+    });
+
+    // The studio's document-level undo shortcut must leave native browser/editor
+    // shortcuts alone while a form control (select, input, textarea, or a
+    // contentEditable field) has focus, instead of calling preventDefault()
+    // and jumping the whole study back regardless of what's focused.
+    expect(event.defaultPrevented).toBe(false);
+  });
 });
