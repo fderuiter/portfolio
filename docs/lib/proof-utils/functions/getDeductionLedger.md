@@ -8,8 +8,6 @@
 
 > **getDeductionLedger**(`edges`, `theoremId?`): [`LedgerStep`](../interfaces/LedgerStep.md)[]
 
-Defined in: [lib/proof-utils.ts:2462](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L2462)
-
 Constructs the multi-row formal deduction ledger table for the active theorem.
 
 ## Parameters

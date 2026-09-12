@@ -8,8 +8,6 @@
 
 > `const` **BATHTUB\_BOUNDS**: `object`
 
-Defined in: [lib/working-with-duck-engine.ts:21](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L21)
-
 ## Type Declaration
 
 ### height

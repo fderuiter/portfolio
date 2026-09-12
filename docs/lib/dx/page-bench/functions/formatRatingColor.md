@@ -8,8 +8,6 @@
 
 > **formatRatingColor**(`val`, `rating`): `string`
 
-Defined in: [lib/dx/page-bench.ts:268](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L268)
-
 ## Parameters
 
 ### val

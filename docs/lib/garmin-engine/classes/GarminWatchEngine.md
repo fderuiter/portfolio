@@ -6,8 +6,6 @@
 
 # Class: GarminWatchEngine
 
-Defined in: [lib/garmin-engine.ts:1459](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L1459)
-
 Base abstract class and typed EventBus for all headless arcade game engines.
 Zero framework dependencies. Testable in pure Node.js/Vitest.
 
@@ -20,8 +18,6 @@ Zero framework dependencies. Testable in pure Node.js/Vitest.
 ### Constructor
 
 > **new GarminWatchEngine**(`device?`): `GarminWatchEngine`
-
-Defined in: [lib/garmin-engine.ts:1463](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L1463)
 
 #### Parameters
 
@@ -43,8 +39,6 @@ Defined in: [lib/garmin-engine.ts:1463](https://github.com/fderuiter/portfolio/b
 
 > `protected` **cachedSnapshot**: [`GarminWatchSnapshot`](../interfaces/GarminWatchSnapshot.md) \| `null` = `null`
 
-Defined in: [lib/arcade/core/engine.ts:8](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L8)
-
 #### Inherited from
 
 [`ArcadeEngine`](../../arcade/core/engine/classes/ArcadeEngine.md).[`cachedSnapshot`](../../arcade/core/engine/classes/ArcadeEngine.md#cachedsnapshot)
@@ -55,8 +49,6 @@ Defined in: [lib/arcade/core/engine.ts:8](https://github.com/fderuiter/portfolio
 
 > `protected` **state**: [`GameEngineState`](../interfaces/GameEngineState.md)
 
-Defined in: [lib/arcade/core/engine.ts:7](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L7)
-
 #### Inherited from
 
 [`ArcadeEngine`](../../arcade/core/engine/classes/ArcadeEngine.md).[`state`](../../arcade/core/engine/classes/ArcadeEngine.md#state)
@@ -66,8 +58,6 @@ Defined in: [lib/arcade/core/engine.ts:7](https://github.com/fderuiter/portfolio
 ### createSnapshot()
 
 > **createSnapshot**(): [`GarminWatchSnapshot`](../interfaces/GarminWatchSnapshot.md)
-
-Defined in: [lib/garmin-engine.ts:1529](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L1529)
 
 Generates a fresh immutable state snapshot.
 
@@ -85,8 +75,6 @@ Generates a fresh immutable state snapshot.
 
 > **destroy**(): `void`
 
-Defined in: [lib/arcade/core/engine.ts:60](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L60)
-
 Cleans up engine timers, event subscriptions, and resources.
 
 #### Returns
@@ -102,8 +90,6 @@ Cleans up engine timers, event subscriptions, and resources.
 ### emit()
 
 > **emit**\<`T`\>(`event`, `payload`): `void`
-
-Defined in: [lib/arcade/core/engine.ts:117](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L117)
 
 Emits a typed event to registered listeners.
 
@@ -137,8 +123,6 @@ Emits a typed event to registered listeners.
 
 > **getSnapshot**(): [`GarminWatchSnapshot`](../interfaces/GarminWatchSnapshot.md)
 
-Defined in: [lib/arcade/core/engine.ts:43](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L43)
-
 Returns a cached immutable state snapshot for React useSyncExternalStore.
 Reference is preserved until notifySubscribers() is explicitly called.
 
@@ -156,8 +140,6 @@ Reference is preserved until notifySubscribers() is explicitly called.
 
 > **init**(): `void`
 
-Defined in: [lib/garmin-engine.ts:1467](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L1467)
-
 Initializes engine resources, object pools, and audio bindings.
 
 #### Returns
@@ -173,8 +155,6 @@ Initializes engine resources, object pools, and audio bindings.
 ### invalidateSnapshot()
 
 > **invalidateSnapshot**(): `void`
-
-Defined in: [lib/arcade/core/engine.ts:78](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L78)
 
 Invalidates cached snapshot so the next getSnapshot() recomputes fresh state.
 
@@ -192,8 +172,6 @@ Invalidates cached snapshot so the next getSnapshot() recomputes fresh state.
 
 > **jettisonOldest**(): `void`
 
-Defined in: [lib/garmin-engine.ts:1482](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L1482)
-
 #### Returns
 
 `void`
@@ -204,8 +182,6 @@ Defined in: [lib/garmin-engine.ts:1482](https://github.com/fderuiter/portfolio/b
 
 > **jump**(): `void`
 
-Defined in: [lib/garmin-engine.ts:1488](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L1488)
-
 #### Returns
 
 `void`
@@ -215,8 +191,6 @@ Defined in: [lib/garmin-engine.ts:1488](https://github.com/fderuiter/portfolio/b
 ### notifySubscribers()
 
 > **notifySubscribers**(): `void`
-
-Defined in: [lib/arcade/core/engine.ts:85](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L85)
 
 Invalidates cached snapshot and broadcasts a state change to subscribers.
 
@@ -233,8 +207,6 @@ Invalidates cached snapshot and broadcasts a state change to subscribers.
 ### on()
 
 > **on**\<`T`\>(`event`, `callback`): () => `void`
-
-Defined in: [lib/arcade/core/engine.ts:95](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L95)
 
 Subscribes to a typed one-shot action event (e.g. sfx, haptic, screen shake).
 
@@ -268,8 +240,6 @@ Subscribes to a typed one-shot action event (e.g. sfx, haptic, screen shake).
 
 > **pressButton**(`btn`): `void`
 
-Defined in: [lib/garmin-engine.ts:1496](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L1496)
-
 #### Parameters
 
 ##### btn
@@ -285,8 +255,6 @@ Defined in: [lib/garmin-engine.ts:1496](https://github.com/fderuiter/portfolio/b
 ### render()
 
 > **render**(`ctx`, `_alpha`): `void`
-
-Defined in: [lib/garmin-engine.ts:1524](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L1524)
 
 Renders in-world graphics to the 2D canvas with sub-frame alpha interpolation.
 
@@ -313,8 +281,6 @@ Renders in-world graphics to the 2D canvas with sub-frame alpha interpolation.
 ### resize()
 
 > **resize**(`_width`, `_height`, `_dpr`): `void`
-
-Defined in: [lib/arcade/core/engine.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L53)
 
 Handles canvas dimension and device pixel ratio resize events.
 
@@ -346,8 +312,6 @@ Handles canvas dimension and device pixel ratio resize events.
 
 > **startGame**(): `void`
 
-Defined in: [lib/garmin-engine.ts:1471](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L1471)
-
 #### Returns
 
 `void`
@@ -357,8 +321,6 @@ Defined in: [lib/garmin-engine.ts:1471](https://github.com/fderuiter/portfolio/b
 ### subscribe()
 
 > **subscribe**(`callback`): () => `void`
-
-Defined in: [lib/arcade/core/engine.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L68)
 
 Subscribes a listener to snapshot state updates (React useSyncExternalStore).
 
@@ -382,8 +344,6 @@ Subscribes a listener to snapshot state updates (React useSyncExternalStore).
 
 > **triggerGc**(): `void`
 
-Defined in: [lib/garmin-engine.ts:1476](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L1476)
-
 #### Returns
 
 `void`
@@ -393,8 +353,6 @@ Defined in: [lib/garmin-engine.ts:1476](https://github.com/fderuiter/portfolio/b
 ### update()
 
 > **update**(`dt`): `void`
-
-Defined in: [lib/garmin-engine.ts:1517](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L1517)
 
 Advances deterministic simulation physics by fixed delta time dt (in seconds).
 

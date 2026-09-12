@@ -8,8 +8,6 @@
 
 > **startProceduralBGM**(`initialTempoMs?`): `void`
 
-Defined in: [lib/clinical-trial-chaos/sound-effects.ts:118](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/sound-effects.ts#L118)
-
 Starts the procedural retro 8-bit chiptune background synth loop.
 
 ## Parameters

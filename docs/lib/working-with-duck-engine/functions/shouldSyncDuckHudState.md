@@ -8,8 +8,6 @@
 
 > **shouldSyncDuckHudState**(`nextState`): `boolean`
 
-Defined in: [lib/working-with-duck-engine.ts:715](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L715)
-
 Decide whether a stepped state should be flushed to React UI state.
 
 The canvas game loop steps the engine at 60 FPS but only syncs the

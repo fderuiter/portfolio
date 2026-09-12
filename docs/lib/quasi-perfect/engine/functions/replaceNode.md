@@ -8,8 +8,6 @@
 
 > **replaceNode**(`root`, `targetId`, `replacementNode`): [`ASTNode`](../../types/interfaces/ASTNode.md)
 
-Defined in: [lib/quasi-perfect/engine.ts:31](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/engine.ts#L31)
-
 Replaces a target node matching targetId with replacementNode.
 
 ## Parameters

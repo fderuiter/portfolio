@@ -6,15 +6,11 @@
 
 # Interface: EvaluateFormulaSpec
 
-Defined in: [lib/services/crf-evaluator/evaluate-formula/spec.ts:34](https://github.com/fderuiter/portfolio/blob/main/lib/services/crf-evaluator/evaluate-formula/spec.ts#L34)
-
 ## Methods
 
 ### execute()
 
 > **execute**(`input`): [`EvaluateFormulaResult`](../type-aliases/EvaluateFormulaResult.md)
-
-Defined in: [lib/services/crf-evaluator/evaluate-formula/spec.ts:35](https://github.com/fderuiter/portfolio/blob/main/lib/services/crf-evaluator/evaluate-formula/spec.ts#L35)
 
 #### Parameters
 

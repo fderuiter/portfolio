@@ -8,6 +8,4 @@
 
 > `const` **clinicalChaosScenarios**: readonly [`ClinicalScenario`](../interfaces/ClinicalScenario.md)[]
 
-Defined in: [lib/clinical-trial-chaos.ts:21](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos.ts#L21)
-
 Legacy export for backwards compatibility with earlier scaffold consumers

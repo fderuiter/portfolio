@@ -8,8 +8,6 @@
 
 > **evaluateQAMetrics**(`scenario`, `volume`, `controlPoints`, `voxelEdits`): [`QAMetrics`](../../types/interfaces/QAMetrics.md)
 
-Defined in: [lib/neuro/qa-engine.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/qa-engine.ts#L13)
-
 Evaluate the live QA status of the current workspace state.
 
 ## Parameters

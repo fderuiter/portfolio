@@ -8,8 +8,6 @@
 
 > **createCorticalSurfaceMeshFromBuffers**(`response`, `THREEModule?`): `Group`\<`Object3DEventMap`\>
 
-Defined in: [lib/neuro/engine-loader.ts:119](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/engine-loader.ts#L119)
-
 Construct THREE.Group from compiled Web Worker response object.
 
 ## Parameters

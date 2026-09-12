@@ -8,8 +8,6 @@
 
 > **mapPresetToFormVariables**(`presetFormula`, `fields`): `string`
 
-Defined in: [lib/crf/formula-presets.ts:113](https://github.com/fderuiter/portfolio/blob/main/lib/crf/formula-presets.ts#L113)
-
 Maps standard preset placeholder variables to available fields in the active CRF form.
 
 ## Parameters

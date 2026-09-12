@@ -8,8 +8,6 @@
 
 > **startGame**(`state`, `device?`): [`GameEngineState`](../interfaces/GameEngineState.md)
 
-Defined in: [lib/garmin-engine.ts:249](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L249)
-
 Start a new game session
 
 ## Parameters

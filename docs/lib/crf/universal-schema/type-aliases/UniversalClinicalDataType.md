@@ -7,5 +7,3 @@
 # Type Alias: UniversalClinicalDataType
 
 > **UniversalClinicalDataType** = `z.infer`\<*typeof* [`UniversalClinicalDataTypeSchema`](../variables/UniversalClinicalDataTypeSchema.md)\>
-
-Defined in: [lib/crf/universal-schema.ts:32](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L32)

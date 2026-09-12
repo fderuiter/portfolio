@@ -7,5 +7,3 @@
 # Type Alias: GameMode
 
 > **GameMode** = `"story"` \| `"hacker"`
-
-Defined in: [lib/quasi-perfect/types.ts:41](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L41)

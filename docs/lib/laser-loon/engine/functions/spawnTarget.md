@@ -8,8 +8,6 @@
 
 > **spawnTarget**(`targets`, `nextId`, `canvasWidth?`, `canvasHeight?`, `forcedType?`, `actNumber?`): `object`
 
-Defined in: [lib/laser-loon/engine.ts:96](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L96)
-
 ## Parameters
 
 ### targets

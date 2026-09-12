@@ -8,8 +8,6 @@
 
 > **updateEnemyAI**(`enemies`, `grid`, `playerX`, `playerY`, `deltaMs`): [`AIUpdateResult`](../interfaces/AIUpdateResult.md)
 
-Defined in: [lib/dungeon/ai.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/ai.ts#L17)
-
 Updates AI states (patrol, chase, stunned, confused, frozen) and positions for all active enemies.
 
 ## Parameters

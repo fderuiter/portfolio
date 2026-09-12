@@ -8,8 +8,6 @@
 
 > **getSoftwareSourceCodeNode**(`study`, `stats`, `options?`): `Record`\<`string`, `unknown`\>
 
-Defined in: [lib/seo.ts:444](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L444)
-
 Returns a specialized SoftwareSourceCode entity node for dynamic Case Studies.
 
 ## Parameters

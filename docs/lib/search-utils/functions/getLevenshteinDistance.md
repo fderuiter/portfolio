@@ -8,8 +8,6 @@
 
 > **getLevenshteinDistance**(`a`, `b`): `number`
 
-Defined in: [lib/search-utils.ts:33](https://github.com/fderuiter/portfolio/blob/main/lib/search-utils.ts#L33)
-
 ## Parameters
 
 ### a

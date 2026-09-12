@@ -7,5 +7,3 @@
 # Variable: COMMUNITY\_TONE\_ERROR\_MESSAGE
 
 > `const` **COMMUNITY\_TONE\_ERROR\_MESSAGE**: `"Submission rejected: Content violates community tone standards. Please ensure your submission uses constructive and respectful language."` = `"Submission rejected: Content violates community tone standards. Please ensure your submission uses constructive and respectful language."`
-
-Defined in: [lib/moderation.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/moderation.ts#L14)

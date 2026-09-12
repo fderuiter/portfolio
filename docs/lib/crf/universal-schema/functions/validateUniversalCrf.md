@@ -8,8 +8,6 @@
 
 > **validateUniversalCrf**(`data`): [`UniversalCrfValidationResult`](../interfaces/UniversalCrfValidationResult.md)
 
-Defined in: [lib/crf/universal-schema.ts:284](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L284)
-
 Validates any JSON object against the Universal CRF Protocol specification.
 
 ## Parameters

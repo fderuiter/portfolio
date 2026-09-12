@@ -7,5 +7,3 @@
 # Type Alias: PuzzlerTacticId
 
 > **PuzzlerTacticId** = `"simp"` \| `"rw"` \| `"linarith"` \| `"omega"` \| `"decide"` \| `"sorry"`
-
-Defined in: [lib/quasi-perfect-puzzler.ts:7](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect-puzzler.ts#L7)

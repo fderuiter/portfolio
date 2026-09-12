@@ -8,8 +8,6 @@
 
 > **getVisualArtworkNode**(`options`): `Record`\<`string`, `unknown`\>
 
-Defined in: [lib/seo.ts:159](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L159)
-
 Returns a specialized VisualArtwork & MediaObject Schema.org representation for open graphic design assets (e.g. Laser Loon).
 
 ## Parameters

@@ -8,8 +8,6 @@
 
 > **scaffoldCaseStudy**(`root`, `rawName`, `dryRun?`): [`GeneratedFile`](../interfaces/GeneratedFile.md)[]
 
-Defined in: [lib/dx/scaffolder.ts:441](https://github.com/fderuiter/portfolio/blob/main/lib/dx/scaffolder.ts#L441)
-
 Scaffold Case Study Page
 
 ## Parameters

@@ -6,15 +6,11 @@
 
 # Interface: LeanProofStep
 
-Defined in: [lib/quasi-perfect/types.ts:117](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L117)
-
 ## Properties
 
 ### cost?
 
 > `optional` **cost?**: `number`
-
-Defined in: [lib/quasi-perfect/types.ts:121](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L121)
 
 ***
 
@@ -22,15 +18,11 @@ Defined in: [lib/quasi-perfect/types.ts:121](https://github.com/fderuiter/portfo
 
 > **explanation**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:122](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L122)
-
 ***
 
 ### goalAfter
 
 > **goalAfter**: `string`
-
-Defined in: [lib/quasi-perfect/types.ts:124](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L124)
 
 ***
 
@@ -38,15 +30,11 @@ Defined in: [lib/quasi-perfect/types.ts:124](https://github.com/fderuiter/portfo
 
 > **goalBefore**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:123](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L123)
-
 ***
 
 ### id
 
 > **id**: `string`
-
-Defined in: [lib/quasi-perfect/types.ts:118](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L118)
 
 ***
 
@@ -54,20 +42,14 @@ Defined in: [lib/quasi-perfect/types.ts:118](https://github.com/fderuiter/portfo
 
 > **leanLine**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:120](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L120)
-
 ***
 
 ### subgoalLabel?
 
 > `optional` **subgoalLabel?**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:125](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L125)
-
 ***
 
 ### tacticId
 
 > **tacticId**: [`TacticId`](../type-aliases/TacticId.md)
-
-Defined in: [lib/quasi-perfect/types.ts:119](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L119)

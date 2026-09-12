@@ -7,5 +7,3 @@
 # Type Alias: UniversalAstCondition
 
 > **UniversalAstCondition** = `z.infer`\<*typeof* [`AstConditionSchema`](../variables/AstConditionSchema.md)\>
-
-Defined in: [lib/crf/universal-schema.ts:71](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L71)

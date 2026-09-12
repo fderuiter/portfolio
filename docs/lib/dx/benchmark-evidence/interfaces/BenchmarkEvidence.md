@@ -6,15 +6,11 @@
 
 # Interface: BenchmarkEvidence
 
-Defined in: [lib/dx/benchmark-evidence.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/dx/benchmark-evidence.ts#L14)
-
 ## Properties
 
 ### assertion
 
 > **assertion**: `object`
-
-Defined in: [lib/dx/benchmark-evidence.ts:50](https://github.com/fderuiter/portfolio/blob/main/lib/dx/benchmark-evidence.ts#L50)
 
 #### budgetEnabled
 
@@ -29,8 +25,6 @@ Defined in: [lib/dx/benchmark-evidence.ts:50](https://github.com/fderuiter/portf
 ### browser
 
 > **browser**: `object`
-
-Defined in: [lib/dx/benchmark-evidence.ts:39](https://github.com/fderuiter/portfolio/blob/main/lib/dx/benchmark-evidence.ts#L39)
 
 #### engine
 
@@ -66,8 +60,6 @@ Defined in: [lib/dx/benchmark-evidence.ts:39](https://github.com/fderuiter/portf
 
 > **build**: `object`
 
-Defined in: [lib/dx/benchmark-evidence.ts:22](https://github.com/fderuiter/portfolio/blob/main/lib/dx/benchmark-evidence.ts#L22)
-
 #### buildId
 
 > **buildId**: `string` \| `null`
@@ -102,15 +94,11 @@ Defined in: [lib/dx/benchmark-evidence.ts:22](https://github.com/fderuiter/portf
 
 > **capturedAt**: `string`
 
-Defined in: [lib/dx/benchmark-evidence.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/dx/benchmark-evidence.ts#L17)
-
 ***
 
 ### mode
 
 > **mode**: `"production"` \| `"exploratory"`
-
-Defined in: [lib/dx/benchmark-evidence.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/dx/benchmark-evidence.ts#L16)
 
 ***
 
@@ -118,15 +106,11 @@ Defined in: [lib/dx/benchmark-evidence.ts:16](https://github.com/fderuiter/portf
 
 > **routes**: [`PageBenchmarkSummary`](../../page-bench/interfaces/PageBenchmarkSummary.md)[]
 
-Defined in: [lib/dx/benchmark-evidence.ts:54](https://github.com/fderuiter/portfolio/blob/main/lib/dx/benchmark-evidence.ts#L54)
-
 ***
 
 ### sampling
 
 > **sampling**: `object`
-
-Defined in: [lib/dx/benchmark-evidence.ts:46](https://github.com/fderuiter/portfolio/blob/main/lib/dx/benchmark-evidence.ts#L46)
 
 #### measuredRuns
 
@@ -142,8 +126,6 @@ Defined in: [lib/dx/benchmark-evidence.ts:46](https://github.com/fderuiter/portf
 
 > **source**: `object`
 
-Defined in: [lib/dx/benchmark-evidence.ts:18](https://github.com/fderuiter/portfolio/blob/main/lib/dx/benchmark-evidence.ts#L18)
-
 #### dirty
 
 > **dirty**: `boolean`
@@ -157,8 +139,6 @@ Defined in: [lib/dx/benchmark-evidence.ts:18](https://github.com/fderuiter/portf
 ### target
 
 > **target**: `object`
-
-Defined in: [lib/dx/benchmark-evidence.ts:31](https://github.com/fderuiter/portfolio/blob/main/lib/dx/benchmark-evidence.ts#L31)
 
 #### hostname
 
@@ -189,5 +169,3 @@ Defined in: [lib/dx/benchmark-evidence.ts:31](https://github.com/fderuiter/portf
 ### version
 
 > **version**: `1`
-
-Defined in: [lib/dx/benchmark-evidence.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/dx/benchmark-evidence.ts#L15)

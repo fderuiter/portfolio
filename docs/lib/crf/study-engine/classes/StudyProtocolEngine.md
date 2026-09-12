@@ -6,8 +6,6 @@
 
 # Class: StudyProtocolEngine
 
-Defined in: [lib/crf/study-engine.ts:175](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L175)
-
 Pure Functional Protocol Engine
 
 ## Constructors
@@ -25,8 +23,6 @@ Pure Functional Protocol Engine
 ### addArm()
 
 > `static` **addArm**(`study`, `arm`): `object`
-
-Defined in: [lib/crf/study-engine.ts:631](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L631)
 
 Add Study Arm to Protocol Graph
 
@@ -58,8 +54,6 @@ Add Study Arm to Protocol Graph
 
 > `static` **addBiomedicalConcept**(`study`, `concept`): `object`
 
-Defined in: [lib/crf/study-engine.ts:718](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L718)
-
 Add Biomedical Concept to Protocol Graph
 
 #### Parameters
@@ -89,8 +83,6 @@ Add Biomedical Concept to Protocol Graph
 ### addCohort()
 
 > `static` **addCohort**(`study`, `cohort`): `object`
-
-Defined in: [lib/crf/study-engine.ts:690](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L690)
 
 Add Study Cohort to Protocol Graph
 
@@ -122,8 +114,6 @@ Add Study Cohort to Protocol Graph
 
 > `static` **addEpoch**(`study`, `epoch`): `object`
 
-Defined in: [lib/crf/study-engine.ts:659](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L659)
-
 Add Study Epoch to Protocol Graph
 
 #### Parameters
@@ -153,8 +143,6 @@ Add Study Epoch to Protocol Graph
 ### addField()
 
 > `static` **addField**(`study`, `domainOrFormId`, `fieldData`, `sectionIndex?`): `object`
-
-Defined in: [lib/crf/study-engine.ts:333](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L333)
 
 Add Clinical Field to Form
 
@@ -202,8 +190,6 @@ Add Clinical Field to Form
 
 > `static` **addForm**(`study`, `domain`, `customName?`): `object`
 
-Defined in: [lib/crf/study-engine.ts:256](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L256)
-
 Add / Scaffold CDASH Domain Form
 
 #### Parameters
@@ -237,8 +223,6 @@ Add / Scaffold CDASH Domain Form
 ### addRule()
 
 > `static` **addRule**(`study`, `domainOrFormId`, `ruleData`): `object`
-
-Defined in: [lib/crf/study-engine.ts:780](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L780)
 
 Add Dynamic AST Edit Check / Calculation Rule to Form
 
@@ -308,8 +292,6 @@ Add Dynamic AST Edit Check / Calculation Rule to Form
 
 > `static` **addVisit**(`study`, `visitData`): `object`
 
-Defined in: [lib/crf/study-engine.ts:489](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L489)
-
 Add Longitudinal Study Visit to SoA Matrix
 
 #### Parameters
@@ -339,8 +321,6 @@ Add Longitudinal Study Visit to SoA Matrix
 ### assignArmVisitForms()
 
 > `static` **assignArmVisitForms**(`study`, `visitIdOrName`, `armId`, `formIdsOrDomains`): `object`
-
-Defined in: [lib/crf/study-engine.ts:586](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L586)
 
 Assign Forms to a Study Visit specifically for a designated Study Arm
 
@@ -384,8 +364,6 @@ Assign Forms to a Study Visit specifically for a designated Study Arm
 
 > `static` **assignVisitForms**(`study`, `visitIdOrName`, `formIdsOrDomains`): `object`
 
-Defined in: [lib/crf/study-engine.ts:549](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L549)
-
 Assign Forms to a Study Visit (Additive)
 
 #### Parameters
@@ -424,8 +402,6 @@ Assign Forms to a Study Visit (Additive)
 
 > `static` **createInitialStudy**(`profile?`): [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
 
-Defined in: [lib/crf/study-engine.ts:179](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L179)
-
 Create Initial Blank Study Protocol
 
 #### Parameters
@@ -443,8 +419,6 @@ Create Initial Blank Study Protocol
 ### diffProtocols()
 
 > `static` **diffProtocols**(`studyA`, `studyB`): [`ProtocolDiffSummary`](../../universal-schema/interfaces/ProtocolDiffSummary.md)
-
-Defined in: [lib/crf/study-engine.ts:952](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L952)
 
 Semantic Diff between Two Protocols
 
@@ -467,8 +441,6 @@ Semantic Diff between Two Protocols
 ### exportProtocol()
 
 > `static` **exportProtocol**(`study`, `format`): `object`
-
-Defined in: [lib/crf/study-engine.ts:959](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L959)
 
 Multi-Format Regulatory Export Compilation
 
@@ -512,8 +484,6 @@ Multi-Format Regulatory Export Compilation
 
 > `static` **getArmAwareVisitMatrix**(`study`): `object`[] \| `object`[]
 
-Defined in: [lib/crf/study-engine.ts:734](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L734)
-
 Constructs an arm-aware visit matrix reflecting form assignments across study arms and epochs
 
 #### Parameters
@@ -531,8 +501,6 @@ Constructs an arm-aware visit matrix reflecting form assignments across study ar
 ### getField()
 
 > `static` **getField**(`study`, `domainOrFormId`, `fieldIdOrVar`): \{ `field`: [`CRFField`](../../types/interfaces/CRFField.md); `fieldIndex`: `number`; `form`: [`CRFForm`](../../types/interfaces/CRFForm.md); `sectionIndex`: `number`; \} \| `undefined`
-
-Defined in: [lib/crf/study-engine.ts:232](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L232)
 
 Find Field within Study or Specific Form
 
@@ -560,8 +528,6 @@ Find Field within Study or Specific Form
 
 > `static` **getForm**(`study`, `formIdOrDomain`): [`CRFForm`](../../types/interfaces/CRFForm.md) \| `undefined`
 
-Defined in: [lib/crf/study-engine.ts:221](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L221)
-
 Find Form by ID or Domain (Case-Insensitive)
 
 #### Parameters
@@ -584,8 +550,6 @@ Find Form by ID or Domain (Case-Insensitive)
 
 > `static` **listDomains**(): [`DomainMetadata`](../interfaces/DomainMetadata.md)[]
 
-Defined in: [lib/crf/study-engine.ts:871](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L871)
-
 List Supported CDASH Domains
 
 #### Returns
@@ -598,8 +562,6 @@ List Supported CDASH Domains
 
 > `static` **listPresets**(): `object`[]
 
-Defined in: [lib/crf/study-engine.ts:840](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L840)
-
 List Available Presets
 
 #### Returns
@@ -611,8 +573,6 @@ List Available Presets
 ### loadPreset()
 
 > `static` **loadPreset**(`presetId`): `object`
-
-Defined in: [lib/crf/study-engine.ts:855](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L855)
 
 Load Preset by ID
 
@@ -648,8 +608,6 @@ Load Preset by ID
 
 > `static` **removeArm**(`study`, `armId`): `object`
 
-Defined in: [lib/crf/study-engine.ts:644](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L644)
-
 Remove Study Arm from Protocol Graph
 
 #### Parameters
@@ -679,8 +637,6 @@ Remove Study Arm from Protocol Graph
 ### removeCohort()
 
 > `static` **removeCohort**(`study`, `cohortId`): `object`
-
-Defined in: [lib/crf/study-engine.ts:703](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L703)
 
 Remove Study Cohort from Protocol Graph
 
@@ -712,8 +668,6 @@ Remove Study Cohort from Protocol Graph
 
 > `static` **removeEpoch**(`study`, `epochId`): `object`
 
-Defined in: [lib/crf/study-engine.ts:675](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L675)
-
 Remove Study Epoch from Protocol Graph
 
 #### Parameters
@@ -743,8 +697,6 @@ Remove Study Epoch from Protocol Graph
 ### removeField()
 
 > `static` **removeField**(`study`, `domainOrFormId`, `fieldIdOrVar`): `object`
-
-Defined in: [lib/crf/study-engine.ts:449](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L449)
 
 Remove Field from Form & Prune AST Rules
 
@@ -788,8 +740,6 @@ Remove Field from Form & Prune AST Rules
 
 > `static` **removeForm**(`study`, `formIdOrDomain`): `object`
 
-Defined in: [lib/crf/study-engine.ts:303](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L303)
-
 Remove Form & Automatically Prune Schedule of Activities (SoA) References
 
 #### Parameters
@@ -820,8 +770,6 @@ Remove Form & Automatically Prune Schedule of Activities (SoA) References
 
 > `static` **removeVisit**(`study`, `visitIdOrName`): `object`
 
-Defined in: [lib/crf/study-engine.ts:524](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L524)
-
 Remove Study Visit from SoA Matrix
 
 #### Parameters
@@ -851,8 +799,6 @@ Remove Study Visit from SoA Matrix
 ### updateField()
 
 > `static` **updateField**(`study`, `domainOrFormId`, `fieldIdOrVar`, `updates`): `object`
-
-Defined in: [lib/crf/study-engine.ts:407](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L407)
 
 Update Existing Clinical Field in Form
 
@@ -899,8 +845,6 @@ Update Existing Clinical Field in Form
 ### validateProtocol()
 
 > `static` **validateProtocol**(`study`): [`ProtocolValidationResult`](../interfaces/ProtocolValidationResult.md)
-
-Defined in: [lib/crf/study-engine.ts:878](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L878)
 
 4-Tier Regulatory & Logic Conformance Validation
 

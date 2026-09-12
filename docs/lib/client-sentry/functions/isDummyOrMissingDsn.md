@@ -8,8 +8,6 @@
 
 > **isDummyOrMissingDsn**(`dsn?`): `boolean`
 
-Defined in: [lib/client-sentry.ts:7](https://github.com/fderuiter/portfolio/blob/main/lib/client-sentry.ts#L7)
-
 ## Parameters
 
 ### dsn?

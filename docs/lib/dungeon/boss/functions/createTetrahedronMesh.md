@@ -8,8 +8,6 @@
 
 > **createTetrahedronMesh**(`color?`, `scale?`): [`WireframeMesh`](../../types/interfaces/WireframeMesh.md)
 
-Defined in: [lib/dungeon/boss.ts:120](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/boss.ts#L120)
-
 Creates 3D tetrahedron/pyramid mesh for high-velocity projectiles.
 
 ## Parameters

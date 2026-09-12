@@ -8,8 +8,6 @@
 
 > **dequeueOfflineRequest**(`id`): `void`
 
-Defined in: [hooks/useOfflineQueue.ts:167](https://github.com/fderuiter/portfolio/blob/main/hooks/useOfflineQueue.ts#L167)
-
 Remove an item from the offline queue by its unique ID.
 
 ## Parameters

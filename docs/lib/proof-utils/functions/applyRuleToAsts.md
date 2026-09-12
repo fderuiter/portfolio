@@ -8,8 +8,6 @@
 
 > **applyRuleToAsts**(`ruleId`, `inputs`): `object`
 
-Defined in: [lib/proof-utils.ts:2632](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L2632)
-
 Attempts to apply an inference rule to given AST premises and returns the derived AST.
 
 ## Parameters

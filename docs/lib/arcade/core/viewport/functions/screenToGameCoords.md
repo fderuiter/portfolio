@@ -8,8 +8,6 @@
 
 > **screenToGameCoords**(`clientX`, `clientY`, `rect`, `metrics`): [`GamePoint`](../interfaces/GamePoint.md)
 
-Defined in: [lib/arcade/core/viewport.ts:123](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/viewport.ts#L123)
-
 Defensively translates client mouse/pointer coordinates to logical game safe zone coordinates.
 
 ## Parameters

@@ -8,8 +8,6 @@
 
 > **calculateColumnCount**(`containerWidth`, `breakpoints`, `cols`): `number`
 
-Defined in: [lib/graphics-math.ts:57](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-math.ts#L57)
-
 Calculates responsive column count based on container width and breakpoints.
 
 ## Parameters

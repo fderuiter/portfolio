@@ -8,8 +8,6 @@
 
 > `const` **\_testCache**: `object`
 
-Defined in: [lib/services/telemetry-service.ts:66](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L66)
-
 ## Type Declaration
 
 ### active

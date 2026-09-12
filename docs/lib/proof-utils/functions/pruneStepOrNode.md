@@ -8,8 +8,6 @@
 
 > **pruneStepOrNode**(`stepOrNode`, `edges`, `theoremId?`): [`PruneResult`](../interfaces/PruneResult.md)
 
-Defined in: [lib/proof-utils.ts:2546](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L2546)
-
 Prunes an intermediate lemma or conclusion deduction step and recursively removes dependent edges in the DAG.
 Foundational premises are immutable axioms and cannot be deleted.
 

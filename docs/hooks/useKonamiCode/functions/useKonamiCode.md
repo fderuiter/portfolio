@@ -8,8 +8,6 @@
 
 > **useKonamiCode**(`onSuccess?`): `object`
 
-Defined in: [hooks/useKonamiCode.ts:20](https://github.com/fderuiter/portfolio/blob/main/hooks/useKonamiCode.ts#L20)
-
 ## Parameters
 
 ### onSuccess?

@@ -8,8 +8,6 @@
 
 > **formatSection**(`name`): `string`
 
-Defined in: [lib/dx/utils.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/dx/utils.ts#L68)
-
 ## Parameters
 
 ### name

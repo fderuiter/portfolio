@@ -8,8 +8,6 @@
 
 > **normalizeText**(`input`): `string`
 
-Defined in: [lib/moderation.ts:21](https://github.com/fderuiter/portfolio/blob/main/lib/moderation.ts#L21)
-
 Normalizes input text by converting to lowercase, replacing common leetspeak substitutions,
 and stripping obstructive character separators between letters.
 

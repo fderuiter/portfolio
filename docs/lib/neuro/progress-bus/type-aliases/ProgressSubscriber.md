@@ -8,8 +8,6 @@
 
 > **ProgressSubscriber** = (`event`) => `void`
 
-Defined in: [lib/neuro/progress-bus.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/progress-bus.ts#L15)
-
 ## Parameters
 
 ### event

@@ -8,8 +8,6 @@
 
 > **getVisualArtworkSchema**(`options`): `string`
 
-Defined in: [lib/seo.ts:189](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L189)
-
 ## Parameters
 
 ### options

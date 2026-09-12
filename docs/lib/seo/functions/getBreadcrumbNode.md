@@ -8,8 +8,6 @@
 
 > **getBreadcrumbNode**(`items`, `pageUrl`, `options?`): `Record`\<`string`, `unknown`\>
 
-Defined in: [lib/seo.ts:116](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L116)
-
 Returns a normalized BreadcrumbList entity node with explicit #breadcrumb @id.
 
 ## Parameters

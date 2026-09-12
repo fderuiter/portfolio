@@ -8,8 +8,6 @@
 
 > **LiveAnnouncerListener** = () => `void`
 
-Defined in: [lib/a11y/announcer.ts:28](https://github.com/fderuiter/portfolio/blob/main/lib/a11y/announcer.ts#L28)
-
 ## Returns
 
 `void`

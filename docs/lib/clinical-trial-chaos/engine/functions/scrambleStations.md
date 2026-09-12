@@ -8,8 +8,6 @@
 
 > **scrambleStations**(`stations`): [`StationConfig`](../../types/interfaces/StationConfig.md)[]
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:472](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L472)
-
 Scrambles station positions (for Protocol Amendment event).
 
 ## Parameters

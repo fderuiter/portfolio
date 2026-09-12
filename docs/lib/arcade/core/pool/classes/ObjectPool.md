@@ -6,8 +6,6 @@
 
 # Class: ObjectPool\<T\>
 
-Defined in: [lib/arcade/core/pool.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/pool.ts#L16)
-
 ## Type Parameters
 
 ### T
@@ -19,8 +17,6 @@ Defined in: [lib/arcade/core/pool.ts:16](https://github.com/fderuiter/portfolio/
 ### Constructor
 
 > **new ObjectPool**\<`T`\>(`config`): `ObjectPool`\<`T`\>
-
-Defined in: [lib/arcade/core/pool.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/pool.ts#L26)
 
 #### Parameters
 
@@ -38,8 +34,6 @@ Defined in: [lib/arcade/core/pool.ts:26](https://github.com/fderuiter/portfolio/
 
 > **acquire**(): `T` \| `null`
 
-Defined in: [lib/arcade/core/pool.ts:44](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/pool.ts#L44)
-
 Acquires an inactive object from the pool, or recycles/expands according to policy.
 
 #### Returns
@@ -52,8 +46,6 @@ Acquires an inactive object from the pool, or recycles/expands according to poli
 
 > **clear**(): `void`
 
-Defined in: [lib/arcade/core/pool.ts:101](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/pool.ts#L101)
-
 #### Returns
 
 `void`
@@ -63,8 +55,6 @@ Defined in: [lib/arcade/core/pool.ts:101](https://github.com/fderuiter/portfolio
 ### forEachActive()
 
 > **forEachActive**(`callback`): `void`
-
-Defined in: [lib/arcade/core/pool.ts:87](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/pool.ts#L87)
 
 Iterates through all currently active items in the pool.
 
@@ -84,8 +74,6 @@ Iterates through all currently active items in the pool.
 
 > **getActiveCount**(): `number`
 
-Defined in: [lib/arcade/core/pool.ts:93](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/pool.ts#L93)
-
 #### Returns
 
 `number`
@@ -96,8 +84,6 @@ Defined in: [lib/arcade/core/pool.ts:93](https://github.com/fderuiter/portfolio/
 
 > **getCapacity**(): `number`
 
-Defined in: [lib/arcade/core/pool.ts:97](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/pool.ts#L97)
-
 #### Returns
 
 `number`
@@ -107,8 +93,6 @@ Defined in: [lib/arcade/core/pool.ts:97](https://github.com/fderuiter/portfolio/
 ### release()
 
 > **release**(`item`): `void`
-
-Defined in: [lib/arcade/core/pool.ts:75](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/pool.ts#L75)
 
 Releases an active object back to the pool.
 

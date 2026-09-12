@@ -8,8 +8,6 @@
 
 > **useRetroAudioCleanup**(): `void`
 
-Defined in: [lib/dungeon/audio.ts:179](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/audio.ts#L179)
-
 ## Returns
 
 `void`

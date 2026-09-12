@@ -8,8 +8,6 @@
 
 > **evaluateAstWithTrace**(`ast`, `env?`, `depth?`): [`AstTraceNode`](../interfaces/AstTraceNode.md)
 
-Defined in: [lib/proof-utils.ts:461](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L461)
-
 Evaluates the boolean truth value of an AST under a variable valuation and produces a hierarchical evaluation trace.
 
 ## Parameters

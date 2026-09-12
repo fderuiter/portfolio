@@ -7,5 +7,3 @@
 # Variable: CRT\_THEMES
 
 > `const` **CRT\_THEMES**: `Record`\<[`CRTThemeId`](../../types/type-aliases/CRTThemeId.md), [`CRTThemeConfig`](../../types/interfaces/CRTThemeConfig.md)\>
-
-Defined in: [lib/dungeon/metaprogression.ts:73](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/metaprogression.ts#L73)

@@ -8,6 +8,4 @@
 
 > `const` **BENCHMARK\_EVIDENCE\_MAX\_AGE\_MS**: `number`
 
-Defined in: [lib/dx/benchmark-evidence.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/dx/benchmark-evidence.ts#L9)
-
 Assertion evidence is only useful while it still represents the active checkout.

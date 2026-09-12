@@ -6,8 +6,6 @@
 
 # Class: DuckCommandHandler
 
-Defined in: [lib/services/duck/dispatch-command/handler.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/services/duck/dispatch-command/handler.ts#L14)
-
 ## Implements
 
 - [`DuckCommandSpec`](../../spec/interfaces/DuckCommandSpec.md)
@@ -27,8 +25,6 @@ Defined in: [lib/services/duck/dispatch-command/handler.ts:14](https://github.co
 ### execute()
 
 > **execute**(`input`): [`DuckCommandResult`](../../spec/type-aliases/DuckCommandResult.md)
-
-Defined in: [lib/services/duck/dispatch-command/handler.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/services/duck/dispatch-command/handler.ts#L15)
 
 #### Parameters
 

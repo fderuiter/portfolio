@@ -8,8 +8,6 @@
 
 > **safeGetItem**\<`T`\>(`key`, `defaultValue?`): `T` \| `null`
 
-Defined in: [lib/safe-storage.ts:503](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L503)
-
 ## Type Parameters
 
 ### T

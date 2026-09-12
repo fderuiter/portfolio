@@ -6,8 +6,6 @@
 
 # Interface: ServiceSuccess\<T\>
 
-Defined in: [lib/services/service-result.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/services/service-result.ts#L14)
-
 ## Type Parameters
 
 ### T
@@ -20,12 +18,8 @@ Defined in: [lib/services/service-result.ts:14](https://github.com/fderuiter/por
 
 > **data**: `T`
 
-Defined in: [lib/services/service-result.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/services/service-result.ts#L16)
-
 ***
 
 ### success
 
 > **success**: `true`
-
-Defined in: [lib/services/service-result.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/services/service-result.ts#L15)

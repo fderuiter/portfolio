@@ -6,8 +6,6 @@
 
 # Class: InteractHazardHandler
 
-Defined in: [lib/services/duck/interact-hazard/handler.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/services/duck/interact-hazard/handler.ts#L13)
-
 ## Implements
 
 - [`InteractHazardSpec`](../../spec/interfaces/InteractHazardSpec.md)
@@ -27,8 +25,6 @@ Defined in: [lib/services/duck/interact-hazard/handler.ts:13](https://github.com
 ### execute()
 
 > **execute**(`input`): [`InteractHazardResult`](../../spec/type-aliases/InteractHazardResult.md)
-
-Defined in: [lib/services/duck/interact-hazard/handler.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/services/duck/interact-hazard/handler.ts#L14)
 
 #### Parameters
 

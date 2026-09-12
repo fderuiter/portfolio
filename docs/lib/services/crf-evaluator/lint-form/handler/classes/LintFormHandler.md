@@ -6,8 +6,6 @@
 
 # Class: LintFormHandler
 
-Defined in: [lib/services/crf-evaluator/lint-form/handler.ts:5](https://github.com/fderuiter/portfolio/blob/main/lib/services/crf-evaluator/lint-form/handler.ts#L5)
-
 ## Implements
 
 - [`LintFormSpec`](../../spec/interfaces/LintFormSpec.md)
@@ -27,8 +25,6 @@ Defined in: [lib/services/crf-evaluator/lint-form/handler.ts:5](https://github.c
 ### execute()
 
 > **execute**(`input`): [`LintFormResult`](../../spec/type-aliases/LintFormResult.md)
-
-Defined in: [lib/services/crf-evaluator/lint-form/handler.ts:6](https://github.com/fderuiter/portfolio/blob/main/lib/services/crf-evaluator/lint-form/handler.ts#L6)
 
 #### Parameters
 

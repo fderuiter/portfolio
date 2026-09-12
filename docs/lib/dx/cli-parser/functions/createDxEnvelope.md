@@ -8,8 +8,6 @@
 
 > **createDxEnvelope**\<`T`\>(`options`): [`DxEnvelope`](../interfaces/DxEnvelope.md)\<`T`\>
 
-Defined in: [lib/dx/cli-parser.ts:165](https://github.com/fderuiter/portfolio/blob/main/lib/dx/cli-parser.ts#L165)
-
 Creates a standardized DX JSON Envelope
 
 ## Type Parameters

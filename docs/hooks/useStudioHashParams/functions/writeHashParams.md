@@ -8,8 +8,6 @@
 
 > **writeHashParams**(`updates`, `options?`): `void`
 
-Defined in: [hooks/useStudioHashParams.ts:97](https://github.com/fderuiter/portfolio/blob/main/hooks/useStudioHashParams.ts#L97)
-
 Updates URL hash parameters with new values.
 
 ## Parameters

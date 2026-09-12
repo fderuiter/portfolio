@@ -6,8 +6,6 @@
 
 # Class: LintFormulaHandler
 
-Defined in: [lib/services/crf-evaluator/lint-formula/handler.ts:5](https://github.com/fderuiter/portfolio/blob/main/lib/services/crf-evaluator/lint-formula/handler.ts#L5)
-
 ## Implements
 
 - [`LintFormulaSpec`](../../spec/interfaces/LintFormulaSpec.md)
@@ -27,8 +25,6 @@ Defined in: [lib/services/crf-evaluator/lint-formula/handler.ts:5](https://githu
 ### execute()
 
 > **execute**(`input`): [`LintFormulaResult`](../../spec/type-aliases/LintFormulaResult.md)
-
-Defined in: [lib/services/crf-evaluator/lint-formula/handler.ts:6](https://github.com/fderuiter/portfolio/blob/main/lib/services/crf-evaluator/lint-formula/handler.ts#L6)
 
 #### Parameters
 

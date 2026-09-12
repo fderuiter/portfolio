@@ -6,15 +6,11 @@
 
 # Interface: SearchItem
 
-Defined in: [lib/search-utils.ts:1](https://github.com/fderuiter/portfolio/blob/main/lib/search-utils.ts#L1)
-
 ## Properties
 
 ### id
 
 > **id**: `string`
-
-Defined in: [lib/search-utils.ts:2](https://github.com/fderuiter/portfolio/blob/main/lib/search-utils.ts#L2)
 
 ***
 
@@ -22,12 +18,8 @@ Defined in: [lib/search-utils.ts:2](https://github.com/fderuiter/portfolio/blob/
 
 > **subtitle**: `string`
 
-Defined in: [lib/search-utils.ts:4](https://github.com/fderuiter/portfolio/blob/main/lib/search-utils.ts#L4)
-
 ***
 
 ### title
 
 > **title**: `string`
-
-Defined in: [lib/search-utils.ts:3](https://github.com/fderuiter/portfolio/blob/main/lib/search-utils.ts#L3)

@@ -6,8 +6,6 @@
 
 # Interface: StudyAuditReport
 
-Defined in: [lib/crf/study-auditor.ts:76](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L76)
-
 Global study audit report returned by StudyAuditor.audit().
 
 ## Properties
@@ -15,8 +13,6 @@ Global study audit report returned by StudyAuditor.audit().
 ### autoFix
 
 > **autoFix**: (`diagnosticId`) => [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
-
-Defined in: [lib/crf/study-auditor.ts:87](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L87)
 
 #### Parameters
 
@@ -33,8 +29,6 @@ Defined in: [lib/crf/study-auditor.ts:87](https://github.com/fderuiter/portfolio
 ### autoFixAll
 
 > **autoFixAll**: () => `object`
-
-Defined in: [lib/crf/study-auditor.ts:88](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L88)
 
 #### Returns
 
@@ -54,15 +48,11 @@ Defined in: [lib/crf/study-auditor.ts:88](https://github.com/fderuiter/portfolio
 
 > **diagnostics**: [`AuditDiagnostic`](AuditDiagnostic.md)[]
 
-Defined in: [lib/crf/study-auditor.ts:80](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L80)
-
 ***
 
 ### health
 
 > **health**: [`FormHealthMetrics`](FormHealthMetrics.md)
-
-Defined in: [lib/crf/study-auditor.ts:79](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L79)
 
 ***
 
@@ -70,23 +60,17 @@ Defined in: [lib/crf/study-auditor.ts:79](https://github.com/fderuiter/portfolio
 
 > **isCompliant**: `boolean`
 
-Defined in: [lib/crf/study-auditor.ts:77](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L77)
-
 ***
 
 ### score
 
 > **score**: `number`
 
-Defined in: [lib/crf/study-auditor.ts:78](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L78)
-
 ***
 
 ### summary
 
 > **summary**: `object`
-
-Defined in: [lib/crf/study-auditor.ts:81](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L81)
 
 #### errors
 

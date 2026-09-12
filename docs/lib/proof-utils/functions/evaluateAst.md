@@ -8,8 +8,6 @@
 
 > **evaluateAst**(`ast`, `env?`, `depth?`): `boolean`
 
-Defined in: [lib/proof-utils.ts:434](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L434)
-
 Evaluates the boolean truth value of an AST under a variable valuation.
 
 ## Parameters

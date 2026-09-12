@@ -6,8 +6,6 @@
 
 # Class: LiveAnnouncer
 
-Defined in: [lib/a11y/announcer.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/a11y/announcer.ts#L69)
-
 Pure LiveAnnouncer Engine managing polite FIFO queuing, assertive preemption, and auto-expiration timers.
 
 ## Constructors
@@ -15,8 +13,6 @@ Pure LiveAnnouncer Engine managing polite FIFO queuing, assertive preemption, an
 ### Constructor
 
 > **new LiveAnnouncer**(`options?`): `LiveAnnouncer`
-
-Defined in: [lib/a11y/announcer.ts:76](https://github.com/fderuiter/portfolio/blob/main/lib/a11y/announcer.ts#L76)
 
 #### Parameters
 
@@ -33,8 +29,6 @@ Defined in: [lib/a11y/announcer.ts:76](https://github.com/fderuiter/portfolio/bl
 ### announce()
 
 > **announce**(`message`, `priority?`): [`AnnounceItem`](../interfaces/AnnounceItem.md) \| `null`
-
-Defined in: [lib/a11y/announcer.ts:114](https://github.com/fderuiter/portfolio/blob/main/lib/a11y/announcer.ts#L114)
 
 Enqueues or plays an announcement based on priority and current active state.
 
@@ -64,8 +58,6 @@ The generated announcement item or null if invalid.
 
 > **clear**(): `void`
 
-Defined in: [lib/a11y/announcer.ts:164](https://github.com/fderuiter/portfolio/blob/main/lib/a11y/announcer.ts#L164)
-
 Clears all active announcements, queued items, and cancels running timers.
 
 #### Returns
@@ -77,8 +69,6 @@ Clears all active announcements, queued items, and cancels running timers.
 ### destroy()
 
 > **destroy**(): `void`
-
-Defined in: [lib/a11y/announcer.ts:178](https://github.com/fderuiter/portfolio/blob/main/lib/a11y/announcer.ts#L178)
 
 Destroys the announcer instance, cancelling timers and removing all subscribers.
 
@@ -92,8 +82,6 @@ Destroys the announcer instance, cancelling timers and removing all subscribers.
 
 > **getSnapshot**(): [`AnnouncerState`](../interfaces/AnnouncerState.md)
 
-Defined in: [lib/a11y/announcer.ts:103](https://github.com/fderuiter/portfolio/blob/main/lib/a11y/announcer.ts#L103)
-
 Returns the current immutable snapshot of the announcer state.
 
 #### Returns
@@ -105,8 +93,6 @@ Returns the current immutable snapshot of the announcer state.
 ### subscribe()
 
 > **subscribe**(`listener`): () => `void`
-
-Defined in: [lib/a11y/announcer.ts:93](https://github.com/fderuiter/portfolio/blob/main/lib/a11y/announcer.ts#L93)
 
 Subscribes a listener callback to state changes.
 

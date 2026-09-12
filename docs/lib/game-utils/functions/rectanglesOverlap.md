@@ -8,8 +8,6 @@
 
 > **rectanglesOverlap**(`first`, `second`): `boolean`
 
-Defined in: [lib/game-utils.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/game-utils.ts#L16)
-
 ## Parameters
 
 ### first

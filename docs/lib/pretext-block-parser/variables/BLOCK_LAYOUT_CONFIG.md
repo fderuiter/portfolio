@@ -8,8 +8,6 @@
 
 > `const` **BLOCK\_LAYOUT\_CONFIG**: `object`
 
-Defined in: [lib/pretext-block-parser.ts:87](https://github.com/fderuiter/portfolio/blob/main/lib/pretext-block-parser.ts#L87)
-
 ## Type Declaration
 
 ### BLOCK\_PADDING

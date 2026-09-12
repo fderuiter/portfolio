@@ -6,15 +6,11 @@
 
 # Class: SoundEngine
 
-Defined in: [lib/audio/sound-engine.ts:84](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L84)
-
 ## Constructors
 
 ### Constructor
 
 > **new SoundEngine**(`options?`): `SoundEngine`
-
-Defined in: [lib/audio/sound-engine.ts:92](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L92)
 
 #### Parameters
 
@@ -32,8 +28,6 @@ Defined in: [lib/audio/sound-engine.ts:92](https://github.com/fderuiter/portfoli
 
 > **close**(): `void`
 
-Defined in: [lib/audio/sound-engine.ts:571](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L571)
-
 Closes and disposes of AudioContext resources.
 
 #### Returns
@@ -45,8 +39,6 @@ Closes and disposes of AudioContext resources.
 ### getAudioContext()
 
 > **getAudioContext**(): `AudioContext` \| `null`
-
-Defined in: [lib/audio/sound-engine.ts:149](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L149)
 
 Lazily resolves or instantiates the active AudioContext.
 
@@ -60,8 +52,6 @@ Lazily resolves or instantiates the active AudioContext.
 
 > **getVolume**(): `number`
 
-Defined in: [lib/audio/sound-engine.ts:183](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L183)
-
 Returns current master volume (0.0 to 1.0).
 
 #### Returns
@@ -73,8 +63,6 @@ Returns current master volume (0.0 to 1.0).
 ### isBypassActive()
 
 > **isBypassActive**(): `boolean`
-
-Defined in: [lib/audio/sound-engine.ts:240](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L240)
 
 Checks if user has enabled OS or browser-level accessibility bypasses
 (e.g. forced-colors, high-contrast, or prefers-reduced-motion).
@@ -89,8 +77,6 @@ Checks if user has enabled OS or browser-level accessibility bypasses
 
 > **isMuted**(): `boolean`
 
-Defined in: [lib/audio/sound-engine.ts:203](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L203)
-
 Returns current mute status.
 
 #### Returns
@@ -103,8 +89,6 @@ Returns current mute status.
 
 > **isSoundAllowed**(): `boolean`
 
-Defined in: [lib/audio/sound-engine.ts:273](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L273)
-
 Returns whether sound playback is currently permitted.
 
 #### Returns
@@ -116,8 +100,6 @@ Returns whether sound playback is currently permitted.
 ### playNoise()
 
 > **playNoise**(`options`): `void`
-
-Defined in: [lib/audio/sound-engine.ts:465](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L465)
 
 Synthesizes and plays procedural white noise with optional filter resonance.
 
@@ -136,8 +118,6 @@ Synthesizes and plays procedural white noise with optional filter resonance.
 ### playSequence()
 
 > **playSequence**(`notes`, `options?`): [`SequenceHandle`](../interfaces/SequenceHandle.md)
-
-Defined in: [lib/audio/sound-engine.ts:414](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L414)
 
 Plays an ordered sequence or arpeggio of notes.
 
@@ -163,8 +143,6 @@ Plays an ordered sequence or arpeggio of notes.
 
 > **playTone**(`options`): `void`
 
-Defined in: [lib/audio/sound-engine.ts:295](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L295)
-
 Synthesizes and plays a customizable frequency pulse.
 
 ##### Parameters
@@ -180,8 +158,6 @@ Synthesizes and plays a customizable frequency pulse.
 #### Call Signature
 
 > **playTone**(`frequency`, `duration?`, `type?`, `volume?`, `pan?`): `void`
-
-Defined in: [lib/audio/sound-engine.ts:296](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L296)
 
 Synthesizes and plays a customizable frequency pulse.
 
@@ -217,8 +193,6 @@ Synthesizes and plays a customizable frequency pulse.
 
 > **setMuted**(`muted`): `void`
 
-Defined in: [lib/audio/sound-engine.ts:210](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L210)
-
 Sets mute status, persists to storage, and halts active audio on mute.
 
 #### Parameters
@@ -236,8 +210,6 @@ Sets mute status, persists to storage, and halts active audio on mute.
 ### setVolume()
 
 > **setVolume**(`v`): `void`
-
-Defined in: [lib/audio/sound-engine.ts:190](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L190)
 
 Sets master volume, clamps between 0 and 1, and persists to storage.
 
@@ -257,8 +229,6 @@ Sets master volume, clamps between 0 and 1, and persists to storage.
 
 > **stopAll**(): `void`
 
-Defined in: [lib/audio/sound-engine.ts:546](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L546)
-
 Immediately halts all active playing oscillators, noise sources, and sequence timers.
 
 #### Returns
@@ -271,8 +241,6 @@ Immediately halts all active playing oscillators, noise sources, and sequence ti
 
 > **toggleMute**(): `boolean`
 
-Defined in: [lib/audio/sound-engine.ts:230](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L230)
-
 Toggles mute status and returns the next value.
 
 #### Returns
@@ -284,8 +252,6 @@ Toggles mute status and returns the next value.
 ### trackSource()
 
 > **trackSource**\<`T`\>(`source`): `T`
-
-Defined in: [lib/audio/sound-engine.ts:280](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L280)
 
 Tracks an active audio source node for unified lifecycle governance and immediate stopAll() termination.
 

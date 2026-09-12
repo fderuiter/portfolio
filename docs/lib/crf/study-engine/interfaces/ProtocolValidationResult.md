@@ -6,15 +6,11 @@
 
 # Interface: ProtocolValidationResult
 
-Defined in: [lib/crf/study-engine.ts:45](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L45)
-
 ## Properties
 
 ### errors
 
 > **errors**: [`ValidationIssue`](ValidationIssue.md)[]
-
-Defined in: [lib/crf/study-engine.ts:48](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L48)
 
 ***
 
@@ -22,15 +18,11 @@ Defined in: [lib/crf/study-engine.ts:48](https://github.com/fderuiter/portfolio/
 
 > **isCompliant**: `boolean`
 
-Defined in: [lib/crf/study-engine.ts:46](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L46)
-
 ***
 
 ### issues
 
 > **issues**: [`ValidationIssue`](ValidationIssue.md)[]
-
-Defined in: [lib/crf/study-engine.ts:50](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L50)
 
 ***
 
@@ -38,12 +30,8 @@ Defined in: [lib/crf/study-engine.ts:50](https://github.com/fderuiter/portfolio/
 
 > **totalIssues**: `number`
 
-Defined in: [lib/crf/study-engine.ts:47](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L47)
-
 ***
 
 ### warnings
 
 > **warnings**: [`ValidationIssue`](ValidationIssue.md)[]
-
-Defined in: [lib/crf/study-engine.ts:49](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L49)

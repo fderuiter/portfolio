@@ -8,8 +8,6 @@
 
 > **renderContactAdminEmail**(`payload`): [`RenderedEmail`](../interfaces/RenderedEmail.md)
 
-Defined in: [lib/email-templates.ts:51](https://github.com/fderuiter/portfolio/blob/main/lib/email-templates.ts#L51)
-
 Renders an admin alert email for a new visitor inquiry.
 
 ## Parameters

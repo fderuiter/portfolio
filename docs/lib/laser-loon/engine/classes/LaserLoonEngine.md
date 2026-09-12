@@ -6,8 +6,6 @@
 
 # Class: LaserLoonEngine
 
-Defined in: [lib/laser-loon/engine.ts:681](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L681)
-
 Base abstract class and typed EventBus for all headless arcade game engines.
 Zero framework dependencies. Testable in pure Node.js/Vitest.
 
@@ -20,8 +18,6 @@ Zero framework dependencies. Testable in pure Node.js/Vitest.
 ### Constructor
 
 > **new LaserLoonEngine**(`config?`): `LaserLoonEngine`
-
-Defined in: [lib/laser-loon/engine.ts:688](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L688)
 
 #### Parameters
 
@@ -43,8 +39,6 @@ Defined in: [lib/laser-loon/engine.ts:688](https://github.com/fderuiter/portfoli
 
 > `protected` **cachedSnapshot**: [`LaserLoonSnapshot`](../interfaces/LaserLoonSnapshot.md) \| `null` = `null`
 
-Defined in: [lib/arcade/core/engine.ts:8](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L8)
-
 #### Inherited from
 
 [`ArcadeEngine`](../../../arcade/core/engine/classes/ArcadeEngine.md).[`cachedSnapshot`](../../../arcade/core/engine/classes/ArcadeEngine.md#cachedsnapshot)
@@ -55,8 +49,6 @@ Defined in: [lib/arcade/core/engine.ts:8](https://github.com/fderuiter/portfolio
 
 > `protected` **state**: [`LaserLoonState`](../../types/interfaces/LaserLoonState.md)
 
-Defined in: [lib/arcade/core/engine.ts:7](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L7)
-
 #### Inherited from
 
 [`ArcadeEngine`](../../../arcade/core/engine/classes/ArcadeEngine.md).[`state`](../../../arcade/core/engine/classes/ArcadeEngine.md#state)
@@ -66,8 +58,6 @@ Defined in: [lib/arcade/core/engine.ts:7](https://github.com/fderuiter/portfolio
 ### createSnapshot()
 
 > **createSnapshot**(): [`LaserLoonSnapshot`](../interfaces/LaserLoonSnapshot.md)
-
-Defined in: [lib/laser-loon/engine.ts:892](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L892)
 
 Generates a fresh immutable state snapshot.
 
@@ -85,8 +75,6 @@ Generates a fresh immutable state snapshot.
 
 > **destroy**(): `void`
 
-Defined in: [lib/arcade/core/engine.ts:60](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L60)
-
 Cleans up engine timers, event subscriptions, and resources.
 
 #### Returns
@@ -102,8 +90,6 @@ Cleans up engine timers, event subscriptions, and resources.
 ### emit()
 
 > **emit**\<`T`\>(`event`, `payload`): `void`
-
-Defined in: [lib/arcade/core/engine.ts:117](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L117)
 
 Emits a typed event to registered listeners.
 
@@ -137,8 +123,6 @@ Emits a typed event to registered listeners.
 
 > **getSnapshot**(): [`LaserLoonSnapshot`](../interfaces/LaserLoonSnapshot.md)
 
-Defined in: [lib/arcade/core/engine.ts:43](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L43)
-
 Returns a cached immutable state snapshot for React useSyncExternalStore.
 Reference is preserved until notifySubscribers() is explicitly called.
 
@@ -156,8 +140,6 @@ Reference is preserved until notifySubscribers() is explicitly called.
 
 > **init**(): `void`
 
-Defined in: [lib/laser-loon/engine.ts:724](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L724)
-
 Initializes engine resources, object pools, and audio bindings.
 
 #### Returns
@@ -174,8 +156,6 @@ Initializes engine resources, object pools, and audio bindings.
 
 > **invalidateSnapshot**(): `void`
 
-Defined in: [lib/arcade/core/engine.ts:78](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L78)
-
 Invalidates cached snapshot so the next getSnapshot() recomputes fresh state.
 
 #### Returns
@@ -191,8 +171,6 @@ Invalidates cached snapshot so the next getSnapshot() recomputes fresh state.
 ### launchIceBlock()
 
 > **launchIceBlock**(`x`, `y`): `void`
-
-Defined in: [lib/laser-loon/engine.ts:800](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L800)
 
 #### Parameters
 
@@ -214,8 +192,6 @@ Defined in: [lib/laser-loon/engine.ts:800](https://github.com/fderuiter/portfoli
 
 > **notifySubscribers**(): `void`
 
-Defined in: [lib/arcade/core/engine.ts:85](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L85)
-
 Invalidates cached snapshot and broadcasts a state change to subscribers.
 
 #### Returns
@@ -231,8 +207,6 @@ Invalidates cached snapshot and broadcasts a state change to subscribers.
 ### on()
 
 > **on**\<`T`\>(`event`, `callback`): () => `void`
-
-Defined in: [lib/arcade/core/engine.ts:95](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L95)
 
 Subscribes to a typed one-shot action event (e.g. sfx, haptic, screen shake).
 
@@ -266,8 +240,6 @@ Subscribes to a typed one-shot action event (e.g. sfx, haptic, screen shake).
 
 > **render**(`ctx`, `_alpha`): `void`
 
-Defined in: [lib/laser-loon/engine.ts:860](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L860)
-
 Renders in-world graphics to the 2D canvas with sub-frame alpha interpolation.
 
 #### Parameters
@@ -293,8 +265,6 @@ Renders in-world graphics to the 2D canvas with sub-frame alpha interpolation.
 ### resize()
 
 > **resize**(`_width`, `_height`, `_dpr`): `void`
-
-Defined in: [lib/arcade/core/engine.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L53)
 
 Handles canvas dimension and device pixel ratio resize events.
 
@@ -326,8 +296,6 @@ Handles canvas dimension and device pixel ratio resize events.
 
 > **setAim**(`x`, `y`): `void`
 
-Defined in: [lib/laser-loon/engine.ts:753](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L753)
-
 #### Parameters
 
 ##### x
@@ -348,8 +316,6 @@ Defined in: [lib/laser-loon/engine.ts:753](https://github.com/fderuiter/portfoli
 
 > **setLaserType**(`type`): `void`
 
-Defined in: [lib/laser-loon/engine.ts:762](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L762)
-
 #### Parameters
 
 ##### type
@@ -366,8 +332,6 @@ Defined in: [lib/laser-loon/engine.ts:762](https://github.com/fderuiter/portfoli
 
 > **setLoonTargetY**(`y`): `void`
 
-Defined in: [lib/laser-loon/engine.ts:758](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L758)
-
 #### Parameters
 
 ##### y
@@ -383,8 +347,6 @@ Defined in: [lib/laser-loon/engine.ts:758](https://github.com/fderuiter/portfoli
 ### spawnExplosion()
 
 > **spawnExplosion**(`x`, `y`, `color`, `count?`, `isIce?`, `isStar?`): `void`
-
-Defined in: [lib/laser-loon/engine.ts:767](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L767)
 
 #### Parameters
 
@@ -422,8 +384,6 @@ Defined in: [lib/laser-loon/engine.ts:767](https://github.com/fderuiter/portfoli
 
 > **startGame**(): `void`
 
-Defined in: [lib/laser-loon/engine.ts:728](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L728)
-
 #### Returns
 
 `void`
@@ -433,8 +393,6 @@ Defined in: [lib/laser-loon/engine.ts:728](https://github.com/fderuiter/portfoli
 ### subscribe()
 
 > **subscribe**(`callback`): () => `void`
-
-Defined in: [lib/arcade/core/engine.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L68)
 
 Subscribes a listener to snapshot state updates (React useSyncExternalStore).
 
@@ -457,8 +415,6 @@ Subscribes a listener to snapshot state updates (React useSyncExternalStore).
 ### update()
 
 > **update**(`dt`): `void`
-
-Defined in: [lib/laser-loon/engine.ts:816](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L816)
 
 Advances deterministic simulation physics by fixed delta time dt (in seconds).
 

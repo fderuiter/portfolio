@@ -8,8 +8,6 @@
 
 > **selectHexCell**(`puzzle`, `row`, `col`): `object`
 
-Defined in: [lib/dungeon/hacking.ts:93](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/hacking.ts#L93)
-
 Selects a hex matrix cell and processes the next step in the bypass sequence.
 
 ## Parameters

@@ -8,8 +8,6 @@
 
 > **resolveThemeFonts**(`fontSize`, `fontFamilyVariable?`): [`ThemeFonts`](../interfaces/ThemeFonts.md)
 
-Defined in: [lib/layout-config.ts:40](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L40)
-
 ## Parameters
 
 ### fontSize

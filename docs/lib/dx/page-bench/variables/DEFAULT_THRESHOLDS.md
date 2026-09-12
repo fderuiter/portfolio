@@ -7,5 +7,3 @@
 # Variable: DEFAULT\_THRESHOLDS
 
 > `const` **DEFAULT\_THRESHOLDS**: [`BenchmarkThresholds`](../interfaces/BenchmarkThresholds.md)
-
-Defined in: [lib/dx/page-bench.ts:210](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L210)

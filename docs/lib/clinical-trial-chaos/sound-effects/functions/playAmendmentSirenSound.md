@@ -8,8 +8,6 @@
 
 > **playAmendmentSirenSound**(): `void`
 
-Defined in: [lib/clinical-trial-chaos/sound-effects.ts:79](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/sound-effects.ts#L79)
-
 Sound: Protocol Amendment Siren Alert
 
 ## Returns

@@ -8,8 +8,6 @@
 
 > **isProofComplete**(`ast`): `boolean`
 
-Defined in: [lib/quasi-perfect/engine.ts:317](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/engine.ts#L317)
-
 Checks if the AST represents a fully solved/closed proof state.
 
 ## Parameters

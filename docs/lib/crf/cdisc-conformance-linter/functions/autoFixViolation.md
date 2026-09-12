@@ -8,8 +8,6 @@
 
 > **autoFixViolation**(`study`, `violation`): [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
 
-Defined in: [lib/crf/cdisc-conformance-linter.ts:204](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cdisc-conformance-linter.ts#L204)
-
 Applies a single 1-Click Auto-Fix remediation to the study protocol.
 
 ## Parameters

@@ -8,8 +8,6 @@
 
 > **findNodeById**(`root`, `id`): [`ASTNode`](../../types/interfaces/ASTNode.md) \| `null`
 
-Defined in: [lib/quasi-perfect/engine.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/engine.ts#L17)
-
 Searches for a node by its unique ID in the AST.
 
 ## Parameters

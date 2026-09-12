@@ -8,8 +8,6 @@
 
 > **getUnlockedAchievements**(): `string`[]
 
-Defined in: [lib/meme-data.ts:356](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L356)
-
 ## Returns
 
 `string`[]

@@ -8,8 +8,6 @@
 
 > **getWebApplicationSchema**(`options`): `string`
 
-Defined in: [lib/seo.ts:308](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L308)
-
 Returns a specialized WebApplication schema for interactive games, proof tools, and simulators.
 
 ## Parameters

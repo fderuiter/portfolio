@@ -8,8 +8,6 @@
 
 > **UniversalCrfField** = `z.infer`\<*typeof* [`BaseCRFFieldSchema`](../variables/BaseCRFFieldSchema.md)\> & `object`
 
-Defined in: [lib/crf/universal-schema.ts:174](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L174)
-
 ## Type Declaration
 
 ### repeatingColumns?

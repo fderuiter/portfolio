@@ -8,8 +8,6 @@
 
 > `const` **dictionary**: `object`
 
-Defined in: [lib/i18n-dictionary.ts:218](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L218)
-
 ## Type Declaration
 
 ### detailed

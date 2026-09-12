@@ -7,5 +7,3 @@
 # Type Alias: StructuredBlockType
 
 > **StructuredBlockType** = `"paragraph"` \| `"code"` \| `"log"` \| `"diff"`
-
-Defined in: [lib/pretext-block-parser.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/pretext-block-parser.ts#L69)

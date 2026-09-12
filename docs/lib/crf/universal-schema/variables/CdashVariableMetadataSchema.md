@@ -7,5 +7,3 @@
 # Variable: CdashVariableMetadataSchema
 
 > `const` **CdashVariableMetadataSchema**: `ZodObject`\<\{ `acrfAnnotation`: `ZodString`; `cdashLabel`: `ZodString`; `core`: `ZodEnum`\<\{ `HR`: `"HR"`; `O`: `"O"`; `R`: `"R"`; \}\>; `dataCategory`: `ZodOptional`\<`ZodString`\>; `domain`: `ZodString`; `nciConceptId`: `ZodOptional`\<`ZodString`\>; `sdtmVariable`: `ZodString`; \}, `$strip`\>
-
-Defined in: [lib/crf/universal-schema.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L53)

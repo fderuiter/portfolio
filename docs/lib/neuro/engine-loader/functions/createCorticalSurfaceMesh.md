@@ -8,8 +8,6 @@
 
 > **createCorticalSurfaceMesh**(`mode?`, `wireframe?`, `hemiFilter?`, `THREEModule?`): `Group`\<`Object3DEventMap`\>
 
-Defined in: [lib/neuro/engine-loader.ts:134](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/engine-loader.ts#L134)
-
 Synchronous mesh construction helper using raw geometry buffers.
 
 ## Parameters

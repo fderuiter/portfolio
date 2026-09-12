@@ -7,5 +7,3 @@
 # Variable: UniversalClinicalDataTypeSchema
 
 > `const` **UniversalClinicalDataTypeSchema**: `ZodEnum`\<\{ `boolean`: `"boolean"`; `calculated`: `"calculated"`; `checkbox`: `"checkbox"`; `date`: `"date"`; `datetime`: `"datetime"`; `integer`: `"integer"`; `multi_select`: `"multi_select"`; `nrs_scale`: `"nrs_scale"`; `number`: `"number"`; `partial_date`: `"partial_date"`; `precision_date`: `"precision_date"`; `radio`: `"radio"`; `repeating_table`: `"repeating_table"`; `signature`: `"signature"`; `single_select`: `"single_select"`; `text`: `"text"`; `textarea`: `"textarea"`; `time`: `"time"`; `vas_scale`: `"vas_scale"`; \}\>
-
-Defined in: [lib/crf/universal-schema.ts:11](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L11)

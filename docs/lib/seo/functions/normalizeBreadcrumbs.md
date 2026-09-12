@@ -8,8 +8,6 @@
 
 > **normalizeBreadcrumbs**(`items`): [`BreadcrumbItem`](../interfaces/BreadcrumbItem.md)[]
 
-Defined in: [lib/seo.ts:329](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L329)
-
 Normalizes breadcrumb items to enforce a single root location entry across all routes and schemas.
 Strips any initial or duplicate root entries (links to "/", empty string, SITE_BASE_URL, or named "Home")
 and prepends exactly one root location entry ({ name: "Home", url: "/" }).

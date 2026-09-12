@@ -8,8 +8,6 @@
 
 > **useMemeAudioCleanup**(): `void`
 
-Defined in: [lib/meme-audio.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/meme-audio.ts#L12)
-
 ## Returns
 
 `void`

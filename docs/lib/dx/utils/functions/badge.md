@@ -8,8 +8,6 @@
 
 > **badge**(`text`, `type`): `string`
 
-Defined in: [lib/dx/utils.ts:42](https://github.com/fderuiter/portfolio/blob/main/lib/dx/utils.ts#L42)
-
 ## Parameters
 
 ### text

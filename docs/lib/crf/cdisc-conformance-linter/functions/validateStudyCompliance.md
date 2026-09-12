@@ -8,8 +8,6 @@
 
 > **validateStudyCompliance**(`study`): [`ComplianceViolation`](../../types/interfaces/ComplianceViolation.md)[]
 
-Defined in: [lib/crf/cdisc-conformance-linter.ts:60](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cdisc-conformance-linter.ts#L60)
-
 Validates an entire study protocol against CDISC CDASH and regulatory submission conformance rules.
 
 ## Parameters

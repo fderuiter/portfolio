@@ -8,8 +8,6 @@
 
 > **ASCII\_DUCK**(): `string`
 
-Defined in: [lib/meme-data.ts:280](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L280)
-
 ## Returns
 
 `string`

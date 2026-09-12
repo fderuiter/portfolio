@@ -7,5 +7,3 @@
 # Variable: BRANDING\_PRESETS
 
 > `const` **BRANDING\_PRESETS**: [`BrandingPalettePreset`](../interfaces/BrandingPalettePreset.md)[]
-
-Defined in: [lib/crf/branding-defaults.ts:24](https://github.com/fderuiter/portfolio/blob/main/lib/crf/branding-defaults.ts#L24)

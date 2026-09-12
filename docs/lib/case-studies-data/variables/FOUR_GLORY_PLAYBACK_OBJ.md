@@ -7,5 +7,3 @@
 # Variable: FOUR\_GLORY\_PLAYBACK\_OBJ
 
 > `const` **FOUR\_GLORY\_PLAYBACK\_OBJ**: [`CaseStudyPlayback`](../type-aliases/CaseStudyPlayback.md)
-
-Defined in: [lib/case-studies-data.ts:403](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L403)

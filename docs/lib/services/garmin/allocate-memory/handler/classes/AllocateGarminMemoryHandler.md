@@ -6,8 +6,6 @@
 
 # Class: AllocateGarminMemoryHandler
 
-Defined in: [lib/services/garmin/allocate-memory/handler.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/services/garmin/allocate-memory/handler.ts#L13)
-
 ## Implements
 
 - [`AllocateGarminMemorySpec`](../../spec/interfaces/AllocateGarminMemorySpec.md)
@@ -27,8 +25,6 @@ Defined in: [lib/services/garmin/allocate-memory/handler.ts:13](https://github.c
 ### execute()
 
 > **execute**(`input`): [`AllocateGarminMemoryResult`](../../spec/type-aliases/AllocateGarminMemoryResult.md)
-
-Defined in: [lib/services/garmin/allocate-memory/handler.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/services/garmin/allocate-memory/handler.ts#L14)
 
 #### Parameters
 

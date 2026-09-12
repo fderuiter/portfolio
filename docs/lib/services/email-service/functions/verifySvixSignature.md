@@ -8,8 +8,6 @@
 
 > **verifySvixSignature**(`__namedParameters`): `boolean`
 
-Defined in: [lib/services/email-service.ts:65](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L65)
-
 Verifies Svix cryptographic signature for incoming Resend deliverability webhooks.
 
 ## Parameters

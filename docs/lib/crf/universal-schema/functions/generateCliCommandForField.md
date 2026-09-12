@@ -8,8 +8,6 @@
 
 > **generateCliCommandForField**(`domain`, `field`): `string`
 
-Defined in: [lib/crf/universal-schema.ts:448](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L448)
-
 Generates the CLI subcommand string to add this field via terminal
 
 ## Parameters

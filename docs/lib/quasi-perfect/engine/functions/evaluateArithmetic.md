@@ -8,8 +8,6 @@
 
 > **evaluateArithmetic**(`node`): `number` \| `null`
 
-Defined in: [lib/quasi-perfect/engine.ts:135](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/engine.ts#L135)
-
 Recursively attempts to evaluate constant arithmetic expressions.
 
 ## Parameters

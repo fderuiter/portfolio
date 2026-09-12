@@ -8,8 +8,6 @@
 
 > **exportFormToFhirQuestionnaire**(`form`, `study`): `object`
 
-Defined in: [lib/crf/fhir-questionnaire.ts:43](https://github.com/fderuiter/portfolio/blob/main/lib/crf/fhir-questionnaire.ts#L43)
-
 Converts a CRFForm into an HL7 FHIR R4 Questionnaire Resource
 
 ## Parameters

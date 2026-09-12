@@ -8,8 +8,6 @@
 
 > **validateCdashVariableName**(`name`): `object`
 
-Defined in: [lib/crf/precision-date.ts:309](https://github.com/fderuiter/portfolio/blob/main/lib/crf/precision-date.ts#L309)
-
 Strict CDASH 2.2 / SAS Variable Name Validator
 Rules:
 - 1 to 8 characters in length

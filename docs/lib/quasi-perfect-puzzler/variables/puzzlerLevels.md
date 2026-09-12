@@ -7,5 +7,3 @@
 # Variable: puzzlerLevels
 
 > `const` **puzzlerLevels**: readonly [`PuzzlerLevel`](../interfaces/PuzzlerLevel.md)[]
-
-Defined in: [lib/quasi-perfect-puzzler.ts:33](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect-puzzler.ts#L33)

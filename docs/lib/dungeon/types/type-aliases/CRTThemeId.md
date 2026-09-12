@@ -7,5 +7,3 @@
 # Type Alias: CRTThemeId
 
 > **CRTThemeId** = `"emerald"` \| `"amber"` \| `"synthwave"` \| `"matrix"`
-
-Defined in: [lib/dungeon/types.ts:316](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L316)

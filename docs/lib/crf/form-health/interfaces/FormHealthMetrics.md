@@ -6,15 +6,11 @@
 
 # Interface: FormHealthMetrics
 
-Defined in: [lib/crf/form-health.ts:3](https://github.com/fderuiter/portfolio/blob/main/lib/crf/form-health.ts#L3)
-
 ## Properties
 
 ### cdashConformancePercentage
 
 > **cdashConformancePercentage**: `number`
-
-Defined in: [lib/crf/form-health.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/crf/form-health.ts#L9)
 
 ***
 
@@ -22,15 +18,11 @@ Defined in: [lib/crf/form-health.ts:9](https://github.com/fderuiter/portfolio/bl
 
 > **codelistsAttached**: `number`
 
-Defined in: [lib/crf/form-health.ts:6](https://github.com/fderuiter/portfolio/blob/main/lib/crf/form-health.ts#L6)
-
 ***
 
 ### mandatoryFields
 
 > **mandatoryFields**: `number`
-
-Defined in: [lib/crf/form-health.ts:5](https://github.com/fderuiter/portfolio/blob/main/lib/crf/form-health.ts#L5)
 
 ***
 
@@ -38,15 +30,11 @@ Defined in: [lib/crf/form-health.ts:5](https://github.com/fderuiter/portfolio/bl
 
 > **missingCoreVariables**: `string`[]
 
-Defined in: [lib/crf/form-health.ts:10](https://github.com/fderuiter/portfolio/blob/main/lib/crf/form-health.ts#L10)
-
 ***
 
 ### sdvReadinessPercentage
 
 > **sdvReadinessPercentage**: `number`
-
-Defined in: [lib/crf/form-health.ts:8](https://github.com/fderuiter/portfolio/blob/main/lib/crf/form-health.ts#L8)
 
 ***
 
@@ -54,12 +42,8 @@ Defined in: [lib/crf/form-health.ts:8](https://github.com/fderuiter/portfolio/bl
 
 > **sdvVerifiedCount**: `number`
 
-Defined in: [lib/crf/form-health.ts:7](https://github.com/fderuiter/portfolio/blob/main/lib/crf/form-health.ts#L7)
-
 ***
 
 ### totalFields
 
 > **totalFields**: `number`
-
-Defined in: [lib/crf/form-health.ts:4](https://github.com/fderuiter/portfolio/blob/main/lib/crf/form-health.ts#L4)

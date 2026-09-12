@@ -8,8 +8,6 @@
 
 > `const` **ansi**: `object`
 
-Defined in: [lib/crf/cli-engine.ts:29](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cli-engine.ts#L29)
-
 ## Type Declaration
 
 ### amber

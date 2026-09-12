@@ -7,5 +7,3 @@
 # Variable: DESIKAN\_KILLIANY\_PARCELS
 
 > `const` **DESIKAN\_KILLIANY\_PARCELS**: `Record`\<`string`, [`AnatomicalParcel`](../interfaces/AnatomicalParcel.md)\>
-
-Defined in: [lib/neuro/types.ts:48](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L48)

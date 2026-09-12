@@ -7,5 +7,3 @@
 # Type Alias: PowerUpType
 
 > **PowerUpType** = `"hotdish"` \| `"pronto-pup"` \| `"north-star"`
-
-Defined in: [lib/laser-loon/types.ts:84](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L84)

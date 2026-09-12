@@ -7,5 +7,3 @@
 # Variable: MAX\_DUCK\_X
 
 > `const` **MAX\_DUCK\_X**: `number`
-
-Defined in: [lib/working-with-duck-engine.ts:11](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L11)

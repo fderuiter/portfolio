@@ -8,8 +8,6 @@
 
 > **validateObservationChoice**(`observation`, `selectedChoice`, `activeProtocol?`): `object`
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:126](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L126)
-
 Validates a user's multi-choice answer on a clinical observation using authored AST conditions.
 
 ## Parameters

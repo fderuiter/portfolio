@@ -8,8 +8,6 @@
 
 > **validateBranchName**(`branch`): `object`
 
-Defined in: [lib/dx/git-guard.ts:113](https://github.com/fderuiter/portfolio/blob/main/lib/dx/git-guard.ts#L113)
-
 Validates branch names against team convention: feat/*, fix/*, chore/*, refactor/*, docs/*, perf/*, dx/*, main, master.
 
 ## Parameters

@@ -8,8 +8,6 @@
 
 > **benchmarkProofDAGValidation**(`iterations?`): [`BenchmarkResult`](../interfaces/BenchmarkResult.md)[]
 
-Defined in: [lib/dx/bench.ts:332](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L332)
-
 Benchmark Deductive Logic Proof Engine & Truth Table Solver
 
 ## Parameters

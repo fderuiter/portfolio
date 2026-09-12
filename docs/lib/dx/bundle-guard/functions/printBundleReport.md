@@ -8,8 +8,6 @@
 
 > **printBundleReport**(`report`, `options?`): `void`
 
-Defined in: [lib/dx/bundle-guard.ts:252](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bundle-guard.ts#L252)
-
 Renders Bundle Budget Report adhering to Document-Driven CLI Output (design-cli-output)
 
 ## Parameters

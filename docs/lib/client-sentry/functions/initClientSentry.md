@@ -8,8 +8,6 @@
 
 > **initClientSentry**(): `Promise`\<`boolean` \| `null`\>
 
-Defined in: [lib/client-sentry.ts:27](https://github.com/fderuiter/portfolio/blob/main/lib/client-sentry.ts#L27)
-
 Dynamically initializes Sentry SDK if a valid DSN is provided.
 
 ## Returns

@@ -8,8 +8,6 @@
 
 > **renderContactConfirmationEmail**(`payload`): [`RenderedEmail`](../interfaces/RenderedEmail.md)
 
-Defined in: [lib/email-templates.ts:164](https://github.com/fderuiter/portfolio/blob/main/lib/email-templates.ts#L164)
-
 Renders an automated confirmation receipt email for the visitor.
 
 ## Parameters

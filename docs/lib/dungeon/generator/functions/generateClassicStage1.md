@@ -8,8 +8,6 @@
 
 > **generateClassicStage1**(): [`DungeonRoom`](../../types/interfaces/DungeonRoom.md)
 
-Defined in: [lib/dungeon/generator.ts:652](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/generator.ts#L652)
-
 Creates classic stage 1 baseline room.
 
 ## Returns

@@ -8,8 +8,6 @@
 
 > **ContextLossStatus** = `"idle"` \| `"lost"` \| `"restoring"` \| `"restored"`
 
-Defined in: [lib/webgl/context-manager.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/webgl/context-manager.ts#L9)
-
 WebGL and Canvas 2D Context Loss Lifecycle Manager
 
 Provides isolated event handling for webglcontextlost, webglcontextrestored,

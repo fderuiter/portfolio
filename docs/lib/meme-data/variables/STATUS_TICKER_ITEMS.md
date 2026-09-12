@@ -7,5 +7,3 @@
 # Variable: STATUS\_TICKER\_ITEMS
 
 > `const` **STATUS\_TICKER\_ITEMS**: `string`[]
-
-Defined in: [lib/meme-data.ts:255](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L255)

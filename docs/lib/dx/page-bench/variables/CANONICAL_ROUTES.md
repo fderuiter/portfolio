@@ -7,5 +7,3 @@
 # Variable: CANONICAL\_ROUTES
 
 > `const` **CANONICAL\_ROUTES**: [`PageBenchmarkRoute`](../interfaces/PageBenchmarkRoute.md)[]
-
-Defined in: [lib/dx/page-bench.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L17)

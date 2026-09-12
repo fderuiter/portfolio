@@ -8,8 +8,6 @@
 
 > **executePresetCommand**(`study`, `action`, `presetId?`, `options?`): [`CliCommandResult`](../interfaces/CliCommandResult.md)
 
-Defined in: [lib/crf/cli-engine.ts:570](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cli-engine.ts#L570)
-
 Preset Command (list / load)
 
 ## Parameters

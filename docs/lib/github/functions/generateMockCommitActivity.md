@@ -8,8 +8,6 @@
 
 > **generateMockCommitActivity**(): `number`[]
 
-Defined in: [lib/github.ts:34](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L34)
-
 Centralized, mathematically uniform mock telemetry commit activity generator.
 Produces exactly 52 values with static, non-parameterized curves to ensure visual parity
 across simulation and rate-limiting API fallbacks.

@@ -8,8 +8,6 @@
 
 > **diffUsdmProtocols**(`usdmAInput`, `usdmBInput`): [`UsdmDiffSummary`](../interfaces/UsdmDiffSummary.md)
 
-Defined in: [lib/crf/usdm-adapter.ts:713](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L713)
-
 Performs semantic version diffing between two USDM protocol revisions.
 Identifies added, modified, or removed arms, epochs, cohorts, biomedical concepts, encounters, and activities.
 

@@ -8,8 +8,6 @@
 
 > **benchmarkDuckPhysics**(`iterations?`): [`BenchmarkResult`](../interfaces/BenchmarkResult.md)[]
 
-Defined in: [lib/dx/bench.ts:374](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L374)
-
 Benchmark Autonomous Duck Physics & Park Simulation Step
 
 ## Parameters

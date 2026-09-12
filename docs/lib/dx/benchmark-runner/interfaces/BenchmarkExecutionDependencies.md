@@ -6,8 +6,6 @@
 
 # Interface: BenchmarkExecutionDependencies
 
-Defined in: [lib/dx/benchmark-runner.ts:39](https://github.com/fderuiter/portfolio/blob/main/lib/dx/benchmark-runner.ts#L39)
-
 Injectable side effects keep production lifecycle behavior testable.
 
 ## Properties
@@ -15,8 +13,6 @@ Injectable side effects keep production lifecycle behavior testable.
 ### buildProduction
 
 > **buildProduction**: (`source`) => `Promise`\<[`ProductionBuildResult`](ProductionBuildResult.md)\>
-
-Defined in: [lib/dx/benchmark-runner.ts:41](https://github.com/fderuiter/portfolio/blob/main/lib/dx/benchmark-runner.ts#L41)
 
 #### Parameters
 
@@ -34,8 +30,6 @@ Defined in: [lib/dx/benchmark-runner.ts:41](https://github.com/fderuiter/portfol
 
 > **inspectSource**: () => [`BenchmarkSourceState`](BenchmarkSourceState.md)
 
-Defined in: [lib/dx/benchmark-runner.ts:40](https://github.com/fderuiter/portfolio/blob/main/lib/dx/benchmark-runner.ts#L40)
-
 #### Returns
 
 [`BenchmarkSourceState`](BenchmarkSourceState.md)
@@ -46,8 +40,6 @@ Defined in: [lib/dx/benchmark-runner.ts:40](https://github.com/fderuiter/portfol
 
 > `optional` **now?**: () => `Date`
 
-Defined in: [lib/dx/benchmark-runner.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/dx/benchmark-runner.ts#L53)
-
 #### Returns
 
 `Date`
@@ -57,8 +49,6 @@ Defined in: [lib/dx/benchmark-runner.ts:53](https://github.com/fderuiter/portfol
 ### runPageBenchmarks
 
 > **runPageBenchmarks**: (`input`) => `Promise`\<[`PageBenchmarkSummary`](../../page-bench/interfaces/PageBenchmarkSummary.md)[]\>
-
-Defined in: [lib/dx/benchmark-runner.ts:48](https://github.com/fderuiter/portfolio/blob/main/lib/dx/benchmark-runner.ts#L48)
 
 #### Parameters
 
@@ -86,8 +76,6 @@ Defined in: [lib/dx/benchmark-runner.ts:48](https://github.com/fderuiter/portfol
 
 > **startProductionServer**: (`target`) => `Promise`\<[`OwnedBenchmarkServer`](OwnedBenchmarkServer.md)\>
 
-Defined in: [lib/dx/benchmark-runner.ts:44](https://github.com/fderuiter/portfolio/blob/main/lib/dx/benchmark-runner.ts#L44)
-
 #### Parameters
 
 ##### target
@@ -103,8 +91,6 @@ Defined in: [lib/dx/benchmark-runner.ts:44](https://github.com/fderuiter/portfol
 ### waitForServer
 
 > **waitForServer**: (`target`) => `Promise`\<[`ServerReadiness`](ServerReadiness.md)\>
-
-Defined in: [lib/dx/benchmark-runner.ts:47](https://github.com/fderuiter/portfolio/blob/main/lib/dx/benchmark-runner.ts#L47)
 
 #### Parameters
 

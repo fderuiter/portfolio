@@ -8,8 +8,6 @@
 
 > **createInitialAuditorState**(): [`AuditorState`](../../types/interfaces/AuditorState.md)
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:39](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L39)
-
 ## Returns
 
 [`AuditorState`](../../types/interfaces/AuditorState.md)

@@ -8,8 +8,6 @@
 
 > **calculateCollisionPoint**(`beamRect`, `parentRect`): [`Point2D`](../type-aliases/Point2D.md)
 
-Defined in: [lib/graphics-math.ts:250](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-math.ts#L250)
-
 Calculates relative coordinates of the collision point with respect to a parent container.
 
 ## Parameters

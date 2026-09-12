@@ -8,8 +8,6 @@
 
 > **validatePrecisionDate**(`value`, `options?`): [`PrecisionDateValidationResult`](../interfaces/PrecisionDateValidationResult.md)
 
-Defined in: [lib/crf/precision-date.ts:237](https://github.com/fderuiter/portfolio/blob/main/lib/crf/precision-date.ts#L237)
-
 Comprehensive clinical validator for precision dates.
 
 ## Parameters

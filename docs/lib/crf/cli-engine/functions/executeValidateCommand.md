@@ -8,8 +8,6 @@
 
 > **executeValidateCommand**(`study`, `options?`): [`CliCommandResult`](../interfaces/CliCommandResult.md)
 
-Defined in: [lib/crf/cli-engine.ts:155](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cli-engine.ts#L155)
-
 Four-Tier Conformance Validation Command
 
 ## Parameters

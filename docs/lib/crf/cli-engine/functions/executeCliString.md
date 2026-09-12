@@ -8,8 +8,6 @@
 
 > **executeCliString**(`study`, `input`, `options?`): [`CliCommandResult`](../interfaces/CliCommandResult.md)
 
-Defined in: [lib/crf/cli-engine.ts:673](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cli-engine.ts#L673)
-
 Dispatcher executing raw CLI argument string or parsed args
 
 ## Parameters

@@ -8,8 +8,6 @@
 
 > `const` **withApiWrapper**: \{\<`TSchema`\>(`handler`, `options`): [`ApiRouteHandler`](../type-aliases/ApiRouteHandler.md); (`handler`, `options?`): [`ApiRouteHandler`](../type-aliases/ApiRouteHandler.md); \} = `createApiHandler`
 
-Defined in: [lib/route-wrapper.ts:180](https://github.com/fderuiter/portfolio/blob/main/lib/route-wrapper.ts#L180)
-
 ## Call Signature
 
 > \<`TSchema`\>(`handler`, `options`): [`ApiRouteHandler`](../type-aliases/ApiRouteHandler.md)

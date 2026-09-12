@@ -8,8 +8,6 @@
 
 > **inspectBundleChunks**(`workspaceRoot`, `options?`): [`BundleBudgetReport`](../interfaces/BundleBudgetReport.md)
 
-Defined in: [lib/dx/bundle-guard.ts:39](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bundle-guard.ts#L39)
-
 Inspects .next build output chunks and evaluates gzip sizes and budget limits.
 
 ## Parameters

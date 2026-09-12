@@ -6,15 +6,11 @@
 
 # Interface: GarbageCollectData
 
-Defined in: [lib/services/garmin/garbage-collect/spec.ts:23](https://github.com/fderuiter/portfolio/blob/main/lib/services/garmin/garbage-collect/spec.ts#L23)
-
 ## Properties
 
 ### freedKb
 
 > **freedKb**: `number`
-
-Defined in: [lib/services/garmin/garbage-collect/spec.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/services/garmin/garbage-collect/spec.ts#L25)
 
 ***
 
@@ -22,12 +18,8 @@ Defined in: [lib/services/garmin/garbage-collect/spec.ts:25](https://github.com/
 
 > **remainingRamKb**: `number`
 
-Defined in: [lib/services/garmin/garbage-collect/spec.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/services/garmin/garbage-collect/spec.ts#L26)
-
 ***
 
 ### state
 
 > **state**: [`GameEngineState`](../../../../../garmin-engine/interfaces/GameEngineState.md)
-
-Defined in: [lib/services/garmin/garbage-collect/spec.ts:24](https://github.com/fderuiter/portfolio/blob/main/lib/services/garmin/garbage-collect/spec.ts#L24)

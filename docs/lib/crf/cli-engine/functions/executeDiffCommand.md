@@ -8,8 +8,6 @@
 
 > **executeDiffCommand**(`studyA`, `studyB`, `options?`): [`CliCommandResult`](../interfaces/CliCommandResult.md)
 
-Defined in: [lib/crf/cli-engine.ts:623](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cli-engine.ts#L623)
-
 Protocol Semantic Diff
 
 ## Parameters

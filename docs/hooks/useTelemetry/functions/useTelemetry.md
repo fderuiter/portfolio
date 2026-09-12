@@ -8,8 +8,6 @@
 
 > **useTelemetry**(`options?`): `object`
 
-Defined in: [hooks/useTelemetry.ts:404](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L404)
-
 Custom hook implementing a lightweight SWR telemetry system with useSyncExternalStore.
 Hydrates state instantly from LocalStorage cache, schedules background syncs during idle frames,
 and delegates retry queueing, rate-limiting rollbacks, and keepalive beacons to TelemetryOutbox.

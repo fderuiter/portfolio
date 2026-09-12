@@ -8,8 +8,6 @@
 
 > **calculateCardHeightFromBlocks**(`blocks`, `textWidth`, `paddingHeight`, `config`, `colCount`): `number`
 
-Defined in: [lib/masonry.ts:48](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L48)
-
 ## Parameters
 
 ### blocks
