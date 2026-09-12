@@ -33,6 +33,7 @@
     "migration:replay": "npx tsx scripts/migration-replay.ts",
     "verify:upstash": "npx tsx scripts/verify-upstash.ts",
     "inventory:vercel": "npx tsx scripts/vercel-retention-inventory.ts",
+    "headroom:vercel": "npx tsx scripts/vercel-headroom.ts",
     "release:gate": "npx tsx scripts/release-gate.ts",
     "lint:docs": "npx markdownlint \"**/*.md\" --ignore node_modules --ignore .next --ignore coverage --ignore .agents --ignore scratch --ignore tmp --ignore test-results",
     "prebuild": "npx tsx scripts/generate-theme.ts",
