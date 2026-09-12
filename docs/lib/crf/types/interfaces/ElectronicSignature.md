@@ -53,3 +53,9 @@
 ### userRole
 
 > **userRole**: `string`
+
+***
+
+### visitId
+
+> **visitId**: `string`

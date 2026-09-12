@@ -49,10 +49,16 @@ interface LiveEdcSimulatorProps {
   study: StudyProtocol;
 }
 
-type UserRole = "Site Coordinator" | "Principal Investigator" | "CRA Monitor" | "Data Manager";
+type UserRole =
+  | "Site Coordinator"
+  | "Principal Investigator"
+  | "CRA Monitor"
+  | "Data Manager";
 type EdcSubView = "form_entry" | "subject_matrix" | "audit_trail" | "queries";
 
-export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => {
+export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
+  study,
+}) => {
   const [subView, setSubView] = useState<EdcSubView>("form_entry");
   const [subjectId, setSubjectId] = useState("001-101");
   const [availableSubjects, setAvailableSubjects] = useState<string[]>([
@@ -63,12 +69,18 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
   const [newSubjectInput, setNewSubjectInput] = useState("");
   const [isAddingSubject, setIsAddingSubject] = useState(false);
 
-  const [activeVisitId, setActiveVisitId] = useState<string>(study.visits[0]?.id || "");
-  const [activeFormId, setActiveFormId] = useState<string>(study.forms[0]?.id || "");
+  const [activeVisitId, setActiveVisitId] = useState<string>(
+    study.visits[0]?.id || ""
+  );
+  const [activeFormId, setActiveFormId] = useState<string>(
+    study.forms[0]?.id || ""
+  );
   const [currentRole, setCurrentRole] = useState<UserRole>("Site Coordinator");
 
   // Subject Form Values State: Map<subjectId_visitId_fieldId, value>
-  const [formValues, setFormValues] = useState<Record<string, string | number | boolean | null>>({
+  const [formValues, setFormValues] = useState<
+    Record<string, string | number | boolean | null>
+  >({
     "001-101_v_screen_f_brthyr": 1982,
     "001-101_v_screen_f_age": 44,
     "001-101_v_screen_f_sex": "M",
@@ -124,11 +136,14 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
   );
 
   // Query Response Modal State
-  const [activeQueryToAnswer, setActiveQueryToAnswer] = useState<EDCQuery | null>(null);
+  const [activeQueryToAnswer, setActiveQueryToAnswer] =
+    useState<EDCQuery | null>(null);
   const [queryResponseText, setQueryResponseText] = useState("");
 
   // 3-Tier Missing Data & Validation State
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, string>
+  >({});
   const [saveStatus, setSaveStatus] = useState<{
     type: "success" | "error";
     message: string;
@@ -136,7 +151,8 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
     autoQueries?: string[];
   } | null>(null);
 
-  const activeForm = study.forms.find((f) => f.id === activeFormId) || study.forms[0];
+  const activeForm =
+    study.forms.find((f) => f.id === activeFormId) || study.forms[0];
   const formLockKey = `${subjectId}_${activeVisitId}_${activeForm?.id || ""}`;
   const isCurrentFormLocked = lockedForms[formLockKey]?.locked || false;
 
@@ -145,7 +161,10 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
     if (!activeForm) return;
 
     const fields = activeForm.sections.flatMap((s) => s.fields);
-    const subjectVals: Record<string, string | number | boolean | null | undefined> = {};
+    const subjectVals: Record<
+      string,
+      string | number | boolean | null | undefined
+    > = {};
     fields.forEach((f) => {
       const key = `${subjectId}_${activeVisitId}_${f.id}`;
       subjectVals[f.id] = formValues[key];
@@ -163,7 +182,11 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
     // 1. Evaluate Calculated Fields
     fields.forEach((field) => {
       if (field.dataType === "calculated" && field.calculationFormula) {
-        const calculatedVal = evaluateFormula(field.calculationFormula, subjectVals, fields);
+        const calculatedVal = evaluateFormula(
+          field.calculationFormula,
+          subjectVals,
+          fields
+        );
         const key = `${subjectId}_${activeVisitId}_${field.id}`;
         if (formValues[key] !== calculatedVal) {
           setFormValues((prev) => ({ ...prev, [key]: calculatedVal }));
@@ -173,7 +196,12 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
 
     // 2. Evaluate Dynamic Edit Check Rules
     activeForm.rules.forEach((rule) => {
-      const isTriggered = evaluateRule(rule, subjectVals, fields, activeVisitId);
+      const isTriggered = evaluateRule(
+        rule,
+        subjectVals,
+        fields,
+        activeVisitId
+      );
 
       if (isTriggered && rule.actionType === "raise_query") {
         setQueries((prevQueries) => {
@@ -208,9 +236,14 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
     });
   }, [formValues, activeForm, activeVisitId, subjectId]);
 
-  const handleFieldChange = (field: CRFField, rawValue: string | number | boolean | null) => {
+  const handleFieldChange = (
+    field: CRFField,
+    rawValue: string | number | boolean | null
+  ) => {
     if (isCurrentFormLocked && currentRole !== "Principal Investigator") {
-      alert("This form has been locked by the Principal Investigator. Edits are disabled.");
+      alert(
+        "This form has been locked by the Principal Investigator. Edits are disabled."
+      );
       return;
     }
 
@@ -218,7 +251,11 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
     const previousVal = formValues[key] ?? null;
 
     // Prompt for 21 CFR Part 11 Reason for Change if modifying existing non-empty value
-    if (previousVal !== null && previousVal !== rawValue && previousVal !== "") {
+    if (
+      previousVal !== null &&
+      previousVal !== rawValue &&
+      previousVal !== ""
+    ) {
       setPendingChange({
         field,
         oldVal: previousVal,
@@ -253,8 +290,8 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
         currentRole === "Principal Investigator"
           ? "Dr. Jenkins (PI)"
           : currentRole === "CRA Monitor"
-          ? "CRA Monitor"
-          : "Clinical Coordinator",
+            ? "CRA Monitor"
+            : "Clinical Coordinator",
       userRole: currentRole,
       reasonForChange: reason,
     };
@@ -318,6 +355,7 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
         id: generateSignatureId(),
         subjectId,
         formId: activeForm.id,
+        visitId: activeVisitId,
         signedBy: "Dr. Sarah Jenkins, M.D. (Investigator)",
         userRole: "Principal Investigator",
         timestamp: new Date().toISOString(),
@@ -352,7 +390,8 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
 
       if (isEmpty && !hasNullFlavor) {
         if (isHardStop) {
-          newErrors[field.id] = `Mandatory variable '${field.variableName}' is missing (Hard Stop).`;
+          newErrors[field.id] =
+            `Mandatory variable '${field.variableName}' is missing (Hard Stop).`;
           hardStopVars.push(field.variableName);
         } else if (isAutoQuery) {
           autoQueryVars.push(field.variableName);
@@ -385,7 +424,8 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
         const valRes = validatePrecisionDate(String(val), {
           allowPartial:
             field.allowPartial ??
-            (field.dataType === "partial_date" || field.dataType === "precision_date"),
+            (field.dataType === "partial_date" ||
+              field.dataType === "precision_date"),
           preventFutureDate: field.preventFutureDate,
           allowNullFlavor: field.allowNullFlavor,
         });
@@ -401,10 +441,15 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
     if (newQueriesToRaise.length > 0) {
       setQueries((prev) => {
         const existingKeys = new Set(
-          prev.map((q) => `${q.subjectId}_${q.visitId}_${q.fieldId}_${q.ruleId}`)
+          prev.map(
+            (q) => `${q.subjectId}_${q.visitId}_${q.fieldId}_${q.ruleId}`
+          )
         );
         const filteredNew = newQueriesToRaise.filter(
-          (q) => !existingKeys.has(`${q.subjectId}_${q.visitId}_${q.fieldId}_${q.ruleId}`)
+          (q) =>
+            !existingKeys.has(
+              `${q.subjectId}_${q.visitId}_${q.fieldId}_${q.ruleId}`
+            )
         );
         return [...prev, ...filteredNew];
       });
@@ -431,11 +476,17 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
   };
 
   const isFormSigned = signatures.some(
-    (s) => s.subjectId === subjectId && s.formId === activeForm?.id
+    (s) =>
+      s.subjectId === subjectId &&
+      s.formId === activeForm?.id &&
+      s.visitId === activeVisitId
   );
 
   const activeFormQueries = queries.filter(
-    (q) => q.subjectId === subjectId && q.formId === activeForm?.id && q.visitId === activeVisitId
+    (q) =>
+      q.subjectId === subjectId &&
+      q.formId === activeForm?.id &&
+      q.visitId === activeVisitId
   );
 
   // Compute Subject Form Status Matrix
@@ -453,7 +504,11 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
     let sdvCount = 0;
     formFields.forEach((f) => {
       const vKey = `${subjId}_${visitId}_${f.id}`;
-      if (formValues[vKey] !== undefined && formValues[vKey] !== null && formValues[vKey] !== "") {
+      if (
+        formValues[vKey] !== undefined &&
+        formValues[vKey] !== null &&
+        formValues[vKey] !== ""
+      ) {
         hasValues = true;
       }
       if (sdvMap[vKey]?.verified) {
@@ -469,7 +524,8 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
         q.status === "Open"
     ).length;
 
-    const isSdvVerified = formFields.length > 0 && sdvCount >= formFields.length;
+    const isSdvVerified =
+      formFields.length > 0 && sdvCount >= formFields.length;
 
     return {
       subjectId: subjId,
@@ -496,14 +552,24 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
             </h1>
           </div>
           <p className="text-xs text-zinc-400 font-sans mt-1">
-            Test live subject patient entry, CRA source data verification (SDV), investigator locking, and longitudinal visit matrix.
+            Test live subject patient entry, CRA source data verification (SDV),
+            investigator locking, and longitudinal visit matrix.
           </p>
         </div>
 
         {/* User Role Switcher */}
         <div className="flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 p-1 rounded-xl shadow-inner max-w-full overflow-x-auto scrollbar-none">
-          <span className="text-[10px] font-mono text-zinc-500 uppercase px-1.5 hidden sm:inline">Active Role:</span>
-          {(["Site Coordinator", "Principal Investigator", "CRA Monitor", "Data Manager"] as UserRole[]).map((role) => (
+          <span className="text-[10px] font-mono text-zinc-500 uppercase px-1.5 hidden sm:inline">
+            Active Role:
+          </span>
+          {(
+            [
+              "Site Coordinator",
+              "Principal Investigator",
+              "CRA Monitor",
+              "Data Manager",
+            ] as UserRole[]
+          ).map((role) => (
             <button
               key={role}
               onClick={() => setCurrentRole(role)}
@@ -552,7 +618,10 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
           }`}
         >
           <IconMessageCircleQuestion className="w-4 h-4" />
-          <span>Discrepancy Queries ({queries.filter((q) => q.status === "Open").length})</span>
+          <span>
+            Discrepancy Queries (
+            {queries.filter((q) => q.status === "Open").length})
+          </span>
         </button>
         <button
           onClick={() => setSubView("audit_trail")}
@@ -589,7 +658,10 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                   <button
                     onClick={() => {
                       if (newSubjectInput.trim()) {
-                        setAvailableSubjects([...availableSubjects, newSubjectInput.trim()]);
+                        setAvailableSubjects([
+                          ...availableSubjects,
+                          newSubjectInput.trim(),
+                        ]);
                         setSubjectId(newSubjectInput.trim());
                         setIsAddingSubject(false);
                         setNewSubjectInput("");
@@ -626,7 +698,9 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
 
             {/* Visit Selector */}
             <div>
-              <label className="block text-[10px] font-mono text-zinc-400 mb-1">Protocol Visit</label>
+              <label className="block text-[10px] font-mono text-zinc-400 mb-1">
+                Protocol Visit
+              </label>
               <select
                 value={activeVisitId}
                 onChange={(e) => setActiveVisitId(e.target.value)}
@@ -642,7 +716,9 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
 
             {/* Form Selector */}
             <div>
-              <label className="block text-[10px] font-mono text-zinc-400 mb-1">CRF Form</label>
+              <label className="block text-[10px] font-mono text-zinc-400 mb-1">
+                CRF Form
+              </label>
               <select
                 value={activeFormId}
                 onChange={(e) => setActiveFormId(e.target.value)}
@@ -675,7 +751,9 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-zinc-400 font-sans">{activeForm.description}</p>
+                <p className="text-xs text-zinc-400 font-sans">
+                  {activeForm.description}
+                </p>
               </div>
 
               <div className="flex items-center gap-2">
@@ -738,14 +816,17 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                   <div className="font-bold">{saveStatus.message}</div>
                   {saveStatus.hardStops && saveStatus.hardStops.length > 0 && (
                     <div className="text-[11px] text-red-400 font-sans">
-                      Hard-stop blocked fields: {saveStatus.hardStops.join(", ")}
+                      Hard-stop blocked fields:{" "}
+                      {saveStatus.hardStops.join(", ")}
                     </div>
                   )}
-                  {saveStatus.autoQueries && saveStatus.autoQueries.length > 0 && (
-                    <div className="text-[11px] text-amber-300 font-sans">
-                      Auto-generated open queries raised for: {saveStatus.autoQueries.join(", ")}
-                    </div>
-                  )}
+                  {saveStatus.autoQueries &&
+                    saveStatus.autoQueries.length > 0 && (
+                      <div className="text-[11px] text-amber-300 font-sans">
+                        Auto-generated open queries raised for:{" "}
+                        {saveStatus.autoQueries.join(", ")}
+                      </div>
+                    )}
                 </div>
               </div>
             )}
@@ -768,7 +849,8 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                     const fieldError = validationErrors[field.id];
                     const hasNullFlavor = isCdiscNullFlavor(currentVal);
                     const isBlindedForUser =
-                      field.isBlinded && currentRole !== "Principal Investigator";
+                      field.isBlinded &&
+                      currentRole !== "Principal Investigator";
 
                     const parsedPrecision =
                       field.dataType === "precision_date"
@@ -782,8 +864,8 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                           fieldError
                             ? "bg-red-500/10 border-red-500/60 ring-1 ring-red-500/30"
                             : fieldQueries.length > 0
-                            ? "bg-amber-500/5 border-amber-500/40 ring-1 ring-amber-500/20"
-                            : "bg-zinc-950/70 border-zinc-800/80"
+                              ? "bg-amber-500/5 border-amber-500/40 ring-1 ring-amber-500/20"
+                              : "bg-zinc-950/70 border-zinc-800/80"
                         }`}
                         style={{ gridColumn: `span ${field.columnSpan}` }}
                       >
@@ -792,7 +874,9 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                           <div>
                             <label className="block text-xs font-semibold text-zinc-200">
                               {field.label}
-                              {field.required && <span className="text-red-400 ml-0.5">*</span>}
+                              {field.required && (
+                                <span className="text-red-400 ml-0.5">*</span>
+                              )}
                             </label>
                             <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                               <span className="text-[10px] font-mono text-zinc-500">
@@ -805,17 +889,18 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                                   field.requirementTier === "auto_query"
                                     ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
                                     : field.requirementTier === "hard_stop" ||
-                                      (!field.requirementTier && field.required)
-                                    ? "bg-red-500/15 text-red-300 border-red-500/30"
-                                    : "bg-zinc-900 text-zinc-400 border-zinc-800"
+                                        (!field.requirementTier &&
+                                          field.required)
+                                      ? "bg-red-500/15 text-red-300 border-red-500/30"
+                                      : "bg-zinc-900 text-zinc-400 border-zinc-800"
                                 }`}
                               >
                                 {field.requirementTier === "auto_query"
                                   ? "? Auto-Query"
                                   : field.requirementTier === "hard_stop" ||
-                                    (!field.requirementTier && field.required)
-                                  ? "* Hard Stop"
-                                  : "Opt"}
+                                      (!field.requirementTier && field.required)
+                                    ? "* Hard Stop"
+                                    : "Opt"}
                               </span>
 
                               {field.requiresSdv && (
@@ -837,7 +922,9 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                             {/* CRA SDV Toggle */}
                             {currentRole === "CRA Monitor" && (
                               <button
-                                onClick={() => handleToggleSdv(field.id, field.variableName)}
+                                onClick={() =>
+                                  handleToggleSdv(field.id, field.variableName)
+                                }
                                 className={`px-1.5 py-0.5 rounded text-[9px] font-mono transition-colors border ${
                                   isSdv
                                     ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
@@ -889,19 +976,27 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                         {isBlindedForUser ? (
                           <div className="p-2.5 bg-zinc-900/90 border border-zinc-800 rounded-lg text-zinc-400 font-mono text-xs flex items-center gap-2">
                             <IconEyeOff className="w-4 h-4 text-indigo-400 shrink-0" />
-                            <span>[MASKED PROTOCOL DATA — BLINDED TO SPONSOR]</span>
+                            <span>
+                              [MASKED PROTOCOL DATA — BLINDED TO SPONSOR]
+                            </span>
                           </div>
                         ) : hasNullFlavor ? (
                           <div className="p-2 bg-zinc-900 border border-brand-cyan/40 rounded-lg text-brand-cyan font-mono text-xs flex items-center justify-between">
                             <span className="font-bold">
                               Null Flavor: {currentVal} (
-                              {CDISC_NULL_FLAVORS[currentVal as keyof typeof CDISC_NULL_FLAVORS]})
+                              {
+                                CDISC_NULL_FLAVORS[
+                                  currentVal as keyof typeof CDISC_NULL_FLAVORS
+                                ]
+                              }
+                              )
                             </span>
                             <button
                               type="button"
                               onClick={() => handleFieldChange(field, null)}
                               disabled={
-                                isCurrentFormLocked && currentRole !== "Principal Investigator"
+                                isCurrentFormLocked &&
+                                currentRole !== "Principal Investigator"
                               }
                               className="text-[10px] text-zinc-400 hover:text-white underline font-mono"
                             >
@@ -923,23 +1018,30 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                                       value={
                                         parsedPrecision?.day !== null &&
                                         parsedPrecision?.day !== undefined
-                                          ? String(parsedPrecision.day).padStart(2, "0")
+                                          ? String(
+                                              parsedPrecision.day
+                                            ).padStart(2, "0")
                                           : parsedPrecision?.isPartial &&
-                                            parsedPrecision?.day === null
-                                          ? "UNK"
-                                          : ""
+                                              parsedPrecision?.day === null
+                                            ? "UNK"
+                                            : ""
                                       }
                                       onChange={(e) => {
                                         const dVal = e.target.value;
-                                        const yVal = parsedPrecision?.year || 2026;
+                                        const yVal =
+                                          parsedPrecision?.year || 2026;
                                         const mVal =
                                           parsedPrecision?.month !== null &&
                                           parsedPrecision?.month !== undefined
                                             ? parsedPrecision.month
                                             : field.allowPartial
-                                            ? "UNK"
-                                            : 1;
-                                        const newIso = formatPrecisionDate(yVal, mVal, dVal || null);
+                                              ? "UNK"
+                                              : 1;
+                                        const newIso = formatPrecisionDate(
+                                          yVal,
+                                          mVal,
+                                          dVal || null
+                                        );
                                         handleFieldChange(field, newIso);
                                       }}
                                       disabled={
@@ -949,7 +1051,11 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                                       className="w-full px-2 py-1 text-xs bg-zinc-900 border border-zinc-700 rounded text-white font-mono focus:border-brand-cyan focus:outline-none disabled:opacity-50"
                                     >
                                       <option value="">-- Day --</option>
-                                      {field.allowPartial && <option value="UNK">UNK (Unknown)</option>}
+                                      {field.allowPartial && (
+                                        <option value="UNK">
+                                          UNK (Unknown)
+                                        </option>
+                                      )}
                                       {Array.from({ length: 31 }, (_, i) =>
                                         String(i + 1).padStart(2, "0")
                                       ).map((d) => (
@@ -969,23 +1075,30 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                                       value={
                                         parsedPrecision?.month !== null &&
                                         parsedPrecision?.month !== undefined
-                                          ? String(parsedPrecision.month).padStart(2, "0")
+                                          ? String(
+                                              parsedPrecision.month
+                                            ).padStart(2, "0")
                                           : parsedPrecision?.isPartial &&
-                                            parsedPrecision?.month === null
-                                          ? "UNK"
-                                          : ""
+                                              parsedPrecision?.month === null
+                                            ? "UNK"
+                                            : ""
                                       }
                                       onChange={(e) => {
                                         const mVal = e.target.value;
-                                        const yVal = parsedPrecision?.year || 2026;
+                                        const yVal =
+                                          parsedPrecision?.year || 2026;
                                         const dVal =
                                           parsedPrecision?.day !== null &&
                                           parsedPrecision?.day !== undefined
                                             ? parsedPrecision.day
                                             : field.allowPartial
-                                            ? "UNK"
-                                            : null;
-                                        const newIso = formatPrecisionDate(yVal, mVal || null, dVal);
+                                              ? "UNK"
+                                              : null;
+                                        const newIso = formatPrecisionDate(
+                                          yVal,
+                                          mVal || null,
+                                          dVal
+                                        );
                                         handleFieldChange(field, newIso);
                                       }}
                                       disabled={
@@ -995,7 +1108,11 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                                       className="w-full px-2 py-1 text-xs bg-zinc-900 border border-zinc-700 rounded text-white font-mono focus:border-brand-cyan focus:outline-none disabled:opacity-50"
                                     >
                                       <option value="">-- Month --</option>
-                                      {field.allowPartial && <option value="UNK">UNK (Unknown)</option>}
+                                      {field.allowPartial && (
+                                        <option value="UNK">
+                                          UNK (Unknown)
+                                        </option>
+                                      )}
                                       {[
                                         "01 (Jan)",
                                         "02 (Feb)",
@@ -1010,7 +1127,13 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                                         "11 (Nov)",
                                         "12 (Dec)",
                                       ].map((m, idx) => (
-                                        <option key={m} value={String(idx + 1).padStart(2, "0")}>
+                                        <option
+                                          key={m}
+                                          value={String(idx + 1).padStart(
+                                            2,
+                                            "0"
+                                          )}
+                                        >
                                           {m}
                                         </option>
                                       ))}
@@ -1040,16 +1163,20 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                                           parsedPrecision?.month !== undefined
                                             ? parsedPrecision.month
                                             : field.allowPartial
-                                            ? "UNK"
-                                            : null;
+                                              ? "UNK"
+                                              : null;
                                         const dVal =
                                           parsedPrecision?.day !== null &&
                                           parsedPrecision?.day !== undefined
                                             ? parsedPrecision.day
                                             : field.allowPartial
-                                            ? "UNK"
-                                            : null;
-                                        const newIso = formatPrecisionDate(yVal, mVal, dVal);
+                                              ? "UNK"
+                                              : null;
+                                        const newIso = formatPrecisionDate(
+                                          yVal,
+                                          mVal,
+                                          dVal
+                                        );
                                         handleFieldChange(field, newIso);
                                       }}
                                       disabled={
@@ -1069,7 +1196,9 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                                     </strong>
                                   </span>
                                   {field.preventFutureDate && (
-                                    <span className="text-amber-400/90">≤ Current UTC</span>
+                                    <span className="text-amber-400/90">
+                                      ≤ Current UTC
+                                    </span>
                                   )}
                                 </div>
                               </div>
@@ -1080,13 +1209,17 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                               <input
                                 type="text"
                                 value={String(currentVal || "")}
-                                onChange={(e) => handleFieldChange(field, e.target.value)}
+                                onChange={(e) =>
+                                  handleFieldChange(field, e.target.value)
+                                }
                                 disabled={
                                   isCurrentFormLocked &&
                                   currentRole !== "Principal Investigator"
                                 }
                                 className="w-full px-2.5 py-1.5 text-xs bg-zinc-900 border border-zinc-700 rounded-lg text-white font-sans focus:border-brand-cyan focus:outline-none disabled:opacity-50"
-                                placeholder={field.placeholder || "Enter value..."}
+                                placeholder={
+                                  field.placeholder || "Enter value..."
+                                }
                               />
                             )}
 
@@ -1094,29 +1227,37 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                               <textarea
                                 rows={2}
                                 value={String(currentVal || "")}
-                                onChange={(e) => handleFieldChange(field, e.target.value)}
+                                onChange={(e) =>
+                                  handleFieldChange(field, e.target.value)
+                                }
                                 disabled={
                                   isCurrentFormLocked &&
                                   currentRole !== "Principal Investigator"
                                 }
                                 className="w-full px-2.5 py-1.5 text-xs bg-zinc-900 border border-zinc-700 rounded-lg text-white font-sans focus:border-brand-cyan focus:outline-none resize-none disabled:opacity-50"
-                                placeholder={field.placeholder || "Enter narrative..."}
+                                placeholder={
+                                  field.placeholder || "Enter narrative..."
+                                }
                               />
                             )}
 
-                            {(field.dataType === "number" || field.dataType === "integer") && (
+                            {(field.dataType === "number" ||
+                              field.dataType === "integer") && (
                               <div className="relative">
                                 <input
                                   type="number"
                                   value={
-                                    currentVal !== undefined && currentVal !== null
+                                    currentVal !== undefined &&
+                                    currentVal !== null
                                       ? Number(currentVal)
                                       : ""
                                   }
                                   onChange={(e) =>
                                     handleFieldChange(
                                       field,
-                                      e.target.value === "" ? null : parseFloat(e.target.value)
+                                      e.target.value === ""
+                                        ? null
+                                        : parseFloat(e.target.value)
                                     )
                                   }
                                   disabled={
@@ -1140,7 +1281,9 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                               <input
                                 type="text"
                                 value={String(currentVal || "")}
-                                onChange={(e) => handleFieldChange(field, e.target.value)}
+                                onChange={(e) =>
+                                  handleFieldChange(field, e.target.value)
+                                }
                                 disabled={
                                   isCurrentFormLocked &&
                                   currentRole !== "Principal Investigator"
@@ -1159,8 +1302,9 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                               <div className="space-y-1.5 pt-0.5">
                                 {(
                                   field.customOptions ||
-                                  study.codelists.find((cl) => cl.id === field.codelistId)
-                                    ?.options || [
+                                  study.codelists.find(
+                                    (cl) => cl.id === field.codelistId
+                                  )?.options || [
                                     { code: "Y", label: "Yes", order: 1 },
                                     { code: "N", label: "No", order: 2 },
                                   ]
@@ -1174,7 +1318,9 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                                       name={key}
                                       value={opt.code}
                                       checked={currentVal === opt.code}
-                                      onChange={(e) => handleFieldChange(field, e.target.value)}
+                                      onChange={(e) =>
+                                        handleFieldChange(field, e.target.value)
+                                      }
                                       disabled={
                                         isCurrentFormLocked &&
                                         currentRole !== "Principal Investigator"
@@ -1190,7 +1336,9 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                             {field.dataType === "single_select" && (
                               <select
                                 value={String(currentVal || "")}
-                                onChange={(e) => handleFieldChange(field, e.target.value)}
+                                onChange={(e) =>
+                                  handleFieldChange(field, e.target.value)
+                                }
                                 disabled={
                                   isCurrentFormLocked &&
                                   currentRole !== "Principal Investigator"
@@ -1200,8 +1348,10 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                                 <option value="">-- Select Option --</option>
                                 {(
                                   field.customOptions ||
-                                  study.codelists.find((cl) => cl.id === field.codelistId)
-                                    ?.options || []
+                                  study.codelists.find(
+                                    (cl) => cl.id === field.codelistId
+                                  )?.options ||
+                                  []
                                 ).map((opt) => (
                                   <option key={opt.code} value={opt.code}>
                                     {opt.label} ({opt.code})
@@ -1214,15 +1364,22 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                               <div className="space-y-1.5 pt-0.5">
                                 {(
                                   field.customOptions ||
-                                  study.codelists.find((cl) => cl.id === field.codelistId)
-                                    ?.options || []
+                                  study.codelists.find(
+                                    (cl) => cl.id === field.codelistId
+                                  )?.options ||
+                                  []
                                 ).map((opt) => {
-                                  const selectedArray: string[] = Array.isArray(currentVal)
+                                  const selectedArray: string[] = Array.isArray(
+                                    currentVal
+                                  )
                                     ? currentVal
-                                    : typeof currentVal === "string" && currentVal
-                                    ? currentVal.split(",")
-                                    : [];
-                                  const isChecked = selectedArray.includes(opt.code);
+                                    : typeof currentVal === "string" &&
+                                        currentVal
+                                      ? currentVal.split(",")
+                                      : [];
+                                  const isChecked = selectedArray.includes(
+                                    opt.code
+                                  );
 
                                   return (
                                     <label
@@ -1235,12 +1392,18 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                                         onChange={(e) => {
                                           const updated = e.target.checked
                                             ? [...selectedArray, opt.code]
-                                            : selectedArray.filter((c) => c !== opt.code);
-                                          handleFieldChange(field, updated.join(","));
+                                            : selectedArray.filter(
+                                                (c) => c !== opt.code
+                                              );
+                                          handleFieldChange(
+                                            field,
+                                            updated.join(",")
+                                          );
                                         }}
                                         disabled={
                                           isCurrentFormLocked &&
-                                          currentRole !== "Principal Investigator"
+                                          currentRole !==
+                                            "Principal Investigator"
                                         }
                                         className="text-brand-cyan rounded border-zinc-700 bg-zinc-900 focus:ring-0"
                                       />
@@ -1254,12 +1417,15 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                             {field.dataType === "calculated" && (
                               <div className="p-2 rounded-lg bg-brand-cyan/10 border border-brand-cyan/30 flex items-center justify-between font-mono min-h-[34px]">
                                 <span className="text-xs text-brand-cyan font-bold">
-                                  {currentVal !== undefined && currentVal !== null
+                                  {currentVal !== undefined &&
+                                  currentVal !== null
                                     ? String(currentVal)
                                     : ""}
                                 </span>
                                 {field.unit && (
-                                  <span className="text-[10px] text-zinc-400">{field.unit}</span>
+                                  <span className="text-[10px] text-zinc-400">
+                                    {field.unit}
+                                  </span>
                                 )}
                               </div>
                             )}
@@ -1283,7 +1449,8 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
             {/* Bottom Save Action */}
             <div className="pt-4 border-t border-zinc-800 flex items-center justify-between">
               <div className="text-xs text-zinc-400 font-mono">
-                Active Form: <strong>{activeForm.name}</strong> ({activeForm.domain})
+                Active Form: <strong>{activeForm.name}</strong> (
+                {activeForm.domain})
               </div>
               <button
                 onClick={handleSaveForm}
@@ -1311,10 +1478,12 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
             </div>
             <div className="flex items-center gap-3 text-[10px] font-mono">
               <span className="flex items-center gap-1 text-emerald-400">
-                <span className="w-2 h-2 rounded-full bg-emerald-400" /> Complete
+                <span className="w-2 h-2 rounded-full bg-emerald-400" />{" "}
+                Complete
               </span>
               <span className="flex items-center gap-1 text-amber-400">
-                <span className="w-2 h-2 rounded-full bg-amber-400" /> Incomplete
+                <span className="w-2 h-2 rounded-full bg-amber-400" />{" "}
+                Incomplete
               </span>
               <span className="flex items-center gap-1 text-sky-400">
                 <span className="w-2 h-2 rounded-full bg-sky-400" /> Locked
@@ -1333,14 +1502,19 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                   {study.visits.map((v) => (
                     <th key={v.id} className="p-3 text-center">
                       <div>{v.name}</div>
-                      <div className="text-[10px] text-zinc-500">Day {v.targetDay}</div>
+                      <div className="text-[10px] text-zinc-500">
+                        Day {v.targetDay}
+                      </div>
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-800">
                 {availableSubjects.map((subj) => (
-                  <tr key={subj} className="hover:bg-zinc-850/40 transition-colors">
+                  <tr
+                    key={subj}
+                    className="hover:bg-zinc-850/40 transition-colors"
+                  >
                     <td className="p-3 font-bold text-brand-cyan">{subj}</td>
                     {study.visits.map((v) => {
                       const formsForVisit = study.forms.filter((f) =>
@@ -1351,7 +1525,11 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                         <td key={v.id} className="p-3 text-center align-top">
                           <div className="flex flex-wrap justify-center gap-1.5">
                             {formsForVisit.map((form) => {
-                              const status = getSubjectFormStatus(subj, v.id, form.id);
+                              const status = getSubjectFormStatus(
+                                subj,
+                                v.id,
+                                form.id
+                              );
 
                               return (
                                 <button
@@ -1366,15 +1544,17 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                                     status.openQueriesCount > 0
                                       ? "bg-red-500/20 text-red-400 border-red-500/40 animate-pulse"
                                       : status.isLocked
-                                      ? "bg-sky-500/20 text-sky-400 border-sky-500/40"
-                                      : status.isComplete
-                                      ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
-                                      : "bg-zinc-800/80 text-zinc-400 border-zinc-700 hover:text-white"
+                                        ? "bg-sky-500/20 text-sky-400 border-sky-500/40"
+                                        : status.isComplete
+                                          ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
+                                          : "bg-zinc-800/80 text-zinc-400 border-zinc-700 hover:text-white"
                                   }`}
                                   title={`Open ${form.name} for ${subj}`}
                                 >
                                   <span>{form.domain}</span>
-                                  {status.openQueriesCount > 0 && <span> !</span>}
+                                  {status.openQueriesCount > 0 && (
+                                    <span> !</span>
+                                  )}
                                   {status.isLocked && <span> 🔒</span>}
                                 </button>
                               );
@@ -1420,17 +1600,26 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                       >
                         {q.severity}
                       </span>
-                      <span className="font-bold text-white">Subject {q.subjectId}</span>
-                      <span className="text-zinc-500">• Variable: {q.fieldName}</span>
+                      <span className="font-bold text-white">
+                        Subject {q.subjectId}
+                      </span>
+                      <span className="text-zinc-500">
+                        • Variable: {q.fieldName}
+                      </span>
                     </div>
-                    <span className="text-[10px] text-zinc-500">{q.raisedAt.slice(0, 19)}</span>
+                    <span className="text-[10px] text-zinc-500">
+                      {q.raisedAt.slice(0, 19)}
+                    </span>
                   </div>
 
                   <p className="text-zinc-300 font-sans text-xs">{q.message}</p>
 
                   {q.response && (
                     <div className="p-2.5 rounded bg-zinc-900 border border-zinc-800 text-[11px] text-zinc-400 font-sans">
-                      <span className="font-bold text-zinc-200">Site Response:</span> {q.response}
+                      <span className="font-bold text-zinc-200">
+                        Site Response:
+                      </span>{" "}
+                      {q.response}
                     </div>
                   )}
 
@@ -1477,9 +1666,13 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                     <td className="p-2.5 text-zinc-500 whitespace-nowrap">
                       {entry.timestamp.slice(0, 19)}
                     </td>
-                    <td className="p-2.5 text-brand-cyan font-bold">{entry.subjectId}</td>
+                    <td className="p-2.5 text-brand-cyan font-bold">
+                      {entry.subjectId}
+                    </td>
                     <td className="p-2.5 text-white">{entry.fieldName}</td>
-                    <td className="p-2.5 text-zinc-400">{String(entry.previousValue ?? "—")}</td>
+                    <td className="p-2.5 text-zinc-400">
+                      {String(entry.previousValue ?? "—")}
+                    </td>
                     <td className="p-2.5 text-emerald-400 font-bold">
                       {String(entry.newValue ?? "—")}
                     </td>
@@ -1504,13 +1697,29 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
               <span>21 CFR Part 11 Audit Justification</span>
             </h3>
             <p className="text-xs text-zinc-400 font-sans">
-              Modifying existing clinical observation data requires a documented Reason for Change.
+              Modifying existing clinical observation data requires a documented
+              Reason for Change.
             </p>
 
             <div className="p-3 rounded bg-zinc-950 border border-zinc-800 font-mono text-xs space-y-1">
-              <div>Variable: <span className="text-brand-cyan">{pendingChange.field.variableName}</span></div>
-              <div>Previous Value: <span className="text-zinc-400">{String(pendingChange.oldVal)}</span></div>
-              <div>New Value: <span className="text-emerald-400">{String(pendingChange.newVal)}</span></div>
+              <div>
+                Variable:{" "}
+                <span className="text-brand-cyan">
+                  {pendingChange.field.variableName}
+                </span>
+              </div>
+              <div>
+                Previous Value:{" "}
+                <span className="text-zinc-400">
+                  {String(pendingChange.oldVal)}
+                </span>
+              </div>
+              <div>
+                New Value:{" "}
+                <span className="text-emerald-400">
+                  {String(pendingChange.newVal)}
+                </span>
+              </div>
             </div>
 
             <div>
@@ -1557,7 +1766,9 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
             <h3 className="text-sm font-bold text-white font-mono">
               Respond to Clinical Query
             </h3>
-            <p className="text-xs text-zinc-400 font-sans">{activeQueryToAnswer.message}</p>
+            <p className="text-xs text-zinc-400 font-sans">
+              {activeQueryToAnswer.message}
+            </p>
 
             <textarea
               rows={3}
