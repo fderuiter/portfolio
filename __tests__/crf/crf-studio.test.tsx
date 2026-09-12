@@ -108,6 +108,7 @@ describe("CRFStudioContainer Component", () => {
   beforeEach(() => {
     container = document.createElement("div");
     document.body.appendChild(container);
+    window.localStorage.clear();
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ status: "ok", data: {} }),
@@ -251,4 +252,47 @@ describe("CRFStudioContainer Component", () => {
     // and jumping the whole study back regardless of what's focused.
     expect(event.defaultPrevented).toBe(false);
   });
+
+  it(
+    "recovers the acknowledged draft with identical content after a simulated refresh (#657)",
+    { timeout: 20000 },
+    async () => {
+      vi.useFakeTimers();
+      try {
+        await act(async () => {
+          root = createRoot(container);
+          root.render(<CRFStudioContainer />);
+        });
+
+        const selectEl = container.querySelector("select") as HTMLSelectElement;
+        expect(selectEl).toBeTruthy();
+
+        await act(async () => {
+          selectEl.value = "cns_neuro";
+          selectEl.dispatchEvent(new Event("change", { bubbles: true }));
+        });
+        expect(container.textContent).toContain("Phase II");
+
+        // Let the debounced autosave commit the acknowledged draft.
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(1000);
+        });
+
+        expect(window.localStorage.getItem("crf_studio_draft_v1")).toBeTruthy();
+
+        // Simulate a refresh: unmount and mount a brand-new instance.
+        await act(async () => {
+          root.unmount();
+        });
+        await act(async () => {
+          root = createRoot(container);
+          root.render(<CRFStudioContainer />);
+        });
+
+        expect(container.textContent).toContain("Phase II");
+      } finally {
+        vi.useRealTimers();
+      }
+    }
+  );
 });

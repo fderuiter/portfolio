@@ -848,6 +848,18 @@ Re-exports [lintFormula](formula-linter/functions/lintFormula.md)
 
 ***
 
+### loadStudyDraft
+
+Re-exports [loadStudyDraft](study-draft-storage/functions/loadStudyDraft.md)
+
+***
+
+### LoadStudyDraftResult
+
+Re-exports [LoadStudyDraftResult](study-draft-storage/type-aliases/LoadStudyDraftResult.md)
+
+***
+
 ### mapPresetToFormVariables
 
 Re-exports [mapPresetToFormVariables](formula-presets/functions/mapPresetToFormVariables.md)
@@ -929,6 +941,18 @@ Re-exports [sanitizeRName](export-r/functions/sanitizeRName.md)
 ### sanitizeSasName
 
 Re-exports [sanitizeSasName](export-sas/functions/sanitizeSasName.md)
+
+***
+
+### saveStudyDraft
+
+Re-exports [saveStudyDraft](study-draft-storage/functions/saveStudyDraft.md)
+
+***
+
+### SaveStudyDraftResult
+
+Re-exports [SaveStudyDraftResult](study-draft-storage/type-aliases/SaveStudyDraftResult.md)
 
 ***
 
@@ -1040,6 +1064,24 @@ Re-exports [StudioTheme](types/type-aliases/StudioTheme.md)
 
 ***
 
+### STUDY\_DRAFT\_CORRUPT\_BACKUP\_KEY
+
+Re-exports [STUDY_DRAFT_CORRUPT_BACKUP_KEY](study-draft-storage/variables/STUDY_DRAFT_CORRUPT_BACKUP_KEY.md)
+
+***
+
+### STUDY\_DRAFT\_ENVELOPE\_VERSION
+
+Re-exports [STUDY_DRAFT_ENVELOPE_VERSION](study-draft-storage/variables/STUDY_DRAFT_ENVELOPE_VERSION.md)
+
+***
+
+### STUDY\_DRAFT\_STORAGE\_KEY
+
+Re-exports [STUDY_DRAFT_STORAGE_KEY](study-draft-storage/variables/STUDY_DRAFT_STORAGE_KEY.md)
+
+***
+
 ### STUDY\_PRESETS
 
 Re-exports [STUDY_PRESETS](presets/variables/STUDY_PRESETS.md)
@@ -1085,6 +1127,12 @@ Re-exports [StudyCohort](types/interfaces/StudyCohort.md)
 ### StudyCohortSchema
 
 Re-exports [StudyCohortSchema](universal-schema/variables/StudyCohortSchema.md)
+
+***
+
+### StudyDraftEnvelope
+
+Re-exports [StudyDraftEnvelope](study-draft-storage/interfaces/StudyDraftEnvelope.md)
 
 ***
 

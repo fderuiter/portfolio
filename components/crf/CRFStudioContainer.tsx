@@ -15,6 +15,8 @@ import {
   StudyVisit,
 } from "@/lib/crf/types";
 import { getPresetByIdSync, getOncologyPresetSync } from "@/lib/crf/presets";
+import { loadStudyDraft } from "@/lib/crf/study-draft-storage";
+import { useStudyAutosave } from "@/hooks/useStudyAutosave";
 import { StudioHeader } from "./StudioHeader";
 import { StudySpine, LeftSidebarTab } from "./LeftSidebar/StudySpine";
 import { WidgetPalette } from "./LeftSidebar/WidgetPalette";
@@ -121,8 +123,24 @@ import {
 } from "@tabler/icons-react";
 
 export const CRFStudioContainer: React.FC = () => {
+  // Recover the most recently acknowledged local draft (forms, visits, codelists,
+  // rules, and branding together) before falling back to the built-in example so
+  // a refresh never silently loses an author's in-progress study.
+  const [recoveredDraftSavedAt] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    const draft = loadStudyDraft();
+    return draft.status === "recovered" ? draft.savedAt : null;
+  });
+
   // Study State & History
   const [study, setStudy] = useState<StudyProtocol>(() => {
+    if (typeof window !== "undefined") {
+      const draft = loadStudyDraft();
+      if (draft.status === "recovered") {
+        return draft.study;
+      }
+    }
+
     const preset = getOncologyPresetSync();
     if (typeof window !== "undefined") {
       try {
@@ -140,6 +158,12 @@ export const CRFStudioContainer: React.FC = () => {
     }
     return preset;
   });
+
+  const {
+    status: draftSaveStatus,
+    errorMessage: draftSaveError,
+    downloadDraft,
+  } = useStudyAutosave(study);
 
   const [history, setHistory] = useState<StudyProtocol[]>([]);
   const [future, setFuture] = useState<StudyProtocol[]>([]);
@@ -907,6 +931,38 @@ export const CRFStudioContainer: React.FC = () => {
           <span>{copyToast}</span>
         </div>
       )}
+
+      {/* Local Draft Save Status */}
+      <div
+        data-testid="draft-save-status"
+        role="status"
+        aria-live="polite"
+        className={`absolute bottom-2 left-2 z-40 flex items-center gap-2 text-[10px] font-mono px-2.5 py-1 rounded-lg border backdrop-blur-md ${
+          draftSaveStatus === "error"
+            ? "bg-rose-950/80 border-rose-500/40 text-rose-200"
+            : "bg-zinc-900/80 border-zinc-800 text-zinc-400"
+        }`}
+      >
+        {recoveredDraftSavedAt && draftSaveStatus !== "error" && (
+          <span>Recovered local draft · </span>
+        )}
+        {draftSaveStatus === "saving" && <span>Saving…</span>}
+        {draftSaveStatus === "saved" && <span>Saved locally</span>}
+        {draftSaveStatus === "error" && (
+          <>
+            <span>
+              Local save failed{draftSaveError ? `: ${draftSaveError}` : ""}
+            </span>
+            <button
+              type="button"
+              onClick={downloadDraft}
+              className="underline hover:text-rose-100 cursor-pointer"
+            >
+              Download draft
+            </button>
+          </>
+        )}
+      </div>
 
       {/* Main Workspace Body based on Mode */}
       <div className="flex-1 flex overflow-hidden relative">
