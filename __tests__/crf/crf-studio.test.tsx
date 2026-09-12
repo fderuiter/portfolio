@@ -295,4 +295,78 @@ describe("CRFStudioContainer Component", () => {
       }
     }
   );
+
+  it(
+    "traps focus in the mobile widget palette sheet and returns it to the FAB on close (#660)",
+    { timeout: 20000 },
+    async () => {
+      vi.useFakeTimers();
+      try {
+        await act(async () => {
+          root = createRoot(container);
+          root.render(<CRFStudioContainer />);
+        });
+
+        // A prior test in this file may leave the studio on a non-designer
+        // mode via the URL hash (window.location.hash persists across tests
+        // in the same jsdom document); force back to Designer mode, where
+        // the mobile widget palette FAB lives, for a deterministic start.
+        const designerBtn = Array.from(
+          container.querySelectorAll("button")
+        ).find((b) => b.textContent?.includes("Form Designer"));
+        if (designerBtn) {
+          await act(async () => {
+            designerBtn.click();
+          });
+        }
+
+        const fabBtn = container.querySelector(
+          'button[aria-label="Add Field Widget"]'
+        ) as HTMLButtonElement;
+        expect(fabBtn).toBeTruthy();
+
+        fabBtn.focus();
+        expect(document.activeElement).toBe(fabBtn);
+
+        await act(async () => {
+          fabBtn.click();
+        });
+
+        // Flush useFocusTrap's initial-focus setTimeout.
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(60);
+        });
+
+        const dialog = container.querySelector(
+          '[role="dialog"][aria-labelledby="mobile-widget-sheet-title"]'
+        ) as HTMLElement;
+        expect(dialog).toBeTruthy();
+        expect(document.activeElement).not.toBe(fabBtn);
+        expect(dialog.contains(document.activeElement)).toBe(true);
+
+        const closeBtn = dialog.querySelector(
+          'button[aria-label="Close Widget Palette"]'
+        ) as HTMLButtonElement;
+        expect(closeBtn).toBeTruthy();
+
+        await act(async () => {
+          closeBtn.click();
+        });
+
+        // Flush useFocusTrap's returnFocus setTimeout(0).
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(10);
+        });
+
+        expect(
+          container.querySelector(
+            '[role="dialog"][aria-labelledby="mobile-widget-sheet-title"]'
+          )
+        ).toBeNull();
+        expect(document.activeElement).toBe(fabBtn);
+      } finally {
+        vi.useRealTimers();
+      }
+    }
+  );
 });

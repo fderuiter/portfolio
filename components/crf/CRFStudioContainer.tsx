@@ -17,6 +17,7 @@ import {
 import { getPresetByIdSync, getOncologyPresetSync } from "@/lib/crf/presets";
 import { loadStudyDraft } from "@/lib/crf/study-draft-storage";
 import { useStudyAutosave } from "@/hooks/useStudyAutosave";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { StudioHeader } from "./StudioHeader";
 import { StudySpine, LeftSidebarTab } from "./LeftSidebar/StudySpine";
 import { WidgetPalette } from "./LeftSidebar/WidgetPalette";
@@ -257,6 +258,12 @@ export const CRFStudioContainer: React.FC = () => {
   >("canvas");
   const [isMobileWidgetDrawerOpen, setIsMobileWidgetDrawerOpen] =
     useState(false);
+  // Escape dismissal is already handled by the global keyboard-shortcuts
+  // effect below; this trap only owns initial focus, Tab containment, and
+  // returning focus to the trigger button on close.
+  const mobileWidgetSheetRef = useFocusTrap<HTMLDivElement>(
+    isMobileWidgetDrawerOpen
+  );
 
   // Modals & Panels State
   const [isScaffolderOpen, setIsScaffolderOpen] = useState(false);
@@ -1223,11 +1230,21 @@ export const CRFStudioContainer: React.FC = () => {
             className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs md:hidden"
             onClick={() => setIsMobileWidgetDrawerOpen(false)}
           />
-          <div className="fixed bottom-0 inset-x-0 z-50 max-h-[75vh] bg-zinc-950 border-t border-zinc-800 rounded-t-3xl p-4 overflow-y-auto md:hidden shadow-2xl space-y-3 animate-in slide-in-from-bottom duration-200">
+          <div
+            ref={mobileWidgetSheetRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="mobile-widget-sheet-title"
+            tabIndex={-1}
+            className="fixed bottom-0 inset-x-0 z-50 max-h-[75vh] bg-zinc-950 border-t border-zinc-800 rounded-t-3xl p-4 overflow-y-auto md:hidden shadow-2xl space-y-3 animate-in slide-in-from-bottom duration-200"
+          >
             <div className="flex items-center justify-between pb-2 border-b border-zinc-850">
               <div className="flex items-center gap-2">
                 <IconSparkles className="w-4 h-4 text-brand-cyan" />
-                <span className="text-xs font-mono font-bold text-white uppercase">
+                <span
+                  id="mobile-widget-sheet-title"
+                  className="text-xs font-mono font-bold text-white uppercase"
+                >
                   Add Clinical Widget
                 </span>
               </div>
