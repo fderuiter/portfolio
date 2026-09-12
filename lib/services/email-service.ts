@@ -176,20 +176,24 @@ export class EmailService {
 
   /**
    * Records an email address in the suppression list.
+   *
+   * Deliberately lets a database failure propagate instead of swallowing it:
+   * the caller (`handleWebhookEvent`) depends on this rejecting so it can
+   * report the event as unhandled, which in turn makes the webhook route
+   * respond with a retryable non-2xx status instead of acknowledging a
+   * durable write that never happened. The upsert is idempotent by
+   * construction, so a retried delivery (or a partially-failed batch of
+   * recipients being reprocessed from the start) is always safe to replay.
    */
   static async recordSuppression(
     email: string,
     reason: "BOUNCE" | "COMPLAINT" | "UNSUBSCRIBE"
   ): Promise<void> {
-    try {
-      await prisma.suppressionList.upsert({
-        where: { email: email.toLowerCase().trim() },
-        create: { email: email.toLowerCase().trim(), reason },
-        update: { reason },
-      });
-    } catch (err) {
-      console.error(`Failed to record suppression for ${email}:`, err);
-    }
+    await prisma.suppressionList.upsert({
+      where: { email: email.toLowerCase().trim() },
+      create: { email: email.toLowerCase().trim(), reason },
+      update: { reason },
+    });
   }
 
   /**
@@ -412,6 +416,10 @@ export class EmailService {
 
   /**
    * Processes incoming Resend deliverability webhook event.
+   *
+   * `handled: false` signals a durable-processing failure (e.g. the
+   * suppression-list write threw) rather than a no-op event type; callers
+   * must treat that as retryable and must not acknowledge the delivery.
    */
   static async handleWebhookEvent(
     event: ResendWebhookEvent

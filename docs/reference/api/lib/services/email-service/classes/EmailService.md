@@ -27,6 +27,10 @@ bounce/complaint suppression list defenses, retry queueing, and webhook ingestio
 
 Processes incoming Resend deliverability webhook event.
 
+`handled: false` signals a durable-processing failure (e.g. the
+suppression-list write threw) rather than a no-op event type; callers
+must treat that as retryable and must not acknowledge the delivery.
+
 #### Parameters
 
 ##### event
@@ -158,6 +162,14 @@ Enqueues an email to the persistent OutboundEmailQueue table.
 > `static` **recordSuppression**(`email`, `reason`): `Promise`\<`void`\>
 
 Records an email address in the suppression list.
+
+Deliberately lets a database failure propagate instead of swallowing it:
+the caller (`handleWebhookEvent`) depends on this rejecting so it can
+report the event as unhandled, which in turn makes the webhook route
+respond with a retryable non-2xx status instead of acknowledging a
+durable write that never happened. The upsert is idempotent by
+construction, so a retried delivery (or a partially-failed batch of
+recipients being reprocessed from the start) is always safe to replay.
 
 #### Parameters
 
