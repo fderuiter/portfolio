@@ -102,6 +102,9 @@ function printUsage(): void {
     `  ${colors.cyan}inventory:vercel${colors.reset}              Inspect Vercel storage meters, retention inventory, and candidates`
   );
   console.log(
+    `  ${colors.cyan}headroom:vercel${colors.reset}               Evaluate Vercel storage and build hour headroom budgets`
+  );
+  console.log(
     `  ${colors.cyan}release:gate${colors.reset}                  Run pre-release security audit and deploy gate`
   );
   console.log(
@@ -1404,6 +1407,15 @@ export async function main(): Promise<void> {
         json,
         candidates,
       });
+      if (!success) process.exit(1);
+      break;
+    }
+    case "headroom:vercel": {
+      const { runHeadroomVerification } = await import("./vercel-headroom");
+      const strict = Boolean(parsed.flags.strict || parsed.flags.s);
+      const json = Boolean(parsed.flags.json || parsed.flags.j);
+      const ledger = Boolean(parsed.flags.ledger || parsed.flags.l);
+      const { success } = runHeadroomVerification({ strict, json, ledger });
       if (!success) process.exit(1);
       break;
     }

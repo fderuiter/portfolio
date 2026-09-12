@@ -23,7 +23,7 @@ for a given provider.
 | Resend | Active | Transactional email + deliverability webhook | `lib/services/email-service.ts`, `app/api/webhooks/resend/route.ts` — setup: [how-to: configure Resend and webhooks](../how-to/configure-resend-and-webhooks.md) |
 | Sentry | Active | Error monitoring (server, edge, client) | `sentry.server.config.ts`, `sentry.edge.config.ts`, `instrumentation.ts`, `instrumentation-client.ts` — setup: [how-to §Sentry](../how-to/configure-integrations.md#sentry-error-monitoring) |
 | Upstash Redis | Active | Telemetry event buffer, rate limiting | `lib/redis.ts`, `lib/services/telemetry-service.ts` — setup: [how-to §Upstash Redis](../how-to/configure-integrations.md#upstash-redis) |
-| Vercel Hosting | Active | Production/preview deployment | `vercel.json`, root `next.config.ts` — setup: [how-to §Vercel Hosting, Cron, and Analytics](../how-to/configure-integrations.md#vercel-hosting-cron-and-analytics) — capacity & audit: [Vercel retention inventory](vercel-retention-inventory.md) |
+| Vercel Hosting | Active | Production/preview deployment | `vercel.json`, root `next.config.ts` — setup: [how-to §Vercel Hosting, Cron, and Analytics](../how-to/configure-integrations.md#vercel-hosting-cron-and-analytics) — capacity & audit: [Vercel retention inventory](vercel-retention-inventory.md), [how-to: monitor headroom](../how-to/monitor-vercel-headroom.md) |
 | Vercel Cron | Active | Scheduled telemetry sync | `vercel.json`, `app/api/telemetry/sync/route.ts` — same how-to section as Vercel Hosting above |
 | Vercel Analytics | Active | Page-view analytics widget | `app/layout.tsx` (`@vercel/analytics/next`) — same how-to section as Vercel Hosting above |
 | Vercel Speed Insights | Not present | — | Not installed — confirmed absent from `app/layout.tsx` and `package.json`; do not assume it is running |
@@ -185,4 +185,5 @@ for the design rationale behind the DX CLI these commands belong to.
 - [ADR 0018: resilient transactional email and bot defense](../../adr/0018-resilient-transactional-email-and-bot-defense.md)
 - [ADR 0024: resilient Resend webhook deliverability and outbound retry queue](../../adr/0024-resilient-resend-webhook-deliverability-and-outbound-retry-queue.md)
 - [Reference: Vercel retention and storage inventory](vercel-retention-inventory.md)
+- [How-to: monitor Vercel headroom](../how-to/monitor-vercel-headroom.md)
 - [`openapi.json`](../../openapi.json) at the repository root — every `app/api/**/route.ts` this catalog references has a corresponding contract there
