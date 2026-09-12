@@ -135,28 +135,70 @@ Redis database's REST API credentials (Upstash's free tier is REST-only,
 which is why this project uses `@upstash/redis` rather than a raw TCP Redis
 client — see [`lib/redis.ts`](../../lib/redis.ts)).
 
+To isolate deployments sharing an Upstash database:
+- `UPSTASH_REDIS_KEY_PREFIX`: optional custom key prefix (e.g. `preview-pr-123:`).
+- When running in Vercel Previews (`VERCEL_ENV="preview"`), the system automatically
+  applies the `preview:` namespace prefix to prevent preview rate limits and
+  telemetry buffers from colliding with or draining production data.
+- Production defaults to unprefixed keys (`telemetry_buffer`, `telemetry_processing`,
+  `@upstash/ratelimit`) to maintain continuous access to active queues without
+  disruption. Any production namespace modification must be operator-gated.
+
 ### Verification
 
-Upstash's dashboard exposes a request/latency graph per database; after
-triggering telemetry ingestion locally, confirm requests appear there. There
-is no bundled CLI ping script in this repository today — the fastest local
-check is exercising `/api/telemetry` directly:
+Run the safe, non-destructive Upstash verification CLI:
+
+```bash
+npm run verify:upstash
+```
+
+This inspects environment attachments, evaluates active namespace prefixes,
+checks quota limits, and reports live connectivity/latency (when configured)
+without revealing credentials or mutating database contents. Add `--strict` in
+automated deployment gates to require verified live connectivity, or `--json`
+for machine-readable telemetry audits:
+
+```bash
+npm run verify:upstash -- --json
+```
+
+You can also exercise the ingestion route locally:
 
 ```bash
 curl -X POST http://localhost:3000/api/telemetry \
   -H "Content-Type: application/json" \
-  -d '{"eventType": "page_view", "path": "/"}'
+  -d '{"eventType": "page_view", "projectSlug": "/dashboard"}'
 ```
 
-then confirm the Upstash dashboard shows the write.
+### Outage response & circuit breaker
 
-### Troubleshooting & recovery
+- **Request deadline**: Upstream rate-limiting checks enforce an explicit
+  1500ms request deadline. If Upstash takes longer than 1500ms, the request
+  does not hang; it immediately trips the circuit breaker and falls back to
+  instance-local memory rate limiting.
+- **Circuit breaker cooldown**: Upon upstream timeout or connection failure,
+  a 30-second circuit breaker cooldown activates. During this window, all
+  requests bypass remote Redis calls and enforce rate limiting using an
+  in-memory generational double-buffered cache (`activeGeneration` /
+  `inactiveGeneration`), attaching standard `X-RateLimit-*` headers.
+- **Recovery probe**: After 30 seconds, the circuit breaker enters a half-open
+  state and probes Upstash again on the next request. If the provider has
+  recovered, distributed rate limiting resumes automatically.
+- **Lossy telemetry buffer fallback**: If Upstash buffer writes fail, the event
+  is dropped cleanly, logged to Sentry, and the API returns HTTP 202
+  (`durable: false`), preventing upstream retries from compounding outages.
 
-- **Redis unreachable / unconfigured**: `lib/redis.ts` falls back to
-  `http://localhost:8079` with a placeholder token when the env vars are
-  unset — this is not a running service in most environments, so any code
-  path depending on it must handle the resulting connection failure rather
-  than assume Redis is always present.
+### Credential rotation & namespace cleanup runbook
+
+- **Credential rotation**: Generate a new REST token in the Upstash console.
+  Update `UPSTASH_REDIS_REST_TOKEN` in the Vercel project environment variables
+  and trigger a redeployment. There is no dual-secret overlap window in the
+  Upstash REST API, so the redeploy constitutes the atomic switch.
+- **Preview namespace cleanup**: Ephemeral preview keys prefixed with `preview:`
+  or a custom PR prefix can be listed via `SCAN 0 MATCH preview:* COUNT 100`.
+  Queue keys have an explicit 48-hour TTL (`172800s`), and rate-limit sliding
+  windows expire within 60 seconds, ensuring automated reclamation without
+  manual deletion. Never execute un-prefixed `FLUSHDB` on shared instances.
 - **Buffered telemetry events never reach Postgres**: check the Vercel Cron
   job (`/api/telemetry/sync`, see below) is actually firing — buffered
   events sit in Redis until that route drains them, they are not written to

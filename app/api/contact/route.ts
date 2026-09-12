@@ -20,11 +20,25 @@ export const POST = createApiHandler(
       const connectionHash = await getConnectionHashFromRequest(req);
 
       // 1. Anonymous Connection-Hash Rate Limiting (5 attempts per 10 minutes)
-      const rateLimitCheck = checkSubmissionAttemptRateLimit(connectionHash, 5, 600000);
+      const rateLimitCheck = checkSubmissionAttemptRateLimit(
+        connectionHash,
+        5,
+        600000
+      );
       if (rateLimitCheck.isRateLimited) {
         return NextResponse.json(
-          { error: "Too many contact submission attempts. Please try again later." },
-          { status: 429 }
+          {
+            error:
+              "Too many contact submission attempts. Please try again later.",
+          },
+          {
+            status: 429,
+            headers: {
+              "Retry-After": "600",
+              "X-RateLimit-Limit": "5",
+              "X-RateLimit-Remaining": "0",
+            },
+          }
         );
       }
 
@@ -58,7 +72,10 @@ export const POST = createApiHandler(
       }
 
       // 4. Dispatch Inbound Inquiry and Confirmation
-      const result = await EmailService.sendContactInquiry(data, connectionHash);
+      const result = await EmailService.sendContactInquiry(
+        data,
+        connectionHash
+      );
 
       if (!result.success) {
         return NextResponse.json(
@@ -94,7 +111,11 @@ export const POST = createApiHandler(
     type: "body",
     customJsonError: "Invalid JSON body payload",
     customValidationError: (err) => {
-      const issues = (err as { issues: Array<{ path: Array<string | number>; message: string }> }).issues;
+      const issues = (
+        err as {
+          issues: Array<{ path: Array<string | number>; message: string }>;
+        }
+      ).issues;
       const isToneViolation = issues.some(
         (i) =>
           i.message.toLowerCase().includes("tone") ||

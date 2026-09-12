@@ -96,6 +96,9 @@ function printUsage(): void {
     `  ${colors.cyan}migration:replay${colors.reset}              Replay full migration history on disposable target`
   );
   console.log(
+    `  ${colors.cyan}verify:upstash${colors.reset}                Verify Upstash Redis connectivity, namespaces, and outage behavior`
+  );
+  console.log(
     `  ${colors.cyan}release:gate${colors.reset}                  Run pre-release security audit and deploy gate`
   );
   console.log(
@@ -1370,6 +1373,23 @@ export async function main(): Promise<void> {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { runMigrationReplay } = require("./migration-replay");
       await runMigrationReplay();
+      break;
+    }
+    case "verify:upstash": {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { runUpstashVerification } = require("./verify-upstash");
+      const strict = Boolean(parsed.flags.strict || parsed.flags.s);
+      const json = Boolean(parsed.flags.json || parsed.flags.j);
+      const { success, data } = await runUpstashVerification({ strict });
+      if (json) {
+        console.log(JSON.stringify({ success, result: data }, null, 2));
+      } else {
+        console.log("\n--- Upstash Redis Verification ---");
+        console.log(`Status: ${data.status.toUpperCase()}`);
+        console.log(`Prefix: ${data.environment.isolatedPrefix}`);
+        console.log(`Buffer: ${data.keyspaces.telemetryBuffer}`);
+      }
+      if (!success) process.exit(1);
       break;
     }
     case "release:gate": {
