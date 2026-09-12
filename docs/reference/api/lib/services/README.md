@@ -410,6 +410,12 @@ Re-exports [LocalCacheEntry](telemetry-service/interfaces/LocalCacheEntry.md)
 
 ***
 
+### OutboundEmailStatus
+
+Re-exports [OutboundEmailStatus](../db/variables/OutboundEmailStatus.md)
+
+***
+
 ### PrivacyHashResult
 
 Re-exports [PrivacyHashResult](privacy-service/interfaces/PrivacyHashResult.md)
@@ -455,6 +461,12 @@ Re-exports [ServiceResult](service-result/type-aliases/ServiceResult.md)
 ### ServiceSuccess
 
 Re-exports [ServiceSuccess](service-result/interfaces/ServiceSuccess.md)
+
+***
+
+### SuppressionReason
+
+Re-exports [SuppressionReason](../db/variables/SuppressionReason.md)
 
 ***
 

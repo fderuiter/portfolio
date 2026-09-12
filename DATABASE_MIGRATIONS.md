@@ -6,7 +6,7 @@ changes the schema without adding an entry to Prisma's migration history.
 
 ## Active migrations
 
-The repository contains six active Prisma migrations:
+The repository contains seven active Prisma migrations:
 
 1. `20260417215437_init`: Initial database baseline and core models.
 2. `20260528000000_add_telemetry_event`: Telemetry event ingestion table.
@@ -14,6 +14,7 @@ The repository contains six active Prisma migrations:
 4. `20260818000000_add_feedback_and_reactions`: Feedback submission and reaction tracking models.
 5. `20261014000000_add_commands_and_playback`: Command logging and session playback models.
 6. `20261015000000_add_email_resilience`: Suppression list and outbound email retry queue tables.
+7. `20261016000000_enforce_email_contracts`: Shared enum contracts on suppression reasons and outbound delivery states with preflight validation and redundant index cleanup.
 
 ## Normal workflow
 
@@ -275,6 +276,19 @@ Never mark a successfully applied migration rolled back.
 Prisma serializes concurrent migration attempts with its PostgreSQL advisory
 lock. Never automate `migrate resolve`; it is a one-time recovery operation that
 requires a verified schema comparison and a restorable snapshot.
+
+## Email contract enforcement (`20261016000000_enforce_email_contracts`)
+
+`20261016000000_enforce_email_contracts` upgrades the string columns on `SuppressionList.reason` and `OutboundEmailQueue.status` into strict PostgreSQL enums (`SuppressionReason` and `OutboundEmailStatus`), drops the redundant non-unique index on `SuppressionList(email)`, and guarantees zero data loss via PostgreSQL `ALTER TABLE ... ALTER COLUMN ... TYPE ... USING` casts.
+
+### Preflight guard
+
+The migration executes an automated preflight check that validates existing rows before attempting type conversion:
+
+- Validates all `SuppressionList.reason` values belong to `'BOUNCE'`, `'COMPLAINT'`, or `'UNSUBSCRIBE'`.
+- Validates all `OutboundEmailQueue.status` values belong to `'PENDING'`, `'RETRYING'`, `'DELIVERED'`, or `'FAILED'`.
+
+If any row contains incompatible legacy values, the preflight transaction aborts with a descriptive exception requiring operator remediation rather than silently dropping or corrupting data.
 
 ## Connection URLs (`DATABASE_URL` vs `DIRECT_URL`)
 

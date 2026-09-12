@@ -2,7 +2,9 @@ import { Resend } from "resend";
 import crypto from "crypto";
 import * as Sentry from "@sentry/nextjs";
 import { env, getEnv } from "@/lib/env";
-import { prisma } from "@/lib/db";
+import { prisma, SuppressionReason, OutboundEmailStatus } from "@/lib/db";
+
+export type { SuppressionReason, OutboundEmailStatus };
 import { ContactSubmission, ResendWebhookEvent } from "@/lib/schemas";
 import {
   renderContactAdminEmail,
@@ -187,7 +189,7 @@ export class EmailService {
    */
   static async recordSuppression(
     email: string,
-    reason: "BOUNCE" | "COMPLAINT" | "UNSUBSCRIBE"
+    reason: SuppressionReason
   ): Promise<void> {
     await prisma.suppressionList.upsert({
       where: { email: email.toLowerCase().trim() },
@@ -295,7 +297,7 @@ export class EmailService {
       text: string | null;
       tags: unknown;
       attempts: number;
-      status: string;
+      status: OutboundEmailStatus;
       nextRetryAt: Date;
       lastError: string | null;
     }> = [];

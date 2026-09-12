@@ -183,7 +183,7 @@ recipients being reprocessed from the start) is always safe to replay.
 
 ##### reason
 
-`"BOUNCE"` \| `"COMPLAINT"` \| `"UNSUBSCRIBE"`
+[`SuppressionReason`](../../../db/type-aliases/SuppressionReason.md)
 
 #### Returns
 
