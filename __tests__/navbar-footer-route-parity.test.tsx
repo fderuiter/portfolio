@@ -142,4 +142,14 @@ describe("Navbar mobile drawer & Footer Systems route parity", () => {
     expect(drawer?.querySelector('a[href="/simulator"]')).toBeNull();
     expect(footer?.querySelector('a[href="/simulator"]')).toBeNull();
   });
+
+  it("does not brand the Meme Vault as secret in the footer, since it's linked on every page (#593)", async () => {
+    await act(async () => {
+      root.render(<Footer />);
+    });
+
+    const link = container.querySelector('a[href="/arcade/meme-vault"]');
+    expect(link).toBeTruthy();
+    expect(link?.textContent).not.toContain("Secret");
+  });
 });

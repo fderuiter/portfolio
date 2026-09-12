@@ -310,7 +310,7 @@ export const MemeVaultClient: React.FC = () => {
         <div className="relative z-10 max-w-3xl">
           <div className="flex items-center gap-2.5 mb-3">
             <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[11px] font-bold uppercase tracking-wider">
-              Secret Easter Egg Vault
+              Meme Soundboard & Trophy Room
             </span>
             <span className="text-xs text-slate-400 font-sans">v2.4.0</span>
           </div>

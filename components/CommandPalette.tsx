@@ -836,14 +836,14 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
       },
       {
         id: "nav-meme-vault",
-        title: "Secret Meme Vault & Soundboard",
+        title: "Meme Vault & Soundboard",
         subtitle:
           "Make some noise, find hidden trophies, and enjoy a few jokes about code and clinical data.",
         category: "navigation",
         url: "/arcade/meme-vault",
         icon: <IconDeviceGamepad2 className="w-4 h-4 text-emerald-400" />,
-        badge: "Secret Vault",
-        status: "Unlocked",
+        badge: "Meme Soundboard",
+        status: "8-Bit Audio Active",
         description:
           "Make some noise, find hidden trophies, and enjoy a few jokes about code and clinical data.",
         techStack: ["Web Audio API", "CRT Shader", "React 19", "LocalStorage"],

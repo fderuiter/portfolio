@@ -205,7 +205,7 @@ export const Footer: React.FC = () => {
                     className="text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1.5"
                   >
                     <IconDeviceGamepad2 className="w-3 h-3 text-emerald-400" />
-                    Secret Meme Vault 🔓
+                    Meme Vault 🔓
                   </Link>
                 </li>
               </ul>

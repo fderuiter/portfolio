@@ -395,7 +395,7 @@ export const ArcadeHubClient: React.FC = () => {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase border bg-emerald-500/10 text-emerald-300 border-emerald-500/30">
-                  Secret Vault
+                  Meme Soundboard
                 </span>
                 <span className="text-xs font-mono text-zinc-400">
                   SOUNDS &amp; EASTER EGGS

@@ -80,7 +80,7 @@ const ARCADE_ITEMS: SubNavItem[] = [
     icon: <IconBone className="w-4 h-4 text-brand-cyan" />,
   },
   {
-    title: "Secret Meme Vault",
+    title: "Meme Vault",
     subtitle: "Soundboard & fun easter egg trophies",
     href: "/arcade/meme-vault",
     icon: <IconDeviceGamepad2 className="w-4 h-4 text-emerald-400" />,
