@@ -38,7 +38,7 @@ const authMiddleware = clerkMiddleware(async (auth, req: NextRequest) => {
     },
   });
 
-  return applySecurityHeaders(response);
+  return applySecurityHeaders(response, req);
 });
 
 export function proxy(req: NextRequest, event: NextFetchEvent) {
