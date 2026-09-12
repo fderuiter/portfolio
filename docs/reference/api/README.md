@@ -88,15 +88,20 @@ Operational workflows for production releases—including Automated Canary Analy
 
 ## Project Roadmap
 
-The full 5-phase development roadmap, milestone progress, and issue tracker are maintained in **[GitHub Issue #18 — Portfolio Hub V1 Architecture Master 5-Phase Development Plan](https://github.com/fderuiter/portfolio/issues/18)**.
+Work is tracked as eight epic maps on the [Portfolio Hub: Release Readiness](https://github.com/users/fderuiter/projects/18) board. Each epic owns a slice of the product and links its own child issues; live progress is the sub-issue completion shown on the epic itself, so this table records scope rather than a percentage that would drift.
 
-| Phase                                 | Milestone | Status         |
-| ------------------------------------- | --------- | -------------- |
-| 1 — Foundation & Data Integrity       | `v0.1.0`  | ✅ Complete    |
-| 2 — Core Architecture & Layout Engine | `v0.2.0`  | ✅ Complete    |
-| 3 — Integration & Content Pipeline    | `v0.3.0`  | 🔄 In Progress |
-| 4 — Hardening & Performance           | `v0.4.0`  | ⏳ Upcoming    |
-| 5 — Production CI/CD & Go-Live        | `v1.0.0`  | ⏳ Upcoming    |
+| Epic                                                                          | Scope                                                                     | Priority |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------- | -------- |
+| [#632](https://github.com/fderuiter/portfolio/issues/632) Release delivery    | Neon, Vercel, Resend, Clerk, migrations, previews, and the delivery gate  | P0       |
+| [#643](https://github.com/fderuiter/portfolio/issues/643) Dependency exposure | Evidence-backed remediation of every open dependency advisory             | P0       |
+| [#633](https://github.com/fderuiter/portfolio/issues/633) Verification trust  | Local, agent, browser, and release verification that can be believed      | P1       |
+| [#634](https://github.com/fderuiter/portfolio/issues/634) Experience & a11y   | The public visitor journey and WCAG 2.1 AA polish                         | P2       |
+| [#536](https://github.com/fderuiter/portfolio/issues/536) CRF Designer        | Next-generation clinical case report form designer architecture           | P3       |
+| [#549](https://github.com/fderuiter/portfolio/issues/549) Arcade engine       | Headless arcade lifecycle, viewport matrix, and HTML HUD overlay standard | P3       |
+| [#330](https://github.com/fderuiter/portfolio/issues/330) Portfolio assistant | A grounded, cost-bounded, observable assistant                            | P3       |
+| [#327](https://github.com/fderuiter/portfolio/issues/327) Asset management    | Authenticated upload and lifecycle management for portfolio media         | P3       |
+
+Architectural decisions are recorded in [`adr/`](https://github.com/fderuiter/portfolio/tree/dev/adr); the invariants these epics are held to are listed in [`AGENTS.md`](https://github.com/fderuiter/portfolio/blob/dev/AGENTS.md).
 
 ## Prerequisites
 
