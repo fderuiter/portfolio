@@ -126,6 +126,11 @@ every pull request.
   [how-to: add an API route and Zod contract](../how-to/add-api-route-and-zod-contract.md).
 - Wiring up transactional email or webhooks? See
   [how-to: configure Resend and webhooks](../how-to/configure-resend-and-webhooks.md).
+- Setting up Clerk, Sentry, Upstash, Vercel Cron/Analytics, or GitHub data
+  fetching? See
+  [how-to: configure Clerk, Sentry, Upstash, Vercel Cron/Analytics, and GitHub data fetching](../how-to/configure-integrations.md),
+  or the full per-environment fact table in the
+  [integration catalog](../reference/integrations-catalog.md).
 - Looking for the compiled `lib/`, `hooks/`, and `types/` API surface? See
   [reference/api](../reference/api/README.md).
 - Curious about *why* the codebase is shaped the way it is? See
