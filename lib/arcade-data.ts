@@ -161,11 +161,11 @@ export const ARCADE_GAMES_METADATA: ArcadeGameMetadata[] = [
   {
     id: "meme-vault",
     slug: "meme-vault",
-    title: "Secret Meme Vault & Soundboard",
+    title: "Meme Vault & Soundboard",
     subtitle: "Developer Soundboard & Easter Egg Trophies",
-    genre: "Secret Easter Egg Room",
+    genre: "Meme Soundboard & Trophy Room",
     description:
-      "Unlockable developer & MedTech secret chamber. Trigger synthesized audio soundbites, collect site easter egg achievements, and browse curated engineering memes.",
+      "Developer & MedTech easter-egg room. Trigger synthesized audio soundbites, collect site easter egg achievements, and browse curated engineering memes.",
     mechanics: [
       "8-Channel Web Audio Soundboard",
       "Easter Egg Achievement Tracker",
