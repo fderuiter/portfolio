@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { isUserAuthorizedAdmin, requireAdmin, isCurrentUserAdmin, getAdminAuthSession } from "@/lib/auth/admin";
+import {
+  isUserAuthorizedAdmin,
+  requireAdmin,
+  isCurrentUserAdmin,
+  getAdminAuthSession,
+} from "@/lib/auth/admin";
 import * as envModule from "@/lib/env";
 
 const mockAuth = vi.fn();
@@ -10,17 +15,28 @@ vi.mock("@clerk/nextjs/server", () => ({
   auth: () => mockAuth(),
   currentUser: () => mockCurrentUser(),
   clerkMiddleware: (handler: unknown) => handler,
-  createRouteMatcher: (routes: string[]) => (req: { nextUrl: { pathname: string } }) => {
-    return routes.some((pattern) => {
-      const regex = new RegExp("^" + pattern.replace(/\(\.\*\)/g, ".*") + "$");
-      return regex.test(req.nextUrl.pathname);
-    });
-  },
+  createRouteMatcher:
+    (routes: string[]) => (req: { nextUrl: { pathname: string } }) => {
+      return routes.some((pattern) => {
+        const regex = new RegExp(
+          "^" + pattern.replace(/\(\.\*\)/g, ".*") + "$"
+        );
+        return regex.test(req.nextUrl.pathname);
+      });
+    },
 }));
 
 vi.mock("next/navigation", () => ({
   redirect: (url: string) => mockRedirect(url),
 }));
+
+function verifiedEmail(emailAddress: string) {
+  return { emailAddress, verification: { status: "verified" } };
+}
+
+function unverifiedEmail(emailAddress: string) {
+  return { emailAddress, verification: { status: "unverified" } };
+}
 
 describe("Clerk Admin Authorization & Allowlist Engine", () => {
   beforeEach(() => {
@@ -34,7 +50,9 @@ describe("Clerk Admin Authorization & Allowlist Engine", () => {
         ADMIN_EMAILS: undefined,
       } as ReturnType<typeof envModule.getEnv>);
 
-      expect(isUserAuthorizedAdmin("user_123", ["admin@example.com"])).toBe(false);
+      expect(
+        isUserAuthorizedAdmin("user_123", [verifiedEmail("admin@example.com")])
+      ).toBe(false);
     });
 
     it("authorizes user matching ADMIN_USER_IDS allowlist (case-insensitive)", () => {
@@ -48,15 +66,100 @@ describe("Clerk Admin Authorization & Allowlist Engine", () => {
       expect(isUserAuthorizedAdmin("user_intruder", [])).toBe(false);
     });
 
-    it("authorizes user matching ADMIN_EMAILS allowlist", () => {
+    it("authorizes user matching ADMIN_EMAILS allowlist when the email is provider-verified", () => {
       vi.spyOn(envModule, "getEnv").mockReturnValue({
         ADMIN_USER_IDS: "",
         ADMIN_EMAILS: "frederick@deruiter.dev, admin@deruiter.dev",
       } as ReturnType<typeof envModule.getEnv>);
 
-      expect(isUserAuthorizedAdmin("user_any", ["FREDERICK@deruiter.dev"])).toBe(true);
-      expect(isUserAuthorizedAdmin("user_any", ["guest@example.com", "admin@deruiter.dev"])).toBe(true);
-      expect(isUserAuthorizedAdmin("user_any", ["stranger@other.org"])).toBe(false);
+      expect(
+        isUserAuthorizedAdmin("user_any", [
+          verifiedEmail("FREDERICK@deruiter.dev"),
+        ])
+      ).toBe(true);
+      expect(
+        isUserAuthorizedAdmin("user_any", [
+          verifiedEmail("guest@example.com"),
+          verifiedEmail("admin@deruiter.dev"),
+        ])
+      ).toBe(true);
+      expect(
+        isUserAuthorizedAdmin("user_any", [verifiedEmail("stranger@other.org")])
+      ).toBe(false);
+    });
+
+    it("rejects an allowlisted email whose verification status is anything other than 'verified'", () => {
+      vi.spyOn(envModule, "getEnv").mockReturnValue({
+        ADMIN_USER_IDS: "",
+        ADMIN_EMAILS: "admin@deruiter.dev",
+      } as ReturnType<typeof envModule.getEnv>);
+
+      expect(
+        isUserAuthorizedAdmin("user_attacker", [
+          unverifiedEmail("admin@deruiter.dev"),
+        ])
+      ).toBe(false);
+      expect(
+        isUserAuthorizedAdmin("user_attacker", [
+          {
+            emailAddress: "admin@deruiter.dev",
+            verification: { status: "expired" },
+          },
+        ])
+      ).toBe(false);
+      expect(
+        isUserAuthorizedAdmin("user_attacker", [
+          {
+            emailAddress: "admin@deruiter.dev",
+            verification: { status: "failed" },
+          },
+        ])
+      ).toBe(false);
+    });
+
+    it("rejects an allowlisted email with no verification record at all", () => {
+      vi.spyOn(envModule, "getEnv").mockReturnValue({
+        ADMIN_USER_IDS: "",
+        ADMIN_EMAILS: "admin@deruiter.dev",
+      } as ReturnType<typeof envModule.getEnv>);
+
+      expect(
+        isUserAuthorizedAdmin("user_attacker", [
+          { emailAddress: "admin@deruiter.dev" },
+        ])
+      ).toBe(false);
+      expect(
+        isUserAuthorizedAdmin("user_attacker", [
+          { emailAddress: "admin@deruiter.dev", verification: null },
+        ])
+      ).toBe(false);
+    });
+
+    it("rejects a verified email that does not match the allowlist (mismatched identity)", () => {
+      vi.spyOn(envModule, "getEnv").mockReturnValue({
+        ADMIN_USER_IDS: "",
+        ADMIN_EMAILS: "admin@deruiter.dev",
+      } as ReturnType<typeof envModule.getEnv>);
+
+      expect(
+        isUserAuthorizedAdmin("user_stranger", [
+          verifiedEmail("stranger@other.org"),
+        ])
+      ).toBe(false);
+    });
+
+    it("authorizes a verified secondary email even when the (unverified) first entry does not match", () => {
+      vi.spyOn(envModule, "getEnv").mockReturnValue({
+        ADMIN_USER_IDS: "",
+        ADMIN_EMAILS: "admin@deruiter.dev",
+      } as ReturnType<typeof envModule.getEnv>);
+
+      expect(
+        isUserAuthorizedAdmin("user_any", [
+          unverifiedEmail("personal@example.com"),
+          verifiedEmail("admin@deruiter.dev"),
+        ])
+      ).toBe(true);
     });
   });
 
@@ -67,20 +170,51 @@ describe("Clerk Admin Authorization & Allowlist Engine", () => {
       expect(isAdmin).toBe(false);
     });
 
-    it("returns true from isCurrentUserAdmin when authenticated user is authorized", async () => {
+    it("returns true from isCurrentUserAdmin when authenticated user is authorized via verified email", async () => {
+      vi.spyOn(envModule, "getEnv").mockReturnValue({
+        ADMIN_USER_IDS: "",
+        ADMIN_EMAILS: "admin@test.com",
+      } as ReturnType<typeof envModule.getEnv>);
+
+      mockAuth.mockResolvedValue({ userId: "user_admin_valid" });
+      mockCurrentUser.mockResolvedValue({
+        id: "user_admin_valid",
+        emailAddresses: [verifiedEmail("admin@test.com")],
+      });
+
+      const isAdmin = await isCurrentUserAdmin();
+      expect(isAdmin).toBe(true);
+    });
+
+    it("returns false from isCurrentUserAdmin when the matching email is unverified", async () => {
+      vi.spyOn(envModule, "getEnv").mockReturnValue({
+        ADMIN_USER_IDS: "",
+        ADMIN_EMAILS: "admin@test.com",
+      } as ReturnType<typeof envModule.getEnv>);
+
+      mockAuth.mockResolvedValue({ userId: "user_attacker" });
+      mockCurrentUser.mockResolvedValue({
+        id: "user_attacker",
+        emailAddresses: [unverifiedEmail("admin@test.com")],
+      });
+
+      const isAdmin = await isCurrentUserAdmin();
+      expect(isAdmin).toBe(false);
+    });
+
+    it("returns false from isCurrentUserAdmin when the Clerk provider call fails", async () => {
       vi.spyOn(envModule, "getEnv").mockReturnValue({
         ADMIN_USER_IDS: "user_admin_valid",
         ADMIN_EMAILS: "",
       } as ReturnType<typeof envModule.getEnv>);
 
       mockAuth.mockResolvedValue({ userId: "user_admin_valid" });
-      mockCurrentUser.mockResolvedValue({
-        id: "user_admin_valid",
-        emailAddresses: [{ emailAddress: "admin@test.com" }],
-      });
+      mockCurrentUser.mockRejectedValue(
+        new Error("Clerk backend API unavailable")
+      );
 
       const isAdmin = await isCurrentUserAdmin();
-      expect(isAdmin).toBe(true);
+      expect(isAdmin).toBe(false);
     });
 
     it("redirects to /admin/login in requireAdmin() when user is unauthenticated", async () => {
@@ -99,7 +233,7 @@ describe("Clerk Admin Authorization & Allowlist Engine", () => {
       mockAuth.mockResolvedValue({ userId: "user_unauthorized" });
       mockCurrentUser.mockResolvedValue({
         id: "user_unauthorized",
-        emailAddresses: [{ emailAddress: "unauthorized@test.com" }],
+        emailAddresses: [verifiedEmail("unauthorized@test.com")],
       });
 
       await expect(requireAdmin()).rejects.toThrow("403 Forbidden");
@@ -114,7 +248,7 @@ describe("Clerk Admin Authorization & Allowlist Engine", () => {
       mockAuth.mockResolvedValue({ userId: "user_authorized" });
       mockCurrentUser.mockResolvedValue({
         id: "user_authorized",
-        emailAddresses: [{ emailAddress: "authorized@test.com" }],
+        emailAddresses: [verifiedEmail("authorized@test.com")],
       });
 
       const result = await requireAdmin();
@@ -142,7 +276,7 @@ describe("Clerk Admin Authorization & Allowlist Engine", () => {
       mockCurrentUser.mockResolvedValue({
         id: "user_visitor_999",
         fullName: "Visitor Author",
-        emailAddresses: [{ emailAddress: "visitor@custom.org" }],
+        emailAddresses: [verifiedEmail("visitor@custom.org")],
       });
 
       const session = await getAdminAuthSession();
@@ -153,7 +287,7 @@ describe("Clerk Admin Authorization & Allowlist Engine", () => {
       expect(session.displayName).toBe("Visitor Author");
     });
 
-    it("returns authorized admin session object when user is in allowlist", async () => {
+    it("returns authorized admin session object when user is in allowlist via a verified email", async () => {
       vi.spyOn(envModule, "getEnv").mockReturnValue({
         ADMIN_USER_IDS: "",
         ADMIN_EMAILS: "fred@deruiter.dev",
@@ -163,7 +297,7 @@ describe("Clerk Admin Authorization & Allowlist Engine", () => {
       mockCurrentUser.mockResolvedValue({
         id: "user_admin_fred",
         firstName: "Fred",
-        emailAddresses: [{ emailAddress: "fred@deruiter.dev" }],
+        emailAddresses: [verifiedEmail("fred@deruiter.dev")],
       });
 
       const session = await getAdminAuthSession();
@@ -173,6 +307,25 @@ describe("Clerk Admin Authorization & Allowlist Engine", () => {
       expect(session.primaryEmail).toBe("fred@deruiter.dev");
       expect(session.displayName).toBe("Fred");
     });
+
+    it("denies admin access when the allowlisted email exists on the account but was never verified", async () => {
+      vi.spyOn(envModule, "getEnv").mockReturnValue({
+        ADMIN_USER_IDS: "",
+        ADMIN_EMAILS: "fred@deruiter.dev",
+      } as ReturnType<typeof envModule.getEnv>);
+
+      mockAuth.mockResolvedValue({ userId: "user_impersonator" });
+      mockCurrentUser.mockResolvedValue({
+        id: "user_impersonator",
+        firstName: "Impersonator",
+        emailAddresses: [unverifiedEmail("fred@deruiter.dev")],
+      });
+
+      const session = await getAdminAuthSession();
+      expect(session.isAdmin).toBe(false);
+      // The account identity itself is still surfaced (client-visible display data,
+      // never the authorization boundary), only elevated privileges are withheld.
+      expect(session.primaryEmail).toBe("fred@deruiter.dev");
+    });
   });
 });
-

@@ -9,6 +9,7 @@
 ## Interfaces
 
 - [AdminAuthSession](interfaces/AdminAuthSession.md)
+- [AdminEmailCandidate](interfaces/AdminEmailCandidate.md)
 
 ## Functions
 

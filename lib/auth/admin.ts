@@ -16,12 +16,35 @@ function parseAllowedList(rawString?: string): Set<string> {
 }
 
 /**
- * Pure evaluation helper determining if a given Clerk User ID or list of emails
- * is present in the server's authorized admin allowlist.
+ * Shape of a Clerk `EmailAddress` this module needs: structurally compatible
+ * with `@clerk/backend`'s `EmailAddress` (and `@clerk/nextjs`'s re-export),
+ * but expressed independently so tests can pass synthetic objects without
+ * constructing real Clerk SDK instances.
+ */
+export interface AdminEmailCandidate {
+  emailAddress?: string | null;
+  verification?: { status?: string | null } | null;
+}
+
+/**
+ * Pure evaluation helper determining if a given Clerk User ID or list of
+ * email addresses is present in the server's authorized admin allowlist.
+ *
+ * Email-based authorization policy: only an address with
+ * `verification.status === "verified"` can satisfy the `ADMIN_EMAILS`
+ * allowlist. An address with no verification record, a non-"verified"
+ * status, or a matching string but unverified ownership is never sufficient
+ * — Clerk lets an account hold unverified email addresses, and an attacker
+ * who adds an allowlisted address to their own account without proving
+ * ownership must not inherit that address's trust. This check applies
+ * uniformly to every address Clerk returns for the user (primary and
+ * secondary alike): restricting it to only the primary address would not
+ * close the gap, since Clerk does not require the primary address to be
+ * verified either.
  */
 export function isUserAuthorizedAdmin(
   userId?: string | null,
-  emailAddresses?: (string | undefined | null)[] | null
+  emailAddresses?: AdminEmailCandidate[] | null
 ): boolean {
   const env = getEnv();
   const allowedUserIds = parseAllowedList(env.ADMIN_USER_IDS);
@@ -37,7 +60,9 @@ export function isUserAuthorizedAdmin(
   }
 
   if (emailAddresses && emailAddresses.length > 0) {
-    for (const email of emailAddresses) {
+    for (const candidate of emailAddresses) {
+      if (candidate?.verification?.status !== "verified") continue;
+      const email = candidate.emailAddress;
       if (email && allowedEmails.has(email.trim().toLowerCase())) {
         return true;
       }
@@ -56,9 +81,9 @@ export async function isCurrentUserAdmin(): Promise<boolean> {
     if (!userId) return false;
 
     const user = await currentUser();
-    const emails = user?.emailAddresses?.map((e) => e.emailAddress) || [];
+    const emailAddresses = user?.emailAddresses ?? [];
 
-    return isUserAuthorizedAdmin(userId, emails);
+    return isUserAuthorizedAdmin(userId, emailAddresses);
   } catch (error) {
     console.error("[AUTH] Error verifying current admin user:", error);
     return false;
@@ -97,10 +122,10 @@ export async function getAdminAuthSession(): Promise<AdminAuthSession> {
   }
 
   const user = await currentUser();
-  const emails = user?.emailAddresses?.map((e) => e.emailAddress) || [];
-  const primaryEmail = user?.emailAddresses?.[0]?.emailAddress ?? (emails[0] || "N/A");
+  const emailAddresses = user?.emailAddresses ?? [];
+  const primaryEmail = emailAddresses[0]?.emailAddress ?? "N/A";
   const displayName = user?.fullName || user?.firstName || "Author";
-  const isAdmin = isUserAuthorizedAdmin(userId, emails);
+  const isAdmin = isUserAuthorizedAdmin(userId, emailAddresses);
 
   return {
     isAuthenticated: true,
@@ -125,9 +150,10 @@ export async function requireAdmin(): Promise<{ userId: string }> {
 
   const isAdmin = await isCurrentUserAdmin();
   if (!isAdmin) {
-    throw new Error("403 Forbidden: User does not have administrator privileges.");
+    throw new Error(
+      "403 Forbidden: User does not have administrator privileges."
+    );
   }
 
   return { userId };
 }
-
