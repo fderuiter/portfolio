@@ -2690,9 +2690,12 @@ export const WorkingWithDuck: React.FC = () => {
       <TabletOrientationHint />
 
       {/* Top Status & Meters HUD */}
-      <div className="mb-3 sm:mb-4 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
+      <div
+        data-testid="duck-hud-meters"
+        className="mb-3 sm:mb-4 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 [@media(max-height:650px)]:mb-1.5 [@media(max-height:650px)]:grid-cols-4 [@media(max-height:650px)]:gap-1.5"
+      >
         {/* Work Progress Meter */}
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-2.5 sm:p-3.5 backdrop-blur-md">
+        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-2.5 sm:p-3.5 backdrop-blur-md [@media(max-height:650px)]:p-1.5">
           <div className="flex items-center justify-between text-[11px] sm:text-xs font-mono mb-1">
             <span className="text-zinc-400 font-bold flex items-center gap-1 sm:gap-1.5 truncate">
               <IconBriefcase className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400 shrink-0" />
@@ -2730,7 +2733,7 @@ export const WorkingWithDuck: React.FC = () => {
               }}
             />
           </div>
-          <div className="flex justify-between items-center mt-1 text-[9px] sm:text-[10px] font-mono text-zinc-500">
+          <div className="flex justify-between items-center mt-1 text-[9px] sm:text-[10px] font-mono text-zinc-400 [@media(max-height:650px)]:hidden">
             <span className="truncate">
               {uiState.mode === "endless"
                 ? "Endless Mode"
@@ -2743,7 +2746,7 @@ export const WorkingWithDuck: React.FC = () => {
         </div>
 
         {/* Excitement / Zoomies Meter */}
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-2.5 sm:p-3.5 backdrop-blur-md">
+        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-2.5 sm:p-3.5 backdrop-blur-md [@media(max-height:650px)]:p-1.5">
           <div className="flex items-center justify-between text-[11px] sm:text-xs font-mono mb-1">
             <span className="text-zinc-400 font-bold flex items-center gap-1 sm:gap-1.5 truncate">
               <IconSparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 shrink-0" />
@@ -2780,7 +2783,7 @@ export const WorkingWithDuck: React.FC = () => {
               }}
             />
           </div>
-          <div className="flex justify-between items-center mt-1 text-[9px] sm:text-[10px] font-mono text-zinc-500">
+          <div className="flex justify-between items-center mt-1 text-[9px] sm:text-[10px] font-mono text-zinc-400 [@media(max-height:650px)]:hidden">
             <span className="truncate">
               {uiState.excitement > 85 ? "⚠️ ZOOMIES" : "Fetch / Sit"}
             </span>
@@ -2793,7 +2796,7 @@ export const WorkingWithDuck: React.FC = () => {
         </div>
 
         {/* Bladder / Potty Meter */}
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-2.5 sm:p-3.5 backdrop-blur-md">
+        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-2.5 sm:p-3.5 backdrop-blur-md [@media(max-height:650px)]:p-1.5">
           <div className="flex items-center justify-between text-[11px] sm:text-xs font-mono mb-1">
             <span className="text-zinc-400 font-bold flex items-center gap-1 sm:gap-1.5 truncate">
               <IconAlertTriangle
@@ -2828,7 +2831,7 @@ export const WorkingWithDuck: React.FC = () => {
               }}
             />
           </div>
-          <div className="flex justify-between items-center mt-1 text-[9px] sm:text-[10px] font-mono text-zinc-500">
+          <div className="flex justify-between items-center mt-1 text-[9px] sm:text-[10px] font-mono text-zinc-400 [@media(max-height:650px)]:hidden">
             <span className="truncate">
               {uiState.duck.state === "SNIFFING_POTTY"
                 ? "🚨 TO DOOR!"
@@ -2838,7 +2841,7 @@ export const WorkingWithDuck: React.FC = () => {
         </div>
 
         {/* Naughty vs Good Boy Scale */}
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-2.5 sm:p-3.5 backdrop-blur-md">
+        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-2.5 sm:p-3.5 backdrop-blur-md [@media(max-height:650px)]:p-1.5">
           <div className="flex items-center justify-between text-[11px] sm:text-xs font-mono mb-1">
             <span className="text-zinc-400 font-bold flex items-center gap-1 sm:gap-1.5 truncate">
               <IconHeart className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-400 shrink-0" />
@@ -2912,8 +2915,8 @@ export const WorkingWithDuck: React.FC = () => {
           tabIndex={0}
           className={
             isFullscreen
-              ? "max-h-[var(--layout-viewport-budget,calc(100dvh-var(--header-height,80px)-var(--layout-dock-height,64px)))] max-h-[calc(100dvh-var(--header-height,80px)-var(--footer-height,48px))] max-w-full aspect-[800/500] object-contain block cursor-crosshair touch-none my-auto mx-auto"
-              : "w-full h-auto aspect-[800/500] cursor-crosshair block touch-none [@media(max-height:500px)]:w-auto [@media(max-height:500px)]:max-w-full [@media(max-height:500px)]:max-h-[68dvh] [@media(max-height:500px)]:mx-auto"
+              ? "max-h-[var(--layout-viewport-budget,calc(100dvh-var(--header-height,80px)-var(--layout-dock-height,64px)))] max-h-[calc(100dvh-var(--header-height,80px)-var(--footer-height,48px))] max-w-full aspect-[800/500] object-contain block cursor-crosshair touch-none my-auto mx-auto [@media(max-height:500px)]:max-h-[45dvh]"
+              : "w-full h-auto aspect-[800/500] cursor-crosshair block touch-none [@media(max-height:500px)]:w-auto [@media(max-height:500px)]:max-w-full [@media(max-height:500px)]:max-h-[52dvh] [@media(max-height:500px)]:mx-auto"
           }
         />
 
@@ -3000,14 +3003,17 @@ export const WorkingWithDuck: React.FC = () => {
       </div>
 
       {/* Unified Tactile Action Dock */}
-      <div className="mt-3 sm:mt-4 flex flex-col gap-2.5 font-mono">
+      <div
+        data-testid="duck-action-dock"
+        className="mt-3 sm:mt-4 flex flex-col gap-2.5 font-mono [@media(max-height:650px)]:mt-1.5 [@media(max-height:650px)]:gap-1.5"
+      >
         {/* --- MOBILE VIEWPORT CONTROL DECK (<md, or any short/landscape viewport) --- */}
         <div className="flex [@media(min-width:768px)_and_(min-height:560px)]:hidden flex-col gap-2">
           {/* Segmented Switcher Tabs */}
           <div className="grid grid-cols-3 p-1 rounded-2xl bg-zinc-900/90 border border-zinc-800 gap-1 text-xs font-bold">
             <button
               onClick={() => setMobileTab("toys")}
-              className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1 min-h-[40px] cursor-pointer ${
+              className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1 min-h-[40px] [@media(max-height:420px)]:min-h-[32px] [@media(max-height:420px)]:py-1 cursor-pointer ${
                 mobileTab === "toys"
                   ? "bg-brand-cyan text-black shadow-md font-bold"
                   : "text-zinc-400 hover:text-white"
@@ -3021,7 +3027,7 @@ export const WorkingWithDuck: React.FC = () => {
 
             <button
               onClick={() => setMobileTab("tricks")}
-              className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1 min-h-[40px] cursor-pointer ${
+              className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1 min-h-[40px] [@media(max-height:420px)]:min-h-[32px] [@media(max-height:420px)]:py-1 cursor-pointer ${
                 mobileTab === "tricks"
                   ? "bg-brand-cyan text-black shadow-md font-bold"
                   : "text-zinc-400 hover:text-white"
@@ -3035,7 +3041,7 @@ export const WorkingWithDuck: React.FC = () => {
 
             <button
               onClick={() => setMobileTab("actions")}
-              className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1 min-h-[40px] cursor-pointer ${
+              className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1 min-h-[40px] [@media(max-height:420px)]:min-h-[32px] [@media(max-height:420px)]:py-1 cursor-pointer ${
                 mobileTab === "actions"
                   ? "bg-brand-cyan text-black shadow-md font-bold"
                   : "text-zinc-400 hover:text-white"

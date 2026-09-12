@@ -478,6 +478,15 @@ body {
   max-height: 65dvh;
   margin-inline: auto;
 }
+/* Short landscape viewports (e.g. 667x375) don't have room for a 65dvh canvas plus the HUD
+   and action dock stacked above/below it — the dock would start below the fold. Give the
+   playfield a smaller viewport budget so essential actions stay visible without scrolling. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .arcade-cabinet[data-fullscreen="true"][data-arcade-cabinet="working-with-duck"]
+    canvas {
+    max-height: 42dvh;
+  }
+}
 @media (orientation: landscape) and (max-height: 600px) {
   .arcade-shooter-controls [role="group"] > :first-child {
     display: grid;
