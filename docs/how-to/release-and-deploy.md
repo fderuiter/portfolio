@@ -1,16 +1,18 @@
 # Release and Deployment Workflow
 
 This guide implements
-[ADR 0037](../../adr/0037-controlled-integration-and-release-deployments.md).
-It uses one long-lived branch while bounding Vercel Hobby storage and build
-consumption.
+[ADR 0037](../../adr/0037-controlled-integration-and-release-deployments.md)
+and
+[ADR 0038](../../adr/0038-protected-build-once-production-releases.md). It uses
+one long-lived branch and a protected build-once release while bounding Vercel
+Hobby storage and build consumption.
 
 ## Branch Roles
 
 | Branch | Starts from | Pull request target | Merge method | Vercel deployment |
 | --- | --- | --- | --- | --- |
 | `feat/*`, `fix/*`, `chore/*`, `docs/*`, `dx/*`, `refactor/*`, `perf/*` | `main` | `main` | Squash | None by default |
-| `main` | Reviewed topic PR | N/A | N/A | Production |
+| `main` | Reviewed topic PR | N/A | N/A | None until protected release promotion |
 
 ## Normal Development
 
@@ -45,23 +47,60 @@ verification, change GitHub's default branch to `main` and delete `dev`.
 
 ## Release
 
-Every squash merge to `main` is releasable and produces one Vercel production
-deployment. Validate:
+A merge to `main` is releasable, but it does not deploy automatically. Vercel
+Git deployments are disabled so production can change only through
+`.github/workflows/release.yml`.
 
-1. GitHub CI completed successfully.
-2. The Vercel production deployment serves the expected commit SHA.
-3. The production synthetic probe passes.
-4. Database migrations are backward-compatible with the current production
-   application.
-5. Functions Storage and build-hour headroom remain below the warning bounds.
+Before the first release, create a GitHub Environment named
+`production-release`, require the repository owner as its reviewer, prevent
+self-review when the plan supports it, and scope these secrets to that
+environment only:
 
-After production verification, tag the deployed `main` commit:
+| Secret | Scope |
+| --- | --- |
+| `PRODUCTION_MIGRATION_DATABASE_URL` | Unpooled direct PostgreSQL URL with only the connect and schema-DDL rights needed by Prisma migrations; never use the pooled application URL |
+| `VERCEL_TOKEN` | Token restricted to deployments for this Vercel account or team |
+| `VERCEL_ORG_ID` | Vercel team or account identifier |
+| `VERCEL_PROJECT_ID` | Portfolio Vercel project identifier |
 
-```bash
-git fetch origin main
-git tag -a vX.Y.Z origin/main -m "vX.Y.Z"
-git push origin vX.Y.Z
-```
+Do not duplicate the production migration credential in repository secrets,
+Actions variables, Vercel build variables, Preview variables, or `.env` files.
+Ordinary CI and Vercel builds neither receive nor reference it.
+
+Prepare the release commit on `main` with the target stable SemVer in
+`package.json` and `package-lock.json`, an updated `CHANGELOG.md`, and only
+backward-compatible expand/contract migrations. Then dispatch **Protected
+Production Release** from the `main` branch and enter the version without a `v`
+prefix. The first job has no production environment or credentials. It verifies
+that the dispatch targets the current `origin/main`, rejects an existing tag,
+replays every migration on disposable PostgreSQL, and runs `npm run quality`
+plus `npm test`.
+
+After that job passes, the `production-release` Environment asks its reviewer
+to authorize the protected job. Approval releases the environment secrets for
+that job only. The job has a 45-minute timeout and all production runs share the
+non-canceling `production-release` concurrency group. It performs these steps
+in order:
+
+1. Record the current production deployment as the application rollback target.
+2. Run the offline destructive-migration guard, execute exactly one
+   `prisma migrate deploy`, then verify migration status and zero schema drift.
+3. Pull production configuration, build once, and deploy the prebuilt artifact
+   with `--prod --skip-domain`, leaving canonical traffic untouched.
+4. Run the Chromium synthetic journey suite against that staged deployment.
+5. Promote the same deployment without rebuilding and smoke-test
+   `https://www.deruiter.dev`.
+6. Record the promoted deployment ID, commit SHA, previous deployment ID, and
+   timestamp as a retained workflow artifact.
+7. Create the annotated `vX.Y.Z` tag and GitHub release only after the evidence
+   exists.
+
+Prisma's migration table makes a rerun idempotent: already-applied migrations
+are no-ops. The current-main and existing-tag guards prevent an older or already
+released commit from being published under the same version. A failure before
+promotion leaves production traffic on the recorded deployment. A failure
+after the migration step must be safe because expand/contract migrations remain
+compatible with both the current and candidate applications.
 
 ## Hotfix
 
@@ -71,16 +110,30 @@ validated safely before merge. Never patch `main` directly.
 
 ## Rollback
 
-Prefer Vercel's instant rollback to the last known-good production deployment
-for an operational incident. Then create a normal `fix/*` PR that records
-the durable code correction. Do not rewrite `main`, delete the failing commit,
-or force-push the trunk.
+Application rollback and database recovery are separate operations:
+
+- **Application rollback** repoints production to the `previousDeploymentId`
+  captured in `release-evidence.json`. Use Vercel's instant rollback, then open
+  a normal `fix/*` PR for the durable correction. Do not rewrite `main`, delete
+  the failing commit, or force-push the trunk.
+- **Database recovery** never reverses production migrations automatically.
+  Add a forward-compatible migration using expand/contract discipline, replay
+  it on disposable PostgreSQL, and send it through the same protected release
+  gate. Restore from a provider backup only for confirmed data loss and only
+  through the provider's separately authorized recovery procedure.
+
+Before releasing 0.3.0, run **Non-Production Rollback Drill** with two existing
+non-production `*.vercel.app` deployment URLs. The workflow points a unique
+temporary alias to the candidate, verifies it, repoints that alias to the
+known-good artifact, verifies recovery, uploads
+`rollback-drill-evidence.json`, and removes the alias. It builds and deploys
+nothing, so the drill consumes no Vercel build or deployment-storage quota.
 
 ## Vercel Storage Controls
 
-`vercel.json` uses `git.deploymentEnabled` as an allowlist. This prevents
-topic and transitional `dev` commits from creating even canceled Vercel
-deployments. The project retention policy is one day for canceled and
+`vercel.json` disables Git deployments for every branch. This prevents topic,
+transitional `dev`, and unpromoted `main` commits from creating even canceled
+Vercel deployments. The project retention policy is one day for canceled and
 production deployments, and seven days for preview and errored deployments,
 subject to Vercel's mandatory protection exceptions.
 

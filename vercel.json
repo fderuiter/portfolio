@@ -5,8 +5,7 @@
   "ignoreCommand": null,
   "git": {
     "deploymentEnabled": {
-      "*": false,
-      "main": true
+      "*": false
     }
   },
   "crons": [

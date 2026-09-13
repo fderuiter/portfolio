@@ -2,7 +2,8 @@
 
 ## Status
 
-Accepted on 2026-09-12.
+Accepted on 2026-09-12. Its automatic production-deployment decision is
+superseded by ADR 0038; its single-branch integration decision remains active.
 
 ## Context
 
@@ -31,12 +32,11 @@ After production is verified, GitHub's default branch changes to `main` and
 `dev` is deleted. The force-rebase synchronization workflow is removed before
 the reconciliation so it cannot rewrite either history.
 
-Vercel Git deployments are allowlisted in `vercel.json`: only `main` may
-deploy automatically. Topic pushes create no Vercel deployment, preventing
-canceled-deployment noise and function-bundle growth. A high-risk change may
-receive one operator-created preview from its reviewed commit, but automatic
-feature previews remain disabled. The Vercel Git integration is the sole
-automatic deployment owner; there are no Deploy Hooks or deployment Actions.
+Vercel Git deployments were originally allowlisted in `vercel.json` so only
+`main` deployed automatically. ADR 0038 supersedes that part of this decision:
+all Git deployments are now disabled and production uses protected staged
+promotion. Topic pushes still create no Vercel deployment, preventing
+canceled-deployment noise and function-bundle growth.
 
 During reconciliation, CI runs for pull requests into `dev` and `main`; after
 `dev` is retired, only `main` remains relevant. Outdated pull-request runs are

@@ -1,0 +1,277 @@
+name: Protected Production Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: "SemVer from package.json, without the v prefix"
+        required: true
+        type: string
+
+concurrency:
+  group: production-release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  VERCEL_CLI_VERSION: "59.16.0"
+
+jobs:
+  verify-release:
+    name: Verify immutable release candidate
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: portfolio_release_replay
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d portfolio_release_replay"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: "npm"
+
+      - name: Validate source and release version
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+        run: |
+          if [[ ! "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "release_version must be a stable SemVer without a v prefix" >&2
+            exit 1
+          fi
+          if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then
+            echo "Production releases must be dispatched from main" >&2
+            exit 1
+          fi
+          git fetch --no-tags origin main
+          if [[ "$GITHUB_SHA" != "$(git rev-parse origin/main)" ]]; then
+            echo "The dispatched commit is not the current origin/main tip" >&2
+            exit 1
+          fi
+          if [[ "$RELEASE_VERSION" != "$(node -p "require('./package.json').version")" ]]; then
+            echo "release_version does not match package.json" >&2
+            exit 1
+          fi
+          if git ls-remote --exit-code --tags origin "refs/tags/v${RELEASE_VERSION}" >/dev/null 2>&1; then
+            echo "Tag v${RELEASE_VERSION} already exists" >&2
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prove complete migration replay on disposable PostgreSQL
+        env:
+          MIGRATION_REPLAY_URL: postgresql://postgres:postgres@localhost:5432/portfolio_release_replay?schema=replay
+        run: npm run migration:replay
+
+      - name: Re-run complete release quality gates
+        env:
+          DATABASE_URL: postgresql://dummy:dummy@127.0.0.1:59999/dummy
+          CRON_SECRET: release_candidate_placeholder
+        run: |
+          npm run quality
+          npm test
+
+  release-production:
+    name: Migrate, stage, verify, and promote
+    needs: verify-release
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment:
+      name: production-release
+      url: ${{ steps.stage.outputs.url }}
+    steps:
+      - name: Checkout verified candidate
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate protected release configuration
+        env:
+          PRODUCTION_MIGRATION_DATABASE_URL: ${{ secrets.PRODUCTION_MIGRATION_DATABASE_URL }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          for variable in PRODUCTION_MIGRATION_DATABASE_URL VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID; do
+            if [[ -z "${!variable}" ]]; then
+              echo "Required production-release secret ${variable} is missing" >&2
+              exit 1
+            fi
+          done
+
+      - name: Record current production rollback target
+        id: previous
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          response="$(curl --fail --silent --show-error --get \
+            --header "Authorization: Bearer ${VERCEL_TOKEN}" \
+            --data-urlencode "projectId=${VERCEL_PROJECT_ID}" \
+            --data-urlencode "teamId=${VERCEL_ORG_ID}" \
+            --data-urlencode "target=production" \
+            --data-urlencode "state=READY" \
+            --data-urlencode "limit=1" \
+            "https://api.vercel.com/v6/deployments")"
+          previous_id="$(printf '%s' "$response" | jq -er '.deployments[0].uid // .deployments[0].id')"
+          previous_url="$(printf '%s' "$response" | jq -er '.deployments[0].url')"
+          echo "id=${previous_id}" >> "$GITHUB_OUTPUT"
+          echo "url=https://${previous_url}" >> "$GITHUB_OUTPUT"
+
+      - name: Apply production migrations exactly once and verify zero drift
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_MIGRATION_DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.PRODUCTION_MIGRATION_DATABASE_URL }}
+        run: |
+          npm run check:migrations
+          npx prisma migrate deploy
+          npm run check:migrations:drift
+          npx prisma migrate status
+
+      - name: Pull production build configuration
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: >-
+          npx --yes "vercel@${VERCEL_CLI_VERSION}" pull --yes
+          --environment=production --token="$VERCEL_TOKEN"
+
+      - name: Build production artifact once
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: >-
+          npx --yes "vercel@${VERCEL_CLI_VERSION}" build --prod
+          --token="$VERCEL_TOKEN"
+
+      - name: Stage immutable production deployment without assigning domains
+        id: stage
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          deployment_url="$(npx --yes "vercel@${VERCEL_CLI_VERSION}" deploy \
+            --prebuilt --prod --skip-domain --yes \
+            --meta "releaseVersion=${RELEASE_VERSION}" \
+            --meta "gitCommitSha=${GITHUB_SHA}" \
+            --token="$VERCEL_TOKEN")"
+          deployment_url="$(printf '%s\n' "$deployment_url" | tail -n 1)"
+          if [[ ! "$deployment_url" =~ ^https:// ]]; then
+            echo "Vercel did not return a deployment URL" >&2
+            exit 1
+          fi
+          echo "url=${deployment_url}" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve staged deployment ID
+        id: deployment
+        env:
+          DEPLOYMENT_URL: ${{ steps.stage.outputs.url }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+        run: |
+          deployment_host="${DEPLOYMENT_URL#https://}"
+          response="$(curl --fail --silent --show-error --get \
+            --header "Authorization: Bearer ${VERCEL_TOKEN}" \
+            --data-urlencode "teamId=${VERCEL_ORG_ID}" \
+            "https://api.vercel.com/v13/deployments/${deployment_host}")"
+          deployment_id="$(printf '%s' "$response" | jq -er '.id // .uid')"
+          echo "id=${deployment_id}" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for staged deployment readiness
+        env:
+          DEPLOYMENT_URL: ${{ steps.stage.outputs.url }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: >-
+          npx --yes "vercel@${VERCEL_CLI_VERSION}" inspect "$DEPLOYMENT_URL"
+          --wait --timeout=10m --token="$VERCEL_TOKEN"
+
+      - name: Install Chromium for staged verification
+        run: npx playwright install chromium --with-deps
+
+      - name: Verify staged deployment synthetic journeys
+        env:
+          PLAYWRIGHT_TEST_BASE_URL: ${{ steps.stage.outputs.url }}
+        run: npm run probe:synthetic -- --project=chromium
+
+      - name: Promote the verified immutable deployment
+        id: promote
+        env:
+          DEPLOYMENT_URL: ${{ steps.stage.outputs.url }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: >-
+          npx --yes "vercel@${VERCEL_CLI_VERSION}" promote "$DEPLOYMENT_URL"
+          --yes --timeout=10m --token="$VERCEL_TOKEN"
+
+      - name: Verify canonical production after promotion
+        run: curl --fail --location --silent --show-error https://www.deruiter.dev/ --output /dev/null
+
+      - name: Record release evidence
+        env:
+          DEPLOYMENT_ID: ${{ steps.deployment.outputs.id }}
+          DEPLOYMENT_URL: ${{ steps.stage.outputs.url }}
+          PREVIOUS_DEPLOYMENT_ID: ${{ steps.previous.outputs.id }}
+          PREVIOUS_DEPLOYMENT_URL: ${{ steps.previous.outputs.url }}
+          RELEASE_VERSION: ${{ inputs.release_version }}
+        run: |
+          jq -n \
+            --arg version "$RELEASE_VERSION" \
+            --arg commitSha "$GITHUB_SHA" \
+            --arg deploymentId "$DEPLOYMENT_ID" \
+            --arg deploymentUrl "$DEPLOYMENT_URL" \
+            --arg previousDeploymentId "$PREVIOUS_DEPLOYMENT_ID" \
+            --arg previousDeploymentUrl "$PREVIOUS_DEPLOYMENT_URL" \
+            --arg promotedAt "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            '{version: $version, commitSha: $commitSha, deploymentId: $deploymentId, deploymentUrl: $deploymentUrl, previousDeploymentId: $previousDeploymentId, previousDeploymentUrl: $previousDeploymentUrl, promotedAt: $promotedAt, databaseRecovery: "expand/contract roll-forward"}' \
+            > release-evidence.json
+          printf '### Release v%s\n\n- Commit: `%s`\n- Deployment: `%s`\n- Previous rollback target: `%s`\n' \
+            "$RELEASE_VERSION" "$GITHUB_SHA" "$DEPLOYMENT_ID" "$PREVIOUS_DEPLOYMENT_ID" \
+            >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload immutable release evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-evidence-v${{ inputs.release_version }}
+          path: release-evidence.json
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Create tag and GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ inputs.release_version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "v${RELEASE_VERSION}" "$GITHUB_SHA" -m "v${RELEASE_VERSION}"
+          git push origin "v${RELEASE_VERSION}"
+          gh release create "v${RELEASE_VERSION}" --verify-tag --target "$GITHUB_SHA" --title "v${RELEASE_VERSION}" --generate-notes
