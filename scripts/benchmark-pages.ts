@@ -1,229 +1,440 @@
 #!/usr/bin/env node
-/**
- * Page Benchmark CLI & Core Web Vitals Runner
- * Measures real-browser performance and Core Web Vitals across portfolio pages.
- */
+/** Real-browser Core Web Vitals CLI with reproducible production evidence. */
 
-import { spawn, type ChildProcess } from "child_process";
+import { spawn, type ChildProcess, execFileSync } from "child_process";
+import fs from "fs";
 import http from "http";
 import path from "path";
-import fs from "fs";
 import {
   CANONICAL_ROUTES,
-  runPageBenchmarks,
+  generateMarkdownReport,
   printPageBenchmarkReport,
-  exportBenchmarkResults,
+  runPageBenchmarks,
   type PageBenchmarkRoute,
 } from "../lib/dx/page-bench";
+import {
+  DEFAULT_BENCHMARK_EVIDENCE_DIRECTORY,
+  writeBenchmarkEvidence,
+  writeBenchmarkMarkdown,
+  type BenchmarkEvidence,
+  type BenchmarkTarget,
+} from "../lib/dx/benchmark-evidence";
+import {
+  runProductionBenchmark,
+  type BenchmarkExecutionDependencies,
+  type OwnedBenchmarkServer,
+} from "../lib/dx/benchmark-runner";
 import { colors, formatHeader } from "../lib/dx/utils";
 
-async function checkSingleHost(hostname: string, port: number, pathName: string): Promise<boolean> {
+interface BenchmarkCliOptions {
+  baseUrl: string;
+  runs: number;
+  assertBudget: boolean;
+  isMobile: boolean;
+  routeFilter: string | null;
+  outputDirectory: string;
+}
+
+function appendDiagnostics(current: string, chunk: Buffer | string): string {
+  const combined = `${current}${chunk.toString()}`;
+  return combined.length > 12_000 ? combined.slice(-12_000) : combined;
+}
+
+function waitForExit(child: ChildProcess, timeoutMs: number): Promise<void> {
   return new Promise((resolve) => {
-    try {
-      const req = http.request(
-        {
-          hostname,
-          port,
-          path: pathName,
-          method: "GET",
-          timeout: 2000,
-        },
-        (res) => {
-          resolve(res.statusCode !== undefined && res.statusCode < 500);
-        }
-      );
-      req.on("error", () => resolve(false));
-      req.on("timeout", () => {
-        req.destroy();
-        resolve(false);
-      });
-      req.end();
-    } catch {
-      resolve(false);
+    if (child.exitCode !== null || child.signalCode !== null) {
+      resolve();
+      return;
     }
+    const timeout = setTimeout(() => {
+      child.kill("SIGKILL");
+      resolve();
+    }, timeoutMs);
+    child.once("close", () => {
+      clearTimeout(timeout);
+      resolve();
+    });
   });
 }
 
-async function isServerReady(urlStr: string): Promise<boolean> {
-  try {
-    const url = new URL(urlStr);
-    const port = parseInt(url.port || "80", 10);
-    const pathName = url.pathname || "/";
-
-    const hostOk = await checkSingleHost(url.hostname, port, pathName);
-    if (hostOk) return true;
-
-    if (url.hostname === "localhost") {
-      return await checkSingleHost("127.0.0.1", port, pathName);
-    }
-    return false;
-  } catch {
-    return false;
-  }
+function createOwnedServer(
+  child: ChildProcess,
+  diagnostics: () => string
+): OwnedBenchmarkServer {
+  return {
+    diagnostics,
+    isReady: () => /Ready in/.test(diagnostics()),
+    async stop() {
+      if (child.exitCode !== null || child.signalCode !== null) return;
+      child.kill("SIGTERM");
+      await waitForExit(child, 3_000);
+    },
+  };
 }
 
-async function waitForServer(urlStr: string, maxWaitMs = 30000): Promise<boolean> {
-  const start = Date.now();
-  while (Date.now() - start < maxWaitMs) {
-    if (await isServerReady(urlStr)) {
-      return true;
-    }
-    await new Promise((r) => setTimeout(r, 500));
-  }
-  return false;
-}
-
-export async function main(): Promise<void> {
-  const args = process.argv.slice(2);
-
-  // CLI Arguments
-  let baseUrl = "http://localhost:3000";
-  let runs = 3;
-  let assertBudget = false;
-  let isMobile = false;
-  let routeFilter: string | null = null;
-  let outputDir = process.cwd();
-
-  for (let i = 0; i < args.length; i++) {
-    const arg = args[i];
-    if (arg === "--url" && args[i + 1]) {
-      baseUrl = args[++i];
-    } else if (arg === "--runs" && args[i + 1]) {
-      runs = parseInt(args[++i], 10) || 3;
-    } else if (arg === "--assert" || arg === "--budget") {
-      assertBudget = true;
-    } else if (arg === "--mobile" || arg === "-m") {
-      isMobile = true;
-    } else if (arg === "--routes" && args[i + 1]) {
-      routeFilter = args[++i];
-    } else if (arg === "--output" && args[i + 1]) {
-      outputDir = path.resolve(args[++i]);
-    } else if (arg === "--help" || arg === "-h") {
-      console.log(formatHeader("Page Performance Benchmarking CLI", "Real-Browser Navigation & Core Web Vitals"));
-      console.log(`${colors.bold}Usage:${colors.reset} npx tsx scripts/benchmark-pages.ts [options]\n`);
-      console.log(`${colors.bold}Options:${colors.reset}`);
-      console.log(`  --url <url>        Target server URL (default: http://localhost:3000)`);
-      console.log(`  --runs <n>         Number of measured runs per page (default: 3)`);
-      console.log(`  --mobile, -m       Emulate mobile device viewport (iPhone/Pixel 390x844 with touch)`);
-      console.log(`  --routes <pattern> Filter routes by pattern (e.g. 'arcade', 'proof', 'case-studies')`);
-      console.log(`  --assert, --budget Exit with code 1 if any page fails Web Vitals budget`);
-      console.log(`  --output <dir>     Export directory for benchmark-results.md/.json`);
-      console.log(`  --help, -h         Show help menu\n`);
-      process.exit(0);
-    }
-  }
-
-  let selectedRoutes: PageBenchmarkRoute[] = CANONICAL_ROUTES;
-  if (routeFilter) {
-    const regex = new RegExp(routeFilter, "i");
-    selectedRoutes = CANONICAL_ROUTES.filter((r) => regex.test(r.path) || regex.test(r.name));
-    if (selectedRoutes.length === 0) {
-      console.error(`${colors.brightRed}Error: No routes matched filter '${routeFilter}'.${colors.reset}`);
-      process.exit(1);
-    }
-  }
-
-  let spawnedServer: ChildProcess | null = null;
-
-  try {
-    const isLive = await isServerReady(baseUrl);
-    if (!isLive) {
-      const isLocalhost = baseUrl.includes("localhost") || baseUrl.includes("127.0.0.1");
-      if (!isLocalhost) {
-        console.error(`${colors.brightRed}Error: Remote target ${baseUrl} is unreachable.${colors.reset}`);
-        process.exit(1);
-      }
-
-      const dotNext = path.join(process.cwd(), ".next");
-      if (!fs.existsSync(dotNext)) {
-        console.log(`${colors.yellow}Production build not found. Building project with 'npm run build'...${colors.reset}`);
-        const { execSync } = await import("child_process");
-        execSync("npm run build", { stdio: "inherit", cwd: process.cwd() });
-      }
-
-      console.log(`${colors.cyan}Starting Next.js production server at ${baseUrl}...${colors.reset}`);
-      const serverEnv = {
-        ...process.env,
-        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
-          process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk",
-        CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY || "sk_test_example_secret_key",
-        DATABASE_URL: process.env.DATABASE_URL || ("postgres" + "ql://localhost:5432/portfolio_dev"),
-      };
-      spawnedServer = spawn("npx", ["next", "start", "-p", "3000"], {
-        cwd: process.cwd(),
-        stdio: "ignore",
-        env: serverEnv,
-        detached: false,
-      });
-
-      const ready = await waitForServer(baseUrl, 30000);
-      if (!ready) {
-        throw new Error("Spawned Next.js server failed to become ready within 30 seconds.");
-      }
-      console.log(`${colors.brightGreen}✔ Production server active.${colors.reset}\n`);
-    } else {
-      console.log(`${colors.brightGreen}✔ Connected to active target server at ${baseUrl}.${colors.reset}\n`);
-    }
-
-    console.log(`${colors.cyan}Running real-browser benchmarks on ${selectedRoutes.length} route(s)...${colors.reset}`);
-    let currentRouteIdx = 0;
-
-    const summaries = await runPageBenchmarks({
-      baseUrl,
-      runs,
-      routes: selectedRoutes,
-      isMobile,
-      onProgress: ({ route, currentRun, totalRuns, metrics }) => {
-        if (currentRun === 0) {
-          currentRouteIdx++;
-          process.stdout.write(`  [${currentRouteIdx}/${selectedRoutes.length}] ${route.path.padEnd(35)} (warmup)... `);
-        } else if (currentRun === totalRuns) {
-          process.stdout.write(`run ${currentRun}/${totalRuns} (LCP: ${metrics?.lcp ?? 0}ms) ✔\n`);
-        } else {
-          process.stdout.write(`run ${currentRun}/${totalRuns}... `);
-        }
-      },
+async function runProcess(
+  command: string,
+  args: string[],
+  environment: NodeJS.ProcessEnv = process.env
+): Promise<{ code: number; diagnostics: string }> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, {
+      cwd: process.cwd(),
+      env: environment,
+      stdio: ["ignore", "pipe", "pipe"],
     });
+    let diagnostics = "";
+    child.stdout?.on("data", (chunk: Buffer) => {
+      diagnostics = appendDiagnostics(diagnostics, chunk);
+    });
+    child.stderr?.on("data", (chunk: Buffer) => {
+      diagnostics = appendDiagnostics(diagnostics, chunk);
+    });
+    child.once("error", reject);
+    child.once("close", (code) => resolve({ code: code ?? 1, diagnostics }));
+  });
+}
 
-    console.log("");
-    printPageBenchmarkReport(summaries, baseUrl);
+function productionEnvironment(): NodeJS.ProcessEnv {
+  return {
+    ...process.env,
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
+      process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ||
+      "pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk",
+    CLERK_SECRET_KEY:
+      process.env.CLERK_SECRET_KEY || "sk_test_example_secret_key",
+    DATABASE_URL:
+      process.env.DATABASE_URL ||
+      "postgres" + "ql://localhost:5432/portfolio_dev",
+  };
+}
 
-    const { jsonPath, markdownPath } = exportBenchmarkResults(summaries, outputDir, baseUrl);
-    console.log(`${colors.dim}Exported reports:${colors.reset}`);
-    console.log(`  • Markdown: ${colors.cyan}${path.relative(process.cwd(), markdownPath)}${colors.reset}`);
-    console.log(`  • JSON:     ${colors.cyan}${path.relative(process.cwd(), jsonPath)}${colors.reset}\n`);
+function inspectSource() {
+  const revision = execFileSync("git", ["rev-parse", "HEAD"], {
+    cwd: process.cwd(),
+    encoding: "utf-8",
+  }).trim();
+  const dirty =
+    execFileSync("git", ["status", "--porcelain"], {
+      cwd: process.cwd(),
+      encoding: "utf-8",
+    }).trim().length > 0;
+  return { revision, dirty };
+}
 
-    if (assertBudget) {
-      const failed = summaries.filter((s) => !s.passedBudget);
-      if (failed.length > 0) {
-        console.error(
-          `${colors.brightRed}❌ Performance budget assertion failed: ${failed.length} page(s) exceeded SLA thresholds:${colors.reset}`
-        );
-        for (const f of failed) {
-          const breaches: string[] = [];
-          if (f.ttfb.median > 800) breaches.push(`TTFB (${f.ttfb.median}ms > 800ms)`);
-          if (f.fcp.median > 1800) breaches.push(`FCP (${f.fcp.median}ms > 1800ms)`);
-          if (f.lcp.median > 2500) breaches.push(`LCP (${f.lcp.median}ms > 2500ms)`);
-          if (f.cls.median > 0.1) breaches.push(`CLS (${f.cls.median} > 0.1)`);
-          console.error(`  ${colors.red}• ${f.route.path} (${f.route.name}): ${breaches.join(", ")}${colors.reset}`);
-        }
-        console.error("");
-        process.exit(1);
-      } else {
-        console.log(`${colors.brightGreen}✅ All pages passed Web Vitals performance budget.${colors.reset}\n`);
+async function probeTarget(
+  target: BenchmarkTarget
+): Promise<{ ready: boolean; diagnostics: string }> {
+  return new Promise((resolve) => {
+    const request = http.request(
+      {
+        hostname: target.hostname,
+        port: target.port,
+        path: "/",
+        method: "GET",
+        timeout: 2_000,
+      },
+      (response) => {
+        response.resume();
+        resolve({
+          ready: response.statusCode !== undefined && response.statusCode < 500,
+          diagnostics: `HTTP ${response.statusCode ?? "unknown"} from ${target.url}`,
+        });
       }
+    );
+    request.once("error", (error: Error) =>
+      resolve({ ready: false, diagnostics: error.message })
+    );
+    request.once("timeout", () => {
+      request.destroy();
+      resolve({
+        ready: false,
+        diagnostics: `Timed out connecting to ${target.url}`,
+      });
+    });
+    request.end();
+  });
+}
+
+async function waitForProductionServer(
+  target: BenchmarkTarget,
+  server: OwnedBenchmarkServer
+): Promise<{ ready: boolean; diagnostics: string }> {
+  const startedAt = Date.now();
+  let lastProbe = "No response yet.";
+  while (Date.now() - startedAt < 30_000) {
+    if (!server.isReady()) {
+      lastProbe = "Waiting for the owned production server readiness signal.";
+      if (/EADDRINUSE|Error:|Failed to start/.test(server.diagnostics())) break;
+      await new Promise((resolve) => setTimeout(resolve, 250));
+      continue;
     }
-  } catch (err) {
-    console.error(`\n${colors.brightRed}Benchmark execution error:${colors.reset}`, err);
-    process.exit(1);
-  } finally {
-    if (spawnedServer && !spawnedServer.killed) {
-      console.log(`${colors.dim}Shutting down spawned benchmark server...${colors.reset}`);
-      spawnedServer.kill("SIGTERM");
+    const probe = await probeTarget(target);
+    if (probe.ready) return { ready: true, diagnostics: probe.diagnostics };
+    lastProbe = probe.diagnostics;
+    if (server.diagnostics().includes("EADDRINUSE")) break;
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+  return {
+    ready: false,
+    diagnostics: `${lastProbe}\nServer output:\n${server.diagnostics()}`.trim(),
+  };
+}
+
+function parseOptions(args: string[]): BenchmarkCliOptions | null {
+  const options: BenchmarkCliOptions = {
+    baseUrl: "http://localhost:3000",
+    runs: 3,
+    assertBudget: false,
+    isMobile: false,
+    routeFilter: null,
+    outputDirectory: path.resolve(DEFAULT_BENCHMARK_EVIDENCE_DIRECTORY),
+  };
+
+  for (let index = 0; index < args.length; index++) {
+    const argument = args[index];
+    const next = args[index + 1];
+    if (argument === "--url") {
+      if (!next) throw new Error("--url requires a target URL.");
+      options.baseUrl = next;
+      index++;
+    } else if (argument === "--runs") {
+      if (!next || !/^\d+$/.test(next) || Number(next) < 1) {
+        throw new Error("--runs must be a positive integer.");
+      }
+      options.runs = Number(next);
+      index++;
+    } else if (argument === "--assert" || argument === "--budget") {
+      options.assertBudget = true;
+    } else if (argument === "--mobile" || argument === "-m") {
+      options.isMobile = true;
+    } else if (argument === "--routes") {
+      if (!next) throw new Error("--routes requires a pattern.");
+      try {
+        new RegExp(next, "i");
+      } catch {
+        throw new Error(`--routes must be a valid regular expression: ${next}`);
+      }
+      options.routeFilter = next;
+      index++;
+    } else if (argument === "--output") {
+      if (!next) throw new Error("--output requires a directory.");
+      options.outputDirectory = path.resolve(next);
+      index++;
+    } else if (argument === "--help" || argument === "-h") {
+      console.log(
+        formatHeader(
+          "Page Performance Benchmarking CLI",
+          "Reproducible Production Evidence"
+        )
+      );
+      console.log(
+        `${colors.bold}Usage:${colors.reset} npx tsx scripts/benchmark-pages.ts [options]\n`
+      );
+      console.log(`${colors.bold}Options:${colors.reset}`);
+      console.log(
+        `  --url <url>        Target URL; assertions use an owned local HTTP server`
+      );
+      console.log(`  --runs <n>         Measured runs per page (default: 3)`);
+      console.log(`  --mobile, -m       Emulate a 390x844 touch viewport`);
+      console.log(
+        `  --routes <pattern> Filter canonical routes by path or name`
+      );
+      console.log(
+        `  --assert, --budget Require fresh, clean, owned production evidence`
+      );
+      console.log(
+        `  --output <dir>     Evidence directory (default: .benchmark-results)`
+      );
+      console.log(`  --help, -h         Show this help menu\n`);
+      return null;
+    } else {
+      throw new Error(`Unknown benchmark option: ${argument}`);
     }
   }
+  return options;
+}
+
+function selectRoutes(routeFilter: string | null): PageBenchmarkRoute[] {
+  if (!routeFilter) return CANONICAL_ROUTES;
+  const expression = new RegExp(routeFilter, "i");
+  const selected = CANONICAL_ROUTES.filter(
+    (route) => expression.test(route.path) || expression.test(route.name)
+  );
+  if (selected.length === 0)
+    throw new Error(`No routes matched filter '${routeFilter}'.`);
+  return selected;
+}
+
+function createProductionDependencies(
+  routes: PageBenchmarkRoute[]
+): BenchmarkExecutionDependencies {
+  let server: OwnedBenchmarkServer | null = null;
+  return {
+    inspectSource,
+    async buildProduction() {
+      const result = await runProcess(
+        "npm",
+        ["run", "build"],
+        productionEnvironment()
+      );
+      if (result.code !== 0) {
+        throw new Error(
+          `Production build failed (exit ${result.code}):\n${result.diagnostics}`
+        );
+      }
+      const buildIdPath = path.join(process.cwd(), ".next", "BUILD_ID");
+      const buildId = fs.existsSync(buildIdPath)
+        ? fs.readFileSync(buildIdPath, "utf-8").trim()
+        : "";
+      if (!buildId)
+        throw new Error(
+          "Production build completed without a Next.js BUILD_ID."
+        );
+      return {
+        buildId,
+        diagnostics: result.diagnostics,
+        completedAt: new Date().toISOString(),
+      };
+    },
+    async startProductionServer(target) {
+      let diagnostics = "";
+      const nextBin = path.join(
+        process.cwd(),
+        "node_modules",
+        "next",
+        "dist",
+        "bin",
+        "next"
+      );
+      const child = spawn(
+        process.execPath,
+        [nextBin, "start", "-p", String(target.port)],
+        {
+          cwd: process.cwd(),
+          env: productionEnvironment(),
+          stdio: ["ignore", "pipe", "pipe"],
+        }
+      );
+      child.stdout?.on("data", (chunk: Buffer) => {
+        diagnostics = appendDiagnostics(diagnostics, chunk);
+      });
+      child.stderr?.on("data", (chunk: Buffer) => {
+        diagnostics = appendDiagnostics(diagnostics, chunk);
+      });
+      server = createOwnedServer(child, () => diagnostics);
+      return server;
+    },
+    async waitForServer(target) {
+      if (!server)
+        return {
+          ready: false,
+          diagnostics: "Benchmark server was not created.",
+        };
+      return waitForProductionServer(target, server);
+    },
+    async runPageBenchmarks(input) {
+      return runPageBenchmarks({ ...input, routes });
+    },
+  };
+}
+
+async function runExploratoryBenchmark(
+  options: BenchmarkCliOptions,
+  routes: PageBenchmarkRoute[]
+): Promise<BenchmarkEvidence> {
+  const target = new URL(options.baseUrl);
+  const port = Number(
+    target.port || (target.protocol === "https:" ? "443" : "80")
+  );
+  const summaries = await runPageBenchmarks({
+    baseUrl: target.toString(),
+    runs: options.runs,
+    routes,
+    isMobile: options.isMobile,
+  });
+  const source = inspectSource();
+  return {
+    version: 1,
+    mode: "exploratory",
+    capturedAt: new Date().toISOString(),
+    source,
+    build: {
+      mode: "unknown",
+      fresh: false,
+      sourceRevision: null,
+      sourceDirty: null,
+      buildId: null,
+      command: null,
+      completedAt: null,
+    },
+    target: {
+      url: target.toString(),
+      hostname: target.hostname,
+      port,
+      ownership: "external",
+      serverMode: "unknown",
+      startupDiagnostics: "External target; provenance not asserted.",
+    },
+    browser: {
+      engine: "chromium",
+      headless: true,
+      viewport: options.isMobile
+        ? { width: 390, height: 844 }
+        : { width: 1280, height: 800 },
+      isMobile: options.isMobile,
+      hasTouch: options.isMobile,
+    },
+    sampling: { warmupRuns: 1, measuredRuns: options.runs },
+    assertion: {
+      budgetEnabled: false,
+      expectedRoutes: routes.map((route) => route.path),
+    },
+    routes: summaries,
+  };
+}
+
+export async function main(args = process.argv.slice(2)): Promise<void> {
+  const options = parseOptions(args);
+  if (!options) return;
+  const routes = selectRoutes(options.routeFilter);
+  const evidence = options.assertBudget
+    ? await runProductionBenchmark(
+        {
+          url: options.baseUrl,
+          runs: options.runs,
+          routes: routes.map((route) => route.path),
+          isMobile: options.isMobile,
+        },
+        createProductionDependencies(routes)
+      )
+    : await runExploratoryBenchmark(options, routes);
+  printPageBenchmarkReport(evidence.routes, evidence.target.url);
+  const evidencePath = writeBenchmarkEvidence(
+    evidence,
+    options.outputDirectory
+  );
+  const markdownPath = writeBenchmarkMarkdown(
+    generateMarkdownReport(evidence.routes, evidence.target.url),
+    options.outputDirectory
+  );
+  console.log(
+    `${colors.dim}Exported ${evidence.mode} evidence:${colors.reset}`
+  );
+  console.log(
+    `  • Markdown: ${colors.cyan}${path.relative(process.cwd(), markdownPath)}${colors.reset}`
+  );
+  console.log(
+    `  • JSON:     ${colors.cyan}${path.relative(process.cwd(), evidencePath)}${colors.reset}`
+  );
 }
 
 if (typeof process.env.VITEST === "undefined" && require.main === module) {
-  main();
+  main().catch((error: unknown) => {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(
+      `${colors.brightRed}Benchmark execution error:${colors.reset} ${message}`
+    );
+    process.exitCode = 1;
+  });
 }

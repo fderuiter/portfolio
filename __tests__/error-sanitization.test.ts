@@ -11,23 +11,37 @@ describe("Error Sanitization Utility", () => {
 
   describe("sanitizeString", () => {
     it("should scrub Windows absolute system paths", () => {
-      const input = "Failed to load at C:\\Users\\runner\\project\\app.tsx line 10";
-      expect(sanitizeString(input)).toBe("Failed to load at [scrubbed] line 10");
+      const input =
+        "Failed to load at C:\\Users\\runner\\project\\app.tsx line 10";
+      expect(sanitizeString(input)).toBe(
+        "Failed to load at [scrubbed] line 10"
+      );
     });
 
     it("should scrub Unix absolute system paths", () => {
-      const input = "Failed to compile file at /Users/runner/work/app/app/error.tsx:12:34";
-      expect(sanitizeString(input)).toBe("Failed to compile file at [scrubbed]:12:34");
+      const input =
+        "Failed to compile file at /Users/runner/work/app/app/error.tsx:12:34";
+      expect(sanitizeString(input)).toBe(
+        "Failed to compile file at [scrubbed]:12:34"
+      );
     });
 
     it("should scrub paths starting with common system root folders", () => {
-      expect(sanitizeString("Inside /app/lib/utils.ts exception occurred")).toBe("Inside [scrubbed] exception occurred");
-      expect(sanitizeString("Inside /home/ubuntu/project/index.js exception occurred")).toBe("Inside [scrubbed] exception occurred");
+      expect(
+        sanitizeString("Inside /app/lib/utils.ts exception occurred")
+      ).toBe("Inside [scrubbed] exception occurred");
+      expect(
+        sanitizeString(
+          "Inside /home/ubuntu/project/index.js exception occurred"
+        )
+      ).toBe("Inside [scrubbed] exception occurred");
     });
 
     it("should preserve relative web routes", () => {
       expect(sanitizeString("/api/telemetry")).toBe("/api/telemetry");
-      expect(sanitizeString("/case-studies/laser-loon")).toBe("/case-studies/laser-loon");
+      expect(sanitizeString("/case-studies/laser-loon")).toBe(
+        "/case-studies/laser-loon"
+      );
     });
   });
 
@@ -37,10 +51,13 @@ describe("Error Sanitization Utility", () => {
     });
 
     it("should return the original error unmodified in development", () => {
-      const rawError = new Error("Something went wrong at /Users/runner/work/file.ts");
-      rawError.stack = "Error: message\n  at Object.something (/Users/runner/work/file.ts:1:1)";
+      const rawError = new Error(
+        "Something went wrong at /Users/runner/work/file.ts"
+      );
+      rawError.stack =
+        "Error: message\n  at Object.something (/Users/runner/work/file.ts:1:1)";
 
-      const result = sanitizeError(rawError);
+      const result = sanitizeError(rawError) as Error;
       expect(result).toBe(rawError);
       expect(result.message).toContain("/Users/runner/work/file.ts");
       expect(result.stack).toContain("/Users/runner/work/file.ts");
@@ -53,14 +70,19 @@ describe("Error Sanitization Utility", () => {
     });
 
     it("should sanitize the message and name, and not mutate the original error", () => {
-      const rawError = new Error("Something went wrong at /Users/runner/work/file.ts");
-      rawError.stack = "Error: message\n  at Object.something (/Users/runner/work/file.ts:1:1)";
+      const rawError = new Error(
+        "Something went wrong at /Users/runner/work/file.ts"
+      );
+      rawError.stack =
+        "Error: message\n  at Object.something (/Users/runner/work/file.ts:1:1)";
 
-      const result = sanitizeError(rawError);
+      const result = sanitizeError(rawError) as Error;
       expect(result).not.toBe(rawError); // Should be a new Error instance
 
       // Check original error is untouched
-      expect(rawError.message).toBe("Something went wrong at /Users/runner/work/file.ts");
+      expect(rawError.message).toBe(
+        "Something went wrong at /Users/runner/work/file.ts"
+      );
       expect(rawError.stack).toContain("/Users/runner/work/file.ts");
 
       // Check result error is sanitized
@@ -69,7 +91,9 @@ describe("Error Sanitization Utility", () => {
     });
 
     it("should handle plain string errors", () => {
-      const result = sanitizeError("Exception at /app/lib/utils.ts occurred");
+      const result = sanitizeError(
+        "Exception at /app/lib/utils.ts occurred"
+      ) as string;
       expect(result).toBe("Exception at [scrubbed] occurred");
     });
 
@@ -79,7 +103,7 @@ describe("Error Sanitization Utility", () => {
       rawError.traceFrames = [{ file: "/app/app.ts" }];
       rawError.customProp = "Info inside /app/app.ts";
 
-      const result = sanitizeError(rawError);
+      const result = sanitizeError(rawError) as Error & Record<string, unknown>;
       expect(result.sentryError).toBeUndefined();
       expect(result.traceFrames).toBeUndefined();
       expect(result.customProp).toBe("Info inside [scrubbed]");

@@ -368,4 +368,145 @@ describe("Graph-Extended Schema & USDM Bidirectional Adapter", () => {
     expect(condGteV2?.value).toBe(28);
     expect(condLteV2?.value).toBe(32);
   });
+
+  describe("unsupported imported rule expressions are preserved, not silently simplified (#540)", () => {
+    it("passes through a well-formed imported rule unchanged", () => {
+      const doc = {
+        study: {
+          id: "s1",
+          studyDesigns: [
+            {
+              id: "sd1",
+              name: "Design",
+              arms: [],
+              epochs: [],
+              cohorts: [],
+              encounters: [],
+              biomedicalConcepts: [],
+              activities: [
+                {
+                  id: "form1",
+                  name: "Vitals",
+                  domain: "VS",
+                  sections: [],
+                  rules: [
+                    {
+                      id: "rule_valid",
+                      name: "Valid Rule",
+                      description: "",
+                      triggerFieldIds: ["f1"],
+                      actionType: "raise_query",
+                      targetFieldId: "f1",
+                      conditions: [
+                        { fieldId: "f1", operator: "gt", value: 10 },
+                      ],
+                      logicalOperator: "AND",
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      };
+
+      const imported = importStudyFromUsdm(doc);
+      const form = imported.forms.find((f) => f.id === "form1");
+      expect(form?.rules).toHaveLength(1);
+      expect(form?.rules[0].unsupportedExpression).toBeUndefined();
+      expect(form?.rules[0].conditions).toEqual([
+        { fieldId: "f1", operator: "gt", value: 10 },
+      ]);
+    });
+
+    it("preserves a rule whose conditions are not the expected shape, without dropping or silently defaulting it to a normal (always-firing) rule", () => {
+      const malformedConditions = { notAnArray: true };
+      const doc = {
+        study: {
+          id: "s1",
+          studyDesigns: [
+            {
+              id: "sd1",
+              name: "Design",
+              arms: [],
+              epochs: [],
+              cohorts: [],
+              encounters: [],
+              biomedicalConcepts: [],
+              activities: [
+                {
+                  id: "form1",
+                  name: "Vitals",
+                  domain: "VS",
+                  sections: [],
+                  rules: [
+                    {
+                      id: "rule_bad",
+                      name: "Malformed Rule",
+                      description: "",
+                      triggerFieldIds: [],
+                      actionType: "raise_query",
+                      targetFieldId: "f1",
+                      conditions: malformedConditions,
+                      logicalOperator: "AND",
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      };
+
+      const imported = importStudyFromUsdm(doc);
+      const form = imported.forms.find((f) => f.id === "form1");
+      const rule = form?.rules[0];
+      expect(rule?.unsupportedExpression).toBeDefined();
+      expect(rule?.unsupportedExpression?.raw).toMatchObject({
+        id: "rule_bad",
+        conditions: malformedConditions,
+      });
+      expect(rule?.conditions).toEqual([]);
+      // Identity fields a reviewer needs to find the rule are still preserved.
+      expect(rule?.id).toBe("rule_bad");
+      expect(rule?.name).toBe("Malformed Rule");
+    });
+
+    it("preserves a rule with an entirely unrecognized shape (no id/conditions at all) rather than dropping it", () => {
+      const weirdRaw = {
+        totallyForeignShape: true,
+        expr: "SYSBP BEFORE DIABP",
+      };
+      const doc = {
+        study: {
+          id: "s1",
+          studyDesigns: [
+            {
+              id: "sd1",
+              name: "Design",
+              arms: [],
+              epochs: [],
+              cohorts: [],
+              encounters: [],
+              biomedicalConcepts: [],
+              activities: [
+                {
+                  id: "form1",
+                  name: "Vitals",
+                  domain: "VS",
+                  sections: [],
+                  rules: [weirdRaw],
+                },
+              ],
+            },
+          ],
+        },
+      };
+
+      const imported = importStudyFromUsdm(doc);
+      const form = imported.forms.find((f) => f.id === "form1");
+      expect(form?.rules).toHaveLength(1);
+      expect(form?.rules[0].unsupportedExpression?.raw).toEqual(weirdRaw);
+    });
+  });
 });

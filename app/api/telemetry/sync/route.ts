@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
-import { validateRouteInitialization, validateSyncRequest } from "@/lib/security";
+import {
+  validateRouteInitialization,
+  validateSyncRequest,
+} from "@/lib/security";
 import { SyncParamsSchema } from "@/lib/schemas";
-import { TelemetryService } from "@/lib/services/telemetry-service";
+import { MaintenanceService } from "@/lib/services/maintenance-service";
 import { createApiHandler } from "@/lib/route-wrapper";
 import * as Sentry from "@sentry/nextjs";
 
@@ -9,52 +12,63 @@ export const dynamic = "force-dynamic";
 
 validateRouteInitialization();
 
-export const GET = createApiHandler(
-  async (req) => {
-    const authResult = validateSyncRequest(req);
-    if (!authResult.isValid && authResult.errorResponse) {
-      return authResult.errorResponse;
+export const GET = createApiHandler(async (req) => {
+  const authResult = validateSyncRequest(req);
+  if (!authResult.isValid && authResult.errorResponse) {
+    return authResult.errorResponse;
+  }
+
+  try {
+    const url = new URL(req.url);
+    const batchParam = url.searchParams.get("batch");
+    const parsedQuery = SyncParamsSchema.safeParse({
+      batch: batchParam !== null ? batchParam : undefined,
+    });
+
+    if (!parsedQuery.success) {
+      return NextResponse.json(
+        {
+          error: "Validation failed",
+          details: parsedQuery.error.issues.map((issue) => ({
+            path: issue.path.join("."),
+            message: issue.message,
+          })),
+        },
+        { status: 400 }
+      );
     }
 
-    try {
-      const url = new URL(req.url);
-      const batchParam = url.searchParams.get("batch");
-      const parsedQuery = SyncParamsSchema.safeParse({
-        batch: batchParam !== null ? batchParam : undefined,
-      });
+    const summary = await MaintenanceService.run({
+      batchSize: parsedQuery.data.batch,
+    });
+    const telemetry = summary.phases.telemetry;
 
-      if (!parsedQuery.success) {
-        return NextResponse.json(
-          {
-            error: "Validation failed",
-            details: parsedQuery.error.issues.map((issue) => ({
-              path: issue.path.join("."),
-              message: issue.message,
-            })),
-          },
-          { status: 400 }
-        );
-      }
-
-      const BATCH_SIZE = parsedQuery.data.batch;
-      const result = await TelemetryService.syncBufferedEvents(BATCH_SIZE);
-
-      if (result.processed === 0) {
-        return NextResponse.json({ success: true, processed: 0 });
-      }
-
-      return NextResponse.json({
-        success: true,
-        processed: result.processed,
-        inserted: result.inserted,
-      });
-    } catch (err) {
-      Sentry.captureException(err);
-      console.error("Failed to sync buffered telemetry events:", err);
+    if (telemetry.status !== "completed") {
       return NextResponse.json(
-        { error: "Failed to sync events to primary database" },
+        {
+          error: "Failed to sync events to primary database",
+          maintenance: summary,
+        },
         { status: 500 }
       );
     }
+
+    return NextResponse.json({
+      success: true,
+      processed: telemetry.counts.processed || 0,
+      inserted: telemetry.counts.inserted || 0,
+      reactions: {
+        processed: telemetry.counts.reactionsProcessed || 0,
+        inserted: telemetry.counts.reactionsInserted || 0,
+      },
+      maintenance: summary,
+    });
+  } catch (err) {
+    Sentry.captureException(err);
+    console.error("Failed to sync buffered telemetry events:", err);
+    return NextResponse.json(
+      { error: "Failed to sync events to primary database" },
+      { status: 500 }
+    );
   }
-);
+});

@@ -2,7 +2,9 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -62,9 +64,25 @@ describe("SkillsGrid GPU Progress Animations & Reduced Motion AA Suite", () => {
     document.body.removeChild(container);
   });
 
+  it("explains codebase-distribution data instead of presenting it as a language-proficiency claim (#580)", async () => {
+    mockUseReducedMotion.mockReturnValue(false);
+
+    await act(async () => {
+      root.render(<SkillsGrid languages={mockLanguages} />);
+    });
+
+    // The heading and caption must not frame GitHub's byte-based language
+    // detection as a straightforward "languages used" or proficiency split —
+    // that detection counts markup/config files as "languages" too.
+    expect(container.textContent).not.toContain("Languages in the Mix");
+    expect(container.textContent).toContain("Codebase Composition");
+    expect(container.textContent?.toLowerCase()).toContain("github");
+    expect(container.textContent?.toLowerCase()).toContain("markup");
+  });
+
   it("should render languages names and percentage text correctly", async () => {
     mockUseReducedMotion.mockReturnValue(false);
-    
+
     await act(async () => {
       root.render(<SkillsGrid languages={mockLanguages} />);
     });
@@ -77,7 +95,7 @@ describe("SkillsGrid GPU Progress Animations & Reduced Motion AA Suite", () => {
 
   it("should render progress bars with static layout width corresponding to skill percentage to prevent layout shifts", async () => {
     mockUseReducedMotion.mockReturnValue(false);
-    
+
     await act(async () => {
       root.render(<SkillsGrid languages={mockLanguages} />);
     });
@@ -90,8 +108,12 @@ describe("SkillsGrid GPU Progress Animations & Reduced Motion AA Suite", () => {
     const bar1 = bars[0] as HTMLDivElement;
     const bar2 = bars[1] as HTMLDivElement;
 
-    expect(bar1.style.getPropertyValue("--skill-width") || bar1.style.width).toBe("85%");
-    expect(bar2.style.getPropertyValue("--skill-width") || bar2.style.width).toBe("60%");
+    expect(
+      bar1.style.getPropertyValue("--skill-width") || bar1.style.width
+    ).toBe("85%");
+    expect(
+      bar2.style.getPropertyValue("--skill-width") || bar2.style.width
+    ).toBe("60%");
   });
 
   it("should support reduced motion instantly by disabling transitions", async () => {
@@ -105,6 +127,8 @@ describe("SkillsGrid GPU Progress Animations & Reduced Motion AA Suite", () => {
     expect(bars.length).toBe(2);
 
     const bar1 = bars[0] as HTMLDivElement;
-    expect(bar1.style.getPropertyValue("--skill-width") || bar1.style.width).toBe("85%");
+    expect(
+      bar1.style.getPropertyValue("--skill-width") || bar1.style.width
+    ).toBe("85%");
   });
 });

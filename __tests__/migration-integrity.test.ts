@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 // The production guard is CommonJS because it runs directly under Node.
 const {
@@ -24,7 +26,7 @@ describe("Prisma migration integrity", () => {
         datasource db {
           provider = "postgresql"
         }
-      `),
+      `)
     ).toBe("postgresql");
   });
 
@@ -39,6 +41,9 @@ describe("Prisma migration integrity", () => {
       "20260814000000_add_simulated_telemetry",
       "20260818000000_add_feedback_and_reactions",
       "20261014000000_add_commands_and_playback",
+      "20261015000000_add_email_resilience",
+      "20261016000000_enforce_email_contracts",
+      "20261017000000_add_telemetry_daily_rollups",
     ]);
   });
 
@@ -58,14 +63,66 @@ describe("Prisma migration integrity", () => {
 
   it("validates documentation parity against active repository migration assets", () => {
     expect(
-      validateDocMigrations("DATABASE_MIGRATIONS.md", "prisma/migrations"),
+      validateDocMigrations("DATABASE_MIGRATIONS.md", "prisma/migrations")
     ).toEqual([
       "20260417215437_init",
       "20260528000000_add_telemetry_event",
       "20260814000000_add_simulated_telemetry",
       "20260818000000_add_feedback_and_reactions",
       "20261014000000_add_commands_and_playback",
+      "20261015000000_add_email_resilience",
+      "20261016000000_enforce_email_contracts",
+      "20261017000000_add_telemetry_daily_rollups",
     ]);
+  });
+
+  it("keeps the email resilience migration additive, indexed, and upgrade-safe", () => {
+    const migrationPath = resolve(
+      process.cwd(),
+      "prisma/migrations/20261015000000_add_email_resilience/migration.sql"
+    );
+    const migration = readFileSync(migrationPath, "utf8");
+
+    expect(migration).toContain('CREATE TABLE IF NOT EXISTS "SuppressionList"');
+    expect(migration).toContain('"email" TEXT NOT NULL');
+    expect(migration).toContain('"reason" TEXT NOT NULL');
+    expect(migration).toContain(
+      'CREATE UNIQUE INDEX IF NOT EXISTS "SuppressionList_email_key"'
+    );
+    expect(migration).toContain(
+      'CREATE INDEX IF NOT EXISTS "SuppressionList_email_idx"'
+    );
+
+    expect(migration).toContain(
+      'CREATE TABLE IF NOT EXISTS "OutboundEmailQueue"'
+    );
+    expect(migration).toContain('"html" TEXT NOT NULL');
+    expect(migration).toContain('"tags" JSONB');
+    expect(migration).toContain('"attempts" INTEGER NOT NULL DEFAULT 0');
+    expect(migration).toContain("\"status\" TEXT NOT NULL DEFAULT 'PENDING'");
+    expect(migration).toContain(
+      'CREATE INDEX IF NOT EXISTS "OutboundEmailQueue_status_nextRetryAt_idx"'
+    );
+    expect(migration).toContain(
+      'CREATE INDEX IF NOT EXISTS "OutboundEmailQueue_createdAt_idx"'
+    );
+    expect(migration).not.toMatch(/DROP\s+(TABLE|COLUMN)/i);
+  });
+
+  it("keeps the telemetry rollup migration aligned with Prisma updatedAt semantics", () => {
+    const migrationPath = resolve(
+      process.cwd(),
+      "prisma/migrations/20261017000000_add_telemetry_daily_rollups/migration.sql"
+    );
+    const migration = readFileSync(migrationPath, "utf8");
+
+    expect(migration).toContain(
+      '"createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP'
+    );
+    expect(migration).toContain('"updatedAt" TIMESTAMP(3) NOT NULL');
+    expect(migration).not.toMatch(
+      /"updatedAt"\s+TIMESTAMP\(3\)\s+NOT NULL\s+DEFAULT\s+CURRENT_TIMESTAMP/
+    );
   });
 
   it("fails drift check with diagnostic error when documentation misses a migration folder", () => {
@@ -86,14 +143,14 @@ describe("Prisma migration integrity", () => {
 
     fs.writeFileSync(
       docFile,
-      "# Migrations\n- `20260101000000_first_migration`\n",
+      "# Migrations\n- `20260101000000_first_migration`\n"
     );
 
     expect(() => validateDocMigrations(docFile, migrationsDir)).toThrowError(
-      /Documentation drift detected/,
+      /Documentation drift detected/
     );
     expect(() => validateDocMigrations(docFile, migrationsDir)).toThrowError(
-      /Missing in documentation: 20260201000000_second_migration/,
+      /Missing in documentation: 20260201000000_second_migration/
     );
 
     fs.rmSync(tmpDir, { recursive: true, force: true });
@@ -104,7 +161,9 @@ describe("Prisma migration integrity", () => {
     const path = require("path");
     const os = require("os");
 
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "doc-drift-extra-test-"));
+    const tmpDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), "doc-drift-extra-test-")
+    );
     const migrationsDir = path.join(tmpDir, "migrations");
     const docFile = path.join(tmpDir, "DATABASE_MIGRATIONS.md");
 
@@ -114,20 +173,20 @@ describe("Prisma migration integrity", () => {
 
     fs.writeFileSync(
       docFile,
-      "# Migrations\n- `20260101000000_first_migration`\n- `20260909000000_obsolete_migration`\n",
+      "# Migrations\n- `20260101000000_first_migration`\n- `20260909000000_obsolete_migration`\n"
     );
 
     expect(() => validateDocMigrations(docFile, migrationsDir)).toThrowError(
-      /Extra\/mismatched in documentation: 20260909000000_obsolete_migration/,
+      /Extra\/mismatched in documentation: 20260909000000_obsolete_migration/
     );
 
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
   it("rejects a datasource with no literal provider", () => {
-    expect(() => getSchemaProvider("datasource db { url = env(\"DATABASE_URL\") }")).toThrow(
-      "Could not read the datasource provider",
-    );
+    expect(() =>
+      getSchemaProvider('datasource db { url = env("DATABASE_URL") }')
+    ).toThrow("Could not read the datasource provider");
   });
 
   it("executes unified migration validator cleanly across current codebase", () => {
@@ -142,9 +201,14 @@ describe("Prisma migration integrity", () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "migration-test-"));
     const migrationDir = path.join(tmpDir, "20260901_drop_test");
     fs.mkdirSync(migrationDir, { recursive: true });
-    fs.writeFileSync(path.join(migrationDir, "migration.sql"), "ALTER TABLE \"CaseStudy\" DROP COLUMN \"title\";");
+    fs.writeFileSync(
+      path.join(migrationDir, "migration.sql"),
+      'ALTER TABLE "CaseStudy" DROP COLUMN "title";'
+    );
 
-    expect(() => checkDestructiveMigrations(tmpDir, false)).toThrow("Destructive migrations are blocked");
+    expect(() => checkDestructiveMigrations(tmpDir, false)).toThrow(
+      "Destructive migrations are blocked"
+    );
     expect(() => checkDestructiveMigrations(tmpDir, true)).not.toThrow();
 
     fs.rmSync(tmpDir, { recursive: true, force: true });
@@ -165,12 +229,21 @@ describe("Prisma migration integrity", () => {
     // Documentation missing release:gate and check:migrations:drift
     fs.writeFileSync(
       docFile,
-      "# Migrations\nRun `npm run check:migrations` and set `ALLOW_DESTRUCTIVE_MIGRATIONS=true`.\n",
+      "# Migrations\nRun `npm run check:migrations` and set `ALLOW_DESTRUCTIVE_MIGRATIONS=true`.\n"
     );
 
-    expect(() => validateDocCommands(docFile)).toThrow(/Documentation completeness check failed/);
-    expect(() => validateDocCommands(docFile)).toThrow(/schema drift verification/);
-    expect(() => validateDocCommands(docFile)).toThrow(/pipeline release gate execution/);
+    expect(() => validateDocCommands(docFile)).toThrow(
+      /Documentation completeness check failed/
+    );
+    expect(() => validateDocCommands(docFile)).toThrow(
+      /schema drift verification/
+    );
+    expect(() => validateDocCommands(docFile)).toThrow(
+      /pipeline release gate execution/
+    );
+    expect(() => validateDocCommands(docFile)).toThrow(
+      /disposable migration replay/
+    );
 
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });

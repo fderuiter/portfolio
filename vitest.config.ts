@@ -2,6 +2,7 @@ process.env.VITE_CONFIG_NATIVE_IGNORE_WARNING = "true";
 
 import { defineConfig } from "vitest/config";
 import path from "path";
+import os from "os";
 
 export default defineConfig({
   test: {
@@ -11,6 +12,15 @@ export default defineConfig({
     include: ["__tests__/**/*.{test,spec}.{ts,tsx}"],
     execArgv: ["--max-old-space-size=4096", "--no-warnings"],
     exclude: ["**/node_modules/**", "**/e2e/**"],
+    // Vitest defaults threads.maxThreads to (cpus - 1). On small runners
+    // that oversubscribes the machine once each worker's own libuv/GC
+    // helper threads are counted, which starves CPU-heavy synchronous
+    // render tests (e.g. crf-studio.test.tsx, which mounts 9 real
+    // components and drives 5 sequential act() cycles) — they finish in
+    // well under a second in isolation but can exceed their timeout
+    // under full-suite contention. Halving the worker count trades some
+    // wall-clock time for each worker actually getting scheduled.
+    maxWorkers: Math.max(1, Math.floor(os.cpus().length / 2)),
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html", "lcov"],
@@ -26,6 +36,7 @@ export default defineConfig({
         "app/globals.css",
         "lib/dx/utils.ts",
         "sentry.*.config.ts",
+        "instrumentation-client.ts",
         "prisma.config.ts",
         "scripts/**",
         "lib/layout-config.ts",

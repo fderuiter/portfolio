@@ -39,6 +39,10 @@ export function ContactForm({
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const mountedRef = useRef(false);
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const subjectInputRef = useRef<HTMLInputElement>(null);
+  const messageInputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (!mountedRef.current) {
@@ -47,7 +51,7 @@ export function ContactForm({
     }
   }, []);
 
-  const validateForm = (): boolean => {
+  const validateForm = (): Record<string, string> => {
     const errors: Record<string, string> = {};
 
     if (!name.trim() || name.trim().length < 2) {
@@ -67,14 +71,29 @@ export function ContactForm({
     }
 
     setFieldErrors(errors);
-    return Object.keys(errors).length === 0;
+    return errors;
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrorMessage(null);
 
-    if (!validateForm()) {
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      // Move focus to the first invalid field (in visual/DOM order) so
+      // keyboard and screen-reader users are told a submission failed and
+      // where to fix it, instead of focus silently staying on the submit
+      // button with no announcement.
+      const firstInvalidRef = errors.name
+        ? nameInputRef
+        : errors.email
+          ? emailInputRef
+          : errors.subject
+            ? subjectInputRef
+            : errors.message
+              ? messageInputRef
+              : null;
+      firstInvalidRef?.current?.focus();
       return;
     }
 
@@ -148,13 +167,12 @@ export function ContactForm({
           <IconCheck className="w-7 h-7" />
         </div>
         <h3 className="text-lg sm:text-xl font-mono font-bold text-white mb-2">
-          Message Delivered!
+          Message sent!
         </h3>
         <p className="text-xs sm:text-sm text-zinc-300 font-sans max-w-md mb-6 leading-relaxed">
           Thanks for reaching out,{" "}
           <span className="font-bold text-white">{name || "friend"}</span>. Your
-          message has been sent directly to my inbox (fpderuiter@gmail.com) and
-          I will follow up shortly.
+          message is in my inbox. I’ll get back to you by email.
         </p>
         <button
           type="button"
@@ -199,7 +217,9 @@ export function ContactForm({
         >
           <IconAlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
           <div className="flex-1">
-            <span className="font-bold block mb-0.5">Transmission Failed:</span>
+            <span className="font-bold block mb-0.5">
+              Couldn’t send your message:
+            </span>
             <span>{errorMessage}</span>
           </div>
         </div>
@@ -223,6 +243,7 @@ export function ContactForm({
             name="name"
             type="text"
             required
+            ref={nameInputRef}
             value={name}
             onChange={(e) => {
               setName(e.target.value);
@@ -264,6 +285,7 @@ export function ContactForm({
             name="email"
             type="email"
             required
+            ref={emailInputRef}
             value={email}
             onChange={(e) => {
               setEmail(e.target.value);
@@ -294,7 +316,7 @@ export function ContactForm({
       <div className="flex flex-col gap-1.5">
         <label className="text-xs font-mono font-bold text-zinc-300 flex items-center gap-1.5">
           <IconTarget className="w-3.5 h-3.5 text-amber-400" />
-          <span>Inquiry Intent</span>
+          <span>What’s this about?</span>
         </label>
         <div className="flex flex-wrap gap-2">
           {CONTACT_INTENTS.map((item) => {
@@ -333,13 +355,14 @@ export function ContactForm({
           name="subject"
           type="text"
           required
+          ref={subjectInputRef}
           value={subject}
           onChange={(e) => {
             setSubject(e.target.value);
             if (fieldErrors.subject)
               setFieldErrors((prev) => ({ ...prev, subject: "" }));
           }}
-          placeholder="e.g. Collaboration on formal verification or clinical systems"
+          placeholder="e.g. A project I’d like your help with"
           aria-invalid={!!fieldErrors.subject}
           aria-describedby={fieldErrors.subject ? "subject_error" : undefined}
           className={`w-full px-3.5 py-2.5 rounded-xl bg-[#0d0e11] border text-xs font-mono text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-1 transition-all ${
@@ -379,6 +402,7 @@ export function ContactForm({
           name="message"
           required
           rows={4}
+          ref={messageInputRef}
           value={message}
           onChange={(e) => {
             setMessage(e.target.value);
@@ -408,7 +432,7 @@ export function ContactForm({
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-white/5">
         <span className="text-[11px] font-mono text-zinc-400 flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span>Resend TLS Encryption &bull; Anti-Spam Protected</span>
+          <span>Please don’t include passwords or patient information.</span>
         </span>
 
         <button
@@ -419,7 +443,7 @@ export function ContactForm({
           {status === "submitting" ? (
             <>
               <IconLoader2 className="w-4 h-4 animate-spin" />
-              <span>Transmitting...</span>
+              <span>Sending...</span>
             </>
           ) : (
             <>

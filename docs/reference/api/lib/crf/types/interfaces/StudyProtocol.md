@@ -1,0 +1,133 @@
+[**fderuiter-portfolio**](../../../../README.md)
+
+***
+
+[fderuiter-portfolio](../../../../modules.md) / [lib/crf/types](../README.md) / StudyProtocol
+
+# Interface: StudyProtocol
+
+## Properties
+
+### $schema?
+
+> `optional` **$schema?**: `string`
+
+***
+
+### arms?
+
+> `optional` **arms?**: [`StudyArm`](StudyArm.md)[]
+
+***
+
+### biomedicalConcepts?
+
+> `optional` **biomedicalConcepts?**: [`BiomedicalConcept`](BiomedicalConcept.md)[]
+
+***
+
+### branding?
+
+> `optional` **branding?**: [`StudyBranding`](StudyBranding.md)
+
+***
+
+### codelists
+
+> **codelists**: [`CodelistDefinition`](CodelistDefinition.md)[]
+
+***
+
+### cohorts?
+
+> `optional` **cohorts?**: [`StudyCohort`](StudyCohort.md)[]
+
+***
+
+### epochs?
+
+> `optional` **epochs?**: [`StudyEpoch`](StudyEpoch.md)[]
+
+***
+
+### forms
+
+> **forms**: [`CRFForm`](CRFForm.md)[]
+
+***
+
+### id
+
+> **id**: `string`
+
+***
+
+### lastModified
+
+> **lastModified**: `string`
+
+***
+
+### phase
+
+> **phase**: `"Phase I"` \| `"Phase I/II"` \| `"Phase II"` \| `"Phase III"` \| `"Phase IV"` \| `"Registry"`
+
+***
+
+### protocolId?
+
+> `optional` **protocolId?**: `string`
+
+***
+
+### protocolNumber
+
+> **protocolNumber**: `string`
+
+***
+
+### rules?
+
+> `optional` **rules?**: [`EditCheckRule`](EditCheckRule.md)[]
+
+***
+
+### schemaVersion?
+
+> `optional` **schemaVersion?**: `string`
+
+***
+
+### sponsor
+
+> **sponsor**: `string`
+
+***
+
+### studyName
+
+> **studyName**: `string`
+
+***
+
+### therapeuticArea
+
+> **therapeuticArea**: `string`
+
+***
+
+### title?
+
+> `optional` **title?**: `string`
+
+***
+
+### version
+
+> **version**: `string`
+
+***
+
+### visits
+
+> **visits**: [`StudyVisit`](StudyVisit.md)[]

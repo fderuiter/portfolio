@@ -278,12 +278,11 @@ export default async function CaseStudyPage({ params }: PageProps) {
               <div className="mt-12 border-t border-zinc-900/50 pt-10">
                 <h2 className="text-xl font-bold font-sans text-neutral-100 mb-3 flex items-center gap-2">
                   <IconTerminal className="w-5 h-5 text-brand-cyan" />
-                  Interactive CLI Developer Sandbox
+                  Try the Sample Commands
                 </h2>
                 <p className="text-xs font-mono text-zinc-500 mb-6 leading-relaxed">
-                  Test interactive CLI commands and view structured telemetry
-                  outputs directly inside the browser. Use the interactive
-                  badges or type &apos;help&apos; inside the prompt.
+                  Explore recorded sample responses in this browser demo. Choose
+                  a command or type &apos;help&apos; to see what’s available.
                 </p>
                 <SandboxTerminal
                   commands={commands}
@@ -310,7 +309,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
                       d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
                     />
                   </svg>
-                  Interactive Mathematical Proof Tree & Telemetry
+                  Try a Proof Tree
                 </h2>
                 <p className="text-xs font-mono text-zinc-500 mb-6 leading-relaxed">
                   Apply logical tactics to branch and navigate the mathematical
@@ -333,7 +332,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
             <div className="mt-12 border-t border-zinc-900/50 pt-10">
               <h2 className="text-xl font-bold font-sans text-neutral-100 mb-3">
                 <Tooltip text="The human story behind the code—why this was built and who it helps.">
-                  Architectural Narratives
+                  How It Works
                 </Tooltip>
               </h2>
               <RichNarrative
@@ -371,7 +370,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
               }
               backToHub={{
                 title: "View All Case Studies",
-                href: "/#case-studies",
+                href: "/case-studies",
               }}
             />
           )}

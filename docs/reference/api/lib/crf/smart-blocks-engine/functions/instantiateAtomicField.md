@@ -1,0 +1,25 @@
+[**fderuiter-portfolio**](../../../../README.md)
+
+***
+
+[fderuiter-portfolio](../../../../modules.md) / [lib/crf/smart-blocks-engine](../README.md) / instantiateAtomicField
+
+# Function: instantiateAtomicField()
+
+> **instantiateAtomicField**(`commandId`, `indexOffset?`): [`CRFField`](../../types/interfaces/CRFField.md)
+
+Instantiates an atomic CRF Field from a slash command
+
+## Parameters
+
+### commandId
+
+`string`
+
+### indexOffset?
+
+`number` = `0`
+
+## Returns
+
+[`CRFField`](../../types/interfaces/CRFField.md)

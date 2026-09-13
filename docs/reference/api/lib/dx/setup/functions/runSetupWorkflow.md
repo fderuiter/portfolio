@@ -1,0 +1,21 @@
+[**fderuiter-portfolio**](../../../../README.md)
+
+***
+
+[fderuiter-portfolio](../../../../modules.md) / [lib/dx/setup](../README.md) / runSetupWorkflow
+
+# Function: runSetupWorkflow()
+
+> **runSetupWorkflow**(`options?`): `Promise`\<[`SetupResult`](../interfaces/SetupResult.md)\>
+
+Run Interactive DX Setup Routine
+
+## Parameters
+
+### options?
+
+[`SetupOptions`](../interfaces/SetupOptions.md) = `{}`
+
+## Returns
+
+`Promise`\<[`SetupResult`](../interfaces/SetupResult.md)\>

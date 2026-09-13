@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { prisma } from "@/lib/db";
-import { redis } from "@/lib/redis";
+import { redis, getScopedRedisKey } from "@/lib/redis";
 import { RateLimitParamsSchema } from "@/lib/schemas";
 import { Ratelimit } from "@upstash/ratelimit";
 import { env } from "@/lib/env";
@@ -14,6 +15,14 @@ export interface TelemetryEventInput {
   eventType: string;
 }
 
+/** A telemetry event as it is held in, and read back from, the Redis buffer. */
+export interface BufferedTelemetryEvent {
+  id: string;
+  projectSlug: string;
+  eventType: string;
+  createdAt: string | Date;
+}
+
 export interface LocalCacheEntry {
   count: number;
   expiresAt: number;
@@ -22,17 +31,32 @@ export interface LocalCacheEntry {
 const rateLimitConfig = RateLimitParamsSchema.parse({});
 const RATE_LIMIT_WINDOW_S = rateLimitConfig.windowMs / 1000;
 const MAX_REQUESTS_PER_WINDOW = rateLimitConfig.maxRequests;
+const RATE_LIMIT_TIMEOUT_MS = 1500;
 
 const sdkEphemeralCache = new Map<string, number>();
 
-const ratelimit = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(
-    MAX_REQUESTS_PER_WINDOW,
-    `${RATE_LIMIT_WINDOW_S} s`
-  ),
-  ephemeralCache: sdkEphemeralCache,
-});
+const createRateLimiter = (prefix: string) =>
+  new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(
+      MAX_REQUESTS_PER_WINDOW,
+      `${RATE_LIMIT_WINDOW_S} s`
+    ),
+    ephemeralCache: sdkEphemeralCache,
+    prefix,
+  });
+
+let activePrefix = getScopedRedisKey("@upstash/ratelimit");
+let ratelimitInstance = createRateLimiter(activePrefix);
+
+function getRateLimiter() {
+  const currentPrefix = getScopedRedisKey("@upstash/ratelimit");
+  if (currentPrefix !== activePrefix) {
+    activePrefix = currentPrefix;
+    ratelimitInstance = createRateLimiter(currentPrefix);
+  }
+  return ratelimitInstance;
+}
 
 let activeGeneration = new Map<string, LocalCacheEntry>();
 let inactiveGeneration = new Map<string, LocalCacheEntry>();
@@ -145,7 +169,28 @@ export class TelemetryService {
     }
 
     try {
-      const result = await ratelimit.limit(ipHash);
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        timer = setTimeout(() => {
+          reject(
+            new Error(
+              `Upstream rate limiting request timed out after ${RATE_LIMIT_TIMEOUT_MS}ms`
+            )
+          );
+        }, RATE_LIMIT_TIMEOUT_MS);
+        timer.unref?.();
+      });
+
+      let result;
+      try {
+        result = await Promise.race([
+          getRateLimiter().limit(ipHash),
+          timeoutPromise,
+        ]);
+      } finally {
+        if (timer) clearTimeout(timer);
+      }
+
       const headers = {
         "X-RateLimit-Limit": String(result.limit),
         "X-RateLimit-Remaining": String(result.remaining),
@@ -203,8 +248,14 @@ export class TelemetryService {
 
   /**
    * Records a telemetry interaction event into the Redis buffer queue.
+   *
+   * The Redis buffer is the only store in front of the sync job, so a failed
+   * enqueue drops the event outright. `buffered` reports whether the event was
+   * actually accepted so callers never present a dropped event as durable.
    */
-  static async recordEvent(data: TelemetryEventInput) {
+  static async recordEvent(
+    data: TelemetryEventInput
+  ): Promise<{ event: BufferedTelemetryEvent; buffered: boolean }> {
     const eventId = crypto.randomUUID();
     const eventData = {
       id: eventId,
@@ -214,14 +265,30 @@ export class TelemetryService {
     };
 
     if (env.PLAYWRIGHT_TEST === "true") {
-      return eventData;
+      return { event: eventData, buffered: true };
     }
 
     try {
+      const bufferKey = getScopedRedisKey("telemetry_buffer");
       const p = redis.pipeline();
-      p.lpush("telemetry_buffer", eventData);
-      p.expire("telemetry_buffer", 48 * 60 * 60); // 48 hours
-      const [listLength] = await p.exec();
+      p.lpush(bufferKey, eventData);
+      p.expire(bufferKey, 48 * 60 * 60); // 48 hours
+
+      let execTimer: ReturnType<typeof setTimeout> | undefined;
+      const execTimeoutPromise = new Promise<never>((_, reject) => {
+        execTimer = setTimeout(() => {
+          reject(new Error("Redis buffer enqueue timed out after 2000ms"));
+        }, 2000);
+        execTimer.unref?.();
+      });
+
+      let listLength: unknown;
+      try {
+        const [len] = await Promise.race([p.exec(), execTimeoutPromise]);
+        listLength = len;
+      } finally {
+        if (execTimer) clearTimeout(execTimer);
+      }
 
       if (Number(listLength) > 1000) {
         console.error(
@@ -229,10 +296,13 @@ export class TelemetryService {
         );
       }
     } catch (err) {
-      console.warn("Failed to commit telemetry event to Redis buffer:", err);
+      // Losing the event here is silent by nature: nothing else holds it.
+      Sentry.captureException(err);
+      console.error("Failed to commit telemetry event to Redis buffer:", err);
+      return { event: eventData, buffered: false };
     }
 
-    return eventData;
+    return { event: eventData, buffered: true };
   }
 
   /**
@@ -275,20 +345,22 @@ export class TelemetryService {
 
   /**
    * Synchronizes buffered telemetry events from Redis into PostgreSQL.
-   * Atomically transfers event batches from 'telemetry_buffer' to 'telemetry_processing'
-   * using LMOVE to guarantee zero telemetry loss during synchronization failures.
+   *
+   * Events move from `telemetry_buffer` to `telemetry_processing` one at a time
+   * with LMOVE, so a crash mid-transfer cannot drop them, and a batch that
+   * fails to reach the database stays in `telemetry_processing` for the next
+   * run. Acknowledgement is per event rather than per queue: only the events
+   * this invocation persisted are removed, so an overlapping invocation's
+   * batch survives. Re-processing is idempotent through the explicit event id.
    */
   static async syncBufferedEvents(batchSize: number) {
-    interface BufferedEvent {
-      id: string;
-      projectSlug: string;
-      eventType: string;
-      createdAt: string | Date;
-    }
+    type BufferedEvent = BufferedTelemetryEvent;
+    const bufferKey = getScopedRedisKey("telemetry_buffer");
+    const processingKey = getScopedRedisKey("telemetry_processing");
 
     // 1. Fetch any pending events previously transferred to processing queue but not yet synced to DB
     const existingProcessing = (await redis.lrange(
-      "telemetry_processing",
+      processingKey,
       0,
       -1
     )) as BufferedEvent[];
@@ -301,9 +373,9 @@ export class TelemetryService {
       const needed = batchSize - events.length;
       const p = redis.pipeline();
       for (let i = 0; i < needed; i++) {
-        p.lmove("telemetry_buffer", "telemetry_processing", "right", "left");
+        p.lmove(bufferKey, processingKey, "right", "left");
       }
-      p.expire("telemetry_processing", 48 * 60 * 60);
+      p.expire(processingKey, 48 * 60 * 60);
       const moveResults = await p.exec();
 
       const newlyMoved = moveResults.filter(
@@ -337,9 +409,53 @@ export class TelemetryService {
       throw dbErr;
     }
 
-    // On successful DB write, clear the processed events from the processing queue
-    await redis.del("telemetry_processing");
+    // On successful DB write, acknowledge exactly the events this invocation
+    // persisted. Deleting the whole key would also discard events that an
+    // overlapping sync moved into the processing queue after step 1 read it,
+    // losing them before they ever reached the database. LREM removes a single
+    // occurrence per owned event, so a concurrently moved event survives.
+    const ack = redis.pipeline();
+    for (const event of events) {
+      ack.lrem(processingKey, 1, event);
+    }
+    await ack.exec();
 
     return { processed: events.length, inserted: createResult.count };
+  }
+
+  /**
+   * Rolls raw events older than the cutoff into daily aggregates and removes
+   * only the rows committed by the same database transaction.
+   */
+  static async rollupAndPruneRawEvents(before: Date): Promise<{
+    rollupsUpserted: number;
+    rawEventsDeleted: number;
+  }> {
+    return prisma.$transaction(async (transaction) => {
+      const rollupsUpserted = await transaction.$executeRaw`
+        INSERT INTO "TelemetryDailyRollup"
+          ("day", "projectSlug", "eventType", "count", "createdAt", "updatedAt")
+        SELECT
+          date_trunc('day', "createdAt")::date,
+          "projectSlug",
+          "eventType",
+          COUNT(*)::integer,
+          CURRENT_TIMESTAMP,
+          CURRENT_TIMESTAMP
+        FROM "TelemetryEvent"
+        WHERE "createdAt" < ${before}
+        GROUP BY date_trunc('day', "createdAt")::date, "projectSlug", "eventType"
+        ON CONFLICT ("day", "projectSlug", "eventType")
+        DO UPDATE SET
+          "count" = "TelemetryDailyRollup"."count" + EXCLUDED."count",
+          "updatedAt" = CURRENT_TIMESTAMP
+      `;
+
+      const rawEventsDeleted = await transaction.$executeRaw`
+        DELETE FROM "TelemetryEvent" WHERE "createdAt" < ${before}
+      `;
+
+      return { rollupsUpserted, rawEventsDeleted };
+    });
   }
 }

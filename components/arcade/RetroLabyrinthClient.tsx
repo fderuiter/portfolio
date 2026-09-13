@@ -22,7 +22,7 @@ const DynamicRetroLabyrinth = dynamic(RetroLabyrinthLoader, {
   loading: () => (
     <div className="flex flex-col items-center justify-center p-8 min-h-[380px] font-mono text-xs text-zinc-500 animate-pulse">
       <div className="w-8 h-8 border-2 border-rose-500/30 border-t-rose-500 rounded-full animate-spin mb-4" />
-      <span>COMPILING PROCEDURAL SHADERS & MAZE GEOMETRY...</span>
+      <span>Building the dungeon...</span>
     </div>
   ),
 });
@@ -64,10 +64,13 @@ export const RetroLabyrinthClient: React.FC = () => {
             </div>
             <div>
               <h1 className="text-3xl sm:text-4xl font-extrabold font-mono text-white tracking-tight">
-                Retro Labyrinth: <span className="text-rose-400">Graveyard Roguelike</span>
+                Retro Labyrinth:{" "}
+                <span className="text-rose-400">Graveyard Roguelike</span>
               </h1>
               <p className="text-xs sm:text-sm text-zinc-400 font-mono mt-1">
-                Dungeon crawler exploring abandoned codebases. Navigate TSP dynamic shifting walls, wield developer weapons (npm install, git push -f), and defeat the 3D FaceForge boss.
+                An abandoned codebase, now with corridors. Navigate moving
+                walls, wield developer-themed weapons, and find the FaceForge
+                boss.
               </p>
             </div>
           </div>
@@ -78,10 +81,10 @@ export const RetroLabyrinthClient: React.FC = () => {
           <PlayCabinet
             gameId="retro-labyrinth"
             title="Retro Labyrinth: Graveyard Roguelike"
-            subtitle="Procedural Dungeon Generation & CRT Filter Engine"
+            subtitle="There Are Bugs in the Dungeon"
             accentColor="rose"
             icon={<IconDeviceGamepad2 className="w-8 h-8 text-rose-400" />}
-            instructions="Explore procedural code graph dungeons rendered with custom CRT scanline shaders, Traveling Salesperson dynamic shifting geometry, and FOV raycast fog-of-war."
+            instructions="Explore a shifting dungeon made from abandoned codebases. Fight bugs, find your way through the fog, and face a wireframe boss with an unreasonable number of angles."
             controls={[
               { key: "WASD", action: "Move Developer" },
               { key: "Space", action: "Wield Weapon" },
@@ -103,7 +106,9 @@ export const RetroLabyrinthClient: React.FC = () => {
               <span>TSP Shifting Walls</span>
             </div>
             <p className="text-zinc-400 text-[11px] leading-relaxed">
-              In Room 1, maze walls calculate and recalculate the Traveling Salesperson tour as you move. Time your steps through purple barrier shifts to reach landmarks.
+              In Room 1, maze walls calculate and recalculate the Traveling
+              Salesperson tour as you move. Time your steps through purple
+              barrier shifts to reach landmarks.
             </p>
           </div>
 
@@ -113,7 +118,9 @@ export const RetroLabyrinthClient: React.FC = () => {
               <span>Developer Weapons</span>
             </div>
             <p className="text-zinc-400 text-[11px] leading-relaxed">
-              Press <strong>1</strong> for npm install (AoE node_modules bomb), <strong>2</strong> for git push --force (clears all nearby bugs), or <strong>3</strong> for Stack Overflow (wildcard effects).
+              Press <strong>1</strong> for npm install (AoE node_modules bomb),{" "}
+              <strong>2</strong> for git push --force (clears all nearby bugs),
+              or <strong>3</strong> for Stack Overflow (wildcard effects).
             </p>
           </div>
 
@@ -123,7 +130,9 @@ export const RetroLabyrinthClient: React.FC = () => {
               <span>3D Wireframe Boss</span>
             </div>
             <p className="text-zinc-400 text-[11px] leading-relaxed">
-              FaceForge in Room 3 projects real-time rotating 3D wireframe polyhedra. Evade projecting face-normals and utilize EMP bursts to stun rogue drones.
+              FaceForge in Room 3 projects real-time rotating 3D wireframe
+              polyhedra. Evade projecting face-normals and utilize EMP bursts to
+              stun rogue drones.
             </p>
           </div>
         </div>

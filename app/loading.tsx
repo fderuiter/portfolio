@@ -1,6 +1,6 @@
 export default function Loading() {
   return (
-    <main className="min-h-screen py-24 px-6 md:px-16 flex flex-col items-center bg-brand-dark text-foreground">
+    <div className="min-h-screen py-24 px-6 md:px-16 flex flex-col items-center bg-brand-dark text-foreground">
       {/* Decorative Blur Elements */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-brand-cyan/5 blur-[120px] pointer-events-none" />
 
@@ -36,6 +36,6 @@ export default function Loading() {
           ))}
         </div>
       </div>
-    </main>
+    </div>
   );
 }

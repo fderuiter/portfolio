@@ -26,13 +26,18 @@ describe("CaseStudyHeroActions", () => {
           recentCommits: [],
           commitActivity: [],
           updatedAt: "2026-08-18T12:00:00Z",
+          provenance: "live",
         }}
       />
     );
 
-    const githubLink = screen.getByRole("link", { name: /view on github|fderuiter\/duckdeploy/i });
+    const githubLink = screen.getByRole("link", {
+      name: /view on github|fderuiter\/duckdeploy/i,
+    });
     expect(githubLink).toBeDefined();
-    expect(githubLink.getAttribute("href")).toBe("https://github.com/fderuiter/duckdeploy");
+    expect(githubLink.getAttribute("href")).toBe(
+      "https://github.com/fderuiter/duckdeploy"
+    );
     expect(screen.getByText("42")).toBeDefined(); // Stars
     expect(screen.getByText("120")).toBeDefined(); // Commits
   });
@@ -79,9 +84,12 @@ describe("CaseStudyHeroActions", () => {
       />
     );
 
-    const githubLink = screen.getByRole("link", { name: /view on github|fderuiter\/promptops/i });
+    const githubLink = screen.getByRole("link", {
+      name: /view on github|fderuiter\/promptops/i,
+    });
     expect(githubLink).toBeDefined();
-    expect(githubLink.getAttribute("href")).toBe("https://github.com/fderuiter/promptops");
+    expect(githubLink.getAttribute("href")).toBe(
+      "https://github.com/fderuiter/promptops"
+    );
   });
 });
-

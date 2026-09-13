@@ -6,6 +6,10 @@ export type RequestOrHeaders =
   | null
   | undefined;
 
+export interface PrivacyHashResult {
+  hash: string;
+}
+
 /**
  * Safely extracts header value from request objects, Headers, or plain header maps.
  */
@@ -30,7 +34,10 @@ export function extractHeaderValue(
   }
 
   if (typeof reqOrHeaders === "object") {
-    const record = reqOrHeaders as Record<string, string | string[] | undefined>;
+    const record = reqOrHeaders as Record<
+      string,
+      string | string[] | undefined
+    >;
     const lower = name.toLowerCase();
     const val = record[lower] ?? record[name];
     if (Array.isArray(val)) return val[0];
@@ -45,11 +52,16 @@ export function extractHeaderValue(
  * using standard Web Crypto APIs (crypto.subtle), safe for Edge and Node runtimes.
  * Never stores or logs plain-text IP addresses.
  */
-export async function generateClientConnectionHash(ip: string): Promise<string> {
+export async function generateClientConnectionHash(
+  ip: string
+): Promise<string> {
   const normalizedIp = ip?.trim() || "127.0.0.1";
   const encoder = new TextEncoder();
   const data = encoder.encode(normalizedIp);
-  const cryptoObj = typeof globalThis !== "undefined" && globalThis.crypto ? globalThis.crypto : undefined;
+  const cryptoObj =
+    typeof globalThis !== "undefined" && globalThis.crypto
+      ? globalThis.crypto
+      : undefined;
   if (cryptoObj?.subtle) {
     const hashBuffer = await cryptoObj.subtle.digest("SHA-256", data);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
@@ -97,7 +109,9 @@ export function extractClientIp(reqOrHeaders?: RequestOrHeaders): string {
  * Generates an anonymous SHA-256 connection hash directly from a request or header map.
  * Reads pre-computed connection tokens from proxy headers before recomputing client hashes.
  */
-export async function getConnectionHashFromRequest(reqOrHeaders?: RequestOrHeaders): Promise<string> {
+export async function getConnectionHashFromRequest(
+  reqOrHeaders?: RequestOrHeaders
+): Promise<string> {
   const existingHash = extractHeaderValue(reqOrHeaders, "x-connection-hash");
   if (existingHash) {
     return existingHash;
@@ -106,4 +120,3 @@ export async function getConnectionHashFromRequest(reqOrHeaders?: RequestOrHeade
   const ip = extractClientIp(reqOrHeaders);
   return generateClientConnectionHash(`${ip}:${userAgent}`);
 }
-

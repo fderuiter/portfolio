@@ -2,7 +2,9 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -92,9 +94,15 @@ const storageStore: Record<string, string> = {};
 Object.defineProperty(globalThis, "localStorage", {
   value: {
     getItem: (k: string) => storageStore[k] || null,
-    setItem: (k: string, v: string) => { storageStore[k] = String(v); },
-    removeItem: (k: string) => { delete storageStore[k]; },
-    clear: () => { Object.keys(storageStore).forEach((k) => delete storageStore[k]); },
+    setItem: (k: string, v: string) => {
+      storageStore[k] = String(v);
+    },
+    removeItem: (k: string) => {
+      delete storageStore[k];
+    },
+    clear: () => {
+      Object.keys(storageStore).forEach((k) => delete storageStore[k]);
+    },
     key: () => null,
     length: 0,
   },
@@ -156,7 +164,9 @@ describe("Working With Duck - UI & Component Suite", () => {
     });
 
     const scrapbookButtons = container.querySelectorAll("button");
-    const openBtn = Array.from(scrapbookButtons).find((b) => b.textContent?.includes("Duck Scrapbook"));
+    const openBtn = Array.from(scrapbookButtons).find((b) =>
+      b.textContent?.includes("Duck Scrapbook")
+    );
     expect(openBtn).toBeDefined();
 
     if (openBtn) {
@@ -174,7 +184,10 @@ describe("Working With Duck - UI & Component Suite", () => {
     });
 
     const buttons = container.querySelectorAll("button");
-    const wardrobeBtn = Array.from(buttons).find((b) => b.textContent?.includes("Wardrobe") || b.title?.includes("Wardrobe"));
+    const wardrobeBtn = Array.from(buttons).find(
+      (b) =>
+        b.textContent?.includes("Wardrobe") || b.title?.includes("Wardrobe")
+    );
     expect(wardrobeBtn).toBeDefined();
 
     if (wardrobeBtn) {
@@ -208,7 +221,9 @@ describe("Working With Duck - UI & Component Suite", () => {
     });
 
     const scrapbookButtons = container.querySelectorAll("button");
-    const openBtn = Array.from(scrapbookButtons).find((b) => b.textContent?.includes("Duck Scrapbook"));
+    const openBtn = Array.from(scrapbookButtons).find((b) =>
+      b.textContent?.includes("Duck Scrapbook")
+    );
     if (openBtn) {
       await act(async () => {
         openBtn.click();
@@ -217,9 +232,9 @@ describe("Working With Duck - UI & Component Suite", () => {
       expect(container.textContent).toContain("Real Photos 📷");
       expect(container.textContent).toContain("Vector Art 🎨");
 
-      const vectorModeBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-        b.textContent?.includes("Vector Art 🎨")
-      );
+      const vectorModeBtn = Array.from(
+        container.querySelectorAll("button")
+      ).find((b) => b.textContent?.includes("Vector Art 🎨"));
       expect(vectorModeBtn).toBeDefined();
 
       if (vectorModeBtn) {
@@ -237,7 +252,9 @@ describe("Working With Duck - UI & Component Suite", () => {
     });
 
     const scrapbookButtons = container.querySelectorAll("button");
-    const openBtn = Array.from(scrapbookButtons).find((b) => b.textContent?.includes("Duck Scrapbook"));
+    const openBtn = Array.from(scrapbookButtons).find((b) =>
+      b.textContent?.includes("Duck Scrapbook")
+    );
     if (openBtn) {
       await act(async () => {
         openBtn.click();
@@ -245,8 +262,8 @@ describe("Working With Duck - UI & Component Suite", () => {
 
       expect(container.textContent).toContain("Card 1 of 10");
 
-      const nextBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-        b.textContent?.includes("Next →")
+      const nextBtn = Array.from(container.querySelectorAll("button")).find(
+        (b) => b.textContent?.includes("Next →")
       );
       if (nextBtn) {
         await act(async () => {
@@ -296,6 +313,54 @@ describe("Working With Duck - UI & Component Suite", () => {
     }
   });
 
+  it("lets Space activate a focused Dog Park button instead of the global code-burst shortcut (#604)", async () => {
+    await act(async () => {
+      root.render(<WorkingWithDuck />);
+    });
+
+    // Enter running mode so the global Space shortcut (active code burst) is live.
+    const startBtn = container.querySelector("button");
+    await act(async () => {
+      startBtn?.click();
+    });
+
+    const workProgressBar = container.querySelector(
+      '[aria-label="Work Progress"]'
+    );
+    const progressBefore = workProgressBar?.getAttribute("aria-valuenow");
+
+    const parkBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Dog Park")
+    );
+    expect(parkBtn).toBeTruthy();
+
+    parkBtn!.focus();
+    expect(document.activeElement).toBe(parkBtn);
+
+    let event!: KeyboardEvent;
+    await act(async () => {
+      event = new KeyboardEvent("keydown", {
+        code: "Space",
+        bubbles: true,
+        cancelable: true,
+      });
+      parkBtn!.dispatchEvent(event);
+    });
+
+    // The game's global shortcut listener must leave Space alone while a real button is
+    // focused so the browser's native "activate the focused button" behavior can run,
+    // instead of hijacking it for the active-code-burst shortcut (the reported bug).
+    expect(event.defaultPrevented).toBe(false);
+    expect(workProgressBar?.getAttribute("aria-valuenow")).toBe(progressBefore);
+
+    // Native activation (which jsdom does not simulate for Space) is what actually opens
+    // Dog Park; confirm the button still leads there via its own click handler.
+    await act(async () => {
+      parkBtn!.click();
+    });
+    expect(container.textContent).toContain("Agility Jump (Space)");
+  });
+
   it("enters Bathtub and renders bathtub wash and shower rinse controls", async () => {
     await act(async () => {
       root.render(<WorkingWithDuck />);
@@ -319,8 +384,8 @@ describe("Working With Duck - UI & Component Suite", () => {
       root.render(<WorkingWithDuck />);
     });
 
-    const muteButtons = Array.from(container.querySelectorAll("button")).filter((b) =>
-      b.title?.includes("Mute") || b.title?.includes("Music")
+    const muteButtons = Array.from(container.querySelectorAll("button")).filter(
+      (b) => b.title?.includes("Mute") || b.title?.includes("Music")
     );
     expect(muteButtons.length).toBeGreaterThan(0);
 
@@ -336,14 +401,16 @@ describe("Working With Duck - UI & Component Suite", () => {
       root.render(<WorkingWithDuck />);
     });
 
-    const startBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Start Sprint 1")
+    const startBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Start Sprint 1")
     );
     if (startBtn) {
       await act(async () => {
         startBtn.click();
       });
-      expect(container.textContent).toContain("Tip: Work advances automatically");
+      expect(container.textContent).toContain(
+        "Tip: Work advances automatically"
+      );
     }
   });
 
@@ -357,9 +424,27 @@ describe("Working With Duck - UI & Component Suite", () => {
 
     if (canvas) {
       await act(async () => {
-        canvas.dispatchEvent(new MouseEvent("mousedown", { clientX: 430, clientY: 240, bubbles: true }));
-        canvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 450, clientY: 260, bubbles: true }));
-        canvas.dispatchEvent(new MouseEvent("mouseup", { clientX: 450, clientY: 260, bubbles: true }));
+        canvas.dispatchEvent(
+          new MouseEvent("mousedown", {
+            clientX: 430,
+            clientY: 240,
+            bubbles: true,
+          })
+        );
+        canvas.dispatchEvent(
+          new MouseEvent("mousemove", {
+            clientX: 450,
+            clientY: 260,
+            bubbles: true,
+          })
+        );
+        canvas.dispatchEvent(
+          new MouseEvent("mouseup", {
+            clientX: 450,
+            clientY: 260,
+            bubbles: true,
+          })
+        );
       });
     }
   });
@@ -370,7 +455,9 @@ describe("Working With Duck - UI & Component Suite", () => {
     });
 
     const scrapbookButtons = container.querySelectorAll("button");
-    const openBtn = Array.from(scrapbookButtons).find((b) => b.textContent?.includes("Duck Scrapbook"));
+    const openBtn = Array.from(scrapbookButtons).find((b) =>
+      b.textContent?.includes("Duck Scrapbook")
+    );
     expect(openBtn).toBeDefined();
 
     if (openBtn) {

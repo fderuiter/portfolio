@@ -240,7 +240,7 @@ export const MemeVaultClient: React.FC = () => {
   const getAsciiContent = () => {
     switch (asciiTab) {
       case "cowsay":
-        return ASCII_COWSAY("100% Type-Safe & MedTech Ready!");
+        return ASCII_COWSAY("You found the secret handshake.");
       case "duck":
         return ASCII_DUCK();
       case "loon":
@@ -310,7 +310,7 @@ export const MemeVaultClient: React.FC = () => {
         <div className="relative z-10 max-w-3xl">
           <div className="flex items-center gap-2.5 mb-3">
             <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[11px] font-bold uppercase tracking-wider">
-              Secret Easter Egg Vault
+              Meme Soundboard & Trophy Room
             </span>
             <span className="text-xs text-slate-400 font-sans">v2.4.0</span>
           </div>
@@ -320,9 +320,8 @@ export const MemeVaultClient: React.FC = () => {
           </h1>
 
           <p className="text-sm sm:text-base text-slate-300 font-sans leading-relaxed mb-6">
-            Synthesized Web Audio sound effects, collectible Easter egg
-            achievement trophies, and curated engineering &amp; CDISC compliance
-            humor from Lake Minnetonka.
+            A soundboard, hidden trophies, and jokes for people who have spent
+            too long looking at error messages.
           </p>
 
           {/* Achievement Progress Bar */}
@@ -364,8 +363,7 @@ export const MemeVaultClient: React.FC = () => {
               8-Channel Retro Soundboard
             </h2>
             <p className="text-xs text-slate-400 font-sans">
-              Pure client-side Web Audio synthesis with zero external audio
-              assets.
+              Every sound is generated in your browser.
             </p>
           </div>
         </div>
@@ -495,8 +493,8 @@ export const MemeVaultClient: React.FC = () => {
                 Engineering Meme Deck
               </h2>
               <p className="text-xs text-slate-400 font-sans">
-                Curated one-liners from distributed systems, CDISC EDC, and
-                startup life.
+                A few jokes about code, clinical data, and getting through the
+                workday.
               </p>
             </div>
           </div>
@@ -570,7 +568,7 @@ export const MemeVaultClient: React.FC = () => {
 
       {/* Section 4: ASCII Art Console */}
       <section className="mb-12">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
           <div className="flex items-center gap-2.5">
             <IconTerminal className="w-5 h-5 text-emerald-400" />
             <h2 className="text-lg font-bold text-white">
@@ -578,7 +576,7 @@ export const MemeVaultClient: React.FC = () => {
             </h2>
           </div>
 
-          <div className="flex gap-1.5 p-1 rounded-xl bg-slate-900 border border-slate-800 text-xs">
+          <div className="flex flex-wrap gap-1.5 p-1 rounded-xl bg-slate-900 border border-slate-800 text-xs">
             {(["cowsay", "duck", "loon", "train"] as const).map((tab) => (
               <button
                 key={tab}

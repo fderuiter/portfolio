@@ -1,7 +1,10 @@
 import { describe, it, expect } from "vitest";
 import path from "path";
 import fs from "fs";
-import { generateOpenApi, getExpectedApiRoutes } from "@/scripts/generate-openapi";
+import {
+  generateOpenApi,
+  getExpectedApiRoutes,
+} from "@/scripts/generate-openapi";
 
 describe("OpenAPI Specification & Route Parity Test Suite", () => {
   const workspaceRoot = path.resolve(__dirname, "..");
@@ -10,6 +13,7 @@ describe("OpenAPI Specification & Route Parity Test Suite", () => {
     const routes = getExpectedApiRoutes(workspaceRoot);
     expect(routes).toContain("/api/telemetry");
     expect(routes).toContain("/api/telemetry/sync");
+    expect(routes).toContain("/api/cron/maintenance");
     expect(routes).toContain("/api/case-studies");
   });
 
@@ -41,7 +45,9 @@ describe("OpenAPI Specification & Route Parity Test Suite", () => {
       expect(methodKeys.length).toBeGreaterThan(0);
 
       for (const method of methodKeys) {
-        const operation = (methods as Record<string, { summary?: string; responses?: unknown }>)[method];
+        const operation = (
+          methods as Record<string, { summary?: string; responses?: unknown }>
+        )[method];
         expect(operation.summary).toBeDefined();
         expect(operation.responses).toBeDefined();
       }

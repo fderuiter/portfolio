@@ -1,0 +1,103 @@
+# Vercel Retention Inventory
+
+Last verified: 2026-09-12 23:31 UTC
+
+Scope: `laser-loons-projects/portfolio`, Vercel Hobby, last 30 days
+
+Sources: Vercel usage dashboard, deployment API, and Vercel CLI
+
+This is the post-cleanup capacity and retention record for
+[Issue #691](https://github.com/fderuiter/portfolio/issues/691) and closed
+[Issue #692](https://github.com/fderuiter/portfolio/issues/692).
+
+## Capacity Snapshot
+
+| Meter | Used | Limit | Remaining | Status |
+| --- | ---: | ---: | ---: | --- |
+| Functions Storage | **9.68 GB** | 10.00 GB | 0.32 GB (3.2%) | Critical |
+| Deployment Storage | **6.20 GB** | 10.00 GB | 3.80 GB (38.0%) | Healthy |
+| Build Time | **87.0 hrs** | 100.0 hrs | 13.0 hrs (13.0%) | Warning |
+
+Functions Storage is a GB-month meter. Removing deployments prevents future
+retention but does not erase the daily maximum already recorded in the current
+billing window. Deleted successful deployments also enter Vercel's recovery
+period, and protected-deployment reevaluation can take time. A same-day meter
+drop is therefore not an appropriate cleanup success criterion.
+
+## Live Deployment Inventory
+
+The final paginated audit returned 268 records for `portfolio`:
+
+| State | Count |
+| --- | ---: |
+| `READY` | 43 |
+| `BLOCKED` | 190 |
+| `ERROR` | 32 |
+| `CANCELED` | 3 |
+
+The 43 retained `READY` records comprise 20 production and 23 preview
+deployments. The visible team inventory contains no separate
+`wedding-website` Vercel project, so earlier wedding contribution estimates
+are retained only in source history and must not drive current cleanup.
+
+## Cleanup Record
+
+On 2026-09-12 the operator explicitly approved the audited cleanup. Vercel
+accepted removal of 57 superseded, unaliased deployments:
+
+- 36 stale preview deployments;
+- 21 superseded production deployments outside the protected set.
+
+The canonical domain returned HTTP 200 after both phases. The current
+production deployment remains protected:
+
+| Deployment ID | Environment | Branch | Purpose |
+| --- | --- | --- | --- |
+| `dpl_3VVso5GPXhpejKjb5wGRFszJABfa` | Production | `main` | Canonical production target |
+
+The post-cleanup audit found **zero additional conservative deletion
+candidates**. The original review candidates remain in
+`HISTORICAL_REVIEW_CANDIDATES_2026_09_12` in
+`scripts/vercel-retention-inventory.ts` as an audit record; they are not a live
+deletion queue.
+
+## Retention Rules
+
+Before any future deletion:
+
+1. Resolve the canonical production alias and exclude its target.
+2. Exclude every aliased deployment and every active pull-request target.
+3. Preserve Vercel's mandatory latest-deployment and active-branch exceptions.
+4. Preserve at least the current and immediately previous known-good
+   production deployments for rollback.
+5. Rebuild the candidate set from live paginated data. Never reuse the
+   historical list.
+6. Obtain explicit operator authorization for the resolved IDs.
+7. Verify `https://www.deruiter.dev/` after deletion.
+
+The approved 2026-09-12 cleanup does not authorize deleting future
+deployments, aliases, projects, integrations, or provider resources.
+
+## Prevention Policy
+
+- Vercel builds production from `main` only.
+- `vercel.json` disables automatic deployments for every other branch.
+- Retention remains one day for production and canceled deployments and seven
+  days for preview and error deployments, subject to Vercel exceptions.
+- One operator-created preview may be used for a high-risk review, then its
+  branch and alias are removed after merge.
+- Function bundle composition is audited separately from deployment count.
+
+See [ADR 0037](../../adr/0037-controlled-integration-and-release-deployments.md)
+and the [release workflow](../how-to/release-and-deploy.md).
+
+## Verification Commands
+
+```bash
+npm run inventory:vercel
+npm run inventory:vercel -- --json
+npm run headroom:vercel
+```
+
+The scripts contain a verified snapshot, not a live Vercel credential. Refresh
+the snapshot from the dashboard and API before making capacity decisions.

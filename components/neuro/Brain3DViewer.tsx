@@ -272,17 +272,17 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
     const disposeGroup = (group: THREE.Group, scene: THREE.Scene) => {
       scene.remove(group);
       group.traverse((obj) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const meshObj = obj as any;
-        if (meshObj.geometry) {
-          meshObj.geometry.dispose();
+        // Mesh/Line/Points all carry disposable geometry+material, but plain
+        // Object3D/Group nodes don't — duck-type via a partial Mesh shape.
+        const renderable = obj as THREE.Object3D & Partial<THREE.Mesh>;
+        if (renderable.geometry) {
+          renderable.geometry.dispose();
         }
-        if (meshObj.material) {
-          if (Array.isArray(meshObj.material)) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            meshObj.material.forEach((m: any) => m.dispose());
+        if (renderable.material) {
+          if (Array.isArray(renderable.material)) {
+            renderable.material.forEach((m) => m.dispose());
           } else {
-            meshObj.material.dispose();
+            renderable.material.dispose();
           }
         }
       });

@@ -20,11 +20,22 @@ export const POST = createApiHandler(
       const connectionHash = await getConnectionHashFromRequest(req);
 
       // 1. Anonymous Connection-Hash Rate Limiting (5 attempts per 10 minutes)
-      const rateLimitCheck = checkSubmissionAttemptRateLimit(connectionHash, 5, 600000);
+      const rateLimitCheck = checkSubmissionAttemptRateLimit(
+        connectionHash,
+        5,
+        600000
+      );
       if (rateLimitCheck.isRateLimited) {
         return NextResponse.json(
           { error: "Too many subscription attempts. Please try again later." },
-          { status: 429 }
+          {
+            status: 429,
+            headers: {
+              "Retry-After": "600",
+              "X-RateLimit-Limit": "5",
+              "X-RateLimit-Remaining": "0",
+            },
+          }
         );
       }
 
@@ -33,7 +44,8 @@ export const POST = createApiHandler(
         return NextResponse.json(
           {
             success: true,
-            message: "You have been successfully subscribed to the systems dispatch.",
+            message:
+              "You have been successfully subscribed to the systems dispatch.",
             simulated: true,
           },
           { status: 201 }
@@ -47,7 +59,8 @@ export const POST = createApiHandler(
           return NextResponse.json(
             {
               success: true,
-              message: "You have been successfully subscribed to the systems dispatch.",
+              message:
+                "You have been successfully subscribed to the systems dispatch.",
               simulated: true,
             },
             { status: 201 }
@@ -56,7 +69,10 @@ export const POST = createApiHandler(
       }
 
       // 4. Dispatch Newsletter Subscription
-      const result = await EmailService.subscribeNewsletter(data.email, connectionHash);
+      const result = await EmailService.subscribeNewsletter(
+        data.email,
+        connectionHash
+      );
 
       if (!result.success) {
         return NextResponse.json(
@@ -72,7 +88,8 @@ export const POST = createApiHandler(
       return NextResponse.json(
         {
           success: true,
-          message: "You have been successfully subscribed to the systems dispatch.",
+          message:
+            "You have been successfully subscribed to the systems dispatch.",
           subscriberId: result.data?.id,
           simulated: result.simulated,
         },

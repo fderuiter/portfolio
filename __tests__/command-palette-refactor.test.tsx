@@ -88,7 +88,7 @@ describe("CommandPalette Performance & Concurrency Refactor", () => {
 
     expect(combobox.value).toBe("arcade");
     const previewPane = document.querySelector("#palette-preview-pane");
-    expect(previewPane?.textContent).toContain("Arcade Games Hub");
+    expect(previewPane?.textContent).toContain("Arcade");
   });
 
   it("uses consolidated hover listener on list items without redundant listeners", async () => {

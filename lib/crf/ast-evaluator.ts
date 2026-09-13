@@ -8,6 +8,12 @@ export {
   evaluateFormula,
   evaluateCondition,
   evaluateRule,
+  evaluateConditionResult,
+  combineConditionResults,
+  getRuleGroups,
+  evaluateRuleResult,
+  describeCondition,
+  explainRule,
   isMissingOrNullFlavor,
   calculateBMI,
   calculateMostellerBSA,
@@ -18,6 +24,9 @@ export {
   calculateRecistSldChange,
   type Token,
   type TokenType,
+  type ConditionExplanation,
+  type GroupExplanation,
+  type RuleExplanation,
 } from "./expression-evaluator";
 
 export {

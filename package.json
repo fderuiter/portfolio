@@ -1,6 +1,6 @@
 {
   "name": "fderuiter-portfolio",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "private": true,
   "scripts": {
     "dx": "npx tsx scripts/dx.ts",
@@ -12,6 +12,7 @@
     "verify": "npx tsx scripts/dx.ts verify",
     "commit": "npx tsx scripts/dx.ts commit",
     "env:check": "npx tsx scripts/dx.ts env",
+    "preflight": "npx tsx scripts/dx.ts preflight",
     "dead-code": "npx tsx scripts/dx.ts dead-code",
     "analyze:bundle": "npx tsx scripts/dx.ts analyze",
     "bench": "npx tsx scripts/dx.ts bench",
@@ -25,10 +26,14 @@
     "generate:icons": "npx tsx scripts/generate-brand-icons.ts",
     "generate:theme": "npx tsx scripts/generate-theme.ts",
     "precompile-docs": "npx prisma generate",
-    "compile-docs": "npx typedoc --entryPoints hooks --entryPoints types --entryPoints lib --exclude \"**/env.d.ts\" --entryPointStrategy expand --out docs --plugin typedoc-plugin-markdown --hideGenerator --cleanOutputDir false --gitRevision main --sourceLinkTemplate \"https://github.com/fderuiter/portfolio/blob/{gitRevision}/{path}#L{line}\" --intentionallyNotExported TypeMap --intentionallyNotExported GlobalOmitConfig --intentionallyNotExported TypeMapCb --skipErrorChecking",
+    "compile-docs": "npx tsx scripts/compile-docs.ts",
     "check-docs-drift": "npx tsx scripts/check-drift.ts",
     "check:migrations": "node scripts/check-migrations.js",
     "check:migrations:drift": "prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --exit-code",
+    "migration:replay": "npx tsx scripts/migration-replay.ts",
+    "verify:upstash": "npx tsx scripts/verify-upstash.ts",
+    "inventory:vercel": "npx tsx scripts/vercel-retention-inventory.ts",
+    "headroom:vercel": "npx tsx scripts/vercel-headroom.ts",
     "release:gate": "npx tsx scripts/release-gate.ts",
     "lint:docs": "npx markdownlint \"**/*.md\" --ignore node_modules --ignore .next --ignore coverage --ignore .agents --ignore scratch --ignore tmp --ignore test-results",
     "prebuild": "npx tsx scripts/generate-theme.ts",
@@ -40,8 +45,10 @@
     "check": "tsc --noEmit && npm run lint && npm run lint:boundaries",
     "prepare": "husky",
     "preinstall": "node scripts/enforce-npm.js",
-    "pretest": "npx tsx scripts/generate-theme.ts && npx prisma generate",
+    "postinstall": "npx prisma generate",
+    "pretest": "npx prisma generate",
     "test": "VITE_CONFIG_NATIVE_IGNORE_WARNING=1 vitest run",
+    "test:staged": "npx tsx scripts/test-staged.ts",
     "test:ci": "VITE_CONFIG_NATIVE_IGNORE_WARNING=1 vitest run --coverage",
     "test:coverage": "VITE_CONFIG_NATIVE_IGNORE_WARNING=1 vitest run --coverage",
     "test:watch": "VITE_CONFIG_NATIVE_IGNORE_WARNING=1 vitest",
@@ -60,10 +67,16 @@
     "typedoc": {
       "brace-expansion": "^5.0.8"
     },
+    "eslint": {
+      "@eslint/eslintrc": {
+        "js-yaml": "^4.3.2"
+      }
+    },
     "deepmerge-ts": "^8.0.1",
-    "fast-uri": "^3.0.1",
-    "ip-address": "^9.0.5",
-    "shell-quote": "^1.8.1"
+    "fast-uri": "^3.1.6",
+    "shell-quote": "^1.8.1",
+    "browserslist": "^4.28.8",
+    "mysql2": "^3.24.3"
   },
   "dependencies": {
     "@chenglou/pretext": "^0.0.5",
@@ -86,7 +99,7 @@
     "isomorphic-dompurify": "^3.22.0",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",
-    "next": "16.3.1",
+    "next": "16.3.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "resend": "^6.20.0",
@@ -97,7 +110,6 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
-    "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.1",
@@ -107,7 +119,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/ws": "^8.18.1",
-    "@vitest/coverage-v8": "^4.1.10",
+    "@vitest/coverage-v8": "^4.1.11",
     "concurrently": "^9.2.4",
     "dependency-cruiser": "^17.4.3",
     "dotenv": "^17.4.2",
@@ -127,7 +139,7 @@
     "typedoc": "^0.28.20",
     "typedoc-plugin-markdown": "^4.12.0",
     "typescript": "^5",
-    "vitest": "^4.1.7"
+    "vitest": "^4.1.11"
   },
   "ignoreScripts": [
     "sharp",

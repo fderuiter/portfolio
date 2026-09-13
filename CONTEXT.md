@@ -1,5 +1,24 @@
 # Portfolio Domain Context & Glossary
 
+## Delivery Coordination & Issue Governance
+
+- **Governing Map**: A non-executable epic or specification that defines a workstream's boundaries, outcomes, and child tickets. A governing map is not part of the agent work frontier and remains open until its child outcomes are complete.
+- **Executable Leaf**: A context-window-sized ticket that delivers one independently verifiable outcome and may be claimed by an agent when all of its hard blockers are closed.
+- **Hard Blocker**: An unfinished ticket whose outcome is genuinely required before useful work can begin on another ticket. Hard blockers are represented with native issue dependencies; preferred order alone is not a blocker.
+- **Coordination Relationship**: A non-blocking overlap between tickets that share an integration surface, validation environment, or product journey. Coordination relationships describe merge order and handoff expectations without removing tickets from the parallel frontier.
+- **Agent Frontier**: The set of unassigned executable leaves with no open hard blockers and no requirement for human-only authority.
+- **Human Gate**: A ticket requiring human authorization, protected credentials, destructive cloud action, production promotion, or subjective real-device validation. Human gates are prepared with reproducible evidence before being handed to a person.
+- **Completion Evidence**: The commit, pull request, automated results, deployment observation, or human sign-off demonstrating that every acceptance criterion of a ticket is satisfied.
+
+## Release Governance
+
+- **Release Candidate**: The exact current `main` commit whose version, migrations, quality gates, and immutable deployment are being evaluated for promotion.
+- **Staged Production Deployment**: A production-configured immutable artifact that has not yet received the canonical production domains and therefore cannot serve normal production traffic.
+- **Promotion**: The deliberate reassignment of canonical production domains to a verified staged production deployment without rebuilding it.
+- **Application Rollback**: Reassigning production domains to the recorded previous known-good immutable deployment; this changes served application code without reversing database history.
+- **Database Recovery**: A forward-compatible roll-forward following expand/contract migration discipline; it is distinct from and must not be implied by application rollback.
+- **Unified Maintenance Run**: The portfolio's single daily, time-bounded operational pass. It drains buffered interactions, retries leased outbound mail, and converts expired raw telemetry into durable daily rollups while preserving a structured partial-progress record.
+
 ## Logical Proof Workspace
 
 ### Deductive Inference Rules
@@ -105,7 +124,7 @@ Formal inference rules used to derive logical steps from valid premises:
 
 ### Continuous Auditing & Enforcement
 
-- **Multi-Tiered Accessibility Guard**: An automated testing hierarchy comprising static invariant analysis (`lib/dx/doctor.ts`), unit component testing (Vitest), comprehensive end-to-end axe-core browser evaluation (`@axe-core/playwright`), and Lighthouse CI score assertion (100% threshold).
+- **Multi-Tiered Accessibility Guard**: An automated testing hierarchy comprising static invariant analysis (`lib/dx/doctor.ts`), unit component testing (Vitest), and comprehensive end-to-end axe-core browser evaluation (`@axe-core/playwright`).
 - **WCAG 2.1 Level AA Conformance Invariant**: The structural requirement that all public routes, interactive modals, drawers, and form controls pass axe-core scans with zero critical, serious, or moderate violations.
 - **Internal Developer Tool Boundary**: Clear demarcation excluding CLI developer tasks (`scripts/dx.ts`), database seed scripts, and headless build pipelines from end-user accessibility audits while maintaining strict audit coverage across 100% of user-facing production interfaces.
 
@@ -360,3 +379,15 @@ Formal inference rules used to derive logical steps from valid premises:
 
 - **Shoehorn Test Fixture Hygiene**: The testing standard replacing unsafe type assertions (`as unknown as TargetType` or `as TargetType`) in test suites with `@total-typescript/shoehorn`'s `fromPartial()` (for partial data DTOs) and `fromAny()` (for intentionally invalid test payloads), ensuring test fixtures do not mask underlying schema regressions.
 - **Contract Test / Logic Test Separation**: The practice of splitting test coverage into contract tests (`spec.test.ts` testing schema parsing and edge-case rejections) and handler logic tests (`handler.test.ts` asserting business logic and error mapping).
+
+## Free-Tier Offloading & Cloud Provider Quota Governance
+
+### Provider Quotas & Edge Protection
+
+- **Free-Tier Offloading Architecture**: The architectural pattern of delegating high-frequency, long-running, or state-heavy operations (caching, rate-limiting, event buffering, background retry queues, asset storage) away from Vercel Hobby serverless limits onto external generous free tiers to eliminate hosting costs while providing production-grade scalability.
+- **Edge Rate-Limit Shield**: The practice of evaluating client rate limits via `@upstash/ratelimit` at the network edge (Next.js Edge Proxy / Middleware) before requests enter serverless execution, rejecting automated traffic and bot attacks before serverless function execution hours or downstream provider quotas are consumed.
+- **Provider Quota Boundary**: Explicit operating constraints matching free-tier service caps (Resend: 100 emails/day, Upstash Redis: 10,000 commands/day, Sentry: 10,000 performance spans/month, Neon: 0.5 GiB storage and auto-suspending compute) configured with defense-in-depth fallbacks to prevent silent drops or surprise provider billing.
+- **Read-Through Compute Shield**: Caching remote relational database queries (such as published case studies, author records, and aggregate interaction counters) in a globally distributed Redis store (Upstash) with stale-while-revalidate or mutation-based invalidation, allowing serverless Postgres compute (Neon) to remain suspended in zero-compute sleep states across public visitor browsing.
+- **Unified Maintenance Pipeline**: A consolidated, time-budgeted scheduled execution model consolidating disparate recurring tasks (telemetry rollups, outbound retry queue processing, and retention data pruning) into a single secured invocation satisfying Vercel Hobby's strict limitation of one daily scheduled job.
+- **Two-Tier Cache Shield**: The tiered caching strategy pairing Vercel Edge Incremental Static Regeneration (ISR) for static long-lived page rendering with Upstash Redis for volatile interactive counters and write-buffering, eliminating database read compute while providing real-time UI interactivity.
+- **Sub-Daily Event-Driven Dispatch**: The execution pattern using external free-tier webhooks or schedulers (such as Upstash QStash) to dispatch time-sensitive background retries with exponential backoff, overcoming Vercel Hobby's single daily cron restriction without requiring paid infrastructure upgrades.

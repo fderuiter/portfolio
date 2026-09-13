@@ -37,12 +37,12 @@ function getVaultServerSnapshot(): boolean {
 }
 
 const DUCK_QUOTES = [
-  "Woof! 100% test coverage achieved!",
-  "Pant pant! Need more belly rubs and fewer git rebases!",
-  "Tail wag! Duck personally approved this deployment!",
-  "Staging is broken? Don't worry, I hid the logs under the couch.",
-  "Lake Minnetonka water temp is perfect for swimming today!",
-  "Synthesizing maximum good boy energy into the bundle...",
+  "You could be petting me right now.",
+  "The ball is under the desk again.",
+  "I reviewed the code. It needs more walks.",
+  "Your keyboard makes an excellent pillow.",
+  "Meeting agenda: outside?",
+  "I have no notes. I cannot read.",
 ];
 
 interface TreatParticle {
@@ -120,7 +120,7 @@ export const FooterStatusTicker: React.FC = () => {
             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
           </span>
           <span className="text-zinc-400 uppercase tracking-wider text-[10px] font-semibold shrink-0">
-            Live Telemetry:
+            Footnotes:
           </span>
           <div className="h-5 overflow-hidden relative flex-1 sm:w-80">
             <AnimatePresence mode="wait">

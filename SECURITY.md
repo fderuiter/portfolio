@@ -47,13 +47,15 @@ All suppression rules in `security-audit-ignore.json` must strictly adhere to th
 
 1. **Advisory Identifier (`advisory` / `advisoryId` / `cve` / `ghsa` / `id`):** Must specify a valid advisory identifier (e.g., `GHSA-c2qf-rxjj-4v5w` or `CVE-XXXX-XXXX`). Entries missing an advisory ID are invalid and rejected by the audit tool.
 2. **Business Justification (`reason` / `justification`):** Must contain a clear description of why the vulnerability is non-actionable or safe in the current deployment context (e.g., dev-only tool, build-time utility with no production runtime exposure).
-3. **Expiration Date & Maximum 90-Day Lifespan (`expiresAt` / `expires`):** Must provide a valid ISO timestamp specifying when the override expires. Overrides are capped at a **maximum lifespan of 90 days** from creation/execution. Overrides exceeding 90 days are flagged as invalid and fail the audit.
-4. **Target Package Scope (`package` / `name`):** Optional parameter to restrict the override to a specific package name.
+3. **Risk Owner (`owner`):** Must name the person or accountable repository role responsible for resolving or renewing the exception.
+4. **Follow-Up Ticket (`followUp`):** Must reference the visible issue that owns re-evaluation before expiry.
+5. **Expiration Date & Maximum 90-Day Lifespan (`expiresAt` / `expires`):** Must provide a valid ISO timestamp specifying when the override expires. Overrides are capped at a **maximum lifespan of 90 days** from creation/execution. Overrides exceeding 90 days are flagged as invalid and fail the audit.
+6. **Target Package Scope (`package` / `name`):** Optional parameter to restrict the override to a specific package name.
 
 ### Override Validation & Enforcement
 
 During local or CI execution, the audit tool validates all active override rules:
 
 - **Expired Rules:** Rules whose expiration date has passed (`expiresAt <= now`) are rejected and cause the security audit to fail.
-- **Invalid Rules:** Rules missing required fields or exceeding the 90-day limit trigger explicit validation errors and fail the audit.
+- **Invalid Rules:** Rules missing an advisory, rationale, owner, follow-up ticket, expiration, or exceeding the 90-day limit trigger explicit validation errors and fail the audit.
 - **Active Rules:** Valid, unexpired rules temporarily suppress matching high or critical vulnerabilities and log active remaining lifespan (in days) to console output.

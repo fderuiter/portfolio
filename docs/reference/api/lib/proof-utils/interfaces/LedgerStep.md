@@ -1,0 +1,55 @@
+[**fderuiter-portfolio**](../../../README.md)
+
+***
+
+[fderuiter-portfolio](../../../modules.md) / [lib/proof-utils](../README.md) / LedgerStep
+
+# Interface: LedgerStep
+
+## Properties
+
+### formula
+
+> **formula**: `string`
+
+***
+
+### isDeletable?
+
+> `optional` **isDeletable?**: `boolean`
+
+***
+
+### isProven
+
+> **isProven**: `boolean`
+
+***
+
+### nodeId?
+
+> `optional` **nodeId?**: `string`
+
+***
+
+### plainEnglish
+
+> **plainEnglish**: `string`
+
+***
+
+### premises
+
+> **premises**: `string`
+
+***
+
+### rule
+
+> **rule**: `string`
+
+***
+
+### stepNumber
+
+> **stepNumber**: `number`

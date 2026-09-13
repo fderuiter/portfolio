@@ -25,24 +25,29 @@ const CONSULTATION_TOPICS = [
   {
     icon: <IconCpu className="w-5 h-5 text-brand-cyan" />,
     title: "Code, Systems & Web Craft",
-    description: "Next.js, TypeScript, canvas physics, reactive UI experiments, and open-source side projects.",
+    description:
+      "Next.js, TypeScript, canvas physics, reactive UI experiments, and open-source side projects.",
   },
   {
     icon: <IconShieldCheck className="w-5 h-5 text-brand-cyan" />,
     title: "Healthcare & Clinical Data",
-    description: "GxP eClinical systems, CDISC standards, neuroinformatics pipelines, or venting about medical software.",
+    description:
+      "GxP eClinical systems, CDISC standards, neuroinformatics pipelines, or venting about medical software.",
   },
   {
     icon: <IconBrain className="w-5 h-5 text-brand-cyan" />,
     title: "Saying Hi & Bouncing Ideas",
-    description: "Casual chats, side project feedback, civic tech ideas, or talking about dogs and video games.",
+    description:
+      "Casual chats, side project feedback, civic tech ideas, or talking about dogs and video games.",
   },
 ];
 
 export default function SchedulePage() {
-
   return (
-    <PageLayout variant="standard" className="bg-zinc-950 text-foreground relative overflow-hidden">
+    <PageLayout
+      variant="standard"
+      className="bg-zinc-950 text-foreground relative overflow-hidden"
+    >
       {/* Ambient Atmospheric Glows */}
       <div className="absolute top-24 left-1/2 -translate-x-1/2 w-[650px] h-[320px] bg-brand-cyan/5 blur-[140px] pointer-events-none -z-10 rounded-full" />
       <div className="absolute top-96 right-1/4 w-[450px] h-[280px] bg-brand-blue/5 blur-[120px] pointer-events-none -z-10 rounded-full" />
@@ -58,7 +63,7 @@ export default function SchedulePage() {
           />
           <div className="flex items-center gap-2 text-xs font-mono text-brand-cyan bg-brand-cyan/10 border border-brand-cyan/20 px-3 py-1 rounded-full">
             <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
-            <span>Calendar Live Sync</span>
+            <span>Choose a time</span>
           </div>
         </div>
 
@@ -66,13 +71,15 @@ export default function SchedulePage() {
         <div className="text-center max-w-3xl mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-300 mb-4">
             <IconCalendar className="w-3.5 h-3.5 text-brand-cyan" />
-            <span>Google Calendar &amp; Meet Integration</span>
+            <span>30 minutes on Google Meet</span>
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold font-mono text-white tracking-tight mb-4">
             Say Hi &amp; Book a Chat
           </h1>
           <p className="text-sm sm:text-base text-zinc-400 font-sans leading-relaxed">
-            Grab a friendly 30-minute sync to chat about projects, bounce ideas, talk tech, or swap stories. Choose an available slot below to automatically sync to Google Calendar and generate a Google Meet link.
+            Let’s spend half an hour talking about what you’re working on. Bring
+            a question, an idea, or just yourself. The booking link handles the
+            calendar details.
           </p>
         </div>
 
@@ -106,10 +113,12 @@ export default function SchedulePage() {
           </div>
 
           <h2 className="text-2xl sm:text-3xl font-extrabold font-mono text-white mb-3 tracking-tight">
-            Ready to Connect?
+            Find a time that works.
           </h2>
           <p className="text-sm text-zinc-400 max-w-xl mb-8 leading-relaxed font-sans">
-            Pick a time that works best for you on Google Calendar. It will automatically generate a Google Meet video link and send an invite directly to your inbox.
+            Pick a time that works best for you on Google Calendar. It will
+            automatically generate a Google Meet video link and send an invite
+            directly to your inbox.
           </p>
 
           <a
@@ -118,7 +127,7 @@ export default function SchedulePage() {
             rel="noopener noreferrer"
             className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-brand-cyan text-zinc-950 font-mono font-bold text-sm hover:bg-white transition-all duration-300 shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:scale-105 cursor-pointer"
           >
-            <span>Open Google Calendar Appointments</span>
+            <span>Choose a Time</span>
             <IconExternalLink className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
           </a>
 
@@ -126,15 +135,15 @@ export default function SchedulePage() {
           <div className="mt-10 pt-8 border-t border-zinc-800/60 w-full flex flex-wrap items-center justify-center gap-6 text-xs font-mono text-zinc-400">
             <span className="flex items-center gap-2">
               <IconClock className="w-4 h-4 text-brand-cyan" />
-              <span>30-60 Min Sessions</span>
+              <span>30-Minute Chats</span>
             </span>
             <span className="flex items-center gap-2">
               <IconVideo className="w-4 h-4 text-brand-cyan" />
-              <span>Google Meet Video Bridge</span>
+              <span>Google Meet</span>
             </span>
             <span className="flex items-center gap-2">
               <IconMail className="w-4 h-4 text-brand-cyan" />
-              <span>Instant Gmail Confirmation</span>
+              <span>Email Confirmation</span>
             </span>
           </div>
         </div>
@@ -150,7 +159,7 @@ export default function SchedulePage() {
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-brand-cyan hover:border-brand-cyan/40 transition-colors"
             >
               <IconMessageCode className="w-4 h-4 text-brand-cyan" />
-              <span>Direct Contact Form</span>
+              <span>Send a Message</span>
             </Link>
             <a
               href="https://www.linkedin.com/in/frederick-de-ruiter-88012467/"

@@ -2,7 +2,9 @@ import { Resend } from "resend";
 import crypto from "crypto";
 import * as Sentry from "@sentry/nextjs";
 import { env, getEnv } from "@/lib/env";
-import { prisma } from "@/lib/db";
+import { prisma, SuppressionReason, OutboundEmailStatus } from "@/lib/db";
+
+export type { SuppressionReason, OutboundEmailStatus };
 import { ContactSubmission, ResendWebhookEvent } from "@/lib/schemas";
 import {
   renderContactAdminEmail,
@@ -122,6 +124,40 @@ const DEFAULT_FROM_EMAIL = "Frederick de Ruiter <notifications@deruiter.dev>";
 const MAX_RETRY_ATTEMPTS = 5;
 const BASE_RETRY_DELAY_MS = 1000;
 const MAX_RETRY_DELAY_MS = 600000; // 10 minutes
+const RETRY_LEASE_MS = 5 * 60 * 1000;
+const MAX_RETRY_BATCH_SIZE = 20;
+
+function shouldSimulateEmailDelivery(apiKey: string | undefined): boolean {
+  const currentEnv = getEnv();
+  if (
+    currentEnv.NODE_ENV === "development" ||
+    currentEnv.VERCEL_ENV === "preview" ||
+    currentEnv.VERCEL_ENV === "development"
+  ) {
+    return true;
+  }
+
+  // Unit tests use an obviously synthetic SDK key with a mocked transport.
+  // A real inherited key must never turn the test process into a live sender.
+  if (currentEnv.NODE_ENV === "test") {
+    return !apiKey?.startsWith("re_test_");
+  }
+
+  return !apiKey;
+}
+
+function getRetryDelayMs(queueId: string, attempt: number): number {
+  const digest = crypto
+    .createHash("sha256")
+    .update(`${queueId}:${attempt}`)
+    .digest();
+  const jitterFactor = 0.75 + (digest.readUInt16BE(0) / 65535) * 0.5;
+  const exponentialDelay = BASE_RETRY_DELAY_MS * Math.pow(2, attempt);
+  return Math.min(
+    MAX_RETRY_DELAY_MS,
+    Math.round(exponentialDelay * jitterFactor)
+  );
+}
 
 function isRetryableError(errorMessage: string): boolean {
   const lower = errorMessage.toLowerCase();
@@ -176,30 +212,67 @@ export class EmailService {
 
   /**
    * Records an email address in the suppression list.
+   *
+   * Deliberately lets a database failure propagate instead of swallowing it:
+   * the caller (`handleWebhookEvent`) depends on this rejecting so it can
+   * report the event as unhandled, which in turn makes the webhook route
+   * respond with a retryable non-2xx status instead of acknowledging a
+   * durable write that never happened. The upsert is idempotent by
+   * construction, so a retried delivery (or a partially-failed batch of
+   * recipients being reprocessed from the start) is always safe to replay.
    */
   static async recordSuppression(
     email: string,
-    reason: "BOUNCE" | "COMPLAINT" | "UNSUBSCRIBE"
+    reason: SuppressionReason
   ): Promise<void> {
-    try {
-      await prisma.suppressionList.upsert({
-        where: { email: email.toLowerCase().trim() },
-        create: { email: email.toLowerCase().trim(), reason },
-        update: { reason },
-      });
-    } catch (err) {
-      console.error(`Failed to record suppression for ${email}:`, err);
+    await prisma.suppressionList.upsert({
+      where: { email: email.toLowerCase().trim() },
+      create: { email: email.toLowerCase().trim(), reason },
+      update: { reason },
+    });
+  }
+
+  /**
+   * Reads a queued row's `tags` column back into structured tags.
+   *
+   * Accepts native JSON arrays and, for rows written before tags were stored
+   * natively, a JSON-encoded string. Anything unrecognizable yields undefined
+   * so a malformed column never reaches the provider.
+   */
+  private static parseQueuedTags(
+    raw: unknown
+  ): Array<{ name: string; value: string }> | undefined {
+    let value = raw;
+    if (typeof value === "string") {
+      try {
+        value = JSON.parse(value);
+      } catch {
+        return undefined;
+      }
     }
+    if (!Array.isArray(value)) return undefined;
+    const tags = value.filter(
+      (t): t is { name: string; value: string } =>
+        !!t &&
+        typeof t === "object" &&
+        typeof (t as { name?: unknown }).name === "string" &&
+        typeof (t as { value?: unknown }).value === "string"
+    );
+    return tags.length > 0 ? tags : undefined;
   }
 
   /**
    * Enqueues an email to the persistent OutboundEmailQueue table.
+   *
+   * Returns the durable queue id, or `null` when the row could not be
+   * persisted. A null result means the message is not queued and will not be
+   * retried; callers must not present it as accepted for delivery.
    */
   static async queueOutboundEmail(
     options: RawEmailOptions,
     fromAddress?: string,
     errorReason?: string
-  ): Promise<string> {
+  ): Promise<string | null> {
     const toAddress = Array.isArray(options.to)
       ? options.to.join(", ")
       : options.to;
@@ -219,7 +292,9 @@ export class EmailService {
           subject: options.subject,
           html: options.html,
           text: options.text,
-          tags: options.tags ? JSON.stringify(options.tags) : undefined,
+          // Jsonb column: persist the structured tags themselves. Stringifying
+          // here would store a string scalar that no longer round trips.
+          tags: options.tags ?? undefined,
           attempts: 1,
           status: "RETRYING",
           nextRetryAt,
@@ -228,8 +303,11 @@ export class EmailService {
       });
       return entry.id;
     } catch (err) {
+      // Nothing was persisted, so there is no retry and no queue id to hand
+      // back. Synthesizing one would read to every caller as a durable entry.
+      Sentry.captureException(err);
       console.error("Failed to enqueue outbound email to database:", err);
-      return `queued_fallback_${Date.now()}`;
+      return null;
     }
   }
 
@@ -240,10 +318,14 @@ export class EmailService {
     maxBatchSize?: number;
     now?: Date;
   }): Promise<{ processed: number; succeeded: number; failed: number }> {
-    const limit = options?.maxBatchSize || 20;
+    const limit = Math.min(
+      MAX_RETRY_BATCH_SIZE,
+      Math.max(1, options?.maxBatchSize || MAX_RETRY_BATCH_SIZE)
+    );
     const now = options?.now || new Date();
+    const leaseUntil = new Date(now.getTime() + RETRY_LEASE_MS);
 
-    let items: Array<{
+    const items: Array<{
       id: string;
       to: string;
       from: string;
@@ -253,13 +335,13 @@ export class EmailService {
       text: string | null;
       tags: unknown;
       attempts: number;
-      status: string;
+      status: OutboundEmailStatus;
       nextRetryAt: Date;
       lastError: string | null;
     }> = [];
 
     try {
-      items = await prisma.outboundEmailQueue.findMany({
+      const candidates = await prisma.outboundEmailQueue.findMany({
         where: {
           status: { in: ["PENDING", "RETRYING"] },
           nextRetryAt: { lte: now },
@@ -267,9 +349,26 @@ export class EmailService {
         orderBy: { nextRetryAt: "asc" },
         take: limit,
       });
+
+      // Optimistic row leasing: only one overlapping invocation can move a
+      // still-due row's retry timestamp into the lease window. A crashed
+      // worker releases itself naturally when the lease expires.
+      for (const candidate of candidates) {
+        const lease = await prisma.outboundEmailQueue.updateMany({
+          where: {
+            id: candidate.id,
+            status: { in: ["PENDING", "RETRYING"] },
+            nextRetryAt: { lte: now },
+          },
+          data: { nextRetryAt: leaseUntil },
+        });
+        if (lease.count === 1) {
+          items.push({ ...candidate, nextRetryAt: leaseUntil });
+        }
+      }
     } catch (err) {
       console.error("Error reading OutboundEmailQueue:", err);
-      return { processed: 0, succeeded: 0, failed: 0 };
+      throw err;
     }
 
     let succeeded = 0;
@@ -286,6 +385,7 @@ export class EmailService {
         subject: item.subject,
         html: item.html,
         text: item.text || undefined,
+        tags: this.parseQueuedTags(item.tags),
         skipQueue: true,
       };
 
@@ -315,10 +415,9 @@ export class EmailService {
       }
 
       const apiKey = getEnv().RESEND_API_KEY || env.RESEND_API_KEY;
-      const isVitest = getEnv().VITEST === "1" || env.VITEST === "1";
-
-      // If simulated / test environment without live Resend client
-      if (!client || (isVitest && !apiKey)) {
+      // Preview/development are always simulated, even if a production-like
+      // API key is accidentally attached to the deployment.
+      if (!client || shouldSimulateEmailDelivery(apiKey)) {
         await prisma.outboundEmailQueue.update({
           where: { id: item.id },
           data: { status: "DELIVERED", updatedAt: new Date() },
@@ -328,14 +427,18 @@ export class EmailService {
       }
 
       try {
-        const { error } = await client.emails.send({
-          from: item.from,
-          to: rawOptions.to,
-          replyTo: item.replyTo || undefined,
-          subject: item.subject,
-          html: item.html,
-          text: item.text || undefined,
-        });
+        const { error } = await client.emails.send(
+          {
+            from: item.from,
+            to: rawOptions.to,
+            replyTo: item.replyTo || undefined,
+            subject: item.subject,
+            html: item.html,
+            text: item.text || undefined,
+            tags: rawOptions.tags,
+          },
+          { idempotencyKey: `portfolio-email-${item.id}` }
+        );
 
         if (error) {
           const nextAttempts = item.attempts + 1;
@@ -350,16 +453,13 @@ export class EmailService {
             });
             failed++;
           } else {
-            const delay = Math.min(
-              MAX_RETRY_DELAY_MS,
-              BASE_RETRY_DELAY_MS * Math.pow(2, nextAttempts)
-            );
+            const delay = getRetryDelayMs(item.id, nextAttempts);
             await prisma.outboundEmailQueue.update({
               where: { id: item.id },
               data: {
                 status: "RETRYING",
                 attempts: nextAttempts,
-                nextRetryAt: new Date(Date.now() + delay),
+                nextRetryAt: new Date(now.getTime() + delay),
                 lastError: error.message,
               },
             });
@@ -389,16 +489,13 @@ export class EmailService {
           });
           failed++;
         } else {
-          const delay = Math.min(
-            MAX_RETRY_DELAY_MS,
-            BASE_RETRY_DELAY_MS * Math.pow(2, nextAttempts)
-          );
+          const delay = getRetryDelayMs(item.id, nextAttempts);
           await prisma.outboundEmailQueue.update({
             where: { id: item.id },
             data: {
               status: "RETRYING",
               attempts: nextAttempts,
-              nextRetryAt: new Date(Date.now() + delay),
+              nextRetryAt: new Date(now.getTime() + delay),
               lastError: msg,
             },
           });
@@ -410,8 +507,46 @@ export class EmailService {
     return { processed: items.length, succeeded, failed };
   }
 
+  /** Returns secret-free operational health for the durable retry queue. */
+  static async getRetryQueueHealth(now: Date = new Date()): Promise<{
+    depth: number;
+    oldestPendingAgeMs: number | null;
+    terminalFailures: number;
+    retryExhausted: number;
+  }> {
+    const pendingStatuses: OutboundEmailStatus[] = ["PENDING", "RETRYING"];
+    const pendingWhere = { status: { in: pendingStatuses } };
+    const [depth, oldest, terminalFailures, retryExhausted] = await Promise.all(
+      [
+        prisma.outboundEmailQueue.count({ where: pendingWhere }),
+        prisma.outboundEmailQueue.findFirst({
+          where: pendingWhere,
+          orderBy: { createdAt: "asc" },
+          select: { createdAt: true },
+        }),
+        prisma.outboundEmailQueue.count({ where: { status: "FAILED" } }),
+        prisma.outboundEmailQueue.count({
+          where: { status: "FAILED", attempts: { gte: MAX_RETRY_ATTEMPTS } },
+        }),
+      ]
+    );
+
+    return {
+      depth,
+      oldestPendingAgeMs: oldest
+        ? Math.max(0, now.getTime() - oldest.createdAt.getTime())
+        : null,
+      terminalFailures,
+      retryExhausted,
+    };
+  }
+
   /**
    * Processes incoming Resend deliverability webhook event.
+   *
+   * `handled: false` signals a durable-processing failure (e.g. the
+   * suppression-list write threw) rather than a no-op event type; callers
+   * must treat that as retryable and must not acknowledge the delivery.
    */
   static async handleWebhookEvent(
     event: ResendWebhookEvent
@@ -462,10 +597,8 @@ export class EmailService {
       options.from || env.RESEND_FROM_EMAIL || DEFAULT_FROM_EMAIL;
 
     const apiKey = getEnv().RESEND_API_KEY || env.RESEND_API_KEY;
-    const isVitest = getEnv().VITEST === "1" || env.VITEST === "1";
-
-    // If no API key is provisioned, or running in Vitest test harness without live mocks, simulate delivery
-    if (!client || (isVitest && !apiKey)) {
+    // Missing credentials and every non-production deployment are simulated.
+    if (!client || shouldSimulateEmailDelivery(apiKey)) {
       const simulatedId = `sim_msg_${Math.random().toString(36).substring(2, 10)}`;
 
       if (env.NODE_ENV === "development") {
@@ -504,11 +637,17 @@ export class EmailService {
             fromAddress,
             error.message
           );
+          if (queueId) {
+            return {
+              success: true,
+              queued: true,
+              queueId,
+              data: { id: queueId },
+            };
+          }
           return {
-            success: true,
-            queued: true,
-            queueId,
-            data: { id: queueId },
+            success: false,
+            error: `${error.message} (retry could not be queued; message not delivered)`,
           };
         }
 
@@ -536,11 +675,17 @@ export class EmailService {
           fromAddress,
           errorMessage
         );
+        if (queueId) {
+          return {
+            success: true,
+            queued: true,
+            queueId,
+            data: { id: queueId },
+          };
+        }
         return {
-          success: true,
-          queued: true,
-          queueId,
-          data: { id: queueId },
+          success: false,
+          error: `${errorMessage} (retry could not be queued; message not delivered)`,
         };
       }
 

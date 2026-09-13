@@ -4,6 +4,11 @@ import { PrismaClient } from "@/app/generated/prisma/client";
 import ws from "ws";
 import { getEnv } from "./env";
 
+export {
+  SuppressionReason,
+  OutboundEmailStatus,
+} from "@/app/generated/prisma/enums";
+
 // Configure Neon to use native 'ws' package inside Node.js environments (like Next.js build server)
 neonConfig.webSocketConstructor = ws;
 

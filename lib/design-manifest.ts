@@ -28,7 +28,7 @@ export const designManifest = {
     /** Original CSS Variable: --brand-blue */
     "brand-blue": "#3b82f6",
     /** Original CSS Variable: --brand-blue-glow */
-    "brand-blue-glow": "rgba(59, 130, 246, 0.10)",
+    "brand-blue-glow": "rgba(59, 130, 246, 0.1)",
     /** Original CSS Variable: --brand-dark */
     "brand-dark": "#0d0e11",
     /** Original CSS Variable: --success */
@@ -76,9 +76,9 @@ export const designManifest = {
     /** Original CSS Variable: --layout-studio-budget */
     studioBudget: "calc(100dvh - var(--layout-header-height))",
     /** Original CSS Variable: --layout-viewport-budget */
-    viewportBudget: "calc(100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px))",
+    viewportBudget: "calc(\n    100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px)\n  )",
     /** Original CSS Variable: --layout-workspace-budget */
-    workspaceBudget: "calc(100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px) - var(--layout-studio-header-height, 0px))",
+    workspaceBudget: "calc(\n    100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px) -\n      var(--layout-studio-header-height, 0px)\n  )",
   },
   breakpoints: {
     /** Original CSS Variable: --breakpoint-sm */

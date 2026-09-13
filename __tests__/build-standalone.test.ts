@@ -1,32 +1,54 @@
 import { describe, it, expect, vi } from "vitest";
 import fs from "fs";
+import { execFileSync } from "child_process";
+import os from "os";
 import path from "path";
-import { execSync } from "child_process";
 import { inspectStandaloneBundle } from "../lib/dx/bundle-guard";
 import { fromPartial } from "@total-typescript/shoehorn";
 
 describe("Standalone JavaScript Engine Build & 50KB Size Guard", () => {
   const root = process.cwd();
-  const garminJsPath = path.join(root, "public", "garmin-engine.js");
-  const monkeyJsPath = path.join(root, "public", "monkey-c-mayhem.js");
 
   it("compiles the engine into standalone Vanilla JS assets under 50KB via build-standalone-engine script", () => {
-    const output = execSync("npx tsx scripts/build-standalone-engine.ts", {
-      cwd: root,
-      encoding: "utf-8",
-    });
+    const outputDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), "portfolio-standalone-test-")
+    );
+    const tsxCli = path.join(root, "node_modules", "tsx", "dist", "cli.mjs");
 
-    expect(output).toContain("Standalone Engine Build & Size Check Passed");
-    expect(fs.existsSync(garminJsPath)).toBe(true);
-    expect(fs.existsSync(monkeyJsPath)).toBe(true);
+    try {
+      const output = execFileSync(
+        process.execPath,
+        [
+          tsxCli,
+          path.join(root, "scripts", "build-standalone-engine.ts"),
+          "--source-root",
+          root,
+          "--output-dir",
+          outputDir,
+        ],
+        { cwd: root, encoding: "utf-8" }
+      );
 
-    const garminStats = fs.statSync(garminJsPath);
-    const monkeyStats = fs.statSync(monkeyJsPath);
+      expect(output).toContain("Standalone Engine Build & Size Check Passed");
+      expect(fs.existsSync(path.join(outputDir, "garmin-engine.js"))).toBe(
+        true
+      );
+      expect(fs.existsSync(path.join(outputDir, "monkey-c-mayhem.js"))).toBe(
+        true
+      );
 
-    expect(garminStats.size).toBeGreaterThan(0);
-    expect(garminStats.size).toBeLessThanOrEqual(50 * 1024);
-    expect(monkeyStats.size).toBeGreaterThan(0);
-    expect(monkeyStats.size).toBeLessThanOrEqual(50 * 1024);
+      const garminStats = fs.statSync(path.join(outputDir, "garmin-engine.js"));
+      const monkeyStats = fs.statSync(
+        path.join(outputDir, "monkey-c-mayhem.js")
+      );
+
+      expect(garminStats.size).toBeGreaterThan(0);
+      expect(garminStats.size).toBeLessThanOrEqual(50 * 1024);
+      expect(monkeyStats.size).toBeGreaterThan(0);
+      expect(monkeyStats.size).toBeLessThanOrEqual(50 * 1024);
+    } finally {
+      fs.rmSync(outputDir, { recursive: true, force: true });
+    }
   });
 
   it("inspects standalone bundle size cleanly via bundle-guard", () => {

@@ -18,7 +18,15 @@ export interface SoundboardButton {
   category: "dev" | "medtech" | "lore" | "retro" | "classic";
   description: string;
   accent: string;
-  synthType: "bark" | "laser" | "friday-alarm" | "matrix-glitch" | "teapot-whistle" | "modem" | "fda-siren" | "level-up";
+  synthType:
+    | "bark"
+    | "laser"
+    | "friday-alarm"
+    | "matrix-glitch"
+    | "teapot-whistle"
+    | "modem"
+    | "fda-siren"
+    | "level-up";
 }
 
 export interface EasterEggAchievement {
@@ -34,70 +42,80 @@ export const MEME_QUOTES: MemeQuote[] = [
   {
     id: "git-force",
     category: "dev",
-    quote: "git push --force origin main: Because confidence is when you break production with full commit.",
+    quote:
+      "git push --force origin main: Because confidence is when you break production with full commit.",
     author: "Senior Staff Architect at 4:59 PM on a Friday",
     tagline: "DevOps Roulette",
   },
   {
     id: "node-modules",
     category: "dev",
-    quote: "There are only three things of infinite mass in the universe: supermassive black holes, human curiosity, and node_modules.",
+    quote:
+      "There are only three things of infinite mass in the universe: supermassive black holes, human curiosity, and node_modules.",
     author: "Theoretical Package Physicist",
     tagline: "Bundle Gravity",
   },
   {
     id: "works-on-machine",
     category: "dev",
-    quote: "It works on my machine! ...Then we will ship your machine to the cloud datacenter.",
+    quote:
+      "It works on my machine! ...Then we will ship your machine to the cloud datacenter.",
     author: "Every Developer Since 1995",
     tagline: "Docker Origin Story",
   },
   {
     id: "fda-part-11",
     category: "medtech",
-    quote: "21 CFR Part 11: If it wasn't electronically timestamped, audit-trailed, and digitally signed in triplicate, did the clinical trial even occur?",
+    quote:
+      "21 CFR Part 11: If it wasn't electronically timestamped, audit-trailed, and digitally signed in triplicate, did the clinical trial even occur?",
     author: "Lead Regulatory Auditor",
     tagline: "CDISC Compliance",
   },
   {
     id: "sdtm-validation",
     category: "medtech",
-    quote: "All subjects are healthy until you run the SDTM domain validator across the AE dataset.",
+    quote:
+      "All subjects are healthy until you run the SDTM domain validator across the AE dataset.",
     author: "Principal Biostatistician",
     tagline: "Protocol Anomaly",
   },
   {
     id: "duck-puppy",
     category: "lore",
-    quote: "Duck the puppy has achieved 100% test coverage by chewing through the Ethernet cable.",
+    quote:
+      "Duck the puppy has achieved 100% test coverage by chewing through the Ethernet cable.",
     author: "Chief Bark Officer",
     tagline: "Lake Minnetonka QA",
   },
   {
     id: "laser-loon",
     category: "lore",
-    quote: "Blasting through red tape and rival flags with pure Lake Minnetonka cryo-ray optics.",
+    quote:
+      "Blasting through red tape and rival flags with pure Lake Minnetonka cryo-ray optics.",
     author: "Submission F277 State Flag Committee",
     tagline: "Civic Arcade",
   },
   {
     id: "http-418",
     category: "classic",
-    quote: "Error 418: I'm a teapot. RFC 2324 Hyper Text Coffee Pot Control Protocol is alive and brewing.",
+    quote:
+      "Error 418: I'm a teapot. RFC 2324 Hyper Text Coffee Pot Control Protocol is alive and brewing.",
     author: "IETF Network Working Group",
     tagline: "RFC 2324",
   },
   {
     id: "rust-borrow",
     category: "dev",
-    quote: "The Rust borrow checker doesn't just reject your code; it questions your life choices in lifetimes.",
+    quote:
+      "The Rust borrow checker doesn't just reject your code; it questions your life choices in lifetimes.",
     author: "Zero-Cost Abstinence Fanatic",
     tagline: "Memory Safety",
   },
   {
     id: "ai-hallucination",
     category: "dev",
-    quote: "The LLM was 99.9% confident that 2 + 2 = 5 with full citations from non-existent papers.",
+    quote:
+      "The LLM was 99.9% confident that 2 + 2 = 5 with full citations from non-existent papers.",
     author: "Autonomous Agent Orchestrator",
     tagline: "P-Value Drift",
   },
@@ -110,7 +128,8 @@ export const SOUNDBOARD_BUTTONS: SoundboardButton[] = [
     emoji: "🐾",
     category: "lore",
     description: "Synthesized golden retriever puppy bark from Duck.",
-    accent: "from-amber-500/20 to-amber-600/20 text-amber-300 border-amber-500/40",
+    accent:
+      "from-amber-500/20 to-amber-600/20 text-amber-300 border-amber-500/40",
     synthType: "bark",
   },
   {
@@ -137,7 +156,8 @@ export const SOUNDBOARD_BUTTONS: SoundboardButton[] = [
     emoji: "💾",
     category: "retro",
     description: "Cyberpunk CRT digital cascade burst.",
-    accent: "from-emerald-500/20 to-green-600/20 text-emerald-300 border-emerald-500/40",
+    accent:
+      "from-emerald-500/20 to-green-600/20 text-emerald-300 border-emerald-500/40",
     synthType: "matrix-glitch",
   },
   {
@@ -146,7 +166,8 @@ export const SOUNDBOARD_BUTTONS: SoundboardButton[] = [
     emoji: "🫖",
     category: "classic",
     description: "HTCPCP 1.0 whistle and pressure release steam.",
-    accent: "from-teal-500/20 to-emerald-600/20 text-teal-300 border-teal-500/40",
+    accent:
+      "from-teal-500/20 to-emerald-600/20 text-teal-300 border-teal-500/40",
     synthType: "teapot-whistle",
   },
   {
@@ -155,7 +176,8 @@ export const SOUNDBOARD_BUTTONS: SoundboardButton[] = [
     emoji: "📞",
     category: "retro",
     description: "Nostalgic 1996 V.90 modem negotiation frequencies.",
-    accent: "from-indigo-500/20 to-purple-600/20 text-indigo-300 border-indigo-500/40",
+    accent:
+      "from-indigo-500/20 to-purple-600/20 text-indigo-300 border-indigo-500/40",
     synthType: "modem",
   },
   {
@@ -164,7 +186,8 @@ export const SOUNDBOARD_BUTTONS: SoundboardButton[] = [
     emoji: "📋",
     category: "medtech",
     description: "High-voltage buzzer when CDISC validation fails.",
-    accent: "from-yellow-500/20 to-amber-600/20 text-yellow-300 border-yellow-500/40",
+    accent:
+      "from-yellow-500/20 to-amber-600/20 text-yellow-300 border-yellow-500/40",
     synthType: "fda-siren",
   },
   {
@@ -173,7 +196,8 @@ export const SOUNDBOARD_BUTTONS: SoundboardButton[] = [
     emoji: "⭐",
     category: "retro",
     description: "Arpeggiated 8-bit arcade triumph chime.",
-    accent: "from-purple-500/20 to-pink-600/20 text-purple-300 border-purple-500/40",
+    accent:
+      "from-purple-500/20 to-pink-600/20 text-purple-300 border-purple-500/40",
     synthType: "level-up",
   },
 ];
@@ -182,21 +206,24 @@ export const EASTER_EGG_ACHIEVEMENTS: EasterEggAchievement[] = [
   {
     id: "konami-hero",
     title: "Konami Code Pioneer",
-    description: "Entered the legendary sequence (↑ ↑ ↓ ↓ ← → ← → B A) on the keyboard.",
+    description:
+      "Entered the legendary sequence (↑ ↑ ↓ ↓ ← → ← → B A) on the keyboard.",
     icon: "🕹️",
     hint: "Enter the classic retro code on any page.",
   },
   {
     id: "terminal-cowboy",
     title: "Terminal Cowboy",
-    description: "Executed UNIX easter eggs (cowsay, loon, sl, or matrix) in the Sandbox Terminal.",
+    description:
+      "Executed UNIX easter eggs (cowsay, loon, sl, or matrix) in the Sandbox Terminal.",
     icon: "💻",
     hint: "Explore UNIX and dev commands in the interactive terminal.",
   },
   {
     id: "duck-whisperer",
     title: "Duck Whisperer",
-    description: "Clicked Duck the Golden Retriever in the footer and tossed a treat.",
+    description:
+      "Clicked Duck the Golden Retriever in the footer and tossed a treat.",
     icon: "🐾",
     hint: "Find and click Duck resting at the bottom of the page.",
   },
@@ -210,31 +237,35 @@ export const EASTER_EGG_ACHIEVEMENTS: EasterEggAchievement[] = [
   {
     id: "soundboard-maestro",
     title: "Soundboard Maestro",
-    description: "Sampled synthesized retro audio effects in the Secret Meme Vault.",
+    description:
+      "Sampled synthesized retro audio effects in the Secret Meme Vault.",
     icon: "🎧",
     hint: "Play sounds in the Meme Vault room.",
   },
   {
     id: "friday-survivor",
     title: "Friday Deploy Survivor",
-    description: "Attempted a simulated 'git push --force origin main' in the terminal.",
+    description:
+      "Attempted a simulated 'git push --force origin main' in the terminal.",
     icon: "🚨",
     hint: "Try force-pushing in the terminal.",
   },
 ];
 
 export const STATUS_TICKER_ITEMS: string[] = [
-  "Build: Passing (0 errors, 418 warnings)",
-  "Duck Status: Sleeping on keyboard 🐾",
-  "CDISC 21 CFR Part 11: 100% Audit-Trailed",
-  "Laser Loon: Optics charged to 100% 🦆",
-  "Staging: Deployed on Friday with 0 fear",
-  "RAM Footprint: Exactly 31.9 KB of 32 KB",
-  "Lake Minnetonka Water Cooling: 4.2°C",
-  "LLM Temperature: 0.0 (Zero Hallucination Mode)",
+  "Duck would like a word.",
+  "The lasers were a design choice.",
+  "One more tab should do it.",
+  "The footnotes have footnotes.",
+  "A small project, allegedly.",
+  "Yes, the loon needed lasers.",
+  "Still thinking about that bug.",
+  "Duck has requested a park break.",
 ];
 
-export const ASCII_COWSAY = (text: string = "Moo! Ships with 100% test coverage."): string => {
+export const ASCII_COWSAY = (
+  text: string = "Moo! Ships with 100% test coverage."
+): string => {
   const line = "-".repeat(text.length + 2);
   return `  ${line}
 < ${text} >
@@ -323,7 +354,10 @@ export const MEME_STORAGE_KEYS = {
 } as const;
 
 export function getUnlockedAchievements(): string[] {
-  if (typeof window === "undefined" || typeof window.localStorage?.getItem !== "function") {
+  if (
+    typeof window === "undefined" ||
+    typeof window.localStorage?.getItem !== "function"
+  ) {
     return [];
   }
   try {
@@ -335,15 +369,25 @@ export function getUnlockedAchievements(): string[] {
 }
 
 export function unlockAchievement(achievementId: string): boolean {
-  if (typeof window === "undefined" || typeof window.localStorage?.setItem !== "function") {
+  if (
+    typeof window === "undefined" ||
+    typeof window.localStorage?.setItem !== "function"
+  ) {
     return false;
   }
   try {
     const current = getUnlockedAchievements();
     if (!current.includes(achievementId)) {
       const next = [...current, achievementId];
-      window.localStorage.setItem(MEME_STORAGE_KEYS.ACHIEVEMENTS, JSON.stringify(next));
-      window.dispatchEvent(new CustomEvent("meme_achievement_unlocked", { detail: { id: achievementId } }));
+      window.localStorage.setItem(
+        MEME_STORAGE_KEYS.ACHIEVEMENTS,
+        JSON.stringify(next)
+      );
+      window.dispatchEvent(
+        new CustomEvent("meme_achievement_unlocked", {
+          detail: { id: achievementId },
+        })
+      );
       return true;
     }
     return false;
@@ -353,23 +397,36 @@ export function unlockAchievement(achievementId: string): boolean {
 }
 
 export function isVaultUnlocked(): boolean {
-  if (typeof window === "undefined" || typeof window.localStorage?.getItem !== "function") {
+  if (
+    typeof window === "undefined" ||
+    typeof window.localStorage?.getItem !== "function"
+  ) {
     return false;
   }
   try {
-    return window.localStorage.getItem(MEME_STORAGE_KEYS.VAULT_UNLOCKED) === "true";
+    return (
+      window.localStorage.getItem(MEME_STORAGE_KEYS.VAULT_UNLOCKED) === "true"
+    );
   } catch {
     return false;
   }
 }
 
 export function setVaultUnlocked(unlocked: boolean = true): void {
-  if (typeof window === "undefined" || typeof window.localStorage?.setItem !== "function") {
+  if (
+    typeof window === "undefined" ||
+    typeof window.localStorage?.setItem !== "function"
+  ) {
     return;
   }
   try {
-    window.localStorage.setItem(MEME_STORAGE_KEYS.VAULT_UNLOCKED, unlocked ? "true" : "false");
-    window.dispatchEvent(new CustomEvent("meme_vault_unlocked_change", { detail: { unlocked } }));
+    window.localStorage.setItem(
+      MEME_STORAGE_KEYS.VAULT_UNLOCKED,
+      unlocked ? "true" : "false"
+    );
+    window.dispatchEvent(
+      new CustomEvent("meme_vault_unlocked_change", { detail: { unlocked } })
+    );
   } catch {
     // Ignore storage errors in restricted contexts
   }

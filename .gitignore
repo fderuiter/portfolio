@@ -23,6 +23,7 @@
 
 # production
 /build
+/.benchmark-results/
 
 # misc
 .DS_Store
@@ -51,6 +52,7 @@ next-env.d.ts
 *.log
 app/theme.css
 /.scratch
+/scratch/
 
 # clerk configuration (can include secrets)
 /.clerk/

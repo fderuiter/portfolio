@@ -4,7 +4,10 @@ import path from "path";
 import { RetroLabyrinth } from "@/components/RetroLabyrinth";
 
 describe("RetroLabyrinth Component Architecture & Functional Rules", () => {
-  const componentPath = path.resolve(__dirname, "../components/RetroLabyrinth.tsx");
+  const componentPath = path.resolve(
+    __dirname,
+    "../components/RetroLabyrinth.tsx"
+  );
   const content = fs.readFileSync(componentPath, "utf-8");
 
   it("exports a function or component named RetroLabyrinth", () => {
@@ -74,11 +77,16 @@ describe("RetroLabyrinth Component Architecture & Functional Rules", () => {
 });
 
 describe("Direct Inline Coordinate Scaling & Index Clamping Invariants", () => {
-  const componentPath = path.resolve(__dirname, "../components/RetroLabyrinth.tsx");
+  const componentPath = path.resolve(
+    __dirname,
+    "../components/RetroLabyrinth.tsx"
+  );
   const content = fs.readFileSync(componentPath, "utf-8");
 
   it("includes defensive zero-dimension guard for canvas bounding box", () => {
-    expect(content).toContain("if (rect.width <= 0 || rect.height <= 0) return;");
+    expect(content).toContain(
+      "if (rect.width <= 0 || rect.height <= 0) return;"
+    );
   });
 
   it("calculates scaling ratio based on internal canvas resolution and bounding rect", () => {
@@ -87,8 +95,12 @@ describe("Direct Inline Coordinate Scaling & Index Clamping Invariants", () => {
   });
 
   it("transforms client event offsets to internal canvas logical coordinates", () => {
-    expect(content).toContain("const canvasX = (e.clientX - rect.left) * scaleX;");
-    expect(content).toContain("const canvasY = (e.clientY - rect.top) * scaleY;");
+    expect(content).toContain(
+      "const canvasX = (e.clientX - rect.left) * scaleX;"
+    );
+    expect(content).toContain(
+      "const canvasY = (e.clientY - rect.top) * scaleY;"
+    );
   });
 
   it("clamps calculated grid indices within valid column and row bounds", () => {
@@ -118,11 +130,16 @@ describe("CommandPalette Roguelike Registration", () => {
 });
 
 describe("Component-Level Pathfinding Memoization Invariants", () => {
-  const componentPath = path.resolve(__dirname, "../components/RetroLabyrinth.tsx");
+  const componentPath = path.resolve(
+    __dirname,
+    "../components/RetroLabyrinth.tsx"
+  );
   const content = fs.readFileSync(componentPath, "utf-8");
 
   it("imports useMemo from react", () => {
-    expect(content).toMatch(/import\s+.*useMemo.*from\s+["']react["']/);
+    expect(content).toMatch(
+      /import\s+[\s\S]*?useMemo[\s\S]*?from\s+["']react["']/
+    );
   });
 
   it("memoizes Traveling Salesman pathfinding tour using useMemo", () => {

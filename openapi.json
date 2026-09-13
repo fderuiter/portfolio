@@ -390,7 +390,7 @@
       },
       "post": {
         "summary": "Ingest telemetry event",
-        "description": "Saves telemetry transaction events and implements high-availability failover buffering.",
+        "description": "Buffers telemetry transaction events for asynchronous synchronization to the primary datastore. The Redis buffer is the only store in front of the sync job, so a failed enqueue drops the event: such a request is answered with 202 and durable=false rather than being reported as stored.",
         "requestBody": {
           "required": true,
           "content": {
@@ -403,7 +403,7 @@
         },
         "responses": {
           "201": {
-            "description": "Event ingested successfully",
+            "description": "Event buffered durably",
             "content": {
               "application/json": {
                 "schema": {
@@ -411,6 +411,10 @@
                   "properties": {
                     "success": {
                       "type": "boolean"
+                    },
+                    "durable": {
+                      "type": "boolean",
+                      "description": "Whether the event was accepted into the durable buffer. False means the event was dropped."
                     },
                     "event": {
                       "type": "object",
@@ -439,6 +443,55 @@
                   },
                   "required": [
                     "success",
+                    "durable",
+                    "event"
+                  ]
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Event accepted but not durably buffered; the buffer write failed and the event was dropped. Clients must not retry.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "durable": {
+                      "type": "boolean",
+                      "description": "Whether the event was accepted into the durable buffer. False means the event was dropped."
+                    },
+                    "event": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "projectSlug": {
+                          "type": "string"
+                        },
+                        "eventType": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "projectSlug",
+                        "eventType",
+                        "createdAt"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "durable",
                     "event"
                   ]
                 }
@@ -464,10 +517,54 @@
         }
       }
     },
+    "/api/cron/maintenance": {
+      "get": {
+        "summary": "Run the unified daily maintenance pipeline",
+        "description": "Authenticated Vercel Hobby cron route that drains telemetry and reaction buffers, processes a bounded email retry batch, and rolls raw telemetry older than 30 days into daily aggregates before pruning it. Returns isolated per-phase outcomes under an eight-second overall deadline.",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "description": "Bearer authorization secret token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "batch",
+            "in": "query",
+            "required": false,
+            "description": "Maximum telemetry and reaction items to drain",
+            "schema": {
+              "$ref": "#/components/schemas/SyncParams"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Complete or partial execution summary with isolated phase counts, durations, and errors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaintenanceSummary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid batch parameters"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
     "/api/telemetry/sync": {
       "get": {
         "summary": "Cron synchronization of buffered events",
-        "description": "Pulls buffered telemetry events from secondary Redis cache and flushes them to primary datastore in batches.",
+        "description": "Backward-compatible alias for the unified daily maintenance pass. Pulls buffered telemetry events from the secondary Redis cache and flushes them to the primary datastore in batches, then drains the case-study reaction write-buffer into Postgres.",
         "parameters": [
           {
             "name": "Authorization",
@@ -504,6 +601,22 @@
                     },
                     "inserted": {
                       "type": "integer"
+                    },
+                    "reactions": {
+                      "type": "object",
+                      "description": "Case-study reaction write-buffer drain counters.",
+                      "properties": {
+                        "processed": {
+                          "type": "integer"
+                        },
+                        "inserted": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "processed",
+                        "inserted"
+                      ]
                     }
                   },
                   "required": [
@@ -710,6 +823,76 @@
   },
   "components": {
     "schemas": {
+      "MaintenanceSummary": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "partial": {
+            "type": "boolean"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "durationMs": {
+            "type": "integer"
+          },
+          "deadlineMs": {
+            "type": "integer",
+            "maximum": 8000
+          },
+          "phases": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "completed",
+                    "failed",
+                    "timed_out",
+                    "skipped"
+                  ]
+                },
+                "durationMs": {
+                  "type": "integer"
+                },
+                "counts": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "integer",
+                    "nullable": true
+                  }
+                },
+                "error": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "status",
+                "durationMs",
+                "counts"
+              ]
+            }
+          }
+        },
+        "required": [
+          "success",
+          "partial",
+          "startedAt",
+          "completedAt",
+          "durationMs",
+          "deadlineMs",
+          "phases"
+        ]
+      },
       "CaseStudySummary": {
         "type": "object",
         "properties": {
