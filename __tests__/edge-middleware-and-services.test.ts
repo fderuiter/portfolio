@@ -3,13 +3,7 @@ import { NextRequest, NextResponse, type NextFetchEvent } from "next/server";
 import { fromPartial } from "@total-typescript/shoehorn";
 
 // Mock database and upstash redis dependencies
-vi.mock("@/lib/db", async (importOriginal) => {
-  const isLiveDb = !!(
-    process.env.DATABASE_URL && !process.env.DATABASE_URL.includes("dummy")
-  );
-  if (isLiveDb) {
-    return await importOriginal<typeof import("@/lib/db")>();
-  }
+vi.mock("@/lib/db", () => {
   return {
     prisma: {
       caseStudy: {

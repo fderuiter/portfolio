@@ -5,162 +5,18 @@
 
 import { chromium, type Browser, type Page } from "@playwright/test";
 import { colors, formatHeader, formatSection, renderTable } from "./utils";
+import {
+  PUBLIC_ROUTE_REGISTRY,
+  type PublicRouteDefinition,
+} from "@/lib/public-routes";
 import fs from "fs";
 import path from "path";
 
-export interface PageBenchmarkRoute {
-  path: string;
-  name: string;
-  category: "top-level" | "case-study" | "arcade" | "tool";
-}
+export type PageBenchmarkRoute = PublicRouteDefinition;
 
-export const CANONICAL_ROUTES: PageBenchmarkRoute[] = [
-  // Top-Level Navigation
-  { path: "/", name: "Homepage (Pretext & Bio)", category: "top-level" },
-  { path: "/case-studies", name: "Case Studies Index", category: "top-level" },
-  { path: "/arcade", name: "Arcade Hub", category: "top-level" },
-  { path: "/proof", name: "Formal Proof Studio", category: "tool" },
-  { path: "/neuro", name: "Neuro 3D Simulator", category: "tool" },
-  { path: "/crf", name: "CRF Builder & AST", category: "tool" },
-  { path: "/simulator", name: "System Dynamics Simulator", category: "tool" },
-  { path: "/schedule", name: "Schedule / Calendar", category: "top-level" },
-  { path: "/offline", name: "Offline Fallback View", category: "top-level" },
-
-  // Deep Case Studies
-  {
-    path: "/case-studies/clinical-data-mapper",
-    name: "CS: Clinical Data Mapper",
-    category: "case-study",
-  },
-  {
-    path: "/case-studies/cadence-clinical",
-    name: "CS: Cadence Clinical",
-    category: "case-study",
-  },
-  {
-    path: "/case-studies/schemaflow",
-    name: "CS: SchemaFlow",
-    category: "case-study",
-  },
-  {
-    path: "/case-studies/imednet-python-sdk",
-    name: "CS: iMedNet SDK",
-    category: "case-study",
-  },
-  {
-    path: "/case-studies/wedding-website",
-    name: "CS: Wedding Platform",
-    category: "case-study",
-  },
-  {
-    path: "/case-studies/hono-kiln",
-    name: "CS: Hono-Kiln Runtime",
-    category: "case-study",
-  },
-  {
-    path: "/case-studies/inbody-qr-decoder",
-    name: "CS: InBody QR Decoder",
-    category: "case-study",
-  },
-  {
-    path: "/case-studies/oxidizemath",
-    name: "CS: OxidizeMath",
-    category: "case-study",
-  },
-  {
-    path: "/case-studies/ualbf",
-    name: "CS: UALBF Engine",
-    category: "case-study",
-  },
-  {
-    path: "/case-studies/laser-loon",
-    name: "CS: Laser Loon",
-    category: "case-study",
-  },
-  {
-    path: "/work/laser-loon",
-    name: "CS: Laser Loon Work Route",
-    category: "case-study",
-  },
-  {
-    path: "/case-studies/sonos-network-controller",
-    name: "CS: Sonos Network Controller",
-    category: "case-study",
-  },
-  {
-    path: "/case-studies/clintrials",
-    name: "CS: clintrials WASM Engine",
-    category: "case-study",
-  },
-  {
-    path: "/case-studies/equipose-randomization",
-    name: "CS: Equipose Randomization",
-    category: "case-study",
-  },
-  {
-    path: "/case-studies/lambda-wave",
-    name: "CS: Lambda-Wave Radar",
-    category: "case-study",
-  },
-  {
-    path: "/case-studies/duckdeploy",
-    name: "CS: DuckDeploy Dynamic UI",
-    category: "case-study",
-  },
-  {
-    path: "/case-studies/cardiac-risk-modeling",
-    name: "CS: Cardiac Risk Modeling",
-    category: "case-study",
-  },
-  {
-    path: "/case-studies/4glory",
-    name: "CS: 4Glory Sports Analytics",
-    category: "case-study",
-  },
-  {
-    path: "/case-studies/crf-xl",
-    name: "CS: CRF.xl CDISC Compiler",
-    category: "case-study",
-  },
-  {
-    path: "/case-studies/promptops",
-    name: "CS: PromptOps LLM Framework",
-    category: "case-study",
-  },
-
-  // Arcade Mini-Games
-  {
-    path: "/arcade/working-with-duck",
-    name: "Game: Duck Canvas Engine",
-    category: "arcade",
-  },
-  { path: "/arcade/laser-loon", name: "Game: Laser Loon", category: "arcade" },
-  {
-    path: "/arcade/quasi-puzzler",
-    name: "Game: Quasi Puzzler",
-    category: "arcade",
-  },
-  {
-    path: "/arcade/garmin-watch",
-    name: "Game: Garmin Watch",
-    category: "arcade",
-  },
-  {
-    path: "/arcade/clinical-chaos",
-    name: "Game: Clinical Chaos",
-    category: "arcade",
-  },
-  {
-    path: "/arcade/retro-labyrinth",
-    name: "Game: Retro Labyrinth",
-    category: "arcade",
-  },
-  {
-    path: "/arcade/meme-vault",
-    name: "Game: Secret Meme Vault",
-    category: "arcade",
-  },
-];
+export const CANONICAL_ROUTES: PageBenchmarkRoute[] = PUBLIC_ROUTE_REGISTRY.map(
+  (route) => ({ ...route })
+);
 
 export interface SingleRunMetrics {
   ttfb: number; // Time to First Byte (ms)

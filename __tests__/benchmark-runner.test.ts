@@ -88,10 +88,14 @@ describe("production benchmark runner", () => {
     const setup = dependencies({
       startProductionServer: vi.fn(async () => ({
         stop: occupiedStop,
-        diagnostics: () => "Error: listen EADDRINUSE: address already in use :::4312",
+        diagnostics: () =>
+          "Error: listen EADDRINUSE: address already in use :::4312",
         isReady: () => false,
       })),
-      waitForServer: vi.fn(async () => ({ ready: true, diagnostics: "HTTP 200 from existing target" })),
+      waitForServer: vi.fn(async () => ({
+        ready: true,
+        diagnostics: "HTTP 200 from existing target",
+      })),
     });
 
     await expect(

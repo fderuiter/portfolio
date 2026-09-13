@@ -2,7 +2,7 @@
 import React from "react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-import { render, screen, fireEvent } from "@testing-library/react";
+import { cleanup, render, screen, fireEvent } from "@testing-library/react";
 import OfflineFallbackPage from "@/app/offline/page";
 import { SerwistRegister } from "@/components/providers/SerwistRegister";
 import { loadExternalBrainMesh } from "@/lib/neuro/asset-loader";
@@ -22,17 +22,51 @@ vi.mock("next/navigation", () => ({
 
 describe("Serwist PWA Engine & Offline App Shell Integration", () => {
   let originalLocation: Location;
+  let originalOnLineDescriptor: PropertyDescriptor | undefined;
 
   beforeEach(() => {
     originalLocation = window.location;
+    originalOnLineDescriptor = Object.getOwnPropertyDescriptor(
+      navigator,
+      "onLine"
+    );
   });
 
   afterEach(() => {
+    cleanup();
+    if (originalOnLineDescriptor) {
+      Object.defineProperty(navigator, "onLine", originalOnLineDescriptor);
+    }
     vi.restoreAllMocks();
   });
 
   describe("Requirement 1 & 3: Offline Fallback Page", () => {
+    it("describes an online navigation failure without claiming the visitor is offline", () => {
+      Object.defineProperty(navigator, "onLine", {
+        configurable: true,
+        value: true,
+      });
+
+      render(<OfflineFallbackPage />);
+
+      expect(
+        screen.getByRole("heading", {
+          name: /This page is taking longer than expected/i,
+        })
+      ).toBeDefined();
+      expect(
+        screen.queryByRole("heading", {
+          name: /This page isn’t available offline/i,
+        })
+      ).toBeNull();
+    });
+
     it("renders the dedicated offline fallback page with status and retry controls", () => {
+      Object.defineProperty(navigator, "onLine", {
+        configurable: true,
+        value: false,
+      });
+
       render(<OfflineFallbackPage />);
 
       expect(

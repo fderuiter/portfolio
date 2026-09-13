@@ -90,6 +90,8 @@ describe("Security Audit Script", () => {
           package: "concurrently",
           expiresAt: "2026-10-15T23:59:59Z",
           reason: "CLI process runner tool",
+          owner: "repository-owner",
+          followUp: "#725",
         },
       ];
       const rules = parseIgnoreRules(input, fixedNow);
@@ -122,6 +124,8 @@ describe("Security Audit Script", () => {
           package: "concurrently",
           expiresAt: "2027-12-31T23:59:59Z",
           reason: "Distant expiration date",
+          owner: "repository-owner",
+          followUp: "#725",
         },
       ];
       const rules = parseIgnoreRules(inputExceedsCap, fixedNow);
@@ -149,6 +153,24 @@ describe("Security Audit Script", () => {
       );
     });
 
+    it("marks residual-risk rules as invalid without an owner and follow-up ticket", () => {
+      const rules = parseIgnoreRules(
+        [
+          {
+            advisory: "GHSA-owned-risk",
+            package: "example-package",
+            expiresAt: "2026-10-15T23:59:59Z",
+            reason: "No compatible patched release exists yet",
+          },
+        ],
+        fixedNow
+      );
+
+      expect(rules[0].isValid).toBe(false);
+      expect(rules[0].validationError).toContain("risk owner");
+      expect(rules[0].validationError).toContain("follow-up ticket");
+    });
+
     it("marks rules as invalid if legacy string format is used", () => {
       const inputLegacy = ["concurrently", "next"];
       const rules = parseIgnoreRules(inputLegacy, fixedNow);
@@ -164,6 +186,8 @@ describe("Security Audit Script", () => {
           package: "expired-pkg",
           expiresAt: "2025-01-01T00:00:00Z",
           reason: "Old exception",
+          owner: "repository-owner",
+          followUp: "#725",
         },
       ];
       const rules = parseIgnoreRules(inputExpired, fixedNow);
@@ -206,6 +230,8 @@ describe("Security Audit Script", () => {
         advisory: "GHSA-jmr9-qjv8-65gv",
         expiresAt: "2026-10-15T00:00:00Z",
         reason: "Test exception",
+        owner: "repository-owner",
+        followUp: "#725",
         isValid: true,
         isExpired: false,
       };
@@ -215,12 +241,10 @@ describe("Security Audit Script", () => {
   });
 
   describe("loadIgnoreList", () => {
-    it("returns ignore list with valid advisory IDs and package names", () => {
+    it("ships without default vulnerability exceptions", () => {
       const fixedNow = new Date("2026-08-19T12:00:00Z");
       const list = loadIgnoreList(fixedNow);
-      const advisories = list.map((item) => item.advisory);
-      expect(advisories).toContain("GHSA-c2qf-rxjj-4v5w");
-      expect(advisories).toContain("GHSA-953w-3q36-93rf");
+      expect(list).toEqual([]);
     });
   });
 
@@ -297,6 +321,8 @@ describe("Security Audit Script", () => {
           package: "concurrently",
           expiresAt: "2026-10-31T23:59:59Z",
           reason: "CLI runner tool",
+          owner: "repository-owner",
+          followUp: "#725",
         },
       ];
       vi.spyOn(fs, "readFileSync").mockReturnValue(
@@ -338,6 +364,8 @@ describe("Security Audit Script", () => {
           package: "concurrently",
           expiresAt: "2026-10-31T23:59:59Z",
           reason: "CLI runner tool",
+          owner: "repository-owner",
+          followUp: "#725",
         },
       ];
       vi.spyOn(fs, "readFileSync").mockReturnValue(
@@ -400,6 +428,8 @@ describe("Security Audit Script", () => {
           package: "concurrently",
           expiresAt: "2027-12-31T23:59:59Z",
           reason: "Exceeds 90-day cap",
+          owner: "repository-owner",
+          followUp: "#725",
         },
       ];
       vi.spyOn(fs, "readFileSync").mockReturnValue(
@@ -445,6 +475,8 @@ describe("Security Audit Script", () => {
           package: "expired-package",
           expiresAt: "2020-01-01T00:00:00Z",
           reason: "Expired exception",
+          owner: "repository-owner",
+          followUp: "#725",
         },
       ];
       vi.spyOn(fs, "readFileSync").mockReturnValue(

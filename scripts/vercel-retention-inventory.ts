@@ -666,8 +666,7 @@ export function runRetentionInventoryVerification(options?: {
     `• Functions Storage:  ${inventory.meters.functionsStorage.used}/${inventory.meters.functionsStorage.limit} ${inventory.meters.functionsStorage.unit} (${inventory.meters.functionsStorage.headroomPercentage}% headroom remaining)`
   );
   if (
-    typeof inventory.meters.functionsStorage.portfolioContribution ===
-    "number"
+    typeof inventory.meters.functionsStorage.portfolioContribution === "number"
   ) {
     console.log(
       `    - Portfolio:      ${inventory.meters.functionsStorage.portfolioContribution} GB`

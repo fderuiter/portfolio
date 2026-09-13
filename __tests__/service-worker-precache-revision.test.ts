@@ -45,11 +45,12 @@ describe("Service Worker Precache Revisioning", () => {
     expect(fallbackMatcher).toMatch(/navigator\.onLine/);
   });
 
-  it("keeps the app shell routes it precaches", () => {
-    // The fix changes how these are revisioned, not which routes are covered.
-    for (const route of ["/", "/arcade", "/proof", "/offline"]) {
-      expect(swCode).toContain(`"${route}"`);
-    }
+  it("precaches the shared public route registry, not a private copy", () => {
+    // The route list moved to lib/public-routes.ts in c0b17b46, which widened
+    // precaching from ten shells to the whole public surface. This fix changes
+    // how those entries are revisioned, not which routes are covered.
+    expect(swCode).toMatch(/PUBLIC_ROUTE_PATHS\.map/);
+    expect(swCode).not.toMatch(/const coreAppShellRoutes/);
   });
 });
 

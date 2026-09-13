@@ -3,21 +3,19 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import crypto from "crypto";
 
 // Use vi.hoisted to declare the mock function before any imports or mocks are executed
-const { mockRatelimitLimit, mockLpush, mockExpire, mockExec } = vi.hoisted(() => {
-  return {
-    mockRatelimitLimit: vi.fn(),
-    mockLpush: vi.fn(),
-    mockExpire: vi.fn(),
-    mockExec: vi.fn().mockResolvedValue([1]),
-  };
-});
+const { mockRatelimitLimit, mockLpush, mockExpire, mockExec } = vi.hoisted(
+  () => {
+    return {
+      mockRatelimitLimit: vi.fn(),
+      mockLpush: vi.fn(),
+      mockExpire: vi.fn(),
+      mockExec: vi.fn().mockResolvedValue([1]),
+    };
+  }
+);
 
 // Mock the dependencies
-vi.mock("@/lib/db", async (importOriginal) => {
-  const isLiveDb = !!(process.env.DATABASE_URL && !process.env.DATABASE_URL.includes("dummy"));
-  if (isLiveDb) {
-    return await importOriginal<typeof import("@/lib/db")>();
-  }
+vi.mock("@/lib/db", () => {
   return {
     prisma: {
       telemetryEvent: {
@@ -55,10 +53,8 @@ import { POST, GET } from "@/app/api/telemetry/route";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 
-const isLiveDb = !!(process.env.DATABASE_URL && !process.env.DATABASE_URL.includes("dummy"));
-
 describe("Telemetry API Route - Route Error Telemetry", () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.clearAllMocks();
     // Default rate limit behavior to success for existing tests
     mockRatelimitLimit.mockReset().mockResolvedValue({
@@ -68,10 +64,6 @@ describe("Telemetry API Route - Route Error Telemetry", () => {
       reset: Date.now() + 60000,
       pending: Promise.resolve(),
     });
-
-    if (isLiveDb) {
-      await prisma.telemetryEvent.deleteMany();
-    }
   });
 
   it("should accept 'route_error' event type and save it in the memory queue", async () => {
@@ -94,12 +86,7 @@ describe("Telemetry API Route - Route Error Telemetry", () => {
     expect(data.event.projectSlug).toBe("/non-existent-page-link");
     expect(data.event.eventType).toBe("route_error");
 
-    if (isLiveDb) {
-      const count = await prisma.telemetryEvent.count();
-      expect(count).toBe(0);
-    } else {
-      expect(prisma.telemetryEvent.create).not.toHaveBeenCalled();
-    }
+    expect(prisma.telemetryEvent.create).not.toHaveBeenCalled();
     expect(mockLpush).toHaveBeenCalledWith(
       "telemetry_buffer",
       expect.objectContaining({
@@ -163,12 +150,7 @@ describe("Telemetry API Route - Route Error Telemetry", () => {
 
     const data = await response.json();
     expect(data.error).toContain("Missing or invalid eventType");
-    if (isLiveDb) {
-      const count = await prisma.telemetryEvent.count();
-      expect(count).toBe(0);
-    } else {
-      expect(prisma.telemetryEvent.create).not.toHaveBeenCalled();
-    }
+    expect(prisma.telemetryEvent.create).not.toHaveBeenCalled();
   });
 
   it("should reject client with 429 when rate limit is exceeded", async () => {
@@ -195,7 +177,7 @@ describe("Telemetry API Route - Route Error Telemetry", () => {
 
     const res = await POST(req);
     expect(res.status).toBe(429);
-    
+
     const data = await res.json();
     expect(data.error).toContain("Too many requests");
 
@@ -222,14 +204,12 @@ describe("Telemetry API Route - Route Error Telemetry", () => {
     };
 
     // Mock database write success
-    if (!isLiveDb) {
-      vi.mocked(prisma.telemetryEvent.create).mockResolvedValue({
-        id: "uuid-1",
-        projectSlug: "/dashboard",
-        eventType: "page_view",
-        createdAt: new Date(),
-      });
-    }
+    vi.mocked(prisma.telemetryEvent.create).mockResolvedValue({
+      id: "uuid-1",
+      projectSlug: "/dashboard",
+      eventType: "page_view",
+      createdAt: new Date(),
+    });
 
     // First request
     const req1 = new NextRequest("http://localhost:3000/api/telemetry", {
@@ -260,23 +240,18 @@ describe("Telemetry API Route - Route Error Telemetry", () => {
   });
 
   it("should return consolidated stats on GET request", async () => {
-    if (isLiveDb) {
-      // Seed live database with test events
-      await prisma.telemetryEvent.createMany({
-        data: [
-          ...Array(12).fill(null).map(() => ({ projectSlug: "/dashboard", eventType: "page_view" })),
-          ...Array(7).fill(null).map(() => ({ projectSlug: "/dashboard", eventType: "project_click" })),
-          ...Array(4).fill(null).map(() => ({ projectSlug: "/about", eventType: "page_view" })),
-        ],
-      });
-    } else {
-      const mockGroupByRes = [
-        { projectSlug: "/dashboard", eventType: "page_view", _count: { id: 12 } },
-        { projectSlug: "/dashboard", eventType: "project_click", _count: { id: 7 } },
-        { projectSlug: "/about", eventType: "page_view", _count: { id: 4 } },
-      ];
-      vi.mocked(prisma.telemetryEvent.groupBy).mockResolvedValue(mockGroupByRes as any);
-    }
+    const mockGroupByRes = [
+      { projectSlug: "/dashboard", eventType: "page_view", _count: { id: 12 } },
+      {
+        projectSlug: "/dashboard",
+        eventType: "project_click",
+        _count: { id: 7 },
+      },
+      { projectSlug: "/about", eventType: "page_view", _count: { id: 4 } },
+    ];
+    vi.mocked(prisma.telemetryEvent.groupBy).mockResolvedValue(
+      mockGroupByRes as any
+    );
 
     const res = await GET();
     expect(res.status).toBe(200);
@@ -287,11 +262,9 @@ describe("Telemetry API Route - Route Error Telemetry", () => {
   });
 
   it("should fail gracefully on GET request if database query fails", async () => {
-    if (isLiveDb) {
-      vi.spyOn(prisma.telemetryEvent, "groupBy").mockRejectedValue(new Error("Database connection timed out"));
-    } else {
-      vi.mocked(prisma.telemetryEvent.groupBy).mockRejectedValue(new Error("Database connection timed out"));
-    }
+    vi.mocked(prisma.telemetryEvent.groupBy).mockRejectedValue(
+      new Error("Database connection timed out")
+    );
 
     const res = await GET();
     expect(res.status).toBe(500);
@@ -347,11 +320,9 @@ describe("Telemetry API Route - Route Error Telemetry", () => {
     };
 
     // Simulate database write failure
-    if (isLiveDb) {
-      vi.spyOn(prisma.telemetryEvent, "create").mockRejectedValue(new Error("Database connection lost"));
-    } else {
-      vi.mocked(prisma.telemetryEvent.create).mockRejectedValue(new Error("Database connection lost"));
-    }
+    vi.mocked(prisma.telemetryEvent.create).mockRejectedValue(
+      new Error("Database connection lost")
+    );
 
     const req = new NextRequest("http://localhost:3000/api/telemetry", {
       method: "POST",

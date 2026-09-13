@@ -3,8 +3,14 @@ import fs from "fs";
 import path from "path";
 
 describe("Transparent Continuous Overlay Layer Compliance", () => {
-  const usePretextLayoutPath = path.resolve(__dirname, "../hooks/usePretextLayout.tsx");
-  const pretextCardPath = path.resolve(__dirname, "../components/PretextCard.tsx");
+  const usePretextLayoutPath = path.resolve(
+    __dirname,
+    "../hooks/usePretextLayout.tsx"
+  );
+  const pretextCardPath = path.resolve(
+    __dirname,
+    "../components/PretextCard.tsx"
+  );
   const heroPath = path.resolve(__dirname, "../components/Hero.tsx");
 
   it("should implement transparent text overlay in PretextText", () => {
@@ -12,12 +18,16 @@ describe("Transparent Continuous Overlay Layer Compliance", () => {
 
     // Must wrap in a relative container
     expect(content).toContain('className="relative"');
-    
+
     // Custom visual layout must be select-none and pointer-events-none
-    expect(content).toContain('className={`${className || ""} select-none pointer-events-none`}');
+    expect(content).toContain(
+      'className={`${className || ""} select-none pointer-events-none`}'
+    );
 
     // Transparent semantic overlay must be absolute inset-0 select-text
-    expect(content).toContain('className={`${className || ""} absolute inset-0 select-text bg-transparent`}');
+    expect(content).toContain(
+      'className={`${className || ""} absolute inset-0 select-text bg-transparent`}'
+    );
     expect(content).toContain('color: "transparent"');
     expect(content).toContain('WebkitTextFillColor: "transparent"');
     expect(content).toContain('pointerEvents: "auto"');
@@ -30,10 +40,14 @@ describe("Transparent Continuous Overlay Layer Compliance", () => {
     expect(content).toContain('<div className="relative">');
 
     // Custom visual layout must be select-none and pointer-events-none
-    expect(content).toContain('className={`${className || ""} select-none pointer-events-none`}');
+    expect(content).toContain(
+      'className={`${className || ""} select-none pointer-events-none`}'
+    );
 
     // Transparent semantic overlay must be absolute inset-0 select-text
-    expect(content).toContain('className={`${className || ""} absolute inset-0 select-text bg-transparent`}');
+    expect(content).toContain(
+      'className={`${className || ""} absolute inset-0 select-text bg-transparent`}'
+    );
     expect(content).toContain('color: "transparent"');
     expect(content).toContain('WebkitTextFillColor: "transparent"');
     expect(content).toContain('pointerEvents: "auto"');
@@ -49,7 +63,7 @@ describe("Transparent Continuous Overlay Layer Compliance", () => {
     expect(content).toContain('className="select-none pointer-events-none"');
 
     // Transparent semantic overlay must be absolute inset-0 select-text with data-pretext-layer
-    expect(content).toContain('absolute inset-0 select-text bg-transparent');
+    expect(content).toContain("absolute inset-0 select-text bg-transparent");
     expect(content).toContain('data-pretext-layer="semantic"');
   });
 
@@ -57,17 +71,26 @@ describe("Transparent Continuous Overlay Layer Compliance", () => {
     const content = fs.readFileSync(heroPath, "utf-8");
 
     // Headline and Text must be wrapped and set to relative with select-none and pointer-events-none on visual layer
-    expect(content).toContain('className="w-full select-none pointer-events-none"');
-    
+    expect(content).toContain(
+      'className="w-full select-none pointer-events-none"'
+    );
+
     // Headline absolute transparent overlay h1 with fluid typography
-    expect(content).toContain('fluid-heading-hero font-black tracking-tight text-center absolute inset-0 select-text bg-transparent');
-    
+    expect(content).toContain(
+      "fluid-heading-hero font-black tracking-tight text-center absolute inset-0 select-text bg-transparent"
+    );
+
     // Subheadline absolute transparent overlay p with fluid typography
-    expect(content).toContain('text-neutral-400 fluid-body text-center absolute inset-0 select-text bg-transparent');
+    expect(content).toContain(
+      "text-neutral-400 fluid-body text-center absolute inset-0 select-text bg-transparent"
+    );
   });
 
   it("should tag all pretext visual and semantic layers for high contrast forced-colors protection", () => {
-    const usePretextLayoutContent = fs.readFileSync(usePretextLayoutPath, "utf-8");
+    const usePretextLayoutContent = fs.readFileSync(
+      usePretextLayoutPath,
+      "utf-8"
+    );
     const pretextCardContent = fs.readFileSync(pretextCardPath, "utf-8");
     const heroContent = fs.readFileSync(heroPath, "utf-8");
 
@@ -90,9 +113,9 @@ describe("Transparent Continuous Overlay Layer Compliance", () => {
 
     expect(cssContent).toContain("@media (forced-colors: active)");
     expect(cssContent).toContain('[data-pretext-layer="visual"]');
-    expect(cssContent).toContain('opacity: 0 !important');
-    expect(cssContent).toContain('visibility: hidden !important');
+    expect(cssContent).toContain("opacity: 0 !important");
+    expect(cssContent).toContain("visibility: hidden !important");
     expect(cssContent).toContain('[data-pretext-layer="semantic"]');
-    expect(cssContent).toContain('color: CanvasText !important');
+    expect(cssContent).toContain("color: CanvasText !important");
   });
 });

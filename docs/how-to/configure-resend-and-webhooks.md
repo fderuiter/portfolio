@@ -24,9 +24,10 @@ RESEND_FROM_EMAIL="Your Name <notifications@yourdomain.com>"
 ```
 
 - **`RESEND_API_KEY`**: from the [Resend dashboard](https://resend.com/api-keys).
-  Without it, `EmailService` runs in a simulated (non-transmitting) mode —
-  useful for local development without spending real sends, but you won't
-  receive anything.
+  Live transmission is allowed only when the application runs as Production.
+  Development and Preview always use simulated delivery even if a key is
+  accidentally attached. Tests exercise a mocked transport with an explicit
+  `re_test_` fixture key and never contact Resend.
 - **`RESEND_FROM_EMAIL`**: must be a verified sending address/domain in
   your Resend account, or sends will be rejected.
 - **`RESEND_WEBHOOK_SECRET`**: the signing secret Resend gives you when you
@@ -110,6 +111,17 @@ rotation — rotating the secret in the Resend dashboard and updating the
 environment variable must happen together, or verification will fail for
 requests signed with whichever secret is not currently configured.
 
+### Durable outbound retry safety
+
+The daily unified maintenance route leases at most five due queue rows before
+dispatching them. An overlapping invocation can lease each row only once; if a
+worker stops unexpectedly, its five-minute lease expires and the row becomes
+eligible again. Every retry uses `portfolio-email-<queue-id>` as the Resend
+idempotency key, so an ambiguous timeout and later retry converge on one
+provider send. Failures use capped exponential backoff with deterministic
+jitter, recheck the suppression list immediately before dispatch, and retain
+structured tags without logging message bodies.
+
 ## 3. Register the webhook endpoint with Resend
 
 In the Resend dashboard, add a webhook endpoint pointing at:
@@ -141,8 +153,16 @@ worked examples of both a valid and a tampered signature.
 npm run dev
 ```
 
-Submit the contact form (or trigger a newsletter subscription) locally. If
-`RESEND_API_KEY` is unset, check the server logs for the simulated-send
-confirmation; if it's set, check the Resend dashboard's logs for the real
-delivery, and confirm a bounce/complaint against a disposable test address
-round-trips through the webhook route without a 400/401/422.
+Submit the contact form (or trigger a newsletter subscription) locally and
+check the server logs for the simulated-send confirmation. Local development
+never transmits. Live delivery and bounce/complaint verification must be done
+from the protected Production environment with an approved synthetic
+recipient; confirm the event round-trips through the webhook route without a
+400/401/422 and retain only secret-redacted evidence.
+
+Before closing the provider configuration gate, an operator must verify the
+Production sending domain and sender, register the canonical
+`https://www.deruiter.dev/api/webhooks/resend` endpoint with the intended event
+types, scope the API and webhook secrets to Production, and confirm Preview has
+no transmitting path. These dashboard actions cannot be inferred from source
+code or automated without the protected account credentials.

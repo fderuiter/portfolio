@@ -70,6 +70,25 @@ actually accepted so callers never present a dropped event as durable.
 
 ***
 
+### rollupAndPruneRawEvents()
+
+> `static` **rollupAndPruneRawEvents**(`before`): `Promise`\<\{ `rawEventsDeleted`: `number`; `rollupsUpserted`: `number`; \}\>
+
+Rolls raw events older than the cutoff into daily aggregates and removes
+only the rows committed by the same database transaction.
+
+#### Parameters
+
+##### before
+
+`Date`
+
+#### Returns
+
+`Promise`\<\{ `rawEventsDeleted`: `number`; `rollupsUpserted`: `number`; \}\>
+
+***
+
 ### syncBufferedEvents()
 
 > `static` **syncBufferedEvents**(`batchSize`): `Promise`\<\{ `inserted`: `number`; `processed`: `number`; \}\>

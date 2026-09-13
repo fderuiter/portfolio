@@ -5,13 +5,12 @@
   "ignoreCommand": null,
   "git": {
     "deploymentEnabled": {
-      "*": false,
-      "main": true
+      "*": false
     }
   },
   "crons": [
     {
-      "path": "/api/telemetry/sync",
+      "path": "/api/cron/maintenance",
       "schedule": "0 0 * * *"
     }
   ]

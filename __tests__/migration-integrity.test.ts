@@ -43,6 +43,7 @@ describe("Prisma migration integrity", () => {
       "20261014000000_add_commands_and_playback",
       "20261015000000_add_email_resilience",
       "20261016000000_enforce_email_contracts",
+      "20261017000000_add_telemetry_daily_rollups",
     ]);
   });
 
@@ -71,6 +72,7 @@ describe("Prisma migration integrity", () => {
       "20261014000000_add_commands_and_playback",
       "20261015000000_add_email_resilience",
       "20261016000000_enforce_email_contracts",
+      "20261017000000_add_telemetry_daily_rollups",
     ]);
   });
 
@@ -105,6 +107,22 @@ describe("Prisma migration integrity", () => {
       'CREATE INDEX IF NOT EXISTS "OutboundEmailQueue_createdAt_idx"'
     );
     expect(migration).not.toMatch(/DROP\s+(TABLE|COLUMN)/i);
+  });
+
+  it("keeps the telemetry rollup migration aligned with Prisma updatedAt semantics", () => {
+    const migrationPath = resolve(
+      process.cwd(),
+      "prisma/migrations/20261017000000_add_telemetry_daily_rollups/migration.sql"
+    );
+    const migration = readFileSync(migrationPath, "utf8");
+
+    expect(migration).toContain(
+      '"createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP'
+    );
+    expect(migration).toContain('"updatedAt" TIMESTAMP(3) NOT NULL');
+    expect(migration).not.toMatch(
+      /"updatedAt"\s+TIMESTAMP\(3\)\s+NOT NULL\s+DEFAULT\s+CURRENT_TIMESTAMP/
+    );
   });
 
   it("fails drift check with diagnostic error when documentation misses a migration folder", () => {

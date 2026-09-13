@@ -153,4 +153,47 @@ test.describe("Headless Synthetic User Probes & Journey Monitoring", () => {
       expect(Array.isArray(cases)).toBe(true);
     }
   });
+
+  test("Probe 6: Warm Service Worker Arcade Navigation", async ({ page }) => {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+
+    await page.evaluate(async () => {
+      const registration = await navigator.serviceWorker.ready;
+      await registration.update();
+
+      if (!navigator.serviceWorker.controller) {
+        await new Promise<void>((resolve) => {
+          navigator.serviceWorker.addEventListener(
+            "controllerchange",
+            () => resolve(),
+            { once: true }
+          );
+        });
+      }
+    });
+
+    await page.reload({ waitUntil: "domcontentloaded" });
+    const response = await page.goto("/arcade/working-with-duck", {
+      waitUntil: "domcontentloaded",
+    });
+
+    expect(response?.status()).toBe(200);
+    await expect(
+      page.getByRole("heading", {
+        name: /This page isn’t available offline/i,
+      })
+    ).toHaveCount(0);
+
+    await expect(async () => {
+      const launchButton = page.getByRole("button", {
+        name: /Launch Cabinet/i,
+      });
+      if (await launchButton.isVisible()) {
+        await launchButton.click();
+      }
+      await expect(page.locator("canvas").first()).toBeVisible({
+        timeout: 3000,
+      });
+    }).toPass({ timeout: 20000 });
+  });
 });

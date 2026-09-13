@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useSyncExternalStore } from "react";
 import Link from "next/link";
 import { PageLayout } from "@/components/PageLayout";
 import {
@@ -14,23 +14,34 @@ import {
   IconDirections,
 } from "@tabler/icons-react";
 
-export default function OfflineFallbackPage() {
-  const [isOnline, setIsOnline] = useState<boolean>(() =>
-    typeof navigator !== "undefined" ? navigator.onLine : false
-  );
-
-  useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
-
+function subscribeToConnectivity(onStoreChange: () => void) {
+  if (typeof window !== "undefined") {
+    const handleChange = () => onStoreChange();
+    window.addEventListener("online", handleChange);
+    window.addEventListener("offline", handleChange);
     return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
+      window.removeEventListener("online", handleChange);
+      window.removeEventListener("offline", handleChange);
     };
-  }, []);
+  }
+
+  return () => {};
+}
+
+function getConnectivitySnapshot() {
+  return typeof navigator !== "undefined" && navigator.onLine;
+}
+
+function getServerConnectivitySnapshot() {
+  return false;
+}
+
+export default function OfflineFallbackPage() {
+  const isOnline = useSyncExternalStore(
+    subscribeToConnectivity,
+    getConnectivitySnapshot,
+    getServerConnectivitySnapshot
+  );
 
   const handleRetry = () => {
     window.location.reload();
@@ -90,14 +101,16 @@ export default function OfflineFallbackPage() {
                 {isOnline ? "Connection Restored" : "You’re offline"}
               </span>
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100 mt-1">
-                This page isn’t available offline
+                {isOnline
+                  ? "This page is taking longer than expected"
+                  : "This page isn’t available offline"}
               </h1>
             </div>
           </div>
 
           <p className="text-zinc-400 text-base sm:text-lg mb-8 leading-relaxed">
             {isOnline
-              ? "You’re back online. Reload to open this page."
+              ? "Your connection is available, but the requested page did not load. Reload to try the request again."
               : "This page hasn’t been saved for offline use. Try again when you’re connected, or try one of the cached pages below."}
           </p>
 

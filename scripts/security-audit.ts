@@ -15,6 +15,8 @@ export interface IgnoreRule {
   expiresAt: string;
   createdAt?: string;
   reason: string;
+  owner: string;
+  followUp: string;
 }
 
 export interface ParsedIgnoreRule {
@@ -23,6 +25,8 @@ export interface ParsedIgnoreRule {
   expiresAt: string;
   createdAt?: string;
   reason: string;
+  owner: string;
+  followUp: string;
   isValid: boolean;
   isExpired: boolean;
   remainingDays?: number;
@@ -34,70 +38,9 @@ export interface SecurityAuditOptions {
   now?: Date;
 }
 
-// List of currently ignored high/critical vulnerabilities with explicit advisory IDs, expiration dates, and business justifications
-export const DEFAULT_IGNORE_LIST: IgnoreRule[] = [
-  {
-    advisory: "GHSA-c2qf-rxjj-4v5w",
-    package: "concurrently",
-    expiresAt: "2026-11-01T23:59:59Z",
-    reason:
-      "Dev-only process runner CLI tool with no production runtime exposure",
-  },
-  {
-    advisory: "GHSA-qq97-3p32-359f",
-    package: "@prisma/config",
-    expiresAt: "2026-11-01T23:59:59Z",
-    reason: "Prisma ORM tooling configuration parser",
-  },
-  {
-    advisory: "GHSA-v88g-83jp-hd2w",
-    package: "brace-expansion",
-    expiresAt: "2026-11-01T23:59:59Z",
-    reason: "Glob pattern matching library used in build scripts",
-  },
-  {
-    advisory: "GHSA-3xvc-62x2-3635",
-    package: "deepmerge-ts",
-    expiresAt: "2026-11-01T23:59:59Z",
-    reason: "TypeScript utility library for object merging in build config",
-  },
-  {
-    advisory: "GHSA-3rjg-36vw-hh7p",
-    package: "fast-uri",
-    expiresAt: "2026-11-01T23:59:59Z",
-    reason: "URI parser dependency used by internal schema validators",
-  },
-  {
-    advisory: "GHSA-953w-3q36-93rf",
-    package: "next",
-    expiresAt: "2026-11-01T23:59:59Z",
-    reason: "Core Web Framework; security fixes tracked in lockstep releases",
-  },
-  {
-    advisory: "GHSA-7fh5-64p2-3v2j",
-    package: "postcss",
-    expiresAt: "2026-11-01T23:59:59Z",
-    reason: "CSS AST transformer used during static build pipeline",
-  },
-  {
-    advisory: "GHSA-qq97-3p32-359f",
-    package: "prisma",
-    expiresAt: "2026-11-01T23:59:59Z",
-    reason: "Database ORM migration and client code generator",
-  },
-  {
-    advisory: "GHSA-54xr-2vhv-28v8",
-    package: "sharp",
-    expiresAt: "2026-11-01T23:59:59Z",
-    reason: "Native image processing engine for Next.js Image optimization",
-  },
-  {
-    advisory: "GHSA-c2qf-rxjj-4v5w",
-    package: "shell-quote",
-    expiresAt: "2026-11-01T23:59:59Z",
-    reason: "Shell command sanitization helper for build tool scripts",
-  },
-];
+// Fail closed by default. Temporary exceptions must live in the reviewed policy
+// file with an owner, follow-up ticket, rationale, and maximum 90-day expiry.
+export const DEFAULT_IGNORE_LIST: IgnoreRule[] = [];
 
 export interface Advisory {
   source?: number | string;
@@ -143,12 +86,16 @@ export function parseIgnoreRules(
     pkgRaw: string,
     expiresAtRaw: string,
     reasonRaw: string,
+    ownerRaw: string,
+    followUpRaw: string,
     createdAtRaw?: string
   ) => {
     const advisory = advisoryRaw.trim();
     const pkg = pkgRaw.trim();
     const expiresAt = expiresAtRaw.trim();
     const reason = reasonRaw.trim();
+    const owner = ownerRaw.trim();
+    const followUp = followUpRaw.trim();
     const createdAt = createdAtRaw ? createdAtRaw.trim() : undefined;
 
     if (!advisory) {
@@ -158,6 +105,8 @@ export function parseIgnoreRules(
         expiresAt,
         createdAt,
         reason,
+        owner,
+        followUp,
         isValid: false,
         isExpired: false,
         validationError: `Override entry ${pkg ? `for package "${pkg}" ` : ""}is missing a valid advisory ID ("advisory" or "cve").`,
@@ -165,16 +114,20 @@ export function parseIgnoreRules(
       return;
     }
 
-    if (!expiresAt || !reason) {
+    if (!expiresAt || !reason || !owner || !followUp) {
       const missingParts: string[] = [];
       if (!expiresAt) missingParts.push("expiration date ('expiresAt')");
       if (!reason) missingParts.push("business justification ('reason')");
+      if (!owner) missingParts.push("risk owner ('owner')");
+      if (!followUp) missingParts.push("follow-up ticket ('followUp')");
       rules.push({
         advisory,
         package: pkg || undefined,
         expiresAt,
         createdAt,
         reason,
+        owner,
+        followUp,
         isValid: false,
         isExpired: false,
         validationError: `Exception for advisory "${advisory}" is missing ${missingParts.join(" and ")}.`,
@@ -190,6 +143,8 @@ export function parseIgnoreRules(
         expiresAt,
         createdAt,
         reason,
+        owner,
+        followUp,
         isValid: false,
         isExpired: false,
         validationError: `Exception for advisory "${advisory}" has an invalid expiration date format ("${expiresAt}").`,
@@ -207,6 +162,8 @@ export function parseIgnoreRules(
           expiresAt,
           createdAt,
           reason,
+          owner,
+          followUp,
           isValid: false,
           isExpired: false,
           validationError: `Exception for advisory "${advisory}" has an invalid creation date format ("${createdAt}").`,
@@ -222,6 +179,8 @@ export function parseIgnoreRules(
         expiresAt,
         createdAt,
         reason,
+        owner,
+        followUp,
         isValid: false,
         isExpired: false,
         validationError: `Expiration date for advisory "${advisory}" exceeds the maximum 90-day lifespan (${expiresAt}).`,
@@ -239,6 +198,8 @@ export function parseIgnoreRules(
         expiresAt,
         createdAt,
         reason,
+        owner,
+        followUp,
         isValid: false,
         isExpired: false,
         validationError: `Expiration date for advisory "${advisory}" exceeds 90 days from creation date (${expiresAt}).`,
@@ -257,6 +218,8 @@ export function parseIgnoreRules(
       expiresAt,
       createdAt,
       reason,
+      owner,
+      followUp,
       isValid: true,
       isExpired,
       remainingDays,
@@ -266,7 +229,7 @@ export function parseIgnoreRules(
   if (Array.isArray(data)) {
     for (const item of data) {
       if (typeof item === "string") {
-        validateAndAdd("", item, "", "");
+        validateAndAdd("", item, "", "", "", "");
       } else if (item && typeof item === "object") {
         const obj = item as Record<string, unknown>;
         const advisory = String(
@@ -275,11 +238,21 @@ export function parseIgnoreRules(
         const pkg = String(obj.package || obj.name || "");
         const expiresAt = String(obj.expiresAt || obj.expires || "");
         const reason = String(obj.reason || obj.justification || "");
+        const owner = String(obj.owner || "");
+        const followUp = String(obj.followUp || obj.followup || "");
         const createdAt =
           obj.createdAt || obj.created
             ? String(obj.createdAt || obj.created)
             : undefined;
-        validateAndAdd(advisory, pkg, expiresAt, reason, createdAt);
+        validateAndAdd(
+          advisory,
+          pkg,
+          expiresAt,
+          reason,
+          owner,
+          followUp,
+          createdAt
+        );
       }
     }
   } else if (data && typeof data === "object") {
@@ -292,11 +265,21 @@ export function parseIgnoreRules(
         const pkg = String(obj.package || obj.name || "");
         const expiresAt = String(obj.expiresAt || obj.expires || "");
         const reason = String(obj.reason || obj.justification || "");
+        const owner = String(obj.owner || "");
+        const followUp = String(obj.followUp || obj.followup || "");
         const createdAt =
           obj.createdAt || obj.created
             ? String(obj.createdAt || obj.created)
             : undefined;
-        validateAndAdd(advisory, pkg, expiresAt, reason, createdAt);
+        validateAndAdd(
+          advisory,
+          pkg,
+          expiresAt,
+          reason,
+          owner,
+          followUp,
+          createdAt
+        );
       }
     }
   }
@@ -517,7 +500,7 @@ export function runSecurityAudit(options: SecurityAuditOptions = {}): boolean {
       console.log(
         `${colors.gray}ℹ️ Active override rule: Advisory ${rule.advisory} (${rule.remainingDays} days remaining, Package: ${
           rule.package || "all"
-        }, Reason: ${rule.reason})${colors.reset}`
+        }, Owner: ${rule.owner}, Follow-up: ${rule.followUp}, Reason: ${rule.reason})${colors.reset}`
       );
     }
   }
@@ -571,7 +554,7 @@ export function runSecurityAudit(options: SecurityAuditOptions = {}): boolean {
 
           if (matchingRule) {
             console.log(
-              `${colors.gray}ℹ️ Overriding vulnerability for ${pkgName} / Advisory ${matchingRule.advisory} (Expires: ${matchingRule.expiresAt}, Remaining: ${matchingRule.remainingDays} days, Reason: ${matchingRule.reason})${colors.reset}`
+              `${colors.gray}ℹ️ Overriding vulnerability for ${pkgName} / Advisory ${matchingRule.advisory} (Expires: ${matchingRule.expiresAt}, Remaining: ${matchingRule.remainingDays} days, Owner: ${matchingRule.owner}, Follow-up: ${matchingRule.followUp}, Reason: ${matchingRule.reason})${colors.reset}`
             );
           } else {
             unhandledVulnerabilities.push({

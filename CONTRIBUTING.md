@@ -11,6 +11,7 @@ The primary goal of Portfolio Hub is to maintain a unified, high-performance sho
 To prevent route drift, unindexed navigation entries, and architectural regression, human contributor guidelines align **100%** with automated agent rules in [`AGENTS.md`](./AGENTS.md).
 
 ### Core Standards
+
 - **Node.js**: `>=22.0.0` (Sole supported runtime).
 - **Package Manager**: `npm >= 10.0.0` (Sole supported package manager; `bun`, `yarn`, and `pnpm` are unsupported).
 - **Quality Gates**: Zero TypeScript errors, zero ESLint warnings, 100% route indexing parity, zero uncommitted documentation drift.
@@ -21,20 +22,26 @@ To prevent route drift, unindexed navigation entries, and architectural regressi
 ## 2. Developer Onboarding & Setup Workflows
 
 ### Prerequisites
+
 Ensure Node.js 22+ and npm 10+ are installed on your system:
+
 ```bash
 node -v  # Must be >= v22.0.0
 npm -v   # Must be >= 10.0.0
 ```
 
 ### Automated Interactive Setup
+
 Run the developer onboarding setup wizard:
+
 ```bash
 npm run setup
 ```
+
 This automated workflow checks Node/npm versions, syncs `.env.example` to `.env.local` if missing, initializes the Prisma database schema, seeds default clinical trial case study data, and verifies workspace health.
 
 ### Secondary Services & Environment Setup
+
 - To configure optional Clerk authentication and author access allowlists interactively:
   ```bash
   npm run setup:clerk
@@ -52,7 +59,9 @@ This automated workflow checks Node/npm versions, syncs `.env.example` to `.env.
 To eliminate manual multi-file creation errors, route drift, and unindexed navigation items, all vertical slices (components, hooks, APIs, ADRs, case studies, arcade games) **must** be created using the Feature Scaffolding CLI.
 
 ### Interactive CLI Scaffolding Wizard
+
 Executing the scaffolding command **without positional arguments** launches an interactive terminal wizard:
+
 ```bash
 npm run scaffold
 # or:
@@ -62,13 +71,13 @@ npx tsx scripts/dx.ts scaffold
 The interactive terminal wizard guides you through three steps:
 
 1. **Select Architecture Template Type** (lists all 7 supported architecture template types):
-   - `1) component`  - Reusable UI component (`components/ui/<Name>.tsx` + companion test)
-   - `2) hook`       - Custom React hook (`hooks/use<Name>.ts` + companion test)
-   - `3) api`        - Zod-validated API route (`app/api/<name>/route.ts` + companion test)
-   - `4) adr`        - Architectural Decision Record (`adr/00XX-<name>.md`)
+   - `1) component` - Reusable UI component (`components/ui/<Name>.tsx` + companion test)
+   - `2) hook` - Custom React hook (`hooks/use<Name>.ts` + companion test)
+   - `3) api` - Zod-validated API route (`app/api/<name>/route.ts` + companion test)
+   - `4) adr` - Architectural Decision Record (`adr/00XX-<name>.md`)
    - `5) case-study` - Showcase Case Study page (`app/case-studies/<name>/page.tsx` + Command Palette registration + companion test)
-   - `6) arcade`     - Arcade simulator & engine (`lib/<name>-engine.ts`, `components/<Name>.tsx`, `app/arcade/<name>/page.tsx` + unit tests + Command Palette registration)
-   - `7) game`       - Interactive game module (arcade alias)
+   - `6) arcade` - Arcade simulator & engine (`lib/<name>-engine.ts`, `components/<Name>.tsx`, `app/arcade/<name>/page.tsx` + unit tests + Command Palette registration)
+   - `7) game` - Interactive game module (arcade alias)
 
 2. **Enter Feature / Asset Name**:
    - Input a descriptive name (e.g. `matrix-defender`, `analytics-card`).
@@ -79,7 +88,9 @@ The interactive terminal wizard guides you through three steps:
    - In preview mode, the tool outputs all files and relative paths that would be created or updated without modifying disk state.
 
 ### Direct Non-Interactive Scaffolding
+
 For automated CI pipelines, agent scripts, or power users who prefer direct CLI execution, pass explicit positional arguments:
+
 ```bash
 # Non-interactive command syntax:
 npm run scaffold <type> <name> [--dry-run]
@@ -92,6 +103,7 @@ npm run scaffold adr event-sourcing-pattern
 npm run scaffold case-study quantum-compiler
 npm run scaffold arcade cyber-vault
 ```
+
 Direct positional execution bypasses interactive prompts smoothly, executing non-interactively while applying full input validation.
 
 ---
@@ -102,7 +114,7 @@ Whenever a new first-class route, interactive mini-game, or case study page is i
 
 1. **Command Palette (`components/CommandPalette.tsx`)**:
    - Registered under `staticNavs` with Tabler icon, title, subtitle, category, and target URL.
-   - *Note:* The CLI scaffolder automatically registers `arcade` games and `case-study` pages into `CommandPalette.tsx` upon scaffolding!
+   - _Note:_ The CLI scaffolder automatically registers `arcade` games and `case-study` pages into `CommandPalette.tsx` upon scaffolding!
 2. **Navbar Navigation (`components/Navbar.tsx`)**:
    - Indexed under desktop dropdown menus (`SYSTEMS_ITEMS` / `ARCADE_ITEMS`) and mobile drawer.
 3. **Footer Navigation (`components/Footer.tsx`)**:
@@ -131,6 +143,7 @@ When contributing code, ensure adherence to system invariants detailed in [`AGEN
 ## 6. Git Conventions & Verification Workflow
 
 ### Branch Naming
+
 After the one-time `dev` reconciliation described in
 [ADR 0037](./adr/0037-controlled-integration-and-release-deployments.md), all
 work branches from `main` and returns through a pull request to `main`. Topic
@@ -150,21 +163,26 @@ feature branches do not deploy automatically. See
 [Release and deployment workflow](./docs/how-to/release-and-deploy.md).
 
 Generate conforming branch names interactively:
+
 ```bash
 npm run dx branch
 ```
 
 ### Conventional Commit Messages
+
 Commit messages must adhere strictly to Conventional Commits:
 `type(scope): subject` (e.g. `feat(scaffold): add interactive prompt wizard`).
 
 Generate valid commit messages interactively:
+
 ```bash
 npm run dx commit
 ```
 
 ### Verification & Health Verification
+
 Before pushing changes or opening a Pull Request, run the full verification suite:
+
 ```bash
 # 1. Run architectural health diagnostics
 npm run doctor

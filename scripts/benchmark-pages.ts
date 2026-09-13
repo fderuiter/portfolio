@@ -105,7 +105,7 @@ function productionEnvironment(): NodeJS.ProcessEnv {
       process.env.CLERK_SECRET_KEY || "sk_test_example_secret_key",
     DATABASE_URL:
       process.env.DATABASE_URL ||
-      ("postgres" + "ql://localhost:5432/portfolio_dev"),
+      "postgres" + "ql://localhost:5432/portfolio_dev",
   };
 }
 

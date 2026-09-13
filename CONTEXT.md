@@ -10,6 +10,15 @@
 - **Human Gate**: A ticket requiring human authorization, protected credentials, destructive cloud action, production promotion, or subjective real-device validation. Human gates are prepared with reproducible evidence before being handed to a person.
 - **Completion Evidence**: The commit, pull request, automated results, deployment observation, or human sign-off demonstrating that every acceptance criterion of a ticket is satisfied.
 
+## Release Governance
+
+- **Release Candidate**: The exact current `main` commit whose version, migrations, quality gates, and immutable deployment are being evaluated for promotion.
+- **Staged Production Deployment**: A production-configured immutable artifact that has not yet received the canonical production domains and therefore cannot serve normal production traffic.
+- **Promotion**: The deliberate reassignment of canonical production domains to a verified staged production deployment without rebuilding it.
+- **Application Rollback**: Reassigning production domains to the recorded previous known-good immutable deployment; this changes served application code without reversing database history.
+- **Database Recovery**: A forward-compatible roll-forward following expand/contract migration discipline; it is distinct from and must not be implied by application rollback.
+- **Unified Maintenance Run**: The portfolio's single daily, time-bounded operational pass. It drains buffered interactions, retries leased outbound mail, and converts expired raw telemetry into durable daily rollups while preserving a structured partial-progress record.
+
 ## Logical Proof Workspace
 
 ### Deductive Inference Rules

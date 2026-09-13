@@ -117,6 +117,30 @@ vi.mock("@/lib/db", () => ({
           return results;
         }
       ),
+      updateMany: vi.fn().mockImplementation(
+        async ({
+          where,
+          data,
+        }: {
+          where: {
+            id: string;
+            status?: { in?: string[] };
+            nextRetryAt?: { lte?: Date };
+          };
+          data: Partial<MockQueueItem>;
+        }) => {
+          const existing = mockQueueStore.get(where.id);
+          const isDue =
+            existing &&
+            (!where.status?.in || where.status.in.includes(existing.status)) &&
+            (!where.nextRetryAt?.lte ||
+              existing.nextRetryAt.getTime() <=
+                where.nextRetryAt.lte.getTime());
+          if (!existing || !isDue) return { count: 0 };
+          mockQueueStore.set(where.id, { ...existing, ...data });
+          return { count: 1 };
+        }
+      ),
       update: vi
         .fn()
         .mockImplementation(
@@ -168,6 +192,7 @@ describe("Outbound Email Queue & Resilient Backoff Retry Engine (#546)", () => {
   afterEach(() => {
     EmailService.resetClient();
     process.env.VITEST = "1";
+    vi.unstubAllEnvs();
   });
 
   describe("Automatic Queueing on Rate Limit (429) & Network Timeouts", () => {
@@ -274,6 +299,79 @@ describe("Outbound Email Queue & Resilient Backoff Retry Engine (#546)", () => {
       expect(queueId).not.toBeNull();
       const item = mockQueueStore.get(queueId as string);
       expect(item?.status).toBe("DELIVERED");
+      expect(mockSendFn).toHaveBeenCalledWith(
+        expect.objectContaining({ to: "pending@example.com" }),
+        { idempotencyKey: `portfolio-email-${queueId}` }
+      );
+    });
+
+    it("leases due rows so overlapping workers dispatch each email once", async () => {
+      const queueId = await EmailService.queueOutboundEmail(
+        {
+          to: "leased@example.com",
+          subject: "Lease Test",
+          html: "<p>one delivery</p>",
+        },
+        undefined,
+        "temporary"
+      );
+      mockSendFn.mockResolvedValue({
+        data: { id: "msg_leased" },
+        error: null,
+      });
+      const now = new Date(Date.now() + 5000);
+
+      const [workerA, workerB] = await Promise.all([
+        EmailService.processRetryQueue({ now }),
+        EmailService.processRetryQueue({ now }),
+      ]);
+
+      expect(queueId).not.toBeNull();
+      expect(workerA.processed + workerB.processed).toBe(1);
+      expect(mockSendFn).toHaveBeenCalledTimes(1);
+    });
+
+    it("caps one retry invocation at twenty messages", async () => {
+      for (let index = 0; index < 25; index++) {
+        mockQueueStore.set(`queue-${index}`, {
+          id: `queue-${index}`,
+          to: `recipient-${index}@example.com`,
+          from: "sender@deruiter.dev",
+          replyTo: null,
+          subject: "Batch cap",
+          html: "<p>bounded</p>",
+          text: null,
+          tags: null,
+          attempts: 1,
+          status: "RETRYING",
+          nextRetryAt: new Date(0),
+          lastError: "temporary",
+          createdAt: new Date(0),
+          updatedAt: new Date(0),
+        });
+      }
+      mockSendFn.mockResolvedValue({ data: { id: "msg" }, error: null });
+
+      const summary = await EmailService.processRetryQueue({
+        maxBatchSize: 100,
+      });
+
+      expect(summary.processed).toBe(20);
+      expect(mockSendFn).toHaveBeenCalledTimes(20);
+    });
+
+    it("forces simulated delivery in Preview even when an API key is attached", async () => {
+      vi.stubEnv("VERCEL_ENV", "preview");
+
+      const result = await EmailService.sendRawEmail({
+        to: "preview@example.com",
+        subject: "Preview isolation",
+        html: "<p>must not leave preview</p>",
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.simulated).toBe(true);
+      expect(mockSendFn).not.toHaveBeenCalled();
     });
 
     it("applies exponential backoff on consecutive failures and marks FAILED after max attempts", async () => {

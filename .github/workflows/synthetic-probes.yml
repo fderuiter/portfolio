@@ -27,10 +27,10 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: "npm"
@@ -95,6 +95,7 @@ jobs:
             echo "| Proof Studio Engine | AST graph deductions & multi-format export |"
             echo "| Arcade Canvas 2D | Game canvas lifecycle & controls |"
             echo "| API Telemetry & Schemas | Ingest endpoint, rate-limiting & response schema |"
+            echo "| Warm Service Worker Navigation | Arcade route remains available after service-worker activation |"
             echo ""
             echo "*Per-journey status is not derived here; the suite reports one outcome."
             echo "Read the job log to see which spec failed.*"

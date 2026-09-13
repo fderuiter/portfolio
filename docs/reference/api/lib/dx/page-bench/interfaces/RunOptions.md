@@ -68,7 +68,7 @@
 
 ###### route
 
-[`PageBenchmarkRoute`](PageBenchmarkRoute.md)
+[`PublicRouteDefinition`](../../../public-routes/interfaces/PublicRouteDefinition.md)
 
 ###### totalRuns
 
@@ -82,7 +82,7 @@
 
 ### routes?
 
-> `optional` **routes?**: [`PageBenchmarkRoute`](PageBenchmarkRoute.md)[]
+> `optional` **routes?**: [`PublicRouteDefinition`](../../../public-routes/interfaces/PublicRouteDefinition.md)[]
 
 ***
 

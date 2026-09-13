@@ -4,13 +4,7 @@ import { POST, GET } from "@/app/api/case-studies/route";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 
-const isLiveDb = !!(process.env.DATABASE_URL && !process.env.DATABASE_URL.includes("dummy"));
-
-vi.mock("@/lib/db", async (importOriginal) => {
-  const isLive = !!(process.env.DATABASE_URL && !process.env.DATABASE_URL.includes("dummy"));
-  if (isLive) {
-    return await importOriginal<typeof import("@/lib/db")>();
-  }
+vi.mock("@/lib/db", () => {
   return {
     prisma: {
       caseStudy: {
@@ -34,7 +28,8 @@ describe("Case Study Submission API Endpoint (POST /api/case-studies)", () => {
         slug: "production-outage-post-mortem",
         primary_language: "TypeScript",
         editorial_content: "High level summary of the incident and recovery.",
-        architectural_narrative: "<h3>Root Cause</h3><p>Memory leak in queue consumer.</p>",
+        architectural_narrative:
+          "<h3>Root Cause</h3><p>Memory leak in queue consumer.</p>",
         tags: "post-mortem, nodejs, resilience",
       };
 
@@ -48,9 +43,9 @@ describe("Case Study Submission API Endpoint (POST /api/case-studies)", () => {
         updated_at: new Date(),
       };
 
-      if (!isLiveDb) {
-        vi.mocked(prisma.caseStudy.create).mockResolvedValue(mockCreatedRecord as any);
-      }
+      vi.mocked(prisma.caseStudy.create).mockResolvedValue(
+        mockCreatedRecord as any
+      );
 
       const req = new NextRequest("http://localhost:3000/api/case-studies", {
         method: "POST",
@@ -65,16 +60,14 @@ describe("Case Study Submission API Endpoint (POST /api/case-studies)", () => {
       expect(json.data.slug).toBe("production-outage-post-mortem");
       expect(json.data.published).toBe(false);
 
-      if (!isLiveDb) {
-        expect(prisma.caseStudy.create).toHaveBeenCalledWith({
-          data: expect.objectContaining({
-            title: "Production Outage Post-Mortem",
-            slug: "production-outage-post-mortem",
-            primary_language: "TypeScript",
-            published: false,
-          }),
-        });
-      }
+      expect(prisma.caseStudy.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          title: "Production Outage Post-Mortem",
+          slug: "production-outage-post-mortem",
+          primary_language: "TypeScript",
+          published: false,
+        }),
+      });
     });
 
     it("supports field aliases (language, summary, narrative, array of tags)", async () => {
@@ -83,7 +76,8 @@ describe("Case Study Submission API Endpoint (POST /api/case-studies)", () => {
         slug: "distributed-cache-failure",
         language: "Go",
         summary: "Summary of Redis connection pool exhaustion.",
-        narrative: "<h4>Incident Detail</h4><p>Connection starvation under spike.</p>",
+        narrative:
+          "<h4>Incident Detail</h4><p>Connection starvation under spike.</p>",
         tags: ["distributed-systems", "redis", "post-mortem"],
       };
 
@@ -102,9 +96,9 @@ describe("Case Study Submission API Endpoint (POST /api/case-studies)", () => {
         updated_at: new Date(),
       };
 
-      if (!isLiveDb) {
-        vi.mocked(prisma.caseStudy.create).mockResolvedValue(mockCreatedRecord as any);
-      }
+      vi.mocked(prisma.caseStudy.create).mockResolvedValue(
+        mockCreatedRecord as any
+      );
 
       const req = new NextRequest("http://localhost:3000/api/case-studies", {
         method: "POST",
@@ -128,19 +122,21 @@ describe("Case Study Submission API Endpoint (POST /api/case-studies)", () => {
         title: "Malicious Injection Post-Mortem",
         slug: "malicious-injection-post-mortem",
         primary_language: "Python",
-        editorial_content: "Attempting XSS injection in narrative body <script>alert('xss')</script>.",
+        editorial_content:
+          "Attempting XSS injection in narrative body <script>alert('xss')</script>.",
         architectural_narrative: `<p>Normal narrative paragraph.</p><script>window.location='http://attacker.com'</script><img src="x" onerror="alert('xss')" /><a href="javascript:alert(1)">Evil link</a>`,
         tags: "security, xss",
       };
 
-      if (!isLiveDb) {
-        vi.mocked(prisma.caseStudy.create).mockImplementation((args: any) => Promise.resolve({
-          id: "cuid-sec-1",
-          ...args.data,
-          created_at: new Date(),
-          updated_at: new Date(),
-        }) as any);
-      }
+      vi.mocked(prisma.caseStudy.create).mockImplementation(
+        (args: any) =>
+          Promise.resolve({
+            id: "cuid-sec-1",
+            ...args.data,
+            created_at: new Date(),
+            updated_at: new Date(),
+          }) as any
+      );
 
       const req = new NextRequest("http://localhost:3000/api/case-studies", {
         method: "POST",
@@ -196,7 +192,9 @@ describe("Case Study Submission API Endpoint (POST /api/case-studies)", () => {
       expect(res.status).toBe(400);
 
       const json = await res.json();
-      expect(json.error).toBe("Missing or invalid case study submission fields");
+      expect(json.error).toBe(
+        "Missing or invalid case study submission fields"
+      );
       expect(json.details.some((d: any) => d.path === "title")).toBe(true);
     });
 
@@ -205,8 +203,10 @@ describe("Case Study Submission API Endpoint (POST /api/case-studies)", () => {
         title: "Complete Garbage Architecture Post-Mortem",
         slug: "complete-garbage-post-mortem",
         primary_language: "TypeScript",
-        editorial_content: "This whole system is a total piece of shit and utter trash.",
-        architectural_narrative: "<p>Everything is broken and this is complete garbage.</p>",
+        editorial_content:
+          "This whole system is a total piece of shit and utter trash.",
+        architectural_narrative:
+          "<p>Everything is broken and this is complete garbage.</p>",
         tags: "garbage, trash",
       };
 
@@ -219,7 +219,9 @@ describe("Case Study Submission API Endpoint (POST /api/case-studies)", () => {
       expect(res.status).toBe(400);
 
       const json = await res.json();
-      expect(json.error).toContain("Submission rejected: Content violates community tone standards.");
+      expect(json.error).toContain(
+        "Submission rejected: Content violates community tone standards."
+      );
       expect(json.details.length).toBeGreaterThan(0);
     });
 
@@ -241,7 +243,9 @@ describe("Case Study Submission API Endpoint (POST /api/case-studies)", () => {
       expect(res.status).toBe(400);
 
       const json = await res.json();
-      expect(json.error).toBe("Missing or invalid case study submission fields");
+      expect(json.error).toBe(
+        "Missing or invalid case study submission fields"
+      );
       expect(json.details.some((d: any) => d.path === "slug")).toBe(true);
     });
 
@@ -264,7 +268,9 @@ describe("Case Study Submission API Endpoint (POST /api/case-studies)", () => {
       expect(res.status).toBe(400);
 
       const json = await res.json();
-      expect(json.error).toBe("Missing or invalid case study submission fields");
+      expect(json.error).toBe(
+        "Missing or invalid case study submission fields"
+      );
       expect(json.details.some((d: any) => d.path === "slug")).toBe(true);
     });
 
@@ -286,7 +292,9 @@ describe("Case Study Submission API Endpoint (POST /api/case-studies)", () => {
       expect(res.status).toBe(400);
 
       const json = await res.json();
-      expect(json.details.some((d: any) => d.path === "primary_language")).toBe(true);
+      expect(json.details.some((d: any) => d.path === "primary_language")).toBe(
+        true
+      );
     });
 
     it("rejects duplicate slug errors with 400 status code", async () => {
@@ -299,11 +307,11 @@ describe("Case Study Submission API Endpoint (POST /api/case-studies)", () => {
         tags: "rust, duplicate",
       };
 
-      if (!isLiveDb) {
-        const error: any = new Error("Unique constraint failed on the fields: (`slug`)");
-        error.code = "P2002";
-        vi.mocked(prisma.caseStudy.create).mockRejectedValue(error);
-      }
+      const error: any = new Error(
+        "Unique constraint failed on the fields: (`slug`)"
+      );
+      error.code = "P2002";
+      vi.mocked(prisma.caseStudy.create).mockRejectedValue(error);
 
       const req = new NextRequest("http://localhost:3000/api/case-studies", {
         method: "POST",
@@ -320,24 +328,24 @@ describe("Case Study Submission API Endpoint (POST /api/case-studies)", () => {
 
   describe("Draft Status Isolation & Error Sanitization", () => {
     it("ensures newly created unpublished draft case studies do NOT appear in public GET listings", async () => {
-      if (!isLiveDb) {
-        vi.mocked(prisma.caseStudy.findMany).mockResolvedValue([
-          {
-            id: "published-1",
-            slug: "published-study",
-            title: "Published Study",
-            primary_language: "TypeScript",
-            tags: "published",
-          } as any,
-        ]);
-      }
+      vi.mocked(prisma.caseStudy.findMany).mockResolvedValue([
+        {
+          id: "published-1",
+          slug: "published-study",
+          title: "Published Study",
+          primary_language: "TypeScript",
+          tags: "published",
+        } as any,
+      ]);
 
       const res = await GET();
       expect(res.status).toBe(200);
 
       const studies = await res.json();
       if (Array.isArray(studies)) {
-        const foundDraft = studies.find((s: any) => s.slug === "production-outage-post-mortem");
+        const foundDraft = studies.find(
+          (s: any) => s.slug === "production-outage-post-mortem"
+        );
         expect(foundDraft).toBeUndefined();
       }
     });
@@ -352,11 +360,12 @@ describe("Case Study Submission API Endpoint (POST /api/case-studies)", () => {
         tags: "cpp",
       };
 
-      if (!isLiveDb) {
-        const error = new Error("Fatal DB Error at /app/prisma/client.ts line 42");
-        error.stack = "Error: Fatal DB Error at /app/prisma/client.ts\n  at /app/lib/db.ts:12:34";
-        vi.mocked(prisma.caseStudy.create).mockRejectedValue(error);
-      }
+      const error = new Error(
+        "Fatal DB Error at /app/prisma/client.ts line 42"
+      );
+      error.stack =
+        "Error: Fatal DB Error at /app/prisma/client.ts\n  at /app/lib/db.ts:12:34";
+      vi.mocked(prisma.caseStudy.create).mockRejectedValue(error);
 
       const req = new NextRequest("http://localhost:3000/api/case-studies", {
         method: "POST",

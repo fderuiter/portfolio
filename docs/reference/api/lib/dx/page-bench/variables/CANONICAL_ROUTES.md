@@ -6,4 +6,4 @@
 
 # Variable: CANONICAL\_ROUTES
 
-> `const` **CANONICAL\_ROUTES**: [`PageBenchmarkRoute`](../interfaces/PageBenchmarkRoute.md)[]
+> `const` **CANONICAL\_ROUTES**: [`PageBenchmarkRoute`](../type-aliases/PageBenchmarkRoute.md)[]

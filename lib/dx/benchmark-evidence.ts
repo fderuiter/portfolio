@@ -324,7 +324,11 @@ export function writeBenchmarkMarkdown(
   markdown: string,
   outputDirectory = DEFAULT_BENCHMARK_EVIDENCE_DIRECTORY
 ): string {
-  return writeBenchmarkArtifact(outputDirectory, "benchmark-results.v1.md", markdown);
+  return writeBenchmarkArtifact(
+    outputDirectory,
+    "benchmark-results.v1.md",
+    markdown
+  );
 }
 
 function writeBenchmarkArtifact(

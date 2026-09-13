@@ -1,4 +1,5 @@
 import { defaultCache } from "@serwist/next/worker";
+import { PUBLIC_ROUTE_PATHS } from "@/lib/public-routes";
 import type { PrecacheEntry } from "serwist";
 import { CacheFirst, ExpirationPlugin, NetworkOnly, Serwist } from "serwist";
 
@@ -10,34 +11,24 @@ declare global {
 
 declare const self: ServiceWorkerGlobalScope;
 
-const coreAppShellRoutes: string[] = [
-  "/",
-  "/proof",
-  "/simulator",
-  "/schedule",
-  "/stack",
-  "/crf",
-  "/neuro",
-  "/arcade",
-  "/case-studies",
-  "/offline",
-];
-
 const injectedManifest = self.__SW_MANIFEST || [];
 
 /**
  * A fingerprint of this build, derived from the manifest Serwist injects.
  *
- * The app shell routes below are real HTML documents, not content-hashed
- * assets, so they need revision information. `revision: null` tells Serwist
- * the URL is already self-versioned: `createCacheKey` then uses the bare URL
- * as the cache key, identical on every deployment forever. `handleActivate`
- * only deletes cache entries whose key is absent from the current manifest,
- * and a bare URL never is -- so those documents were fetched once, on the
- * visitor's first install, and served from cache for the life of the browser
- * profile. Their embedded `/_next/static/chunks/<buildId>/...` scripts stop
- * existing after the next deployment, which is what broke the arcade in
- * production while a freshly installed origin worked fine.
+ * The precached routes are real HTML documents, not content-hashed assets, so
+ * they need revision information. `revision: null` tells Serwist the URL is
+ * already self-versioned: `createCacheKey` then uses the bare URL as the cache
+ * key, identical on every deployment forever. `handleActivate` only deletes
+ * cache entries whose key is absent from the current manifest, and a bare URL
+ * never is -- so those documents were fetched once, on the visitor's first
+ * install, and served from cache for the life of the browser profile. Their
+ * embedded `/_next/static/chunks/<buildId>/...` scripts stop existing after
+ * the next deployment, which is what broke the arcade in production while a
+ * freshly installed origin worked fine.
+ *
+ * Precaching every entry in PUBLIC_ROUTE_PATHS makes that matter more, not
+ * less: it is the whole public surface rather than ten shells.
  *
  * The injected manifest changes whenever any precached asset changes, so
  * hashing it gives a per-build revision with no extra build plumbing. The
@@ -56,7 +47,7 @@ const buildRevision = (() => {
 })();
 
 const precacheManifest = injectedManifest.concat(
-  coreAppShellRoutes.map((url) => ({
+  PUBLIC_ROUTE_PATHS.map((url) => ({
     url,
     revision: buildRevision,
   }))
