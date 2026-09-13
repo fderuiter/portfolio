@@ -43,6 +43,7 @@ describe("Prisma migration integrity", () => {
       "20261014000000_add_commands_and_playback",
       "20261015000000_add_email_resilience",
       "20261016000000_enforce_email_contracts",
+      "20261017000000_add_telemetry_daily_rollups",
     ]);
   });
 
@@ -71,6 +72,7 @@ describe("Prisma migration integrity", () => {
       "20261014000000_add_commands_and_playback",
       "20261015000000_add_email_resilience",
       "20261016000000_enforce_email_contracts",
+      "20261017000000_add_telemetry_daily_rollups",
     ]);
   });
 
