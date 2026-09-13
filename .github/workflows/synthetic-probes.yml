@@ -95,6 +95,7 @@ jobs:
             echo "| Proof Studio Engine | AST graph deductions & multi-format export |"
             echo "| Arcade Canvas 2D | Game canvas lifecycle & controls |"
             echo "| API Telemetry & Schemas | Ingest endpoint, rate-limiting & response schema |"
+            echo "| Warm Service Worker Navigation | Arcade route remains available after service-worker activation |"
             echo ""
             echo "*Per-journey status is not derived here; the suite reports one outcome."
             echo "Read the job log to see which spec failed.*"

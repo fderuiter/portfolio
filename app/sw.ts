@@ -1,4 +1,5 @@
 import { defaultCache } from "@serwist/next/worker";
+import { PUBLIC_ROUTE_PATHS } from "@/lib/public-routes";
 import type { PrecacheEntry } from "serwist";
 import { CacheFirst, ExpirationPlugin, NetworkOnly, Serwist } from "serwist";
 
@@ -10,21 +11,8 @@ declare global {
 
 declare const self: ServiceWorkerGlobalScope;
 
-const coreAppShellRoutes: string[] = [
-  "/",
-  "/proof",
-  "/simulator",
-  "/schedule",
-  "/stack",
-  "/crf",
-  "/neuro",
-  "/arcade",
-  "/case-studies",
-  "/offline",
-];
-
 const precacheManifest = (self.__SW_MANIFEST || []).concat(
-  coreAppShellRoutes.map((url) => ({
+  PUBLIC_ROUTE_PATHS.map((url) => ({
     url,
     revision: null,
   }))

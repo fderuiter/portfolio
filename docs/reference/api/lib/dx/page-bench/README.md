@@ -10,13 +10,13 @@
 
 - [BenchmarkThresholds](interfaces/BenchmarkThresholds.md)
 - [MetricSummary](interfaces/MetricSummary.md)
-- [PageBenchmarkRoute](interfaces/PageBenchmarkRoute.md)
 - [PageBenchmarkSummary](interfaces/PageBenchmarkSummary.md)
 - [RunOptions](interfaces/RunOptions.md)
 - [SingleRunMetrics](interfaces/SingleRunMetrics.md)
 
 ## Type Aliases
 
+- [PageBenchmarkRoute](type-aliases/PageBenchmarkRoute.md)
 - [WebVitalRating](type-aliases/WebVitalRating.md)
 
 ## Variables

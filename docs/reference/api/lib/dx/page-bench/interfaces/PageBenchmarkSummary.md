@@ -68,7 +68,7 @@
 
 ### route
 
-> **route**: [`PageBenchmarkRoute`](PageBenchmarkRoute.md)
+> **route**: [`PublicRouteDefinition`](../../../public-routes/interfaces/PublicRouteDefinition.md)
 
 ***
 

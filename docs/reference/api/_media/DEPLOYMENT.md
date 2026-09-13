@@ -224,3 +224,27 @@ When a synthetic probe alert triggers, on-call engineers should follow the dedic
      ```
      Verify HTTP status `400 Bad Request` and JSON error details.
   4. **Inspect Database & Redis Rate Limiter**: Check Neon PostgreSQL connection string (`DATABASE_URL`) and Upstash Redis rate limiting headers (`X-RateLimit-Limit`, `X-RateLimit-Remaining`).
+
+### Runbook 6: Warm Service Worker Arcade Navigation
+
+- **Probe ID**: Probe 6 (`__tests__/e2e/synthetic-probes.spec.ts`)
+- **Covered Capabilities**: Service-worker installation and activation, controlled
+  navigation to `/arcade/working-with-duck`, truthful fallback messaging, and the
+  `<PlayCabinet>` canvas launch workflow.
+- **Failure Symptoms**: The worker never controls the page, the arcade navigation
+  serves the offline recovery view while online, or the game canvas does not mount.
+- **Triage Steps**:
+  1. **Run the isolated probe against the intended deployment**:
+     ```bash
+     PLAYWRIGHT_TEST_BASE_URL="<TARGET_URL>" npx playwright test __tests__/e2e/synthetic-probes.spec.ts -g "Probe 6" --project=chromium
+     ```
+  2. **Inspect the deployed worker**: Confirm `/sw.js` contains the current
+     release's public route catalog and that the browser reports an active
+     controller after reload.
+  3. **Remove stale-worker ambiguity**: Test once in a fresh browser profile and
+     once after allowing the existing registration to update. A fresh-profile
+     pass with an upgrade-profile failure indicates an activation or cache
+     migration regression.
+  4. **Verify the response truthfully**: A real connectivity failure may render
+     the offline recovery view. An online navigation failure must identify the
+     page as unavailable and offer retry without claiming the visitor is offline.
