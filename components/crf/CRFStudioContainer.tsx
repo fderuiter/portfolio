@@ -25,6 +25,8 @@ import {
   StudyProtocolEngine,
   generateCdashVariableName,
   generateEngineId,
+  FieldImpactPreview,
+  SectionImpactPreview,
 } from "@/lib/crf/study-engine";
 import { useStudyAutosave } from "@/hooks/useStudyAutosave";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
@@ -187,6 +189,26 @@ export const CRFStudioContainer: React.FC = () => {
     !!pendingStudyReplacement,
     {
       onEscape: () => setPendingStudyReplacement(null),
+    }
+  );
+  const [impactPendingDeletion, setImpactPendingDeletion] = useState<
+    | {
+        type: "field";
+        field: CRFField;
+        sectionId: string;
+        preview: FieldImpactPreview;
+      }
+    | {
+        type: "section";
+        section: CRFSection;
+        preview: SectionImpactPreview;
+      }
+    | null
+  >(null);
+  const impactDeletionModalRef = useFocusTrap<HTMLDivElement>(
+    impactPendingDeletion !== null,
+    {
+      onEscape: () => setImpactPendingDeletion(null),
     }
   );
 
@@ -824,10 +846,29 @@ export const CRFStudioContainer: React.FC = () => {
 
   const handleDeleteSection = (sectionId: string) => {
     if (!activeForm || activeForm.sections.length <= 1) return;
-    const updatedSections = activeForm.sections.filter(
-      (s) => s.id !== sectionId
+    const preview = StudyProtocolEngine.previewSectionRemoval(
+      study,
+      activeForm.id,
+      sectionId
     );
-    handleUpdateFormMeta({ sections: updatedSections });
+    if (!preview.canSafelyDelete && preview.totalReferencesCount > 0) {
+      const foundSec = activeForm.sections.find((s) => s.id === sectionId);
+      if (foundSec) {
+        setImpactPendingDeletion({
+          type: "section",
+          section: foundSec,
+          preview,
+        });
+        return;
+      }
+    }
+    const { study: updatedStudy } =
+      StudyProtocolEngine.removeSectionWithCascade(
+        study,
+        activeForm.id,
+        sectionId
+      );
+    updateStudyWithHistory(updatedStudy);
   };
 
   const handleUpdateSectionTitle = (sectionId: string, title: string) => {
@@ -962,6 +1003,25 @@ export const CRFStudioContainer: React.FC = () => {
 
   const handleDeleteField = (sectionId: string, fieldId: string) => {
     if (!activeForm) return;
+    const preview = StudyProtocolEngine.previewFieldRemoval(
+      study,
+      activeForm.id,
+      fieldId
+    );
+    if (!preview.canSafelyDelete && preview.references.length > 0) {
+      const foundField = activeForm.sections
+        .flatMap((s) => s.fields)
+        .find((f) => f.id === fieldId);
+      if (foundField) {
+        setImpactPendingDeletion({
+          type: "field",
+          field: foundField,
+          sectionId,
+          preview,
+        });
+        return;
+      }
+    }
     const { study: updatedStudy } = StudyProtocolEngine.removeField(
       study,
       activeForm.id,
@@ -971,6 +1031,52 @@ export const CRFStudioContainer: React.FC = () => {
     if (selectedFieldId === fieldId) {
       setSelectedFieldId(null);
     }
+  };
+
+  const handleConfirmImpactDeletion = () => {
+    if (!activeForm || !impactPendingDeletion) return;
+    if (impactPendingDeletion.type === "field") {
+      const { study: updatedStudy } =
+        StudyProtocolEngine.removeFieldWithCascade(
+          study,
+          activeForm.id,
+          impactPendingDeletion.field.id,
+          { purgeReferencingRules: true }
+        );
+      updateStudyWithHistory(updatedStudy);
+      if (selectedFieldId === impactPendingDeletion.field.id) {
+        setSelectedFieldId(null);
+      }
+    } else if (impactPendingDeletion.type === "section") {
+      const { study: updatedStudy } =
+        StudyProtocolEngine.removeSectionWithCascade(
+          study,
+          activeForm.id,
+          impactPendingDeletion.section.id,
+          { purgeReferencingRules: true }
+        );
+      updateStudyWithHistory(updatedStudy);
+    }
+    setImpactPendingDeletion(null);
+  };
+
+  const handleRenameFieldEverywhere = (
+    fieldId: string,
+    newVariableName: string
+  ) => {
+    if (!activeForm) return;
+    const { study: updatedStudy, error } =
+      StudyProtocolEngine.renameFieldEverywhere(
+        study,
+        activeForm.id,
+        fieldId,
+        newVariableName
+      );
+    if (error) {
+      console.warn("Failed to rename field everywhere:", error);
+      return;
+    }
+    updateStudyWithHistory(updatedStudy);
   };
 
   const handleUpdateRules = (rules: EditCheckRule[]) => {
@@ -1196,6 +1302,15 @@ export const CRFStudioContainer: React.FC = () => {
                       }
                     }}
                     onDuplicateForm={(fId) => handleDuplicateForm(fId)}
+                    onRenameEverywhere={
+                      selectedField
+                        ? (newVar) =>
+                            handleRenameFieldEverywhere(
+                              selectedField.id,
+                              newVar
+                            )
+                        : undefined
+                    }
                   />
                 </div>
               )}
@@ -1249,6 +1364,12 @@ export const CRFStudioContainer: React.FC = () => {
                     }
                   }}
                   onDuplicateForm={(fId) => handleDuplicateForm(fId)}
+                  onRenameEverywhere={
+                    selectedField
+                      ? (newVar) =>
+                          handleRenameFieldEverywhere(selectedField.id, newVar)
+                      : undefined
+                  }
                 />
               </aside>
             )}
@@ -1544,6 +1665,128 @@ export const CRFStudioContainer: React.FC = () => {
                 className="px-3.5 py-1.5 rounded-lg bg-brand-cyan hover:bg-brand-cyan/90 text-xs font-mono font-bold text-black transition-colors shadow-sm"
               >
                 Save Snapshot &amp; Replace
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Dependency Web Sentinel Impact Warning & Deletion Confirmation Modal (#542) */}
+      {impactPendingDeletion && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="impact-deletion-modal-title"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150"
+          onClick={() => setImpactPendingDeletion(null)}
+        >
+          <div
+            ref={impactDeletionModalRef}
+            className="w-full max-w-lg bg-zinc-900 border border-zinc-800 rounded-2xl p-5 shadow-2xl space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shrink-0" />
+                  <h3
+                    id="impact-deletion-modal-title"
+                    className="text-sm font-bold font-mono text-white"
+                  >
+                    Dependency Sentinel: Blast Radius Preview
+                  </h3>
+                </div>
+                <p className="text-xs text-zinc-400 font-sans">
+                  {impactPendingDeletion.type === "field" ? (
+                    <>
+                      Field{" "}
+                      <span className="font-mono text-brand-cyan font-bold">
+                        {impactPendingDeletion.field.variableName}
+                      </span>{" "}
+                      (&quot;{impactPendingDeletion.field.label}&quot;) is
+                      actively referenced in your study protocol.
+                    </>
+                  ) : (
+                    <>
+                      Section{" "}
+                      <span className="font-mono text-brand-cyan font-bold">
+                        {impactPendingDeletion.section.title}
+                      </span>{" "}
+                      contains fields with active dependencies in your study
+                      protocol.
+                    </>
+                  )}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setImpactPendingDeletion(null)}
+                className="p-1 rounded text-zinc-400 hover:text-white hover:bg-zinc-850 transition-colors"
+                aria-label="Cancel deletion"
+              >
+                <IconX className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* References Blast Radius Details */}
+            <div className="bg-zinc-950/80 rounded-xl p-3 border border-zinc-850 space-y-2 max-h-52 overflow-y-auto">
+              <div className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider font-semibold flex items-center justify-between">
+                <span>
+                  Active References (
+                  {impactPendingDeletion.type === "field"
+                    ? impactPendingDeletion.preview.references.length
+                    : impactPendingDeletion.preview.totalReferencesCount}
+                  )
+                </span>
+                <span className="text-amber-400 text-[10px]">
+                  Cascading Cleanup
+                </span>
+              </div>
+              <ul className="space-y-1.5">
+                {(impactPendingDeletion.type === "field"
+                  ? impactPendingDeletion.preview.references
+                  : impactPendingDeletion.preview.allReferences
+                ).map((ref, idx) => (
+                  <li
+                    key={`ref_${idx}`}
+                    className="text-xs font-mono text-zinc-300 p-2 rounded bg-zinc-900/60 border border-zinc-800/80 space-y-0.5"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-bold text-brand-cyan">
+                        {ref.type.replace(/_/g, " ")}
+                      </span>
+                      <span className="text-[10px] text-zinc-500">
+                        {ref.formName}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-zinc-300 font-sans">
+                      {ref.description}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <p className="text-[11px] text-zinc-400 font-sans leading-relaxed">
+              Confirming deletion will cleanly prune all referencing rules,
+              triggers, and conditions across the protocol in a single commit,
+              preserving 1-operation undo.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setImpactPendingDeletion(null)}
+                className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-750 text-xs font-mono text-zinc-300 transition-colors"
+              >
+                Cancel (Keep Field)
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmImpactDeletion}
+                className="px-3.5 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-xs font-mono font-bold text-white transition-colors shadow-sm"
+              >
+                Delete &amp; Cascade Prune
               </button>
             </div>
           </div>

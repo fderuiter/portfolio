@@ -37,6 +37,7 @@ interface InspectorPanelProps {
   onSaveCodelist?: (codelist: CodelistDefinition) => void;
   onDuplicateField?: (fieldId: string) => void;
   onDuplicateForm?: (formId: string) => void;
+  onRenameEverywhere?: (newVar: string) => void;
 }
 
 type InspectorTab = "properties" | "logic" | "cdash";
@@ -52,6 +53,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
   onSaveCodelist,
   onDuplicateField,
   onDuplicateForm,
+  onRenameEverywhere,
 }) => {
   const [activeTab, setActiveTab] = useState<InspectorTab>("properties");
   const [hasCopiedCli, setHasCopiedCli] = useState(false);
@@ -200,6 +202,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                   onUpdateField(selectedField.id, updates)
                 }
                 onSaveToStudyCodelist={onSaveCodelist}
+                onRenameEverywhere={onRenameEverywhere}
               />
             )}
 

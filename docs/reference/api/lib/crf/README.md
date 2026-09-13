@@ -362,6 +362,24 @@ Re-exports [DEFAULT_STUDY_BRANDING](branding-defaults/variables/DEFAULT_STUDY_BR
 
 ***
 
+### DerivationExplanation
+
+Re-exports [DerivationExplanation](expression-evaluator/interfaces/DerivationExplanation.md)
+
+***
+
+### DerivationInputDependency
+
+Re-exports [DerivationInputDependency](expression-evaluator/interfaces/DerivationInputDependency.md)
+
+***
+
+### DerivationStep
+
+Re-exports [DerivationStep](expression-evaluator/interfaces/DerivationStep.md)
+
+***
+
 ### describeCondition
 
 Re-exports [describeCondition](expression-evaluator/functions/describeCondition.md)
@@ -563,6 +581,12 @@ Re-exports [executeVisitCommand](cli-engine/functions/executeVisitCommand.md)
 ### ExpandedRField
 
 Re-exports [ExpandedRField](export-r/interfaces/ExpandedRField.md)
+
+***
+
+### explainCalculationDerivation
+
+Re-exports [explainCalculationDerivation](expression-evaluator/functions/explainCalculationDerivation.md)
 
 ***
 

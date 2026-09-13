@@ -12,12 +12,14 @@ import {
   CRFField,
   StudyVisit,
   EditCheckRule,
+  AstCondition,
   ClinicalDataType,
   StudyArm,
   StudyEpoch,
   StudyCohort,
   BiomedicalConcept,
 } from "./types";
+import { validateCdashVariableName } from "./precision-date";
 import { lintForm } from "./ast-evaluator";
 import {
   scaffoldCdashDomain,
@@ -62,6 +64,44 @@ export interface DomainMetadata {
   category: "core" | "device" | "pharma" | "specialty";
   variableCount: number;
   sampleVariables: string[];
+}
+
+export interface FieldReferenceLocation {
+  type:
+    | "rule_target"
+    | "rule_trigger"
+    | "rule_condition"
+    | "rule_formula"
+    | "field_calculation"
+    | "repeating_column"
+    | "cross_visit_rule";
+  formId: string;
+  formName: string;
+  ruleId?: string;
+  ruleName?: string;
+  fieldId?: string;
+  variableName?: string;
+  description: string;
+}
+
+export interface FieldImpactPreview {
+  targetFieldId: string;
+  targetVariableName: string;
+  formId: string;
+  references: FieldReferenceLocation[];
+  canSafelyDelete: boolean;
+  warningMessage?: string;
+}
+
+export interface SectionImpactPreview {
+  sectionId: string;
+  sectionTitle: string;
+  formId: string;
+  fields: FieldImpactPreview[];
+  totalReferencesCount: number;
+  allReferences: FieldReferenceLocation[];
+  canSafelyDelete: boolean;
+  warningMessage?: string;
 }
 
 /**
@@ -313,6 +353,10 @@ export function generateCdashVariableName(
       return candidate;
     }
   }
+}
+
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 /**
@@ -1048,6 +1092,56 @@ export class StudyProtocolEngine {
   }
 
   /**
+   * Add Section to Form
+   */
+  static addSection(
+    study: StudyProtocol,
+    domainOrFormId: string,
+    titleOrSection: string | Partial<CRFSection>
+  ): {
+    study: StudyProtocol;
+    section?: CRFSection;
+    form?: CRFForm;
+    error?: string;
+  } {
+    const form = this.getForm(study, domainOrFormId);
+    if (!form) {
+      return {
+        study,
+        error: `Form '${domainOrFormId}' not found in protocol.`,
+      };
+    }
+
+    const newSection: CRFSection = {
+      id:
+        typeof titleOrSection === "object" && titleOrSection.id
+          ? titleOrSection.id
+          : generateEngineId("sec"),
+      title:
+        typeof titleOrSection === "string"
+          ? titleOrSection
+          : titleOrSection.title || "New Section",
+      fields:
+        typeof titleOrSection === "object" && titleOrSection.fields
+          ? titleOrSection.fields
+          : [],
+    };
+
+    const updatedForm: CRFForm = {
+      ...form,
+      sections: [...form.sections, newSection],
+    };
+
+    const updatedStudy: StudyProtocol = {
+      ...study,
+      lastModified: new Date().toISOString(),
+      forms: study.forms.map((f) => (f.id === form.id ? updatedForm : f)),
+    };
+
+    return { study: updatedStudy, section: newSection, form: updatedForm };
+  }
+
+  /**
    * Insert Clinical Field into Specified Section and Position
    */
   static insertField(
@@ -1291,38 +1385,669 @@ export class StudyProtocolEngine {
   }
 
   /**
-   * Remove Field from Form & Prune AST Rules
+   * Find All References to a Field Across Rules, Conditions, Formulas, Calculations, and Grids (#542)
    */
-  static removeField(
+  static findFieldReferences(
+    study: StudyProtocol,
+    fieldIdOrVar: string,
+    formId?: string
+  ): FieldReferenceLocation[] {
+    const rawTarget = fieldIdOrVar.trim();
+    if (!rawTarget) return [];
+
+    const targetUpper = rawTarget.toUpperCase();
+    const targetLower = rawTarget.toLowerCase();
+
+    // Resolve target field to determine both exact id and variableName if possible
+    let resolvedId = rawTarget;
+    let resolvedVar = rawTarget;
+
+    const formsToScan = study.forms || [];
+    for (const f of formsToScan) {
+      for (const s of f.sections) {
+        for (const fld of s.fields) {
+          if (
+            fld.id.toLowerCase() === targetLower ||
+            fld.variableName.toUpperCase() === targetUpper
+          ) {
+            resolvedId = fld.id;
+            resolvedVar = fld.variableName;
+            break;
+          }
+          if (fld.repeatingColumns) {
+            for (const rc of fld.repeatingColumns) {
+              if (
+                rc.id.toLowerCase() === targetLower ||
+                rc.variableName.toUpperCase() === targetUpper
+              ) {
+                resolvedId = rc.id;
+                resolvedVar = rc.variableName;
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    const idRegex = new RegExp(`\\b${escapeRegex(resolvedId)}\\b`, "i");
+    const varRegex = new RegExp(`\\b${escapeRegex(resolvedVar)}\\b`, "i");
+
+    const matchesTarget = (val?: string | null): boolean => {
+      if (!val) return false;
+      const u = val.toUpperCase();
+      const l = val.toLowerCase();
+      return (
+        l === resolvedId.toLowerCase() ||
+        u === resolvedVar.toUpperCase() ||
+        l === targetLower ||
+        u === targetUpper
+      );
+    };
+
+    const references: FieldReferenceLocation[] = [];
+    const seen = new Set<string>();
+
+    const addRef = (ref: FieldReferenceLocation) => {
+      const key = `${ref.formId}:${ref.type}:${ref.ruleId || ""}:${ref.fieldId || ""}:${ref.description}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        references.push(ref);
+      }
+    };
+
+    for (const form of formsToScan) {
+      if (
+        formId &&
+        form.id !== formId &&
+        !form.rules?.some((r) => r.conditions?.some((c) => c.crossVisitId))
+      ) {
+        // Optimization: if specific formId requested and no cross-visit, prioritize focused scanning
+      }
+
+      // 1. Scan form rules
+      const rules = form.rules || [];
+      for (const rule of rules) {
+        // Target field check
+        if (matchesTarget(rule.targetFieldId)) {
+          addRef({
+            type: "rule_target",
+            formId: form.id,
+            formName: form.name,
+            ruleId: rule.id,
+            ruleName: rule.name,
+            description: `Rule '${rule.name}' targets this field as its action target.`,
+          });
+        }
+
+        // Trigger fields check
+        if (rule.triggerFieldIds?.some((id) => matchesTarget(id))) {
+          addRef({
+            type: "rule_trigger",
+            formId: form.id,
+            formName: form.name,
+            ruleId: rule.id,
+            ruleName: rule.name,
+            description: `Rule '${rule.name}' lists this field as an evaluation trigger.`,
+          });
+        }
+
+        // Conditions check
+        const checkCond = (cond: AstCondition) => {
+          const isCrossVisit = Boolean(cond.crossVisitId);
+          if (matchesTarget(cond.fieldId)) {
+            addRef({
+              type: isCrossVisit ? "cross_visit_rule" : "rule_condition",
+              formId: form.id,
+              formName: form.name,
+              ruleId: rule.id,
+              ruleName: rule.name,
+              description: isCrossVisit
+                ? `Cross-visit rule '${rule.name}' evaluates this field at visit '${cond.crossVisitId}'.`
+                : `Rule '${rule.name}' evaluates this field in condition '${cond.fieldId} ${cond.operator}'.`,
+            });
+          }
+          if (cond.compareFieldId && matchesTarget(cond.compareFieldId)) {
+            addRef({
+              type: isCrossVisit ? "cross_visit_rule" : "rule_condition",
+              formId: form.id,
+              formName: form.name,
+              ruleId: rule.id,
+              ruleName: rule.name,
+              description: isCrossVisit
+                ? `Cross-visit rule '${rule.name}' compares against this field at visit '${cond.crossVisitId}'.`
+                : `Rule '${rule.name}' compares against this field in condition.`,
+            });
+          }
+        };
+
+        if (rule.conditions) {
+          rule.conditions.forEach(checkCond);
+        }
+
+        if (rule.conditionGroups) {
+          for (const grp of rule.conditionGroups) {
+            grp.conditions.forEach(checkCond);
+          }
+        }
+
+        // Rule formula expression check
+        if (rule.formulaExpression) {
+          if (
+            idRegex.test(rule.formulaExpression) ||
+            varRegex.test(rule.formulaExpression)
+          ) {
+            addRef({
+              type: "rule_formula",
+              formId: form.id,
+              formName: form.name,
+              ruleId: rule.id,
+              ruleName: rule.name,
+              description: `Rule '${rule.name}' derives values using this variable in formula '${rule.formulaExpression}'.`,
+            });
+          }
+        }
+      }
+
+      // 2. Scan other fields' calculation formulas and repeating columns
+      for (const sec of form.sections) {
+        for (const fld of sec.fields) {
+          if (fld.id !== resolvedId) {
+            if (fld.calculationFormula) {
+              if (
+                idRegex.test(fld.calculationFormula) ||
+                varRegex.test(fld.calculationFormula)
+              ) {
+                addRef({
+                  type: "field_calculation",
+                  formId: form.id,
+                  formName: form.name,
+                  fieldId: fld.id,
+                  variableName: fld.variableName,
+                  description: `Field '${fld.label}' (${fld.variableName}) uses this variable in calculation formula '${fld.calculationFormula}'.`,
+                });
+              }
+            }
+          }
+
+          if (fld.repeatingColumns) {
+            for (const rc of fld.repeatingColumns) {
+              if (rc.id !== resolvedId && rc.calculationFormula) {
+                if (
+                  idRegex.test(rc.calculationFormula) ||
+                  varRegex.test(rc.calculationFormula)
+                ) {
+                  addRef({
+                    type: "field_calculation",
+                    formId: form.id,
+                    formName: form.name,
+                    fieldId: rc.id,
+                    variableName: rc.variableName,
+                    description: `Repeating column '${rc.label}' (${rc.variableName}) in grid '${fld.label}' uses this variable in calculation formula.`,
+                  });
+                }
+              }
+              if (matchesTarget(rc.id) || matchesTarget(rc.variableName)) {
+                if (fld.id !== resolvedId) {
+                  addRef({
+                    type: "repeating_column",
+                    formId: form.id,
+                    formName: form.name,
+                    fieldId: fld.id,
+                    variableName: fld.variableName,
+                    description: `This field is a column inside repeating grid '${fld.label}' (${fld.variableName}).`,
+                  });
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return references;
+  }
+
+  /**
+   * Preview Blast Radius Before Deleting a Field (#542)
+   */
+  static previewFieldRemoval(
     study: StudyProtocol,
     domainOrFormId: string,
     fieldIdOrVar: string
+  ): FieldImpactPreview {
+    const found = this.getField(study, domainOrFormId, fieldIdOrVar);
+    const form = this.getForm(study, domainOrFormId);
+    const formId = form?.id || domainOrFormId;
+
+    if (!found) {
+      return {
+        targetFieldId: fieldIdOrVar,
+        targetVariableName: fieldIdOrVar,
+        formId,
+        references: [],
+        canSafelyDelete: true,
+      };
+    }
+
+    const { field } = found;
+    const references = this.findFieldReferences(study, field.id, formId);
+    const canSafelyDelete = references.length === 0;
+
+    let warningMessage: string | undefined;
+    if (!canSafelyDelete) {
+      const ruleRefs = references.filter(
+        (r) => r.type.startsWith("rule") || r.type === "cross_visit_rule"
+      );
+      const calcRefs = references.filter((r) => r.type === "field_calculation");
+      const parts: string[] = [];
+      if (ruleRefs.length > 0)
+        parts.push(`${ruleRefs.length} rule reference(s)`);
+      if (calcRefs.length > 0)
+        parts.push(`${calcRefs.length} calculation formula(s)`);
+      warningMessage = `Field '${field.variableName}' is actively referenced by ${parts.join(" and ") || "other elements"}. Deleting it will cascade and prune dependent rules.`;
+    }
+
+    return {
+      targetFieldId: field.id,
+      targetVariableName: field.variableName,
+      formId,
+      references,
+      canSafelyDelete,
+      warningMessage,
+    };
+  }
+
+  /**
+   * Preview Blast Radius Before Deleting a Section (#542)
+   */
+  static previewSectionRemoval(
+    study: StudyProtocol,
+    domainOrFormId: string,
+    sectionId: string
+  ): SectionImpactPreview {
+    const form = this.getForm(study, domainOrFormId);
+    const formId = form?.id || domainOrFormId;
+    const section = form?.sections.find((s) => s.id === sectionId);
+
+    if (!form || !section) {
+      return {
+        sectionId,
+        sectionTitle: sectionId,
+        formId,
+        fields: [],
+        totalReferencesCount: 0,
+        allReferences: [],
+        canSafelyDelete: true,
+      };
+    }
+
+    const fields: FieldImpactPreview[] = [];
+    const allRefs: FieldReferenceLocation[] = [];
+    const seen = new Set<string>();
+
+    for (const fld of section.fields) {
+      const preview = this.previewFieldRemoval(study, form.id, fld.id);
+      fields.push(preview);
+      for (const r of preview.references) {
+        const key = `${r.formId}:${r.type}:${r.ruleId || ""}:${r.fieldId || ""}:${r.description}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          allRefs.push(r);
+        }
+      }
+    }
+
+    const totalReferencesCount = allRefs.length;
+    const canSafelyDelete = totalReferencesCount === 0;
+    const warningMessage = !canSafelyDelete
+      ? `Section '${section.title}' contains ${section.fields.length} field(s) with ${totalReferencesCount} active reference(s) in rules and calculations.`
+      : undefined;
+
+    return {
+      sectionId: section.id,
+      sectionTitle: section.title,
+      formId,
+      fields,
+      totalReferencesCount,
+      allReferences: allRefs,
+      canSafelyDelete,
+      warningMessage,
+    };
+  }
+
+  /**
+   * Rename Field Everywhere: Atomically updates variable name and all AST rules, conditions, and formulas (#542)
+   */
+  static renameFieldEverywhere(
+    study: StudyProtocol,
+    domainOrFormId: string,
+    fieldIdOrVar: string,
+    newVariableName: string,
+    newLabel?: string
   ): {
     study: StudyProtocol;
-    removedField?: CRFField;
-    form?: CRFForm;
+    updatedField?: CRFField;
+    affectedReferencesCount: number;
     error?: string;
   } {
     const found = this.getField(study, domainOrFormId, fieldIdOrVar);
     if (!found) {
       return {
         study,
+        affectedReferencesCount: 0,
         error: `Field '${fieldIdOrVar}' not found in form '${domainOrFormId}'.`,
       };
     }
 
-    const { form, field } = found;
+    const { form, field: targetField } = found;
+    const upperNewVar = newVariableName.trim().toUpperCase();
 
-    const updatedSections = form.sections.map((sec) => ({
-      ...sec,
-      fields: sec.fields.filter((f) => f.id !== field.id),
-    }));
+    if (!upperNewVar) {
+      return {
+        study,
+        affectedReferencesCount: 0,
+        error: "Variable name cannot be empty.",
+      };
+    }
 
-    // Prune rules that target this field or use it as trigger
-    const updatedRules = form.rules.filter(
-      (r) =>
-        r.targetFieldId !== field.id && !r.triggerFieldIds.includes(field.id)
+    const validation = validateCdashVariableName(upperNewVar);
+    if (!validation.isValid) {
+      return {
+        study,
+        affectedReferencesCount: 0,
+        error:
+          validation.error || `Invalid CDASH variable name '${upperNewVar}'.`,
+      };
+    }
+
+    // Check collision in this form
+    const isConflict = form.sections.some((s) =>
+      s.fields.some((f) => {
+        if (
+          f.id !== targetField.id &&
+          f.variableName.toUpperCase() === upperNewVar
+        ) {
+          return true;
+        }
+        return f.repeatingColumns?.some(
+          (rc) =>
+            rc.id !== targetField.id &&
+            rc.variableName.toUpperCase() === upperNewVar
+        );
+      })
     );
+
+    if (isConflict) {
+      return {
+        study,
+        affectedReferencesCount: 0,
+        error: `Variable name '${upperNewVar}' already exists in form '${form.name}'.`,
+      };
+    }
+
+    const oldVar = targetField.variableName.toUpperCase();
+    const oldId = targetField.id;
+
+    // Build replacement regex for word boundary
+    const oldVarRegex = new RegExp(`\\b${escapeRegex(oldVar)}\\b`, "g");
+    const oldIdRegex = new RegExp(`\\b${escapeRegex(oldId)}\\b`, "g");
+
+    const replaceInFormula = (
+      formula?: string
+    ): { next?: string; changed: boolean } => {
+      if (!formula) return { next: formula, changed: false };
+      let next = formula.replace(oldVarRegex, upperNewVar);
+      next = next.replace(oldIdRegex, upperNewVar);
+      return { next, changed: next !== formula };
+    };
+
+    let affectedReferencesCount = 0;
+    let finalUpdatedField: CRFField | undefined;
+
+    const updatedForms = study.forms.map((f) => {
+      // 1. Update fields in sections
+      const updatedSections = f.sections.map((sec) => ({
+        ...sec,
+        fields: sec.fields.map((fld) => {
+          let updatedFld = fld;
+          if (fld.id === oldId) {
+            updatedFld = {
+              ...fld,
+              variableName: upperNewVar,
+              ...(newLabel !== undefined ? { label: newLabel } : {}),
+            };
+            finalUpdatedField = updatedFld;
+          } else if (fld.calculationFormula) {
+            const { next, changed } = replaceInFormula(fld.calculationFormula);
+            if (changed) {
+              affectedReferencesCount++;
+              updatedFld = { ...fld, calculationFormula: next };
+            }
+          }
+
+          if (updatedFld.repeatingColumns) {
+            const updatedRc = updatedFld.repeatingColumns.map((rc) => {
+              if (rc.id === oldId) {
+                return {
+                  ...rc,
+                  variableName: upperNewVar,
+                  ...(newLabel !== undefined ? { label: newLabel } : {}),
+                };
+              }
+              if (rc.calculationFormula) {
+                const { next, changed } = replaceInFormula(
+                  rc.calculationFormula
+                );
+                if (changed) {
+                  affectedReferencesCount++;
+                  return { ...rc, calculationFormula: next };
+                }
+              }
+              return rc;
+            });
+            updatedFld = { ...updatedFld, repeatingColumns: updatedRc };
+          }
+
+          return updatedFld;
+        }),
+      }));
+
+      // 2. Update rules
+      const updatedRules = (f.rules || []).map((rule) => {
+        let ruleModified = false;
+
+        let nextTarget = rule.targetFieldId;
+        if (rule.targetFieldId === oldVar) {
+          nextTarget = upperNewVar;
+          ruleModified = true;
+        }
+
+        const nextTriggers = (rule.triggerFieldIds || []).map((tid) => {
+          if (tid === oldVar) {
+            ruleModified = true;
+            return upperNewVar;
+          }
+          return tid;
+        });
+
+        const updateCondition = (cond: AstCondition): AstCondition => {
+          let cMod = false;
+          let fieldId = cond.fieldId;
+          let compareFieldId = cond.compareFieldId;
+
+          if (cond.fieldId === oldVar) {
+            fieldId = upperNewVar;
+            cMod = true;
+          }
+          if (cond.compareFieldId === oldVar) {
+            compareFieldId = upperNewVar;
+            cMod = true;
+          }
+          if (cMod) ruleModified = true;
+          return {
+            ...cond,
+            fieldId,
+            ...(compareFieldId !== undefined ? { compareFieldId } : {}),
+          };
+        };
+
+        const nextConditions = (rule.conditions || []).map(updateCondition);
+
+        const nextConditionGroups = rule.conditionGroups?.map((grp) => ({
+          ...grp,
+          conditions: grp.conditions.map(updateCondition),
+        }));
+
+        let nextFormula = rule.formulaExpression;
+        if (rule.formulaExpression) {
+          const { next, changed } = replaceInFormula(rule.formulaExpression);
+          if (changed) {
+            nextFormula = next;
+            ruleModified = true;
+          }
+        }
+
+        if (ruleModified) {
+          affectedReferencesCount++;
+        }
+
+        return {
+          ...rule,
+          targetFieldId: nextTarget,
+          triggerFieldIds: nextTriggers,
+          conditions: nextConditions,
+          ...(nextConditionGroups
+            ? { conditionGroups: nextConditionGroups }
+            : {}),
+          ...(nextFormula !== undefined
+            ? { formulaExpression: nextFormula }
+            : {}),
+        };
+      });
+
+      return {
+        ...f,
+        sections: updatedSections,
+        rules: updatedRules,
+      };
+    });
+
+    const updatedStudy: StudyProtocol = {
+      ...study,
+      lastModified: new Date().toISOString(),
+      forms: updatedForms,
+    };
+
+    return {
+      study: updatedStudy,
+      updatedField: finalUpdatedField,
+      affectedReferencesCount,
+    };
+  }
+
+  /**
+   * Remove Field with Cascade: Prunes referencing rules/conditions with 1-operation undo (#542)
+   */
+  static removeFieldWithCascade(
+    study: StudyProtocol,
+    domainOrFormId: string,
+    fieldIdOrVar: string,
+    options?: {
+      purgeReferencingRules?: boolean;
+    }
+  ): {
+    study: StudyProtocol;
+    removedField?: CRFField;
+    removedFromSectionId?: string;
+    removedAtIndex?: number;
+    affectedReferences: FieldReferenceLocation[];
+    undo?: (currentStudy: StudyProtocol) => StudyProtocol;
+    error?: string;
+  } {
+    const found = this.getField(study, domainOrFormId, fieldIdOrVar);
+    if (!found) {
+      return {
+        study,
+        affectedReferences: [],
+        error: `Field '${fieldIdOrVar}' not found in form '${domainOrFormId}'.`,
+      };
+    }
+
+    const { form, field, sectionIndex, fieldIndex } = found;
+    const targetSection = form.sections[sectionIndex];
+    const targetSectionId = targetSection.id;
+
+    // Collect references before removal
+    const affectedReferences = this.findFieldReferences(
+      study,
+      field.id,
+      form.id
+    );
+    const shouldPurgeRules = options?.purgeReferencingRules !== false;
+
+    // Snapshot original rules and form for undo
+    const originalRules: EditCheckRule[] = JSON.parse(
+      JSON.stringify(form.rules || [])
+    );
+    const targetFieldId = field.id;
+    const targetVar = field.variableName.toUpperCase();
+
+    const matchesThis = (idOrVar?: string | null) => {
+      if (!idOrVar) return false;
+      return (
+        idOrVar.toLowerCase() === targetFieldId.toLowerCase() ||
+        idOrVar.toUpperCase() === targetVar
+      );
+    };
+
+    // Remove field from section
+    const updatedSections = form.sections.map((sec, sIdx) => {
+      if (sIdx !== sectionIndex) return sec;
+      return {
+        ...sec,
+        fields: sec.fields.filter((f) => f.id !== targetFieldId),
+      };
+    });
+
+    // Prune rules if shouldPurgeRules
+    let updatedRules = form.rules || [];
+    if (shouldPurgeRules) {
+      updatedRules = updatedRules
+        .filter((r) => !matchesThis(r.targetFieldId))
+        .map((r) => {
+          const nextTriggers = (r.triggerFieldIds || []).filter(
+            (id) => !matchesThis(id)
+          );
+          const nextConditions = (r.conditions || []).filter(
+            (c) => !matchesThis(c.fieldId) && !matchesThis(c.compareFieldId)
+          );
+          const nextGroups = r.conditionGroups
+            ?.map((g) => ({
+              ...g,
+              conditions: g.conditions.filter(
+                (c) => !matchesThis(c.fieldId) && !matchesThis(c.compareFieldId)
+              ),
+            }))
+            .filter((g) => g.conditions.length > 0);
+
+          return {
+            ...r,
+            triggerFieldIds: nextTriggers,
+            conditions: nextConditions,
+            ...(nextGroups !== undefined
+              ? { conditionGroups: nextGroups }
+              : {}),
+          };
+        })
+        .filter((r) => {
+          const hasTriggers = r.triggerFieldIds && r.triggerFieldIds.length > 0;
+          const hasConds =
+            (r.conditions && r.conditions.length > 0) ||
+            (r.conditionGroups && r.conditionGroups.length > 0);
+          return hasTriggers || hasConds;
+        });
+    }
 
     const updatedForm: CRFForm = {
       ...form,
@@ -1336,7 +2061,315 @@ export class StudyProtocolEngine {
       forms: study.forms.map((f) => (f.id === form.id ? updatedForm : f)),
     };
 
-    return { study: updatedStudy, removedField: field, form: updatedForm };
+    const undo = (currentStudy: StudyProtocol): StudyProtocol => {
+      return StudyProtocolEngine.restoreField(
+        currentStudy,
+        form.id,
+        field,
+        targetSectionId,
+        fieldIndex,
+        originalRules
+      );
+    };
+
+    return {
+      study: updatedStudy,
+      removedField: field,
+      removedFromSectionId: targetSectionId,
+      removedAtIndex: fieldIndex,
+      affectedReferences,
+      undo,
+    };
+  }
+
+  /**
+   * Restore Field and Associated Rules to Specified Section and Position (#542)
+   */
+  static restoreField(
+    study: StudyProtocol,
+    formId: string,
+    field: CRFField,
+    sectionId?: string,
+    fieldIndex?: number,
+    restoredRules?: EditCheckRule[]
+  ): StudyProtocol {
+    const form = this.getForm(study, formId);
+    if (!form) return study;
+
+    let targetSecIdx = 0;
+    if (sectionId) {
+      const foundIdx = form.sections.findIndex((s) => s.id === sectionId);
+      if (foundIdx !== -1) targetSecIdx = foundIdx;
+    }
+
+    const targetSec = form.sections[targetSecIdx];
+    if (!targetSec) return study;
+
+    // Check if field already present
+    const alreadyExists = form.sections.some((s) =>
+      s.fields.some((f) => f.id === field.id)
+    );
+    if (alreadyExists) return study;
+
+    const updatedSections = form.sections.map((sec, idx) => {
+      if (idx !== targetSecIdx) return sec;
+      const nextFields = [...sec.fields];
+      const insIdx =
+        fieldIndex !== undefined &&
+        fieldIndex >= 0 &&
+        fieldIndex <= nextFields.length
+          ? fieldIndex
+          : nextFields.length;
+      nextFields.splice(insIdx, 0, field);
+      return { ...sec, fields: nextFields };
+    });
+
+    let updatedRules = form.rules;
+    if (restoredRules && restoredRules.length > 0) {
+      const ruleMap = new Map<string, EditCheckRule>();
+      form.rules.forEach((r) => ruleMap.set(r.id, r));
+      restoredRules.forEach((r) => ruleMap.set(r.id, r));
+      updatedRules = Array.from(ruleMap.values());
+    }
+
+    const updatedForm: CRFForm = {
+      ...form,
+      sections: updatedSections,
+      rules: updatedRules,
+    };
+
+    return {
+      ...study,
+      lastModified: new Date().toISOString(),
+      forms: study.forms.map((f) => (f.id === form.id ? updatedForm : f)),
+    };
+  }
+
+  /**
+   * Remove Containing Section with Cascade: Removes section, all contained fields, and cleans up referencing rules (#542)
+   */
+  static removeSectionWithCascade(
+    study: StudyProtocol,
+    domainOrFormId: string,
+    sectionId: string,
+    options?: {
+      purgeReferencingRules?: boolean;
+    }
+  ): {
+    study: StudyProtocol;
+    removedSection?: CRFSection;
+    removedAtIndex?: number;
+    removedFields: CRFField[];
+    affectedReferences: FieldReferenceLocation[];
+    undo?: (currentStudy: StudyProtocol) => StudyProtocol;
+    error?: string;
+  } {
+    const form = this.getForm(study, domainOrFormId);
+    if (!form) {
+      return {
+        study,
+        removedFields: [],
+        affectedReferences: [],
+        error: `Form '${domainOrFormId}' not found in protocol.`,
+      };
+    }
+
+    const secIdx = form.sections.findIndex((s) => s.id === sectionId);
+    if (secIdx === -1) {
+      return {
+        study,
+        removedFields: [],
+        affectedReferences: [],
+        error: `Section '${sectionId}' not found in form '${form.name}'.`,
+      };
+    }
+
+    if (form.sections.length <= 1) {
+      return {
+        study,
+        removedFields: [],
+        affectedReferences: [],
+        error: `Cannot remove the only remaining section in form '${form.name}'.`,
+      };
+    }
+
+    const targetSection = form.sections[secIdx];
+    const removedFields = [...targetSection.fields];
+    const preview = this.previewSectionRemoval(study, form.id, sectionId);
+    const affectedReferences = preview.allReferences;
+
+    const originalRules: EditCheckRule[] = JSON.parse(
+      JSON.stringify(form.rules || [])
+    );
+    const shouldPurgeRules = options?.purgeReferencingRules !== false;
+
+    // Filter out section
+    const updatedSections = form.sections.filter((s) => s.id !== sectionId);
+
+    // If shouldPurgeRules, prune all rules referencing any field in the section
+    let updatedRules = form.rules || [];
+    if (shouldPurgeRules) {
+      const removedIds = new Set(removedFields.map((f) => f.id.toLowerCase()));
+      const removedVars = new Set(
+        removedFields.map((f) => f.variableName.toUpperCase())
+      );
+
+      const isRemoved = (val?: string | null) => {
+        if (!val) return false;
+        return (
+          removedIds.has(val.toLowerCase()) ||
+          removedVars.has(val.toUpperCase())
+        );
+      };
+
+      updatedRules = updatedRules
+        .filter((r) => !isRemoved(r.targetFieldId))
+        .map((r) => {
+          const nextTriggers = (r.triggerFieldIds || []).filter(
+            (id) => !isRemoved(id)
+          );
+          const nextConditions = (r.conditions || []).filter(
+            (c) => !isRemoved(c.fieldId) && !isRemoved(c.compareFieldId)
+          );
+          const nextGroups = r.conditionGroups
+            ?.map((g) => ({
+              ...g,
+              conditions: g.conditions.filter(
+                (c) => !isRemoved(c.fieldId) && !isRemoved(c.compareFieldId)
+              ),
+            }))
+            .filter((g) => g.conditions.length > 0);
+
+          return {
+            ...r,
+            triggerFieldIds: nextTriggers,
+            conditions: nextConditions,
+            ...(nextGroups !== undefined
+              ? { conditionGroups: nextGroups }
+              : {}),
+          };
+        })
+        .filter((r) => {
+          const hasTriggers = r.triggerFieldIds && r.triggerFieldIds.length > 0;
+          const hasConds =
+            (r.conditions && r.conditions.length > 0) ||
+            (r.conditionGroups && r.conditionGroups.length > 0);
+          return hasTriggers || hasConds;
+        });
+    }
+
+    const updatedForm: CRFForm = {
+      ...form,
+      sections: updatedSections,
+      rules: updatedRules,
+    };
+
+    const updatedStudy: StudyProtocol = {
+      ...study,
+      lastModified: new Date().toISOString(),
+      forms: study.forms.map((f) => (f.id === form.id ? updatedForm : f)),
+    };
+
+    const undo = (currentStudy: StudyProtocol): StudyProtocol => {
+      return StudyProtocolEngine.restoreSection(
+        currentStudy,
+        form.id,
+        targetSection,
+        secIdx,
+        originalRules
+      );
+    };
+
+    return {
+      study: updatedStudy,
+      removedSection: targetSection,
+      removedAtIndex: secIdx,
+      removedFields,
+      affectedReferences,
+      undo,
+    };
+  }
+
+  /**
+   * Restore Section and Associated Fields / Rules (#542)
+   */
+  static restoreSection(
+    study: StudyProtocol,
+    formId: string,
+    section: CRFSection,
+    sectionIndex?: number,
+    restoredRules?: EditCheckRule[]
+  ): StudyProtocol {
+    const form = this.getForm(study, formId);
+    if (!form) return study;
+
+    const exists = form.sections.some((s) => s.id === section.id);
+    let nextSections = form.sections;
+    if (!exists) {
+      nextSections = [...form.sections];
+      const insIdx =
+        sectionIndex !== undefined &&
+        sectionIndex >= 0 &&
+        sectionIndex <= nextSections.length
+          ? sectionIndex
+          : nextSections.length;
+      nextSections.splice(insIdx, 0, section);
+    }
+
+    let updatedRules = form.rules;
+    if (restoredRules && restoredRules.length > 0) {
+      const ruleMap = new Map<string, EditCheckRule>();
+      form.rules.forEach((r) => ruleMap.set(r.id, r));
+      restoredRules.forEach((r) => ruleMap.set(r.id, r));
+      updatedRules = Array.from(ruleMap.values());
+    }
+
+    const updatedForm: CRFForm = {
+      ...form,
+      sections: nextSections,
+      rules: updatedRules,
+    };
+
+    return {
+      ...study,
+      lastModified: new Date().toISOString(),
+      forms: study.forms.map((f) => (f.id === form.id ? updatedForm : f)),
+    };
+  }
+
+  /**
+   * Remove Field from Form & Prune AST Rules (Backwards-compatible wrapper over removeFieldWithCascade)
+   */
+  static removeField(
+    study: StudyProtocol,
+    domainOrFormId: string,
+    fieldIdOrVar: string,
+    options?: { purgeReferencingRules?: boolean }
+  ): {
+    study: StudyProtocol;
+    removedField?: CRFField;
+    form?: CRFForm;
+    affectedReferences?: FieldReferenceLocation[];
+    undo?: (currentStudy: StudyProtocol) => StudyProtocol;
+    error?: string;
+  } {
+    const res = this.removeFieldWithCascade(
+      study,
+      domainOrFormId,
+      fieldIdOrVar,
+      options
+    );
+    if (res.error || !res.removedField) {
+      return { study, error: res.error };
+    }
+    const updatedForm = this.getForm(res.study, domainOrFormId);
+    return {
+      study: res.study,
+      removedField: res.removedField,
+      form: updatedForm,
+      affectedReferences: res.affectedReferences,
+      undo: res.undo,
+    };
   }
 
   /**

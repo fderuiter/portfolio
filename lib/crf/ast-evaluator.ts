@@ -14,6 +14,7 @@ export {
   evaluateRuleResult,
   describeCondition,
   explainRule,
+  explainCalculationDerivation,
   isMissingOrNullFlavor,
   calculateBMI,
   calculateMostellerBSA,
@@ -27,6 +28,9 @@ export {
   type ConditionExplanation,
   type GroupExplanation,
   type RuleExplanation,
+  type DerivationStep,
+  type DerivationInputDependency,
+  type DerivationExplanation,
 } from "./expression-evaluator";
 
 export {
