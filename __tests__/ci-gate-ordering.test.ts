@@ -20,7 +20,7 @@ describe("CI Gate Ordering", () => {
     ci.split("\n").findIndex((line) => line.includes(marker));
 
   it("runs the production build before the invariant verification", () => {
-    const build = stepIndex("npx next build");
+    const build = stepIndex("npm run build");
     const verify = stepIndex("npm run verify");
 
     expect(build).toBeGreaterThan(-1);
@@ -47,6 +47,20 @@ describe("CI Gate Ordering", () => {
     expect(quality.indexOf("bench:pages")).toBeLessThan(
       quality.lastIndexOf("verify")
     );
+  });
+
+  it("builds with the same entrypoint production uses", () => {
+    // Vercel runs `npm run build` -> scripts/build.js -> `next build --webpack`.
+    // A bare `npx next build` picks Turbopack on Next 16, which does not
+    // complete for this app, so CI must not diverge from the shipped path.
+    expect(ci).toContain("npm run build");
+    expect(ci).not.toMatch(/^\s*(run:\s*)?npx next build\s*$/m);
+
+    const buildScript = fs.readFileSync(
+      path.join(process.cwd(), "scripts/build.js"),
+      "utf8"
+    );
+    expect(buildScript).toContain("--webpack");
   });
 
   it("keeps the benchmark evidence directory untracked", () => {

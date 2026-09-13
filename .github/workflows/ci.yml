@@ -103,7 +103,13 @@ jobs:
             nextjs-main-${{ hashFiles('package-lock.json') }}
 
       - name: Build Production
-        run: npx next build
+        # Must be the same entrypoint Vercel runs. `npx next build` defaults to
+        # Turbopack on Next 16, which never completes for this app (it was
+        # cancelled at 41m47s here and never finished locally either).
+        # scripts/build.js pins `next build --webpack`, which is what actually
+        # ships, and it also runs the prisma/openapi/docs/standalone phases the
+        # production build depends on.
+        run: npm run build
         env:
           # Port 59999 has no listener, so @neondatabase/serverless fails fast and
           # static generation falls back. Pointing this at localhost:5432 reaches
