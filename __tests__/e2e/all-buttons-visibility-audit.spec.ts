@@ -1,10 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 
-const BASE_URL = "http://localhost:3001";
-
 test.describe("Arcade Games Complete Buttons Visibility & Usability Audit", () => {
-  test.use({ baseURL: BASE_URL });
-
   const AUDIT_TARGETS: Array<{
     name: string;
     route: string;

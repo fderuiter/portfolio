@@ -1,10 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-const BASE_URL = "http://localhost:3001";
-
 test.describe("Multi-Viewport Arcade Games & Cabinets Suite", () => {
-  test.use({ baseURL: BASE_URL });
-
   test("Arcade Hub (/arcade) is fully accessible with zero horizontal overflow", async ({
     page,
   }) => {
