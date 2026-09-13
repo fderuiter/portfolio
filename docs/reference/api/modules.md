@@ -166,6 +166,7 @@
 - [lib/search-utils](lib/search-utils/README.md)
 - [lib/security](lib/security/README.md)
 - [lib/security-headers](lib/security-headers/README.md)
+- [lib/sentry-policy](lib/sentry-policy/README.md)
 - [lib/seo](lib/seo/README.md)
 - [lib/seo-metadata](lib/seo-metadata/README.md)
 - [lib/services](lib/services/README.md)
