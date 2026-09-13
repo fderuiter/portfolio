@@ -76,6 +76,42 @@ describe("CI Service Container Isolation", () => {
     expect(runtimeStepsWithServiceDsn.map((step) => step.name)).toEqual([]);
   });
 
+  /**
+   * proxy.ts wraps every route in `clerkMiddleware`, so a server booted
+   * without a Clerk publishable key rejects each request before routing --
+   * public pages included. Playwright reported that as
+   * `Timed out waiting 120000ms from config.webServer` after 120 identical
+   * `Missing publishableKey` errors, with no mention of Clerk in the failure
+   * itself. Any step that starts the production server needs the placeholders.
+   */
+  const SERVER_BOOTING_STEPS = /playwright test|bench:pages/;
+  const RUNTIME_ENV_KEYS = [
+    "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+    "CLERK_SECRET_KEY",
+  ];
+
+  const serverBootingSteps = steps.filter(
+    (step) =>
+      SERVER_BOOTING_STEPS.test(step.body) && /\n\s+env:/.test(step.body)
+  );
+
+  it("starts the production server only in steps that declare one", () => {
+    expect(serverBootingSteps.length).toBeGreaterThan(0);
+  });
+
+  it.each(serverBootingSteps.map((step) => step.name))(
+    "step %s supplies the env the production server needs to boot",
+    (name) => {
+      const step = serverBootingSteps.find(
+        (candidate) => candidate.name === name
+      )!;
+      const missing = RUNTIME_ENV_KEYS.filter(
+        (key) => !step.body.includes(`${key}:`)
+      );
+      expect(missing).toEqual([]);
+    }
+  );
+
   it("bounds every job so a hang fails fast instead of running to the 6h default", () => {
     const jobsBlock = ci.slice(ci.indexOf("\njobs:"));
     const runsOn = (jobsBlock.match(/^\s{4}runs-on:/gm) ?? []).length;

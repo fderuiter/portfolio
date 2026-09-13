@@ -146,6 +146,12 @@ jobs:
         env:
           DATABASE_URL: "postgresql://dummy:dummy@127.0.0.1:59999/dummy"
           CRON_SECRET: "ci_placeholder_cron_secret"
+          # proxy.ts wraps every route in clerkMiddleware, so a missing
+          # publishable key fails each request before routing and the web
+          # server never comes up. Same placeholders the benchmark step and
+          # .env.example use.
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk"
+          CLERK_SECRET_KEY: "sk_test_example_secret_key"
 
       - name: Run Real-Browser Sub-Route Web Vitals Performance Gate
         id: page-bench
