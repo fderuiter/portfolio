@@ -44,7 +44,9 @@ const REACTIONS: ReactionConfig[] = [
   { type: "thorough", label: "Thorough", icon: IconSearch },
 ];
 
-export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps) {
+export function CaseStudyFeedbackSection({
+  slug,
+}: CaseStudyFeedbackSectionProps) {
   const { enqueue } = useOfflineQueue();
 
   // Reactions state
@@ -63,7 +65,8 @@ export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [hasSubmittedFeedback, setHasSubmittedFeedback] = useState<boolean>(false);
+  const [hasSubmittedFeedback, setHasSubmittedFeedback] =
+    useState<boolean>(false);
 
   // Initial fetch for reaction counts and submission status
   useEffect(() => {
@@ -96,28 +99,41 @@ export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps
         }
       } catch (err) {
         if (!isProductionEnvironment()) {
-          console.error("Failed to load case study reaction/feedback status:", err);
+          console.error(
+            "Failed to load case study reaction/feedback status:",
+            err
+          );
         }
       } finally {
         if (isMounted) {
           const pendingItems = getOfflineQueue();
           for (const item of pendingItems) {
             if (item.endpoint === "/api/case-studies/reactions" && item.body) {
-              const body = item.body as { caseStudySlug?: string; reactionType?: string };
+              const body = item.body as {
+                caseStudySlug?: string;
+                reactionType?: string;
+              };
               if (body.caseStudySlug === slug && body.reactionType) {
                 setUserReactions((prev) =>
-                  prev.includes(body.reactionType!) ? prev : [...prev, body.reactionType!]
+                  prev.includes(body.reactionType!)
+                    ? prev
+                    : [...prev, body.reactionType!]
                 );
                 setCounts((prev) => ({
                   ...prev,
                   [body.reactionType!]: (prev[body.reactionType!] || 0) + 1,
                 }));
               }
-            } else if (item.endpoint === "/api/case-studies/feedback" && item.body) {
+            } else if (
+              item.endpoint === "/api/case-studies/feedback" &&
+              item.body
+            ) {
               const body = item.body as { caseStudySlug?: string };
               if (body.caseStudySlug === slug) {
                 setHasSubmittedFeedback(true);
-                setSuccessMsg("Thank you! Your learning feedback has been recorded.");
+                setSuccessMsg(
+                  "Thank you! Your learning feedback has been recorded."
+                );
               }
             }
           }
@@ -210,13 +226,17 @@ export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps
       return;
     }
     if (comments.trim().length < 3) {
-      setErrorMsg("Please provide constructive comments (at least 3 characters).");
+      setErrorMsg(
+        "Please provide constructive comments (at least 3 characters)."
+      );
       return;
     }
 
     const toneCheck = validateConstructiveContent(comments.trim());
     if (!toneCheck.isValid) {
-      setErrorMsg(toneCheck.reason || "Submission text violates community tone standards.");
+      setErrorMsg(
+        toneCheck.reason || "Submission text violates community tone standards."
+      );
       return;
     }
 
@@ -253,7 +273,8 @@ export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps
 
       if (!res.ok) {
         if (res.status >= 400 && res.status < 500) {
-          const detailMsg = data.details?.[0]?.message || data.error || "Submission rejected.";
+          const detailMsg =
+            data.details?.[0]?.message || data.error || "Submission rejected.";
           setErrorMsg(detailMsg);
           setHasSubmittedFeedback(false);
           setSuccessMsg(null);
@@ -270,7 +291,9 @@ export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps
         }
       } else {
         setHasSubmittedFeedback(true);
-        setSuccessMsg(data.message || "Thank you! Your learning feedback has been recorded.");
+        setSuccessMsg(
+          data.message || "Thank you! Your learning feedback has been recorded."
+        );
         setSelectedTakeaways([]);
         setComments("");
       }
@@ -303,10 +326,11 @@ export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps
               Learning Feedback & Article Reactions
             </h3>
             <p className="text-xs font-mono text-zinc-400 mt-1">
-              Share quick sentiment badges or offer structured post-mortem takeaways.
+              Share quick sentiment badges or offer structured post-mortem
+              takeaways.
             </p>
           </div>
-          <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest bg-zinc-900/80 px-2.5 py-1 rounded border border-zinc-800/60 self-start sm:self-center">
+          <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest bg-zinc-900/80 px-2.5 py-1 rounded border border-zinc-800/60 self-start sm:self-center">
             Anonymous Rate-Limited
           </span>
         </div>
@@ -336,11 +360,15 @@ export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps
                       : "bg-zinc-900/70 border-zinc-800 text-zinc-300 hover:border-zinc-700 hover:text-neutral-100 hover:bg-zinc-900"
                   }`}
                 >
-                  <IconComponent className={`w-4 h-4 ${isReacted ? "text-brand-cyan" : "text-zinc-400"}`} />
+                  <IconComponent
+                    className={`w-4 h-4 ${isReacted ? "text-brand-cyan" : "text-zinc-400"}`}
+                  />
                   <span>{label}</span>
                   <span
                     className={`ml-1 px-1.5 py-0.5 rounded text-[11px] font-bold ${
-                      isReacted ? "bg-brand-cyan/20 text-brand-cyan" : "bg-zinc-800 text-zinc-400"
+                      isReacted
+                        ? "bg-brand-cyan/20 text-brand-cyan"
+                        : "bg-zinc-800 text-zinc-400"
                     }`}
                   >
                     {count}
@@ -364,8 +392,12 @@ export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps
             >
               <IconCheck className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-bold font-sans text-emerald-200">Feedback Submitted!</p>
-                <p className="text-xs font-mono text-emerald-300/90 mt-1">{successMsg}</p>
+                <p className="font-bold font-sans text-emerald-200">
+                  Feedback Submitted!
+                </p>
+                <p className="text-xs font-mono text-emerald-300/90 mt-1">
+                  {successMsg}
+                </p>
               </div>
             </div>
           ) : (
@@ -396,10 +428,13 @@ export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps
               {/* Comments Textarea */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label htmlFor={`comments-${slug}`} className="text-xs font-mono text-zinc-400">
+                  <label
+                    htmlFor={`comments-${slug}`}
+                    className="text-xs font-mono text-zinc-400"
+                  >
                     Constructive Comments & Key Takeaways
                   </label>
-                  <span className="text-[11px] font-mono text-zinc-500">
+                  <span className="text-[11px] font-mono text-zinc-400">
                     {comments.length} / 2000
                   </span>
                 </div>

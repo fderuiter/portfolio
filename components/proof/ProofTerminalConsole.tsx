@@ -48,9 +48,11 @@ export const ProofTerminalConsole: React.FC<ProofTerminalConsoleProps> = ({
       <div className="px-4 py-2 border-b border-slate-800 bg-slate-900/60 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <IconTerminal className="w-4 h-4 text-brand-cyan" />
-          <span className="text-xs font-mono font-semibold text-slate-300">proof-cli @ formal-verification</span>
+          <span className="text-xs font-mono font-semibold text-slate-300">
+            proof-cli @ formal-verification
+          </span>
         </div>
-        <div className="flex items-center gap-2 text-xs font-mono text-slate-500">
+        <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
           <span>Toggle: Ctrl + `</span>
           <button
             ref={toggleBtnRef}
@@ -75,10 +77,10 @@ export const ProofTerminalConsole: React.FC<ProofTerminalConsoleProps> = ({
                   log.type === "command"
                     ? "text-brand-cyan font-bold"
                     : log.type === "error"
-                    ? "text-red-400 font-semibold"
-                    : log.type === "success"
-                    ? "text-emerald-400"
-                    : "text-slate-300"
+                      ? "text-red-400 font-semibold"
+                      : log.type === "success"
+                        ? "text-emerald-400"
+                        : "text-slate-300"
                 }`}
               >
                 {log.type === "command" ? `$ ${log.text}` : log.text}
@@ -86,8 +88,13 @@ export const ProofTerminalConsole: React.FC<ProofTerminalConsoleProps> = ({
             ))}
           </div>
 
-          <form onSubmit={handleConsoleSubmit} className="relative border-t border-slate-800 flex items-center">
-            <span className="pl-4 text-brand-cyan font-mono text-xs font-bold">$</span>
+          <form
+            onSubmit={handleConsoleSubmit}
+            className="relative border-t border-slate-800 flex items-center"
+          >
+            <span className="pl-4 text-brand-cyan font-mono text-xs font-bold">
+              $
+            </span>
             <input
               ref={consoleInputRef}
               type="text"

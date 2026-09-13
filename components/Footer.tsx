@@ -357,9 +357,9 @@ export const Footer: React.FC = () => {
                 Project Notes
               </span>
             </div>
-            <h4 className="text-sm font-mono font-bold text-white">
+            <h2 className="text-sm font-mono font-bold text-white">
               Notes from my projects
-            </h4>
+            </h2>
             <p className="text-xs font-mono text-zinc-400">
               Occasional notes on what I’m building, what I’m learning, and the
               bugs that put up a good fight.

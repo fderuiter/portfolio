@@ -30,7 +30,7 @@ const DynamicClinicalTrialChaos = dynamic(ClinicalTrialChaosLoader, {
 
 export const ClinicalChaosClient: React.FC = () => {
   return (
-    <main className="min-h-screen bg-black text-white pt-28 pb-24 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-black text-white pt-28 pb-24 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
         {/* Navigation Breadcrumb */}
         <div className="flex items-center justify-between gap-4 mb-6 border-b border-zinc-800/80 pb-4 flex-wrap">
@@ -156,6 +156,6 @@ export const ClinicalChaosClient: React.FC = () => {
           }}
         />
       </div>
-    </main>
+    </div>
   );
 };
