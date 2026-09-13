@@ -28,4 +28,4 @@
 
 ### type
 
-> **type**: `"error"` \| `"warning"` \| `"info"` \| `"success"`
+> **type**: `"error"` \| `"success"` \| `"warning"` \| `"info"`

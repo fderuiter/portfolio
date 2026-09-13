@@ -1134,3 +1134,374 @@ export function explainRule(
 
   return { result, groupExplanations, summary };
 }
+
+export interface DerivationStep {
+  stepNumber: number;
+  description: string;
+  expression: string;
+  evaluatedValue?: number | string | null;
+}
+
+export interface DerivationInputDependency {
+  fieldId: string;
+  variableName: string;
+  label: string;
+  expectedUnit?: string;
+  actualUnit?: string;
+  value: number | string | null;
+  status: "provided" | "missing" | "invalid_unit" | "invalid_value";
+  message?: string;
+}
+
+export interface DerivationExplanation {
+  targetFieldId?: string;
+  targetVariableName?: string;
+  formula: string;
+  result: number | null;
+  formattedResult?: string;
+  status:
+    | "success"
+    | "missing_inputs"
+    | "division_by_zero"
+    | "invalid_unit"
+    | "cyclic_dependency"
+    | "syntax_error";
+  dependencies: DerivationInputDependency[];
+  steps: DerivationStep[];
+  diagnostics: string[];
+  summary: string;
+}
+
+/**
+ * Author and explain calculated field derivations (#671):
+ * Inspects formula input dependencies, validates units, detects division by zero
+ * and cyclic references, and breaks down evaluation steps with clear diagnostics.
+ */
+export function explainCalculationDerivation(
+  formula: string,
+  fieldValues: Record<string, string | number | boolean | null | undefined>,
+  fieldsList: CRFField[],
+  targetField?: CRFField
+): DerivationExplanation {
+  const targetVar = targetField?.variableName || "TARGET";
+  const targetId = targetField?.id || "";
+
+  if (!formula || typeof formula !== "string" || !formula.trim()) {
+    return {
+      targetFieldId: targetId,
+      targetVariableName: targetVar,
+      formula: formula || "",
+      result: null,
+      status: "syntax_error",
+      dependencies: [],
+      steps: [],
+      diagnostics: ["Formula expression is empty."],
+      summary: "No calculation formula defined.",
+    };
+  }
+
+  // Extract variable tokens from formula
+  let tokens: Token[] = [];
+  try {
+    tokens = tokenize(formula);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return {
+      targetFieldId: targetId,
+      targetVariableName: targetVar,
+      formula,
+      result: null,
+      status: "syntax_error",
+      dependencies: [],
+      steps: [],
+      diagnostics: [`Syntax error while parsing formula: ${msg}`],
+      summary: `Invalid formula syntax: ${msg}`,
+    };
+  }
+
+  // Find all variable names referenced in the formula
+  const varNames = Array.from(
+    new Set(
+      tokens
+        .filter((t) => t.type === "IDENTIFIER")
+        .map((t) => t.value)
+        .filter((name) => {
+          const lower = name.toLowerCase();
+          return ![
+            "round",
+            "sqrt",
+            "abs",
+            "max",
+            "min",
+            "ceil",
+            "floor",
+            "log",
+            "exp",
+          ].includes(lower);
+        })
+    )
+  );
+
+  // Check for cyclic dependency: target variable or ID cannot be in formula
+  const isCyclic = varNames.some(
+    (v) =>
+      v.toUpperCase() === targetVar.toUpperCase() ||
+      (targetId && v.toLowerCase() === targetId.toLowerCase())
+  );
+
+  if (isCyclic) {
+    return {
+      targetFieldId: targetId,
+      targetVariableName: targetVar,
+      formula,
+      result: null,
+      status: "cyclic_dependency",
+      dependencies: [],
+      steps: [],
+      diagnostics: [
+        `Cyclic dependency detected: target field '${targetVar}' cannot reference itself in its calculation formula.`,
+      ],
+      summary: `Calculation failed: target '${targetVar}' references itself, creating a cyclic dependency loop.`,
+    };
+  }
+
+  // Resolve dependencies
+  const dependencies: DerivationInputDependency[] = [];
+  const missingInputs: string[] = [];
+  const invalidUnits: string[] = [];
+
+  for (const vName of varNames) {
+    const matchedField = fieldsList.find(
+      (f) =>
+        f.variableName.toUpperCase() === vName.toUpperCase() ||
+        f.id.toLowerCase() === vName.toLowerCase()
+    );
+
+    const rawVal = matchedField
+      ? (fieldValues[matchedField.id] ??
+        fieldValues[matchedField.id.toLowerCase()] ??
+        fieldValues[matchedField.variableName] ??
+        fieldValues[matchedField.variableName.toLowerCase()] ??
+        fieldValues[vName] ??
+        fieldValues[vName.toLowerCase()])
+      : (fieldValues[vName] ?? fieldValues[vName.toLowerCase()]);
+
+    const fieldLabel = matchedField?.label || vName;
+    const actualUnit = matchedField?.unit || undefined;
+
+    let expectedUnit: string | undefined;
+    const upper = vName.toUpperCase();
+    if (upper.includes("HEIGHT") || upper === "VSORRES_HEIGHT") {
+      expectedUnit = "cm";
+    } else if (upper.includes("WEIGHT") || upper === "VSORRES_WEIGHT") {
+      expectedUnit = "kg";
+    }
+
+    let status: DerivationInputDependency["status"] = "provided";
+    let message: string | undefined;
+
+    if (isMissingOrNullFlavor(rawVal)) {
+      status = "missing";
+      message = `Input value for '${vName}' is missing.`;
+      missingInputs.push(vName);
+    } else {
+      const num =
+        typeof rawVal === "number" ? rawVal : parseFloat(String(rawVal));
+      if (!Number.isFinite(num)) {
+        status = "invalid_value";
+        message = `Value '${rawVal}' for '${vName}' cannot be converted to a valid number.`;
+        missingInputs.push(vName);
+      } else if (
+        expectedUnit &&
+        actualUnit &&
+        actualUnit.toLowerCase() !== expectedUnit.toLowerCase()
+      ) {
+        status = "invalid_unit";
+        message = `Unit mismatch for '${vName}': expected '${expectedUnit}', got '${actualUnit}'.`;
+        invalidUnits.push(`${vName} (${actualUnit} != ${expectedUnit})`);
+      }
+    }
+
+    dependencies.push({
+      fieldId: matchedField?.id || vName,
+      variableName: matchedField?.variableName || vName,
+      label: fieldLabel,
+      expectedUnit,
+      actualUnit,
+      value: isMissingOrNullFlavor(rawVal) ? null : (rawVal as string | number),
+      status,
+      message,
+    });
+  }
+
+  // Detect division by zero explicitly
+  const steps: DerivationStep[] = [];
+  const diagnostics: string[] = [];
+
+  // Step 1: Input values
+  const inputStrings = dependencies.map((d) => {
+    const valStr =
+      d.value !== null && d.value !== undefined ? String(d.value) : "(missing)";
+    const unitStr = d.actualUnit ? ` ${d.actualUnit}` : "";
+    return `${d.variableName} = ${valStr}${unitStr}`;
+  });
+
+  steps.push({
+    stepNumber: 1,
+    description: "Gather and validate input dependencies",
+    expression: inputStrings.join(", "),
+    evaluatedValue: null,
+  });
+
+  if (missingInputs.length > 0) {
+    diagnostics.push(
+      `Missing required input values: ${missingInputs.join(", ")}.`
+    );
+    return {
+      targetFieldId: targetId,
+      targetVariableName: targetVar,
+      formula,
+      result: null,
+      status: "missing_inputs",
+      dependencies,
+      steps,
+      diagnostics,
+      summary: `Calculation pending: missing required inputs (${missingInputs.join(", ")}).`,
+    };
+  }
+
+  if (invalidUnits.length > 0) {
+    diagnostics.push(`Unit mismatch detected: ${invalidUnits.join("; ")}.`);
+  }
+
+  // Check denominator division by zero for BMI or fractions
+  let isDivZero = false;
+  const heightDep = dependencies.find((d) =>
+    d.variableName.toUpperCase().includes("HEIGHT")
+  );
+  if (
+    heightDep &&
+    (Number(heightDep.value) === 0 || Number(heightDep.value) < 0)
+  ) {
+    isDivZero = true;
+    diagnostics.push(
+      `Division by zero: ${heightDep.variableName} is ${heightDep.value}. Height must be positive.`
+    );
+  }
+
+  // Attempt evaluation
+  const evalResult = evaluateFormula(formula, fieldValues, fieldsList);
+
+  if (evalResult === null) {
+    if (isDivZero) {
+      steps.push({
+        stepNumber: 2,
+        description: "Evaluate denominator",
+        expression: `${heightDep?.variableName} = 0 -> Denominator is zero`,
+        evaluatedValue: 0,
+      });
+      return {
+        targetFieldId: targetId,
+        targetVariableName: targetVar,
+        formula,
+        result: null,
+        status: "division_by_zero",
+        dependencies,
+        steps,
+        diagnostics,
+        summary: `Calculation halted: division by zero encountered.`,
+      };
+    }
+
+    diagnostics.push(
+      "Evaluation produced null result (possible zero denominator or undefined calculation)."
+    );
+    return {
+      targetFieldId: targetId,
+      targetVariableName: targetVar,
+      formula,
+      result: null,
+      status: "division_by_zero",
+      dependencies,
+      steps,
+      diagnostics,
+      summary: `Calculation halted: division by zero or undefined operation in formula.`,
+    };
+  }
+
+  // Formula evaluation succeeded - generate clinical derivation steps
+  const isBmi =
+    formula.toUpperCase().includes("WEIGHT") &&
+    formula.toUpperCase().includes("HEIGHT");
+
+  if (isBmi) {
+    const wDep = dependencies.find((d) =>
+      d.variableName.toUpperCase().includes("WEIGHT")
+    );
+    const hDep = dependencies.find((d) =>
+      d.variableName.toUpperCase().includes("HEIGHT")
+    );
+    const wVal = Number(wDep?.value || 0);
+    const hVal = Number(hDep?.value || 0);
+    const hM = hVal / 100;
+    const hSq = hM * hM;
+    const rawBmi = wVal / hSq;
+    const roundedBmi = Math.round(rawBmi * 10) / 10;
+
+    steps.push({
+      stepNumber: 2,
+      description: "Convert height from centimeters to meters",
+      expression: `${hVal} cm / 100 = ${hM.toFixed(2)} m`,
+      evaluatedValue: hM,
+    });
+    steps.push({
+      stepNumber: 3,
+      description: "Compute squared height in square meters",
+      expression: `(${hM.toFixed(2)} m)² = ${hSq.toFixed(4)} m²`,
+      evaluatedValue: hSq,
+    });
+    steps.push({
+      stepNumber: 4,
+      description: "Divide body weight by squared height",
+      expression: `${wVal} kg / ${hSq.toFixed(4)} m² = ${rawBmi.toFixed(4)} kg/m²`,
+      evaluatedValue: rawBmi,
+    });
+    steps.push({
+      stepNumber: 5,
+      description: "Round result to standard 1 decimal place",
+      expression: `round(${rawBmi.toFixed(4)}, 1) = ${roundedBmi.toFixed(1)} kg/m²`,
+      evaluatedValue: roundedBmi,
+    });
+  } else {
+    // Generic formula steps
+    steps.push({
+      stepNumber: 2,
+      description: "Evaluate formula expression with resolved inputs",
+      expression: formula,
+      evaluatedValue: evalResult,
+    });
+    steps.push({
+      stepNumber: 3,
+      description: "Computed result",
+      expression: `${targetVar} = ${evalResult}`,
+      evaluatedValue: evalResult,
+    });
+  }
+
+  const formattedResult = evalResult !== null ? String(evalResult) : undefined;
+  const status = invalidUnits.length > 0 ? "invalid_unit" : "success";
+  const summary = `${targetVar} = ${evalResult}${isBmi ? " kg/m²" : ""}`;
+
+  return {
+    targetFieldId: targetId,
+    targetVariableName: targetVar,
+    formula,
+    result: evalResult,
+    formattedResult,
+    status,
+    dependencies,
+    steps,
+    diagnostics,
+    summary,
+  };
+}

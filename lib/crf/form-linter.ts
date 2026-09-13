@@ -51,7 +51,10 @@ export function lintForm(form: CRFForm): DiagnosticItem[] {
       }
 
       // Check Calculated Fields
-      if (field.dataType === "calculated" && (!field.calculationFormula || field.calculationFormula.trim() === "")) {
+      if (
+        field.dataType === "calculated" &&
+        (!field.calculationFormula || field.calculationFormula.trim() === "")
+      ) {
         diagnostics.push({
           id: `empty_formula_${field.id}`,
           severity: "warning",
@@ -83,6 +86,35 @@ export function lintForm(form: CRFForm): DiagnosticItem[] {
         location: `Edit Check Rule "${rule.name}"`,
       });
     }
+
+    // Check conditions in rules and condition groups (#542)
+    const allConditions = [
+      ...(rule.conditions || []),
+      ...(rule.conditionGroups?.flatMap((g) => g.conditions) || []),
+    ];
+
+    allConditions.forEach((cond) => {
+      if (!cond.crossVisitId && !fieldMap.has(cond.fieldId)) {
+        diagnostics.push({
+          id: `broken_rule_cond_${rule.id}_${cond.fieldId}`,
+          severity: "error",
+          message: `Rule "${rule.name}" condition references non-existent field "${cond.fieldId}"`,
+          location: `Edit Check Rule "${rule.name}"`,
+        });
+      }
+      if (
+        cond.compareFieldId &&
+        !cond.crossVisitId &&
+        !fieldMap.has(cond.compareFieldId)
+      ) {
+        diagnostics.push({
+          id: `broken_rule_compare_${rule.id}_${cond.compareFieldId}`,
+          severity: "error",
+          message: `Rule "${rule.name}" compares against non-existent field "${cond.compareFieldId}"`,
+          location: `Edit Check Rule "${rule.name}"`,
+        });
+      }
+    });
   });
 
   return diagnostics;
