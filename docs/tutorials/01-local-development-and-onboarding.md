@@ -8,7 +8,8 @@ specific recurring tasks instead.
 
 ## 1. Prerequisites
 
-- **Node.js 22.x** (the sole supported runtime)
+- **Node.js >= 22.0.0** (Node 22 LTS and Node 24 LTS are both supported;
+  CI runs Node 24)
 - **npm >= 10.0.0** (the sole supported package manager — bun, yarn, and
   pnpm are unsupported)
 - A Postgres connection string (a free [Neon](https://neon.tech) serverless
