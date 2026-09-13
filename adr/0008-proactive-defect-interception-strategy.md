@@ -33,7 +33,7 @@ We establish an end-to-end Proactive Defect Interception architecture spanning t
   - Formal Proof Assistant DAG deduction step insertion, graph node connection, and multi-format export.
   - Arcade 2D/3D canvas context initialization and state transitions.
   - Telemetry API ingestion, strict schema rejection on malformed inputs, and rate limit compliance.
-- **Scheduled Continuous Execution (`.github/workflows/synthetic-probes.yml`)**: Executes headless synthetic probes on a recurring 30-minute cron schedule and post-deployment triggers.
+- **Scheduled Continuous Execution (`.github/workflows/synthetic-probes.yml`)**: Executes headless synthetic probes on a daily cron schedule (`17 7 * * *`) plus manual `workflow_dispatch` triggers. The interval is deliberately daily: a `*/30` cadence consumed roughly 144% of the private-repo free Actions allowance.
 
 ### 3. Canary Telemetry, Anomaly Detection & Automated Rollback
 

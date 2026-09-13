@@ -37,8 +37,8 @@ We implement a **Dual-Defense Git Guardrail Architecture** and establish **Early
    - Positions `npm run lint:boundaries` (`depcruise lib app components __tests__ hooks scripts`) immediately after `npm run typecheck` and prior to `npm run test`.
    - Halts the pre-commit workflow within ~1.5s upon detecting any deep-module encapsulation breach, cyclic dependency, or private subfolder leak before spinning up worker threads for test suites.
 
-4. **Public Service Entry Point Pattern (`lib/services/crf-evaluator.ts`)**:
-   - All vertical service operations under `lib/services/<domain>/*` expose their public schemas, handlers, and types through root entry points (`lib/services/crf-evaluator.ts`, `lib/services/index.ts`).
+4. **Public Service Entry Point Pattern (`lib/services/crf-evaluator/index.ts`)**:
+   - All vertical service operations under `lib/services/<domain>/*` expose their public schemas, handlers, and types through root entry points (`lib/services/crf-evaluator/index.ts`, `lib/services/index.ts`).
    - Consumers in `lib/crf/` and `app/` import solely through these root entry points, maintaining zero private subfolder penetration and 100% boundary compliance.
 
 ## Consequences

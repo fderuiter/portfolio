@@ -6,7 +6,7 @@ Accepted
 ## Context
 The portfolio dispatches transactional communications across multiple user journeys:
 1. Inbound contact inquiries (`/api/contact`) with visitor confirmation auto-replies.
-2. Case study peer feedback alerts (`/api/feedback`).
+2. Case study peer feedback alerts (`/api/case-studies/feedback`).
 3. Systems dispatch newsletter subscriptions (`/api/newsletter`).
 
 Under high traffic, serverless cold starts, or upstream Resend API maintenance/rate-limiting (429), transactional emails could fail without retry mechanisms. Additionally, lack of automated bounce/spam complaint processing risked domain reputation degradation when visitors submitted malformed or invalid email addresses.

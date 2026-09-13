@@ -16,9 +16,9 @@ We adopt the **Dual-Tracker Issue Slicing Pattern**:
      - `Context & Seam`: Target files and architecture boundaries
      - `Red-Green TDD Plan`: Explicit failing tests and implementation steps
      - `Verification Gates`: Quality invariant commands to run
-2. **Automated GitHub Synchronization (`scripts/sync-issues.ts` / `npm run dx issues:sync`)**:
-   - A zero-dependency script utilizing GitHub CLI (`gh issue list`, `gh issue create`, `gh issue edit`) to create or synchronize local tickets into GitHub Issues.
-   - Attaches standardized triage labels (`area:email`, `area:docs`, `area:dx`, `type:feature`, `type:refactor`), milestone assignments, and dependency references (`Blocked by #X`).
+2. **Automated GitHub Synchronization (planned — `scripts/sync-issues.ts` and `npm run dx issues:sync` do not exist yet)**:
+   - Planned as a zero-dependency script utilizing GitHub CLI (`gh issue list`, `gh issue create`, `gh issue edit`) to create or synchronize local tickets into GitHub Issues. Until it lands, synchronization is performed manually with the `gh` CLI as described in [`docs/agents/issue-tracker.md`](../docs/agents/issue-tracker.md).
+   - Would attach standardized triage labels (`area:email`, `area:docs`, `area:dx`, `type:feature`, `type:refactor`), milestone assignments, and dependency references (`Blocked by #X`).
 3. **Execution Boundary**:
    - Agents work from local ticket files via `/implement`, clearing context between tickets, while commits and PRs reference both the ticket ID and GitHub issue number.
 

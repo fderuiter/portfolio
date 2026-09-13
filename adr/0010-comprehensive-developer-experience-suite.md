@@ -38,7 +38,7 @@ We implement a native, zero-dependency Developer Experience (DX) tooling suite o
 
 ### 4. Production Bundle Chunk & Performance Budget Guard (`lib/dx/bundle-guard.ts`)
 - Build manifest parser evaluating raw and gzip chunk sizes in `.next/static/chunks/`.
-- Performance budget assertions (initial shared bundle <= 350 kB gzip, single chunk <= 200 kB gzip).
+- Performance budget assertions (initial shared bundle <= 400 kB gzip, single chunk <= 350 kB gzip), defined by `DEFAULT_BUDGETS` in `lib/dx/bundle-guard.ts`.
 - Diagnostic chunk inventory via `npm run dx analyze` and integrated into `lib/dx/doctor.ts` (`checkBundleBudgets`).
 
 ### 5. Standardized IDE & Workspace Configuration (`.vscode/*`, `.editorconfig`)
