@@ -109,6 +109,22 @@ describe("Prisma migration integrity", () => {
     expect(migration).not.toMatch(/DROP\s+(TABLE|COLUMN)/i);
   });
 
+  it("keeps the telemetry rollup migration aligned with Prisma updatedAt semantics", () => {
+    const migrationPath = resolve(
+      process.cwd(),
+      "prisma/migrations/20261017000000_add_telemetry_daily_rollups/migration.sql"
+    );
+    const migration = readFileSync(migrationPath, "utf8");
+
+    expect(migration).toContain(
+      '"createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP'
+    );
+    expect(migration).toContain('"updatedAt" TIMESTAMP(3) NOT NULL');
+    expect(migration).not.toMatch(
+      /"updatedAt"\s+TIMESTAMP\(3\)\s+NOT NULL\s+DEFAULT\s+CURRENT_TIMESTAMP/
+    );
+  });
+
   it("fails drift check with diagnostic error when documentation misses a migration folder", () => {
     const fs = require("fs");
     const path = require("path");

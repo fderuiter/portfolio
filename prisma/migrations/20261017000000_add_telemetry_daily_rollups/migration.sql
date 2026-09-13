@@ -5,7 +5,7 @@ CREATE TABLE "TelemetryDailyRollup" (
     "eventType" TEXT NOT NULL,
     "count" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "TelemetryDailyRollup_pkey" PRIMARY KEY ("day", "projectSlug", "eventType")
 );

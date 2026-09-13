@@ -41,12 +41,12 @@ jobs:
           --health-retries 5
     steps:
       - name: Checkout exact candidate
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: "npm"
@@ -118,12 +118,12 @@ jobs:
       url: ${{ steps.stage.outputs.url }}
     steps:
       - name: Checkout verified candidate
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: "npm"
