@@ -708,6 +708,62 @@ Find Form by ID or Domain (Case-Insensitive)
 
 ***
 
+### insertAtomicSlashField()
+
+> `static` **insertAtomicSlashField**(`study`, `domainOrFormId`, `commandId`, `options?`): `object`
+
+Inserts an atomic field from a slash command into the specified form/section
+
+#### Parameters
+
+##### study
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### domainOrFormId
+
+`string`
+
+##### commandId
+
+`string`
+
+##### options?
+
+###### targetIndex?
+
+`number`
+
+###### targetSectionId?
+
+`string`
+
+#### Returns
+
+`object`
+
+##### error?
+
+> `optional` **error?**: `string`
+
+##### insertedField?
+
+> `optional` **insertedField?**: [`CRFField`](../../types/interfaces/CRFField.md)
+
+##### study
+
+> **study**: [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### undo
+
+> **undo**: () => [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+###### Returns
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+***
+
 ### insertField()
 
 > `static` **insertField**(`study`, `domainOrFormId`, `fieldData`, `options?`): `object`
@@ -761,6 +817,75 @@ Insert Clinical Field into Specified Section and Position
 ##### study
 
 > **study**: [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+***
+
+### insertSmartBlock()
+
+> `static` **insertSmartBlock**(`study`, `domainOrFormId`, `smartBlockId`, `options?`): `object`
+
+Inserts a Clinical Smart Block into the specified form with collision-resistant
+IDs, CDASH non-conflicting variable names, and remapped rule conditions/formulas.
+
+#### Parameters
+
+##### study
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### domainOrFormId
+
+`string`
+
+##### smartBlockId
+
+`string`
+
+##### options?
+
+###### asNewSection?
+
+`boolean`
+
+###### targetIndex?
+
+`number`
+
+###### targetSectionId?
+
+`string`
+
+#### Returns
+
+`object`
+
+##### error?
+
+> `optional` **error?**: `string`
+
+##### insertedFields
+
+> **insertedFields**: [`CRFField`](../../types/interfaces/CRFField.md)[]
+
+##### insertedRules
+
+> **insertedRules**: [`EditCheckRule`](../../types/interfaces/EditCheckRule.md)[]
+
+##### insertedSection?
+
+> `optional` **insertedSection?**: [`CRFSection`](../../types/interfaces/CRFSection.md)
+
+##### study
+
+> **study**: [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### undo
+
+> **undo**: () => [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+###### Returns
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
 
 ***
 

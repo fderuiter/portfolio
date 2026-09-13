@@ -9,6 +9,9 @@
 ## Interfaces
 
 - [ClinicalSmartBlockDefinition](interfaces/ClinicalSmartBlockDefinition.md)
+- [InstantiateAtomicFieldOptions](interfaces/InstantiateAtomicFieldOptions.md)
+- [InstantiatedSmartBlock](interfaces/InstantiatedSmartBlock.md)
+- [InstantiateSmartBlockOptions](interfaces/InstantiateSmartBlockOptions.md)
 - [SlashCommandItem](interfaces/SlashCommandItem.md)
 
 ## Type Aliases

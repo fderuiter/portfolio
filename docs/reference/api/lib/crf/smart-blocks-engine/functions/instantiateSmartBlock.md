@@ -6,9 +6,10 @@
 
 # Function: instantiateSmartBlock()
 
-> **instantiateSmartBlock**(`blockId`): `object`
+> **instantiateSmartBlock**(`blockId`, `options?`): [`InstantiatedSmartBlock`](../interfaces/InstantiatedSmartBlock.md)
 
-Instantiates a compound Clinical Smart Block by ID
+Instantiates a compound Clinical Smart Block by ID with collision-resistant IDs
+and automatic CDASH non-conflicting variable name remapping.
 
 ## Parameters
 
@@ -16,14 +17,10 @@ Instantiates a compound Clinical Smart Block by ID
 
 `string`
 
+### options?
+
+[`InstantiateSmartBlockOptions`](../interfaces/InstantiateSmartBlockOptions.md)
+
 ## Returns
 
-`object`
-
-### rules
-
-> **rules**: [`EditCheckRule`](../../types/interfaces/EditCheckRule.md)[]
-
-### section
-
-> **section**: [`CRFSection`](../../types/interfaces/CRFSection.md)
+[`InstantiatedSmartBlock`](../interfaces/InstantiatedSmartBlock.md)

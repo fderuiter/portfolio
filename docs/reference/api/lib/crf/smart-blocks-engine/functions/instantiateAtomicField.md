@@ -6,9 +6,9 @@
 
 # Function: instantiateAtomicField()
 
-> **instantiateAtomicField**(`commandId`, `indexOffset?`): [`CRFField`](../../types/interfaces/CRFField.md)
+> **instantiateAtomicField**(`commandId`, `optionsOrOffset?`): [`CRFField`](../../types/interfaces/CRFField.md)
 
-Instantiates an atomic CRF Field from a slash command
+Instantiates an atomic CRF Field from a slash command with valid CDASH variable naming (<= 8 chars)
 
 ## Parameters
 
@@ -16,9 +16,9 @@ Instantiates an atomic CRF Field from a slash command
 
 `string`
 
-### indexOffset?
+### optionsOrOffset?
 
-`number` = `0`
+`number` \| [`InstantiateAtomicFieldOptions`](../interfaces/InstantiateAtomicFieldOptions.md)
 
 ## Returns
 

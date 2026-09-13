@@ -740,6 +740,12 @@ Re-exports [generateAcrfHtml](export-acrf/functions/generateAcrfHtml.md)
 
 ***
 
+### generateCdashVariableName
+
+Re-exports [generateCdashVariableName](precision-date/functions/generateCdashVariableName.md)
+
+***
+
 ### generateCliCommandForField
 
 Re-exports [generateCliCommandForField](universal-schema/functions/generateCliCommandForField.md)
@@ -749,6 +755,12 @@ Re-exports [generateCliCommandForField](universal-schema/functions/generateCliCo
 ### generateCliCommandForForm
 
 Re-exports [generateCliCommandForForm](universal-schema/functions/generateCliCommandForForm.md)
+
+***
+
+### generateEngineId
+
+Re-exports [generateEngineId](precision-date/functions/generateEngineId.md)
 
 ***
 
@@ -896,9 +908,27 @@ Re-exports [instantiateAtomicField](smart-blocks-engine/functions/instantiateAto
 
 ***
 
+### InstantiateAtomicFieldOptions
+
+Re-exports [InstantiateAtomicFieldOptions](smart-blocks-engine/interfaces/InstantiateAtomicFieldOptions.md)
+
+***
+
+### InstantiatedSmartBlock
+
+Re-exports [InstantiatedSmartBlock](smart-blocks-engine/interfaces/InstantiatedSmartBlock.md)
+
+***
+
 ### instantiateSmartBlock
 
 Re-exports [instantiateSmartBlock](smart-blocks-engine/functions/instantiateSmartBlock.md)
+
+***
+
+### InstantiateSmartBlockOptions
+
+Re-exports [InstantiateSmartBlockOptions](smart-blocks-engine/interfaces/InstantiateSmartBlockOptions.md)
 
 ***
 
