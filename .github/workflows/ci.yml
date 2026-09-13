@@ -17,6 +17,7 @@ jobs:
   rigor-pipeline:
     name: Rigor Ecosystem (Logic, Visual, Performance)
     runs-on: ubuntu-latest
+    timeout-minutes: 45
 
     services:
       postgres:
@@ -104,7 +105,12 @@ jobs:
       - name: Build Production
         run: npx next build
         env:
-          DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
+          # Port 59999 has no listener, so @neondatabase/serverless fails fast and
+          # static generation falls back. Pointing this at localhost:5432 reaches
+          # the Postgres service container above: the Neon driver opens a
+          # WebSocket handshake against a server that speaks the Postgres wire
+          # protocol, gets no HTTP response, and waits forever with no timeout.
+          DATABASE_URL: "postgresql://dummy:dummy@127.0.0.1:59999/dummy"
 
       - name: Verify Bundle Performance Budgets
         id: bundle
@@ -124,13 +130,13 @@ jobs:
         id: playwright
         run: npx playwright test
         env:
-          DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
+          DATABASE_URL: "postgresql://dummy:dummy@127.0.0.1:59999/dummy"
 
       - name: Run Real-Browser Sub-Route Web Vitals Performance Gate
         id: page-bench
         run: npm run bench:pages -- --assert
         env:
-          DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
+          DATABASE_URL: "postgresql://dummy:dummy@127.0.0.1:59999/dummy"
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk"
           CLERK_SECRET_KEY: "sk_test_example_secret_key"
 
@@ -173,6 +179,7 @@ jobs:
   security-gate:
     name: Security Gate (Vulnerability Audit)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
