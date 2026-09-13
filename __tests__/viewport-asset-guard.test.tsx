@@ -38,6 +38,9 @@ describe("Viewport-Driven Component Asset Guard", () => {
     class MockIntersectionObserver implements IntersectionObserver {
       readonly root: Element | Document | null = null;
       readonly rootMargin: string = "0px";
+      // Required by lib.dom from TypeScript 5.10 on; harmless as an extra
+      // class member under older libs, which keeps the mock valid on both.
+      readonly scrollMargin: string = "0px";
       readonly thresholds: ReadonlyArray<number> = [];
 
       constructor(

@@ -17,11 +17,11 @@ export type ClinicalDataType =
   | "multi_select"
   | "radio"
   | "checkbox"
-  | "vas_scale"       // Visual Analog Scale (0-100mm)
-  | "nrs_scale"       // Numerical Rating Scale (0-10)
-  | "calculated"      // Dynamic formula (BMI, BSA, eGFR, RECIST)
+  | "vas_scale" // Visual Analog Scale (0-100mm)
+  | "nrs_scale" // Numerical Rating Scale (0-10)
+  | "calculated" // Dynamic formula (BMI, BSA, eGFR, RECIST)
   | "repeating_table" // ConMeds, Adverse Events, Lesions
-  | "signature";      // 21 CFR Part 11 e-signature
+  | "signature"; // 21 CFR Part 11 e-signature
 
 export interface CodelistOption {
   code: string;
@@ -39,34 +39,89 @@ export interface CodelistDefinition {
 }
 
 export interface CdashVariableMetadata {
-  domain: string;           // e.g. DM, VS, AE, CM, LB
-  sdtmVariable: string;     // e.g. USUBJID, AESTDTC, VSTESTCD
-  cdashLabel: string;       // e.g. "Adverse Event Start Date"
-  nciConceptId?: string;    // e.g. C49487
-  core: "HR" | "O" | "R";   // Highly Recommended, Optional, Required
-  acrfAnnotation: string;   // e.g. "AE.AESTDTC"
-  dataCategory?: string;    // Identifier, Timing, Topic, Qualifier
+  domain: string; // e.g. DM, VS, AE, CM, LB
+  sdtmVariable: string; // e.g. USUBJID, AESTDTC, VSTESTCD
+  cdashLabel: string; // e.g. "Adverse Event Start Date"
+  nciConceptId?: string; // e.g. C49487
+  core: "HR" | "O" | "R"; // Highly Recommended, Optional, Required
+  acrfAnnotation: string; // e.g. "AE.AESTDTC"
+  dataCategory?: string; // Identifier, Timing, Topic, Qualifier
 }
+
+export type AstOperator =
+  | "eq"
+  | "neq"
+  | "gt"
+  | "gte"
+  | "lt"
+  | "lte"
+  | "in"
+  | "contains"
+  | "is_empty"
+  | "is_not_empty";
 
 export interface AstCondition {
   fieldId: string;
   crossVisitId?: string; // Optional cross-visit comparator (e.g. "v_screen" or "prev_visit")
-  operator: "eq" | "neq" | "gt" | "gte" | "lt" | "lte" | "in" | "contains" | "is_empty" | "is_not_empty";
+  operator: AstOperator;
   value: string | number | boolean | string[];
+  /**
+   * Field/field discrepancy check (#540): compares fieldId's value against
+   * this OTHER field's value instead of the literal `value`. Takes
+   * precedence over `value` when set.
+   */
+  compareFieldId?: string;
 }
+
+/**
+ * One AND/OR-homogeneous group of leaf conditions (#540). EditCheckRule can
+ * combine several of these with its own groupLogicalOperator, giving
+ * explicit two-level AND/OR grouping (e.g. "(A AND B) OR (C AND D)")
+ * without unbounded recursive nesting.
+ */
+export interface ConditionGroup {
+  id: string;
+  logicalOperator: "AND" | "OR";
+  conditions: AstCondition[];
+}
+
+/**
+ * Four-valued discrepancy check result (#540): "incompatible" is distinct
+ * from "missing" so a genuine authoring/import error (comparing a date
+ * field to a number literal, an unrecognized operator from an import) is
+ * never silently reported the same as a field that simply has no value yet.
+ */
+export type ConditionResult = "true" | "false" | "missing" | "incompatible";
 
 export interface EditCheckRule {
   id: string;
   name: string;
   description: string;
   triggerFieldIds: string[];
-  actionType: "show_field" | "hide_field" | "require_field" | "raise_query" | "set_value";
+  actionType:
+    "show_field" | "hide_field" | "require_field" | "raise_query" | "set_value";
   targetFieldId: string;
   conditions: AstCondition[];
   logicalOperator: "AND" | "OR";
+  /**
+   * Explicit AND/OR groups (#540). When present (non-empty), evaluation
+   * uses these groups instead of the flat `conditions`/`logicalOperator`
+   * pair, which is retained for backward compatibility with rules
+   * authored, imported, or persisted before grouping existed.
+   */
+  conditionGroups?: ConditionGroup[];
+  groupLogicalOperator?: "AND" | "OR";
   querySeverity?: "info" | "warning" | "error";
   queryMessage?: string;
   formulaExpression?: string; // For calculations: e.g. "weight / ((height/100) * (height/100))"
+  /**
+   * Preserves an imported expression this evaluator couldn't map onto
+   * `conditions`/`conditionGroups` (unrecognized shape, not merely an
+   * unrecognized operator) verbatim, rather than silently dropping or
+   * simplifying it during import (#540). A rule carrying this never fires
+   * automatically; it is surfaced to the author for review instead.
+   */
+  unsupportedExpression?: { raw: unknown; reason: string };
 }
 
 export interface StudyArm {
@@ -116,35 +171,35 @@ export interface BiomedicalConcept {
 
 export interface CRFField {
   id: string;
-  conceptId?: string;        // Reference to BiomedicalConcept
-  variableName: string;      // e.g. BRTHYR, DIABP, AETERM
-  label: string;             // Question text displayed to investigator
-  description?: string;      // Instructions / hint
+  conceptId?: string; // Reference to BiomedicalConcept
+  variableName: string; // e.g. BRTHYR, DIABP, AETERM
+  label: string; // Question text displayed to investigator
+  description?: string; // Instructions / hint
   dataType: ClinicalDataType;
-  columnSpan: number;        // 1 to 12 in responsive grid
+  columnSpan: number; // 1 to 12 in responsive grid
   required: boolean;
   readOnly?: boolean;
   placeholder?: string;
-  unit?: string;             // e.g. mmHg, kg, cm, mg/dL
+  unit?: string; // e.g. mmHg, kg, cm, mg/dL
   unitOptions?: string[];
   minValue?: number;
   maxValue?: number;
   defaultValue?: string | number | boolean;
-  codelistId?: string;       // Reference to CodelistDefinition
+  codelistId?: string; // Reference to CodelistDefinition
   customOptions?: CodelistOption[];
   calculationFormula?: string; // AST formula string
   cdashMetadata?: CdashVariableMetadata;
   repeatingColumns?: CRFField[]; // When dataType is 'repeating_table'
-  scaleMinLabel?: string;    // For VAS/NRS e.g. "No Pain"
-  scaleMaxLabel?: string;    // For VAS/NRS e.g. "Worst Possible Pain"
-  allowPartial?: boolean;    // Allow omission of unknown day/month in date capture
+  scaleMinLabel?: string; // For VAS/NRS e.g. "No Pain"
+  scaleMaxLabel?: string; // For VAS/NRS e.g. "Worst Possible Pain"
+  allowPartial?: boolean; // Allow omission of unknown day/month in date capture
   preventFutureDate?: boolean; // Enforce date <= current UTC timestamp
   allowNullFlavor?: boolean; // Enable compact CDISC null-flavor pills (ND, NA, UNK)
   requirementTier?: "optional" | "hard_stop" | "auto_query"; // 3-tier missing data engine
-  requiresSdv?: boolean;     // Mandatory CRA Source Document Verification governance flag
-  isBlinded?: boolean;       // Protocol masking from unblinded sponsor roles until DB lock
-  nullFlavorValue?: string;  // Active/selected CDISC null-flavor code (e.g. "ND" | "NA" | "UNK")
-  sdvVerified?: boolean;     // CRA Source Data Verification flag
+  requiresSdv?: boolean; // Mandatory CRA Source Document Verification governance flag
+  isBlinded?: boolean; // Protocol masking from unblinded sponsor roles until DB lock
+  nullFlavorValue?: string; // Active/selected CDISC null-flavor code (e.g. "ND" | "NA" | "UNK")
+  sdvVerified?: boolean; // CRA Source Data Verification flag
   sdvTimestamp?: string;
   sdvAuditedBy?: string;
 }
@@ -161,32 +216,32 @@ export interface CRFSection {
 export interface CRFForm {
   id: string;
   name: string;
-  domain: string;            // e.g. DM, VS, AE, CM, LB, RECIST
+  domain: string; // e.g. DM, VS, AE, CM, LB, RECIST
   description: string;
   version: string;
   sections: CRFSection[];
   rules: EditCheckRule[];
-  isLogForm?: boolean;       // Continuous log form vs visit-specific
-  isLocked?: boolean;        // PI Data Lock flag
+  isLogForm?: boolean; // Continuous log form vs visit-specific
+  isLocked?: boolean; // PI Data Lock flag
   lockedBy?: string;
   lockedAt?: string;
 }
 
 export interface StudyVisit {
   id: string;
-  oid: string;               // e.g. SE.SCREENING, SE.VISIT1
-  name: string;              // e.g. "Screening", "Cycle 1 Day 1"
+  oid: string; // e.g. SE.SCREENING, SE.VISIT1
+  name: string; // e.g. "Screening", "Cycle 1 Day 1"
   visitType: "Scheduled" | "Unscheduled" | "Common";
-  targetDay: number;         // e.g. Day 0, Day 28
+  targetDay: number; // e.g. Day 0, Day 28
   timepointDays?: number;
-  windowBefore: number;      // -3 days
-  windowAfter: number;       // +3 days
+  windowBefore: number; // -3 days
+  windowAfter: number; // +3 days
   assignedFormIds: string[]; // Forms collected at this visit
   formIds?: string[];
   isRepeating?: boolean;
   repeatMax?: number;
-  epochId?: string;          // Link to StudyEpoch
-  armIds?: string[];         // Link to applicable StudyArms
+  epochId?: string; // Link to StudyEpoch
+  armIds?: string[]; // Link to applicable StudyArms
   armFormAssignments?: Record<string, string[]>; // armId -> formIds[]
 }
 
@@ -194,11 +249,11 @@ export interface StudyBranding {
   organizationName: string;
   logoBase64?: string;
   logoUrl?: string;
-  primaryColor: string;     // e.g. "#0284c7" or "#00f0ff"
-  accentColor: string;      // e.g. "#9333ea" or "#3b82f6"
+  primaryColor: string; // e.g. "#0284c7" or "#00f0ff"
+  accentColor: string; // e.g. "#9333ea" or "#3b82f6"
   tableHeaderColor?: string;
-  headerText?: string;      // e.g. "CONFIDENTIAL - INVESTIGATOR USE ONLY"
-  footerText?: string;      // e.g. "Protocol: ONC-2026-003 | Global Development"
+  headerText?: string; // e.g. "CONFIDENTIAL - INVESTIGATOR USE ONLY"
+  footerText?: string; // e.g. "Protocol: ONC-2026-003 | Global Development"
   confidentialityNotice?: string;
   watermarkText?: string;
   showPageNumbers?: boolean;
@@ -244,13 +299,19 @@ export interface StudyProtocol {
   $schema?: string;
   schemaVersion?: string;
   id: string;
-  protocolNumber: string;    // e.g. "ONC-2026-003"
+  protocolNumber: string; // e.g. "ONC-2026-003"
   protocolId?: string;
-  studyName: string;         // e.g. "Phase III Multicenter Study of Immuno-Oncology..."
+  studyName: string; // e.g. "Phase III Multicenter Study of Immuno-Oncology..."
   title?: string;
-  phase: "Phase I" | "Phase I/II" | "Phase II" | "Phase III" | "Phase IV" | "Registry";
+  phase:
+    | "Phase I"
+    | "Phase I/II"
+    | "Phase II"
+    | "Phase III"
+    | "Phase IV"
+    | "Registry";
   sponsor: string;
-  therapeuticArea: string;   // Oncology, Neurology, Cardiology, Infectious Disease, etc.
+  therapeuticArea: string; // Oncology, Neurology, Cardiology, Infectious Disease, etc.
   version: string;
   lastModified: string;
   forms: CRFForm[];
@@ -275,8 +336,8 @@ export interface EDCQuery {
   status: "Open" | "Answered" | "Closed" | "Cancelled";
   severity: "info" | "warning" | "error";
   message: string;
-  raisedBy: string;          // System or User name
-  raisedAt: string;          // ISO Date
+  raisedBy: string; // System or User name
+  raisedAt: string; // ISO Date
   response?: string;
   respondedBy?: string;
   respondedAt?: string;
@@ -284,7 +345,7 @@ export interface EDCQuery {
 
 export interface AuditTrailEntry {
   id: string;
-  timestamp: string;         // ISO Date
+  timestamp: string; // ISO Date
   subjectId: string;
   formId: string;
   fieldId: string;
@@ -292,7 +353,11 @@ export interface AuditTrailEntry {
   previousValue: string | number | boolean | null;
   newValue: string | number | boolean | null;
   changedBy: string;
-  userRole: "Site Coordinator" | "Principal Investigator" | "CRA Monitor" | "Data Manager";
+  userRole:
+    | "Site Coordinator"
+    | "Principal Investigator"
+    | "CRA Monitor"
+    | "Data Manager";
   reasonForChange: string;
 }
 
@@ -300,11 +365,13 @@ export interface ElectronicSignature {
   id: string;
   subjectId: string;
   formId: string;
+  visitId: string;
   signedBy: string;
   userRole: string;
   timestamp: string;
-  meaning: "Author" | "Investigator Approval" | "Data Lock" | "Monitor Verification";
-  digest: string;            // Cryptographic SHA-256 simulated signature hash
+  meaning:
+    "Author" | "Investigator Approval" | "Data Lock" | "Monitor Verification";
+  digest: string; // Cryptographic SHA-256 simulated signature hash
 }
 
 export type ComplianceSeverity = "error" | "warning" | "notice";
@@ -320,7 +387,12 @@ export interface ComplianceViolation {
   variableName?: string;
   message: string;
   autoFixAvailable: boolean;
-  autoFixType?: "truncate_variable" | "add_core_variable" | "assign_nci_codelist" | "fix_date_format" | "assign_visit_form";
+  autoFixType?:
+    | "truncate_variable"
+    | "add_core_variable"
+    | "assign_nci_codelist"
+    | "fix_date_format"
+    | "assign_visit_form";
   suggestedFix?: string;
 }
 
@@ -336,12 +408,12 @@ export interface SubjectFormStatus {
 }
 
 export type StudioMode =
-  | "designer"               // 12-Column Responsive Form Canvas
-  | "matrix"                 // Visit x Form Matrix
-  | "rules"                  // Visual Logic & AST Edit Check Graph
-  | "edc"                    // Live 21 CFR Part 11 EDC Simulator
-  | "acrf"                   // Annotated CRF Preview & Overlay
-  | "export";                // ODM-XML, JSON, FHIR & Define-XML Export
+  | "designer" // 12-Column Responsive Form Canvas
+  | "matrix" // Visit x Form Matrix
+  | "rules" // Visual Logic & AST Edit Check Graph
+  | "edc" // Live 21 CFR Part 11 EDC Simulator
+  | "acrf" // Annotated CRF Preview & Overlay
+  | "export"; // ODM-XML, JSON, FHIR & Define-XML Export
 
 export type DeviceViewport = "desktop" | "tablet" | "mobile";
 

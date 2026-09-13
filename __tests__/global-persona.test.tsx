@@ -1,11 +1,16 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { PersonaProvider, usePersona } from "@/components/providers/PersonaProvider";
+import {
+  PersonaProvider,
+  usePersona,
+} from "@/components/providers/PersonaProvider";
 import { Footer } from "@/components/Footer";
 import { Navbar } from "@/components/Navbar";
 import { Timeline } from "@/components/Timeline";
@@ -16,7 +21,10 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@/components/providers/AudioProvider", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/components/providers/AudioProvider")>();
+  const actual =
+    await importOriginal<
+      typeof import("@/components/providers/AudioProvider")
+    >();
   return {
     ...actual,
     useAudio: () => ({
@@ -143,7 +151,11 @@ describe("Global Persona Perspective Toggle Suite", () => {
   });
 
   it("hides the 'Interactive Systems Highlights' CTA card dynamically in technical mode", async () => {
-    const TestWrapper = ({ initialPersona }: { initialPersona: "recruiter" | "technical" }) => {
+    const TestWrapper = ({
+      initialPersona,
+    }: {
+      initialPersona: "recruiter" | "technical";
+    }) => {
       const { setPersona } = usePersona();
       React.useEffect(() => {
         setPersona(initialPersona);
@@ -160,8 +172,8 @@ describe("Global Persona Perspective Toggle Suite", () => {
       );
     });
 
-    expect(container.textContent).toContain("Interactive Canvas & Game Labs");
-    expect(container.textContent).toContain("Explore Labs Hub");
+    expect(container.textContent).toContain("Yes, there are games.");
+    expect(container.textContent).toContain("Visit the Arcade");
 
     await act(async () => {
       root.render(
@@ -174,8 +186,12 @@ describe("Global Persona Perspective Toggle Suite", () => {
     expect(container.textContent).toBe("");
   });
 
-  it("hides 'Arcade & Labs' column and 'Incident Simulator' link in the footer in technical mode", async () => {
-    const TestWrapper = ({ initialPersona }: { initialPersona: "recruiter" | "technical" }) => {
+  it("hides 'Arcade' column and 'Incident Simulator' link in the footer in technical mode", async () => {
+    const TestWrapper = ({
+      initialPersona,
+    }: {
+      initialPersona: "recruiter" | "technical";
+    }) => {
       const { setPersona } = usePersona();
       React.useEffect(() => {
         setPersona(initialPersona);
@@ -193,8 +209,8 @@ describe("Global Persona Perspective Toggle Suite", () => {
       );
     });
 
-    expect(container.textContent).toContain("Arcade & Labs");
-    expect(container.textContent).toContain("Arcade Hub Index ↗");
+    expect(container.textContent).toContain("Arcade");
+    expect(container.textContent).toContain("Arcade ↗");
     expect(container.textContent).toContain("Incident Simulator");
 
     // 2. Technical mode (hides arcade columns and simulator paths)
@@ -206,14 +222,18 @@ describe("Global Persona Perspective Toggle Suite", () => {
       );
     });
 
-    expect(container.textContent).not.toContain("Arcade & Labs");
-    expect(container.textContent).not.toContain("Arcade Hub Index ↗");
+    expect(container.textContent).not.toContain("Arcade");
+    expect(container.textContent).not.toContain("Arcade ↗");
     expect(container.textContent).not.toContain("Incident Simulator");
     expect(container.textContent).toContain("Proof Workspace");
   });
 
-  it("hides 'Arcade & Labs' dropdown and 'Incident Simulator' path from global navbar in technical mode", async () => {
-    const TestWrapper = ({ initialPersona }: { initialPersona: "recruiter" | "technical" }) => {
+  it("keeps the Arcade navigation discoverable in both personas", async () => {
+    const TestWrapper = ({
+      initialPersona,
+    }: {
+      initialPersona: "recruiter" | "technical";
+    }) => {
       const { setPersona } = usePersona();
       React.useEffect(() => {
         setPersona(initialPersona);
@@ -222,7 +242,7 @@ describe("Global Persona Perspective Toggle Suite", () => {
       return <Navbar />;
     };
 
-    // 1. Recruiter mode: should display Arcade & Labs column header, and Incident Simulator in active paths
+    // 1. Recruiter mode: should display Arcade column header, and Incident Simulator in active paths
     await act(async () => {
       root.render(
         <PersonaProvider>
@@ -231,9 +251,9 @@ describe("Global Persona Perspective Toggle Suite", () => {
       );
     });
 
-    expect(container.textContent).toContain("Arcade & Labs");
+    expect(container.textContent).toContain("Arcade");
 
-    // 2. Technical mode: should hide Arcade & Labs and filter out Incident Simulator
+    // Technical readers retain access to the same top-level navigation.
     await act(async () => {
       root.render(
         <PersonaProvider>
@@ -242,11 +262,16 @@ describe("Global Persona Perspective Toggle Suite", () => {
       );
     });
 
-    expect(container.textContent).not.toContain("Arcade & Labs");
+    expect(container.textContent).toContain("Arcade");
   });
 
   it("syncs career timeline active display mode and automatically resets overrides on transition", async () => {
-    let currentPersona: { persona: "recruiter" | "technical"; setPersona: (p: "recruiter" | "technical") => void } | undefined;
+    let currentPersona:
+      | {
+          persona: "recruiter" | "technical";
+          setPersona: (p: "recruiter" | "technical") => void;
+        }
+      | undefined;
     const TestWrapper = () => {
       const { persona, setPersona } = usePersona();
       currentPersona = { persona, setPersona };
@@ -263,7 +288,7 @@ describe("Global Persona Perspective Toggle Suite", () => {
 
     // Default recruiter maps to "formal summary" (period tag handles period matching, period spans like period format)
     expect(container.textContent).toContain("FORMAL SUMMARY");
-    
+
     // Switch global persona to technical
     await act(async () => {
       currentPersona?.setPersona("technical");

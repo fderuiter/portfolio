@@ -3,7 +3,7 @@
 # Prevents accidental force pushes or direct pushes to main from local environment.
 # Bypass with: ALLOW_DANGEROUS_GIT=1 git push ...
 
-set -euo pipefail
+set -eu
 
 if [ "${ALLOW_DANGEROUS_GIT:-0}" = "1" ]; then
   exit 0

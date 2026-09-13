@@ -53,7 +53,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ### 6. Developer Suite (DX) & Quality Invariants
 
-- Run `npm run quality` (or `npm run verify`) to ensure type safety, zero ESLint warnings, docs synchronization, and all 9 architectural invariants pass.
+- Run `npm run quality` (or `npm run verify`) to ensure type safety, zero ESLint warnings, docs synchronization, and every architectural invariant reported by DX Doctor passes.
 - When adding new games, APIs, ADRs, case studies, or components, utilize `npm run scaffold <type> <name>` to guarantee standard vertical slices and automatic `CommandPalette.tsx` registration.
 - Whenever public library or hook signatures change, regenerate TypeDoc markdown with `npm run compile-docs` and verify with `npm run check-docs-drift`.
 
@@ -138,7 +138,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Git branches must follow naming conventions (`feat/*`, `fix/*`, `chore/*`, `refactor/*`, `docs/*`, `perf/*`, `dx/*`, `main`, `dev`).
 - **Git Safety Guardrails & Protected Branch Invariant**: Destructive git commands (`git push --force`, `git push origin main`, `git reset --hard`, `git clean -f/-fd`, `git branch -D`, `git checkout .`, `git restore .`) are intercepted and blocked across agent tool runners and local CLI sessions by `scripts/git-guardrail.sh` (exit code 2) and `.husky/pre-push`. Direct pushes to `main` are prohibited to guarantee PR-based governance. Explicit emergency override requires `ALLOW_DANGEROUS_GIT=1`.
 - **Early Fail-Fast Pre-Commit Pipeline**: `.husky/pre-commit` executes `lint:boundaries` immediately after `typecheck` and prior to `test`, failing within ~1.5s on deep-module boundary breaches or circular dependencies before long test suites run.
-- **Standard Developer Workflow & Automated Dev Rebase**: Active development takes place on feature branches cut from and merged into `dev`. The `dev` branch is kept synchronized with `main` via automated GitHub Actions rebase (`.github/workflows/sync-dev-on-main-push.yml`), ensuring linear history and preventing drift when `main` receives hotfixes or production releases.
+- **Standard Developer Workflow**: After the one-time reconciliation in ADR 0037, active development uses short-lived prefixed branches cut from `main` and squash-merged into `main` through pull requests. Treat `main` as the sole long-lived integration, release, and Vercel production branch. Keep automatic non-production Vercel deployments disabled unless an operator deliberately requests one preview.
 - **Pull Request Publication Protocol**: When publishing feature branches via GitHub CLI (`gh pr create`), author structured descriptions that cross-link relevant Architectural Decision Records (`adr/00XX-*.md`), summarize key architectural changes, and report test validation metrics.
 - Dead code and orphaned exports must be inspected via `npm run dx dead-code` and monitored in `lib/dx/doctor.ts`. Private helper functions, props interfaces, and internal sub-components in `components/` and `app/` must not use `export` unless consumed across modules, while `lib/`, `types/`, and `hooks/` constitute public TypeDoc contract entrypoints.
 - Build-time static generation and offline fallbacks (such as dummy database connections or rate-limited GitHub stats) must gate console warnings with `if (process.env.VERCEL_ENV === "production")` to eliminate false-alarm stderr noise during static compilation.
@@ -186,6 +186,18 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Subfolder internals (`lib/**/internal/*`, `lib/**/core/*`, `lib/**/presets/*`) are strictly private to their owning module.
 - Unit tests (`__tests__/`) and external components (`app/`, `components/`) must import exclusively through public root entry points.
 - Zero circular dependencies are permitted across the repository, enforced deterministically via `npm run lint:boundaries` and `npm run verify`.
+
+### 22. Free-Tier Provider Quota Governance & Edge Offloading
+
+- **Zero-Cost Free-Tier Ceiling**: All application architecture, scheduled jobs, and telemetry pipelines must operate strictly within the zero-cost free-tier entitlements of external providers (Vercel Hobby, Neon Postgres 0.5 GiB, Upstash Redis 10k commands/day, Resend 100 emails/day, Sentry 5k errors / 10k spans/mo, Clerk 10k MAU). Governed by [ADR 0036](adr/0036-free-tier-offloading-and-provider-quota-governance.md).
+- **Database Compute Sleep Invariant**: Neon serverless Postgres compute auto-suspends after 5 minutes of inactivity. Public browsing routes must never query Neon directly per request: full-page editorial content must use Next.js Incremental Static Regeneration (ISR with `revalidate = 3600`) at the edge, dynamic reads must pass through Upstash Redis read-through caching (`CaseStudyService`), and visitor interaction counters (reactions, pageviews) must be buffered in Redis (`HINCRBY`) rather than waking Postgres per click.
+- **Upstash Daily Command Protection**: To prevent exhausting Upstash's 10,000 commands/day allowance, `@upstash/ratelimit` instances must configure local in-memory caching (`ephemeralCache`), multi-key operations must use `redis.pipeline()`, and rate-limiting must be restricted strictly to mutative routes (`/api/contact`, `/api/newsletter`, `/api/telemetry`), completely bypassing static GET assets.
+- **Unified Maintenance Pipeline (Vercel Hobby 1-Cron Limit)**: Because Vercel Hobby permits strictly one cron job per day (`0 0 * * *`), all background tasks (telemetry buffer syncing, outbound email retries, and retention rollups) must be consolidated into a single time-budgeted maintenance route (`/api/cron/maintenance`) executing within $\le 8$ seconds. Sub-daily email retries may optionally use external event-driven webhooks via Upstash QStash.
+- **Sentry Quota & Noise Bounds**: `tracesSampleRate` must resolve dynamically to 0% in preview, development, and testing, and be clamped to $\le 5\%$ (0.05) in production. `beforeSend` filters must drop benign client noise (`AbortError`, `ResizeObserver loop limit exceeded`, browser extension errors) and strip all PII and authorization headers.
+- **External Agent Review Brief Standard**: All integration, devops, and feature tickets authored for review or execution by external AI agents (Claude Code, OpenAI) must include an explicit `## Agent Review Brief` specifying:
+  1. Exact file paths and symbols to inspect.
+  2. Invariant boundaries (non-destructive execution, quota caps, environment namespacing).
+  3. Actionable terminal verification commands (`npm test`, `npm run verify:*`, `npm run check-docs-drift`, `npm run quality`).
 
 ## Agent skills
 

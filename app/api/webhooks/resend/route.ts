@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ResendWebhookEventSchema } from "@/lib/schemas";
-import { EmailService, verifySvixSignature } from "@/lib/services/email-service";
+import {
+  EmailService,
+  verifySvixSignature,
+} from "@/lib/services/email-service";
 import * as Sentry from "@sentry/nextjs";
 
 export const dynamic = "force-dynamic";
@@ -60,6 +63,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     const result = await EmailService.handleWebhookEvent(parseResult.data);
+
+    if (!result.handled) {
+      // Durable processing (e.g. the suppression-list write) failed. Respond
+      // with a retryable status so Resend/Svix redelivers the event instead
+      // of treating a lost write as acknowledged.
+      return NextResponse.json(
+        { error: "Failed to durably process webhook event" },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(
       {

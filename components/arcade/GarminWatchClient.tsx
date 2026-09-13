@@ -15,14 +15,16 @@ import {
 } from "@tabler/icons-react";
 
 const GarminWatchSimulatorLoader = () =>
-  import("@/components/GarminWatchSimulator").then((mod) => mod.GarminWatchSimulator);
+  import("@/components/GarminWatchSimulator").then(
+    (mod) => mod.GarminWatchSimulator
+  );
 
 const DynamicGarminWatchSimulator = dynamic(GarminWatchSimulatorLoader, {
   ssr: false,
   loading: () => (
     <div className="flex flex-col items-center justify-center p-8 min-h-[380px] font-mono text-xs text-zinc-500 animate-pulse">
       <div className="w-8 h-8 border-2 border-amber-500/30 border-t-amber-500 rounded-full animate-spin mb-4" />
-      <span>ALLOCATING HEAP STACK BUFFER (32KB)...</span>
+      <span>Loading the watch...</span>
     </div>
   ),
 });
@@ -64,10 +66,13 @@ export const GarminWatchClient: React.FC = () => {
             </div>
             <div>
               <h1 className="text-3xl sm:text-4xl font-extrabold font-mono text-white tracking-tight">
-                Monkey C Mayhem: <span className="text-amber-400">Garmin Schvitz App</span>
+                Monkey C Mayhem:{" "}
+                <span className="text-amber-400">Garmin Schvitz App</span>
               </h1>
               <p className="text-xs sm:text-sm text-zinc-400 font-mono mt-1">
-                Circular 280×280 Monkey C Mayhem smartwatch simulator running the Garmin Schvitz App artifact under severe 32KB RAM memory constraints.
+                A smartwatch game with a 32KB memory budget and an inconvenient
+                tendency to fog up. Manage the memory while keeping the run
+                alive.
               </p>
             </div>
           </div>
@@ -78,10 +83,10 @@ export const GarminWatchClient: React.FC = () => {
           <PlayCabinet
             gameId="garmin-watch"
             title="Monkey C Mayhem: Garmin Schvitz App"
-            subtitle="Embedded Systems & Garmin Schvitz App Simulator"
+            subtitle="A Small Watch With a Lot Going On"
             accentColor="amber"
             icon={<IconDeviceWatch className="w-8 h-8 text-amber-400" />}
-            instructions="Circular 280×280 Monkey C Mayhem smartwatch simulator running the Garmin Schvitz App artifact under strict 32KB RAM constraints with real-time garbage collection lifecycle tracking."
+            instructions="Keep a simulated Garmin Schvitz App running with a 32KB memory budget. Clear memory, dodge obstacles, and wipe the fog off the screen before the watch has a very bad day."
             controls={[
               { key: "UP", action: "Jump" },
               { key: "DOWN", action: "Jettison RAM" },
@@ -103,7 +108,9 @@ export const GarminWatchClient: React.FC = () => {
               <span>32KB RAM Constraint &amp; Jettison</span>
             </div>
             <p className="text-zinc-400 text-[11px] leading-relaxed">
-              Every obstacle passed allocates variables onto the memory heap. Press <strong>DOWN</strong> or tap the bezel button to jettison variables before hitting the 32KB ceiling.
+              Every obstacle passed allocates variables onto the memory heap.
+              Press <strong>DOWN</strong> or tap the bezel button to jettison
+              variables before hitting the 32KB ceiling.
             </p>
           </div>
 
@@ -113,7 +120,9 @@ export const GarminWatchClient: React.FC = () => {
               <span>Garbage Collector [GC] Freeze</span>
             </div>
             <p className="text-zinc-400 text-[11px] leading-relaxed">
-              Press <strong>BACK / GC</strong> to trigger the garbage collector. GC cleans all dead memory allocations but introduces an authentic 500ms execution freeze!
+              Press <strong>BACK / GC</strong> to trigger the garbage collector.
+              GC clears unused memory but pauses the game for a simulated 500ms.
+              Time it carefully.
             </p>
           </div>
 
@@ -123,7 +132,9 @@ export const GarminWatchClient: React.FC = () => {
               <span>Thermal Fogging &amp; Screen Wiping</span>
             </div>
             <p className="text-zinc-400 text-[11px] leading-relaxed">
-              High CPU usage causes condensation fog on the circular display. Drag your finger or cursor over the watch lens or press <strong>W</strong> to wipe the fog clear.
+              High CPU usage causes condensation fog on the circular display.
+              Drag your finger or cursor over the watch lens or press{" "}
+              <strong>W</strong> to wipe the fog clear.
             </p>
           </div>
         </div>

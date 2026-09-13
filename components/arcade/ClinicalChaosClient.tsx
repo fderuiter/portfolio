@@ -14,14 +14,16 @@ import {
 } from "@tabler/icons-react";
 
 const ClinicalTrialChaosLoader = () =>
-  import("@/components/ClinicalTrialChaos").then((mod) => mod.ClinicalTrialChaos);
+  import("@/components/ClinicalTrialChaos").then(
+    (mod) => mod.ClinicalTrialChaos
+  );
 
 const DynamicClinicalTrialChaos = dynamic(ClinicalTrialChaosLoader, {
   ssr: false,
   loading: () => (
     <div className="flex flex-col items-center justify-center p-8 min-h-[380px] font-mono text-xs text-zinc-500 animate-pulse">
       <div className="w-8 h-8 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin mb-4" />
-      <span>ALIGNING CDISC SDTM COMPLIANCE ENGINE...</span>
+      <span>Loading Clinical Trial Chaos...</span>
     </div>
   ),
 });
@@ -63,10 +65,13 @@ export const ClinicalChaosClient: React.FC = () => {
             </div>
             <div>
               <h1 className="text-3xl sm:text-4xl font-extrabold font-mono text-white tracking-tight">
-                Clinical Trial Chaos: <span className="text-emerald-400">CDISC Compliance</span>
+                Clinical Trial Chaos:{" "}
+                <span className="text-emerald-400">CDISC Compliance</span>
               </h1>
               <p className="text-xs sm:text-sm text-zinc-400 font-mono mt-1">
-                Fast-paced compliance arcade. Map clinical variables across SDTM domains (DM, VS, AE, LB), sign electronic submissions, and survive FDA auditor scrutiny.
+                Sort clinical data into SDTM domains, sign the submissions, and
+                keep up with the conveyor belt. The auditor is watching. This is
+                a game, so at least there’s a restart button.
               </p>
             </div>
           </div>
@@ -77,10 +82,10 @@ export const ClinicalChaosClient: React.FC = () => {
           <PlayCabinet
             gameId="clinical-chaos"
             title="Clinical Trial Chaos: CDISC Compliance"
-            subtitle="21 CFR Part 11 Compliance & Domain Mapper"
+            subtitle="Clinical Data, Against the Clock"
             accentColor="emerald"
             icon={<IconShieldCheck className="w-8 h-8 text-emerald-400" />}
-            instructions="Ingest CDISC SDTM/ADaM clinical observations, execute 21 CFR Part 11 electronic signatures with intent verification, and resolve site audit queries under inspection time pressure."
+            instructions="Sort clinical observations, fix data problems, and sign submissions before time runs out. A game inspired by clinical data work, with a considerably less patient auditor."
             controls={[
               { key: "Click", action: "Fix Obs / Map SDTM" },
               { key: "Space", action: "Power-up" },
@@ -100,7 +105,9 @@ export const ClinicalChaosClient: React.FC = () => {
               <span>Standardize CDISC Data</span>
             </div>
             <p className="text-zinc-400 text-[11px] leading-relaxed">
-              Click invalid observations on active subject packets to convert non-standard units (e.g. lbs to kg) and format timestamps to ISO-8601 standard.
+              Click invalid observations on active subject packets to convert
+              non-standard units (e.g. lbs to kg) and format timestamps to
+              ISO-8601 standard.
             </p>
           </div>
 
@@ -110,7 +117,9 @@ export const ClinicalChaosClient: React.FC = () => {
               <span>21 CFR Electronic Signatures</span>
             </div>
             <p className="text-zinc-400 text-[11px] leading-relaxed">
-              Route packets to stations (1: DM, 2: VS, 3: AE, 4: LB) and authenticate electronic signatures with meaningful submission intent before the conveyor expires.
+              Route packets to stations (1: DM, 2: VS, 3: AE, 4: LB) and
+              authenticate electronic signatures with meaningful submission
+              intent before the conveyor expires.
             </p>
           </div>
 
@@ -120,7 +129,9 @@ export const ClinicalChaosClient: React.FC = () => {
               <span>FDA Auditor &amp; Form 483</span>
             </div>
             <p className="text-zinc-400 text-[11px] leading-relaxed">
-              Expired records or fraudulent non-compliant submissions raise auditor suspicion. If suspicion reaches 100%, an FDA Form 483 warning is issued and the trial is terminated!
+              Expired records or fraudulent non-compliant submissions raise
+              auditor suspicion. If suspicion reaches 100%, an FDA Form 483
+              warning is issued and the trial is terminated!
             </p>
           </div>
         </div>

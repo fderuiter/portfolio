@@ -3,12 +3,24 @@ import { NextRequest } from "next/server";
 import fs from "fs";
 import path from "path";
 
-const { mockLpush, mockExpire, mockExec, mockRpop, mockLmove, mockLrange, mockDel, mockCreateMany, mockQueryRawUnsafe } = vi.hoisted(() => ({
+const {
+  mockLpush,
+  mockExpire,
+  mockExec,
+  mockRpop,
+  mockLmove,
+  mockLrem,
+  mockLrange,
+  mockDel,
+  mockCreateMany,
+  mockQueryRawUnsafe,
+} = vi.hoisted(() => ({
   mockLpush: vi.fn(),
   mockExpire: vi.fn(),
   mockExec: vi.fn(),
   mockRpop: vi.fn(),
   mockLmove: vi.fn(),
+  mockLrem: vi.fn(),
   mockLrange: vi.fn().mockResolvedValue([]),
   mockDel: vi.fn(),
   mockCreateMany: vi.fn().mockResolvedValue({ count: 2 }),
@@ -37,6 +49,7 @@ vi.mock("@upstash/redis", () => {
         exec: mockExec,
         rpop: mockRpop,
         lmove: mockLmove,
+        lrem: mockLrem,
       };
     }
     lrange = mockLrange;
@@ -70,8 +83,18 @@ describe("Atomic LMOVE Queue, Passive Timer & Lazy DB Health Check Acceptance Cr
   // Acceptance Criterion 1: Telemetry events transfer atomically between buffer lists
   it("transfers telemetry events atomically using LMOVE without non-atomic pop actions", async () => {
     const mockEvents = [
-      { id: "evt-101", projectSlug: "/studio", eventType: "page_view", createdAt: new Date() },
-      { id: "evt-102", projectSlug: "/proof", eventType: "project_click", createdAt: new Date() },
+      {
+        id: "evt-101",
+        projectSlug: "/studio",
+        eventType: "page_view",
+        createdAt: new Date(),
+      },
+      {
+        id: "evt-102",
+        projectSlug: "/proof",
+        eventType: "project_click",
+        createdAt: new Date(),
+      },
     ];
 
     mockLrange.mockResolvedValueOnce([]);
@@ -84,16 +107,37 @@ describe("Atomic LMOVE Queue, Passive Timer & Lazy DB Health Check Acceptance Cr
     expect(result.inserted).toBe(2);
 
     // Verify LMOVE was used instead of RPOP
-    expect(mockLmove).toHaveBeenCalledWith("telemetry_buffer", "telemetry_processing", "right", "left");
+    expect(mockLmove).toHaveBeenCalledWith(
+      "telemetry_buffer",
+      "telemetry_processing",
+      "right",
+      "left"
+    );
     expect(mockRpop).not.toHaveBeenCalled();
 
-    // Verify processing queue cleared after DB write success
-    expect(mockDel).toHaveBeenCalledWith("telemetry_processing");
+    // Verify only the processed events are acknowledged after DB write success.
+    // Clearing the whole key would also discard events an overlapping sync
+    // moved into the processing queue after this worker read it.
+    expect(mockDel).not.toHaveBeenCalledWith("telemetry_processing");
+    expect(mockLrem).toHaveBeenCalledTimes(2);
+    expect(mockLrem).toHaveBeenCalledWith(
+      "telemetry_processing",
+      1,
+      mockEvents[0]
+    );
+    expect(mockLrem).toHaveBeenCalledWith(
+      "telemetry_processing",
+      1,
+      mockEvents[1]
+    );
   });
 
   // Acceptance Criterion 2: Background interval timer workers are completely removed
   it("has zero active background setInterval timers in the telemetry service codebase", () => {
-    const filePath = path.resolve(process.cwd(), "lib/services/telemetry-service.ts");
+    const filePath = path.resolve(
+      process.cwd(),
+      "lib/services/telemetry-service.ts"
+    );
     const source = fs.readFileSync(filePath, "utf-8");
 
     expect(source).not.toContain("setInterval");
@@ -141,7 +185,12 @@ describe("Atomic LMOVE Queue, Passive Timer & Lazy DB Health Check Acceptance Cr
   // Acceptance Criterion 5: Unhandled database write exceptions leave telemetry event batches in the processing queue
   it("preserves telemetry event batch in processing queue when database write fails", async () => {
     const mockEvents = [
-      { id: "evt-fail-1", projectSlug: "/fail-test", eventType: "page_view", createdAt: new Date() },
+      {
+        id: "evt-fail-1",
+        projectSlug: "/fail-test",
+        eventType: "page_view",
+        createdAt: new Date(),
+      },
     ];
 
     mockLrange.mockResolvedValueOnce([]);
@@ -150,11 +199,18 @@ describe("Atomic LMOVE Queue, Passive Timer & Lazy DB Health Check Acceptance Cr
     const dbError = new Error("Database Write Failed / Connection Timeout");
     mockCreateMany.mockRejectedValueOnce(dbError);
 
-    await expect(TelemetryService.syncBufferedEvents(10)).rejects.toThrow("Database Write Failed / Connection Timeout");
+    await expect(TelemetryService.syncBufferedEvents(10)).rejects.toThrow(
+      "Database Write Failed / Connection Timeout"
+    );
 
     // Processing queue must NOT be deleted on error
     expect(mockDel).not.toHaveBeenCalledWith("telemetry_processing");
     // Events transferred via LMOVE remain in telemetry_processing for subsequent retry
-    expect(mockLmove).toHaveBeenCalledWith("telemetry_buffer", "telemetry_processing", "right", "left");
+    expect(mockLmove).toHaveBeenCalledWith(
+      "telemetry_buffer",
+      "telemetry_processing",
+      "right",
+      "left"
+    );
   });
 });

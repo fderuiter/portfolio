@@ -1,12 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  IconCpu,
-  IconLink,
-  IconPlus,
-  IconDownload,
-} from "@tabler/icons-react";
+import { IconCpu, IconLink, IconPlus, IconDownload } from "@tabler/icons-react";
 import { FieldManualButton } from "@/components/FieldManualButton";
 
 export function ProofWorkspaceSkeleton() {
@@ -16,7 +11,10 @@ export function ProofWorkspaceSkeleton() {
         {/* Header and Breadcrumbs */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
           <div className="space-y-1">
-            <nav aria-label="Breadcrumb" className="flex items-center text-xs font-mono text-zinc-400 select-none">
+            <nav
+              aria-label="Breadcrumb"
+              className="flex items-center text-xs font-mono text-zinc-400 select-none"
+            >
               <ol className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                 <li className="inline-flex items-center gap-1.5 sm:gap-2">
                   <span className="hover:text-brand-cyan transition-colors duration-150 inline-flex items-center gap-1">
@@ -42,19 +40,35 @@ export function ProofWorkspaceSkeleton() {
               Logical Proof Canvas
             </h1>
             <p className="text-sm text-slate-400">
-              AST Natural Deduction & Distributed Systems Formal Invariant Workbench
+              AST Natural Deduction & Distributed Systems Formal Invariant
+              Workbench
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 text-slate-200 text-xs font-semibold">
+            <button
+              type="button"
+              disabled
+              aria-disabled="true"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 text-slate-200 text-xs font-semibold min-h-[48px] opacity-60 cursor-not-allowed"
+            >
               <IconLink className="w-4 h-4 text-brand-cyan" />
               Share
             </button>
-            <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-brand-purple/40 bg-brand-purple/10 text-brand-purple text-xs font-semibold">
+            <button
+              type="button"
+              disabled
+              aria-disabled="true"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-brand-purple/40 bg-brand-purple/10 text-brand-purple text-xs font-semibold min-h-[48px] opacity-60 cursor-not-allowed"
+            >
               <IconPlus className="w-4 h-4" />
               Custom Studio
             </button>
-            <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 text-slate-200 text-xs font-semibold">
+            <button
+              type="button"
+              disabled
+              aria-disabled="true"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 text-slate-200 text-xs font-semibold min-h-[48px] opacity-60 cursor-not-allowed"
+            >
               <IconDownload className="w-4 h-4" />
               Export
             </button>
@@ -65,7 +79,9 @@ export function ProofWorkspaceSkeleton() {
         {/* Curriculum Domain Carousel */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-mono uppercase tracking-wider text-slate-400">Curriculum Invariant Catalog</span>
+            <span className="text-xs font-mono uppercase tracking-wider text-slate-400">
+              Curriculum Invariant Catalog
+            </span>
             <span className="text-xs font-mono text-brand-cyan">
               Status: ⏳ IN PROGRESS
             </span>
@@ -117,11 +133,26 @@ export function ProofWorkspaceSkeleton() {
                 <div className="relative min-w-[760px] h-full flex items-center justify-center">
                   <svg className="absolute inset-0 w-full h-full pointer-events-none">
                     <defs>
-                      <pattern id="skeleton-grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                        <circle cx="2" cy="2" r="1" fill="#334155" opacity={0.15} />
+                      <pattern
+                        id="skeleton-grid"
+                        width="20"
+                        height="20"
+                        patternUnits="userSpaceOnUse"
+                      >
+                        <circle
+                          cx="2"
+                          cy="2"
+                          r="1"
+                          fill="#334155"
+                          opacity={0.15}
+                        />
                       </pattern>
                     </defs>
-                    <rect width="100%" height="100%" fill="url(#skeleton-grid)" />
+                    <rect
+                      width="100%"
+                      height="100%"
+                      fill="url(#skeleton-grid)"
+                    />
                   </svg>
                   <div className="text-slate-500 font-mono text-xs flex flex-col items-center gap-2">
                     <div className="w-6 h-6 border-2 border-slate-800 border-t-brand-cyan rounded-full animate-spin" />

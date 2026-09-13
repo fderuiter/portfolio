@@ -1,22 +1,19 @@
 import * as Sentry from "@sentry/nextjs";
+import {
+  isBenignClientNoise,
+  resolveTracesSampleRate,
+} from "@/lib/sentry-policy";
 
 Sentry.init({
-  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN || "https://dummy@o0.ingest.sentry.io/0",
-  tracesSampleRate: 1.0,
+  dsn:
+    process.env.NEXT_PUBLIC_SENTRY_DSN || "https://dummy@o0.ingest.sentry.io/0",
+  tracesSampleRate: resolveTracesSampleRate(),
   debug: false,
   sendDefaultPii: false,
   beforeSend(event, hint) {
-    const error = hint?.originalException;
-    if (error && (
-      (error instanceof Error && error.name === "GameEngineException") ||
-      (typeof error === "object" && (
-        ("name" in error && error.name === "GameEngineException") || 
-        error.constructor?.name === "GameEngineException"
-      ))
-    )) {
-      return null; // Discard simulated game engine exceptions globally
+    if (isBenignClientNoise(hint?.originalException)) {
+      return null;
     }
     return event;
   },
 });
-

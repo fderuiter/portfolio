@@ -2,7 +2,9 @@ import { Resend } from "resend";
 import crypto from "crypto";
 import * as Sentry from "@sentry/nextjs";
 import { env, getEnv } from "@/lib/env";
-import { prisma } from "@/lib/db";
+import { prisma, SuppressionReason, OutboundEmailStatus } from "@/lib/db";
+
+export type { SuppressionReason, OutboundEmailStatus };
 import { ContactSubmission, ResendWebhookEvent } from "@/lib/schemas";
 import {
   renderContactAdminEmail,
@@ -176,30 +178,67 @@ export class EmailService {
 
   /**
    * Records an email address in the suppression list.
+   *
+   * Deliberately lets a database failure propagate instead of swallowing it:
+   * the caller (`handleWebhookEvent`) depends on this rejecting so it can
+   * report the event as unhandled, which in turn makes the webhook route
+   * respond with a retryable non-2xx status instead of acknowledging a
+   * durable write that never happened. The upsert is idempotent by
+   * construction, so a retried delivery (or a partially-failed batch of
+   * recipients being reprocessed from the start) is always safe to replay.
    */
   static async recordSuppression(
     email: string,
-    reason: "BOUNCE" | "COMPLAINT" | "UNSUBSCRIBE"
+    reason: SuppressionReason
   ): Promise<void> {
-    try {
-      await prisma.suppressionList.upsert({
-        where: { email: email.toLowerCase().trim() },
-        create: { email: email.toLowerCase().trim(), reason },
-        update: { reason },
-      });
-    } catch (err) {
-      console.error(`Failed to record suppression for ${email}:`, err);
+    await prisma.suppressionList.upsert({
+      where: { email: email.toLowerCase().trim() },
+      create: { email: email.toLowerCase().trim(), reason },
+      update: { reason },
+    });
+  }
+
+  /**
+   * Reads a queued row's `tags` column back into structured tags.
+   *
+   * Accepts native JSON arrays and, for rows written before tags were stored
+   * natively, a JSON-encoded string. Anything unrecognizable yields undefined
+   * so a malformed column never reaches the provider.
+   */
+  private static parseQueuedTags(
+    raw: unknown
+  ): Array<{ name: string; value: string }> | undefined {
+    let value = raw;
+    if (typeof value === "string") {
+      try {
+        value = JSON.parse(value);
+      } catch {
+        return undefined;
+      }
     }
+    if (!Array.isArray(value)) return undefined;
+    const tags = value.filter(
+      (t): t is { name: string; value: string } =>
+        !!t &&
+        typeof t === "object" &&
+        typeof (t as { name?: unknown }).name === "string" &&
+        typeof (t as { value?: unknown }).value === "string"
+    );
+    return tags.length > 0 ? tags : undefined;
   }
 
   /**
    * Enqueues an email to the persistent OutboundEmailQueue table.
+   *
+   * Returns the durable queue id, or `null` when the row could not be
+   * persisted. A null result means the message is not queued and will not be
+   * retried; callers must not present it as accepted for delivery.
    */
   static async queueOutboundEmail(
     options: RawEmailOptions,
     fromAddress?: string,
     errorReason?: string
-  ): Promise<string> {
+  ): Promise<string | null> {
     const toAddress = Array.isArray(options.to)
       ? options.to.join(", ")
       : options.to;
@@ -219,7 +258,9 @@ export class EmailService {
           subject: options.subject,
           html: options.html,
           text: options.text,
-          tags: options.tags ? JSON.stringify(options.tags) : undefined,
+          // Jsonb column: persist the structured tags themselves. Stringifying
+          // here would store a string scalar that no longer round trips.
+          tags: options.tags ?? undefined,
           attempts: 1,
           status: "RETRYING",
           nextRetryAt,
@@ -228,8 +269,11 @@ export class EmailService {
       });
       return entry.id;
     } catch (err) {
+      // Nothing was persisted, so there is no retry and no queue id to hand
+      // back. Synthesizing one would read to every caller as a durable entry.
+      Sentry.captureException(err);
       console.error("Failed to enqueue outbound email to database:", err);
-      return `queued_fallback_${Date.now()}`;
+      return null;
     }
   }
 
@@ -253,7 +297,7 @@ export class EmailService {
       text: string | null;
       tags: unknown;
       attempts: number;
-      status: string;
+      status: OutboundEmailStatus;
       nextRetryAt: Date;
       lastError: string | null;
     }> = [];
@@ -286,6 +330,7 @@ export class EmailService {
         subject: item.subject,
         html: item.html,
         text: item.text || undefined,
+        tags: this.parseQueuedTags(item.tags),
         skipQueue: true,
       };
 
@@ -335,6 +380,7 @@ export class EmailService {
           subject: item.subject,
           html: item.html,
           text: item.text || undefined,
+          tags: rawOptions.tags,
         });
 
         if (error) {
@@ -412,6 +458,10 @@ export class EmailService {
 
   /**
    * Processes incoming Resend deliverability webhook event.
+   *
+   * `handled: false` signals a durable-processing failure (e.g. the
+   * suppression-list write threw) rather than a no-op event type; callers
+   * must treat that as retryable and must not acknowledge the delivery.
    */
   static async handleWebhookEvent(
     event: ResendWebhookEvent
@@ -504,11 +554,17 @@ export class EmailService {
             fromAddress,
             error.message
           );
+          if (queueId) {
+            return {
+              success: true,
+              queued: true,
+              queueId,
+              data: { id: queueId },
+            };
+          }
           return {
-            success: true,
-            queued: true,
-            queueId,
-            data: { id: queueId },
+            success: false,
+            error: `${error.message} (retry could not be queued; message not delivered)`,
           };
         }
 
@@ -536,11 +592,17 @@ export class EmailService {
           fromAddress,
           errorMessage
         );
+        if (queueId) {
+          return {
+            success: true,
+            queued: true,
+            queueId,
+            data: { id: queueId },
+          };
+        }
         return {
-          success: true,
-          queued: true,
-          queueId,
-          data: { id: queueId },
+          success: false,
+          error: `${errorMessage} (retry could not be queued; message not delivered)`,
         };
       }
 

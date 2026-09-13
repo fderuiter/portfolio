@@ -1,7 +1,9 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -38,7 +40,7 @@ describe("DeferredHydration & Structure-Matched Skeletons Suite", () => {
 
     // Check animate-pulse class is active for visual loading indicator
     expect(container.querySelector(".animate-pulse")).not.toBeNull();
-    
+
     // Check that grid containers and blocks exist
     expect(container.textContent).toBe(""); // should be empty of real text, just skeleton divs
     const divs = container.querySelectorAll("div");
@@ -58,7 +60,9 @@ describe("DeferredHydration & Structure-Matched Skeletons Suite", () => {
 
   it("DeferredHydration behaves correctly on the client mounting cycle", async () => {
     const TestComponent = () => (
-      <DeferredHydration fallback={<div data-testid="my-skeleton">Skeleton Active</div>}>
+      <DeferredHydration
+        fallback={<div data-testid="my-skeleton">Skeleton Active</div>}
+      >
         <div data-testid="my-content">Interactive Loaded Content</div>
       </DeferredHydration>
     );
@@ -67,18 +71,31 @@ describe("DeferredHydration & Structure-Matched Skeletons Suite", () => {
       root.render(<TestComponent />);
     });
 
-    // Initially, before mounting is complete, we should only see the fallback skeleton
-    expect(container.querySelector('[data-testid="my-skeleton"]')).not.toBeNull();
-    expect(container.querySelector('[data-testid="my-content"]')).toBeNull();
+    // Both the fallback and the real content are present from the very first render
+    // (server and client markup must match to avoid a hydration mismatch) -- only
+    // their visibility classes differ. Initially the skeleton is visible and the
+    // content is hidden.
+    const skeletonWrapper = container.querySelector(
+      '[data-testid="my-skeleton"]'
+    )?.parentElement;
+    const contentWrapper = container.querySelector(
+      '[data-testid="my-content"]'
+    )?.parentElement;
+    expect(skeletonWrapper).not.toBeNull();
+    expect(contentWrapper).not.toBeNull();
+    expect(contentWrapper?.className).toContain("opacity-0");
+    expect(skeletonWrapper?.className).toContain("opacity-100");
 
     // Advance timers so idle callback and mounting effects execute
     await act(async () => {
       vi.advanceTimersByTime(150);
     });
 
-    // After mounting, the skeleton should be unmounted/faded out, and interactive component active
-    expect(container.querySelector('[data-testid="my-skeleton"]')).toBeNull();
-    
+    // After mounting, the skeleton fades out (but stays structurally present) and
+    // the interactive content becomes visible.
+    expect(contentWrapper?.className).toContain("opacity-100");
+    expect(skeletonWrapper?.className).toContain("opacity-0");
+
     const content = container.querySelector('[data-testid="my-content"]');
     expect(content).not.toBeNull();
     expect(content?.textContent).toContain("Interactive Loaded Content");
@@ -98,7 +115,9 @@ describe("DeferredHydration & Structure-Matched Skeletons Suite", () => {
       // In a real server render, React renders components to string. We want to test that when window is undefined,
       // the server branch returns both the children (masked) and fallback (visible).
       const element = (
-        <DeferredHydration fallback={<div data-testid="server-skeleton">Skeleton HTML</div>}>
+        <DeferredHydration
+          fallback={<div data-testid="server-skeleton">Skeleton HTML</div>}
+        >
           <div data-testid="server-content">Heavy SEO Text Content</div>
         </DeferredHydration>
       );

@@ -205,4 +205,101 @@ describe("DiagnosticsDrawer & CDISC Conformance Studio Suite", () => {
 
     expect(onUpdateStudy).toHaveBeenCalled();
   });
+
+  it("surfaces a broken rule-reference (AST) diagnostic as a navigable finding, not just a count (#661)", async () => {
+    const studyWithBrokenRule: StudyProtocol = {
+      ...ONCOLOGY_RECIST_PRESET,
+      forms: [
+        {
+          id: "form_rules",
+          name: "Rule Test Form",
+          domain: "DM",
+          description: "Rules",
+          version: "1.0",
+          rules: [
+            {
+              id: "rule_1",
+              name: "Missing Trigger Rule",
+              description: "References a field that does not exist",
+              triggerFieldIds: ["does_not_exist_field"],
+              actionType: "show_field",
+              targetFieldId: "f_present",
+              conditions: [],
+              logicalOperator: "AND",
+            },
+          ],
+          sections: [
+            {
+              id: "sec_1",
+              title: "Test",
+              fields: [
+                {
+                  id: "f_present",
+                  variableName: "PRESENT",
+                  label: "Present Field",
+                  dataType: "text",
+                  columnSpan: 6,
+                  required: false,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      visits: [
+        {
+          id: "v1",
+          oid: "SE.V1",
+          name: "Visit 1",
+          visitType: "Scheduled",
+          targetDay: 0,
+          windowBefore: 0,
+          windowAfter: 0,
+          assignedFormIds: ["form_rules"],
+        },
+      ],
+    };
+
+    const onSelectForm = vi.fn();
+    const onClose = vi.fn();
+
+    await act(async () => {
+      root.render(
+        <DiagnosticsDrawer
+          isOpen={true}
+          study={studyWithBrokenRule}
+          onClose={onClose}
+          onSelectForm={onSelectForm}
+        />
+      );
+    });
+
+    // Before this fix, this AST diagnostic was only reflected in the header
+    // "All Issues" count; the finding list itself never rendered it, so
+    // there was nothing here to read or navigate to.
+    const messageEl = Array.from(container.querySelectorAll("p")).find((p) =>
+      p.textContent?.includes(
+        'Rule "Missing Trigger Rule" references non-existent trigger field "does_not_exist_field"'
+      )
+    );
+    expect(messageEl).toBeDefined();
+
+    // This minimal single-field "DM" domain form also trips the unrelated
+    // SD0002 (missing CDASH core variable) compliance violation, each with
+    // its own "Inspect Form" button, so scope the lookup to this finding's
+    // own row rather than any button with matching text on the page.
+    const findingRow = messageEl?.closest("div.space-y-2") as HTMLElement;
+    expect(findingRow).toBeTruthy();
+    const inspectBtn = Array.from(findingRow.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Inspect Form")
+    );
+    expect(inspectBtn).toBeDefined();
+
+    await act(async () => {
+      inspectBtn?.click();
+    });
+
+    expect(onSelectForm).toHaveBeenCalledWith("form_rules");
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
 });

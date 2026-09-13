@@ -1,6 +1,15 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useId, useMemo, useDeferredValue, useTransition, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useId,
+  useMemo,
+  useDeferredValue,
+  useTransition,
+  useCallback,
+} from "react";
 import { hexToRgba } from "@/lib/utils";
 import { designManifest } from "@/lib/design-manifest";
 import { motion, AnimatePresence } from "framer-motion";
@@ -54,7 +63,10 @@ interface CommandPaletteModalProps {
   studies: SearchCaseStudy[];
 }
 
-const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, studies }) => {
+const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
+  onClose,
+  studies,
+}) => {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [, startTransition] = useTransition();
@@ -71,7 +83,12 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
 
   const throttledPlayHover = useCallback(() => {
     const now = performance.now();
-    const isActEnv = typeof globalThis !== "undefined" && Boolean((globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT);
+    const isActEnv =
+      typeof globalThis !== "undefined" &&
+      Boolean(
+        (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT?: boolean })
+          .IS_REACT_ACT_ENVIRONMENT
+      );
     const throttleMs = isActEnv ? 0 : 50;
     if (now - lastAudioTimeRef.current >= throttleMs) {
       lastAudioTimeRef.current = now;
@@ -87,7 +104,12 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
       return;
     }
 
-    const isActEnv = typeof globalThis !== "undefined" && Boolean((globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT);
+    const isActEnv =
+      typeof globalThis !== "undefined" &&
+      Boolean(
+        (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT?: boolean })
+          .IS_REACT_ACT_ENVIRONMENT
+      );
     const timerMs = isActEnv ? 0 : 150;
 
     if (timerMs === 0) {
@@ -135,530 +157,720 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
     const staticNavs: PaletteItem[] = [
       {
         id: "nav-work",
-        title: "Work Showcase Feed",
-        subtitle: "Jump to Bento grid clinical & architectural case studies",
+        title: "Work",
+        subtitle:
+          "The problems, implementation choices, and lessons behind my clinical data tools, web apps, and side projects.",
         category: "navigation",
-        url: "/#case-studies",
+        url: "/case-studies",
         icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
         badge: "Showcase",
-        status: "Production Feed",
-        description: "Comprehensive portfolio showcase featuring interactive clinical systems, formal logic tools, arcade game engines, and full-stack architectural case studies.",
+        status: "Project Collection",
+        description:
+          "The problems, implementation choices, and lessons behind my clinical data tools, web apps, and side projects.",
         techStack: ["Next.js 16", "React 19", "Tailwind CSS", "TypeScript"],
         highlights: [
-          "Interactive bento-box case study grid",
+          "Project summaries and technical writeups",
           "Live telemetry event logging",
-          "Direct GitHub repository & demo links"
-        ]
+          "Direct GitHub repository & demo links",
+        ],
       },
       {
         id: "nav-about",
         title: "About Frederick (Bio & Timeline)",
-        subtitle: "Origin story, Mayo Clinic background, and problem-solving skills",
+        subtitle:
+          "Clinical research, Vikings training camp, ski patrol, and the route that brought me to building software.",
         category: "navigation",
         url: "/#about",
         icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
         badge: "Bio & Skills",
         status: "Origin Story",
-        description: "Personal origin story, Mayo Clinic operations background, interactive skills matrix, and career track record.",
-        techStack: ["TypeScript", "Mayo Clinic Operations", "Interactive Graphics", "Emergency Triage"],
+        description:
+          "Clinical research, Vikings training camp, ski patrol, and the route that brought me to building software.",
+        techStack: [
+          "TypeScript",
+          "Mayo Clinic Operations",
+          "Interactive Graphics",
+          "Emergency Triage",
+        ],
         highlights: [
           "Interactive skills matrix with audio feedback",
           "Mayo Clinic operations & research track record",
-          "Authentic career timeline & stories"
-        ]
+          "Authentic career timeline & stories",
+        ],
       },
       {
         id: "nav-contact",
-        title: "Contact & Direct Inquiries",
-        subtitle: "Send a direct message, consulting inquiry, or systems collaboration",
+        title: "Contact",
+        subtitle:
+          "Have a project, a role, or a question in mind? Send me a note or find a time to talk.",
         category: "navigation",
         url: "/contact",
         icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
         badge: "Direct Inquiries",
-        status: "Relay Active",
-        description: "Secure, rate-limited direct messaging channel for systems architecture inquiries, consulting, and collaboration.",
-        techStack: ["Next.js 16", "Resend API", "Zod", "Rate Limiting", "Honeypot"],
+        status: "Contact Form",
+        description:
+          "Have a project, a role, or a question in mind? Send me a note or find a time to talk.",
+        techStack: [
+          "Next.js 16",
+          "Resend API",
+          "Zod",
+          "Rate Limiting",
+          "Honeypot",
+        ],
         highlights: [
-          "Encrypted transactional relay dispatch",
+          "Messages delivered to my inbox",
           "Automated instant confirmation receipt",
-          "Zero-friction bot and spam protection"
-        ]
+          "Spam protection",
+        ],
       },
       {
         id: "nav-arcade",
-        title: "Arcade Games Hub",
-        subtitle: "Launch interactive games, physics engines, and systems simulators",
+        title: "Arcade",
+        subtitle:
+          "A laser loon, a demanding puppy, logic puzzles, and a watch with very little memory. Try my browser games.",
         category: "navigation",
         url: "/arcade",
         icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />,
         badge: "Arcade Hub",
         status: "Interactive 60 FPS",
-        description: "Suite of playable 2D/3D browser games and systems engineering simulators built on bare-metal HTML5 Canvas and Web Audio APIs.",
-        techStack: ["Canvas 2D", "Web Audio API", "Framer Motion", "Physics Engine"],
+        description:
+          "A laser loon, a demanding puppy, logic puzzles, and a watch with very little memory. Try my browser games.",
+        techStack: [
+          "Canvas 2D",
+          "Web Audio API",
+          "Framer Motion",
+          "Physics Engine",
+        ],
         highlights: [
           "Zero-dependency custom physics engines",
           "Synthesized 8-bit & retro audio chips",
-          "Virtual D-Pad touch controls on mobile"
-        ]
-      },
-      {
-        id: "nav-case-studies",
-        title: "Engineering Case Studies Hub",
-        subtitle: "Full Bento showcase of clinical data & architectural systems",
-        category: "navigation",
-        url: "/case-studies",
-        icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
-        badge: "Case Studies",
-        status: "Interactive Showcase",
-        description: "Comprehensive portfolio showcase featuring interactive clinical systems, formal logic tools, live telemetry feeds, and full-stack architectural case studies.",
-        techStack: ["Next.js 16", "React 19", "Tailwind CSS", "TypeScript"],
-        highlights: [
-          "Interactive bento-box case study grid",
-          "Live telemetry and commit logs",
-          "Deep architectural retrospectives"
-        ]
+          "Virtual D-Pad touch controls on mobile",
+        ],
       },
       {
         id: "nav-newsletter",
-        title: "Systems Dispatch Newsletter",
-        subtitle: "Subscribe to engineering retrospectives, AST logic, and browser physics",
+        title: "Project Notes Newsletter",
+        subtitle:
+          "Have a project, a role, or a question in mind? Send me a note or find a time to talk.",
         category: "navigation",
         url: "/contact",
         icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
         badge: "Newsletter",
         status: "Bi-Weekly",
-        description: "High-density technical dispatches covering formal verification, CDISC clinical data systems, and bare-metal browser physics.",
-        techStack: ["Resend API", "Next.js 16", "TypeScript", "Transactional Email"],
+        description:
+          "Have a project, a role, or a question in mind? Send me a note or find a time to talk.",
+        techStack: [
+          "Resend API",
+          "Next.js 16",
+          "TypeScript",
+          "Transactional Email",
+        ],
         highlights: [
           "Formal verification & logic AST case studies",
           "Clinical EDC & CDISC architectural breakdowns",
-          "Zero tracking beacons and zero spam"
-        ]
+          "Occasional project updates",
+        ],
       },
       {
         id: "nav-oxidizemath",
         title: "OxidizeMath: Verified Numerical Framework in Rust",
-        subtitle: "Deep-dive technical case study — proc-macro verification, double-buffer PDEs & egui WASM",
+        subtitle:
+          "A Rust scientific computing framework exploring numerical solvers, compile-time checks, and interactive simulations. The aim is to keep the mathematical model and the code that runs it close together.",
         category: "navigation",
         url: "/case-studies/oxidizemath",
         icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
         badge: "Case Study",
         status: "Rust / WASM",
-        description: "Unified, memory-safe computation framework in Rust spanning pure math, medical physics, biology, and ML domains.",
-        techStack: ["Rust", "WebAssembly", "egui", "Formal Verification", "PDE Solver"],
+        description:
+          "A Rust scientific computing framework exploring numerical solvers, compile-time checks, and interactive simulations. The aim is to keep the mathematical model and the code that runs it close together.",
+        techStack: [
+          "Rust",
+          "WebAssembly",
+          "egui",
+          "Formal Verification",
+          "PDE Solver",
+        ],
         highlights: [
           "10+ crate domain monorepo architecture",
           "Compile-time LaTeX proc-macro verification",
-          "Zero-copy double-buffered state execution"
-        ]
+          "Zero-copy double-buffered state execution",
+        ],
       },
       {
         id: "nav-sonos-network-controller",
         title: "Sonos Network Controller: Technical Breakdown & Architecture",
-        subtitle: "Deep-dive technical case study — async UPnP/SOAP protocol client, FastAPI, HTMX & local LAN orchestration",
+        subtitle:
+          "A local Sonos controller built with Python, FastAPI, and HTMX. It talks to speakers over UPnP/SOAP and exposes a REST API for playback control on your own network.",
         category: "navigation",
         url: "/case-studies/sonos-network-controller",
         icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
         badge: "Case Study",
         status: "Python / IoT",
-        description: "Lightweight local-network control plane and REST API for Sonos speakers bypassing cloud dependencies in favor of direct async UPnP/SOAP orchestration.",
-        techStack: ["Python", "FastAPI", "AsyncIO", "UPnP/SOAP", "HTMX", "TailwindCSS"],
+        description:
+          "A local Sonos controller built with Python, FastAPI, and HTMX. It talks to speakers over UPnP/SOAP and exposes a REST API for playback control on your own network.",
+        techStack: [
+          "Python",
+          "FastAPI",
+          "AsyncIO",
+          "UPnP/SOAP",
+          "HTMX",
+          "TailwindCSS",
+        ],
         highlights: [
           "Sub-10ms route dispatch latency using FastAPI and async I/O",
           "10s TTL SSDP multicast memoization cache eliminating socket exhaustion",
-          "Hypermedia-driven HTMX single-page architecture for low-power edge hosting"
-        ]
+          "Hypermedia-driven HTMX single-page architecture for low-power edge hosting",
+        ],
       },
       {
         id: "nav-clintrials",
-        title: "clintrials: Adaptive Clinical Trial Design & WebAssembly Engine",
-        subtitle: "Deep-dive technical case study — Pyodide WASM workers, CRM Bayesian escalation & accrual solvers",
+        title:
+          "clintrials: Adaptive Clinical Trial Design & WebAssembly Engine",
+        subtitle:
+          "A browser-based workspace for comparing adaptive clinical trial designs. Pyodide workers run models including CRM, EffTox, group sequential designs, and win ratio analyses.",
         category: "navigation",
         url: "/case-studies/clintrials",
         icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
         badge: "Case Study",
         status: "Python / WASM",
-        description: "Adaptive clinical trial simulation framework powered by Pyodide WebAssembly workers running CRM, EffTox, and Win Ratio models directly in-browser.",
-        techStack: ["Python", "Pyodide", "WebAssembly", "Biostatistics", "Service Worker"],
+        description:
+          "A browser-based workspace for comparing adaptive clinical trial designs. Pyodide workers run models including CRM, EffTox, group sequential designs, and win ratio analyses.",
+        techStack: [
+          "Python",
+          "Pyodide",
+          "WebAssembly",
+          "Biostatistics",
+          "Service Worker",
+        ],
         highlights: [
           "Zero backend infrastructure costs via Web Workers",
           "Deterministic numerical parity with CPython",
-          "Bayesian CRM & EffTox dose finding algorithms"
-        ]
+          "Bayesian CRM & EffTox dose finding algorithms",
+        ],
       },
       {
         id: "nav-equipose-randomization",
-        title: "Equipose Randomization: Technical Breakdown & Portfolio Integration",
-        subtitle: "Deep-dive technical case study — MT19937 transpiler, Pocock-Simon minimization & zero-exfiltration Web Workers",
+        title:
+          "Equipose Randomization: Technical Breakdown & Portfolio Integration",
+        subtitle:
+          "A browser-based tool for clinical trial allocation. It uses Mersenne Twister (MT19937) and generates code for Python, R, SAS, and Stata, making it easier to inspect and reproduce a randomization.",
         category: "navigation",
         url: "/case-studies/equipose-randomization",
         icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
         badge: "Case Study",
         status: "Angular / TS",
-        description: "Fully client-side clinical trial randomization engine with cross-runtime deterministic MT19937 PRNG parity across Python, R, SAS, and Stata.",
-        techStack: ["Angular", "TypeScript", "Web Workers", "CDISC ADaM-Lite", "Transpiler"],
+        description:
+          "A browser-based tool for clinical trial allocation. It uses Mersenne Twister (MT19937) and generates code for Python, R, SAS, and Stata, making it easier to inspect and reproduce a randomization.",
+        techStack: [
+          "Angular",
+          "TypeScript",
+          "Web Workers",
+          "CDISC ADaM-Lite",
+          "Transpiler",
+        ],
         highlights: [
           "Sub-10ms in-browser statistical code transpilation",
           "Zero PHI data exfiltration via Web Workers",
-          "Pocock-Simon covariate adaptive minimization"
-        ]
+          "Pocock-Simon covariate adaptive minimization",
+        ],
       },
       {
         id: "nav-lambda-wave",
         title: "Lambda-Wave: Real-Time SGRT FMCW Radar System",
-        subtitle: "Deep-dive technical case study — Haskell DSP core, lock-free C++ ring buffers & IEC 62304 Class C safety watchdog",
+        subtitle:
+          "An FMCW radar project exploring respiratory motion tracking for Surface Guided Radiation Therapy. Haskell handles signal processing; C++ ring buffers move samples between stages.",
         category: "navigation",
         url: "/case-studies/lambda-wave",
         icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
         badge: "Case Study",
         status: "Haskell / C++",
-        description: "Safety-critical FMCW mmWave radar processing pipeline for Surface Guided Radiation Therapy (SGRT) with lock-free C++ ring buffer bridge and Dear ImGui HUD.",
-        techStack: ["Haskell", "C++", "OpenGL", "DSP", "IEC 62304", "Real-Time Systems"],
+        description:
+          "An FMCW radar project exploring respiratory motion tracking for Surface Guided Radiation Therapy. Haskell handles signal processing; C++ ring buffers move samples between stages.",
+        techStack: [
+          "Haskell",
+          "C++",
+          "OpenGL",
+          "DSP",
+          "IEC 62304",
+          "Real-Time Systems",
+        ],
         highlights: [
           "Sub-10ms end-to-end processing & respiratory gating latency",
           "Lock-free C++ circular ring buffer zero-copy FFI bridge",
-          "Safety-critical watchdog interlock meeting IEC 62304 Class C"
-        ]
+          "Safety-critical watchdog interlock meeting IEC 62304 Class C",
+        ],
       },
       {
         id: "nav-duckdeploy",
         title: "DuckDeploy: Schema-Driven Dynamic UI Engine",
-        subtitle: "Deep-dive technical case study — Web Worker manifest compiler, polymorphic form state & zero-eval JSON Schema",
+        subtitle:
+          "A TypeScript tool that turns JSON Schema into configuration forms, then compiles their values into Kubernetes, Helm, or Cloud Run manifests. Web Workers keep compilation off the UI thread.",
         category: "navigation",
         url: "/case-studies/duckdeploy",
         icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
         badge: "Case Study",
         status: "TypeScript / UI",
-        description: "Schema-driven dynamic UI synthesis engine compiling JSON Schema Draft-07 manifests into reactive, polymorphic form state via Web Workers.",
-        techStack: ["TypeScript", "React 19", "Web Workers", "JSON Schema", "Zod", "State Machine"],
+        description:
+          "A TypeScript tool that turns JSON Schema into configuration forms, then compiles their values into Kubernetes, Helm, or Cloud Run manifests. Web Workers keep compilation off the UI thread.",
+        techStack: [
+          "TypeScript",
+          "React 19",
+          "Web Workers",
+          "JSON Schema",
+          "Zod",
+          "State Machine",
+        ],
         highlights: [
           "Sub-5ms Web Worker JSON Schema manifest compilation",
           "Zero-eval polymorphic form state synthesizer",
-          "AST-level schema dependency resolution"
-        ]
+          "AST-level schema dependency resolution",
+        ],
       },
       {
         id: "nav-cardiac-risk-modeling",
         title: "Predictive Cardiac Risk Modeling Pipeline",
-        subtitle: "Deep-dive technical case study — clinical tabular ML, adversarial validation & leak-free Stratified OOF",
+        subtitle:
+          "A Python cardiac risk modeling project using XGBoost, LightGBM, calibration, and SHAP explanations. The writeup examines data leakage, distribution shift, and how to evaluate the predictions.",
         category: "navigation",
         url: "/case-studies/cardiac-risk-modeling",
         icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
         badge: "Case Study",
         status: "Python / ML",
-        description: "High-assurance clinical tabular ML pipeline with adversarial validation, leak-free Stratified Out-of-Fold cross-validation, and calibrated risk scoring.",
-        techStack: ["Python", "LightGBM", "Scikit-Learn", "SHAP", "Adversarial Validation", "ROC-AUC"],
+        description:
+          "A Python cardiac risk modeling project using XGBoost, LightGBM, calibration, and SHAP explanations. The writeup examines data leakage, distribution shift, and how to evaluate the predictions.",
+        techStack: [
+          "Python",
+          "LightGBM",
+          "Scikit-Learn",
+          "SHAP",
+          "Adversarial Validation",
+          "ROC-AUC",
+        ],
         highlights: [
           "Adversarial validation detecting covariate distribution drift",
           "Leak-free 5-fold Stratified OOF ensemble architecture",
-          "Brier-calibrated probabilistic clinical risk outputs"
-        ]
+          "Brier-calibrated probabilistic clinical risk outputs",
+        ],
       },
       {
         id: "nav-4glory",
         title: "4Glory | Does Fred Know Ball?: Sports Analytics Engine",
-        subtitle: "Deep-dive technical case study — real-time sports analytics, data pipeline & interactive evaluation engine",
+        subtitle:
+          "A Python basketball prediction project that compares my basketball judgment with XGBoost models across NBA seasons. Includes rolling features, walk-forward validation, and SHAP analysis. Confidence is easy; checking it takes a dataset.",
         category: "navigation",
         url: "/case-studies/4glory",
         icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
         badge: "Case Study",
         status: "Full Stack / Analytics",
-        description: "Real-time sports prediction and evaluation engine computing play-by-play Expected Points Added (EPA), Win Probability, and Monte Carlo season projections.",
-        techStack: ["TypeScript", "Python", "Monte Carlo", "EPA Modeling", "Next.js 16", "TailwindCSS"],
+        description:
+          "A Python basketball prediction project that compares my basketball judgment with XGBoost models across NBA seasons. Includes rolling features, walk-forward validation, and SHAP analysis. Confidence is easy; checking it takes a dataset.",
+        techStack: [
+          "TypeScript",
+          "Python",
+          "Monte Carlo",
+          "EPA Modeling",
+          "Next.js 16",
+          "TailwindCSS",
+        ],
         highlights: [
           "Sub-15ms real-time EPA and win probability evaluation",
           "10,000-run vectorized Monte Carlo tournament simulator",
-          "Interactive prediction calibration ledger"
-        ]
+          "Interactive prediction calibration ledger",
+        ],
       },
       {
         id: "nav-crf-xl",
         title: "CRF.xl: Spreadsheet-to-CDISC CRF Compiler",
-        subtitle: "Deep-dive technical case study — spreadsheet-to-CDISC compiler, AST calculation engine & ODM-XML export",
+        subtitle:
+          "An Excel add-in that turns protocol spreadsheets into CDISC CDASH forms and ODM-XML exports. It checks rule dependencies and runs compilation in background workers so the workbook stays usable.",
         category: "navigation",
         url: "/case-studies/crf-xl",
         icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
         badge: "Case Study",
         status: "CDISC / Compiler",
-        description: "High-throughput spreadsheet compiler converting clinical protocol workbooks into compliant CDISC CDASH CRFs, ODM-XML definitions, and AST edit check rules.",
-        techStack: ["TypeScript", "CDISC CDASH", "ODM-XML", "AST Engine", "Excel Parser", "21 CFR Part 11"],
+        description:
+          "An Excel add-in that turns protocol spreadsheets into CDISC CDASH forms and ODM-XML exports. It checks rule dependencies and runs compilation in background workers so the workbook stays usable.",
+        techStack: [
+          "TypeScript",
+          "CDISC CDASH",
+          "ODM-XML",
+          "AST Engine",
+          "Excel Parser",
+          "21 CFR Part 11",
+        ],
         highlights: [
           "Zero-dependency Excel AST formula transpiler",
           "Automated CDISC CDASH 2.2 variable mapping linter",
-          "Deterministic ODM-XML v1.3.2 export generator"
-        ]
+          "Deterministic ODM-XML v1.3.2 export generator",
+        ],
       },
       {
         id: "nav-promptops",
         title: "PromptOps: LLM Prompt Orchestration & Eval Engine",
-        subtitle: "Deep-dive technical case study — prompt orchestration, CI/CD evaluation pipelines & semantic versioning",
+        subtitle:
+          "A TypeScript toolkit for versioning prompts, validating output with Zod, and running regression evaluations in CI. A prompt change should come with a way to check what changed in the results.",
         category: "navigation",
         url: "/case-studies/promptops",
         icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
         badge: "Case Study",
         status: "LLM / DevOps",
-        description: "Production LLM prompt orchestration framework featuring deterministic evaluation gates, semantic versioning, prompt drift detection, and automated regression testing.",
-        techStack: ["TypeScript", "Python", "LLM Evals", "SemVer", "RAG", "CI/CD Pipeline"],
+        description:
+          "A TypeScript toolkit for versioning prompts, validating output with Zod, and running regression evaluations in CI. A prompt change should come with a way to check what changed in the results.",
+        techStack: [
+          "TypeScript",
+          "Python",
+          "LLM Evals",
+          "SemVer",
+          "RAG",
+          "CI/CD Pipeline",
+        ],
         highlights: [
           "Automated prompt drift and regression test harness",
           "Semantic versioning and schema lock for LLM prompts",
-          "Zero-cost local deterministic evaluation mock suites"
-        ]
+          "Zero-cost local deterministic evaluation mock suites",
+        ],
       },
       {
         id: "nav-laser-loon",
         title: "Laser Loon: Quest for the State Flag",
-        subtitle: "Playable civic physics shooter — pilot F277 Laser Loon on the Road to the Capitol",
+        subtitle:
+          "Fly toward the Minnesota State Capitol, battle rival flags, and blast through red tape in this browser arcade game.",
         category: "navigation",
         url: "/arcade/laser-loon",
         icon: <IconTerminal className="w-4 h-4 text-red-400" />,
         badge: "Physics Shooter",
         status: "60 FPS Arcade",
-        description: "Action physics shooter featuring trajectory raycasting, multi-tiered enemy waves, particle explosions, and synthesized chiptune audio.",
-        techStack: ["Canvas 2D", "Vector Physics", "Web Audio API", "Particle Systems"],
+        description:
+          "Fly toward the Minnesota State Capitol, battle rival flags, and blast through red tape in this browser arcade game.",
+        techStack: [
+          "Canvas 2D",
+          "Vector Physics",
+          "Web Audio API",
+          "Particle Systems",
+        ],
         highlights: [
           "High-performance 60 FPS particle engine",
           "Multi-stage boss battle mechanics",
-          "Accessible keyboard & virtual D-Pad controls"
-        ]
+          "Accessible keyboard & virtual D-Pad controls",
+        ],
       },
       {
         id: "nav-laser-loon-cs",
         title: "The Laser Loon: Graphic Design Case Study & Open Asset Hub",
-        subtitle: "Vector illustration case study, side-by-side pass comparison, and open asset downloads",
+        subtitle:
+          "Meet my Minnesota flag submission and download the loon, lasers included, in print and web formats.",
         category: "navigation",
         url: "/work/laser-loon",
         icon: <IconDirections className="w-4 h-4 text-amber-400" />,
         badge: "Graphic Design",
         status: "Vector Assets",
-        description: "Production-grade graphic design case study and open vector asset distribution hub (.ai, .eps, .pdf, .svg, .psd, .png, .jpg).",
-        techStack: ["Graphic Design", "Adobe Illustrator", "Adobe Photoshop", "Vector Optics", "CC BY 4.0"],
+        description:
+          "Meet my Minnesota flag submission and download the loon, lasers included, in print and web formats.",
+        techStack: [
+          "Graphic Design",
+          "Adobe Illustrator",
+          "Adobe Photoshop",
+          "Vector Optics",
+          "CC BY 4.0",
+        ],
         highlights: [
           "Side-by-side vector pass comparison viewer",
           "7 production file classifications + 1-click ZIP archive",
-          "Creative Commons CC BY 4.0 open source license"
-        ]
+          "Creative Commons CC BY 4.0 open source license",
+        ],
       },
       {
         id: "nav-quasi-puzzler",
         title: "Quasi-Perfect Puzzler",
-        subtitle: "Formal-methods arcade scaffold — tactics, proof goals, and simulated Lean RAM",
+        subtitle:
+          "Apply tactics to a proof tree in this Lean-inspired puzzle game. Complete the proof before your simulated memory runs out.",
         category: "navigation",
         url: "/arcade/quasi-puzzler",
         icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />,
         badge: "Logic Puzzler",
         status: "Formal Tactics",
-        description: "Gamified formal verification scaffold teaching tactic discharge, lemma substitution, and simulated Lean RAM memory management.",
-        techStack: ["Lean 4 Grammar", "AST Validator", "State Machine", "Canvas 2D"],
+        description:
+          "Apply tactics to a proof tree in this Lean-inspired puzzle game. Complete the proof before your simulated memory runs out.",
+        techStack: [
+          "Lean 4 Grammar",
+          "AST Validator",
+          "State Machine",
+          "Canvas 2D",
+        ],
         highlights: [
           "Simulated theorem goal discharges",
           "Bounded RAM consumption constraints",
-          "Interactive theorem tree visualizer"
-        ]
+          "Interactive theorem tree visualizer",
+        ],
       },
       {
         id: "nav-clinical-chaos",
         title: "Clinical Trial Chaos: CDISC Compliance Arcade",
-        subtitle: "Fast-paced CDISC mapping & 21 CFR Part 11 electronic signature compliance arcade under FDA auditor pressure",
+        subtitle:
+          "Sort clinical data, fix entries, and sign submissions against the clock in this clinical research arcade game.",
         category: "navigation",
         url: "/arcade/clinical-chaos",
         icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />,
         badge: "Regulatory Arcade",
         status: "Audit Simulation",
-        description: "Fast-paced clinical data management arcade simulating high-pressure FDA audit inspections, CDASH mapping, and e-signature locks.",
-        techStack: ["CDASH Standards", "21 CFR Part 11", "Canvas 2D", "Timer Engine"],
+        description:
+          "Sort clinical data, fix entries, and sign submissions against the clock in this clinical research arcade game.",
+        techStack: [
+          "CDASH Standards",
+          "21 CFR Part 11",
+          "Canvas 2D",
+          "Timer Engine",
+        ],
         highlights: [
           "Real-time CDASH domain variable mapping",
           "Discrepancy query resolution clock",
-          "Audit trail integrity scoring"
-        ]
+          "Audit trail integrity scoring",
+        ],
       },
       {
         id: "nav-garmin-watch",
         title: "Monkey C Mayhem: Garmin Schvitz App",
-        subtitle: "Retro smartwatch engineering game — survive strict 32KB RAM, GC freezes, and thermal overheating in Monkey C Mayhem (Garmin Schvitz App)",
+        subtitle:
+          "Dodge obstacles, clear memory, and wipe the fog from a simulated smartwatch with a 32KB budget.",
         category: "navigation",
         url: "/arcade/garmin-watch",
         icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />,
         badge: "Monkey C Mayhem",
         status: "Garmin Schvitz App",
-        description: "Constrained embedded systems runner simulating Connect IQ Monkey C memory allocators in Monkey C Mayhem (Garmin Schvitz App), mark-sweep garbage collection, and thermal throttling.",
-        techStack: ["Connect IQ Specs", "Memory Profiler", "GC Simulator", "Canvas 2D"],
+        description:
+          "Dodge obstacles, clear memory, and wipe the fog from a simulated smartwatch with a 32KB budget.",
+        techStack: [
+          "Connect IQ Specs",
+          "Memory Profiler",
+          "GC Simulator",
+          "Canvas 2D",
+        ],
         highlights: [
           "32KB hard heap budget simulation",
           "Mark-and-sweep GC freeze penalties",
-          "Thermal envelope clock management"
-        ]
+          "Thermal envelope clock management",
+        ],
       },
       {
         id: "nav-working-with-duck",
         title: "Working With Duck: Pet Simulation Arcade",
-        subtitle: "Multitasking & puppy management game — balance coding deadlines against Duck's zoomies, potty breaks, and belly rubs",
+        subtitle:
+          "You have a deadline. Duck has a ball. Keep the project and the puppy happy in this browser game.",
         category: "navigation",
         url: "/arcade/working-with-duck",
         icon: <IconTerminal className="w-4 h-4 text-amber-400" />,
         badge: "Pet Simulation",
         status: "Puppy AI Active",
-        description: "Whimsical multitasking simulator balancing software release deadlines with duck-tolling retriever puppy needs and chaotic zoomies.",
-        techStack: ["Behavior Tree AI", "State Machine", "Web Audio API", "Canvas 2D"],
+        description:
+          "You have a deadline. Duck has a ball. Keep the project and the puppy happy in this browser game.",
+        techStack: [
+          "Behavior Tree AI",
+          "State Machine",
+          "Web Audio API",
+          "Canvas 2D",
+        ],
         highlights: [
           "Autonomous puppy mood & energy engine",
           "Simulated sprint deadline crunch",
-          "Interactive belly rub & treat triggers"
-        ]
+          "Interactive belly rub & treat triggers",
+        ],
       },
       {
         id: "nav-retro-labyrinth",
         title: "Retro Labyrinth: Graveyard Roguelike",
-        subtitle: "Roguelike dungeon crawler exploring abandoned repos — TSP dynamic walls, 3D wireframe boss, and developer weapons",
+        subtitle:
+          "Explore an abandoned codebase as a shifting dungeon. Fight bugs, navigate moving walls, and face a wireframe boss.",
         category: "navigation",
         url: "/arcade/retro-labyrinth",
         icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />,
         badge: "Dungeon Roguelike",
         status: "Procedural Maze",
-        description: "Procedural retro roguelike exploring graveyard codebases with traveling salesperson wall generation, raycast lighting, and 3D wireframes.",
-        techStack: ["TSP Algorithms", "Raycasting 3D", "Procedural Generation", "Canvas 2D"],
+        description:
+          "Explore an abandoned codebase as a shifting dungeon. Fight bugs, navigate moving walls, and face a wireframe boss.",
+        techStack: [
+          "TSP Algorithms",
+          "Raycasting 3D",
+          "Procedural Generation",
+          "Canvas 2D",
+        ],
         highlights: [
           "Dynamic graph-based maze generation",
           "Wireframe 3D vector boss rendering",
-          "CRT phosphor scanline post-processing"
-        ]
+          "CRT phosphor scanline post-processing",
+        ],
       },
       {
         id: "nav-proof",
         title: "Logical Proof Workspace",
-        subtitle: "Construct and verify logic graphs using fully accessible CLI terminal",
+        subtitle:
+          "Build a proof one step at a time. Connect premises, try inference rules, and inspect where an argument goes wrong.",
         category: "navigation",
         url: "/proof",
         icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />,
         badge: "Formal Verification",
         status: "Theorem Engine",
-        description: "High-assurance formal logic studio for proving distributed systems invariants, checking fallacy ASTs, and exporting Lean 4 proofs.",
+        description:
+          "Build a proof one step at a time. Connect premises, try inference rules, and inspect where an argument goes wrong.",
         techStack: ["Lean 4", "Propositional AST", "DAG Engine", "Web Workers"],
         highlights: [
           "AST-level Fallacy counterexample engine",
           "Distributed consensus theorem templates",
-          "Multi-format Lean 4 & LaTeX export"
-        ]
+          "Multi-format Lean 4 & LaTeX export",
+        ],
       },
       {
         id: "nav-neuro",
         title: "NeuroRecon: FreeSurfer Pipeline Simulator",
-        subtitle: "Interactive neuroimaging CAD workspace — repair 3D cortical surfaces, control points & 2D MRI slices",
+        subtitle:
+          "Explore brain surfaces and MRI slices, place control points, and work through simulated reconstruction problems.",
         category: "navigation",
         url: "/neuro",
         icon: <IconBrain className="w-4 h-4 text-brand-cyan" />,
         badge: "Neuroimaging CAD",
         status: "WebGL 3D Active",
-        description: "Multi-planar MRI volumetric viewer and 3D cortical mesh reconstruction simulator with real-time pial/white-matter boundary editing.",
+        description:
+          "Explore brain surfaces and MRI slices, place control points, and work through simulated reconstruction problems.",
         techStack: ["Three.js", "WebGL 2", "Marching Cubes", "Medical Imaging"],
         highlights: [
           "Coronal, Sagittal, and Axial slice views",
           "Automated 3D surface mesh generation",
-          "Context loss auto-recovery handler"
-        ]
+          "Context loss auto-recovery handler",
+        ],
       },
       {
         id: "nav-crf",
         title: "CRF Studio: Clinical Form & Protocol Designer",
-        subtitle: "Zero-latency 12-column visual CRF builder, AST edit check logic, CDISC CDASH/ODM-XML, and live Part 11 EDC simulator",
+        subtitle:
+          "Build clinical research forms, add validation rules, and try them with sample data in a browser-based study designer.",
         category: "navigation",
         url: "/crf",
         icon: <IconFileSpreadsheet className="w-4 h-4 text-brand-cyan" />,
         badge: "Clinical Data Suite",
         status: "21 CFR Part 11",
-        description: "Zero-latency visual CRF designer, AST edit check engine, NCI Thesaurus terminology mapper, and full 21 CFR Part 11 EDC simulation.",
-        techStack: ["CDISC ODM-XML", "NCI Thesaurus", "Zero-Eval AST", "FHIR SDC"],
+        description:
+          "Build clinical research forms, add validation rules, and try them with sample data in a browser-based study designer.",
+        techStack: [
+          "CDISC ODM-XML",
+          "NCI Thesaurus",
+          "Zero-Eval AST",
+          "FHIR SDC",
+        ],
         highlights: [
           "12-column clinical grid & visit schedule",
           "Automated CDASH regulatory remediation",
-          "Multi-role simulated investigator sign-off"
-        ]
+          "Multi-role simulated investigator sign-off",
+        ],
       },
       {
         id: "nav-stack",
         title: "Under the Hood: Architecture & Stack Overview",
-        subtitle: "Interactive architecture colophon, layout physics benchmark, Web Audio synthesizer & 12 quality invariants",
+        subtitle:
+          "See how this site works: text layout, browser audio, the application stack, and the checks I use while building it.",
         category: "navigation",
         url: "/stack",
         icon: <IconCpu className="w-4 h-4 text-brand-cyan" />,
         badge: "Architecture",
         status: "Live Blueprint",
-        description: "Interactive architecture colophon & live telemetry breakdown showcasing Next.js 16, @chenglou/pretext layout physics, procedural Web Audio, and 12 engineering invariants.",
-        techStack: ["Next.js 16", "Pretext Canvas", "Web Audio API", "Prisma 7", "Vitest"],
+        description:
+          "See how this site works: text layout, browser audio, the application stack, and the checks I use while building it.",
+        techStack: [
+          "Next.js 16",
+          "Pretext Canvas",
+          "Web Audio API",
+          "Prisma 7",
+          "Vitest",
+        ],
         highlights: [
           "Real-time Pretext vs DOM reflow benchmark",
           "Zero-asset procedural audio soundboard",
-          "12 verified architectural quality invariants"
-        ]
+          "12 verified architectural quality invariants",
+        ],
       },
       {
         id: "nav-simulator",
         title: "Engineering Alignment Simulator",
-        subtitle: "Incident triage, architecture dilemmas, and candidate compatibility arcade",
+        subtitle:
+          "Work through a few engineering decisions, from interface priorities to an outage. Compare what your choices emphasize.",
         category: "navigation",
         url: "/simulator",
         icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
         badge: "Systems Simulator",
         status: "Incident Triage",
-        description: "Interactive architecture triage game exploring distributed system trade-offs, outage root causes, and engineering leadership decisions.",
-        techStack: ["State Machine", "Decision Trees", "Telemetry Hooks", "Framer Motion"],
+        description:
+          "Work through a few engineering decisions, from interface priorities to an outage. Compare what your choices emphasize.",
+        techStack: [
+          "State Machine",
+          "Decision Trees",
+          "Telemetry Hooks",
+          "Framer Motion",
+        ],
         highlights: [
           "Live incident triage scenarios",
           "Candidate alignment benchmark scoring",
-          "Detailed post-mortem decision reports"
-        ]
+          "Detailed post-mortem decision reports",
+        ],
       },
       {
         id: "nav-schedule",
         title: "Say Hi / Book a Chat",
-        subtitle: "Book a friendly 30-minute sync to chat about code, projects, or ideas",
+        subtitle:
+          "Find a time to talk about a project, ask a question, or introduce yourself. Book a 30-minute Google Meet call.",
         category: "navigation",
         url: "/schedule",
         icon: <IconCalendar className="w-4 h-4 text-brand-cyan" />,
         badge: "Sync Scheduler",
         status: "Live Calendar",
-        description: "Frictionless calendar booking for 30-minute technical chats, architecture brainstorms, or informal introductory conversations.",
-        techStack: ["Next.js 16", "Calendar API", "Timezone Engine", "WCAG 2.1 AA"],
+        description:
+          "Find a time to talk about a project, ask a question, or introduce yourself. Book a 30-minute Google Meet call.",
+        techStack: [
+          "Next.js 16",
+          "Calendar API",
+          "Timezone Engine",
+          "WCAG 2.1 AA",
+        ],
         highlights: [
           "Timezone-aware slot availability",
           "Accessible keyboard-driven date selection",
-          "Zero-friction confirmation workflow"
-        ]
+          "Zero-friction confirmation workflow",
+        ],
       },
       {
         id: "nav-meme-vault",
-        title: "Secret Meme Vault & Soundboard",
-        subtitle: "Synthesized retro sounds, Easter egg achievements, and engineering jokes",
+        title: "Meme Vault & Soundboard",
+        subtitle:
+          "Make some noise, find hidden trophies, and enjoy a few jokes about code and clinical data.",
         category: "navigation",
         url: "/arcade/meme-vault",
         icon: <IconDeviceGamepad2 className="w-4 h-4 text-emerald-400" />,
-        badge: "Secret Vault",
-        status: "Unlocked",
-        description: "Interactive developer & MedTech soundboard, achievement tracker, and meme generator cards.",
+        badge: "Meme Soundboard",
+        status: "8-Bit Audio Active",
+        description:
+          "Make some noise, find hidden trophies, and enjoy a few jokes about code and clinical data.",
         techStack: ["Web Audio API", "CRT Shader", "React 19", "LocalStorage"],
         highlights: [
           "8-channel synthesized retro soundboard",
           "6 collectible site achievements",
-          "Interactive meme quotes & sound triggers"
-        ]
+          "Interactive meme quotes & sound triggers",
+        ],
       },
       {
         id: "nav-offline",
         title: "Offline Fallback View",
-        subtitle: "Dedicated connection loss recovery page",
+        subtitle:
+          "Check your connection, retry this page, or explore pages saved for offline use.",
         category: "navigation",
         url: "/offline",
         icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
         badge: "Offline Shell",
         status: "Fallback View",
-        description: "Dedicated offline fallback view explaining connection loss and providing retry options for precached core tools.",
+        description:
+          "Check your connection, retry this page, or explore pages saved for offline use.",
         techStack: ["Serwist", "Service Worker", "Cache-First", "React 19"],
         highlights: [
           "Precaching core application shell routes",
           "Cache-first 3D asset caching with procedural fallback",
-          "Bypasses error-tracking telemetry endpoints"
-        ]
+          "Bypasses error-tracking telemetry endpoints",
+        ],
       },
       {
         id: "nav-admin",
@@ -666,14 +878,17 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         subtitle: "Navigate to Admin view",
         category: "navigation",
         url: "/admin",
-        icon: <IconDirections className="w-4 h-4 text-brand-cyan" />
+        icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
       },
     ];
 
     const safeStudies = Array.isArray(studies) ? studies : [];
     const studyItems: PaletteItem[] = safeStudies.map((study) => {
       const parsedTags = study.tags
-        ? study.tags.split(",").map((t) => t.trim()).filter(Boolean)
+        ? study.tags
+            .split(",")
+            .map((t) => t.trim())
+            .filter(Boolean)
         : [];
       return {
         id: study.id,
@@ -689,8 +904,8 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         highlights: [
           "Production architecture and trade-off analysis",
           "Source code snippets and design patterns",
-          "Measured performance benchmarks & metrics"
-        ]
+          "Measured performance benchmarks & metrics",
+        ],
       };
     });
 
@@ -715,9 +930,14 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         icon: <IconCoffee className="w-4 h-4 text-teal-400" />,
         badge: "RFC 2324",
         status: "Brewing Error",
-        description: "HTCPCP 1.0 error: The requested entity body is short and stout. Cannot brew espresso on a web server.",
+        description:
+          "HTCPCP 1.0 error: The requested entity body is short and stout. Cannot brew espresso on a web server.",
         techStack: ["RFC 2324", "RFC 7168", "HTCPCP/1.0"],
-        highlights: ["Brew coffee action", "Teapot whistle sound effect", "Instant achievement unlock"]
+        highlights: [
+          "Brew coffee action",
+          "Teapot whistle sound effect",
+          "Instant achievement unlock",
+        ],
       });
     }
 
@@ -731,9 +951,14 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         icon: <IconSparkles className="w-4 h-4 text-amber-400" />,
         badge: "Chief Bark Officer",
         status: "Good Boy",
-        description: "Duck has achieved 100% test coverage by enthusiastically chewing through the staging network cables.",
+        description:
+          "Duck has achieved 100% test coverage by enthusiastically chewing through the staging network cables.",
         techStack: ["Golden Retriever AI", "Treat Physics", "Bark Synthesizer"],
-        highlights: ["Playful synthesized puppy woof", "Achievement unlocked: Duck Whisperer", "100% Good Boy rating"]
+        highlights: [
+          "Playful synthesized puppy woof",
+          "Achievement unlocked: Duck Whisperer",
+          "100% Good Boy rating",
+        ],
       });
     }
 
@@ -747,25 +972,41 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         icon: <IconTerminal className="w-4 h-4 text-rose-400" />,
         badge: "Security Log",
         status: "Denied",
-        description: "User is not in the sudoers file. This incident has been logged in triplicate under 21 CFR Part 11 audit trails.",
+        description:
+          "User is not in the sudoers file. This incident has been logged in triplicate under 21 CFR Part 11 audit trails.",
         techStack: ["UNIX PAM", "21 CFR Part 11", "Audit Sentry"],
-        highlights: ["Audit alert siren", "Immutable security log", "Terminal achievement progress"]
+        highlights: [
+          "Audit alert siren",
+          "Immutable security log",
+          "Terminal achievement progress",
+        ],
       });
     }
 
-    if (q.includes("chaos") || q.includes("konami") || q.includes("retro") || q.includes("matrix")) {
+    if (
+      q.includes("chaos") ||
+      q.includes("konami") ||
+      q.includes("retro") ||
+      q.includes("matrix")
+    ) {
       secretItems.push({
         id: "secret-chaos",
         title: "🎮 Launch Retro Chaos Mode",
-        subtitle: "Activate full-screen CRT scanline overlay and unlock secrets",
+        subtitle:
+          "Activate full-screen CRT scanline overlay and unlock secrets",
         category: "navigation",
         url: "action:chaos",
         icon: <IconSparkles className="w-4 h-4 text-emerald-400" />,
         badge: "Easter Egg",
         status: "CRT Ready",
-        description: "Trigger the full-screen cyberpunk phosphor CRT scanline overlay, unlocking all easter eggs and achievement badges.",
+        description:
+          "Trigger the full-screen cyberpunk phosphor CRT scanline overlay, unlocking all easter eggs and achievement badges.",
         techStack: ["CRT Post-Processing", "Konami Engine", "Web Audio API"],
-        highlights: ["Full-screen phosphor CRT scanlines", "8-bit fanfare chime", "Unlocks Secret Meme Vault"]
+        highlights: [
+          "Full-screen phosphor CRT scanlines",
+          "8-bit fanfare chime",
+          "Unlocks Secret Meme Vault",
+        ],
       });
     }
 
@@ -779,25 +1020,36 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         icon: <IconFlame className="w-4 h-4 text-red-400" />,
         badge: "High Risk",
         status: "Alarm Armed",
-        description: "Push directly to production without testing. Will the server survive the weekend?",
+        description:
+          "Push directly to production without testing. Will the server survive the weekend?",
         techStack: ["Git Engine", "Friday Deploy Protocol", "Panic Siren"],
-        highlights: ["Dramatic alarm siren sound", "Achievement unlocked: Friday Deploy Survivor", "Zero staging fear"]
+        highlights: [
+          "Dramatic alarm siren sound",
+          "Achievement unlocked: Friday Deploy Survivor",
+          "Zero staging fear",
+        ],
       });
     }
 
     if (q === "ping") {
       secretItems.push({
         id: "secret-ping",
-        title: "ping 127.0.0.1 -> 64 bytes from localhost: icmp_seq=1 ttl=64 time=0.012 ms",
+        title:
+          "ping 127.0.0.1 -> 64 bytes from localhost: icmp_seq=1 ttl=64 time=0.012 ms",
         subtitle: "Lake Minnetonka cluster is 100% online",
         category: "navigation",
         url: "action:ping",
         icon: <IconTerminal className="w-4 h-4 text-cyan-400" />,
         badge: "ICMP Pong",
         status: "0.012ms",
-        description: "Direct zero-latency heartbeat from the local Next.js 15 kernel runtime.",
+        description:
+          "Direct zero-latency heartbeat from the local Next.js 15 kernel runtime.",
         techStack: ["ICMP Ping", "Localhost", "Zero Latency"],
-        highlights: ["Instant response", "Sub-millisecond latency", "100% uptime"]
+        highlights: [
+          "Instant response",
+          "Sub-millisecond latency",
+          "100% uptime",
+        ],
       });
     }
 
@@ -830,7 +1082,9 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
       throttledPlayHover();
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setActiveIndex((prev) => (prev - 1 + filteredItems.length) % filteredItems.length);
+      setActiveIndex(
+        (prev) => (prev - 1 + filteredItems.length) % filteredItems.length
+      );
       throttledPlayHover();
     } else if (e.key === "Escape") {
       e.preventDefault();
@@ -924,7 +1178,11 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         exit={{ opacity: 0, scale: 0.97, y: -8 }}
         transition={{ duration: 0.18, ease: "easeOut" }}
         ref={trapRef}
-        style={{ "--cmd-glow": `0 0 50px ${hexToRgba(designManifest.colors["brand-cyan"], 0.06)}` } as React.CSSProperties}
+        style={
+          {
+            "--cmd-glow": `0 0 50px ${hexToRgba(designManifest.colors["brand-cyan"], 0.06)}`,
+          } as React.CSSProperties
+        }
         className="w-full max-w-3xl bg-zinc-900/95 border border-zinc-800/90 backdrop-blur-2xl shadow-[var(--cmd-glow)] rounded-3xl overflow-hidden flex flex-col relative my-auto sm:my-0 max-h-[85vh]"
       >
         {/* Circular glow visual elements inside modal */}
@@ -949,7 +1207,9 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
             aria-expanded={true}
             aria-autocomplete="list"
             aria-controls="palette-results-list"
-            aria-activedescendant={activeItem ? `palette-option-${activeItem.id}` : undefined}
+            aria-activedescendant={
+              activeItem ? `palette-option-${activeItem.id}` : undefined
+            }
             aria-haspopup="listbox"
             aria-label="Spotlight command palette search"
             className="w-full bg-transparent text-sm sm:text-base text-neutral-100 placeholder-zinc-500 focus:outline-none font-sans"
@@ -983,9 +1243,18 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
                       id={`palette-option-${item.id}`}
                       role="option"
                       aria-selected={isActive}
-                      aria-describedby={isActive ? "palette-preview-pane" : undefined}
+                      aria-describedby={
+                        isActive ? "palette-preview-pane" : undefined
+                      }
                       onClick={() => handleSelectItem(item)}
-                      style={{ "--cmd-item-glow": hexToRgba(designManifest.colors["brand-cyan"], 0.04) } as React.CSSProperties}
+                      style={
+                        {
+                          "--cmd-item-glow": hexToRgba(
+                            designManifest.colors["brand-cyan"],
+                            0.04
+                          ),
+                        } as React.CSSProperties
+                      }
                       onMouseEnter={() => handleItemHover(index)}
                       className={`flex items-center gap-3.5 px-3.5 py-3 rounded-xl cursor-pointer select-none transition-all duration-200 border ${
                         isActive
@@ -1012,7 +1281,10 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
                               isActive ? "text-brand-cyan" : "text-zinc-400"
                             }`}
                           >
-                            {item.badge || (item.category === "case-study" ? "Case Study" : "Site Channel")}
+                            {item.badge ||
+                              (item.category === "case-study"
+                                ? "Case Study"
+                                : "Site Channel")}
                           </span>
                           {item.status && (
                             <span className="hidden sm:inline-block text-[9px] font-mono text-zinc-400 border border-zinc-800/80 px-1.5 py-0.2 rounded">
@@ -1045,7 +1317,9 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
               </div>
             ) : (
               <div className="flex-1 max-h-[380px] overflow-y-auto p-2.5 space-y-1 scrollbar-none py-12 text-center select-none">
-                <p className="text-sm text-zinc-400 italic">No outcomes match search query.</p>
+                <p className="text-sm text-zinc-400 italic">
+                  No outcomes match search query.
+                </p>
                 <p className="text-xs font-mono text-zinc-400 mt-1 uppercase tracking-widest">
                   Try searching other tags
                 </p>
@@ -1071,7 +1345,10 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
                 <div>
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-brand-cyan/10 text-brand-cyan border border-brand-cyan/20">
-                      {activeItem.badge || (activeItem.category === "case-study" ? "Case Study" : "Navigation")}
+                      {activeItem.badge ||
+                        (activeItem.category === "case-study"
+                          ? "Case Study"
+                          : "Navigation")}
                     </span>
                     {activeItem.status && (
                       <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md flex items-center gap-1.5">
@@ -1121,27 +1398,35 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
                   )}
 
                   {/* Capability Highlights */}
-                  {activeItem.highlights && activeItem.highlights.length > 0 && (
-                    <div className="mt-3 border-t border-zinc-850 pt-2.5">
-                      <div className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider mb-1.5">
-                        Key Highlights
+                  {activeItem.highlights &&
+                    activeItem.highlights.length > 0 && (
+                      <div className="mt-3 border-t border-zinc-850 pt-2.5">
+                        <div className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider mb-1.5">
+                          Key Highlights
+                        </div>
+                        <ul className="space-y-1">
+                          {activeItem.highlights.map((highlight, idx) => (
+                            <li
+                              key={idx}
+                              className="text-[11px] text-zinc-300 flex items-start gap-1.5 leading-snug"
+                            >
+                              <span className="text-brand-cyan text-xs leading-none">
+                                ▸
+                              </span>
+                              <span>{highlight}</span>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
-                      <ul className="space-y-1">
-                        {activeItem.highlights.map((highlight, idx) => (
-                          <li key={idx} className="text-[11px] text-zinc-300 flex items-start gap-1.5 leading-snug">
-                            <span className="text-brand-cyan text-xs leading-none">▸</span>
-                            <span>{highlight}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                    )}
                 </div>
 
                 {/* Bottom Quick Navigation Hint */}
                 <div className="pt-2.5 border-t border-zinc-850 flex items-center justify-between text-[10px] font-mono text-zinc-400 select-none">
                   <span className="flex items-center gap-1 text-brand-cyan/90">
-                    <span className="bg-zinc-900 border border-zinc-800 px-1 py-0.5 rounded text-[9px]">↵ ENTER</span>
+                    <span className="bg-zinc-900 border border-zinc-800 px-1 py-0.5 rounded text-[9px]">
+                      ↵ ENTER
+                    </span>
                     <span>Launch</span>
                   </span>
                   <span className="truncate max-w-[140px] text-zinc-400">
@@ -1152,7 +1437,9 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-center text-zinc-400 p-4">
                 <IconTerminal className="w-8 h-8 text-zinc-600 mb-2" />
-                <p className="text-xs font-mono uppercase tracking-wider">Select a route or case</p>
+                <p className="text-xs font-mono uppercase tracking-wider">
+                  Select a route or case
+                </p>
               </div>
             )}
           </div>
@@ -1162,13 +1449,22 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         <div className="relative z-10 border-t border-zinc-800/60 p-3 bg-zinc-950/60 flex justify-between items-center text-xs font-mono text-zinc-400 select-none">
           <div className="flex gap-4">
             <span className="flex items-center gap-1">
-              <span className="bg-zinc-900 border border-zinc-800 px-1 rounded-md text-[10px]">↑↓</span> Move
+              <span className="bg-zinc-900 border border-zinc-800 px-1 rounded-md text-[10px]">
+                ↑↓
+              </span>{" "}
+              Move
             </span>
             <span className="flex items-center gap-1">
-              <span className="bg-zinc-900 border border-zinc-800 px-1 rounded-md text-[10px]">↵</span> Enter
+              <span className="bg-zinc-900 border border-zinc-800 px-1 rounded-md text-[10px]">
+                ↵
+              </span>{" "}
+              Enter
             </span>
             <span className="hidden sm:inline-flex items-center gap-1">
-              <span className="bg-zinc-900 border border-zinc-800 px-1 rounded-md text-[10px]">ESC</span> Close
+              <span className="bg-zinc-900 border border-zinc-800 px-1 rounded-md text-[10px]">
+                ESC
+              </span>{" "}
+              Close
             </span>
           </div>
           <div>
@@ -1257,9 +1553,15 @@ export const CommandPalette: React.FC = () => {
 
     if (isOpen) {
       loadStudies();
-    } else if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+    } else if (
+      typeof window !== "undefined" &&
+      "requestIdleCallback" in window
+    ) {
       const idleWindow = window as Window & {
-        requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+        requestIdleCallback?: (
+          cb: () => void,
+          opts?: { timeout: number }
+        ) => number;
         cancelIdleCallback?: (id: number) => void;
       };
       if (typeof idleWindow.requestIdleCallback === "function") {

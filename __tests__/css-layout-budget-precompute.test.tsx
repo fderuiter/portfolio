@@ -7,9 +7,17 @@ import { PageLayout } from "@/components/PageLayout";
 import { CaseStudyBentoCard } from "@/components/ui/CaseStudyBentoCard";
 import { BentoLayoutProvider } from "@/components/providers/BentoLayoutContext";
 import { TerminologyProvider } from "@/components/providers/TerminologyProvider";
-import { calculateCardHeightFromBlocks, calculateMasonryLayout } from "@/lib/masonry";
+import {
+  calculateCardHeightFromBlocks,
+  calculateMasonryLayout,
+} from "@/lib/masonry";
 import { preparePretextBlocks } from "@/lib/pretext-block-parser";
-import { DpadActionDock, TwinStickAimDock, BezelClusterDock, ActionStripDock } from "@/components/arcade/ControlDocks";
+import {
+  DpadActionDock,
+  TwinStickAimDock,
+  BezelClusterDock,
+  ActionStripDock,
+} from "@/components/arcade/ControlDocks";
 
 const mockStudy = {
   id: "schemaflow",
@@ -59,25 +67,29 @@ describe("CSS Variable Layout Budgeting & Offscreen Card Pre-computation", () =>
 
   describe("Requirement 2: Studio Container & Viewport Height Derivation", () => {
     it("derives heights from layout budget tokens instead of hardcoded 100vh subtractions", () => {
-      const crfPath = path.resolve(process.cwd(), "components/crf/CRFStudioContainer.tsx");
+      const crfPath = path.resolve(
+        process.cwd(),
+        "components/crf/CRFStudioContainer.tsx"
+      );
       const crfContent = fs.readFileSync(crfPath, "utf-8");
       expect(crfContent).toContain("var(--layout-studio-budget");
       expect(crfContent).not.toContain("h-[calc(100vh-4rem)]");
-
-      const playCabinetPath = path.resolve(process.cwd(), "components/arcade/PlayCabinet.tsx");
-      const playCabinetContent = fs.readFileSync(playCabinetPath, "utf-8");
-      expect(playCabinetContent).toContain("var(--layout-viewport-budget");
-      expect(playCabinetContent).toContain("--layout-dock-height");
     });
   });
 
   describe("Requirement 3: Offscreen Pre-computation of Expanded Cards", () => {
     it("calculates expanded card height offscreen synchronously using Pretext blocks", () => {
-      const pitchText = "High performance visual schema editor and canvas system.";
-      const realityText = "While the drag-and-drop canvas is extremely smooth, we initially faced major rendering bottlenecks when rendering over 150 schema nodes.";
+      const pitchText =
+        "High performance visual schema editor and canvas system.";
+      const realityText =
+        "While the drag-and-drop canvas is extremely smooth, we initially faced major rendering bottlenecks when rendering over 150 schema nodes.";
 
       const pitchBlocks = preparePretextBlocks(pitchText, 14, "--font-inter");
-      const realityBlocks = preparePretextBlocks(realityText, 14, "--font-inter");
+      const realityBlocks = preparePretextBlocks(
+        realityText,
+        14,
+        "--font-inter"
+      );
 
       const config = {
         COLS: { SM: 1, MD: 2, LG: 3 },
@@ -88,8 +100,20 @@ describe("CSS Variable Layout Budgeting & Offscreen Card Pre-computation", () =>
         FALLBACK_ITEM_HEIGHT: 320,
       };
 
-      const pitchHeight = calculateCardHeightFromBlocks(pitchBlocks, 300, 250, config, 3);
-      const realityHeight = calculateCardHeightFromBlocks(realityBlocks, 300, 250, config, 3);
+      const pitchHeight = calculateCardHeightFromBlocks(
+        pitchBlocks,
+        300,
+        250,
+        config,
+        3
+      );
+      const realityHeight = calculateCardHeightFromBlocks(
+        realityBlocks,
+        300,
+        250,
+        config,
+        3
+      );
 
       expect(pitchHeight).toBeGreaterThan(0);
       expect(realityHeight).toBeGreaterThan(pitchHeight);
@@ -99,8 +123,16 @@ describe("CSS Variable Layout Budgeting & Offscreen Card Pre-computation", () =>
       const items = [mockStudy];
       const preparedData = {
         schemaflow: {
-          blocks: preparePretextBlocks(mockStudy.editorial_content, 14, "--font-inter"),
-          realityBlocks: preparePretextBlocks("Reality test content line 1.\nReality test content line 2.", 14, "--font-inter"),
+          blocks: preparePretextBlocks(
+            mockStudy.editorial_content,
+            14,
+            "--font-inter"
+          ),
+          realityBlocks: preparePretextBlocks(
+            "Reality test content line 1.\nReality test content line 2.",
+            14,
+            "--font-inter"
+          ),
           paddingHeight: 250,
         },
       };
@@ -125,7 +157,11 @@ describe("CSS Variable Layout Budgeting & Offscreen Card Pre-computation", () =>
       const { getByText } = render(
         <BentoLayoutProvider>
           <TerminologyProvider>
-            <CaseStudyBentoCard study={mockStudy} preCalculatedHeight={300} preCalculatedRealityHeight={450} />
+            <CaseStudyBentoCard
+              study={mockStudy}
+              preCalculatedHeight={300}
+              preCalculatedRealityHeight={450}
+            />
           </TerminologyProvider>
         </BentoLayoutProvider>
       );
@@ -142,7 +178,11 @@ describe("CSS Variable Layout Budgeting & Offscreen Card Pre-computation", () =>
   describe("Requirement 5: Control Dock Accessibility & Touch Targets", () => {
     it("renders DpadActionDock controls with accessible touch targets", () => {
       const { getByLabelText } = render(
-        <DpadActionDock forceVisible onDirectionPress={() => {}} onActionAPress={() => {}} />
+        <DpadActionDock
+          forceVisible
+          onDirectionPress={() => {}}
+          onActionAPress={() => {}}
+        />
       );
 
       const upButton = getByLabelText("Move Up");

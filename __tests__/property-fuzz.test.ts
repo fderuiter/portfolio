@@ -19,10 +19,12 @@ import { NextRequest } from "next/server";
 
 // Arbitrary generator for Propositional Logic ASTs
 const varNames = ["P", "Q", "R", "S", "A", "B", "C"];
-const leafAstArbitrary: fc.Arbitrary<PropAst> = fc.constantFrom(...varNames).map((name) => ({
-  type: "var" as const,
-  name,
-}));
+const leafAstArbitrary: fc.Arbitrary<PropAst> = fc
+  .constantFrom(...varNames)
+  .map((name) => ({
+    type: "var" as const,
+    name,
+  }));
 
 const astArbitrary: fc.Arbitrary<PropAst> = fc.letrec((tie) => ({
   tree: fc.oneof(
@@ -34,7 +36,12 @@ const astArbitrary: fc.Arbitrary<PropAst> = fc.letrec((tie) => ({
       operand: tie("tree") as fc.Arbitrary<PropAst>,
     }),
     fc.record({
-      type: fc.constantFrom("and" as const, "or" as const, "implies" as const, "iff" as const),
+      type: fc.constantFrom(
+        "and" as const,
+        "or" as const,
+        "implies" as const,
+        "iff" as const
+      ),
       left: tie("tree") as fc.Arbitrary<PropAst>,
       right: tie("tree") as fc.Arbitrary<PropAst>,
     })
@@ -98,7 +105,9 @@ describe("Shift-Left Fuzz & Property-Based Verification", () => {
               right: { type: "not", operand: astB },
             };
 
-            expect(evaluateAst(notAAndB, env)).toBe(evaluateAst(notAOrNotB, env));
+            expect(evaluateAst(notAAndB, env)).toBe(
+              evaluateAst(notAOrNotB, env)
+            );
           }
         ),
         { numRuns: 100 }
@@ -159,7 +168,11 @@ describe("Shift-Left Fuzz & Property-Based Verification", () => {
           fc.integer({ min: 1, max: 4 }),
           fc.integer({ min: 0, max: 48 }),
           (containerWidth, colCount, gap) => {
-            const colWidth = calculateColumnWidth(containerWidth, colCount, gap);
+            const colWidth = calculateColumnWidth(
+              containerWidth,
+              colCount,
+              gap
+            );
             const reconstructed = colWidth * colCount + gap * (colCount - 1);
             expect(Math.abs(reconstructed - containerWidth)).toBeLessThan(1e-6);
           }
@@ -181,12 +194,19 @@ describe("Shift-Left Fuzz & Property-Based Verification", () => {
           fc.integer({ min: 1, max: 6 }),
           fc.integer({ min: 0, max: 32 }),
           (items, colCount, gap) => {
-            const { columns, columnHeights } = distributeItemsGreedily(items, colCount, gap);
+            const { columns, columnHeights } = distributeItemsGreedily(
+              items,
+              colCount,
+              gap
+            );
 
             expect(columns.length).toBe(colCount);
             expect(columnHeights.length).toBe(colCount);
 
-            const totalItemsPlaced = columns.reduce((acc, col) => acc + col.length, 0);
+            const totalItemsPlaced = columns.reduce(
+              (acc, col) => acc + col.length,
+              0
+            );
             expect(totalItemsPlaced).toBe(items.length);
 
             for (const h of columnHeights) {
@@ -204,7 +224,11 @@ describe("Shift-Left Fuzz & Property-Based Verification", () => {
       fc.assert(
         fc.property(
           fc.string(),
-          fc.constantFrom("/Users/fred/Code/secret.ts", "/home/ubuntu/app/server.js", "C:\\Users\\admin\\file.txt"),
+          fc.constantFrom(
+            "/Users/fred/Code/secret.ts",
+            "/home/ubuntu/app/server.js",
+            "C:\\Users\\admin\\file.txt"
+          ),
           (prefix, pathSample) => {
             const raw = `${prefix} ${pathSample} debug trace`;
             const sanitized = sanitizeString(raw);
@@ -218,13 +242,14 @@ describe("Shift-Left Fuzz & Property-Based Verification", () => {
     it("sanitizeError is idempotent in production", () => {
       const originalEnv = process.env.NODE_ENV;
       try {
-        (process.env as Record<string, string | undefined>).NODE_ENV = "production";
+        (process.env as Record<string, string | undefined>).NODE_ENV =
+          "production";
 
         fc.assert(
           fc.property(fc.string({ minLength: 1 }), (msg) => {
             const err = new Error(`/Users/admin/app/file.ts: ${msg}`);
-            const pass1 = sanitizeError(err);
-            const pass2 = sanitizeError(pass1);
+            const pass1 = sanitizeError(err) as Error;
+            const pass2 = sanitizeError(pass1) as Error;
 
             expect(pass1.message).toBe(pass2.message);
             expect(pass1.name).toBe(pass2.name);
@@ -232,7 +257,8 @@ describe("Shift-Left Fuzz & Property-Based Verification", () => {
           { numRuns: 50 }
         );
       } finally {
-        (process.env as Record<string, string | undefined>).NODE_ENV = originalEnv;
+        (process.env as Record<string, string | undefined>).NODE_ENV =
+          originalEnv;
       }
     });
 
@@ -240,16 +266,22 @@ describe("Shift-Left Fuzz & Property-Based Verification", () => {
       const originalEnv = process.env.NODE_ENV;
       const originalSecret = process.env.CRON_SECRET;
       try {
-        (process.env as Record<string, string | undefined>).NODE_ENV = "production";
+        (process.env as Record<string, string | undefined>).NODE_ENV =
+          "production";
         process.env.CRON_SECRET = "production-super-secret-token";
 
         fc.assert(
           fc.property(
-            fc.string().filter((s) => s !== "Bearer production-super-secret-token"),
+            fc
+              .string()
+              .filter((s) => s !== "Bearer production-super-secret-token"),
             (invalidAuthHeader) => {
-              const req = new NextRequest("https://example.com/api/telemetry/sync", {
-                headers: { authorization: invalidAuthHeader },
-              });
+              const req = new NextRequest(
+                "https://example.com/api/telemetry/sync",
+                {
+                  headers: { authorization: invalidAuthHeader },
+                }
+              );
 
               const result = validateSyncRequest(req);
               expect(result.isValid).toBe(false);
@@ -259,7 +291,8 @@ describe("Shift-Left Fuzz & Property-Based Verification", () => {
           { numRuns: 50 }
         );
       } finally {
-        (process.env as Record<string, string | undefined>).NODE_ENV = originalEnv;
+        (process.env as Record<string, string | undefined>).NODE_ENV =
+          originalEnv;
         process.env.CRON_SECRET = originalSecret;
       }
     });

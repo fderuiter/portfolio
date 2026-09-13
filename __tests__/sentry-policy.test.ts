@@ -1,0 +1,75 @@
+import { describe, it, expect } from "vitest";
+import {
+  MAX_PRODUCTION_TRACES_SAMPLE_RATE,
+  isBenignClientNoise,
+  resolveTracesSampleRate,
+} from "@/lib/sentry-policy";
+
+describe("Sentry quota and noise policy", () => {
+  describe("trace sampling", () => {
+    it("clamps production to the ADR 0036 ceiling", () => {
+      expect(resolveTracesSampleRate(true)).toBe(
+        MAX_PRODUCTION_TRACES_SAMPLE_RATE
+      );
+      expect(MAX_PRODUCTION_TRACES_SAMPLE_RATE).toBeLessThanOrEqual(0.05);
+    });
+
+    it("samples nothing outside production", () => {
+      // NODE_ENV is "production" for preview builds too, so a preview must not
+      // be able to reach a non-zero rate.
+      expect(resolveTracesSampleRate(false)).toBe(0);
+    });
+
+    it("never returns full sampling", () => {
+      expect(resolveTracesSampleRate(true)).not.toBe(1);
+      expect(resolveTracesSampleRate(false)).not.toBe(1);
+    });
+  });
+
+  describe("benign client noise", () => {
+    it("drops aborted requests", () => {
+      const abort = new Error("The operation was aborted");
+      abort.name = "AbortError";
+      expect(isBenignClientNoise(abort)).toBe(true);
+    });
+
+    it("drops both ResizeObserver notifications", () => {
+      expect(
+        isBenignClientNoise(new Error("ResizeObserver loop limit exceeded"))
+      ).toBe(true);
+      expect(
+        isBenignClientNoise(
+          new Error(
+            "ResizeObserver loop completed with undelivered notifications."
+          )
+        )
+      ).toBe(true);
+    });
+
+    it("drops faults originating in browser extensions", () => {
+      const extensionError = new Error("undefined is not an object");
+      extensionError.stack = "at chrome-extension://abcdef/content.js:1:1";
+      expect(isBenignClientNoise(extensionError)).toBe(true);
+      expect(
+        isBenignClientNoise(new Error("x"), "moz-extension://xyz/inject.js")
+      ).toBe(true);
+    });
+
+    it("still drops simulated game engine exceptions", () => {
+      const gameError = new Error("simulated");
+      gameError.name = "GameEngineException";
+      expect(isBenignClientNoise(gameError)).toBe(true);
+    });
+
+    it("keeps real application errors", () => {
+      expect(
+        isBenignClientNoise(new TypeError("cannot read x of undefined"))
+      ).toBe(false);
+      expect(isBenignClientNoise(new Error("Database connection failed"))).toBe(
+        false
+      );
+      expect(isBenignClientNoise(undefined)).toBe(false);
+      expect(isBenignClientNoise(null)).toBe(false);
+    });
+  });
+});

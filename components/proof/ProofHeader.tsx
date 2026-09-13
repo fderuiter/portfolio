@@ -13,7 +13,12 @@ import {
 } from "@tabler/icons-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { FieldManualButton } from "@/components/FieldManualButton";
-import { THEOREMS, TheoremId, Edge, evaluateProofStatus } from "@/lib/proof-utils";
+import {
+  THEOREMS,
+  TheoremId,
+  Edge,
+  evaluateProofStatus,
+} from "@/lib/proof-utils";
 
 interface ProofHeaderProps {
   activeTheoremId: TheoremId;
@@ -24,7 +29,9 @@ interface ProofHeaderProps {
   setIsCustomStudioOpen: (open: boolean) => void;
   setIsExportModalOpen: (open: boolean) => void;
   mobileActiveView: "canvas" | "ledger" | "systems" | "fallacy" | "terminal";
-  setMobileActiveView: (view: "canvas" | "ledger" | "systems" | "fallacy" | "terminal") => void;
+  setMobileActiveView: (
+    view: "canvas" | "ledger" | "systems" | "fallacy" | "terminal"
+  ) => void;
   setActiveTab: (tab: "ledger" | "systems" | "fallacy") => void;
 }
 
@@ -45,13 +52,16 @@ export const ProofHeader: React.FC<ProofHeaderProps> = ({
       {/* Top Header Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-6">
         <div>
-          <Breadcrumbs items={[{ label: "Logical Proof Workspace", href: "/proof" }]} />
+          <Breadcrumbs
+            items={[{ label: "Logical Proof Workspace", href: "/proof" }]}
+          />
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-2 mt-1">
             <IconCpu className="w-8 h-8 text-brand-cyan animate-pulse" />
             Logical Proof Canvas
           </h1>
           <p className="text-sm text-slate-400 mt-0.5">
-            AST Natural Deduction & Distributed Systems Formal Invariant Workbench
+            Connect premises, apply rules, and see whether the conclusion
+            follows.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -84,7 +94,9 @@ export const ProofHeader: React.FC<ProofHeaderProps> = ({
       {/* Curriculum Domain Carousel */}
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-mono uppercase tracking-wider text-slate-400">Curriculum Invariant Catalog</span>
+          <span className="text-xs font-mono uppercase tracking-wider text-slate-400">
+            Choose a Proof
+          </span>
           <span className="text-xs font-mono text-brand-cyan">
             Status: {isE_Proven ? "✔ Q.E.D. DISCHARGED" : "⏳ IN PROGRESS"}
           </span>
@@ -117,8 +129,12 @@ export const ProofHeader: React.FC<ProofHeaderProps> = ({
                     <span className="w-2 h-2 rounded-full bg-amber-500/80" />
                   )}
                 </div>
-                <span className="text-xs font-bold text-slate-200 line-clamp-1">{th.title}</span>
-                <span className="text-[11px] text-slate-400 line-clamp-1">{th.subtitle}</span>
+                <span className="text-xs font-bold text-slate-200 line-clamp-1">
+                  {th.title}
+                </span>
+                <span className="text-[11px] text-slate-400 line-clamp-1">
+                  {th.subtitle}
+                </span>
               </button>
             );
           })}

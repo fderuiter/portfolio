@@ -23,6 +23,7 @@ import {
   validateBranchName,
 } from "../lib/dx/git-guard";
 import { checkEnvironmentVariables } from "../lib/dx/env-guard";
+import { runPreflight } from "../lib/dx/preflight";
 import { runSetupWorkflow } from "../lib/dx/setup";
 import { scanDeadCode, printDeadCodeDocument } from "../lib/dx/dead-code";
 import { inspectBundleChunks, printBundleReport } from "../lib/dx/bundle-guard";
@@ -90,6 +91,18 @@ function printUsage(): void {
   );
   console.log(
     `  ${colors.cyan}check:migrations:drift${colors.reset}        Run schema drift verification against prisma/schema.prisma`
+  );
+  console.log(
+    `  ${colors.cyan}migration:replay${colors.reset}              Replay full migration history on disposable target`
+  );
+  console.log(
+    `  ${colors.cyan}verify:upstash${colors.reset}                Verify Upstash Redis connectivity, namespaces, and outage behavior`
+  );
+  console.log(
+    `  ${colors.cyan}inventory:vercel${colors.reset}              Inspect Vercel storage meters, retention inventory, and candidates`
+  );
+  console.log(
+    `  ${colors.cyan}headroom:vercel${colors.reset}               Evaluate Vercel storage and build hour headroom budgets`
   );
   console.log(
     `  ${colors.cyan}release:gate${colors.reset}                  Run pre-release security audit and deploy gate`
@@ -280,6 +293,49 @@ export async function handleEnvCommand(parsed: ParsedCliArgs): Promise<void> {
   }
 
   if (result.status === "fail" && !fix) {
+    process.exit(1);
+  }
+}
+
+/**
+ * Bounded runtime preflight: checks Node/npm versions, the generated
+ * Prisma client, and real `node --import tsx` execution up front, before
+ * an agent or developer starts expensive work (tests, `npm run verify`,
+ * browser probes). Meant to turn a broken environment into one clear,
+ * actionable report instead of a confusing wall of downstream failures.
+ */
+export function handlePreflightCommand(parsed: ParsedCliArgs): void {
+  const isJson = Boolean(parsed.flags.json || parsed.flags.j);
+  const startTime = Date.now();
+
+  const report = runPreflight(workspaceRoot);
+  const durationMs = Date.now() - startTime;
+
+  if (isJson) {
+    printJsonEnvelope(
+      createDxEnvelope({
+        command: "preflight",
+        success: report.ready,
+        durationMs,
+        data: report,
+      })
+    );
+  } else {
+    console.log(
+      formatHeader("DX Runtime Preflight", "Node • npm • Prisma • tsx")
+    );
+    for (const check of report.checks) {
+      console.log(`${badge(check.label, check.status)}`);
+      console.log(`  ${check.message}`);
+    }
+    console.log(
+      report.ready
+        ? `\n${colors.green}✔ Environment ready.${colors.reset}\n`
+        : `\n${colors.red}✘ Environment NOT ready -- see the failing check(s) above before starting real work.${colors.reset}\n`
+    );
+  }
+
+  if (!report.ready) {
     process.exit(1);
   }
 }
@@ -1216,6 +1272,9 @@ export async function main(): Promise<void> {
     case "env":
       await handleEnvCommand(parsed);
       break;
+    case "preflight":
+      handlePreflightCommand(parsed);
+      break;
     case "dead-code":
     case "unused":
       handleDeadCodeCommand(parsed);
@@ -1314,6 +1373,50 @@ export async function main(): Promise<void> {
           `\n${colors.brightYellow}⚠️  Schema drift check completed (live database connection unavailable or drift detected).${colors.reset}\n`
         );
       }
+      break;
+    }
+    case "migration:replay": {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { runMigrationReplay } = require("./migration-replay");
+      await runMigrationReplay();
+      break;
+    }
+    case "verify:upstash": {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { runUpstashVerification } = require("./verify-upstash");
+      const strict = Boolean(parsed.flags.strict || parsed.flags.s);
+      const json = Boolean(parsed.flags.json || parsed.flags.j);
+      const { success, data } = await runUpstashVerification({ strict });
+      if (json) {
+        console.log(JSON.stringify({ success, result: data }, null, 2));
+      } else {
+        console.log("\n--- Upstash Redis Verification ---");
+        console.log(`Status: ${data.status.toUpperCase()}`);
+        console.log(`Prefix: ${data.environment.isolatedPrefix}`);
+        console.log(`Buffer: ${data.keyspaces.telemetryBuffer}`);
+      }
+      if (!success) process.exit(1);
+      break;
+    }
+    case "inventory:vercel": {
+      const { runRetentionInventoryVerification } =
+        await import("./vercel-retention-inventory");
+      const json = Boolean(parsed.flags.json || parsed.flags.j);
+      const candidates = Boolean(parsed.flags.candidates || parsed.flags.c);
+      const { success } = runRetentionInventoryVerification({
+        json,
+        candidates,
+      });
+      if (!success) process.exit(1);
+      break;
+    }
+    case "headroom:vercel": {
+      const { runHeadroomVerification } = await import("./vercel-headroom");
+      const strict = Boolean(parsed.flags.strict || parsed.flags.s);
+      const json = Boolean(parsed.flags.json || parsed.flags.j);
+      const ledger = Boolean(parsed.flags.ledger || parsed.flags.l);
+      const { success } = runHeadroomVerification({ strict, json, ledger });
+      if (!success) process.exit(1);
       break;
     }
     case "release:gate": {

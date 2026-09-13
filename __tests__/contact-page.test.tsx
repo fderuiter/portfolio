@@ -2,7 +2,9 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -36,10 +38,10 @@ describe("ContactPage Component", () => {
       root?.render(<ContactPage />);
     });
 
-    expect(container?.textContent).toContain("Let's Start a Conversation");
-    expect(container?.textContent).toContain("Direct Relay Active");
-    expect(container?.textContent).toContain("Contact & Inquiries");
-    expect(container?.textContent).toContain("Send a Direct Inquiry");
+    expect(container?.textContent).toContain("Let’s talk.");
+    expect(container?.textContent).toContain("Say hello");
+    expect(container?.textContent).toContain("Contact");
+    expect(container?.textContent).toContain("Send me a message");
   });
 
   it("renders the integrated contact form", async () => {
@@ -53,7 +55,9 @@ describe("ContactPage Component", () => {
     const emailInput = container?.querySelector('input[name="email"]');
     expect(emailInput).not.toBeNull();
 
-    const messageTextarea = container?.querySelector('textarea[name="message"]');
+    const messageTextarea = container?.querySelector(
+      'textarea[name="message"]'
+    );
     expect(messageTextarea).not.toBeNull();
   });
 
@@ -62,9 +66,9 @@ describe("ContactPage Component", () => {
       root?.render(<ContactPage />);
     });
 
-    expect(container?.textContent).toContain("Prefer a Live Technical Sync?");
-    expect(container?.textContent).toContain("Schedule 1:1 Video Sync");
-    expect(container?.textContent).toContain("Systems Dispatch");
+    expect(container?.textContent).toContain("More of a talking person?");
+    expect(container?.textContent).toContain("Book a Chat");
+    expect(container?.textContent).toContain("Notes from my projects");
     expect(container?.textContent).toContain("LinkedIn");
     expect(container?.textContent).toContain("GitHub");
 

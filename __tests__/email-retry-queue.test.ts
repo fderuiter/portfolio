@@ -20,70 +20,125 @@ interface MockQueueItem {
 }
 
 const mockQueueStore = new Map<string, MockQueueItem>();
-const mockSuppressionStore = new Map<string, { email: string; reason: string }>();
+const mockSuppressionStore = new Map<
+  string,
+  { email: string; reason: string }
+>();
 
 vi.mock("@/lib/db", () => ({
   prisma: {
     suppressionList: {
-      findUnique: vi.fn().mockImplementation(async ({ where }: { where: { email: string } }) => {
-        const item = mockSuppressionStore.get(where.email.toLowerCase().trim());
-        return item ? { ...item, id: "sup_1", createdAt: new Date() } : null;
-      }),
-      upsert: vi.fn().mockImplementation(async ({ where, create }: { where: { email: string }; create: { email: string; reason: string } }) => {
-        mockSuppressionStore.set(where.email.toLowerCase().trim(), {
-          email: where.email.toLowerCase().trim(),
-          reason: create.reason,
-        });
-        return { id: "sup_1", email: where.email, reason: create.reason, createdAt: new Date() };
-      }),
+      findUnique: vi
+        .fn()
+        .mockImplementation(async ({ where }: { where: { email: string } }) => {
+          const item = mockSuppressionStore.get(
+            where.email.toLowerCase().trim()
+          );
+          return item ? { ...item, id: "sup_1", createdAt: new Date() } : null;
+        }),
+      upsert: vi
+        .fn()
+        .mockImplementation(
+          async ({
+            where,
+            create,
+          }: {
+            where: { email: string };
+            create: { email: string; reason: string };
+          }) => {
+            mockSuppressionStore.set(where.email.toLowerCase().trim(), {
+              email: where.email.toLowerCase().trim(),
+              reason: create.reason,
+            });
+            return {
+              id: "sup_1",
+              email: where.email,
+              reason: create.reason,
+              createdAt: new Date(),
+            };
+          }
+        ),
     },
     outboundEmailQueue: {
-      create: vi.fn().mockImplementation(async ({ data }: { data: Record<string, unknown> }) => {
-        const id = `queue_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-        const record: MockQueueItem = {
-          id,
-          to: data.to as string,
-          from: data.from as string,
-          replyTo: (data.replyTo as string) || null,
-          subject: data.subject as string,
-          html: data.html as string,
-          text: (data.text as string) || null,
-          tags: data.tags || null,
-          attempts: (data.attempts as number) ?? 1,
-          status: (data.status as string) ?? "RETRYING",
-          nextRetryAt: (data.nextRetryAt as Date) ?? new Date(),
-          lastError: (data.lastError as string) ?? null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-        mockQueueStore.set(id, record);
-        return record;
-      }),
-      findMany: vi.fn().mockImplementation(async ({ where, take }: { where?: { status?: { in?: string[] }; nextRetryAt?: { lte?: Date } }; take?: number }) => {
-        let results = Array.from(mockQueueStore.values());
-        if (where?.status?.in) {
-          results = results.filter((item) => where.status?.in?.includes(item.status));
+      create: vi
+        .fn()
+        .mockImplementation(
+          async ({ data }: { data: Record<string, unknown> }) => {
+            const id = `queue_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+            const record: MockQueueItem = {
+              id,
+              to: data.to as string,
+              from: data.from as string,
+              replyTo: (data.replyTo as string) || null,
+              subject: data.subject as string,
+              html: data.html as string,
+              text: (data.text as string) || null,
+              tags: data.tags || null,
+              attempts: (data.attempts as number) ?? 1,
+              status: (data.status as string) ?? "RETRYING",
+              nextRetryAt: (data.nextRetryAt as Date) ?? new Date(),
+              lastError: (data.lastError as string) ?? null,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            };
+            mockQueueStore.set(id, record);
+            return record;
+          }
+        ),
+      findMany: vi.fn().mockImplementation(
+        async ({
+          where,
+          take,
+        }: {
+          where?: {
+            status?: { in?: string[] };
+            nextRetryAt?: { lte?: Date };
+          };
+          take?: number;
+        }) => {
+          let results = Array.from(mockQueueStore.values());
+          if (where?.status?.in) {
+            results = results.filter((item) =>
+              where.status?.in?.includes(item.status)
+            );
+          }
+          if (where?.nextRetryAt?.lte) {
+            const lteTime =
+              where.nextRetryAt.lte instanceof Date
+                ? where.nextRetryAt.lte.getTime()
+                : new Date(where.nextRetryAt.lte).getTime();
+            results = results.filter(
+              (item) => item.nextRetryAt.getTime() <= lteTime
+            );
+          }
+          if (take) {
+            results = results.slice(0, take);
+          }
+          return results;
         }
-        if (where?.nextRetryAt?.lte) {
-          const lteTime = where.nextRetryAt.lte instanceof Date ? where.nextRetryAt.lte.getTime() : new Date(where.nextRetryAt.lte).getTime();
-          results = results.filter((item) => item.nextRetryAt.getTime() <= lteTime);
-        }
-        if (take) {
-          results = results.slice(0, take);
-        }
-        return results;
-      }),
-      update: vi.fn().mockImplementation(async ({ where, data }: { where: { id: string }; data: Partial<MockQueueItem> }) => {
-        const existing = mockQueueStore.get(where.id);
-        if (!existing) throw new Error(`Record ${where.id} not found in mock queue`);
-        const updated: MockQueueItem = {
-          ...existing,
-          ...data,
-          updatedAt: new Date(),
-        };
-        mockQueueStore.set(where.id, updated);
-        return updated;
-      }),
+      ),
+      update: vi
+        .fn()
+        .mockImplementation(
+          async ({
+            where,
+            data,
+          }: {
+            where: { id: string };
+            data: Partial<MockQueueItem>;
+          }) => {
+            const existing = mockQueueStore.get(where.id);
+            if (!existing)
+              throw new Error(`Record ${where.id} not found in mock queue`);
+            const updated: MockQueueItem = {
+              ...existing,
+              ...data,
+              updatedAt: new Date(),
+            };
+            mockQueueStore.set(where.id, updated);
+            return updated;
+          }
+        ),
     },
   },
 }));
@@ -119,7 +174,10 @@ describe("Outbound Email Queue & Resilient Backoff Retry Engine (#546)", () => {
     it("automatically persists email to OutboundEmailQueue when Resend returns 429 rate limit", async () => {
       mockSendFn.mockResolvedValueOnce({
         data: null,
-        error: { message: "Too many requests (429 rate limit exceeded)", name: "rate_limit_exceeded" },
+        error: {
+          message: "Too many requests (429 rate limit exceeded)",
+          name: "rate_limit_exceeded",
+        },
       });
 
       const options: RawEmailOptions = {
@@ -143,7 +201,9 @@ describe("Outbound Email Queue & Resilient Backoff Retry Engine (#546)", () => {
     });
 
     it("automatically persists email to OutboundEmailQueue when network dispatch throws transient error", async () => {
-      mockSendFn.mockRejectedValueOnce(new Error("fetch failed (ECONNRESET timeout)"));
+      mockSendFn.mockRejectedValueOnce(
+        new Error("fetch failed (ECONNRESET timeout)")
+      );
 
       const options: RawEmailOptions = {
         to: "transient@example.com",
@@ -202,13 +262,17 @@ describe("Outbound Email Queue & Resilient Backoff Retry Engine (#546)", () => {
         error: null,
       });
 
-      const summary = await EmailService.processRetryQueue({ now: new Date(Date.now() + 5000) });
+      const summary = await EmailService.processRetryQueue({
+        now: new Date(Date.now() + 5000),
+      });
 
       expect(summary.processed).toBe(1);
       expect(summary.succeeded).toBe(1);
       expect(summary.failed).toBe(0);
 
-      const item = mockQueueStore.get(queueId);
+      // A null id would mean the seed row was never persisted.
+      expect(queueId).not.toBeNull();
+      const item = mockQueueStore.get(queueId as string);
       expect(item?.status).toBe("DELIVERED");
     });
 
@@ -249,37 +313,36 @@ describe("Outbound Email Queue & Resilient Backoff Retry Engine (#546)", () => {
     });
 
     it("marks queued item FAILED immediately if recipient was added to suppression list in the interim", async () => {
-      // Suppress the email
+      mockSendFn.mockResolvedValueOnce({
+        data: null,
+        error: {
+          message: "Too many requests (429 rate limit exceeded)",
+          name: "rate_limit_exceeded",
+        },
+      });
+
+      const initialDispatch = await EmailService.sendRawEmail({
+        to: "suppressed@example.com",
+        subject: "Suppression Check Test",
+        html: "<p>Test</p>",
+      });
+      expect(initialDispatch.queued).toBe(true);
+
       mockSuppressionStore.set("suppressed@example.com", {
         email: "suppressed@example.com",
         reason: "BOUNCE",
       });
+      mockSendFn.mockClear();
 
-      const record: MockQueueItem = {
-        id: "queue_suppressed_target",
-        to: "suppressed@example.com",
-        from: "Frederick de Ruiter <notifications@deruiter.dev>",
-        replyTo: null,
-        subject: "Suppression Check Test",
-        html: "<p>Test</p>",
-        text: null,
-        tags: null,
-        attempts: 1,
-        status: "RETRYING",
-        nextRetryAt: new Date(Date.now() - 1000),
-        lastError: "Rate limit",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      mockQueueStore.set(record.id, record);
-
-      const summary = await EmailService.processRetryQueue();
+      const summary = await EmailService.processRetryQueue({
+        now: new Date(Date.now() + 5000),
+      });
 
       expect(summary.processed).toBe(1);
       expect(summary.failed).toBe(1);
       expect(mockSendFn).not.toHaveBeenCalled();
 
-      const updated = mockQueueStore.get("queue_suppressed_target");
+      const updated = mockQueueStore.get(initialDispatch.queueId!);
       expect(updated?.status).toBe("FAILED");
       expect(updated?.lastError).toContain("suppression list");
     });

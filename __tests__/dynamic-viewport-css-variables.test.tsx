@@ -107,7 +107,7 @@ describe("Dynamic Viewport Heights & CSS Custom Variable Space Contract", () => 
   });
 
   describe("Requirement 2 & 4: Workspace, Studio, and Arcade Cabinet calculations", () => {
-    it("PlayCabinet utilizes variable-backed viewport max-height formula", async () => {
+    it("PlayCabinet keeps windowed content in natural flow without a viewport height cap", async () => {
       vi.useFakeTimers();
 
       const { container } = render(
@@ -136,10 +136,10 @@ describe("Dynamic Viewport Heights & CSS Custom Variable Space Contract", () => 
         vi.advanceTimersByTime(1000);
       });
 
-      const gameArea = container.querySelector(
-        ".max-h-\\[calc\\(100dvh-var\\(--header-height\\,80px\\)-var\\(--footer-height\\,48px\\)\\)\\]"
-      );
+      const gameArea = container.querySelector(".arcade-cabinet-stage");
       expect(gameArea).not.toBeNull();
+      expect(gameArea?.className).not.toContain("max-h-");
+      expect(gameArea?.className).toContain("justify-start");
 
       vi.useRealTimers();
     });

@@ -4,7 +4,9 @@ import { buildRouteMetadata, ROUTE_METADATA_CONFIGS } from "@/lib/seo-metadata";
 import { getWebApplicationSchema, getBreadcrumbSchema } from "@/lib/seo";
 import { PageLayout } from "@/components/PageLayout";
 
-export const metadata: Metadata = buildRouteMetadata(ROUTE_METADATA_CONFIGS.memeVault);
+export const metadata: Metadata = buildRouteMetadata(
+  ROUTE_METADATA_CONFIGS.memeVault
+);
 
 export default function MemeVaultPage() {
   return (
@@ -17,7 +19,7 @@ export default function MemeVaultPage() {
             description: ROUTE_METADATA_CONFIGS.memeVault.description,
             url: ROUTE_METADATA_CONFIGS.memeVault.path,
             applicationCategory: "GameApplication",
-            genre: "Secret Easter Egg Chamber",
+            genre: "Meme Soundboard & Trophy Room",
           }),
         }}
       />
@@ -27,7 +29,7 @@ export default function MemeVaultPage() {
           __html: getBreadcrumbSchema([
             { name: "Home", url: "/" },
             { name: "Arcade Hub", url: "/arcade" },
-            { name: "Secret Meme Vault", url: "/arcade/meme-vault" },
+            { name: "Meme Vault", url: "/arcade/meme-vault" },
           ]),
         }}
       />

@@ -104,15 +104,15 @@ export function NewsletterForm({
           <div className="flex items-center gap-2 mb-1.5">
             <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
             <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-cyan-400">
-              Systems Dispatch // Newsletter
+              PROJECT NOTES / NEWSLETTER
             </span>
           </div>
           <h4 className="text-sm font-mono font-bold text-white mb-1">
-            Engineering &amp; Architecture Notes
+            Notes from my projects
           </h4>
           <p className="text-xs font-mono text-zinc-400 leading-relaxed">
-            Occasional deep-dives into formal verification, AST compilers, CDISC
-            clinical architectures, and bare-metal browser physics. Zero fluff.
+            Occasional notes on what I’m building, what I’m learning, and the
+            bugs that put up a good fight.
           </p>
         </div>
       )}
@@ -123,7 +123,7 @@ export function NewsletterForm({
           className="flex items-center gap-3 p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-300 text-xs font-mono animate-fade-in"
         >
           <IconCheck className="w-4 h-4 shrink-0 text-emerald-400" />
-          <span>Subscribed! Check your inbox for a confirmation receipt.</span>
+          <span>You’re subscribed. Thanks for reading!</span>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-2">

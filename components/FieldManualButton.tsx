@@ -58,7 +58,10 @@ export function FieldManualButton({
         return;
       }
 
-      if (e.key === "?" || (e.key === "h" && !e.metaKey && !e.ctrlKey && !e.altKey)) {
+      if (
+        e.key === "?" ||
+        (e.key === "h" && !e.metaKey && !e.ctrlKey && !e.altKey)
+      ) {
         e.preventDefault();
         setIsOpen((prev) => !prev);
       }
@@ -97,7 +100,11 @@ export function FieldManualButton({
           <span>Manual</span>
         </button>
 
-        <FieldManualModal isOpen={isOpen} onClose={handleClose} manual={manual} />
+        <FieldManualModal
+          isOpen={isOpen}
+          onClose={handleClose}
+          manual={manual}
+        />
       </>
     );
   }
@@ -119,7 +126,11 @@ export function FieldManualButton({
           </kbd>
         </button>
 
-        <FieldManualModal isOpen={isOpen} onClose={handleClose} manual={manual} />
+        <FieldManualModal
+          isOpen={isOpen}
+          onClose={handleClose}
+          manual={manual}
+        />
       </>
     );
   }
@@ -133,14 +144,14 @@ export function FieldManualButton({
           onClick={handleOpen}
           onMouseEnter={() => playHover()}
           aria-label={`Open Field Manual for ${manual.title}`}
-          className={`group flex items-center gap-2 px-3.5 py-1.5 text-xs font-mono font-bold rounded-xl transition-all border cursor-pointer ${
+          className={`group flex items-center justify-center gap-2 px-3.5 py-1.5 min-h-[36px] text-xs font-mono font-bold rounded-xl transition-all border cursor-pointer ${
             !hasSeenGuide
               ? "bg-cyan-950/40 text-cyan-300 border-cyan-500/40 shadow-sm shadow-cyan-500/10 animate-pulse"
               : "bg-zinc-900/60 hover:bg-zinc-850 text-zinc-300 hover:text-cyan-300 border-zinc-800 hover:border-cyan-500/40"
           } ${className}`}
         >
           <IconHelp className="w-4 h-4 text-cyan-400 group-hover:rotate-12 transition-transform" />
-          <span>{label}</span>
+          <span className="hidden sm:inline">{label}</span>
           <kbd className="hidden sm:inline-block text-[10px] text-zinc-500 group-hover:text-zinc-400 bg-zinc-950 px-1.5 py-0.5 rounded border border-zinc-800">
             ?
           </kbd>

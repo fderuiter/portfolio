@@ -74,7 +74,8 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
     12: "col-span-12 sm:col-span-12",
   };
 
-  const spanClass = colSpanClasses[field.columnSpan] || "col-span-12 sm:col-span-6";
+  const spanClass =
+    colSpanClasses[field.columnSpan] || "col-span-12 sm:col-span-6";
 
   const handleSaveInline = () => {
     if (onUpdateField) {
@@ -93,6 +94,11 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    // Only treat Enter/Space as "select this field card" when they originate on
+    // the card itself. Child controls (the tier badge, move/duplicate/delete
+    // buttons, inline inputs) bubble their own keydown here too; without this
+    // guard, activating any of them by keyboard also re-triggers onSelect().
+    if (e.target !== e.currentTarget) return;
     if (e.key === "Enter" || e.key === " ") {
       if (!isInlineEditing) {
         e.preventDefault();
@@ -146,11 +152,12 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             onClick={(e) => {
               e.stopPropagation();
               const nextTier =
-                field.requirementTier === "hard_stop" || (!field.requirementTier && field.required)
+                field.requirementTier === "hard_stop" ||
+                (!field.requirementTier && field.required)
                   ? "auto_query"
                   : field.requirementTier === "auto_query"
-                  ? "optional"
-                  : "hard_stop";
+                    ? "optional"
+                    : "hard_stop";
               onUpdateField?.({
                 requirementTier: nextTier,
                 required: nextTier !== "optional",
@@ -159,23 +166,26 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             className={`px-1.5 py-0.5 rounded text-[9px] font-mono transition-colors border ${
               field.requirementTier === "auto_query"
                 ? "bg-amber-500/15 text-amber-400 border-amber-500/30 font-bold"
-                : field.requirementTier === "hard_stop" || (!field.requirementTier && field.required)
-                ? "bg-red-500/15 text-red-400 border-red-500/30 font-bold"
-                : "bg-zinc-900 text-zinc-600 border-zinc-800 hover:text-zinc-400"
+                : field.requirementTier === "hard_stop" ||
+                    (!field.requirementTier && field.required)
+                  ? "bg-red-500/15 text-red-400 border-red-500/30 font-bold"
+                  : "bg-zinc-900 text-zinc-600 border-zinc-800 hover:text-zinc-400"
             }`}
             title={`Requirement Tier: ${
               field.requirementTier === "auto_query"
                 ? "Auto-Query on empty"
-                : field.requirementTier === "hard_stop" || (!field.requirementTier && field.required)
-                ? "Hard Stop (Blocks form)"
-                : "Optional"
+                : field.requirementTier === "hard_stop" ||
+                    (!field.requirementTier && field.required)
+                  ? "Hard Stop (Blocks form)"
+                  : "Optional"
             } (click to cycle)`}
           >
             {field.requirementTier === "auto_query"
               ? "? Auto-Query"
-              : field.requirementTier === "hard_stop" || (!field.requirementTier && field.required)
-              ? "* Hard Stop"
-              : "Opt"}
+              : field.requirementTier === "hard_stop" ||
+                  (!field.requirementTier && field.required)
+                ? "* Hard Stop"
+                : "Opt"}
           </button>
 
           {field.requiresSdv && (
@@ -210,7 +220,9 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           {/* Compact Column Span Stepper (Visible on Hover / Focus / Selection) */}
           <div
             className={`hidden sm:flex items-center bg-zinc-900/90 border border-zinc-800 rounded-lg px-1.5 py-0.5 text-[9px] font-mono text-zinc-400 gap-1 transition-opacity ${
-              isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus-within:opacity-100"
+              isSelected
+                ? "opacity-100"
+                : "opacity-0 group-hover:opacity-100 focus-within:opacity-100"
             }`}
           >
             <button
@@ -224,7 +236,9 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             >
               -
             </button>
-            <span className="text-brand-cyan font-bold">{field.columnSpan}/12</span>
+            <span className="text-brand-cyan font-bold">
+              {field.columnSpan}/12
+            </span>
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -270,7 +284,9 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           {/* Desktop Hover Actions */}
           <div
             className={`hidden sm:flex items-center gap-0.5 transition-opacity ${
-              isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus-within:opacity-100"
+              isSelected
+                ? "opacity-100"
+                : "opacity-0 group-hover:opacity-100 focus-within:opacity-100"
             }`}
           >
             <button
@@ -287,7 +303,11 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
               className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-brand-cyan transition-colors"
               title={isInlineEditing ? "Save Inline Edit" : "Quick Edit"}
             >
-              {isInlineEditing ? <IconCheck className="w-3.5 h-3.5 text-emerald-400" /> : <IconEdit className="w-3.5 h-3.5" />}
+              {isInlineEditing ? (
+                <IconCheck className="w-3.5 h-3.5 text-emerald-400" />
+              ) : (
+                <IconEdit className="w-3.5 h-3.5" />
+              )}
             </button>
             <button
               onClick={(e) => {
@@ -384,7 +404,9 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           onClick={(e) => e.stopPropagation()}
         >
           <div>
-            <label className="block text-[9px] font-mono text-zinc-400">Prompt / Label</label>
+            <label className="block text-[9px] font-mono text-zinc-400">
+              Prompt / Label
+            </label>
             <input
               type="text"
               value={labelInput}
@@ -393,7 +415,9 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             />
           </div>
           <div>
-            <label className="block text-[9px] font-mono text-zinc-400">SDTM Variable (Max 8 chars)</label>
+            <label className="block text-[9px] font-mono text-zinc-400">
+              SDTM Variable (Max 8 chars)
+            </label>
             <input
               type="text"
               maxLength={8}
@@ -484,25 +508,47 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
               </div>
             </div>
             <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500">
-              <span>{field.allowPartial ? "ISO: YYYY-MM-DD / UNK" : "ISO: YYYY-MM-DD"}</span>
-              {field.preventFutureDate && <span className="text-amber-400/80">≤ Today UTC</span>}
+              <span>
+                {field.allowPartial
+                  ? "ISO: YYYY-MM-DD / UNK"
+                  : "ISO: YYYY-MM-DD"}
+              </span>
+              {field.preventFutureDate && (
+                <span className="text-amber-400/80">≤ Today UTC</span>
+              )}
             </div>
           </div>
         )}
 
-        {(field.dataType === "date" || field.dataType === "partial_date" || field.dataType === "datetime" || field.dataType === "time") && (
+        {(field.dataType === "date" ||
+          field.dataType === "partial_date" ||
+          field.dataType === "datetime" ||
+          field.dataType === "time") && (
           <input
             type="text"
             readOnly
-            placeholder={field.placeholder || (field.dataType === "partial_date" ? "YYYY-MM-DD (or YYYY)" : "YYYY-MM-DD")}
+            placeholder={
+              field.placeholder ||
+              (field.dataType === "partial_date"
+                ? "YYYY-MM-DD (or YYYY)"
+                : "YYYY-MM-DD")
+            }
             className="w-full px-2.5 py-1.5 text-xs bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-400 font-mono"
           />
         )}
 
         {(field.dataType === "radio" || field.dataType === "multi_select") && (
           <div className="space-y-1.5 pt-0.5">
-            {(options || [{ code: "Y", label: "Yes", order: 1 }, { code: "N", label: "No", order: 2 }]).map((opt) => (
-              <div key={opt.code} className="flex items-center gap-2 text-xs text-zinc-300">
+            {(
+              options || [
+                { code: "Y", label: "Yes", order: 1 },
+                { code: "N", label: "No", order: 2 },
+              ]
+            ).map((opt) => (
+              <div
+                key={opt.code}
+                className="flex items-center gap-2 text-xs text-zinc-300"
+              >
                 <div
                   className={`w-3.5 h-3.5 border border-zinc-700 bg-zinc-900 flex items-center justify-center ${
                     field.dataType === "radio" ? "rounded-full" : "rounded"
@@ -516,7 +562,11 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
 
         {field.dataType === "single_select" && (
           <div className="w-full px-2.5 py-1.5 text-xs bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-400 flex items-center justify-between">
-            <span>{options && options.length > 0 ? `-- Select from ${options.length} options --` : "-- Select --"}</span>
+            <span>
+              {options && options.length > 0
+                ? `-- Select from ${options.length} options --`
+                : "-- Select --"}
+            </span>
             <span className="text-[10px] text-zinc-600">▼</span>
           </div>
         )}
@@ -532,9 +582,15 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           <div className="p-2 rounded-lg bg-brand-cyan/5 border border-brand-cyan/20 flex items-center justify-between">
             <div className="flex items-center gap-1.5 text-brand-cyan font-mono text-[11px]">
               <IconMathFunction className="w-3.5 h-3.5 shrink-0" />
-              <span className="truncate">{field.calculationFormula || "f(x)"}</span>
+              <span className="truncate">
+                {field.calculationFormula || "f(x)"}
+              </span>
             </div>
-            {field.unit && <span className="text-[10px] font-mono text-zinc-400 ml-1">{field.unit}</span>}
+            {field.unit && (
+              <span className="text-[10px] font-mono text-zinc-400 ml-1">
+                {field.unit}
+              </span>
+            )}
           </div>
         )}
 
@@ -582,7 +638,9 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
       {field.cdashMetadata && (
         <div className="mt-2.5 pt-2 border-t border-zinc-850 flex items-center justify-between text-[10px] font-mono text-zinc-500">
           <span>SDTM: {field.cdashMetadata.acrfAnnotation}</span>
-          <span className="text-zinc-600">Core: {field.cdashMetadata.core}</span>
+          <span className="text-zinc-600">
+            Core: {field.cdashMetadata.core}
+          </span>
         </div>
       )}
     </div>

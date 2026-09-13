@@ -37,17 +37,48 @@ export default function OfflineFallbackPage() {
   };
 
   const precachedRoutes = [
-    { title: "Home Overview", path: "/", icon: <IconDirections className="w-4 h-4 text-brand-cyan" /> },
-    { title: "Formal Proof Studio", path: "/proof", icon: <IconTerminal className="w-4 h-4 text-brand-cyan" /> },
-    { title: "Systems Simulator", path: "/simulator", icon: <IconDirections className="w-4 h-4 text-brand-cyan" /> },
-    { title: "Neuro 3D CAD", path: "/neuro", icon: <IconBrain className="w-4 h-4 text-brand-cyan" /> },
-    { title: "CRF Studio", path: "/crf", icon: <IconFileSpreadsheet className="w-4 h-4 text-brand-cyan" /> },
-    { title: "Architecture & Stack", path: "/stack", icon: <IconCpu className="w-4 h-4 text-brand-cyan" /> },
-    { title: "Arcade Hub", path: "/arcade", icon: <IconTerminal className="w-4 h-4 text-brand-cyan" /> },
+    {
+      title: "Home Overview",
+      path: "/",
+      icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
+    },
+    {
+      title: "Formal Proof Studio",
+      path: "/proof",
+      icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />,
+    },
+    {
+      title: "Systems Simulator",
+      path: "/simulator",
+      icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
+    },
+    {
+      title: "Neuro 3D CAD",
+      path: "/neuro",
+      icon: <IconBrain className="w-4 h-4 text-brand-cyan" />,
+    },
+    {
+      title: "CRF Studio",
+      path: "/crf",
+      icon: <IconFileSpreadsheet className="w-4 h-4 text-brand-cyan" />,
+    },
+    {
+      title: "Architecture & Stack",
+      path: "/stack",
+      icon: <IconCpu className="w-4 h-4 text-brand-cyan" />,
+    },
+    {
+      title: "Arcade Hub",
+      path: "/arcade",
+      icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />,
+    },
   ];
 
   return (
-    <PageLayout variant="standard" className="pt-28 pb-16 bg-zinc-950 text-foreground relative overflow-hidden">
+    <PageLayout
+      variant="standard"
+      className="pt-28 pb-16 bg-zinc-950 text-foreground relative overflow-hidden"
+    >
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-8 md:p-12 shadow-2xl backdrop-blur-md">
           <div className="flex items-center space-x-3 mb-6">
@@ -56,18 +87,18 @@ export default function OfflineFallbackPage() {
             </div>
             <div>
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                {isOnline ? "Connection Restored" : "Network Disconnected"}
+                {isOnline ? "Connection Restored" : "You’re offline"}
               </span>
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100 mt-1">
-                Offline Application Shell
+                This page isn’t available offline
               </h1>
             </div>
           </div>
 
           <p className="text-zinc-400 text-base sm:text-lg mb-8 leading-relaxed">
             {isOnline
-              ? "Your network connection has been re-established. You can now reload to access uncached dynamic routes."
-              : "You are currently offline. The requested page is not precached in your offline application shell. You can retry the request or navigate to available precached core tools below."}
+              ? "You’re back online. Reload to open this page."
+              : "This page hasn’t been saved for offline use. Try again when you’re connected, or try one of the cached pages below."}
           </p>
 
           <div className="flex flex-wrap items-center gap-4 mb-10">
@@ -89,7 +120,7 @@ export default function OfflineFallbackPage() {
 
           <div className="border-t border-zinc-800/80 pt-8">
             <h2 className="text-sm font-mono uppercase tracking-wider text-zinc-400 mb-4">
-              Precached App Shell Workspaces
+              Pages to Try Offline
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {precachedRoutes.map((route) => (

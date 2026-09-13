@@ -22,7 +22,7 @@ We establish an automated, continuous accessibility auditing framework enforcing
 - **Component Unit Suite (Vitest)**: Unit tests for focus traps (`useFocusTrap`), live announcers (`useAnnouncer`), and bypass components (`SkipToContent`).
 - **Comprehensive E2E Browser Matrix (Playwright + @axe-core/playwright)**: Exhaustive scans of all 7 public routes, 6 arcade mini-games, dynamic modals, Command Palette, and mobile navigation drawers.
 - **Strict Zero-Tolerance Threshold**: Any **Critical**, **Serious**, or **Moderate** axe violation triggers an immediate test failure and blocks build promotion. Minor/informational items are captured in structured JSON diagnostic reports.
-- **Lighthouse CI Assertion**: Enforces 100% accessibility category score (`minScore: 1.0`) in `.lighthouserc.js`.
+- **Browser Accessibility Assertion**: Playwright and `@axe-core/playwright` enforce zero Critical, Serious, or Moderate accessibility violations.
 
 ### 2. Standardized Focus Trapping & Navigation Landmarks
 

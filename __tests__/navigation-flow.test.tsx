@@ -2,7 +2,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -15,7 +17,10 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@/components/providers/AudioProvider", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/components/providers/AudioProvider")>();
+  const actual =
+    await importOriginal<
+      typeof import("@/components/providers/AudioProvider")
+    >();
   return {
     ...actual,
     useAudio: () => ({
@@ -118,26 +123,29 @@ describe("Navigation Flow Components Suite", () => {
       });
 
       expect(container.textContent).toContain("FDERUITER");
-      expect(container.textContent).toContain("All Systems Operational");
+      expect(container.textContent).toContain("Explore the projects");
 
       // Arcade links
-      expect(container.textContent).toContain("Arcade Hub Index ↗");
+      expect(container.textContent).toContain("Arcade ↗");
       expect(container.textContent).toContain("Laser Loon");
       expect(container.textContent).toContain("Quasi-Puzzler");
       expect(container.textContent).toContain("Monkey C Mayhem");
 
       // Systems links
       expect(container.textContent).toContain("Proof Workspace");
+      expect(container.textContent).toContain("NeuroRecon Studio");
       expect(container.textContent).toContain("Incident Simulator");
 
       // Connect links & Newsletter
-      expect(container.textContent).toContain("Schedule 1:1 Sync ↗");
-      expect(container.textContent).toContain("Direct Contact Form ↗");
-      expect(container.textContent).toContain("Systems Dispatch");
+      expect(container.textContent).toContain("Book a Chat ↗");
+      expect(container.textContent).toContain("Contact ↗");
+      expect(container.textContent).toContain("Project Notes");
       expect(container.textContent).not.toContain("fpderuiter@gmail.com");
 
       // Back to top button
-      const backToTopBtn = container.querySelector('button[aria-label="Scroll back to top of page"]');
+      const backToTopBtn = container.querySelector(
+        'button[aria-label="Scroll back to top of page"]'
+      );
       expect(backToTopBtn).not.toBeNull();
 
       act(() => {

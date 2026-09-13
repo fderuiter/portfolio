@@ -6,28 +6,10 @@
     "reason": "Dev-only process runner CLI tool with no production runtime exposure"
   },
   {
-    "advisory": "GHSA-725w-8224-vh33",
-    "package": "@lhci/cli",
-    "expiresAt": "2026-11-01T23:59:59Z",
-    "reason": "Lighthouse CI automated performance test runner"
-  },
-  {
-    "advisory": "GHSA-725w-8224-vh33",
-    "package": "@lhci/utils",
-    "expiresAt": "2026-11-01T23:59:59Z",
-    "reason": "Lighthouse CI utility module for benchmark assertions"
-  },
-  {
     "advisory": "GHSA-qq97-3p32-359f",
     "package": "@prisma/config",
     "expiresAt": "2026-11-01T23:59:59Z",
     "reason": "Prisma ORM tooling configuration parser"
-  },
-  {
-    "advisory": "GHSA-566m-v2pf-453b",
-    "package": "@puppeteer/browsers",
-    "expiresAt": "2026-11-01T23:59:59Z",
-    "reason": "Browser binary downloader for synthetic Playwright/Lighthouse testing"
   },
   {
     "advisory": "GHSA-v88g-83jp-hd2w",
@@ -42,40 +24,10 @@
     "reason": "TypeScript utility library for object merging in build config"
   },
   {
-    "advisory": "GHSA-jmr9-qjv8-65gv",
-    "package": "extract-zip",
-    "expiresAt": "2026-11-01T23:59:59Z",
-    "reason": "Zip archive extraction utility for Playwright browser binaries"
-  },
-  {
     "advisory": "GHSA-3rjg-36vw-hh7p",
     "package": "fast-uri",
     "expiresAt": "2026-11-01T23:59:59Z",
     "reason": "URI parser dependency used by internal schema validators"
-  },
-  {
-    "advisory": "GHSA-52cp-r559-cp3m",
-    "package": "js-yaml",
-    "expiresAt": "2026-11-01T23:59:59Z",
-    "reason": "YAML parser for CI configuration and OpenAPI schema compilation"
-  },
-  {
-    "advisory": "GHSA-5p4m-2wfm-xmqj",
-    "package": "js-yaml",
-    "expiresAt": "2026-11-01T23:59:59Z",
-    "reason": "YAML parser for CI configuration and OpenAPI schema compilation"
-  },
-  {
-    "advisory": "GHSA-h67p-54hq-rp68",
-    "package": "js-yaml",
-    "expiresAt": "2026-11-01T23:59:59Z",
-    "reason": "YAML parser for CI configuration and OpenAPI schema compilation"
-  },
-  {
-    "advisory": "GHSA-725w-8224-vh33",
-    "package": "lighthouse",
-    "expiresAt": "2026-11-01T23:59:59Z",
-    "reason": "Performance benchmarking engine for synthetic audit suites"
   },
   {
     "advisory": "GHSA-953w-3q36-93rf",
@@ -96,12 +48,6 @@
     "reason": "Database ORM migration and client code generator"
   },
   {
-    "advisory": "GHSA-566m-v2pf-453b",
-    "package": "puppeteer-core",
-    "expiresAt": "2026-11-01T23:59:59Z",
-    "reason": "Headless Chrome automation driver for end-to-end testing"
-  },
-  {
     "advisory": "GHSA-54xr-2vhv-28v8",
     "package": "sharp",
     "expiresAt": "2026-11-01T23:59:59Z",
@@ -112,41 +58,5 @@
     "package": "shell-quote",
     "expiresAt": "2026-11-01T23:59:59Z",
     "reason": "Shell command sanitization helper for build tool scripts"
-  },
-  {
-    "advisory": "GHSA-ph9p-34f9-6g65",
-    "package": "tmp",
-    "expiresAt": "2026-11-01T23:59:59Z",
-    "reason": "Temporary file creator for build artifacts and benchmark caches"
-  },
-  {
-    "advisory": "GHSA-52f5-9888-hmc6",
-    "package": "tmp",
-    "expiresAt": "2026-11-01T23:59:59Z",
-    "reason": "Temporary file creator for build artifacts and benchmark caches"
-  },
-  {
-    "advisory": "GHSA-2rmq-5992-prm2",
-    "package": "hono",
-    "expiresAt": "2026-11-01T23:59:59Z",
-    "reason": "Lightweight edge HTTP server used in auxiliary benchmark routes"
-  },
-  {
-    "advisory": "GHSA-mwp4-54f8-5fhr",
-    "package": "ip-address",
-    "expiresAt": "2026-11-01T23:59:59Z",
-    "reason": "IP parsing utility used in telemetry network middleware"
-  },
-  {
-    "advisory": "GHSA-v2v4-37r5-5v8g",
-    "package": "ip-address",
-    "expiresAt": "2026-11-01T23:59:59Z",
-    "reason": "IP parsing utility used in telemetry network middleware"
-  },
-  {
-    "advisory": "GHSA-w5hq-g745-h8pq",
-    "package": "uuid",
-    "expiresAt": "2026-11-01T23:59:59Z",
-    "reason": "UUID generator dependency used in lighthouse runner"
   }
 ]

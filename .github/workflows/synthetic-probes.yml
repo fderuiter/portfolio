@@ -2,14 +2,22 @@ name: Synthetic User Probes & Journey Monitoring
 
 on:
   schedule:
-    # Run every 30 minutes continuously to detect silent production regressions
-    - cron: "*/30 * * * *"
+    # Once daily. This job exists to catch silent production regressions, which
+    # is a daily-resolution question, not a half-hourly one. At the previous
+    # */30 cadence this workflow alone consumed roughly 2,880 billable minutes a
+    # month -- about 144% of the private-repo free allowance -- so the interval
+    # is a cost decision as much as a monitoring one. Raise it deliberately.
+    - cron: "17 7 * * *"
   workflow_dispatch:
     inputs:
       target_url:
-        description: "Target URL to run synthetic probes against (default: production)"
+        description: "Origin to probe (defaults to the canonical production domain)"
         required: false
         default: ""
+
+env:
+  # Canonical production domain, per ADR/AGENTS.md §18.
+  DEFAULT_PROBE_TARGET: "https://www.deruiter.dev"
 
 jobs:
   synthetic-probe-run:
@@ -24,7 +32,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: "npm"
 
       - name: Install Dependencies
@@ -48,29 +56,46 @@ jobs:
         if: steps.playwright-cache.outputs.cache-hit == 'true'
         run: npx playwright install-deps chromium
 
+      - name: Resolve Probe Target
+        id: target
+        run: |
+          TARGET="${{ github.event.inputs.target_url }}"
+          if [ -z "$TARGET" ]; then
+            TARGET="${DEFAULT_PROBE_TARGET}"
+          fi
+          echo "url=${TARGET}" >> "$GITHUB_OUTPUT"
+          echo "Probing ${TARGET}"
+
       - name: Run Synthetic Journey Probes
         id: probes
-        run: |
-          if [ -n "${{ github.event.inputs.target_url }}" ]; then
-            export PLAYWRIGHT_TEST_BASE_URL="${{ github.event.inputs.target_url }}"
-          fi
-          npx playwright test __tests__/e2e/synthetic-probes.spec.ts --project=chromium
+        # Probes run against the deployed origin. The playwright config skips its
+        # local webServer whenever PLAYWRIGHT_TEST_BASE_URL is set, so no
+        # production build is needed here -- previously this step started
+        # `next start` with nothing built and failed before any probe ran.
+        run: npx playwright test __tests__/e2e/synthetic-probes.spec.ts --project=chromium
         env:
-          DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
-          NODE_ENV: "production"
+          PLAYWRIGHT_TEST_BASE_URL: ${{ steps.target.outputs.url }}
 
       - name: Publish Synthetic Health Summary
         if: always()
         run: |
-          echo "# 🛰️ Synthetic Journey Monitoring Report" >> $GITHUB_STEP_SUMMARY
-          echo "### Timestamp: $(date -u)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Synthetic Journey | Status | Description |" >> $GITHUB_STEP_SUMMARY
-          echo "| --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Landing & Pretext Layout** | ${{ steps.probes.outcome == 'success' && '✅ Healthy' || '❌ Regression Detected' }} | Card heights, text layout & filtering |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Command Palette** | ${{ steps.probes.outcome == 'success' && '✅ Healthy' || '❌ Regression Detected' }} | Keyboard shortcuts & instant route discovery |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Proof Studio Engine** | ${{ steps.probes.outcome == 'success' && '✅ Healthy' || '❌ Regression Detected' }} | AST graph deductions & multi-format export |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Arcade Canvas 2D** | ${{ steps.probes.outcome == 'success' && '✅ Healthy' || '❌ Regression Detected' }} | Game canvas lifecycle & controls |" >> $GITHUB_STEP_SUMMARY
-          echo "| **API Telemetry & Schemas** | ${{ steps.probes.outcome == 'success' && '✅ Healthy' || '❌ Regression Detected' }} | Ingest endpoint, rate-limiting & response schema |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "*(Automated Canary & Proactive Interception Guard)*" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "# 🛰️ Synthetic Journey Monitoring Report"
+            echo ""
+            echo "- **Target:** ${{ steps.target.outputs.url }}"
+            echo "- **Checked:** $(date -u)"
+            echo "- **Result:** ${{ steps.probes.outcome == 'success' && '✅ All probed journeys healthy' || '❌ Probe run did not pass — see the job log for the failing spec' }}"
+            echo ""
+            echo "Journeys covered by this suite:"
+            echo ""
+            echo "| Synthetic Journey | Description |"
+            echo "| --- | --- |"
+            echo "| Landing & Pretext Layout | Card heights, text layout & filtering |"
+            echo "| Command Palette | Keyboard shortcuts & instant route discovery |"
+            echo "| Proof Studio Engine | AST graph deductions & multi-format export |"
+            echo "| Arcade Canvas 2D | Game canvas lifecycle & controls |"
+            echo "| API Telemetry & Schemas | Ingest endpoint, rate-limiting & response schema |"
+            echo ""
+            echo "*Per-journey status is not derived here; the suite reports one outcome."
+            echo "Read the job log to see which spec failed.*"
+          } >> "$GITHUB_STEP_SUMMARY"

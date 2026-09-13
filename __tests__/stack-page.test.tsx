@@ -2,7 +2,9 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -29,28 +31,30 @@ describe("Stack Overview Page & Components", () => {
     root = createRoot(container);
 
     // Canvas 2D Mock according to Invariant #7
-    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation((contextId) => {
-      if (contextId === "2d") {
-        return {
-          font: "",
-          measureText: vi.fn((text: string) => ({
-            width: (text || "").length * 8,
-          })),
-          fillRect: vi.fn(),
-          clearRect: vi.fn(),
-          beginPath: vi.fn(),
-          closePath: vi.fn(),
-          stroke: vi.fn(),
-          fill: vi.fn(),
-          arc: vi.fn(),
-          arcTo: vi.fn(),
-          quadraticCurveTo: vi.fn(),
-          bezierCurveTo: vi.fn(),
-          roundRect: vi.fn(),
-        } as any;
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(
+      (contextId) => {
+        if (contextId === "2d") {
+          return {
+            font: "",
+            measureText: vi.fn((text: string) => ({
+              width: (text || "").length * 8,
+            })),
+            fillRect: vi.fn(),
+            clearRect: vi.fn(),
+            beginPath: vi.fn(),
+            closePath: vi.fn(),
+            stroke: vi.fn(),
+            fill: vi.fn(),
+            arc: vi.fn(),
+            arcTo: vi.fn(),
+            quadraticCurveTo: vi.fn(),
+            bezierCurveTo: vi.fn(),
+            roundRect: vi.fn(),
+          } as any;
+        }
+        return null;
       }
-      return null;
-    });
+    );
   });
 
   afterEach(async () => {
@@ -77,8 +81,8 @@ describe("Stack Overview Page & Components", () => {
     expect(container?.textContent).toContain("Layout Physics Lab");
     expect(container?.textContent).toContain("Web Audio Synthesizer");
     expect(container?.textContent).toContain("Stack Layers");
-    expect(container?.textContent).toContain("12 Invariants");
-    expect(container?.textContent).toContain("Developer Invariant & Verification CLI");
+    expect(container?.textContent).toContain("Quality Rules");
+    expect(container?.textContent).toContain("Run the Checks");
   });
 
   it("renders PretextBenchmarkLab, dataset selector and triggers benchmark run", async () => {
@@ -88,12 +92,16 @@ describe("Stack Overview Page & Components", () => {
       root?.render(<PretextBenchmarkLab />);
     });
 
-    expect(container?.textContent).toContain("Layout Physics Lab: Pretext vs DOM Reflow");
+    expect(container?.textContent).toContain(
+      "Layout Physics Lab: Pretext vs DOM Reflow"
+    );
     expect(container?.textContent).toContain("Bento Card Teaser");
     expect(container?.textContent).toContain("Clinical Protocol");
     expect(container?.textContent).toContain("Distributed Consensus AST");
 
-    const runBtn = container?.querySelector("button:has(svg)") as HTMLButtonElement;
+    const runBtn = container?.querySelector(
+      "button:has(svg)"
+    ) as HTMLButtonElement;
     expect(runBtn).not.toBeNull();
 
     await act(async () => {
@@ -126,7 +134,9 @@ describe("Stack Overview Page & Components", () => {
     const buttons = container?.querySelectorAll("button");
     expect(buttons && buttons.length).toBeGreaterThanOrEqual(5);
 
-    const laserBtn = Array.from(buttons || []).find((b) => b.textContent?.includes("Laser Blip"));
+    const laserBtn = Array.from(buttons || []).find((b) =>
+      b.textContent?.includes("Laser Blip")
+    );
     expect(laserBtn).toBeDefined();
 
     if (laserBtn) {
@@ -151,7 +161,9 @@ describe("Stack Overview Page & Components", () => {
 
     // Filter by Accessibility
     const filterBtns = container?.querySelectorAll("button");
-    const a11yBtn = Array.from(filterBtns || []).find((b) => b.textContent?.trim() === "Accessibility");
+    const a11yBtn = Array.from(filterBtns || []).find(
+      (b) => b.textContent?.trim() === "Accessibility"
+    );
     expect(a11yBtn).toBeDefined();
 
     if (a11yBtn) {
@@ -159,12 +171,16 @@ describe("Stack Overview Page & Components", () => {
         a11yBtn.click();
       });
       expect(container?.textContent).toContain("INV-10");
-      expect(container?.textContent).toContain("Continuous Accessibility & WCAG 2.1 AA");
+      expect(container?.textContent).toContain(
+        "Continuous Accessibility & WCAG 2.1 AA"
+      );
       expect(container?.textContent).not.toContain("INV-01");
     }
 
     // Test copy command button
-    const copyBtns = container?.querySelectorAll('button[aria-label^="Copy command"]');
+    const copyBtns = container?.querySelectorAll(
+      'button[aria-label^="Copy command"]'
+    );
     expect(copyBtns && copyBtns.length).toBeGreaterThan(0);
     if (copyBtns && copyBtns[0]) {
       await act(async () => {
@@ -179,7 +195,9 @@ describe("Stack Overview Page & Components", () => {
       root?.render(<StackLayerCards />);
     });
 
-    expect(container?.textContent).toContain("Architectural Layers & Tech Stack");
+    expect(container?.textContent).toContain(
+      "Architectural Layers & Tech Stack"
+    );
     expect(container?.textContent).toContain("Framework & Edge Runtime");
     expect(container?.textContent).toContain("Design System & Tokens");
     expect(container?.textContent).toContain("Layout Physics & Text Engine");

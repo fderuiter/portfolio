@@ -6,15 +6,19 @@ import path from "path";
 
 describe("InBody QR Data Decoder & Analyzer Case Study Integration", () => {
   it("includes inbody-qr-decoder in static FALLBACK_CASE_STUDIES array", () => {
-    const study = FALLBACK_CASE_STUDIES.find((s) => s.slug === "inbody-qr-decoder");
+    const study = FALLBACK_CASE_STUDIES.find(
+      (s) => s.slug === "inbody-qr-decoder"
+    );
     expect(study).toBeDefined();
-    expect(study?.title).toContain("InBody QR Data Decoder & Analyzer");
+    expect(study?.title).toContain("InBody QR Decoder");
     expect(study?.primary_language).toBe("Python");
     expect(study?.published).toBe(true);
   });
 
   it("contains complete tags and metadata for inbody-qr-decoder", () => {
-    const study = FALLBACK_CASE_STUDIES.find((s) => s.slug === "inbody-qr-decoder");
+    const study = FALLBACK_CASE_STUDIES.find(
+      (s) => s.slug === "inbody-qr-decoder"
+    );
     expect(study).toBeDefined();
     const tags = study?.tags.split(",").map((t) => t.trim());
     expect(tags).toContain("Python");
@@ -26,16 +30,22 @@ describe("InBody QR Data Decoder & Analyzer Case Study Integration", () => {
   });
 
   it("contains essential architectural narratives and code snippets", () => {
-    const study = FALLBACK_CASE_STUDIES.find((s) => s.slug === "inbody-qr-decoder");
+    const study = FALLBACK_CASE_STUDIES.find(
+      (s) => s.slug === "inbody-qr-decoder"
+    );
     expect(study).toBeDefined();
     expect(study?.architectural_narrative).toContain("decode_digits");
-    expect(study?.architectural_narrative).toContain("Differential Mutation Oracle");
+    expect(study?.architectural_narrative).toContain(
+      "Differential Mutation Oracle"
+    );
     expect(study?.architectural_narrative).toContain("meas_blob");
     expect(study?.architectural_narrative).toContain("Skeletal Muscle Index");
   });
 
   it("passes security and credential regex scanner without violations", () => {
-    const study = FALLBACK_CASE_STUDIES.find((s) => s.slug === "inbody-qr-decoder");
+    const study = FALLBACK_CASE_STUDIES.find(
+      (s) => s.slug === "inbody-qr-decoder"
+    );
     expect(study).toBeDefined();
 
     const editorialMatches = scanText(study!.editorial_content);

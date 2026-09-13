@@ -2,21 +2,48 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 
-// Statically import components to put in global mock registry
-import { VisitMatrixEditor } from "@/components/crf/Modes/VisitMatrixEditor";
-import { RuleGraphStudio } from "@/components/crf/Modes/RuleGraphStudio";
-import { LiveEdcSimulator } from "@/components/crf/Modes/LiveEdcSimulator";
-import { WorkflowWizardModal } from "@/components/crf/Wizard/WorkflowWizardModal";
-import { AcrfOverlayViewer } from "@/components/crf/Modes/AcrfOverlayViewer";
-import { ExportImportModal } from "@/components/crf/Modes/ExportImportModal";
-import { BrandingConfigModal } from "@/components/crf/Branding/BrandingConfigModal";
-import { DiagnosticsDrawer } from "@/components/crf/DiagnosticsDrawer";
-import { SpotlightTourOverlay } from "@/components/crf/Wizard/SpotlightTourOverlay";
+/**
+ * This file tests CRFStudioContainer's own tab-routing and preset-switching
+ * orchestration, not each lazily-loaded panel's internals — those already
+ * have dedicated real-component coverage elsewhere (rule-graph-studio.test.tsx,
+ * live-edc-simulation.test.tsx, branding-modal.test.tsx, workflow-wizard.test.tsx,
+ * diagnostics-drawer.test.tsx, export-statistical-modal.test.tsx). Mounting
+ * all nine real panels here paid their full AST/DAG/canvas setup cost on
+ * every test and intermittently exceeded the timeout under full-suite CPU
+ * contention (#651) despite finishing in well under a second in isolation.
+ * These stubs render only the heading text this file asserts on, so the
+ * container's own routing logic stays fully exercised without the redundant
+ * real-panel cost.
+ */
+const VisitMatrixEditor = () => (
+  <div>Protocol Visit Schedule Matrix (Schedule of Assessments)</div>
+);
+const RuleGraphStudio = () => (
+  <div>Logic Dependency DAG &amp; AST Rule Studio</div>
+);
+const LiveEdcSimulator = () => (
+  <div>Live 21 CFR Part 11 EDC Simulation Mode</div>
+);
+const AcrfOverlayViewer = () => (
+  <div>Visual Annotated CRF (aCRF) Submission Studio</div>
+);
+const ExportImportModal = () => (
+  <div>CDISC Standards &amp; Interoperability Exporter</div>
+);
+// Unasserted-on in this file; the real components early-return null when
+// closed (the state these tests always leave them in), so a null stub is
+// behaviorally equivalent here and skips their import/transform cost too.
+const WorkflowWizardModal = () => null;
+const BrandingConfigModal = () => null;
+const DiagnosticsDrawer = () => null;
+const SpotlightTourOverlay = () => null;
 
 (globalThis as any).mockComponents = {
   VisitMatrixEditor,
@@ -81,6 +108,7 @@ describe("CRFStudioContainer Component", () => {
   beforeEach(() => {
     container = document.createElement("div");
     document.body.appendChild(container);
+    window.localStorage.clear();
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ status: "ok", data: {} }),
@@ -110,60 +138,74 @@ describe("CRFStudioContainer Component", () => {
     expect(container.textContent).toContain("Live 21 CFR EDC");
   });
 
-  it("switches studio modes when clicking header tabs", { timeout: 15000 }, async () => {
-    await act(async () => {
-      root = createRoot(container);
-      root.render(<CRFStudioContainer />);
-    });
+  it(
+    "switches studio modes when clicking header tabs",
+    { timeout: 45000 },
+    async () => {
+      await act(async () => {
+        root = createRoot(container);
+        root.render(<CRFStudioContainer />);
+      });
 
-    // Find and click Visit Matrix tab
-    const buttons = Array.from(container.querySelectorAll("button"));
-    const matrixBtn = buttons.find((b) => b.textContent?.includes("Visit Matrix"));
-    expect(matrixBtn).toBeDefined();
+      // Find and click Visit Matrix tab
+      const buttons = Array.from(container.querySelectorAll("button"));
+      const matrixBtn = buttons.find((b) =>
+        b.textContent?.includes("Visit Matrix")
+      );
+      expect(matrixBtn).toBeDefined();
 
-    await act(async () => {
-      matrixBtn?.click();
-    });
-    expect(container.textContent).toContain("Protocol Visit Schedule Matrix");
+      await act(async () => {
+        matrixBtn?.click();
+      });
+      expect(container.textContent).toContain("Protocol Visit Schedule Matrix");
 
-    // Click Logic & Rules
-    const rulesBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Logic & AST Rules")
-    );
-    await act(async () => {
-      rulesBtn?.click();
-    });
-    expect(container.textContent).toContain("Logic Dependency DAG & AST Rule Studio");
+      // Click Logic & Rules
+      const rulesBtn = Array.from(container.querySelectorAll("button")).find(
+        (b) => b.textContent?.includes("Logic & AST Rules")
+      );
+      await act(async () => {
+        rulesBtn?.click();
+      });
+      expect(container.textContent).toContain(
+        "Logic Dependency DAG & AST Rule Studio"
+      );
 
-    // Click Live EDC Test
-    const edcBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Live 21 CFR EDC")
-    );
-    await act(async () => {
-      edcBtn?.click();
-    });
-    expect(container.textContent).toContain("Live 21 CFR Part 11 EDC Simulation Mode");
+      // Click Live EDC Test
+      const edcBtn = Array.from(container.querySelectorAll("button")).find(
+        (b) => b.textContent?.includes("Live 21 CFR EDC")
+      );
+      await act(async () => {
+        edcBtn?.click();
+      });
+      expect(container.textContent).toContain(
+        "Live 21 CFR Part 11 EDC Simulation Mode"
+      );
 
-    // Click Submission aCRF
-    const acrfBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Annotated aCRF")
-    );
-    await act(async () => {
-      acrfBtn?.click();
-    });
-    expect(container.textContent).toContain("Visual Annotated CRF (aCRF) Submission Studio");
+      // Click Submission aCRF
+      const acrfBtn = Array.from(container.querySelectorAll("button")).find(
+        (b) => b.textContent?.includes("Annotated aCRF")
+      );
+      await act(async () => {
+        acrfBtn?.click();
+      });
+      expect(container.textContent).toContain(
+        "Visual Annotated CRF (aCRF) Submission Studio"
+      );
 
-    // Click Export / CDISC
-    const exportBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("CDISC / Exports")
-    );
-    await act(async () => {
-      exportBtn?.click();
-    });
-    expect(container.textContent).toContain("CDISC Standards & Interoperability Exporter");
-  });
+      // Click Export / CDISC
+      const exportBtn = Array.from(container.querySelectorAll("button")).find(
+        (b) => b.textContent?.includes("CDISC / Exports")
+      );
+      await act(async () => {
+        exportBtn?.click();
+      });
+      expect(container.textContent).toContain(
+        "CDISC Standards & Interoperability Exporter"
+      );
+    }
+  );
 
-  it("switches between study presets cleanly", { timeout: 15000 }, async () => {
+  it("switches between study presets cleanly", { timeout: 45000 }, async () => {
     await act(async () => {
       root = createRoot(container);
       root.render(<CRFStudioContainer />);
@@ -180,5 +222,196 @@ describe("CRFStudioContainer Component", () => {
     });
 
     expect(container.textContent).toContain("Phase II");
+  });
+
+  it("does not hijack Ctrl/Cmd+Z from a focused form control (#658)", async () => {
+    await act(async () => {
+      root = createRoot(container);
+      root.render(<CRFStudioContainer />);
+    });
+
+    const selectEl = container.querySelector("select") as HTMLSelectElement;
+    expect(selectEl).toBeTruthy();
+    selectEl.focus();
+    expect(document.activeElement).toBe(selectEl);
+
+    let event!: KeyboardEvent;
+    await act(async () => {
+      event = new KeyboardEvent("keydown", {
+        key: "z",
+        ctrlKey: true,
+        bubbles: true,
+        cancelable: true,
+      });
+      selectEl.dispatchEvent(event);
+    });
+
+    // The studio's document-level undo shortcut must leave native browser/editor
+    // shortcuts alone while a form control (select, input, textarea, or a
+    // contentEditable field) has focus, instead of calling preventDefault()
+    // and jumping the whole study back regardless of what's focused.
+    expect(event.defaultPrevented).toBe(false);
+  });
+
+  it(
+    "recovers the acknowledged draft with identical content after a simulated refresh (#657)",
+    { timeout: 20000 },
+    async () => {
+      vi.useFakeTimers();
+      try {
+        await act(async () => {
+          root = createRoot(container);
+          root.render(<CRFStudioContainer />);
+        });
+
+        const selectEl = container.querySelector("select") as HTMLSelectElement;
+        expect(selectEl).toBeTruthy();
+
+        await act(async () => {
+          selectEl.value = "cns_neuro";
+          selectEl.dispatchEvent(new Event("change", { bubbles: true }));
+        });
+        expect(container.textContent).toContain("Phase II");
+
+        // Let the debounced autosave commit the acknowledged draft.
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(1000);
+        });
+
+        expect(window.localStorage.getItem("crf_studio_draft_v1")).toBeTruthy();
+
+        // Simulate a refresh: unmount and mount a brand-new instance.
+        await act(async () => {
+          root.unmount();
+        });
+        await act(async () => {
+          root = createRoot(container);
+          root.render(<CRFStudioContainer />);
+        });
+
+        expect(container.textContent).toContain("Phase II");
+      } finally {
+        vi.useRealTimers();
+      }
+    }
+  );
+
+  it(
+    "traps focus in the mobile widget palette sheet and returns it to the FAB on close (#660)",
+    { timeout: 20000 },
+    async () => {
+      vi.useFakeTimers();
+      try {
+        await act(async () => {
+          root = createRoot(container);
+          root.render(<CRFStudioContainer />);
+        });
+
+        // A prior test in this file may leave the studio on a non-designer
+        // mode via the URL hash (window.location.hash persists across tests
+        // in the same jsdom document); force back to Designer mode, where
+        // the mobile widget palette FAB lives, for a deterministic start.
+        const designerBtn = Array.from(
+          container.querySelectorAll("button")
+        ).find((b) => b.textContent?.includes("Form Designer"));
+        if (designerBtn) {
+          await act(async () => {
+            designerBtn.click();
+          });
+        }
+
+        const fabBtn = container.querySelector(
+          'button[aria-label="Add Field Widget"]'
+        ) as HTMLButtonElement;
+        expect(fabBtn).toBeTruthy();
+
+        fabBtn.focus();
+        expect(document.activeElement).toBe(fabBtn);
+
+        await act(async () => {
+          fabBtn.click();
+        });
+
+        // Flush useFocusTrap's initial-focus setTimeout.
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(60);
+        });
+
+        const dialog = container.querySelector(
+          '[role="dialog"][aria-labelledby="mobile-widget-sheet-title"]'
+        ) as HTMLElement;
+        expect(dialog).toBeTruthy();
+        expect(document.activeElement).not.toBe(fabBtn);
+        expect(dialog.contains(document.activeElement)).toBe(true);
+
+        const closeBtn = dialog.querySelector(
+          'button[aria-label="Close Widget Palette"]'
+        ) as HTMLButtonElement;
+        expect(closeBtn).toBeTruthy();
+
+        await act(async () => {
+          closeBtn.click();
+        });
+
+        // Flush useFocusTrap's returnFocus setTimeout(0).
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(10);
+        });
+
+        expect(
+          container.querySelector(
+            '[role="dialog"][aria-labelledby="mobile-widget-sheet-title"]'
+          )
+        ).toBeNull();
+        expect(document.activeElement).toBe(fabBtn);
+      } finally {
+        vi.useRealTimers();
+      }
+    }
+  );
+
+  it("labels the header's copy-link action as a view link, not study sharing (#662)", async () => {
+    Object.assign(navigator, {
+      clipboard: {
+        writeText: vi.fn().mockResolvedValue(undefined),
+      },
+    });
+
+    await act(async () => {
+      root = createRoot(container);
+      root.render(<CRFStudioContainer />);
+    });
+
+    const moreActionsBtn = container.querySelector(
+      'button[aria-label="More Studio Actions"]'
+    ) as HTMLButtonElement;
+    expect(moreActionsBtn).toBeTruthy();
+
+    await act(async () => {
+      moreActionsBtn.click();
+    });
+
+    // Previously labeled "Share Studio Protocol" with "Copy direct link with
+    // state" — implying it shares the authored study — when it only ever
+    // copies the current navigation URL (mode/form/tab hash params). The
+    // study document itself lives in localStorage and never leaves this
+    // browser, so opening that link elsewhere shows a different study.
+    expect(container.textContent).not.toContain("Share Studio Protocol");
+    const copyLinkBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Copy View Link")
+    );
+    expect(copyLinkBtn).toBeDefined();
+    expect(copyLinkBtn?.textContent).toContain(
+      "does not include study content"
+    );
+
+    await act(async () => {
+      copyLinkBtn?.click();
+    });
+
+    expect(navigator.clipboard.writeText).toHaveBeenCalled();
+    expect(container.textContent).toContain(
+      "not the authored study — recipients need their own copy of the study data"
+    );
   });
 });

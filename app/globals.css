@@ -20,7 +20,7 @@
   --brand-cyan: #06b6d4;
   --brand-cyan-glow: rgba(6, 182, 212, 0.15);
   --brand-blue: #3b82f6;
-  --brand-blue-glow: rgba(59, 130, 246, 0.10);
+  --brand-blue-glow: rgba(59, 130, 246, 0.1);
   --brand-dark: #0d0e11;
   --success: #10b981;
   --error: #f87171;
@@ -42,8 +42,13 @@
   --layout-dock-height: 0px;
   --layout-studio-header-height: 3.5rem;
   --layout-studio-budget: calc(100dvh - var(--layout-header-height));
-  --layout-viewport-budget: calc(100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px));
-  --layout-workspace-budget: calc(100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px) - var(--layout-studio-header-height, 0px));
+  --layout-viewport-budget: calc(
+    100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px)
+  );
+  --layout-workspace-budget: calc(
+    100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px) -
+      var(--layout-studio-header-height, 0px)
+  );
 
   /* Motion Springs (stiffness, damping) */
   --motion-spring-snappy-stiffness: 380;
@@ -198,11 +203,13 @@ body {
 
 /* Standardized SVG Visual Filters */
 .svg-glow-cyan {
-  filter: drop-shadow(0 0 1.5px rgba(6, 182, 212, 0.8)) drop-shadow(0 0 4px rgba(6, 182, 212, 0.45));
+  filter: drop-shadow(0 0 1.5px rgba(6, 182, 212, 0.8))
+    drop-shadow(0 0 4px rgba(6, 182, 212, 0.45));
 }
 
 .svg-glow-blue {
-  filter: drop-shadow(0 0 1.5px rgba(59, 130, 246, 0.8)) drop-shadow(0 0 4px rgba(59, 130, 246, 0.45));
+  filter: drop-shadow(0 0 1.5px rgba(59, 130, 246, 0.8))
+    drop-shadow(0 0 4px rgba(59, 130, 246, 0.45));
 }
 
 .svg-shadow {
@@ -227,7 +234,9 @@ body {
 
 .glow-cyan-border {
   border-color: rgba(6, 182, 212, 0.4);
-  box-shadow: 0 0 20px -3px rgba(6, 182, 212, 0.15), inset 0 0 15px -3px rgba(6, 182, 212, 0.05);
+  box-shadow:
+    0 0 20px -3px rgba(6, 182, 212, 0.15),
+    inset 0 0 15px -3px rgba(6, 182, 212, 0.05);
 }
 
 /* Tool Shell & Precision Editorial Utilities */
@@ -256,7 +265,11 @@ body {
 }
 
 .editorial-surface {
-  background: linear-gradient(180deg, rgba(20, 22, 28, 0.6) 0%, rgba(13, 14, 17, 0.9) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(20, 22, 28, 0.6) 0%,
+    rgba(13, 14, 17, 0.9) 100%
+  );
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -287,7 +300,9 @@ body {
 
 /* Reduced motion compliance */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -297,7 +312,8 @@ body {
 
 /* Hardware-Accelerated Mobile Grid Animation */
 @keyframes grid-square-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0;
   }
   50% {
@@ -306,12 +322,11 @@ body {
 }
 
 .animate-grid-square {
-  animation: grid-square-pulse var(--grid-square-duration, 4s) ease-in-out infinite;
+  animation: grid-square-pulse var(--grid-square-duration, 4s) ease-in-out
+    infinite;
   animation-delay: var(--grid-square-delay, 0s);
   will-change: opacity;
 }
-
-
 
 [data-pretext-layer="semantic"] {
   color: transparent;
@@ -335,3 +350,227 @@ body {
   }
 }
 
+/* Portfolio editorial rhythm: readable prose, quiet labels, stable anchors. */
+.portfolio-home :is(#case-studies, #about, #contact) {
+  scroll-margin-top: calc(var(--navbar-height) + 2rem);
+}
+
+.portfolio-home :is(h2, h3) {
+  text-wrap: balance;
+}
+
+.portfolio-home :is(#case-studies, #about, #contact) > div > p {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.75;
+  text-wrap: pretty;
+}
+
+.portfolio-home #hero [data-pretext-layer="visual"] {
+  overflow-wrap: anywhere;
+}
+
+.portfolio-home #hero .fluid-heading-hero {
+  letter-spacing: -0.035em;
+}
+
+.portfolio-home #hero [data-pretext-layer="semantic"].fluid-body {
+  line-height: 1.625;
+}
+
+@media (min-width: 1024px) {
+  .portfolio-home #hero [data-pretext-layer="semantic"] {
+    text-align: left;
+  }
+}
+
+/* Cabinet boundaries own fullscreen; game controls remain inside that boundary. */
+.arcade-cabinet[data-fullscreen="true"] {
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+    env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+}
+.arcade-cabinet-stage > * {
+  flex-shrink: 0;
+  min-width: 0;
+  max-width: 100%;
+}
+.arcade-cabinet-toolbar button {
+  min-width: 48px;
+  min-height: 48px;
+}
+.arcade-shooter-playfield {
+  flex-shrink: 0;
+}
+.arcade-shooter-start > * {
+  flex-shrink: 0;
+}
+.arcade-shooter-start > :first-child {
+  margin-top: auto;
+}
+.arcade-shooter-start > :last-child {
+  margin-bottom: auto;
+}
+.arcade-cabinet[data-fullscreen="true"] .arcade-shooter {
+  margin: 0;
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  justify-items: center;
+}
+.arcade-cabinet[data-fullscreen="true"] .arcade-shooter > [role="status"] {
+  display: none;
+}
+.arcade-cabinet[data-fullscreen="true"] .arcade-shooter-options[open] {
+  max-height: 40dvh;
+  overflow-y: auto;
+}
+.arcade-cabinet[data-fullscreen="true"] .arcade-shooter-playfield {
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+  aspect-ratio: auto;
+  container-type: size;
+}
+.arcade-cabinet[data-fullscreen="true"] .arcade-shooter-playfield canvas {
+  width: min(100cqw, calc(100cqh * 768 / 420));
+  height: auto;
+  max-height: 100%;
+  margin: auto;
+  object-fit: contain;
+}
+@media (orientation: landscape) and (max-height: 600px) {
+  .arcade-cabinet[data-fullscreen="true"] .arcade-shooter {
+    grid-template-columns: minmax(0, 1fr) 164px;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: 4px;
+  }
+  .arcade-cabinet[data-fullscreen="true"] .arcade-shooter-options {
+    grid-column: 1 / -1;
+  }
+  .arcade-cabinet[data-fullscreen="true"] .arcade-shooter-controls {
+    margin: 0;
+    max-height: 100%;
+    overflow-y: auto;
+  }
+  .arcade-cabinet[data-fullscreen="true"] .arcade-shooter-footer {
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+  .arcade-shooter-start h3 {
+    font-size: 1rem;
+  }
+  .arcade-shooter-start > :first-child {
+    display: none;
+  }
+  .arcade-shooter-start p {
+    margin-bottom: 8px;
+  }
+}
+.arcade-shooter-story > * {
+  flex-shrink: 0;
+  margin-block: auto;
+}
+.arcade-cabinet[data-fullscreen="true"][data-arcade-cabinet="working-with-duck"]
+  canvas {
+  width: min(100%, 104dvh);
+  height: auto;
+  max-height: 65dvh;
+  margin-inline: auto;
+}
+/* Short landscape viewports (e.g. 667x375) don't have room for a 65dvh canvas plus the HUD
+   and action dock stacked above/below it — the dock would start below the fold. Give the
+   playfield a smaller viewport budget so essential actions stay visible without scrolling. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .arcade-cabinet[data-fullscreen="true"][data-arcade-cabinet="working-with-duck"]
+    canvas {
+    max-height: 42dvh;
+  }
+}
+@media (orientation: landscape) and (max-height: 600px) {
+  .arcade-shooter-controls [role="group"] > :first-child {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    gap: 4px;
+    padding: 4px;
+  }
+  .arcade-shooter-controls [role="group"] > :first-child button {
+    min-width: 0;
+    padding-inline: 4px;
+    font-size: 10px;
+    gap: 4px;
+  }
+}
+.arcade-shooter-playfield > .absolute.inset-0 {
+  overflow-y: auto;
+  justify-content: safe center;
+}
+.arcade-shooter-playfield > .absolute.inset-0 > * {
+  flex-shrink: 0;
+  max-width: 100%;
+}
+@media (orientation: landscape) and (max-height: 600px) {
+  .arcade-cabinet[data-fullscreen="true"] .arcade-labyrinth {
+    height: 100%;
+    min-height: 0;
+    margin: 0;
+  }
+  .arcade-cabinet[data-fullscreen="true"] .arcade-labyrinth > [role="status"] {
+    display: none;
+  }
+  .arcade-cabinet[data-fullscreen="true"] .arcade-labyrinth-options {
+    flex-shrink: 0;
+    max-height: 40dvh;
+    overflow-y: auto;
+  }
+  .arcade-cabinet[data-fullscreen="true"] .arcade-labyrinth-playfield {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 252px;
+    grid-template-rows: auto minmax(0, 1fr);
+    flex: 1;
+    min-height: 0;
+    padding: 4px;
+    gap: 4px;
+    transform: none;
+  }
+  .arcade-cabinet[data-fullscreen="true"] .arcade-labyrinth-canvas {
+    grid-column: 1;
+    min-height: 0;
+    height: 100%;
+    width: 100%;
+    max-width: none;
+    aspect-ratio: auto;
+    container-type: size;
+  }
+  .arcade-cabinet[data-fullscreen="true"] .arcade-labyrinth-canvas canvas {
+    width: min(100cqw, calc(100cqh * 240 / 144));
+    height: auto;
+    max-width: none;
+    max-height: 100%;
+  }
+  .arcade-cabinet[data-fullscreen="true"] .arcade-labyrinth-controls {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0;
+  }
+  .arcade-labyrinth-controls [role="group"] {
+    padding: 2px;
+    gap: 2px;
+  }
+  .arcade-labyrinth-controls [role="group"] > :last-child {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+@media (orientation: landscape) and (max-height: 600px) {
+  .arcade-cabinet[data-fullscreen="true"]
+    .arcade-labyrinth-controls
+    > :last-child {
+    order: -1;
+    flex-shrink: 0;
+  }
+}

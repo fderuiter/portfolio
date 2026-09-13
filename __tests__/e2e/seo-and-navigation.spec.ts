@@ -58,9 +58,7 @@ test.describe("SEO & Navigation Full-Spectrum Suite", () => {
       await expect(footer).toBeVisible();
 
       // Check Footer links contain key pillars
-      await expect(
-        footer.locator('text="All Systems Operational"')
-      ).toBeVisible();
+      await expect(footer.locator('text="Explore the projects"')).toBeVisible();
       await expect(footer.locator('a[href="/arcade"]')).toBeVisible();
       await expect(footer.locator('a[href="/schedule"]')).toBeVisible();
     });

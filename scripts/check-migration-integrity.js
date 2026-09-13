@@ -5,7 +5,9 @@ const path = require("path");
 function readProvider(source, pattern, sourceName) {
   const match = source.match(pattern);
   if (!match) {
-    throw new Error(`Could not read the datasource provider from ${sourceName}.`);
+    throw new Error(
+      `Could not read the datasource provider from ${sourceName}.`
+    );
   }
   return match[1];
 }
@@ -13,12 +15,14 @@ function readProvider(source, pattern, sourceName) {
 function getSchemaProvider(schema) {
   const datasource = schema.match(/datasource\s+\w+\s*\{([\s\S]*?)\}/);
   if (!datasource) {
-    throw new Error("Could not find a datasource block in prisma/schema.prisma.");
+    throw new Error(
+      "Could not find a datasource block in prisma/schema.prisma."
+    );
   }
   return readProvider(
     datasource[1],
     /provider\s*=\s*["']([^"']+)["']/,
-    "prisma/schema.prisma",
+    "prisma/schema.prisma"
   );
 }
 
@@ -26,7 +30,7 @@ function getLockProvider(lock) {
   return readProvider(
     lock,
     /^provider\s*=\s*["']([^"']+)["']/m,
-    "prisma/migrations/migration_lock.toml",
+    "prisma/migrations/migration_lock.toml"
   );
 }
 
@@ -43,8 +47,13 @@ function validateMigrationFiles(directory) {
 
   for (const migration of migrations) {
     const sqlPath = path.join(directory, migration, "migration.sql");
-    if (!fs.existsSync(sqlPath) || fs.readFileSync(sqlPath, "utf8").trim() === "") {
-      throw new Error(`Migration ${migration} has no non-empty migration.sql file.`);
+    if (
+      !fs.existsSync(sqlPath) ||
+      fs.readFileSync(sqlPath, "utf8").trim() === ""
+    ) {
+      throw new Error(
+        `Migration ${migration} has no non-empty migration.sql file.`
+      );
     }
   }
 
@@ -65,13 +74,13 @@ function validateDocMigrations(docPath, migrationsPath) {
   const documentedMigrations = getDocMigrations(docContent);
   const actualMigrations = validateMigrationFiles(migrationsPath);
 
-  const actualLowerMap = new Map(actualMigrations.map((m) => [m.toLowerCase(), m]));
+  const actualLowerMap = new Map(
+    actualMigrations.map((m) => [m.toLowerCase(), m])
+  );
   const missingInDoc = actualMigrations.filter(
-    (m) => !documentedMigrations.includes(m.toLowerCase()),
+    (m) => !documentedMigrations.includes(m.toLowerCase())
   );
-  const extraInDoc = documentedMigrations.filter(
-    (m) => !actualLowerMap.has(m),
-  );
+  const extraInDoc = documentedMigrations.filter((m) => !actualLowerMap.has(m));
 
   if (missingInDoc.length > 0 || extraInDoc.length > 0) {
     const details = [];
@@ -79,10 +88,12 @@ function validateDocMigrations(docPath, migrationsPath) {
       details.push(`Missing in documentation: ${missingInDoc.join(", ")}`);
     }
     if (extraInDoc.length > 0) {
-      details.push(`Extra/mismatched in documentation: ${extraInDoc.join(", ")}`);
+      details.push(
+        `Extra/mismatched in documentation: ${extraInDoc.join(", ")}`
+      );
     }
     throw new Error(
-      `Documentation drift detected in ${path.basename(docPath)}:\n  ${details.join("\n  ")}\nPlease update ${path.basename(docPath)} to match active repository migrations.`,
+      `Documentation drift detected in ${path.basename(docPath)}:\n  ${details.join("\n  ")}\nPlease update ${path.basename(docPath)} to match active repository migrations.`
     );
   }
 
@@ -90,10 +101,26 @@ function validateDocMigrations(docPath, migrationsPath) {
 }
 
 const REQUIRED_DOC_COMMANDS = [
-  { name: "schema drift verification ('npm run check:migrations:drift' or 'prisma migrate diff')", pattern: /check:migrations:drift|prisma migrate diff/i },
-  { name: "pipeline release gate execution ('npm run release:gate' or 'release-gate.ts')", pattern: /release:gate|release-gate\.ts/i },
-  { name: "destructive migration environment variable ('ALLOW_DESTRUCTIVE_MIGRATIONS')", pattern: /ALLOW_DESTRUCTIVE_MIGRATIONS/i },
-  { name: "unified migration check ('npm run check:migrations')", pattern: /check:migrations\b/i },
+  {
+    name: "schema drift verification ('npm run check:migrations:drift' or 'prisma migrate diff')",
+    pattern: /check:migrations:drift|prisma migrate diff/i,
+  },
+  {
+    name: "disposable migration replay ('npm run migration:replay')",
+    pattern: /migration:replay/i,
+  },
+  {
+    name: "pipeline release gate execution ('npm run release:gate' or 'release-gate.ts')",
+    pattern: /release:gate|release-gate\.ts/i,
+  },
+  {
+    name: "destructive migration environment variable ('ALLOW_DESTRUCTIVE_MIGRATIONS')",
+    pattern: /ALLOW_DESTRUCTIVE_MIGRATIONS/i,
+  },
+  {
+    name: "unified migration check ('npm run check:migrations')",
+    pattern: /check:migrations\b/i,
+  },
 ];
 
 function validateDocCommands(docPath) {
@@ -112,9 +139,9 @@ function validateDocCommands(docPath) {
   if (missing.length > 0) {
     throw new Error(
       `Documentation completeness check failed in ${path.basename(docPath)}:\n` +
-      `  Missing required operational command/variable documentation:\n` +
-      missing.map((m) => `    - ${m}`).join("\n") +
-      `\nPlease update ${path.basename(docPath)} to explicitly document all required database release and drift verification procedures.`,
+        `  Missing required operational command/variable documentation:\n` +
+        missing.map((m) => `    - ${m}`).join("\n") +
+        `\nPlease update ${path.basename(docPath)} to explicitly document all required database release and drift verification procedures.`
     );
   }
 
@@ -123,10 +150,15 @@ function validateDocCommands(docPath) {
 
 function checkMigrationIntegrity(options = {}) {
   const rootDir = options.rootDir || path.resolve(__dirname, "..");
-  const schemaFile = options.schemaPath || path.join(rootDir, "prisma/schema.prisma");
-  const lockFile = options.lockPath || path.join(rootDir, "prisma/migrations/migration_lock.toml");
-  const migrationsDir = options.migrationsPath || path.join(rootDir, "prisma/migrations");
-  const docFile = options.docPath || path.join(rootDir, "DATABASE_MIGRATIONS.md");
+  const schemaFile =
+    options.schemaPath || path.join(rootDir, "prisma/schema.prisma");
+  const lockFile =
+    options.lockPath ||
+    path.join(rootDir, "prisma/migrations/migration_lock.toml");
+  const migrationsDir =
+    options.migrationsPath || path.join(rootDir, "prisma/migrations");
+  const docFile =
+    options.docPath || path.join(rootDir, "DATABASE_MIGRATIONS.md");
 
   const schemaProvider = getSchemaProvider(fs.readFileSync(schemaFile, "utf8"));
   const lockProvider = getLockProvider(fs.readFileSync(lockFile, "utf8"));
@@ -134,7 +166,7 @@ function checkMigrationIntegrity(options = {}) {
   if (schemaProvider !== lockProvider) {
     throw new Error(
       `Datasource provider mismatch: schema.prisma uses ${schemaProvider}, ` +
-        `but migration_lock.toml uses ${lockProvider}.`,
+        `but migration_lock.toml uses ${lockProvider}.`
     );
   }
 
@@ -143,7 +175,7 @@ function checkMigrationIntegrity(options = {}) {
   validateDocCommands(docFile);
 
   console.log(
-    `Migration integrity check passed: provider=${schemaProvider}, migrations=${migrations.length}, docMigrations=${docMigrations.length}.`,
+    `Migration integrity check passed: provider=${schemaProvider}, migrations=${migrations.length}, docMigrations=${docMigrations.length}.`
   );
 }
 

@@ -1,7 +1,9 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React from "react";
 import { CaseStudyService } from "@/lib/services/case-study-service";
@@ -74,7 +76,9 @@ describe("Resilient Hybrid Case Study Fallback Suite", () => {
         updated_at: new Date("2026-01-02"),
       };
 
-      vi.mocked(prisma.caseStudy.findUnique).mockResolvedValueOnce(mockDbRecord as never);
+      vi.mocked(prisma.caseStudy.findUnique).mockResolvedValueOnce(
+        mockDbRecord as never
+      );
 
       const result = await CaseStudyService.getCaseStudyBySlug("schemaflow");
       expect(result).not.toBeNull();
@@ -104,7 +108,9 @@ describe("Resilient Hybrid Case Study Fallback Suite", () => {
     it("returns null when slug does not exist in DB or static fallbacks", async () => {
       vi.mocked(prisma.caseStudy.findUnique).mockResolvedValueOnce(null);
 
-      const result = await CaseStudyService.getCaseStudyBySlug("non-existent-case-study");
+      const result = await CaseStudyService.getCaseStudyBySlug(
+        "non-existent-case-study"
+      );
       expect(result).toBeNull();
     });
   });
@@ -130,7 +136,9 @@ describe("Resilient Hybrid Case Study Fallback Suite", () => {
         },
       ];
 
-      vi.mocked(prisma.caseStudy.findMany).mockResolvedValueOnce(mockDbStudies as never);
+      vi.mocked(prisma.caseStudy.findMany).mockResolvedValueOnce(
+        mockDbStudies as never
+      );
 
       const results = await CaseStudyService.getAllPublishedCaseStudies();
       expect(results.length).toBeGreaterThan(1);
@@ -200,6 +208,75 @@ describe("Resilient Hybrid Case Study Fallback Suite", () => {
       });
 
       expect(element).toBeDefined();
+    });
+
+    it("points the 'back to case study list' link at the same route as the breadcrumb (no competing destinations)", async () => {
+      vi.mocked(prisma.caseStudy.findMany).mockResolvedValueOnce([]);
+      vi.mocked(prisma.caseStudy.findUnique).mockResolvedValueOnce(null);
+
+      const element = await CaseStudyPage({
+        params: Promise.resolve({ slug: "laser-loon" }),
+      });
+
+      // Walk the unrendered React element tree (a plain object graph) to
+      // find the Breadcrumbs and NextPrevNav elements' props directly,
+      // without needing a full DOM render across client/server boundaries.
+      type AnyReactElement = { type: unknown; props?: Record<string, unknown> };
+      function findByDisplayName(
+        node: unknown,
+        name: string
+      ): AnyReactElement | null {
+        if (!node || typeof node !== "object") return null;
+        const el = node as AnyReactElement;
+        const type = el.type as
+          | (((...args: never[]) => unknown) & { displayName?: string })
+          | string
+          | undefined;
+        if (
+          typeof type === "function" &&
+          (type.name === name || type.displayName === name)
+        ) {
+          return el;
+        }
+        if (Array.isArray(node)) {
+          for (const child of node) {
+            const found = findByDisplayName(child, name);
+            if (found) return found;
+          }
+          return null;
+        }
+        const children = el.props?.children;
+        if (children !== undefined) {
+          return findByDisplayName(children, name);
+        }
+        return null;
+      }
+
+      const breadcrumbs = findByDisplayName(element, "Breadcrumbs");
+      const nextPrevNav = findByDisplayName(element, "NextPrevNav");
+
+      expect(breadcrumbs).not.toBeNull();
+      expect(nextPrevNav).not.toBeNull();
+
+      const breadcrumbItems = breadcrumbs!.props!.items as Array<{
+        label: string;
+        href?: string;
+      }>;
+      const caseStudiesCrumb = breadcrumbItems.find(
+        (c) => c.label === "Case Studies"
+      );
+      const backToHub = nextPrevNav!.props!.backToHub as {
+        title: string;
+        href: string;
+      };
+
+      expect(caseStudiesCrumb?.href).toBe("/case-studies");
+      // Regression: backToHub previously pointed at "/#case-studies" (a
+      // homepage anchor section), a different destination than the
+      // breadcrumb's "/case-studies" (the real, filterable list route) --
+      // two competing "back to the list" targets on the same page.
+      expect(backToHub.href).toBe("/case-studies");
+      expect(backToHub.href).toBe(caseStudiesCrumb?.href);
     });
   });
 });

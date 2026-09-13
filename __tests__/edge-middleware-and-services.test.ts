@@ -41,6 +41,7 @@ const {
   mockExec,
   mockRpop,
   mockLmove,
+  mockLrem,
   mockLrange,
   mockDel,
 } = vi.hoisted(() => ({
@@ -49,6 +50,7 @@ const {
   mockExec: vi.fn(),
   mockRpop: vi.fn(),
   mockLmove: vi.fn(),
+  mockLrem: vi.fn(),
   mockLrange: vi.fn().mockResolvedValue([]),
   mockDel: vi.fn(),
 }));
@@ -62,6 +64,7 @@ vi.mock("@upstash/redis", () => {
         exec: mockExec,
         rpop: mockRpop,
         lmove: mockLmove,
+        lrem: mockLrem,
       };
     }
     lrange = mockLrange;
@@ -96,12 +99,12 @@ import { SECURITY_HEADERS } from "@/lib/security-headers";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
 
-describe("Next.js 16 Edge Proxy & Modular Domain Services Suite", () => {
+describe("Next.js 16 Proxy & Modular Domain Services Suite", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe("Edge Proxy & Security Headers", () => {
+  describe("Proxy & Security Headers", () => {
     it("attaches all standard HTTP security headers to API responses", async () => {
       const req = new NextRequest("http://localhost/api/case-studies", {
         headers: { "x-forwarded-for": "203.0.113.195" },
@@ -173,11 +176,12 @@ describe("Next.js 16 Edge Proxy & Modular Domain Services Suite", () => {
     it("buffers telemetry events to Redis list with 48h expiration", async () => {
       mockExec.mockResolvedValueOnce([1]);
 
-      const event = await TelemetryService.recordEvent({
+      const { event, buffered } = await TelemetryService.recordEvent({
         projectSlug: "/dashboard",
         eventType: "page_view",
       });
 
+      expect(buffered).toBe(true);
       expect(event.projectSlug).toBe("/dashboard");
       expect(mockLpush).toHaveBeenCalledWith(
         "telemetry_buffer",
