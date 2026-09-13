@@ -142,9 +142,9 @@ Add Study Epoch to Protocol Graph
 
 ### addField()
 
-> `static` **addField**(`study`, `domainOrFormId`, `fieldData`, `sectionIndex?`): `object`
+> `static` **addField**(`study`, `domainOrFormId`, `fieldData`, `sectionIndexOrOptions?`): `object`
 
-Add Clinical Field to Form
+Add Clinical Field to Form (Appends or Inserts at Target Index)
 
 #### Parameters
 
@@ -160,9 +160,9 @@ Add Clinical Field to Form
 
 `Partial`\<[`CRFField`](../../types/interfaces/CRFField.md)\> & `object`
 
-##### sectionIndex?
+##### sectionIndexOrOptions?
 
-`number` = `0`
+`number` \| \{ `sectionId?`: `string`; `sectionIndex?`: `number`; `targetIndex?`: `number`; \}
 
 #### Returns
 
@@ -438,6 +438,100 @@ Semantic Diff between Two Protocols
 
 ***
 
+### duplicateField()
+
+> `static` **duplicateField**(`study`, `domainOrFormId`, `fieldIdOrVar`, `targetSectionId?`): `object`
+
+Duplicate Clinical Field with Unique Identity and Nonconflicting CDASH Variable Name
+
+#### Parameters
+
+##### study
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### domainOrFormId
+
+`string`
+
+##### fieldIdOrVar
+
+`string`
+
+##### targetSectionId?
+
+`string`
+
+#### Returns
+
+`object`
+
+##### duplicatedField?
+
+> `optional` **duplicatedField?**: [`CRFField`](../../types/interfaces/CRFField.md)
+
+##### error?
+
+> `optional` **error?**: `string`
+
+##### form?
+
+> `optional` **form?**: [`CRFForm`](../../types/interfaces/CRFForm.md)
+
+##### study
+
+> **study**: [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+***
+
+### duplicateForm()
+
+> `static` **duplicateForm**(`study`, `formIdOrDomain`, `options?`): `object`
+
+Duplicate Form with Fresh Identities, Deep Cloning, and Internal Rule Remapping
+
+#### Parameters
+
+##### study
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### formIdOrDomain
+
+`string`
+
+##### options?
+
+###### customName?
+
+`string`
+
+###### newDomain?
+
+`string`
+
+###### renameVariables?
+
+`boolean`
+
+#### Returns
+
+`object`
+
+##### duplicatedForm?
+
+> `optional` **duplicatedForm?**: [`CRFForm`](../../types/interfaces/CRFForm.md)
+
+##### error?
+
+> `optional` **error?**: `string`
+
+##### study
+
+> **study**: [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+***
+
 ### exportProtocol()
 
 > `static` **exportProtocol**(`study`, `format`): `object`
@@ -546,6 +640,62 @@ Find Form by ID or Domain (Case-Insensitive)
 
 ***
 
+### insertField()
+
+> `static` **insertField**(`study`, `domainOrFormId`, `fieldData`, `options?`): `object`
+
+Insert Clinical Field into Specified Section and Position
+
+#### Parameters
+
+##### study
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### domainOrFormId
+
+`string`
+
+##### fieldData
+
+`Partial`\<[`CRFField`](../../types/interfaces/CRFField.md)\> & `object`
+
+##### options?
+
+###### sectionId?
+
+`string`
+
+###### sectionIndex?
+
+`number`
+
+###### targetIndex?
+
+`number`
+
+#### Returns
+
+`object`
+
+##### error?
+
+> `optional` **error?**: `string`
+
+##### field?
+
+> `optional` **field?**: [`CRFField`](../../types/interfaces/CRFField.md)
+
+##### form?
+
+> `optional` **form?**: [`CRFForm`](../../types/interfaces/CRFForm.md)
+
+##### study
+
+> **study**: [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+***
+
 ### listDomains()
 
 > `static` **listDomains**(): [`DomainMetadata`](../interfaces/DomainMetadata.md)[]
@@ -601,6 +751,36 @@ Load Preset by ID
 ##### study
 
 > **study**: [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+***
+
+### previewFormRemoval()
+
+> `static` **previewFormRemoval**(`study`, `formIdOrDomain`): `object`
+
+Preview Form Removal Impact on Visit & Arm Schedule
+
+#### Parameters
+
+##### study
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### formIdOrDomain
+
+`string`
+
+#### Returns
+
+`object`
+
+##### affectedArms
+
+> **affectedArms**: [`StudyArm`](../../types/interfaces/StudyArm.md)[]
+
+##### affectedVisits
+
+> **affectedVisits**: [`StudyVisit`](../../types/interfaces/StudyVisit.md)[]
 
 ***
 
@@ -740,7 +920,7 @@ Remove Field from Form & Prune AST Rules
 
 > `static` **removeForm**(`study`, `formIdOrDomain`): `object`
 
-Remove Form & Automatically Prune Schedule of Activities (SoA) References
+Remove Form & Automatically Prune Visit and Arm Assignments
 
 #### Parameters
 
@@ -756,6 +936,14 @@ Remove Form & Automatically Prune Schedule of Activities (SoA) References
 
 `object`
 
+##### affectedArms?
+
+> `optional` **affectedArms?**: [`StudyArm`](../../types/interfaces/StudyArm.md)[]
+
+##### affectedVisits?
+
+> `optional` **affectedVisits?**: [`StudyVisit`](../../types/interfaces/StudyVisit.md)[]
+
 ##### removedForm?
 
 > `optional` **removedForm?**: [`CRFForm`](../../types/interfaces/CRFForm.md)
@@ -763,6 +951,20 @@ Remove Form & Automatically Prune Schedule of Activities (SoA) References
 ##### study
 
 > **study**: [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### undo?
+
+> `optional` **undo?**: (`currentStudy`) => [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+###### Parameters
+
+###### currentStudy
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+###### Returns
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
 
 ***
 
@@ -793,6 +995,36 @@ Remove Study Visit from SoA Matrix
 ##### study
 
 > **study**: [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+***
+
+### restoreForm()
+
+> `static` **restoreForm**(`study`, `form`, `originalAssignments?`, `originalIndex?`): [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+Restore Form and its Associated Visit / Arm Assignments
+
+#### Parameters
+
+##### study
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### form
+
+[`CRFForm`](../../types/interfaces/CRFForm.md)
+
+##### originalAssignments?
+
+[`StudyVisit`](../../types/interfaces/StudyVisit.md)[] \| `object`[]
+
+##### originalIndex?
+
+`number`
+
+#### Returns
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
 
 ***
 

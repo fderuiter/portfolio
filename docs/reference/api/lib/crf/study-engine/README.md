@@ -19,3 +19,8 @@
 ## Variables
 
 - [CDASH\_DOMAIN\_CATALOG](variables/CDASH_DOMAIN_CATALOG.md)
+
+## Functions
+
+- [generateCdashVariableName](functions/generateCdashVariableName.md)
+- [generateEngineId](functions/generateEngineId.md)
