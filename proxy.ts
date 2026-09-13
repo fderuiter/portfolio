@@ -6,24 +6,19 @@ import {
   extractClientIp,
 } from "@/lib/services/privacy-service";
 
-const isProtectedRoute = createRouteMatcher(["/admin(.*)", "/api/admin(.*)"]);
+/** Routes that need Clerk's auth context: the admin area and its API. */
+const isClerkRoute = createRouteMatcher(["/admin(.*)", "/api/admin(.*)"]);
 const isPublicAuthRoute = createRouteMatcher(["/admin/login(.*)"]);
 
 /**
- * Next.js 16 Node.js Proxy
- * Chains Clerk authentication for protected administrative routes,
- * generates privacy-preserving client connection tokens for API telemetry/rate limiting,
- * and attaches standard HTTP security headers globally.
+ * Privacy-preserving client connection token for API telemetry/rate limiting,
+ * plus the standard HTTP security headers. Applies to every request, whether
+ * or not Clerk is in the chain.
  */
-const authMiddleware = clerkMiddleware(async (auth, req: NextRequest) => {
-  if (isProtectedRoute(req) && !isPublicAuthRoute(req)) {
-    await auth.protect();
-  }
-
-  const isApi = req.nextUrl.pathname.startsWith("/api");
+async function decorateRequest(req: NextRequest): Promise<NextResponse> {
   const requestHeaders = new Headers(req.headers);
 
-  if (isApi) {
+  if (req.nextUrl.pathname.startsWith("/api")) {
     const ip = extractClientIp(req);
     const userAgent = req.headers.get("user-agent") || "";
     const connectionHash = await generateClientConnectionHash(
@@ -39,10 +34,33 @@ const authMiddleware = clerkMiddleware(async (auth, req: NextRequest) => {
   });
 
   return applySecurityHeaders(response, req);
+}
+
+const authMiddleware = clerkMiddleware(async (auth, req: NextRequest) => {
+  if (!isPublicAuthRoute(req)) {
+    await auth.protect();
+  }
+
+  return decorateRequest(req);
 });
 
+/**
+ * Next.js 16 Node.js Proxy
+ *
+ * Clerk runs only for the admin area. It used to wrap every route, which meant
+ * a missing or non-resolvable publishable key took down the whole site: the
+ * handshake fails and the middleware returns Clerk's error JSON as the page
+ * body, or throws outright when the key is absent. Nothing outside `/admin`
+ * reads Clerk state -- `ClerkProvider` is mounted in `app/admin/layout.tsx`
+ * and `lib/auth/admin.ts` is admin-only -- so the rest of the site has no
+ * reason to pay that cost or carry that risk.
+ */
 export function proxy(req: NextRequest, event: NextFetchEvent) {
-  return authMiddleware(req, event);
+  if (isClerkRoute(req)) {
+    return authMiddleware(req, event);
+  }
+
+  return decorateRequest(req);
 }
 
 export const config = {

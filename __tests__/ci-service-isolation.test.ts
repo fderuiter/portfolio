@@ -77,40 +77,19 @@ describe("CI Service Container Isolation", () => {
   });
 
   /**
-   * proxy.ts wraps every route in `clerkMiddleware`, so a server booted
-   * without a Clerk publishable key rejects each request before routing --
-   * public pages included. Playwright reported that as
-   * `Timed out waiting 120000ms from config.webServer` after 120 identical
-   * `Missing publishableKey` errors, with no mention of Clerk in the failure
-   * itself. Any step that starts the production server needs the placeholders.
+   * Clerk is scoped to the admin area (see proxy.ts and
+   * __tests__/proxy-clerk-scope.test.ts), so no CI step needs a Clerk key to
+   * boot the production server. Placeholder keys are worse than none: the
+   * published example key is format-valid but resolves to no live instance,
+   * so Clerk's handshake answers `host_invalid` and the middleware returns
+   * that JSON as the page body -- which reads as a content failure, not a
+   * credential one. It cost a full CI cycle to trace.
    */
-  const SERVER_BOOTING_STEPS = /playwright test|bench:pages/;
-  const RUNTIME_ENV_KEYS = [
-    "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
-    "CLERK_SECRET_KEY",
-  ];
-
-  const serverBootingSteps = steps.filter(
-    (step) =>
-      SERVER_BOOTING_STEPS.test(step.body) && /\n\s+env:/.test(step.body)
-  );
-
-  it("starts the production server only in steps that declare one", () => {
-    expect(serverBootingSteps.length).toBeGreaterThan(0);
+  it("does not hand the workflow placeholder Clerk credentials", () => {
+    expect(ci).not.toMatch(
+      /CLERK_SECRET_KEY|NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY/
+    );
   });
-
-  it.each(serverBootingSteps.map((step) => step.name))(
-    "step %s supplies the env the production server needs to boot",
-    (name) => {
-      const step = serverBootingSteps.find(
-        (candidate) => candidate.name === name
-      )!;
-      const missing = RUNTIME_ENV_KEYS.filter(
-        (key) => !step.body.includes(`${key}:`)
-      );
-      expect(missing).toEqual([]);
-    }
-  );
 
   it("bounds every job so a hang fails fast instead of running to the 6h default", () => {
     const jobsBlock = ci.slice(ci.indexOf("\njobs:"));
