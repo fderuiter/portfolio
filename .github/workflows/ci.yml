@@ -92,9 +92,6 @@ jobs:
           npm run typecheck
           npm run lint
 
-      - name: Verify ADR Invariants & Doctor Health Diagnostics
-        run: npm run verify
-
       - name: Next.js Cache
         uses: actions/cache@v4
         with:
@@ -136,6 +133,9 @@ jobs:
           DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk"
           CLERK_SECRET_KEY: "sk_test_example_secret_key"
+
+      - name: Verify ADR Invariants & Doctor Health Diagnostics
+        run: npm run verify
 
       - name: Generate Centralized Health Dashboard
         if: always()
