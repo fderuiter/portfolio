@@ -465,7 +465,7 @@ Prepared 2026-09-08. This initial 32-item inventory was consolidated into 24 app
 
 **Evidence:** Audit required.
 
-**Scope:** `app/proof/`; `app/crf/`; `app/neuro/`; `components/*Studio*`.
+**Scope:** `app/proof/`; `app/crf/`; `app/neuro/`; `components/crf/*Studio*`.
 
 **Problem / opportunity:** Visitors need confidence about what is saved, shared, reset, or lost during interactive work.
 
@@ -483,7 +483,7 @@ Prepared 2026-09-08. This initial 32-item inventory was consolidated into 24 app
 
 **Evidence:** Audit required.
 
-**Scope:** `app/arcade/page.tsx`; `app/arcade/*/page.tsx`; `components/PlayCabinet.tsx`.
+**Scope:** `app/arcade/page.tsx`; `app/arcade/*/page.tsx`; `components/arcade/PlayCabinet.tsx`.
 
 **Problem / opportunity:** Novel games should be easy to start without needing to infer controls or understand the underlying engine.
 

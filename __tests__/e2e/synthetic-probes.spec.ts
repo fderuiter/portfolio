@@ -131,7 +131,10 @@ test.describe("Headless Synthetic User Probes & Journey Monitoring", () => {
       },
       headers: { "Content-Type": "application/json" },
     });
-    expect([200, 201]).toContain(validRes.status());
+    // POST /api/telemetry answers 201 when the Redis buffer write succeeded and
+    // 202 when the event was accepted but dropped (buffer unavailable). It never
+    // returns 200 -- see app/api/telemetry/route.ts.
+    expect([201, 202]).toContain(validRes.status());
     const validJson = await validRes.json();
     expect(validJson.success).toBe(true);
 

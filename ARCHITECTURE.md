@@ -4,7 +4,7 @@ This document tracks the core, bleeding-edge technical decisions established dur
 
 ## System Architecture & Directory Topology
 
-The application structure maps App Router routes, Python backend core utilities, React UI components, developer experience utilities, and automation scripts:
+The application structure maps App Router routes, React UI components, developer experience utilities, and automation scripts:
 
 ```text
 __tests__/                                 # Vitest unit/integration tests, Playwright E2E, & fuzzing
@@ -31,13 +31,9 @@ app/                                       # Next.js 16 App Router routes, layou
 │   ├── stack/page.tsx                     # System architecture & stack lab route
 │   └── work/                              # Professional case study work routes
 │       └── laser-loon/page.tsx            # Laser Loon work route & technical breakdown
-├── api/                                   # Serverless API contracts & edge functions
-│   ├── case-studies/route.ts              # Case study dynamic search & indexing endpoint
-│   └── telemetry/route.ts                 # Anonymized sliding-window telemetry ingestion
-└── core/                                  # Python Backend Core Engine & Utilities
-    ├── analyzer_strategies.py             # Hybrid offline feature extraction & TF-IDF classification
-    ├── crypto.py                          # Encrypted DB concurrency & SQLCipher security lifecycle
-    └── resilient_file_ops.py              # Crash-resilient 2-phase file operations & rollback
+└── api/                                   # Serverless API contracts & edge functions
+    ├── case-studies/route.ts              # Case study dynamic search & indexing endpoint
+    └── telemetry/route.ts                 # Anonymized sliding-window telemetry ingestion
 
 components/                                # React UI Component Ecosystem
 ├── ui/                                    # Shared Micro-Interactions & Layout Primitives
@@ -466,9 +462,9 @@ To capture and display user engagement metrics in real-time without introducing 
 - **Isolated Client-Side Tracker Boundary (`TelemetryTracker`):** Embedded `<TelemetryTracker slug={slug} />` inside Server dynamic pages. It manages client-side mount hooks (`useEffect` with React strict-mode double-run prevention refs) to trigger dynamic `page_view` records without making the parent route a Client Component.
 - **Zero-Reflow predicted height boundaries:** Adjusted masonry grid Pretext column precalculation paddings from `460` and `170` to `484` and `194` across both `CaseStudyShowcase.tsx` and `components/ui/CaseStudyBentoCard.tsx`. This perfectly maps layout spacing constraints on both server pre-renders and dynamic client loads.
 
-## Backend Core Package Utilities (app/core/)
+## Sortify Backend Core Package Utilities (External Repository)
 
-The Python backend core package utilities power air-gapped document ingestion, encrypted storage, and forensic data classification:
+These Python modules are **not part of this repository**. They live in the separate Sortify project and are summarized here because the portfolio showcases that case study; the full deep dives are in `docs/CASE_STUDY.md`. Paths below are relative to the Sortify repository root. They power air-gapped document ingestion, encrypted storage, and forensic data classification:
 
 - **`app/core/crypto.py` (Encrypted Database Concurrency & Lifecycle):**
   - Manages SQLCipher database encryption keys, concurrent session pooling, and cryptographically secure key derivation routines.
@@ -568,6 +564,6 @@ The deployment pipeline integrates Automated Canary Analysis (ACA) and continuou
 
 - **Automated Canary Release Gates (`scripts/canary-analyzer.ts`)**: Evaluates real-time telemetry against baseline error budgets, enforcing 0.5% 5xx error limits, 800ms p95 latency ceilings, 25% relative latency regression limits, and 2.0x Sentry exception spike ratios before traffic cutover.
 - **Automated Rollback Dispatch**: Automatically prepares and posts JSON payloads (`AUTOMATED_CANARY_ROLLBACK`) to infrastructure webhooks when canary analysis triggers `ROLLBACK_REQUIRED`.
-- **Scheduled Synthetic Journey Monitoring (`.github/workflows/synthetic-probes.yml`)**: Continuous 30-minute crons executing Playwright headless probes across 5 critical user journeys (Landing Pretext layout, Command Palette discovery, Proof Assistant DAG studio, Arcade canvas lifecycle, and Telemetry API schemas).
+- **Scheduled Synthetic Journey Monitoring (`.github/workflows/synthetic-probes.yml`)**: A daily cron (`17 7 * * *`) executing Playwright headless probes across 5 critical user journeys (Landing Pretext layout, Command Palette discovery, Proof Assistant DAG studio, Arcade canvas lifecycle, and Telemetry API schemas).
 
 Detailed operational evaluation commands, webhook payload structures, custom target URL overrides, and step-by-step failure triage runbooks are maintained in [**`DEPLOYMENT.md`**](DEPLOYMENT.md).

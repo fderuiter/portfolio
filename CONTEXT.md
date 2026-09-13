@@ -226,7 +226,7 @@ Formal inference rules used to derive logical steps from valid premises:
 - **Husky Commit Guard (`.husky/commit-msg`)**: Pre-commit hook interceptor preventing malformed or unclassified git commits from entering repository history.
 - **Interactive Commit Wizard (`npm run dx commit`)**: Guided command-line interface generating compliant Conventional Commits with scope validation and breaking change indicators.
 - **Branch Naming Standard**: Team-wide git branch naming convention requiring categorical prefixes (`feat/*`, `fix/*`, `chore/*`, `refactor/*`, `docs/*`, `perf/*`, `dx/*`, `test/*`, `main`).
-- **Dual-Tracker Issue Slicing Pattern**: The engineering issue workflow combining local tracer-bullet ticket files (`.scratch/issues/*.md`) for isolated context-bounded autonomous implementation with bi-directional GitHub CLI integration (`npm run dx issues:sync`), preserving dependency edges, automated triage labels, and verification checklists.
+- **Dual-Tracker Issue Slicing Pattern**: The engineering issue workflow combining local tracer-bullet ticket files (`.scratch/issues/*.md`) for isolated context-bounded autonomous implementation with bi-directional GitHub CLI integration (planned `npm run dx issues:sync`; not yet implemented, so synchronization is currently performed manually with the `gh` CLI per `docs/agents/issue-tracker.md`), preserving dependency edges, automated triage labels, and verification checklists.
 
 ### Static Analysis & Performance Budgets
 
@@ -256,7 +256,7 @@ Formal inference rules used to derive logical steps from valid premises:
 
 ### Garmin Watch Hardware & Thermal Emulation
 
-- **Garmin Thermal & CPU Telemetry Engine**: Deterministic physical simulation engine (`lib/garmin-engine.ts`, `components/arcade/GarminWatch.tsx`) modeling Connect IQ runtime CPU workloads, heat generation curves, passive wrist thermal dissipation, battery discharge profiles, and ANT+ heart rate sensor telemetry under active workload stress.
+- **Garmin Thermal & CPU Telemetry Engine**: Deterministic physical simulation engine (`lib/garmin-engine.ts`, `components/arcade/GarminWatchClient.tsx`) modeling Connect IQ runtime CPU workloads, heat generation curves, passive wrist thermal dissipation, battery discharge profiles, and ANT+ heart rate sensor telemetry under active workload stress.
 - **Monkey C Bytecode Emulation Scaffold**: Canvas-driven graphical rendering pipeline emulating high-contrast MIP (Memory-in-Pixel) transflective smartwatch displays, hardware bezel buttons, and Connect IQ OS lifecycle states with zero native C dependencies.
 
 ## Scientific & Engineering Editorial Design System
