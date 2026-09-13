@@ -19,8 +19,16 @@ import {
   StudyCohort,
   BiomedicalConcept,
 } from "./types";
-import { validateCdashVariableName } from "./precision-date";
+import {
+  validateCdashVariableName,
+  generateEngineId,
+  generateCdashVariableName,
+} from "./precision-date";
 import { lintForm } from "./ast-evaluator";
+import {
+  instantiateSmartBlock,
+  instantiateAtomicField,
+} from "./smart-blocks-engine";
 import {
   scaffoldCdashDomain,
   CDASH_STANDARD_VARIABLES,
@@ -277,83 +285,7 @@ export const CDASH_DOMAIN_CATALOG: DomainMetadata[] = [
   },
 ];
 
-/**
- * Generate Collision-Resistant ID using crypto.randomUUID or Random Fallback
- */
-export function generateEngineId(prefix: string): string {
-  if (
-    typeof crypto !== "undefined" &&
-    typeof crypto.randomUUID === "function"
-  ) {
-    return `${prefix}_${crypto.randomUUID()}`;
-  }
-  const rand = Math.random().toString(36).slice(2, 11);
-  const rand2 = Math.random().toString(36).slice(2, 11);
-  return `${prefix}_${rand}_${rand2}`;
-}
-
-/**
- * Generate Valid CDASH Nonconflicting Variable Name (<= 8 Characters)
- */
-export function generateCdashVariableName(
-  baseName: string,
-  existingVarNames: Set<string> | string[]
-): string {
-  const existing =
-    existingVarNames instanceof Set
-      ? existingVarNames
-      : new Set(existingVarNames.map((v) => v.toUpperCase()));
-
-  // Clean non-alphanumeric/underscore and ensure uppercase
-  let cleaned = (baseName || "VAR").toUpperCase().replace(/[^A-Z0-9_]/g, "");
-  // CDASH variables must start with an alphabetic character [A-Z]
-  if (!cleaned || /^[^A-Z]/.test(cleaned)) {
-    const stripped = cleaned.replace(/^[^A-Z]+/, "");
-    cleaned = `V_${stripped || "VAR"}`.replace(/[^A-Z0-9_]/g, "");
-  }
-
-  // If base already ends in _<digits>, parse stem and counter
-  const match = cleaned.match(/^(.*?)_([0-9]+)$/);
-  const stem =
-    match && match[1].length > 0
-      ? match[1].replace(/_+$/, "")
-      : cleaned.replace(/_+$/, "");
-  let counter = match ? parseInt(match[2], 10) + 1 : 2;
-
-  // Try numerical suffixes within 8-character CDASH limit
-  while (counter < 1000) {
-    const suffix = `_${counter}`;
-    const maxStemLen = Math.max(1, 8 - suffix.length);
-    const truncatedStem = stem.slice(0, maxStemLen).replace(/_+$/, "");
-    const candidate = `${truncatedStem}${suffix}`;
-
-    if (!existing.has(candidate)) {
-      return candidate;
-    }
-    counter++;
-  }
-
-  // Fallback to letter suffixes within 8-character limit
-  for (let code = 65; code <= 90; code++) {
-    const letter = String.fromCharCode(code);
-    const suffix = `_${letter}`;
-    const maxStemLen = Math.max(1, 8 - suffix.length);
-    const truncatedStem = stem.slice(0, maxStemLen).replace(/_+$/, "");
-    const candidate = `${truncatedStem}${suffix}`;
-    if (!existing.has(candidate)) {
-      return candidate;
-    }
-  }
-
-  // Ultimate fallback within 8 characters (guaranteed unique)
-  while (true) {
-    const rand = Math.random().toString(36).slice(2, 8).toUpperCase();
-    const candidate = `V_${rand}`.slice(0, 8);
-    if (!existing.has(candidate)) {
-      return candidate;
-    }
-  }
-}
+export { generateEngineId, generateCdashVariableName } from "./precision-date";
 
 function escapeRegex(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -1330,6 +1262,172 @@ export class StudyProtocolEngine {
         ? { sectionIndex: sectionIndexOrOptions }
         : sectionIndexOrOptions;
     return this.insertField(study, domainOrFormId, fieldData, options);
+  }
+
+  /**
+   * Inserts a Clinical Smart Block into the specified form with collision-resistant
+   * IDs, CDASH non-conflicting variable names, and remapped rule conditions/formulas.
+   */
+  static insertSmartBlock(
+    study: StudyProtocol,
+    domainOrFormId: string,
+    smartBlockId: string,
+    options?: {
+      targetSectionId?: string;
+      targetIndex?: number;
+      asNewSection?: boolean;
+    }
+  ): {
+    study: StudyProtocol;
+    insertedSection?: CRFSection;
+    insertedFields: CRFField[];
+    insertedRules: EditCheckRule[];
+    error?: string;
+    undo: () => StudyProtocol;
+  } {
+    const originalStudy = study;
+    const form = this.getForm(study, domainOrFormId);
+    if (!form) {
+      return {
+        study,
+        insertedFields: [],
+        insertedRules: [],
+        error: `Form '${domainOrFormId}' not found in protocol.`,
+        undo: () => originalStudy,
+      };
+    }
+
+    // Collect all existing variable names across the form
+    const existingVars = new Set<string>();
+    form.sections.forEach((s) => {
+      s.fields.forEach((f) => {
+        existingVars.add(f.variableName.toUpperCase());
+        f.repeatingColumns?.forEach((rc) =>
+          existingVars.add(rc.variableName.toUpperCase())
+        );
+      });
+    });
+
+    const { section, rules } = instantiateSmartBlock(smartBlockId, {
+      existingVariableNames: existingVars,
+    });
+
+    const updatedForm = { ...form };
+    const asNewSection =
+      options?.asNewSection ?? options?.targetSectionId === undefined;
+
+    if (asNewSection) {
+      const targetSecIdx =
+        options?.targetIndex !== undefined
+          ? options.targetIndex
+          : updatedForm.sections.length;
+      const nextSections = [...updatedForm.sections];
+      nextSections.splice(targetSecIdx, 0, section);
+      updatedForm.sections = nextSections;
+    } else {
+      const targetSecIdx = updatedForm.sections.findIndex(
+        (s) => s.id === options?.targetSectionId
+      );
+      if (targetSecIdx === -1) {
+        updatedForm.sections = [...updatedForm.sections, section];
+      } else {
+        const targetSec = updatedForm.sections[targetSecIdx];
+        const nextFields = [...targetSec.fields];
+        const insertIdx =
+          options?.targetIndex !== undefined
+            ? options.targetIndex
+            : nextFields.length;
+        nextFields.splice(insertIdx, 0, ...section.fields);
+        const updatedSec = { ...targetSec, fields: nextFields };
+        const nextSections = [...updatedForm.sections];
+        nextSections[targetSecIdx] = updatedSec;
+        updatedForm.sections = nextSections;
+      }
+    }
+
+    // Add remapped rules to form
+    updatedForm.rules = [...(updatedForm.rules || []), ...rules];
+
+    const updatedForms = study.forms.map((f) =>
+      f.id === form.id || f.domain.toUpperCase() === form.domain.toUpperCase()
+        ? updatedForm
+        : f
+    );
+
+    const updatedStudy = {
+      ...study,
+      forms: updatedForms,
+      updatedAt: new Date().toISOString(),
+    };
+
+    return {
+      study: updatedStudy,
+      insertedSection: asNewSection ? section : undefined,
+      insertedFields: section.fields,
+      insertedRules: rules,
+      undo: () => originalStudy,
+    };
+  }
+
+  /**
+   * Inserts an atomic field from a slash command into the specified form/section
+   */
+  static insertAtomicSlashField(
+    study: StudyProtocol,
+    domainOrFormId: string,
+    commandId: string,
+    options?: {
+      targetSectionId?: string;
+      targetIndex?: number;
+    }
+  ): {
+    study: StudyProtocol;
+    insertedField?: CRFField;
+    error?: string;
+    undo: () => StudyProtocol;
+  } {
+    const originalStudy = study;
+    const form = this.getForm(study, domainOrFormId);
+    if (!form) {
+      return {
+        study,
+        error: `Form '${domainOrFormId}' not found in protocol.`,
+        undo: () => originalStudy,
+      };
+    }
+
+    const existingVars = new Set<string>();
+    form.sections.forEach((s) => {
+      s.fields.forEach((f) => {
+        existingVars.add(f.variableName.toUpperCase());
+        f.repeatingColumns?.forEach((rc) =>
+          existingVars.add(rc.variableName.toUpperCase())
+        );
+      });
+    });
+
+    const field = instantiateAtomicField(commandId, {
+      existingVariableNames: existingVars,
+    });
+
+    const result = this.insertField(study, domainOrFormId, field, {
+      sectionId: options?.targetSectionId,
+      targetIndex: options?.targetIndex,
+    });
+
+    if (result.error || !result.field) {
+      return {
+        study,
+        error: result.error || "Failed to insert atomic field.",
+        undo: () => originalStudy,
+      };
+    }
+
+    return {
+      study: result.study,
+      insertedField: result.field,
+      undo: () => originalStudy,
+    };
   }
 
   /**

@@ -23,7 +23,14 @@
 
 - [CDASH\_DOMAIN\_CATALOG](variables/CDASH_DOMAIN_CATALOG.md)
 
-## Functions
+## References
 
-- [generateCdashVariableName](functions/generateCdashVariableName.md)
-- [generateEngineId](functions/generateEngineId.md)
+### generateCdashVariableName
+
+Re-exports [generateCdashVariableName](../precision-date/functions/generateCdashVariableName.md)
+
+***
+
+### generateEngineId
+
+Re-exports [generateEngineId](../precision-date/functions/generateEngineId.md)
