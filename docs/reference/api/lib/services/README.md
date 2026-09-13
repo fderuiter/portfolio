@@ -56,6 +56,12 @@ Re-exports [AllocateGarminMemorySpec](garmin/allocate-memory/spec/interfaces/All
 
 ***
 
+### BufferedReactionEvent
+
+Re-exports [BufferedReactionEvent](case-study-service/interfaces/BufferedReactionEvent.md)
+
+***
+
 ### BufferedTelemetryEvent
 
 Re-exports [BufferedTelemetryEvent](telemetry-service/interfaces/BufferedTelemetryEvent.md)

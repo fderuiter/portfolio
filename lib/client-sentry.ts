@@ -1,3 +1,4 @@
+import { isBenignClientNoise, resolveTracesSampleRate } from "./sentry-policy";
 /**
  * Utility for lazy Sentry loading and conditional initialization on client side.
  */
@@ -35,23 +36,18 @@ export async function initClientSentry(): Promise<boolean | null> {
   }
 
   const Sentry = await import("@sentry/nextjs");
-  const initFn = Sentry.init || (Sentry as unknown as { default: typeof Sentry }).default?.init;
+  const initFn =
+    Sentry.init ||
+    (Sentry as unknown as { default: typeof Sentry }).default?.init;
   if (typeof initFn === "function") {
     initFn({
       dsn,
-      tracesSampleRate: 1.0,
+      tracesSampleRate: resolveTracesSampleRate(),
       debug: false,
       sendDefaultPii: false,
       beforeSend(event, hint) {
-        const error = hint?.originalException;
-        if (
-          error &&
-          ((error instanceof Error && error.name === "GameEngineException") ||
-            (typeof error === "object" &&
-              (("name" in error && error.name === "GameEngineException") ||
-                error.constructor?.name === "GameEngineException")))
-        ) {
-          return null; // Discard simulated game engine exceptions globally
+        if (isBenignClientNoise(hint?.originalException)) {
+          return null;
         }
         return event;
       },
@@ -76,7 +72,8 @@ export async function reportClientError(error: unknown): Promise<void> {
       const Sentry = await import("@sentry/nextjs");
       const captureFn =
         Sentry.captureException ||
-        (Sentry as unknown as { default: typeof Sentry }).default?.captureException;
+        (Sentry as unknown as { default: typeof Sentry }).default
+          ?.captureException;
       if (typeof captureFn === "function") {
         captureFn(error);
       }

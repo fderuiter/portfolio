@@ -14,3 +14,4 @@
 
 - [getRedisKeyPrefix](functions/getRedisKeyPrefix.md)
 - [getScopedRedisKey](functions/getScopedRedisKey.md)
+- [isRedisConfigured](functions/isRedisConfigured.md)

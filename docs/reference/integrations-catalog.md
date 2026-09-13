@@ -61,14 +61,20 @@ flowchart LR
 ## Per-environment resource identity matrix
 
 "Production", "PR Preview", and "local" are directly observable from
-repository configuration. "dev" here means the `dev` branch this repository
-develops feature branches against (see
-[ADR 0025](../../adr/0025-dual-tracker-issue-slicing-and-github-sync.md) and
-the `sync-dev-on-main-push.yml` workflow) — **whether Vercel deploys `dev` to
-its own persistent preview URL, or whether it only gets ordinary PR preview
-deployments from branches cut off it, is a Vercel project dashboard setting
-this sandbox cannot see. Treat it as unknown and confirm in the Vercel
-dashboard** rather than assuming a dedicated "staging" environment exists.
+repository configuration. During the one-time transition in
+[ADR 0037](../../adr/0037-controlled-integration-and-release-deployments.md),
+`dev` remains a historical integration branch, but automatic Vercel
+deployments are allowlisted to `main` only. After reconciliation, short-lived
+topic branches target `main` and receive a preview only when an operator
+requests one.
+
+The live Vercel audit on 2026-09-12 found Resend, Clerk, and one Neon resource
+connected to `portfolio`. It also found an unconnected Sentry integration and
+two unconnected Neon resources. Vercel environment metadata showed the same
+Neon/Postgres variable records scoped to both Production and Preview, while
+Upstash and Sentry variables were absent. Treat Preview database access as
+unsafe until it has a dedicated branch or read-only credential, and treat
+Upstash and Sentry as unconfigured until a release audit proves otherwise.
 
 | Integration | Production | `dev` / PR Preview | Local | CI (`ci.yml`) |
 | --- | --- | --- | --- | --- |
@@ -100,7 +106,7 @@ in `clientEnvSchema` and safe to ship to the browser.
 | Sentry | `SENTRY_DSN`/`NEXT_PUBLIC_SENTRY_DSN` only permit sending events to that project, not reading/managing the account | Rotate by regenerating the DSN in the Sentry project settings | Sentry's free tier event volume — **unknown current entitlement**; confirm at [sentry.io/pricing](https://sentry.io/pricing/) | Governed by Sentry's own event retention window for the plan in use |
 | Upstash Redis | `UPSTASH_REDIS_REST_TOKEN` grants full read/write via REST API. Key namespaces: `telemetry_buffer` (48h TTL), `telemetry_processing` (48h TTL), `@upstash/ratelimit` (sliding window TTL per check). In preview, all prefixed with `preview:` (or `UPSTASH_REDIS_KEY_PREFIX`) | Rotate in Upstash console; no dual-key overlap in REST API (atomic on redeploy) | Free tier: 10,000 commands/day, 256 MB storage, max 100 req/sec REST rate limit. Rate limiting: 1 command per uncached window check; 0 commands for in-memory hits | Buffered telemetry events held with 48h TTL until drained by `/api/telemetry/sync` into Postgres. Rate-limit sliding window keys expire within 60s |
 | Vercel Cron | `CRON_SECRET` is a shared-secret bearer token this application defines and checks itself — Vercel does not manage its value | Rotate by changing the env var; Vercel Cron always sends whatever value is currently configured, so there is no overlap concern | Vercel Hobby plan allows a limited number of Cron Jobs and a coarser minimum schedule granularity than paid plans — **confirm the exact current Hobby limits** at [vercel.com/docs/cron-jobs/usage-and-pricing](https://vercel.com/docs/cron-jobs/usage-and-pricing), since these have changed over time | N/A |
-| Vercel Hosting | Platform deployment tokens (`VERCEL_TOKEN` / CLI) — not required at application runtime | Rotate via Vercel Personal/Team Tokens dashboard | Functions Storage: 10 GB limit (9.6 GB used, 4% headroom); Deployment Storage: 10 GB limit (5.85 GB used); Build Time: 100 hrs/mo (86 hrs used) | Active deployments retained until manually purged; 42 candidate deployments identified for operator review under issue #691 — see [Vercel retention inventory](vercel-retention-inventory.md) |
+| Vercel Hosting | Platform deployment tokens (`VERCEL_TOKEN` / CLI) — not required at application runtime | Rotate via Vercel Personal/Team Tokens dashboard | Functions Storage: 10 GB limit (9.68 GB used, 3.2% headroom); Deployment Storage: 10 GB limit (6.20 GB used); Build Time: 100 hrs/mo (87 hrs used) | 57 superseded deployments removed under closed issue #692; no additional conservative candidate remained — see [Vercel retention inventory](vercel-retention-inventory.md) |
 | GitHub REST API | `GITHUB_TOKEN` scope depends on how it was generated — **unknown scope**; a fine-grained PAT with read-only public-repo access is sufficient for what `lib/github.ts` does | Rotate/regenerate in GitHub settings; no overlap needed since this token only raises a rate limit, it is not required for correctness (see missing-service behavior below) | 60 req/hour unauthenticated, 5,000 req/hour authenticated per [GitHub's REST API rate-limit docs](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api) | N/A (read-only) |
 
 ## Missing-service / degraded-mode behavior

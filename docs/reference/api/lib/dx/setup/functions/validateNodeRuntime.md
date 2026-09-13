@@ -8,7 +8,8 @@
 
 > **validateNodeRuntime**(): `object`
 
-Validate Node.js 22.x runtime requirement
+Validate the Node.js runtime floor. Node 22 LTS and Node 24 LTS are both
+supported, matching engines.node and the version CI runs.
 
 ## Returns
 

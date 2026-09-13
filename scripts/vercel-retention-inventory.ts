@@ -79,7 +79,7 @@ export interface RetentionInventory {
   };
 }
 
-export const PROTECTED_TARGETS: ProtectedTarget[] = [
+export const HISTORICAL_PROTECTED_TARGETS: ProtectedTarget[] = [
   {
     project: "portfolio",
     id: "dpl_3VVso5GPXhpejKjb5wGRFszJABfa",
@@ -112,7 +112,18 @@ export const PROTECTED_TARGETS: ProtectedTarget[] = [
   },
 ];
 
-export const CANDIDATE_DEPLOYMENTS: DeploymentCandidate[] = [
+export const PROTECTED_TARGETS: ProtectedTarget[] = [
+  {
+    project: "portfolio",
+    id: "dpl_3VVso5GPXhpejKjb5wGRFszJABfa",
+    environment: "production",
+    branch: "main",
+    commit: "53ddf0c91",
+    role: "Current active production deployment and canonical domain target",
+  },
+];
+
+export const HISTORICAL_REVIEW_CANDIDATES_2026_09_12: DeploymentCandidate[] = [
   // Portfolio Preview Candidates (19)
   {
     project: "portfolio",
@@ -540,37 +551,42 @@ export const CANDIDATE_DEPLOYMENTS: DeploymentCandidate[] = [
   },
 ];
 
+/**
+ * Live deletion candidates after the explicitly approved 2026-09-12 cleanup.
+ * Historical review candidates remain above as an immutable audit record;
+ * that original list is not identical to the final approved deletion set.
+ */
+export const CANDIDATE_DEPLOYMENTS: DeploymentCandidate[] = [];
+
 export function getVercelRetentionInventory(): RetentionInventory {
   return {
-    timestamp: "2026-09-12T18:00:00.000Z",
+    timestamp: "2026-09-12T23:31:22.151Z",
     scope: "All projects / Last 30 Days",
     plan: "Vercel Hobby",
     meters: {
       functionsStorage: {
         resource: "Functions Storage",
-        used: 9.6,
+        used: 9.68,
         limit: 10.0,
         unit: "GB",
-        headroom: 0.4,
-        headroomPercentage: 4.0,
-        portfolioContribution: 8.18,
-        weddingContribution: 1.41,
+        headroom: 0.32,
+        headroomPercentage: 3.2,
       },
       deploymentStorage: {
         resource: "Deployment Storage",
-        used: 5.85,
+        used: 6.2,
         limit: 10.0,
         unit: "GB",
-        headroom: 4.15,
-        headroomPercentage: 41.5,
+        headroom: 3.8,
+        headroomPercentage: 38.0,
       },
       buildTime: {
         resource: "Build Time",
-        used: 86.0,
+        used: 87.0,
         limit: 100.0,
         unit: "hours",
-        headroom: 14.0,
-        headroomPercentage: 14.0,
+        headroom: 13.0,
+        headroomPercentage: 13.0,
       },
     },
     regions: {
@@ -579,27 +595,25 @@ export function getVercelRetentionInventory(): RetentionInventory {
     },
     paginationSummary: {
       portfolio: {
-        totalPages: 4,
-        totalRecords: 304,
-        readyRecords: 82,
-        blockedOrErrorRecords: 222,
+        totalPages: 3,
+        totalRecords: 268,
+        readyRecords: 43,
+        blockedOrErrorRecords: 225,
       },
       wedding: {
-        totalPages: 1,
-        totalRecords: 61,
-        readyRecords: 43,
+        totalPages: 0,
+        totalRecords: 0,
+        readyRecords: 0,
       },
-      totalReadyReads: 125,
+      totalReadyReads: 43,
     },
     protectedTargets: PROTECTED_TARGETS,
     preservationRules: [
       "Current active production deployments are unconditionally preserved",
-      "Current active dev branch preview deployment is unconditionally preserved",
-      "Active pull request review deployments (e.g. PR #687) are unconditionally preserved",
-      "All active alias targets (3 pages portfolio, 2 pages wedding) are excluded from candidates",
+      "All active alias targets are excluded from candidates",
       "Latest 20 READY deployments per environment are preserved as recency buffers",
       "Latest 10 deployments overall per project are preserved as project safety buffers",
-      "All rollback targets are documented and retained to preserve recovery objectives",
+      "Deleted deployments remain subject to Vercel's documented recovery window",
     ],
     candidates: CANDIDATE_DEPLOYMENTS,
     summary: {
@@ -651,12 +665,21 @@ export function runRetentionInventoryVerification(options?: {
   console.log(
     `• Functions Storage:  ${inventory.meters.functionsStorage.used}/${inventory.meters.functionsStorage.limit} ${inventory.meters.functionsStorage.unit} (${inventory.meters.functionsStorage.headroomPercentage}% headroom remaining)`
   );
-  console.log(
-    `    - Portfolio:      ${inventory.meters.functionsStorage.portfolioContribution} GB`
-  );
-  console.log(
-    `    - Wedding:        ${inventory.meters.functionsStorage.weddingContribution} GB`
-  );
+  if (
+    typeof inventory.meters.functionsStorage.portfolioContribution ===
+    "number"
+  ) {
+    console.log(
+      `    - Portfolio:      ${inventory.meters.functionsStorage.portfolioContribution} GB`
+    );
+  }
+  if (
+    typeof inventory.meters.functionsStorage.weddingContribution === "number"
+  ) {
+    console.log(
+      `    - Wedding:        ${inventory.meters.functionsStorage.weddingContribution} GB`
+    );
+  }
   console.log(
     `• Deployment Storage: ${inventory.meters.deploymentStorage.used}/${inventory.meters.deploymentStorage.limit} ${inventory.meters.deploymentStorage.unit} (${inventory.meters.deploymentStorage.headroomPercentage}% headroom remaining)`
   );
@@ -680,7 +703,7 @@ export function runRetentionInventoryVerification(options?: {
     console.log(`• [${t.project}] ${t.id} (${t.environment}) — ${t.role}`);
   }
   console.log("");
-  console.log("REVIEW-ONLY CANDIDATE SUMMARY (NOT DELETION AUTHORIZATION):");
+  console.log("CURRENT DELETION CANDIDATE SUMMARY:");
   console.log(`• Total Candidates:   ${inventory.summary.totalCandidates}`);
   console.log(
     `• Portfolio Preview:  ${inventory.summary.portfolioPreviewCandidates}`

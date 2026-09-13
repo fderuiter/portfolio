@@ -488,7 +488,7 @@ export const openApiSpec = {
       get: {
         summary: "Cron synchronization of buffered events",
         description:
-          "Pulls buffered telemetry events from secondary Redis cache and flushes them to primary datastore in batches.",
+          "Unified daily maintenance pass. Pulls buffered telemetry events from the secondary Redis cache and flushes them to the primary datastore in batches, then drains the case-study reaction write-buffer into Postgres.",
         parameters: [
           {
             name: "Authorization",
@@ -520,6 +520,16 @@ export const openApiSpec = {
                     success: { type: "boolean" },
                     processed: { type: "integer" },
                     inserted: { type: "integer" },
+                    reactions: {
+                      type: "object",
+                      description:
+                        "Case-study reaction write-buffer drain counters.",
+                      properties: {
+                        processed: { type: "integer" },
+                        inserted: { type: "integer" },
+                      },
+                      required: ["processed", "inserted"],
+                    },
                   },
                   required: ["success", "processed"],
                 },

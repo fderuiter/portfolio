@@ -25,82 +25,74 @@ describe("Vercel Retention & Storage Inventory", () => {
 
     // Functions Storage
     const fsMeter = inventory.meters.functionsStorage;
-    expect(fsMeter.used).toBe(9.6);
+    expect(fsMeter.used).toBe(9.68);
     expect(fsMeter.limit).toBe(10.0);
     expect(fsMeter.unit).toBe("GB");
-    expect(fsMeter.headroom).toBeCloseTo(0.4);
-    expect(fsMeter.headroomPercentage).toBe(4.0);
-    expect(fsMeter.portfolioContribution).toBe(8.18);
-    expect(fsMeter.weddingContribution).toBe(1.41);
+    expect(fsMeter.headroom).toBeCloseTo(0.32);
+    expect(fsMeter.headroomPercentage).toBe(3.2);
+    expect(fsMeter.portfolioContribution).toBeUndefined();
+    expect(fsMeter.weddingContribution).toBeUndefined();
 
     // Deployment Storage
     const dsMeter = inventory.meters.deploymentStorage;
-    expect(dsMeter.used).toBe(5.85);
+    expect(dsMeter.used).toBe(6.2);
     expect(dsMeter.limit).toBe(10.0);
     expect(dsMeter.unit).toBe("GB");
-    expect(dsMeter.headroom).toBeCloseTo(4.15);
-    expect(dsMeter.headroomPercentage).toBe(41.5);
+    expect(dsMeter.headroom).toBeCloseTo(3.8);
+    expect(dsMeter.headroomPercentage).toBe(38.0);
 
     // Build Time
     const btMeter = inventory.meters.buildTime;
-    expect(btMeter.used).toBe(86.0);
+    expect(btMeter.used).toBe(87.0);
     expect(btMeter.limit).toBe(100.0);
     expect(btMeter.unit).toBe("hours");
-    expect(btMeter.headroom).toBe(14.0);
-    expect(btMeter.headroomPercentage).toBe(14.0);
+    expect(btMeter.headroom).toBe(13.0);
+    expect(btMeter.headroomPercentage).toBe(13.0);
   });
 
   it("records paginated inventory counts and regional uniformity", () => {
-    expect(inventory.paginationSummary.portfolio.totalPages).toBe(4);
-    expect(inventory.paginationSummary.portfolio.totalRecords).toBe(304);
-    expect(inventory.paginationSummary.portfolio.readyRecords).toBe(82);
+    expect(inventory.paginationSummary.portfolio.totalPages).toBe(3);
+    expect(inventory.paginationSummary.portfolio.totalRecords).toBe(268);
+    expect(inventory.paginationSummary.portfolio.readyRecords).toBe(43);
     expect(inventory.paginationSummary.portfolio.blockedOrErrorRecords).toBe(
-      222
+      225
     );
 
-    expect(inventory.paginationSummary.wedding.totalPages).toBe(1);
-    expect(inventory.paginationSummary.wedding.totalRecords).toBe(61);
-    expect(inventory.paginationSummary.wedding.readyRecords).toBe(43);
+    expect(inventory.paginationSummary.wedding.totalPages).toBe(0);
+    expect(inventory.paginationSummary.wedding.totalRecords).toBe(0);
+    expect(inventory.paginationSummary.wedding.readyRecords).toBe(0);
 
-    expect(inventory.paginationSummary.totalReadyReads).toBe(125);
+    expect(inventory.paginationSummary.totalReadyReads).toBe(43);
     expect(inventory.regions.iad1Percentage).toBe(100.0);
     expect(inventory.regions.allRegions).toEqual(["iad1"]);
   });
 
-  it("identifies exactly 42 candidates with 0 duplicate identifiers", () => {
-    expect(inventory.candidates).toHaveLength(42);
-    expect(inventory.summary.totalCandidates).toBe(42);
-    expect(inventory.summary.portfolioPreviewCandidates).toBe(19);
-    expect(inventory.summary.portfolioHistoricalProductionCandidates).toBe(21);
-    expect(inventory.summary.weddingPreviewCandidates).toBe(2);
+  it("records no remaining deletion candidate after approved cleanup", () => {
+    expect(inventory.candidates).toHaveLength(0);
+    expect(inventory.summary.totalCandidates).toBe(0);
+    expect(inventory.summary.portfolioPreviewCandidates).toBe(0);
+    expect(inventory.summary.portfolioHistoricalProductionCandidates).toBe(0);
+    expect(inventory.summary.weddingPreviewCandidates).toBe(0);
 
     const ids = inventory.candidates.map((c) => c.id);
     const uniqueIds = new Set(ids);
-    expect(uniqueIds.size).toBe(42);
+    expect(uniqueIds.size).toBe(0);
   });
 
-  it("strictly excludes all 4 named protected targets from candidates", () => {
+  it("strictly excludes the current production target from candidates", () => {
     const candidateIds = new Set(inventory.candidates.map((c) => c.id));
     const protectedIds = PROTECTED_TARGETS.map((t) => t.id);
 
-    expect(protectedIds).toHaveLength(4);
+    expect(protectedIds).toHaveLength(1);
     expect(protectedIds).toContain("dpl_3VVso5GPXhpejKjb5wGRFszJABfa"); // portfolio prod
-    expect(protectedIds).toContain("dpl_UjoKTURkgG7fooX9DVM84qkUBERZ"); // portfolio dev
-    expect(protectedIds).toContain("dpl_5jnmgXBHz9xmdeKvrJq2rKvwhZ4c"); // portfolio PR 687
-    expect(protectedIds).toContain("dpl_7aFUEAbwXRfddKE9EUvbyNLZTYxA"); // wedding prod
 
     for (const id of protectedIds) {
       expect(candidateIds.has(id)).toBe(false);
     }
   });
 
-  it("records physical byte savings as explicitly unknown for every candidate", () => {
+  it("records physical byte savings as unknown until Vercel reconciles", () => {
     expect(inventory.summary.estimatedSavings).toBe("unknown");
-    for (const candidate of inventory.candidates) {
-      expect(candidate.savingsBytes).toBe("unknown");
-      expect(candidate.region).toBe("iad1");
-      expect(candidate.reason).toBeTruthy();
-    }
   });
 
   it("executes verification check without errors", () => {
@@ -109,7 +101,7 @@ describe("Vercel Retention & Storage Inventory", () => {
       candidates: false,
     });
     expect(result.success).toBe(true);
-    expect(result.data.candidates).toHaveLength(42);
+    expect(result.data.candidates).toHaveLength(0);
   });
 
   it("detects safety violations if a protected target is added as a candidate", () => {
@@ -133,7 +125,7 @@ describe("Vercel Retention & Storage Inventory", () => {
     expect(hasProtectedViolation).toBe(true);
   });
 
-  it("synchronizes the reference documentation with all candidate IDs and protected targets", () => {
+  it("synchronizes the reference documentation with current cleanup state", () => {
     expect(fs.existsSync(docPath)).toBe(true);
     const docContent = fs.readFileSync(docPath, "utf-8");
 
@@ -142,17 +134,10 @@ describe("Vercel Retention & Storage Inventory", () => {
       expect(docContent).toContain(target.id);
     }
 
-    // All candidate deployments must be cited in the document
-    for (const candidate of CANDIDATE_DEPLOYMENTS) {
-      expect(docContent).toContain(candidate.id);
-    }
-
     // Key metrics must be represented
-    expect(docContent).toContain("9.60 GB");
-    expect(docContent).toContain("8.18 GB");
-    expect(docContent).toContain("1.41 GB");
-    expect(docContent).toContain("5.85 GB");
-    expect(docContent).toContain("86.0 hrs");
+    expect(docContent).toContain("9.68 GB");
+    expect(docContent).toContain("6.20 GB");
+    expect(docContent).toContain("87.0 hrs");
     expect(docContent).toContain("Issue #691");
     expect(docContent).toContain("Issue #692");
   });

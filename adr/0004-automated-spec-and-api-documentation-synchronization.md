@@ -42,7 +42,7 @@ We establish an automated, zero-drift technical documentation and API specificat
 ## Invariant Compliance
 
 - **AGENTS.md Invariant 5 (Hygiene)**: Intermediate agent tracking files and scratch notes are isolated and excluded.
-- **AGENTS.md Invariant 6 (DX & Quality)**: All 9 architectural invariants, TypeDoc parity, and OpenAPI synchronization pass via `npm run quality` and `npm run verify`.
+- **AGENTS.md Invariant 6 (DX & Quality)**: Every architectural invariant reported by DX Doctor, plus TypeDoc parity and OpenAPI synchronization, passes via `npm run quality` and `npm run verify`.
 
 ## Consequences
 

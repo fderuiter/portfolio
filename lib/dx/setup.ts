@@ -25,9 +25,13 @@ export interface SetupResult {
 }
 
 /**
- * Validate Node.js 22.x runtime requirement
+ * Validate the Node.js runtime floor. Node 22 LTS and Node 24 LTS are both
+ * supported, matching engines.node and the version CI runs.
  */
-export function validateNodeRuntime(): { valid: boolean; currentVersion: string } {
+export function validateNodeRuntime(): {
+  valid: boolean;
+  currentVersion: string;
+} {
   const currentVersion = process.versions.node;
   const major = parseInt(currentVersion.split(".")[0], 10);
   return { valid: major >= 22, currentVersion };
@@ -38,7 +42,9 @@ export function validateNodeRuntime(): { valid: boolean; currentVersion: string 
  */
 export function validatePackageManager(): { valid: boolean; agent: string } {
   const agent = process.env.npm_config_user_agent || "";
-  const isBun = typeof (process.versions as Record<string, unknown>).bun !== "undefined" || agent.startsWith("bun/");
+  const isBun =
+    typeof (process.versions as Record<string, unknown>).bun !== "undefined" ||
+    agent.startsWith("bun/");
   const isYarn = agent.startsWith("yarn/");
   const isPnpm = agent.startsWith("pnpm/");
 
@@ -51,13 +57,21 @@ export function validatePackageManager(): { valid: boolean; agent: string } {
 /**
  * Check lockfile integrity (package-lock.json must exist, no alternative lockfiles)
  */
-export function validateLockfiles(root: string): { valid: boolean; errors: string[] } {
+export function validateLockfiles(root: string): {
+  valid: boolean;
+  errors: string[];
+} {
   const errors: string[] = [];
   const pkgLock = path.join(root, "package-lock.json");
   if (!fs.existsSync(pkgLock)) {
     errors.push("Missing primary package-lock.json file.");
   }
-  const prohibitedLocks = ["yarn.lock", "bun.lock", "bun.lockb", "pnpm-lock.yaml"];
+  const prohibitedLocks = [
+    "yarn.lock",
+    "bun.lock",
+    "bun.lockb",
+    "pnpm-lock.yaml",
+  ];
   for (const lock of prohibitedLocks) {
     if (fs.existsSync(path.join(root, lock))) {
       errors.push(`Prohibited alternative lockfile detected: ${lock}`);
@@ -69,7 +83,9 @@ export function validateLockfiles(root: string): { valid: boolean; errors: strin
 /**
  * Run Interactive DX Setup Routine
  */
-export async function runSetupWorkflow(options: SetupOptions = {}): Promise<SetupResult> {
+export async function runSetupWorkflow(
+  options: SetupOptions = {}
+): Promise<SetupResult> {
   const root = options.workspaceRoot || path.resolve(__dirname, "..");
   const isInteractive = options.interactive !== false;
   const skipDb = !!options.skipDb;
@@ -87,18 +103,25 @@ export async function runSetupWorkflow(options: SetupOptions = {}): Promise<Setu
     errors: [],
   };
 
-  console.log(formatHeader("Developer Experience (DX) Interactive Setup Wizard", "Node.js 22.x • npm • Next.js 16 • Prisma"));
+  console.log(
+    formatHeader(
+      "Developer Experience (DX) Interactive Setup Wizard",
+      "Node.js 22+ • npm • Next.js 16 • Prisma"
+    )
+  );
 
   // 1. Engine & Package Manager Guard
   const nodeCheck = validateNodeRuntime();
   if (!nodeCheck.valid) {
-    const msg = `Unsupported Node.js version v${nodeCheck.currentVersion}. Node.js 22.x is strictly required.`;
+    const msg = `Unsupported Node.js version v${nodeCheck.currentVersion}. Node.js 22 or newer is required.`;
     console.error(`${badge("[ENGINE]", "fail")} ${msg}`);
     result.errors.push(msg);
     return result;
   }
   result.nodeVersionValid = true;
-  console.log(`${badge("[ENGINE]", "pass")} Running on supported Node.js v${nodeCheck.currentVersion}`);
+  console.log(
+    `${badge("[ENGINE]", "pass")} Running on supported Node.js v${nodeCheck.currentVersion}`
+  );
 
   const pmCheck = validatePackageManager();
   if (!pmCheck.valid) {
@@ -108,7 +131,9 @@ export async function runSetupWorkflow(options: SetupOptions = {}): Promise<Setu
     return result;
   }
   result.packageManagerValid = true;
-  console.log(`${badge("[PACKAGE MANAGER]", "pass")} Validated npm execution context`);
+  console.log(
+    `${badge("[PACKAGE MANAGER]", "pass")} Validated npm execution context`
+  );
 
   // 2. Lockfile Check
   const lockCheck = validateLockfiles(root);
@@ -121,7 +146,9 @@ export async function runSetupWorkflow(options: SetupOptions = {}): Promise<Setu
     return result;
   }
   result.lockfileValid = true;
-  console.log(`${badge("[LOCKFILE]", "pass")} package-lock.json verified (no alternative lockfiles)`);
+  console.log(
+    `${badge("[LOCKFILE]", "pass")} package-lock.json verified (no alternative lockfiles)`
+  );
 
   // 3. Environment Configuration Creation & Overwrite Protection
   const envLocalPath = path.join(root, ".env.local");
@@ -138,25 +165,39 @@ export async function runSetupWorkflow(options: SetupOptions = {}): Promise<Setu
 
   if (!fs.existsSync(envLocalPath)) {
     shouldCopyEnv = true;
-    console.log(`${badge("[ENV]", "pass")} .env.local not found. Creating from .env.example...`);
+    console.log(
+      `${badge("[ENV]", "pass")} .env.local not found. Creating from .env.example...`
+    );
   } else if (forceEnv) {
     shouldCopyEnv = true;
-    console.log(`${badge("[ENV]", "warn")} Overwriting .env.local from .env.example (--force-env)...`);
+    console.log(
+      `${badge("[ENV]", "warn")} Overwriting .env.local from .env.example (--force-env)...`
+    );
   } else if (isInteractive) {
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
     const answer = await new Promise<string>((resolve) =>
-      rl.question(`${colors.yellow}Local .env.local already exists. Overwrite with template .env.example? (y/N): ${colors.reset}`, (ans) => {
-        rl.close();
-        resolve(ans.trim());
-      })
+      rl.question(
+        `${colors.yellow}Local .env.local already exists. Overwrite with template .env.example? (y/N): ${colors.reset}`,
+        (ans) => {
+          rl.close();
+          resolve(ans.trim());
+        }
+      )
     );
     if (answer.toLowerCase() === "y" || answer.toLowerCase() === "yes") {
       shouldCopyEnv = true;
     } else {
-      console.log(`${badge("[ENV]", "pass")} Preserved existing .env.local file.`);
+      console.log(
+        `${badge("[ENV]", "pass")} Preserved existing .env.local file.`
+      );
     }
   } else {
-    console.log(`${badge("[ENV]", "pass")} Preserved existing .env.local file (non-interactive mode).`);
+    console.log(
+      `${badge("[ENV]", "pass")} Preserved existing .env.local file (non-interactive mode).`
+    );
   }
 
   if (shouldCopyEnv) {
@@ -166,13 +207,17 @@ export async function runSetupWorkflow(options: SetupOptions = {}): Promise<Setu
 
   const envCheck = checkEnvironmentVariables(root, false);
   if (envCheck.status === "fail") {
-    console.warn(`${badge("[ENV]", "warn")} Environment variable validation notes: ${envCheck.message}`);
+    console.warn(
+      `${badge("[ENV]", "warn")} Environment variable validation notes: ${envCheck.message}`
+    );
   }
   result.envCreatedOrValidated = true;
 
   // 4. Database Schema Sync & Seeding
   if (skipDb) {
-    console.log(`${badge("[DATABASE]", "warn")} Skipping database setup (--skip-db).`);
+    console.log(
+      `${badge("[DATABASE]", "warn")} Skipping database setup (--skip-db).`
+    );
   } else {
     console.log(formatSection("Database Schema Initialization"));
 
@@ -180,7 +225,9 @@ export async function runSetupWorkflow(options: SetupOptions = {}): Promise<Setu
     try {
       console.log(`Generating Prisma client...`);
       execSync("npx prisma generate", { cwd: root, stdio: "inherit" });
-      console.log(`${badge("[PRISMA]", "pass")} Prisma client generated successfully.`);
+      console.log(
+        `${badge("[PRISMA]", "pass")} Prisma client generated successfully.`
+      );
     } catch (_err) {
       const msg = "Failed to generate Prisma client.";
       console.error(`${badge("[PRISMA]", "fail")} ${msg}`);
@@ -193,9 +240,12 @@ export async function runSetupWorkflow(options: SetupOptions = {}): Promise<Setu
       console.log(`Pushing Prisma schema to database (npx prisma db push)...`);
       execSync("npx prisma db push", { cwd: root, stdio: "inherit" });
       result.dbSchemaPushed = true;
-      console.log(`${badge("[DATABASE]", "pass")} Database schema pushed successfully.`);
+      console.log(
+        `${badge("[DATABASE]", "pass")} Database schema pushed successfully.`
+      );
     } catch (_err) {
-      const msg = "Database schema push failed. Verify DATABASE_URL connection in .env.local.";
+      const msg =
+        "Database schema push failed. Verify DATABASE_URL connection in .env.local.";
       console.error(`${badge("[DATABASE]", "fail")} ${msg}`);
       result.errors.push(msg);
       if (!isInteractive) {
@@ -207,12 +257,18 @@ export async function runSetupWorkflow(options: SetupOptions = {}): Promise<Setu
     if (result.dbSchemaPushed && !skipDbSeed) {
       let shouldSeed = true;
       if (isInteractive) {
-        const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+        const rl = readline.createInterface({
+          input: process.stdin,
+          output: process.stdout,
+        });
         const answer = await new Promise<string>((resolve) =>
-          rl.question(`${colors.cyan}Seed database with initial data? (Y/n): ${colors.reset}`, (ans) => {
-            rl.close();
-            resolve(ans.trim());
-          })
+          rl.question(
+            `${colors.cyan}Seed database with initial data? (Y/n): ${colors.reset}`,
+            (ans) => {
+              rl.close();
+              resolve(ans.trim());
+            }
+          )
         );
         if (answer.toLowerCase() === "n" || answer.toLowerCase() === "no") {
           shouldSeed = false;
@@ -224,7 +280,9 @@ export async function runSetupWorkflow(options: SetupOptions = {}): Promise<Setu
           console.log(`Seeding database (npx prisma db seed)...`);
           execSync("npx prisma db seed", { cwd: root, stdio: "inherit" });
           result.dbSeeded = true;
-          console.log(`${badge("[DATABASE]", "pass")} Database seeded successfully.`);
+          console.log(
+            `${badge("[DATABASE]", "pass")} Database seeded successfully.`
+          );
         } catch (_err) {
           const msg = "Database seeding failed.";
           console.error(`${badge("[DATABASE]", "warn")} ${msg}`);
@@ -236,12 +294,22 @@ export async function runSetupWorkflow(options: SetupOptions = {}): Promise<Setu
   result.success = result.errors.length === 0;
 
   if (result.success) {
-    console.log(`\n${colors.brightGreen}======================================================================${colors.reset}`);
-    console.log(`${colors.brightGreen}✅ Interactive DX Setup Completed Successfully!${colors.reset}`);
-    console.log(`You can now run 'npm run dev' to launch the local development server.`);
-    console.log(`${colors.brightGreen}======================================================================${colors.reset}\n`);
+    console.log(
+      `\n${colors.brightGreen}======================================================================${colors.reset}`
+    );
+    console.log(
+      `${colors.brightGreen}✅ Interactive DX Setup Completed Successfully!${colors.reset}`
+    );
+    console.log(
+      `You can now run 'npm run dev' to launch the local development server.`
+    );
+    console.log(
+      `${colors.brightGreen}======================================================================${colors.reset}\n`
+    );
   } else {
-    console.log(`\n${colors.brightRed}❌ Interactive DX Setup Encountered Errors.${colors.reset}\n`);
+    console.log(
+      `\n${colors.brightRed}❌ Interactive DX Setup Encountered Errors.${colors.reset}\n`
+    );
   }
 
   return result;

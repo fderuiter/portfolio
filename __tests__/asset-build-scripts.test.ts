@@ -138,6 +138,33 @@ describe("asset generation and staging workflow", () => {
     }
   });
 
+  it("regenerates the committed design manifest byte for byte", () => {
+    const committedPath = path.join(workspaceRoot, "lib/design-manifest.ts");
+    const committed = fs.readFileSync(committedPath, "utf8");
+    const regenerated = generateTheme({
+      sourceRoot: workspaceRoot,
+      outputPath: path.join(temporaryRoot, "committed-parity-manifest.ts"),
+    });
+
+    expect(regenerated).toBe(committed);
+  });
+
+  it("annotates generated tokens with the CSS variable they compile from", () => {
+    const regenerated = generateTheme({
+      sourceRoot: workspaceRoot,
+      outputPath: path.join(temporaryRoot, "annotated-manifest.ts"),
+    });
+
+    expect(regenerated).toContain("/** Original CSS Variable: --background */");
+    expect(regenerated).toContain(
+      "/** Original CSS Variable: --layout-masonry-padding-with-stats */"
+    );
+    expect(regenerated).toContain(
+      "/** Original CSS Variable: --breakpoint-2xl */"
+    );
+    expect(regenerated).toContain("/** Font stack for sans-serif */");
+  });
+
   it("exports strongly typed runtime design tokens", () => {
     expect(designManifest.colors.background).toBeDefined();
     expect(designManifest.typography.fonts.sans).toContain("var(--font-inter)");
