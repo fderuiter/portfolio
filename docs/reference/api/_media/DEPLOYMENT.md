@@ -215,7 +215,8 @@ When a synthetic probe alert triggers, on-call engineers should follow the dedic
        -H "Content-Type: application/json" \
        -d '{"eventType":"page_view","projectSlug":"triage-probe"}'
      ```
-     Verify HTTP status `200` or `201` and response `{ "success": true }`.
+     Verify HTTP status `201` (buffered) or `202` (accepted but dropped) and
+     response `{ "success": true }`. The route never returns `200`.
   3. **Test Schema Guard Rejection**:
      ```bash
      curl -i -X POST <TARGET_URL>/api/telemetry \

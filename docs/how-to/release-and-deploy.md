@@ -27,23 +27,12 @@ the topic branch, and open a pull request into `main`. The CI workflow is the
 required evidence for normal topic work. Squash-merge the PR and allow GitHub
 to delete its head branch.
 
-## One-Time Dev Reconciliation
+## Dev Reconciliation (completed)
 
-The historical `main` and `dev` branches must be reconciled once before this
-workflow becomes fully active. Freeze merges, capture both branch tips and the
-current production SHA, and create a dedicated reconciliation branch without
-rebasing or force-pushing:
-
-```bash
-git fetch origin
-git switch --create chore/reconcile-dev-into-main origin/main
-git merge --no-commit --no-ff origin/dev
-```
-
-Resolve conflicts by reviewing the intended final tree rather than choosing a
-branch wholesale. Then run `npm run quality` and `npm test`, commit the
-reconciliation, and open it against `main`. After merge and production
-verification, change GitHub's default branch to `main` and delete `dev`.
+The historical `main`/`dev` divergence was reconciled on 2026-09-13.
+`origin/dev`'s tree was confirmed byte-for-byte merged into `main`, GitHub's
+default branch was changed to `main`, and `dev` was deleted. This workflow is
+now fully active; there is no ongoing reconciliation step for new work.
 
 ## Release
 
@@ -142,14 +131,18 @@ retention inventory. At 95%, keep only production deployments until Vercel
 confirms recovery. The usage meter is GB-month accounting and does not fall
 immediately after deletion.
 
-## GitHub Free Limitation
+## GitHub Plan and Actions Minutes
 
-This repository is private on GitHub Free. GitHub therefore rejects branch
-protection and ruleset configuration. Local pre-push guardrails, CI, and this
-workflow reduce risk but cannot prevent an administrator from bypassing the
-process in the GitHub UI. Making the repository public or upgrading to GitHub
-Pro would allow required status checks, blocked force pushes, required pull
-requests, and protected release tags to be enforced server-side.
+This repository is private on **GitHub Pro**, per
+[ADR 0039](../../adr/0039-github-pro-plan-capabilities-and-actions-minutes-governance.md).
+Branch protection, rulesets, and environment protection rules (required
+reviewers on `production-release`) are all available server-side; local
+pre-push guardrails and CI remain as defense-in-depth, not a substitute.
+
+Pro's private-repository Actions allowance is 3,000 minutes/month on standard
+runners, with **no authorized paid overage**. A CI run that exhausts this
+allowance stays down until the monthly reset. See ADR 0039 for the governing
+policy and the tracked follow-up for reducing per-run cost.
 
 ## Integration Release Checklist
 
