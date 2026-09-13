@@ -249,10 +249,14 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
               {/* Form Metadata Settings */}
               <div className="space-y-2.5 pt-2 border-t border-zinc-850">
                 <div>
-                  <label className="block text-[10px] font-mono text-zinc-400 mb-1">
+                  <label
+                    htmlFor="crf-inspector-form-name"
+                    className="block text-[10px] font-mono text-zinc-400 mb-1"
+                  >
                     Form Name
                   </label>
                   <input
+                    id="crf-inspector-form-name"
                     type="text"
                     value={form.name}
                     onChange={(e) => onUpdateFormMeta({ name: e.target.value })}
@@ -260,10 +264,14 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-mono text-zinc-400 mb-1">
+                  <label
+                    htmlFor="crf-inspector-form-domain"
+                    className="block text-[10px] font-mono text-zinc-400 mb-1"
+                  >
                     CDASH Domain
                   </label>
                   <input
+                    id="crf-inspector-form-domain"
                     type="text"
                     value={form.domain}
                     onChange={(e) =>
