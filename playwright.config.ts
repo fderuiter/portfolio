@@ -12,7 +12,13 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  // One worker could not finish: the suite was cancelled at 34m41s under a
+  // 45-minute job cap and again at 58m39s under 70. The runner has 4 vCPU and
+  // was spending three of them idle while 576 tests ran serially. Two workers
+  // rather than the default (cores/2) keeps headroom for the Next server and
+  // the Postgres service container sharing the box, and keeps pixel-matching
+  // in visual.spec.ts away from a fully saturated CPU.
+  workers: process.env.CI ? 2 : undefined,
   reporter: process.env.CI ? "github" : "list",
   use: {
     baseURL: externalBaseUrl || "http://localhost:3000",
