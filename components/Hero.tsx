@@ -371,7 +371,7 @@ const InteractiveEngineeringConsole: React.FC = () => {
   return (
     <div className="@container min-w-0 w-full max-w-xl mx-auto lg:max-w-none break-words bg-[#13151a] border border-white/10 rounded-2xl p-4 sm:p-6 shadow-xl flex flex-col justify-between relative overflow-hidden transition-all duration-300 motion-reduce:transition-none hover:border-amber-500/30">
       {/* Precision grid decorative corner cues */}
-      <div className="mb-4 flex flex-wrap items-center gap-1.5 font-mono text-[9px] text-zinc-500 uppercase tracking-wider select-none">
+      <div className="mb-4 flex flex-wrap items-center gap-1.5 font-mono text-[9px] text-zinc-400 uppercase tracking-wider select-none">
         <span
           className={`w-1.5 h-1.5 rounded-full bg-emerald-400 ${
             shouldReduceMotion ? "" : "animate-pulse"
@@ -487,11 +487,11 @@ const InteractiveEngineeringConsole: React.FC = () => {
 
                 <div className="p-3 bg-black/40 border border-white/5 rounded-xl space-y-1.5 text-xs text-zinc-300">
                   <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-                    <span className="text-zinc-500">1. Rule</span>
+                    <span className="text-zinc-400">1. Rule</span>
                     <span className="text-amber-300 font-semibold">P → Q</span>
                   </div>
                   <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-                    <span className="text-zinc-500">2. Fact</span>
+                    <span className="text-zinc-400">2. Fact</span>
                     <span className="text-amber-300 font-semibold">
                       P is true
                     </span>
@@ -502,7 +502,7 @@ const InteractiveEngineeringConsole: React.FC = () => {
                       className={
                         logicDischarged
                           ? "text-emerald-400 font-bold"
-                          : "text-zinc-500 italic"
+                          : "text-zinc-400 italic"
                       }
                     >
                       {logicDischarged
@@ -565,19 +565,19 @@ const InteractiveEngineeringConsole: React.FC = () => {
 
                 <div className="p-3 bg-black/40 border border-white/5 rounded-xl space-y-1.5 text-xs text-zinc-300">
                   <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-                    <span className="text-zinc-500">Field:</span>
+                    <span className="text-zinc-400">Field:</span>
                     <span className="text-white font-mono">
                       Patient Age (Demographics)
                     </span>
                   </div>
                   <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-                    <span className="text-zinc-500">Validation:</span>
+                    <span className="text-zinc-400">Validation:</span>
                     <span className="text-amber-300">
                       Range &amp; Type Safety Check
                     </span>
                   </div>
                   <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-                    <span className="text-zinc-500">Audit Security:</span>
+                    <span className="text-zinc-400">Audit Security:</span>
                     <span className="text-zinc-400 truncate max-w-[200px]">
                       Example audit record
                     </span>
@@ -655,7 +655,7 @@ const InteractiveEngineeringConsole: React.FC = () => {
                       className="h-full w-full bg-amber-400 origin-left transform-gpu scale-x-[var(--heap-scale-x)]"
                     />
                   </div>
-                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[10px] text-zinc-500 pt-0.5">
+                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[10px] text-zinc-400 pt-0.5">
                     <span>Illustrative frame reference: 16.6ms</span>
                     <span className="text-emerald-400">
                       Simulated allocation (heap)
@@ -709,7 +709,7 @@ const InteractiveEngineeringConsole: React.FC = () => {
       </div>
 
       {/* Footer Spec strip */}
-      <div className="mt-4 pt-3 border-t border-white/5 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[10px] font-mono text-zinc-500">
+      <div className="mt-4 pt-3 border-t border-white/5 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[10px] font-mono text-zinc-400">
         <span className="flex items-center gap-1.5">
           <IconTerminal className="w-3 h-3 text-zinc-400" />
           <span>ILLUSTRATIVE DEMO</span>

@@ -95,7 +95,9 @@ export const ProofCanvas: React.FC<ProofCanvasProps> = ({
         <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between bg-slate-950/40">
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-emerald-500/80 animate-ping" />
-            <span className="text-xs font-semibold text-white">{activeTheorem.ruleName}</span>
+            <span className="text-xs font-semibold text-white">
+              {activeTheorem.ruleName}
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -112,7 +114,9 @@ export const ProofCanvas: React.FC<ProofCanvasProps> = ({
               <span className="text-[11px] font-bold">SNAP</span>
               <span
                 className={`w-1.5 h-1.5 rounded-full ${
-                  isSnappingEnabled ? "bg-emerald-400 animate-pulse" : "bg-slate-600"
+                  isSnappingEnabled
+                    ? "bg-emerald-400 animate-pulse"
+                    : "bg-slate-600"
                 }`}
               />
               <kbd className="hidden md:inline text-[9px] px-1 py-0.2 rounded bg-slate-950/70 border border-slate-800 text-slate-400 font-mono">
@@ -140,7 +144,9 @@ export const ProofCanvas: React.FC<ProofCanvasProps> = ({
         <div className="bg-slate-950/60 px-4 py-2 border-b border-slate-800/80 flex items-center justify-between text-xs">
           <div className="flex items-center gap-2 text-slate-300">
             <IconBulb className="w-4 h-4 text-amber-400 shrink-0" />
-            <span className="font-medium text-amber-300/90">{activeTacticHint.title}:</span>
+            <span className="font-medium text-amber-300/90">
+              {activeTacticHint.title}:
+            </span>
             <span className="text-slate-400">{activeTacticHint.hint}</span>
           </div>
           <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 shrink-0">
@@ -159,10 +165,24 @@ export const ProofCanvas: React.FC<ProofCanvasProps> = ({
           className="relative w-full h-[420px] bg-gradient-to-b from-slate-950/60 via-slate-900 to-slate-950 select-none overflow-x-auto overflow-y-hidden"
         >
           <div className="relative min-w-[760px] h-full">
-            <svg ref={svgCanvasRef} className="absolute inset-0 w-full h-full pointer-events-none">
+            <svg
+              ref={svgCanvasRef}
+              className="absolute inset-0 w-full h-full pointer-events-none"
+            >
               <defs>
-                <pattern id="canvas-grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                  <circle cx="2" cy="2" r="1" fill="#334155" opacity={isSnappingEnabled ? 0.45 : 0.15} />
+                <pattern
+                  id="canvas-grid"
+                  width="20"
+                  height="20"
+                  patternUnits="userSpaceOnUse"
+                >
+                  <circle
+                    cx="2"
+                    cy="2"
+                    r="1"
+                    fill="#334155"
+                    opacity={isSnappingEnabled ? 0.45 : 0.15}
+                  />
                 </pattern>
                 <marker
                   id="arrow"
@@ -186,7 +206,13 @@ export const ProofCanvas: React.FC<ProofCanvasProps> = ({
                 >
                   <path d="M 0 1 L 10 5 L 0 9 z" fill="#10b981" />
                 </marker>
-                <linearGradient id="edgeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <linearGradient
+                  id="edgeGradient"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="100%"
+                >
                   <stop offset="0%" stopColor="#06b6d4" />
                   <stop offset="100%" stopColor="#10b981" />
                 </linearGradient>
@@ -229,8 +255,12 @@ export const ProofCanvas: React.FC<ProofCanvasProps> = ({
 
               {/* Render Bezier Curves for Graph Edges */}
               {edges.map((edge, idx) => {
-                const sNode = activeTheorem.nodes.find((n) => n.id === edge.source);
-                const tNode = activeTheorem.nodes.find((n) => n.id === edge.target);
+                const sNode = activeTheorem.nodes.find(
+                  (n) => n.id === edge.source
+                );
+                const tNode = activeTheorem.nodes.find(
+                  (n) => n.id === edge.target
+                );
                 if (!sNode || !tNode) return null;
 
                 const sOffset = nodeOffsets[sNode.id] || { x: 0, y: 0 };
@@ -260,34 +290,45 @@ export const ProofCanvas: React.FC<ProofCanvasProps> = ({
               })}
 
               {/* Interactive Drag-to-Connect Cord */}
-              {dragConnection && (() => {
-                const x1 = dragConnection.sourceX;
-                const y1 = dragConnection.sourceY;
-                const x2 = dragConnection.currentX;
-                const y2 = dragConnection.currentY;
-                const dx = Math.abs(x2 - x1) * 0.5;
-                const d = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
-                const strokeColor = dragConnection.hoveredTargetId
-                  ? dragConnection.isValid
-                    ? "#10b981"
-                    : "#f43f5e"
-                  : "#06b6d4";
+              {dragConnection &&
+                (() => {
+                  const x1 = dragConnection.sourceX;
+                  const y1 = dragConnection.sourceY;
+                  const x2 = dragConnection.currentX;
+                  const y2 = dragConnection.currentY;
+                  const dx = Math.abs(x2 - x1) * 0.5;
+                  const d = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+                  const strokeColor = dragConnection.hoveredTargetId
+                    ? dragConnection.isValid
+                      ? "#10b981"
+                      : "#f43f5e"
+                    : "#06b6d4";
 
-                return (
-                  <g>
-                    <path
-                      d={d}
-                      fill="none"
-                      stroke={strokeColor}
-                      strokeWidth="2.5"
-                      strokeDasharray="3 3"
-                      className="animate-pulse"
-                      markerEnd={dragConnection.isValid ? "url(#arrow-emerald)" : "url(#arrow)"}
-                    />
-                    <circle cx={x2} cy={y2} r="5" fill={strokeColor} className="animate-ping" />
-                  </g>
-                );
-              })()}
+                  return (
+                    <g>
+                      <path
+                        d={d}
+                        fill="none"
+                        stroke={strokeColor}
+                        strokeWidth="2.5"
+                        strokeDasharray="3 3"
+                        className="animate-pulse"
+                        markerEnd={
+                          dragConnection.isValid
+                            ? "url(#arrow-emerald)"
+                            : "url(#arrow)"
+                        }
+                      />
+                      <circle
+                        cx={x2}
+                        cy={y2}
+                        r="5"
+                        fill={strokeColor}
+                        className="animate-ping"
+                      />
+                    </g>
+                  );
+                })()}
             </svg>
 
             {/* Draggable Logic Nodes */}
@@ -306,14 +347,23 @@ export const ProofCanvas: React.FC<ProofCanvasProps> = ({
                 dragConnection.hoveredTargetId !== node.id &&
                 !dragConnection.isValid;
 
-              const isHoveredInDrag = dragConnection?.hoveredTargetId === node.id;
+              const isHoveredInDrag =
+                dragConnection?.hoveredTargetId === node.id;
 
               const compatibleTargets =
                 selectedNodeIds.length === 1
-                  ? getCompatibleTargets(selectedNodeIds[0], activeTheorem.id, edges)
+                  ? getCompatibleTargets(
+                      selectedNodeIds[0],
+                      activeTheorem.id,
+                      edges
+                    )
                   : [];
-              const isCompatible = compatibleTargets.some((t) => t.targetId === node.id);
-              const compTarget = compatibleTargets.find((t) => t.targetId === node.id);
+              const isCompatible = compatibleTargets.some(
+                (t) => t.targetId === node.id
+              );
+              const compTarget = compatibleTargets.find(
+                (t) => t.targetId === node.id
+              );
 
               return (
                 <motion.div
@@ -335,12 +385,12 @@ export const ProofCanvas: React.FC<ProofCanvasProps> = ({
                         ? "bg-emerald-950/60 border-emerald-400 ring-2 ring-emerald-400/80 shadow-emerald-500/30 scale-105"
                         : "bg-rose-950/60 border-rose-500 ring-2 ring-rose-500/80 shadow-rose-500/30 scale-105"
                       : isCompatible
-                      ? "bg-emerald-950/30 border-emerald-500/70 ring-2 ring-emerald-500/50 shadow-emerald-500/20"
-                      : isSelected
-                      ? "bg-brand-cyan/20 border-brand-cyan ring-2 ring-brand-cyan/50 shadow-cyan-500/20"
-                      : isInspected
-                      ? "bg-slate-800 border-slate-600 ring-1 ring-slate-400"
-                      : "bg-slate-900 border-slate-800 hover:border-slate-700"
+                        ? "bg-emerald-950/30 border-emerald-500/70 ring-2 ring-emerald-500/50 shadow-emerald-500/20"
+                        : isSelected
+                          ? "bg-brand-cyan/20 border-brand-cyan ring-2 ring-brand-cyan/50 shadow-cyan-500/20"
+                          : isInspected
+                            ? "bg-slate-800 border-slate-600 ring-1 ring-slate-400"
+                            : "bg-slate-900 border-slate-800 hover:border-slate-700"
                   }`}
                 >
                   {/* Compatible Rule Floating Badge */}
@@ -374,7 +424,9 @@ export const ProofCanvas: React.FC<ProofCanvasProps> = ({
                       {isNodeProven ? "PROVEN" : "PENDING"}
                     </span>
                   </div>
-                  <div className="font-mono text-sm font-bold text-white mb-0.5">{node.label}</div>
+                  <div className="font-mono text-sm font-bold text-white mb-0.5">
+                    {node.label}
+                  </div>
                   <div className="text-[10px] text-slate-400 line-clamp-2 leading-tight">
                     {node.meaning}
                   </div>
@@ -398,7 +450,9 @@ export const ProofCanvas: React.FC<ProofCanvasProps> = ({
         {/* Floating Rule Palette Dock */}
         <div className="p-3 bg-slate-950/90 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[10px] font-mono uppercase text-slate-500 mr-1">Rule Palette:</span>
+            <span className="text-[10px] font-mono uppercase text-slate-400 mr-1">
+              Rule Palette:
+            </span>
             {INFERENCE_RULES.slice(0, 6).map((rule) => (
               <button
                 key={rule.id}
@@ -407,7 +461,9 @@ export const ProofCanvas: React.FC<ProofCanvasProps> = ({
                 title={`${rule.name}: ${rule.template}`}
               >
                 <span className="text-brand-cyan font-bold">{rule.symbol}</span>
-                <span className="text-[11px] text-slate-400 hidden sm:inline">{rule.name}</span>
+                <span className="text-[11px] text-slate-400 hidden sm:inline">
+                  {rule.name}
+                </span>
               </button>
             ))}
           </div>
@@ -431,7 +487,8 @@ export const ProofCanvas: React.FC<ProofCanvasProps> = ({
             <IconSparkles className="w-4 h-4 text-emerald-400 animate-spin" />
             <span>Background Tactic Simulation Running...</span>
             <span className="text-slate-400 font-mono">
-              [{simulationProgress.step}/{simulationProgress.total}] {simulationProgress.log}
+              [{simulationProgress.step}/{simulationProgress.total}]{" "}
+              {simulationProgress.log}
             </span>
           </div>
           <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">

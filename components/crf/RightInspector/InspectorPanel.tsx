@@ -1,7 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { CRFForm, CRFField, CodelistDefinition, EditCheckRule } from "@/lib/crf/types";
+import {
+  CRFForm,
+  CRFField,
+  CodelistDefinition,
+  EditCheckRule,
+} from "@/lib/crf/types";
 import { computeFormHealthMetrics } from "@/lib/crf/form-health";
 import { FieldPropertiesTab } from "./FieldPropertiesTab";
 import { LogicRulesTab } from "./LogicRulesTab";
@@ -15,7 +20,10 @@ import {
   IconTerminal2,
   IconCheck,
 } from "@tabler/icons-react";
-import { generateCliCommandForField, generateCliCommandForForm } from "@/lib/crf/universal-schema";
+import {
+  generateCliCommandForField,
+  generateCliCommandForForm,
+} from "@/lib/crf/universal-schema";
 
 interface InspectorPanelProps {
   form: CRFForm;
@@ -63,14 +71,20 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
       <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800/80 bg-zinc-900/60">
         <div className="flex items-center gap-2 min-w-0">
           <span className="p-1 rounded bg-brand-cyan/10 border border-brand-cyan/30 text-brand-cyan">
-            {selectedField ? <IconAdjustments className="w-4 h-4" /> : <IconFileSpreadsheet className="w-4 h-4" />}
+            {selectedField ? (
+              <IconAdjustments className="w-4 h-4" />
+            ) : (
+              <IconFileSpreadsheet className="w-4 h-4" />
+            )}
           </span>
           <div className="min-w-0">
             <h3 className="text-xs font-bold text-white font-mono truncate">
               {selectedField ? selectedField.variableName : form.name}
             </h3>
             <p className="text-[10px] text-zinc-400 font-mono">
-              {selectedField ? "Field Property Inspector" : "Form-Level Settings"}
+              {selectedField
+                ? "Field Property Inspector"
+                : "Form-Level Settings"}
             </p>
           </div>
         </div>
@@ -85,8 +99,14 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
             }`}
             title="Copy exact CLI command for this element"
           >
-            {hasCopiedCli ? <IconCheck className="w-3.5 h-3.5 text-emerald-400" /> : <IconTerminal2 className="w-3.5 h-3.5 text-brand-cyan" />}
-            <span className="text-[10px] hidden sm:inline">{hasCopiedCli ? "Copied" : "CLI"}</span>
+            {hasCopiedCli ? (
+              <IconCheck className="w-3.5 h-3.5 text-emerald-400" />
+            ) : (
+              <IconTerminal2 className="w-3.5 h-3.5 text-brand-cyan" />
+            )}
+            <span className="text-[10px] hidden sm:inline">
+              {hasCopiedCli ? "Copied" : "CLI"}
+            </span>
           </button>
 
           <button
@@ -147,7 +167,9 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                 field={selectedField}
                 allFieldsInForm={allFields}
                 codelists={codelists}
-                onUpdateField={(updates) => onUpdateField(selectedField.id, updates)}
+                onUpdateField={(updates) =>
+                  onUpdateField(selectedField.id, updates)
+                }
                 onSaveToStudyCodelist={onSaveCodelist}
               />
             )}
@@ -164,7 +186,9 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
               <CdiscMetadataTab
                 field={selectedField}
                 form={form}
-                onUpdateField={(updates) => onUpdateField(selectedField.id, updates)}
+                onUpdateField={(updates) =>
+                  onUpdateField(selectedField.id, updates)
+                }
               />
             )}
           </>
@@ -187,25 +211,37 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
               {/* 4-Metric Grid */}
               <div className="grid grid-cols-2 gap-2 pt-1">
                 <div className="p-2.5 rounded-xl bg-zinc-950/80 border border-zinc-850">
-                  <div className="text-[10px] font-mono text-zinc-500 uppercase">Total Fields</div>
-                  <div className="text-sm font-mono font-extrabold text-white mt-0.5">{healthMetrics.totalFields}</div>
+                  <div className="text-[10px] font-mono text-zinc-400 uppercase">
+                    Total Fields
+                  </div>
+                  <div className="text-sm font-mono font-extrabold text-white mt-0.5">
+                    {healthMetrics.totalFields}
+                  </div>
                 </div>
                 <div className="p-2.5 rounded-xl bg-zinc-950/80 border border-zinc-850">
-                  <div className="text-[10px] font-mono text-zinc-500 uppercase">Mandatory</div>
+                  <div className="text-[10px] font-mono text-zinc-400 uppercase">
+                    Mandatory
+                  </div>
                   <div className="text-sm font-mono font-extrabold text-amber-400 mt-0.5">
                     {healthMetrics.mandatoryFields}
                   </div>
                 </div>
                 <div className="p-2.5 rounded-xl bg-zinc-950/80 border border-zinc-850">
-                  <div className="text-[10px] font-mono text-zinc-500 uppercase">Codelists</div>
+                  <div className="text-[10px] font-mono text-zinc-400 uppercase">
+                    Codelists
+                  </div>
                   <div className="text-sm font-mono font-extrabold text-purple-400 mt-0.5">
                     {healthMetrics.codelistsAttached}
                   </div>
                 </div>
                 <div className="p-2.5 rounded-xl bg-zinc-950/80 border border-zinc-850">
-                  <div className="text-[10px] font-mono text-zinc-500 uppercase">SDV Verified</div>
+                  <div className="text-[10px] font-mono text-zinc-400 uppercase">
+                    SDV Verified
+                  </div>
                   <div className="text-sm font-mono font-extrabold text-emerald-400 mt-0.5">
-                    {healthMetrics.sdvVerifiedCount} / {healthMetrics.totalFields} ({healthMetrics.sdvReadinessPercentage}%)
+                    {healthMetrics.sdvVerifiedCount} /{" "}
+                    {healthMetrics.totalFields} (
+                    {healthMetrics.sdvReadinessPercentage}%)
                   </div>
                 </div>
               </div>
@@ -213,7 +249,9 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
               {/* Form Metadata Settings */}
               <div className="space-y-2.5 pt-2 border-t border-zinc-850">
                 <div>
-                  <label className="block text-[10px] font-mono text-zinc-400 mb-1">Form Name</label>
+                  <label className="block text-[10px] font-mono text-zinc-400 mb-1">
+                    Form Name
+                  </label>
                   <input
                     type="text"
                     value={form.name}
@@ -222,11 +260,15 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-mono text-zinc-400 mb-1">CDASH Domain</label>
+                  <label className="block text-[10px] font-mono text-zinc-400 mb-1">
+                    CDASH Domain
+                  </label>
                   <input
                     type="text"
                     value={form.domain}
-                    onChange={(e) => onUpdateFormMeta({ domain: e.target.value.toUpperCase() })}
+                    onChange={(e) =>
+                      onUpdateFormMeta({ domain: e.target.value.toUpperCase() })
+                    }
                     className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-brand-cyan font-mono uppercase focus:border-brand-cyan focus:outline-none"
                   />
                 </div>
@@ -235,10 +277,14 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                     <input
                       type="checkbox"
                       checked={form.isLogForm || false}
-                      onChange={(e) => onUpdateFormMeta({ isLogForm: e.target.checked })}
+                      onChange={(e) =>
+                        onUpdateFormMeta({ isLogForm: e.target.checked })
+                      }
                       className="rounded border-zinc-700 bg-zinc-900 text-brand-cyan focus:ring-0"
                     />
-                    <span className="text-xs text-zinc-300">Continuous Log Form (e.g. AE / ConMeds)</span>
+                    <span className="text-xs text-zinc-300">
+                      Continuous Log Form (e.g. AE / ConMeds)
+                    </span>
                   </label>
                 </div>
               </div>

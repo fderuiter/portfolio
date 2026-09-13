@@ -1,15 +1,27 @@
 "use client";
 
 import React from "react";
-import { IconTable, IconBook, IconAlertTriangle, IconShieldCheck, IconX } from "@tabler/icons-react";
+import {
+  IconTable,
+  IconBook,
+  IconAlertTriangle,
+  IconShieldCheck,
+  IconX,
+} from "@tabler/icons-react";
 import { InteractiveTruthTable } from "@/components/proof/InteractiveTruthTable";
-import { FallacyDiagnosis, TheoremDefinition, LedgerStep } from "@/lib/proof-utils";
+import {
+  FallacyDiagnosis,
+  TheoremDefinition,
+  LedgerStep,
+} from "@/lib/proof-utils";
 
 interface ProofLedgerProps {
   activeTab: "ledger" | "systems" | "fallacy";
   setActiveTab: (tab: "ledger" | "systems" | "fallacy") => void;
   mobileActiveView: "canvas" | "ledger" | "systems" | "fallacy" | "terminal";
-  setMobileActiveView: (view: "canvas" | "ledger" | "systems" | "fallacy" | "terminal") => void;
+  setMobileActiveView: (
+    view: "canvas" | "ledger" | "systems" | "fallacy" | "terminal"
+  ) => void;
   deductionLedger: LedgerStep[];
   handleDeleteStep: (stepNumber: number) => void;
   activeTheorem: TheoremDefinition;
@@ -31,7 +43,9 @@ export const ProofLedger: React.FC<ProofLedgerProps> = ({
   return (
     <div
       className={`lg:col-span-4 flex flex-col gap-4 ${
-        mobileActiveView === "ledger" || mobileActiveView === "systems" || mobileActiveView === "fallacy"
+        mobileActiveView === "ledger" ||
+        mobileActiveView === "systems" ||
+        mobileActiveView === "fallacy"
           ? "flex"
           : "hidden lg:flex"
       }`}
@@ -88,8 +102,12 @@ export const ProofLedger: React.FC<ProofLedgerProps> = ({
           {activeTab === "ledger" && (
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-mono font-bold text-slate-300">Formal Fitch Deduction Ledger</span>
-                <span className="text-[10px] font-mono text-slate-500">Lines: {deductionLedger.length}</span>
+                <span className="text-xs font-mono font-bold text-slate-300">
+                  Formal Fitch Deduction Ledger
+                </span>
+                <span className="text-[10px] font-mono text-slate-400">
+                  Lines: {deductionLedger.length}
+                </span>
               </div>
               <div className="flex flex-col gap-2">
                 {deductionLedger.map((step) => (
@@ -103,7 +121,9 @@ export const ProofLedger: React.FC<ProofLedgerProps> = ({
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-slate-400">Step {step.stepNumber}</span>
+                        <span className="font-mono font-bold text-slate-400">
+                          Step {step.stepNumber}
+                        </span>
                         {step.nodeId && (
                           <span className="text-[10px] font-mono px-1.5 py-0.5 text-slate-400 bg-slate-800/60 rounded">
                             Node {step.nodeId}
@@ -113,7 +133,9 @@ export const ProofLedger: React.FC<ProofLedgerProps> = ({
                       <div className="flex items-center gap-1.5">
                         <span
                           className={`text-[9px] font-mono px-1.5 py-0.5 rounded ${
-                            step.isProven ? "bg-emerald-950 text-emerald-400" : "bg-slate-800 text-slate-500"
+                            step.isProven
+                              ? "bg-emerald-950 text-emerald-400"
+                              : "bg-slate-800 text-slate-500"
                           }`}
                         >
                           {step.isProven ? "✔ PROVEN" : "⏳ PENDING"}
@@ -131,11 +153,18 @@ export const ProofLedger: React.FC<ProofLedgerProps> = ({
                         )}
                       </div>
                     </div>
-                    <div className="font-mono font-bold text-white text-sm">{step.formula}</div>
-                    <div className="text-slate-400 text-[11px]">
-                      <span className="text-brand-cyan font-mono">{step.rule}</span> ({step.premises})
+                    <div className="font-mono font-bold text-white text-sm">
+                      {step.formula}
                     </div>
-                    <div className="text-slate-400 text-[11px] leading-tight">{step.plainEnglish}</div>
+                    <div className="text-slate-400 text-[11px]">
+                      <span className="text-brand-cyan font-mono">
+                        {step.rule}
+                      </span>{" "}
+                      ({step.premises})
+                    </div>
+                    <div className="text-slate-400 text-[11px] leading-tight">
+                      {step.plainEnglish}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -145,18 +174,28 @@ export const ProofLedger: React.FC<ProofLedgerProps> = ({
           {activeTab === "systems" && (
             <div className="flex flex-col gap-3 text-xs">
               <div className="space-y-1">
-                <span className="text-xs font-bold text-white">{activeTheorem.title}</span>
-                <p className="text-slate-400 leading-relaxed">{activeTheorem.scenario}</p>
+                <span className="text-xs font-bold text-white">
+                  {activeTheorem.title}
+                </span>
+                <p className="text-slate-400 leading-relaxed">
+                  {activeTheorem.scenario}
+                </p>
               </div>
               <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-2">
-                <span className="font-mono text-brand-cyan font-semibold block">Lean 4 Invariant Model</span>
+                <span className="font-mono text-brand-cyan font-semibold block">
+                  Lean 4 Invariant Model
+                </span>
                 <pre className="font-mono text-[11px] text-slate-300 whitespace-pre-wrap">
                   {activeTheorem.leanCode}
                 </pre>
               </div>
               <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-1">
-                <span className="font-mono text-slate-400 font-semibold block">Distributed Systems Invariant</span>
-                <p className="text-slate-300 leading-relaxed">{activeTheorem.goalDescription}</p>
+                <span className="font-mono text-slate-400 font-semibold block">
+                  Distributed Systems Invariant
+                </span>
+                <p className="text-slate-300 leading-relaxed">
+                  {activeTheorem.goalDescription}
+                </p>
               </div>
             </div>
           )}
@@ -171,9 +210,12 @@ export const ProofLedger: React.FC<ProofLedgerProps> = ({
               ) : (
                 <div className="flex flex-col items-center justify-center text-center p-8 text-slate-500 gap-2">
                   <IconShieldCheck className="w-10 h-10 text-emerald-400/80" />
-                  <span className="font-semibold text-slate-300">Zero Active Fallacies</span>
+                  <span className="font-semibold text-slate-300">
+                    Zero Active Fallacies
+                  </span>
                   <p className="text-[11px] max-w-xs">
-                    All current graph connections and premise selections follow valid deductive inference rules.
+                    All current graph connections and premise selections follow
+                    valid deductive inference rules.
                   </p>
                 </div>
               )}

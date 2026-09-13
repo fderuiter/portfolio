@@ -279,7 +279,7 @@ function GameCard({ game, index }: { game: ArcadeGameCard; index: number }) {
 
         {/* Mechanics Chips */}
         <div className="mt-5">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 font-bold block mb-2">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 font-bold block mb-2">
             How to Play
           </span>
           <div className="flex flex-wrap gap-1.5">
@@ -296,7 +296,7 @@ function GameCard({ game, index }: { game: ArcadeGameCard; index: number }) {
 
         {/* Tech Stack Chips */}
         <div className="mt-3">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 font-bold block mb-2">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 font-bold block mb-2">
             Built With
           </span>
           <div className="flex flex-wrap gap-1.5">
