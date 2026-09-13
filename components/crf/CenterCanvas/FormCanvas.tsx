@@ -10,8 +10,14 @@ import {
   IconArrowUp,
   IconArrowDown,
   IconSparkles,
+  IconCopy,
 } from "@tabler/icons-react";
-import { CRFForm, CRFField, CodelistDefinition, DeviceViewport } from "@/lib/crf/types";
+import {
+  CRFForm,
+  CRFField,
+  CodelistDefinition,
+  DeviceViewport,
+} from "@/lib/crf/types";
 import { FieldRenderer } from "./FieldRenderer";
 import { ViewportSwitcher } from "./ViewportSwitcher";
 
@@ -30,6 +36,7 @@ interface FormCanvasProps {
   onDeleteField: (sectionId: string, fieldId: string) => void;
   onUpdateField?: (fieldId: string, updates: Partial<CRFField>) => void;
   onOpenPalette: () => void;
+  onDuplicateForm?: (formId: string) => void;
 }
 
 export const FormCanvas: React.FC<FormCanvasProps> = ({
@@ -47,6 +54,7 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
   onDeleteField,
   onUpdateField,
   onOpenPalette,
+  onDuplicateForm,
 }) => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [titleInput, setTitleInput] = useState(form.name);
@@ -76,8 +84,12 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
   };
 
   // Section reordering
-  const handleMoveSection = (sectionIndex: number, direction: "up" | "down") => {
-    const targetIndex = direction === "up" ? sectionIndex - 1 : sectionIndex + 1;
+  const handleMoveSection = (
+    sectionIndex: number,
+    direction: "up" | "down"
+  ) => {
+    const targetIndex =
+      direction === "up" ? sectionIndex - 1 : sectionIndex + 1;
     if (targetIndex < 0 || targetIndex >= form.sections.length) return;
 
     const newSections = [...form.sections];
@@ -87,10 +99,15 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
   };
 
   // Field move up / down (touch & accessible navigation)
-  const handleMoveField = (sectionId: string, fieldIndex: number, direction: "up" | "down") => {
+  const handleMoveField = (
+    sectionId: string,
+    fieldIndex: number,
+    direction: "up" | "down"
+  ) => {
     const targetIndex = direction === "up" ? fieldIndex - 1 : fieldIndex + 1;
     const targetSec = form.sections.find((s) => s.id === sectionId);
-    if (!targetSec || targetIndex < 0 || targetIndex >= targetSec.fields.length) return;
+    if (!targetSec || targetIndex < 0 || targetIndex >= targetSec.fields.length)
+      return;
 
     const updatedSections = form.sections.map((sec) => {
       if (sec.id !== sectionId) return sec;
@@ -104,19 +121,34 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
   };
 
   // Drag & drop field reordering
-  const handleFieldDragStart = (e: React.DragEvent, sectionId: string, fieldId: string) => {
+  const handleFieldDragStart = (
+    e: React.DragEvent,
+    sectionId: string,
+    fieldId: string
+  ) => {
     e.stopPropagation();
     setDraggedFieldInfo({ sectionId, fieldId });
-    e.dataTransfer.setData("text/plain", JSON.stringify({ sectionId, fieldId }));
+    e.dataTransfer.setData(
+      "text/plain",
+      JSON.stringify({ sectionId, fieldId })
+    );
   };
 
-  const handleFieldDragOver = (e: React.DragEvent, sectionId: string, targetIndex: number) => {
+  const handleFieldDragOver = (
+    e: React.DragEvent,
+    sectionId: string,
+    targetIndex: number
+  ) => {
     e.preventDefault();
     e.stopPropagation();
     setDropTargetInfo({ sectionId, targetIndex });
   };
 
-  const handleFieldDrop = (e: React.DragEvent, targetSectionId: string, targetIndex: number) => {
+  const handleFieldDrop = (
+    e: React.DragEvent,
+    targetSectionId: string,
+    targetIndex: number
+  ) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -125,7 +157,8 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
       return;
     }
 
-    const { sectionId: sourceSectionId, fieldId: sourceFieldId } = draggedFieldInfo;
+    const { sectionId: sourceSectionId, fieldId: sourceFieldId } =
+      draggedFieldInfo;
 
     // Find source field
     const sourceSec = form.sections.find((s) => s.id === sourceSectionId);
@@ -150,7 +183,8 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
         const adjustedIndex =
           section.id === sourceSectionId &&
           sourceSec &&
-          sourceSec.fields.findIndex((f) => f.id === sourceFieldId) < targetIndex
+          sourceSec.fields.findIndex((f) => f.id === sourceFieldId) <
+            targetIndex
             ? Math.max(0, targetIndex - 1)
             : targetIndex;
 
@@ -210,7 +244,9 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
 
       {/* Main Canvas Scroll Area with Centered Viewport */}
       <div className="flex-1 flex justify-center pb-28">
-        <div className={`${viewportWidthClass} transition-all duration-300 space-y-4 sm:space-y-6`}>
+        <div
+          className={`${viewportWidthClass} transition-all duration-300 space-y-4 sm:space-y-6`}
+        >
           {/* Form Header Card */}
           <div className="p-4 sm:p-5 rounded-2xl bg-zinc-900/70 crf-paper-sheet border border-zinc-800/80 shadow-lg relative group">
             {isEditingTitle ? (
@@ -289,20 +325,37 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                   </p>
                 </div>
 
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setTitleInput(form.name);
-                    setDescInput(form.description);
-                    setDomainInput(form.domain);
-                    setIsEditingTitle(true);
-                  }}
-                  className="p-1.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-white border border-zinc-700/60 transition-all opacity-80 sm:opacity-0 sm:group-hover:opacity-100 shrink-0"
-                  title="Edit Form Properties"
-                  aria-label="Edit Form Properties"
-                >
-                  <IconEdit className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-1 shrink-0">
+                  {onDuplicateForm && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDuplicateForm(form.id);
+                      }}
+                      className="p-1.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-white border border-zinc-700/60 transition-all opacity-80 sm:opacity-0 sm:group-hover:opacity-100 shrink-0"
+                      title="Duplicate Form"
+                      aria-label={`Duplicate form ${form.name}`}
+                    >
+                      <IconCopy className="w-4 h-4 text-brand-cyan" />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setTitleInput(form.name);
+                      setDescInput(form.description);
+                      setDomainInput(form.domain);
+                      setIsEditingTitle(true);
+                    }}
+                    className="p-1.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-white border border-zinc-700/60 transition-all opacity-80 sm:opacity-0 sm:group-hover:opacity-100 shrink-0"
+                    title="Edit Form Properties"
+                    aria-label="Edit Form Properties"
+                  >
+                    <IconEdit className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -314,14 +367,21 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
             return (
               <div
                 key={section.id}
-                onDragOver={(e) => handleFieldDragOver(e, section.id, section.fields.length)}
-                onDrop={(e) => handleFieldDrop(e, section.id, section.fields.length)}
+                onDragOver={(e) =>
+                  handleFieldDragOver(e, section.id, section.fields.length)
+                }
+                onDrop={(e) =>
+                  handleFieldDrop(e, section.id, section.fields.length)
+                }
                 className="p-3.5 sm:p-5 rounded-2xl bg-zinc-900/40 crf-paper-sheet border border-zinc-800/80 space-y-3 sm:space-y-4"
               >
                 {/* Section Header */}
                 <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3">
                   {isEditingSec ? (
-                    <div className="flex items-center gap-2 flex-1 max-w-md" onClick={(e) => e.stopPropagation()}>
+                    <div
+                      className="flex items-center gap-2 flex-1 max-w-md"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <input
                         type="text"
                         value={sectionTitleInput}
@@ -390,7 +450,8 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                     </button>
 
                     <span className="text-[10px] font-mono text-zinc-500 ml-1 hidden xs:inline">
-                      {section.fields.length} {section.fields.length === 1 ? "field" : "fields"}
+                      {section.fields.length}{" "}
+                      {section.fields.length === 1 ? "field" : "fields"}
                     </span>
                     {form.sections.length > 1 && (
                       <button
@@ -441,19 +502,29 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                           isSelected={field.id === selectedFieldId}
                           codelists={codelists}
                           onSelect={() => onSelectField(field.id)}
-                          onDuplicate={() => onDuplicateField(section.id, field.id)}
+                          onDuplicate={() =>
+                            onDuplicateField(section.id, field.id)
+                          }
                           onDelete={() => onDeleteField(section.id, field.id)}
                           canMoveUp={fIdx > 0}
                           canMoveDown={fIdx < section.fields.length - 1}
-                          onMoveUp={() => handleMoveField(section.id, fIdx, "up")}
-                          onMoveDown={() => handleMoveField(section.id, fIdx, "down")}
+                          onMoveUp={() =>
+                            handleMoveField(section.id, fIdx, "up")
+                          }
+                          onMoveDown={() =>
+                            handleMoveField(section.id, fIdx, "down")
+                          }
                           onUpdateField={(updates) => {
                             if (onUpdateField) {
                               onUpdateField(field.id, updates);
                             }
                           }}
-                          onDragStart={(e) => handleFieldDragStart(e, section.id, field.id)}
-                          onDragOver={(e) => handleFieldDragOver(e, section.id, fIdx)}
+                          onDragStart={(e) =>
+                            handleFieldDragStart(e, section.id, field.id)
+                          }
+                          onDragOver={(e) =>
+                            handleFieldDragOver(e, section.id, fIdx)
+                          }
                           onDrop={(e) => handleFieldDrop(e, section.id, fIdx)}
                         />
                       </React.Fragment>

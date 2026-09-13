@@ -19,6 +19,7 @@ import {
   IconFileSpreadsheet,
   IconTerminal2,
   IconCheck,
+  IconCopy,
 } from "@tabler/icons-react";
 import {
   generateCliCommandForField,
@@ -34,6 +35,8 @@ interface InspectorPanelProps {
   onUpdateFormMeta: (updates: Partial<CRFForm>) => void;
   onUpdateRules: (rules: EditCheckRule[]) => void;
   onSaveCodelist?: (codelist: CodelistDefinition) => void;
+  onDuplicateField?: (fieldId: string) => void;
+  onDuplicateForm?: (formId: string) => void;
 }
 
 type InspectorTab = "properties" | "logic" | "cdash";
@@ -47,6 +50,8 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
   onUpdateFormMeta,
   onUpdateRules,
   onSaveCodelist,
+  onDuplicateField,
+  onDuplicateForm,
 }) => {
   const [activeTab, setActiveTab] = useState<InspectorTab>("properties");
   const [hasCopiedCli, setHasCopiedCli] = useState(false);
@@ -90,6 +95,30 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
         </div>
 
         <div className="flex items-center gap-1 shrink-0">
+          {selectedField && onDuplicateField && (
+            <button
+              onClick={() => onDuplicateField(selectedField.id)}
+              className="p-1.5 rounded text-xs font-mono transition-all flex items-center gap-1 border bg-zinc-900 text-zinc-400 hover:text-white border-zinc-800 hover:bg-zinc-800"
+              title="Duplicate Field"
+              aria-label="Duplicate Field"
+            >
+              <IconCopy className="w-3.5 h-3.5 text-brand-cyan" />
+              <span className="text-[10px] hidden sm:inline">Duplicate</span>
+            </button>
+          )}
+
+          {!selectedField && onDuplicateForm && (
+            <button
+              onClick={() => onDuplicateForm(form.id)}
+              className="p-1.5 rounded text-xs font-mono transition-all flex items-center gap-1 border bg-zinc-900 text-zinc-400 hover:text-white border-zinc-800 hover:bg-zinc-800"
+              title="Duplicate Form"
+              aria-label="Duplicate Form"
+            >
+              <IconCopy className="w-3.5 h-3.5 text-brand-cyan" />
+              <span className="text-[10px] hidden sm:inline">Duplicate</span>
+            </button>
+          )}
+
           <button
             onClick={handleCopyCli}
             className={`p-1.5 rounded text-xs font-mono transition-all flex items-center gap-1 border ${

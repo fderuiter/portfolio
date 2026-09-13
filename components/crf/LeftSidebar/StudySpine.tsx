@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   IconFileSpreadsheet,
   IconPlus,
@@ -14,10 +14,15 @@ import {
   IconBook2,
   IconComponents,
   IconLayersSubtract,
+  IconX,
 } from "@tabler/icons-react";
 import { StudyProtocol, CRFForm } from "@/lib/crf/types";
-import { CDASH_DOMAIN_CATALOG } from "@/lib/crf/study-engine";
+import {
+  CDASH_DOMAIN_CATALOG,
+  StudyProtocolEngine,
+} from "@/lib/crf/study-engine";
 import { scaffoldCdashDomain } from "@/lib/crf/cdash-domain-templates";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { WidgetPalette } from "./WidgetPalette";
 
 export type LeftSidebarTab = "spine" | "forms" | "palette";
@@ -69,6 +74,33 @@ export const StudySpine: React.FC<StudySpineProps> = ({
   >({});
   const [dragOverVisitId, setDragOverVisitId] = useState<string | null>(null);
   const [libraryFilter, setLibraryFilter] = useState<string>("");
+  const [formPendingDeletion, setFormPendingDeletion] =
+    useState<CRFForm | null>(null);
+  const deleteFormDialogRef = useFocusTrap<HTMLDivElement>(
+    !!formPendingDeletion,
+    {
+      onEscape: () => setFormPendingDeletion(null),
+    }
+  );
+
+  const formDeletionPreview = useMemo(() => {
+    if (!formPendingDeletion) return null;
+    return StudyProtocolEngine.previewFormRemoval(
+      study,
+      formPendingDeletion.id
+    );
+  }, [study, formPendingDeletion]);
+
+  const handleDeleteFormClick = (form: CRFForm) => {
+    const preview = StudyProtocolEngine.previewFormRemoval(study, form.id);
+    const isInUse =
+      preview.affectedVisits.length > 0 || preview.affectedArms.length > 0;
+    if (isInUse) {
+      setFormPendingDeletion(form);
+    } else {
+      onDeleteForm(form.id);
+    }
+  };
 
   const epochs =
     study.epochs && study.epochs.length > 0
@@ -552,6 +584,7 @@ export const StudySpine: React.FC<StudySpineProps> = ({
                             }}
                             className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white"
                             title="Duplicate Form"
+                            aria-label={`Duplicate form ${form.name}`}
                           >
                             <IconCopy className="w-3.5 h-3.5" />
                           </button>
@@ -559,10 +592,11 @@ export const StudySpine: React.FC<StudySpineProps> = ({
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                onDeleteForm(form.id);
+                                handleDeleteFormClick(form);
                               }}
                               className="p-1 rounded hover:bg-red-500/20 text-zinc-400 hover:text-red-400"
                               title="Delete Form"
+                              aria-label={`Delete form ${form.name}`}
                             >
                               <IconTrash className="w-3.5 h-3.5" />
                             </button>
@@ -660,6 +694,119 @@ export const StudySpine: React.FC<StudySpineProps> = ({
         {/* TAB 3: WIDGET PALETTE */}
         {activeTab === "palette" && <WidgetPalette onAddField={onAddField} />}
       </div>
+
+      {/* Confirmation Dialog Previewing Affected Visits & Arms */}
+      {formPendingDeletion && formDeletionPreview && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-form-dialog-title"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150"
+          onClick={() => setFormPendingDeletion(null)}
+        >
+          <div
+            ref={deleteFormDialogRef}
+            className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl p-5 shadow-2xl space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1">
+                <h3
+                  id="delete-form-dialog-title"
+                  className="text-sm font-bold font-mono text-white"
+                >
+                  Delete Form &amp; Prune Visit Assignments
+                </h3>
+                <p className="text-xs text-zinc-400 font-sans">
+                  Form{" "}
+                  <span className="font-mono text-brand-cyan font-bold">
+                    {formPendingDeletion.name}
+                  </span>{" "}
+                  ({formPendingDeletion.domain}) is currently assigned in the
+                  Schedule of Activities.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setFormPendingDeletion(null)}
+                className="p-1 rounded text-zinc-400 hover:text-white hover:bg-zinc-850 transition-colors"
+                aria-label="Cancel"
+              >
+                <IconX className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Affected Assignments Preview */}
+            <div className="bg-zinc-950/80 rounded-xl p-3 border border-zinc-850 space-y-2 max-h-48 overflow-y-auto">
+              <div className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider font-semibold">
+                Affected Visits ({formDeletionPreview.affectedVisits.length})
+              </div>
+              <ul className="space-y-1">
+                {formDeletionPreview.affectedVisits.map((v) => (
+                  <li
+                    key={v.id}
+                    className="text-xs font-mono text-zinc-300 flex items-center justify-between"
+                  >
+                    <span className="flex items-center gap-1.5 truncate">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+                      <span className="truncate">{v.name}</span>
+                    </span>
+                    <span className="text-zinc-500 text-[10px] shrink-0">
+                      Day {v.targetDay}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              {formDeletionPreview.affectedArms.length > 0 && (
+                <div className="pt-2 border-t border-zinc-850 space-y-1">
+                  <div className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider font-semibold">
+                    Affected Arms ({formDeletionPreview.affectedArms.length})
+                  </div>
+                  <ul className="space-y-1">
+                    {formDeletionPreview.affectedArms.map((a) => (
+                      <li
+                        key={a.id}
+                        className="text-xs font-mono text-zinc-300 flex items-center gap-1.5"
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-purple-400 shrink-0" />
+                        <span>{a.name}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            <p className="text-[11px] text-zinc-500 font-sans leading-relaxed">
+              Confirming deletion will atomically remove this form and cleanly
+              prune all visit and arm assignments across the protocol in a
+              single commit.
+            </p>
+
+            <div className="flex items-center justify-end gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setFormPendingDeletion(null)}
+                className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-mono text-zinc-300 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const idToDelete = formPendingDeletion.id;
+                  setFormPendingDeletion(null);
+                  onDeleteForm(idToDelete);
+                }}
+                className="px-3.5 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-xs font-mono font-bold text-white transition-colors shadow-sm"
+              >
+                Delete Form
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
