@@ -4,7 +4,7 @@
 
 # Portfolio Hub
 
-![Node.js](https://img.shields.io/badge/Node.js-22.x-339933?logo=nodedotjs&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-%3E%3D22.0.0-339933?logo=nodedotjs&logoColor=white)
 ![npm](https://img.shields.io/badge/npm-%3E%3D10.0.0-CB3837?logo=npm&logoColor=white)
 ![Next.js](https://img.shields.io/badge/Next.js-16.3.4-000000?logo=nextdotjs&logoColor=white)
 ![React](https://img.shields.io/badge/React-19.2.4-61DAFB?logo=react&logoColor=white)
@@ -80,7 +80,7 @@ The core objective of this project is to create an interactive showcase that dyn
 
 ## Visual & System Architecture
 
-The portfolio utilizes a "Design Engineering" approach, combining lightweight libraries like Aceternity UI and Magic UI with Framer Motion. For complete architectural documentation—including the App Router route tree (`app/work/laser-loon/page.tsx`), Python backend core utilities (`app/core/crypto.py`, `app/core/resilient_file_ops.py`, `app/core/analyzer_strategies.py`), and UI component hierarchy (`components/ui/CaseStudyBentoCard.tsx`)—refer to [**`ARCHITECTURE.md`**](_media/ARCHITECTURE.md).
+The portfolio utilizes a "Design Engineering" approach, combining lightweight libraries like Aceternity UI and Magic UI with Framer Motion. For complete architectural documentation—including the App Router route tree (`app/work/laser-loon/page.tsx`) and UI component hierarchy (`components/ui/CaseStudyBentoCard.tsx`)—refer to [**`ARCHITECTURE.md`**](_media/ARCHITECTURE.md). The Sortify Python backend core utilities (`app/core/crypto.py`, `app/core/resilient_file_ops.py`, `app/core/analyzer_strategies.py`) belong to the separate Sortify repository, not this one, and are documented in [**`docs/CASE_STUDY.md`**](_media/CASE_STUDY.md).
 
 ## Deployment & Synthetic Monitoring
 
@@ -107,7 +107,7 @@ Architectural decisions are recorded in [`adr/`](https://github.com/fderuiter/po
 
 To work on this repository, you will need:
 
-- **Node.js**: 22.x (sole supported runtime)
+- **Node.js**: >=22.0.0 (per the `engines` field in `package.json`); CI and the scheduled workflows run Node 24
 - **npm**: >=10.0.0 (sole supported package manager; bun, yarn, and pnpm are unsupported)
 
 ## Setup Instructions

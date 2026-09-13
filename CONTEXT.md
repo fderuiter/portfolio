@@ -10,15 +10,6 @@
 - **Human Gate**: A ticket requiring human authorization, protected credentials, destructive cloud action, production promotion, or subjective real-device validation. Human gates are prepared with reproducible evidence before being handed to a person.
 - **Completion Evidence**: The commit, pull request, automated results, deployment observation, or human sign-off demonstrating that every acceptance criterion of a ticket is satisfied.
 
-## Release Governance
-
-- **Release Candidate**: The exact current `main` commit whose version, migrations, quality gates, and immutable deployment are being evaluated for promotion.
-- **Staged Production Deployment**: A production-configured immutable artifact that has not yet received the canonical production domains and therefore cannot serve normal production traffic.
-- **Promotion**: The deliberate reassignment of canonical production domains to a verified staged production deployment without rebuilding it.
-- **Application Rollback**: Reassigning production domains to the recorded previous known-good immutable deployment; this changes served application code without reversing database history.
-- **Database Recovery**: A forward-compatible roll-forward following expand/contract migration discipline; it is distinct from and must not be implied by application rollback.
-- **Unified Maintenance Run**: The portfolio's single daily, time-bounded operational pass. It drains buffered interactions, retries leased outbound mail, and converts expired raw telemetry into durable daily rollups while preserving a structured partial-progress record.
-
 ## Logical Proof Workspace
 
 ### Deductive Inference Rules
@@ -235,7 +226,7 @@ Formal inference rules used to derive logical steps from valid premises:
 - **Husky Commit Guard (`.husky/commit-msg`)**: Pre-commit hook interceptor preventing malformed or unclassified git commits from entering repository history.
 - **Interactive Commit Wizard (`npm run dx commit`)**: Guided command-line interface generating compliant Conventional Commits with scope validation and breaking change indicators.
 - **Branch Naming Standard**: Team-wide git branch naming convention requiring categorical prefixes (`feat/*`, `fix/*`, `chore/*`, `refactor/*`, `docs/*`, `perf/*`, `dx/*`, `test/*`, `main`).
-- **Dual-Tracker Issue Slicing Pattern**: The engineering issue workflow combining local tracer-bullet ticket files (`.scratch/issues/*.md`) for isolated context-bounded autonomous implementation with bi-directional GitHub CLI integration (`npm run dx issues:sync`), preserving dependency edges, automated triage labels, and verification checklists.
+- **Dual-Tracker Issue Slicing Pattern**: The engineering issue workflow combining local tracer-bullet ticket files (`.scratch/issues/*.md`) for isolated context-bounded autonomous implementation with bi-directional GitHub CLI integration (planned `npm run dx issues:sync`; not yet implemented, so synchronization is currently performed manually with the `gh` CLI per `docs/agents/issue-tracker.md`), preserving dependency edges, automated triage labels, and verification checklists.
 
 ### Static Analysis & Performance Budgets
 
@@ -265,7 +256,7 @@ Formal inference rules used to derive logical steps from valid premises:
 
 ### Garmin Watch Hardware & Thermal Emulation
 
-- **Garmin Thermal & CPU Telemetry Engine**: Deterministic physical simulation engine (`lib/garmin-engine.ts`, `components/arcade/GarminWatch.tsx`) modeling Connect IQ runtime CPU workloads, heat generation curves, passive wrist thermal dissipation, battery discharge profiles, and ANT+ heart rate sensor telemetry under active workload stress.
+- **Garmin Thermal & CPU Telemetry Engine**: Deterministic physical simulation engine (`lib/garmin-engine.ts`, `components/arcade/GarminWatchClient.tsx`) modeling Connect IQ runtime CPU workloads, heat generation curves, passive wrist thermal dissipation, battery discharge profiles, and ANT+ heart rate sensor telemetry under active workload stress.
 - **Monkey C Bytecode Emulation Scaffold**: Canvas-driven graphical rendering pipeline emulating high-contrast MIP (Memory-in-Pixel) transflective smartwatch displays, hardware bezel buttons, and Connect IQ OS lifecycle states with zero native C dependencies.
 
 ## Scientific & Engineering Editorial Design System

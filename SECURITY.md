@@ -34,7 +34,7 @@ The security audit CLI evaluates vulnerability severity levels and enforces the 
 Automated security checks are enforced across continuous integration and release workflows:
 
 - **Pre-Commit Hook Gate:** Local commits perform dependency security vulnerability checks via `npm run audit:security` in `.husky/pre-commit` before remote push.
-- **Pull Request & Branch CI Gate:** In `.github/workflows/ci.yml`, the `security-gate` job executes `npm run audit:security` on every pull request and push to primary branches (`main`/`master`). Pull requests with unhandled or expired vulnerabilities cannot pass CI.
+- **Pull Request & Branch CI Gate:** In `.github/workflows/ci.yml`, the `security-gate` job executes `npm run audit:security` on every push to `main` and on every pull request targeting `dev` or `main`. Pull requests with unhandled or expired vulnerabilities cannot pass CI.
 - **Release Gate Pipeline:** Pre-deployment release operations execute `npm run release:gate` (`scripts/release-gate.ts`), which runs the vulnerability security audit step (`runSecurityAudit`) prior to database migration deployments and production builds. Any unhandled high or critical vulnerabilities halt the release pipeline immediately.
 
 ## Vulnerability Override Governance Rules
@@ -47,15 +47,13 @@ All suppression rules in `security-audit-ignore.json` must strictly adhere to th
 
 1. **Advisory Identifier (`advisory` / `advisoryId` / `cve` / `ghsa` / `id`):** Must specify a valid advisory identifier (e.g., `GHSA-c2qf-rxjj-4v5w` or `CVE-XXXX-XXXX`). Entries missing an advisory ID are invalid and rejected by the audit tool.
 2. **Business Justification (`reason` / `justification`):** Must contain a clear description of why the vulnerability is non-actionable or safe in the current deployment context (e.g., dev-only tool, build-time utility with no production runtime exposure).
-3. **Risk Owner (`owner`):** Must name the person or accountable repository role responsible for resolving or renewing the exception.
-4. **Follow-Up Ticket (`followUp`):** Must reference the visible issue that owns re-evaluation before expiry.
-5. **Expiration Date & Maximum 90-Day Lifespan (`expiresAt` / `expires`):** Must provide a valid ISO timestamp specifying when the override expires. Overrides are capped at a **maximum lifespan of 90 days** from creation/execution. Overrides exceeding 90 days are flagged as invalid and fail the audit.
-6. **Target Package Scope (`package` / `name`):** Optional parameter to restrict the override to a specific package name.
+3. **Expiration Date & Maximum 90-Day Lifespan (`expiresAt` / `expires`):** Must provide a valid ISO timestamp specifying when the override expires. Overrides are capped at a **maximum lifespan of 90 days** from creation/execution. Overrides exceeding 90 days are flagged as invalid and fail the audit.
+4. **Target Package Scope (`package` / `name`):** Optional parameter to restrict the override to a specific package name.
 
 ### Override Validation & Enforcement
 
 During local or CI execution, the audit tool validates all active override rules:
 
 - **Expired Rules:** Rules whose expiration date has passed (`expiresAt <= now`) are rejected and cause the security audit to fail.
-- **Invalid Rules:** Rules missing an advisory, rationale, owner, follow-up ticket, expiration, or exceeding the 90-day limit trigger explicit validation errors and fail the audit.
+- **Invalid Rules:** Rules missing required fields or exceeding the 90-day limit trigger explicit validation errors and fail the audit.
 - **Active Rules:** Valid, unexpired rules temporarily suppress matching high or critical vulnerabilities and log active remaining lifespan (in days) to console output.
