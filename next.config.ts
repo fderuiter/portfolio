@@ -22,6 +22,8 @@ const nextConfig: NextConfig = {
     "@neondatabase/serverless",
     "@prisma/adapter-neon",
     "@prisma/client",
+    "jsdom",
+    "isomorphic-dompurify",
   ],
   webpack: (config, { isServer }) => {
     if (isServer) {
