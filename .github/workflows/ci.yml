@@ -89,7 +89,7 @@ jobs:
 
       - name: Type Check & Lint
         run: |
-          tsc --noEmit
+          npm run typecheck
           npm run lint
 
       - name: Verify ADR Invariants & Doctor Health Diagnostics
