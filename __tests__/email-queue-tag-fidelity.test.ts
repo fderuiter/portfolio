@@ -1,21 +1,29 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const { mockCreate, mockFindMany, mockUpdate, mockSuppressionFind, mockSend } =
-  vi.hoisted(() => ({
-    mockCreate: vi.fn(),
-    mockFindMany: vi.fn().mockResolvedValue([]),
-    mockUpdate: vi.fn().mockResolvedValue({}),
-    mockSuppressionFind: vi.fn().mockResolvedValue(null),
-    mockSend: vi
-      .fn()
-      .mockResolvedValue({ data: { id: "msg_live" }, error: null }),
-  }));
+const {
+  mockCreate,
+  mockFindMany,
+  mockUpdateMany,
+  mockUpdate,
+  mockSuppressionFind,
+  mockSend,
+} = vi.hoisted(() => ({
+  mockCreate: vi.fn(),
+  mockFindMany: vi.fn().mockResolvedValue([]),
+  mockUpdateMany: vi.fn().mockResolvedValue({ count: 1 }),
+  mockUpdate: vi.fn().mockResolvedValue({}),
+  mockSuppressionFind: vi.fn().mockResolvedValue(null),
+  mockSend: vi
+    .fn()
+    .mockResolvedValue({ data: { id: "msg_live" }, error: null }),
+}));
 
 vi.mock("@/lib/db", () => ({
   prisma: {
     outboundEmailQueue: {
       create: mockCreate,
       findMany: mockFindMany,
+      updateMany: mockUpdateMany,
       update: mockUpdate,
     },
     suppressionList: {
@@ -54,6 +62,7 @@ describe("Outbound email queue tag fidelity and honest queueing (#689)", () => {
     process.env.RESEND_API_KEY = "re_test_key";
     process.env.VITEST = "0";
     mockFindMany.mockResolvedValue([]);
+    mockUpdateMany.mockResolvedValue({ count: 1 });
     mockUpdate.mockResolvedValue({});
     mockSuppressionFind.mockResolvedValue(null);
     mockCreate.mockResolvedValue({ id: "queue-1" });

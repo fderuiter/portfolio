@@ -10,7 +10,7 @@
   },
   "crons": [
     {
-      "path": "/api/telemetry/sync",
+      "path": "/api/cron/maintenance",
       "schedule": "0 0 * * *"
     }
   ]

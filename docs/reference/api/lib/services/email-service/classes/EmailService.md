@@ -21,6 +21,24 @@ bounce/complaint suppression list defenses, retry queueing, and webhook ingestio
 
 ## Methods
 
+### getRetryQueueHealth()
+
+> `static` **getRetryQueueHealth**(`now?`): `Promise`\<\{ `depth`: `number`; `oldestPendingAgeMs`: `number` \| `null`; `retryExhausted`: `number`; `terminalFailures`: `number`; \}\>
+
+Returns secret-free operational health for the durable retry queue.
+
+#### Parameters
+
+##### now?
+
+`Date` = `...`
+
+#### Returns
+
+`Promise`\<\{ `depth`: `number`; `oldestPendingAgeMs`: `number` \| `null`; `retryExhausted`: `number`; `terminalFailures`: `number`; \}\>
+
+***
+
 ### handleWebhookEvent()
 
 > `static` **handleWebhookEvent**(`event`): `Promise`\<\{ `handled`: `boolean`; `reason?`: `string`; `suppressed?`: `boolean`; \}\>

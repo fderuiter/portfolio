@@ -45,9 +45,9 @@ To guarantee Upstash daily command usage remains strictly under 2,000 commands/d
 Because Vercel Hobby permits only **one cron job per day**, all scheduled operational maintenance is consolidated into a single secured endpoint (`/api/cron/maintenance` or alias `/api/telemetry/sync`):
 
 - **Sequential Bounded Execution**: The job runs once daily at midnight UTC (`0 0 * * *`) and sequentially executes:
-  1. Telemetry buffer draining and rollup into Postgres (`TelemetryService.syncBufferToDatabase`).
-  2. Outbound email retry processing (`EmailService.processRetryQueue`).
-  3. Retention pruning: rollup raw events older than 30 days and purge expired suppression/rate-limit keys.
+  1. Telemetry and reaction-buffer draining into Postgres.
+  2. A maximum of five leased outbound email retries, each carrying a stable provider idempotency key.
+  3. Transactional retention pruning: roll up raw events older than 30 days into `TelemetryDailyRollup`, then delete only the source rows covered by that transaction. Upstash's own TTL expiry remains authoritative for volatile rate-limit keys so the job does not waste free-tier commands scanning for keys Redis has already removed.
 - **Execution Budget**: Total execution is clamped to $\le 8$ seconds to satisfy Hobby's 10-second serverless timeout.
 - **Sub-Daily Option (Upstash QStash)**: For sub-daily email retry latency (< 15 minutes), an event-driven webhook via Upstash QStash (free tier: 500 messages/day) may be attached without requiring Vercel Pro.
 
@@ -60,6 +60,7 @@ Before an email can reach Resend's sending API:
 - Anonymous connection-hash rate limiting (5 requests / 10 minutes).
 - Synchronous profanity and toxic rant pattern filter.
 - Simulated delivery mode in development, preview, and test environments.
+- Retry rows use an expiring optimistic lease so overlapping function invocations cannot double-dispatch. The Resend idempotency key remains stable across lease expiry and ambiguous network failures, and retry delays add deterministic jitter to avoid synchronized bursts.
 
 ### 5. Sentry Quota Bounds (5k Errors / 10k Spans)
 

@@ -422,4 +422,40 @@ export class TelemetryService {
 
     return { processed: events.length, inserted: createResult.count };
   }
+
+  /**
+   * Rolls raw events older than the cutoff into daily aggregates and removes
+   * only the rows committed by the same database transaction.
+   */
+  static async rollupAndPruneRawEvents(before: Date): Promise<{
+    rollupsUpserted: number;
+    rawEventsDeleted: number;
+  }> {
+    return prisma.$transaction(async (transaction) => {
+      const rollupsUpserted = await transaction.$executeRaw`
+        INSERT INTO "TelemetryDailyRollup"
+          ("day", "projectSlug", "eventType", "count", "createdAt", "updatedAt")
+        SELECT
+          date_trunc('day', "createdAt")::date,
+          "projectSlug",
+          "eventType",
+          COUNT(*)::integer,
+          CURRENT_TIMESTAMP,
+          CURRENT_TIMESTAMP
+        FROM "TelemetryEvent"
+        WHERE "createdAt" < ${before}
+        GROUP BY date_trunc('day', "createdAt")::date, "projectSlug", "eventType"
+        ON CONFLICT ("day", "projectSlug", "eventType")
+        DO UPDATE SET
+          "count" = "TelemetryDailyRollup"."count" + EXCLUDED."count",
+          "updatedAt" = CURRENT_TIMESTAMP
+      `;
+
+      const rawEventsDeleted = await transaction.$executeRaw`
+        DELETE FROM "TelemetryEvent" WHERE "createdAt" < ${before}
+      `;
+
+      return { rollupsUpserted, rawEventsDeleted };
+    });
+  }
 }

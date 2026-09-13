@@ -6,7 +6,7 @@ changes the schema without adding an entry to Prisma's migration history.
 
 ## Active migrations
 
-The repository contains seven active Prisma migrations:
+The repository contains eight active Prisma migrations:
 
 1. `20260417215437_init`: Initial database baseline and core models.
 2. `20260528000000_add_telemetry_event`: Telemetry event ingestion table.
@@ -15,6 +15,7 @@ The repository contains seven active Prisma migrations:
 5. `20261014000000_add_commands_and_playback`: Command logging and session playback models.
 6. `20261015000000_add_email_resilience`: Suppression list and outbound email retry queue tables.
 7. `20261016000000_enforce_email_contracts`: Shared enum contracts on suppression reasons and outbound delivery states with preflight validation and redundant index cleanup.
+8. `20261017000000_add_telemetry_daily_rollups`: Additive daily telemetry aggregate table used by the bounded retention phase before raw events older than 30 days are pruned.
 
 ## Normal workflow
 

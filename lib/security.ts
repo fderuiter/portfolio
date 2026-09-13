@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 import { getEnv } from "./env";
+
+function timingSafeSecretMatch(provided: string, expected: string): boolean {
+  const providedDigest = crypto.createHash("sha256").update(provided).digest();
+  const expectedDigest = crypto.createHash("sha256").update(expected).digest();
+  return crypto.timingSafeEqual(providedDigest, expectedDigest);
+}
 
 /**
  * Validates that the required authorization secret is configured.
@@ -57,7 +64,10 @@ export function validateSyncRequest(req: NextRequest): {
   // If secret is configured (regardless of environment), validate against it
   if (secret) {
     const authHeader = req.headers.get("authorization");
-    if (!authHeader || authHeader !== `Bearer ${secret}`) {
+    const provided = authHeader?.startsWith("Bearer ")
+      ? authHeader.slice("Bearer ".length)
+      : "";
+    if (!authHeader || !timingSafeSecretMatch(provided, secret)) {
       return {
         isValid: false,
         errorResponse: NextResponse.json(

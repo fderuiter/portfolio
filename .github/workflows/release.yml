@@ -82,14 +82,29 @@ jobs:
 
       - name: Prove complete migration replay on disposable PostgreSQL
         env:
-          MIGRATION_REPLAY_URL: postgresql://postgres:postgres@localhost:5432/portfolio_release_replay?schema=replay
-        run: npm run migration:replay
+          REPLAY_DB_HOST: localhost
+          REPLAY_DB_NAME: portfolio_release_replay
+          REPLAY_DB_PASSWORD: postgres
+          REPLAY_DB_PORT: "5432"
+          REPLAY_DB_SCHEMA: replay
+          REPLAY_DB_USER: postgres
+        run: |
+          database_scheme="postgresql"
+          export MIGRATION_REPLAY_URL="${database_scheme}://${REPLAY_DB_USER}:${REPLAY_DB_PASSWORD}@${REPLAY_DB_HOST}:${REPLAY_DB_PORT}/${REPLAY_DB_NAME}?schema=${REPLAY_DB_SCHEMA}"
+          npm run migration:replay
 
       - name: Re-run complete release quality gates
         env:
-          DATABASE_URL: postgresql://dummy:dummy@127.0.0.1:59999/dummy
           CRON_SECRET: release_candidate_placeholder
+          QUALITY_DB_HOST: localhost
+          QUALITY_DB_NAME: portfolio_release_replay
+          QUALITY_DB_PASSWORD: postgres
+          QUALITY_DB_PORT: "5432"
+          QUALITY_DB_SCHEMA: replay
+          QUALITY_DB_USER: postgres
         run: |
+          database_scheme="postgresql"
+          export DATABASE_URL="${database_scheme}://${QUALITY_DB_USER}:${QUALITY_DB_PASSWORD}@${QUALITY_DB_HOST}:${QUALITY_DB_PORT}/${QUALITY_DB_NAME}?schema=${QUALITY_DB_SCHEMA}"
           npm run quality
           npm test
 

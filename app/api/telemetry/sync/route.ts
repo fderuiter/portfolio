@@ -4,8 +4,7 @@ import {
   validateSyncRequest,
 } from "@/lib/security";
 import { SyncParamsSchema } from "@/lib/schemas";
-import { TelemetryService } from "@/lib/services/telemetry-service";
-import { CaseStudyService } from "@/lib/services/case-study-service";
+import { MaintenanceService } from "@/lib/services/maintenance-service";
 import { createApiHandler } from "@/lib/route-wrapper";
 import * as Sentry from "@sentry/nextjs";
 
@@ -39,24 +38,30 @@ export const GET = createApiHandler(async (req) => {
       );
     }
 
-    const BATCH_SIZE = parsedQuery.data.batch;
-    const result = await TelemetryService.syncBufferedEvents(BATCH_SIZE);
+    const summary = await MaintenanceService.run({
+      batchSize: parsedQuery.data.batch,
+    });
+    const telemetry = summary.phases.telemetry;
 
-    // Vercel Hobby allows a single daily cron (AGENTS.md section 22), so this
-    // route is the only opportunity to drain the reaction write-buffer.
-    // Without this, CaseStudyService.submitReaction leaves every reaction in
-    // Redis and nothing ever reaches Postgres.
-    const reactions =
-      await CaseStudyService.flushBufferedReactionsToDatabase(BATCH_SIZE);
+    if (telemetry.status !== "completed") {
+      return NextResponse.json(
+        {
+          error: "Failed to sync events to primary database",
+          maintenance: summary,
+        },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
-      processed: result.processed,
-      inserted: result.inserted,
+      processed: telemetry.counts.processed || 0,
+      inserted: telemetry.counts.inserted || 0,
       reactions: {
-        processed: reactions.processed,
-        inserted: reactions.inserted,
+        processed: telemetry.counts.reactionsProcessed || 0,
+        inserted: telemetry.counts.reactionsInserted || 0,
       },
+      maintenance: summary,
     });
   } catch (err) {
     Sentry.captureException(err);

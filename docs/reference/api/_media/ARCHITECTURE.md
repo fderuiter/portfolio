@@ -485,7 +485,7 @@ The Python backend core package utilities power air-gapped document ingestion, e
 To guarantee that technical specifications, API documentation, and internal architectural guidelines evolve in lockstep with codebase mutations without developer friction, we implemented a zero-drift synchronization architecture:
 
 - **Schema-Driven API Contracts (`lib/schemas.ts` & `openapi.json`):**
-  - All API routes (`/api/telemetry`, `/api/telemetry/sync`, `/api/case-studies`) define declarative Zod contracts.
+  - All API routes (`/api/telemetry`, `/api/cron/maintenance`, the compatibility alias `/api/telemetry/sync`, and `/api/case-studies`) define declarative Zod contracts.
   - The OpenAPI generator (`scripts/generate-openapi.ts`) compiles these schemas into OpenAPI 3.0 specifications.
   - Automated route discovery enforces 100% route coverage, failing verification if any handler in `app/api/**/route.ts` lacks specification coverage.
 - **TypeDoc Markdown Parity & API Documentation Compilation (`docs/reference/api/`):**

@@ -200,7 +200,7 @@ curl -X POST http://localhost:3000/api/telemetry \
   windows expire within 60 seconds, ensuring automated reclamation without
   manual deletion. Never execute un-prefixed `FLUSHDB` on shared instances.
 - **Buffered telemetry events never reach Postgres**: check the Vercel Cron
-  job (`/api/telemetry/sync`, see below) is actually firing — buffered
+  job (`/api/cron/maintenance`, see below) is actually firing — buffered
   events sit in Redis until that route drains them, they are not written to
   Postgres directly on ingestion.
 
@@ -213,7 +213,7 @@ curl -X POST http://localhost:3000/api/telemetry \
   schedule below. There is no dedicated setup script for this — it's a
   one-time dashboard action per Vercel's own
   [Git integration docs](https://vercel.com/docs/git).
-- **Cron**: `vercel.json` schedules `GET /api/telemetry/sync` daily
+- **Cron**: `vercel.json` schedules `GET /api/cron/maintenance` daily
   (`0 0 * * *`). Vercel signs every cron invocation with an
   `Authorization: Bearer <CRON_SECRET>` header matching the `CRON_SECRET`
   environment variable configured on the project (see
@@ -234,10 +234,10 @@ curl -X POST http://localhost:3000/api/telemetry \
 
   ```bash
   # Unauthenticated (expected to fail once CRON_SECRET is set and NODE_ENV isn't development)
-  curl -i http://localhost:3000/api/telemetry/sync
+  curl -i http://localhost:3000/api/cron/maintenance
 
   # Authenticated
-  curl -i http://localhost:3000/api/telemetry/sync \
+  curl -i http://localhost:3000/api/cron/maintenance \
     -H "Authorization: Bearer $CRON_SECRET"
   ```
 

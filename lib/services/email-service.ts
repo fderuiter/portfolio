@@ -124,6 +124,40 @@ const DEFAULT_FROM_EMAIL = "Frederick de Ruiter <notifications@deruiter.dev>";
 const MAX_RETRY_ATTEMPTS = 5;
 const BASE_RETRY_DELAY_MS = 1000;
 const MAX_RETRY_DELAY_MS = 600000; // 10 minutes
+const RETRY_LEASE_MS = 5 * 60 * 1000;
+const MAX_RETRY_BATCH_SIZE = 20;
+
+function shouldSimulateEmailDelivery(apiKey: string | undefined): boolean {
+  const currentEnv = getEnv();
+  if (
+    currentEnv.NODE_ENV === "development" ||
+    currentEnv.VERCEL_ENV === "preview" ||
+    currentEnv.VERCEL_ENV === "development"
+  ) {
+    return true;
+  }
+
+  // Unit tests use an obviously synthetic SDK key with a mocked transport.
+  // A real inherited key must never turn the test process into a live sender.
+  if (currentEnv.NODE_ENV === "test") {
+    return !apiKey?.startsWith("re_test_");
+  }
+
+  return !apiKey;
+}
+
+function getRetryDelayMs(queueId: string, attempt: number): number {
+  const digest = crypto
+    .createHash("sha256")
+    .update(`${queueId}:${attempt}`)
+    .digest();
+  const jitterFactor = 0.75 + (digest.readUInt16BE(0) / 65535) * 0.5;
+  const exponentialDelay = BASE_RETRY_DELAY_MS * Math.pow(2, attempt);
+  return Math.min(
+    MAX_RETRY_DELAY_MS,
+    Math.round(exponentialDelay * jitterFactor)
+  );
+}
 
 function isRetryableError(errorMessage: string): boolean {
   const lower = errorMessage.toLowerCase();
@@ -284,10 +318,14 @@ export class EmailService {
     maxBatchSize?: number;
     now?: Date;
   }): Promise<{ processed: number; succeeded: number; failed: number }> {
-    const limit = options?.maxBatchSize || 20;
+    const limit = Math.min(
+      MAX_RETRY_BATCH_SIZE,
+      Math.max(1, options?.maxBatchSize || MAX_RETRY_BATCH_SIZE)
+    );
     const now = options?.now || new Date();
+    const leaseUntil = new Date(now.getTime() + RETRY_LEASE_MS);
 
-    let items: Array<{
+    const items: Array<{
       id: string;
       to: string;
       from: string;
@@ -303,7 +341,7 @@ export class EmailService {
     }> = [];
 
     try {
-      items = await prisma.outboundEmailQueue.findMany({
+      const candidates = await prisma.outboundEmailQueue.findMany({
         where: {
           status: { in: ["PENDING", "RETRYING"] },
           nextRetryAt: { lte: now },
@@ -311,9 +349,26 @@ export class EmailService {
         orderBy: { nextRetryAt: "asc" },
         take: limit,
       });
+
+      // Optimistic row leasing: only one overlapping invocation can move a
+      // still-due row's retry timestamp into the lease window. A crashed
+      // worker releases itself naturally when the lease expires.
+      for (const candidate of candidates) {
+        const lease = await prisma.outboundEmailQueue.updateMany({
+          where: {
+            id: candidate.id,
+            status: { in: ["PENDING", "RETRYING"] },
+            nextRetryAt: { lte: now },
+          },
+          data: { nextRetryAt: leaseUntil },
+        });
+        if (lease.count === 1) {
+          items.push({ ...candidate, nextRetryAt: leaseUntil });
+        }
+      }
     } catch (err) {
       console.error("Error reading OutboundEmailQueue:", err);
-      return { processed: 0, succeeded: 0, failed: 0 };
+      throw err;
     }
 
     let succeeded = 0;
@@ -360,10 +415,9 @@ export class EmailService {
       }
 
       const apiKey = getEnv().RESEND_API_KEY || env.RESEND_API_KEY;
-      const isVitest = getEnv().VITEST === "1" || env.VITEST === "1";
-
-      // If simulated / test environment without live Resend client
-      if (!client || (isVitest && !apiKey)) {
+      // Preview/development are always simulated, even if a production-like
+      // API key is accidentally attached to the deployment.
+      if (!client || shouldSimulateEmailDelivery(apiKey)) {
         await prisma.outboundEmailQueue.update({
           where: { id: item.id },
           data: { status: "DELIVERED", updatedAt: new Date() },
@@ -373,15 +427,18 @@ export class EmailService {
       }
 
       try {
-        const { error } = await client.emails.send({
-          from: item.from,
-          to: rawOptions.to,
-          replyTo: item.replyTo || undefined,
-          subject: item.subject,
-          html: item.html,
-          text: item.text || undefined,
-          tags: rawOptions.tags,
-        });
+        const { error } = await client.emails.send(
+          {
+            from: item.from,
+            to: rawOptions.to,
+            replyTo: item.replyTo || undefined,
+            subject: item.subject,
+            html: item.html,
+            text: item.text || undefined,
+            tags: rawOptions.tags,
+          },
+          { idempotencyKey: `portfolio-email-${item.id}` }
+        );
 
         if (error) {
           const nextAttempts = item.attempts + 1;
@@ -396,16 +453,13 @@ export class EmailService {
             });
             failed++;
           } else {
-            const delay = Math.min(
-              MAX_RETRY_DELAY_MS,
-              BASE_RETRY_DELAY_MS * Math.pow(2, nextAttempts)
-            );
+            const delay = getRetryDelayMs(item.id, nextAttempts);
             await prisma.outboundEmailQueue.update({
               where: { id: item.id },
               data: {
                 status: "RETRYING",
                 attempts: nextAttempts,
-                nextRetryAt: new Date(Date.now() + delay),
+                nextRetryAt: new Date(now.getTime() + delay),
                 lastError: error.message,
               },
             });
@@ -435,16 +489,13 @@ export class EmailService {
           });
           failed++;
         } else {
-          const delay = Math.min(
-            MAX_RETRY_DELAY_MS,
-            BASE_RETRY_DELAY_MS * Math.pow(2, nextAttempts)
-          );
+          const delay = getRetryDelayMs(item.id, nextAttempts);
           await prisma.outboundEmailQueue.update({
             where: { id: item.id },
             data: {
               status: "RETRYING",
               attempts: nextAttempts,
-              nextRetryAt: new Date(Date.now() + delay),
+              nextRetryAt: new Date(now.getTime() + delay),
               lastError: msg,
             },
           });
@@ -454,6 +505,40 @@ export class EmailService {
     }
 
     return { processed: items.length, succeeded, failed };
+  }
+
+  /** Returns secret-free operational health for the durable retry queue. */
+  static async getRetryQueueHealth(now: Date = new Date()): Promise<{
+    depth: number;
+    oldestPendingAgeMs: number | null;
+    terminalFailures: number;
+    retryExhausted: number;
+  }> {
+    const pendingStatuses: OutboundEmailStatus[] = ["PENDING", "RETRYING"];
+    const pendingWhere = { status: { in: pendingStatuses } };
+    const [depth, oldest, terminalFailures, retryExhausted] = await Promise.all(
+      [
+        prisma.outboundEmailQueue.count({ where: pendingWhere }),
+        prisma.outboundEmailQueue.findFirst({
+          where: pendingWhere,
+          orderBy: { createdAt: "asc" },
+          select: { createdAt: true },
+        }),
+        prisma.outboundEmailQueue.count({ where: { status: "FAILED" } }),
+        prisma.outboundEmailQueue.count({
+          where: { status: "FAILED", attempts: { gte: MAX_RETRY_ATTEMPTS } },
+        }),
+      ]
+    );
+
+    return {
+      depth,
+      oldestPendingAgeMs: oldest
+        ? Math.max(0, now.getTime() - oldest.createdAt.getTime())
+        : null,
+      terminalFailures,
+      retryExhausted,
+    };
   }
 
   /**
@@ -512,10 +597,8 @@ export class EmailService {
       options.from || env.RESEND_FROM_EMAIL || DEFAULT_FROM_EMAIL;
 
     const apiKey = getEnv().RESEND_API_KEY || env.RESEND_API_KEY;
-    const isVitest = getEnv().VITEST === "1" || env.VITEST === "1";
-
-    // If no API key is provisioned, or running in Vitest test harness without live mocks, simulate delivery
-    if (!client || (isVitest && !apiKey)) {
+    // Missing credentials and every non-production deployment are simulated.
+    if (!client || shouldSimulateEmailDelivery(apiKey)) {
       const simulatedId = `sim_msg_${Math.random().toString(36).substring(2, 10)}`;
 
       if (env.NODE_ENV === "development") {

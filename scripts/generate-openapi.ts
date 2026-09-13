@@ -484,11 +484,47 @@ export const openApiSpec = {
         },
       },
     },
+    "/api/cron/maintenance": {
+      get: {
+        summary: "Run the unified daily maintenance pipeline",
+        description:
+          "Authenticated Vercel Hobby cron route that drains telemetry and reaction buffers, processes a bounded email retry batch, and rolls raw telemetry older than 30 days into daily aggregates before pruning it. Returns isolated per-phase outcomes under an eight-second overall deadline.",
+        parameters: [
+          {
+            name: "Authorization",
+            in: "header",
+            required: true,
+            description: "Bearer authorization secret token",
+            schema: { type: "string" },
+          },
+          {
+            name: "batch",
+            in: "query",
+            required: false,
+            description: "Maximum telemetry and reaction items to drain",
+            schema: { $ref: "#/components/schemas/SyncParams" },
+          },
+        ],
+        responses: {
+          200: {
+            description:
+              "Complete or partial execution summary with isolated phase counts, durations, and errors",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/MaintenanceSummary" },
+              },
+            },
+          },
+          400: { description: "Invalid batch parameters" },
+          401: { description: "Unauthorized" },
+        },
+      },
+    },
     "/api/telemetry/sync": {
       get: {
         summary: "Cron synchronization of buffered events",
         description:
-          "Unified daily maintenance pass. Pulls buffered telemetry events from the secondary Redis cache and flushes them to the primary datastore in batches, then drains the case-study reaction write-buffer into Postgres.",
+          "Backward-compatible alias for the unified daily maintenance pass. Pulls buffered telemetry events from the secondary Redis cache and flushes them to the primary datastore in batches, then drains the case-study reaction write-buffer into Postgres.",
         parameters: [
           {
             name: "Authorization",
@@ -738,6 +774,48 @@ export const openApiSpec = {
   },
   components: {
     schemas: {
+      MaintenanceSummary: {
+        type: "object",
+        properties: {
+          success: { type: "boolean" },
+          partial: { type: "boolean" },
+          startedAt: { type: "string", format: "date-time" },
+          completedAt: { type: "string", format: "date-time" },
+          durationMs: { type: "integer" },
+          deadlineMs: { type: "integer", maximum: 8000 },
+          phases: {
+            type: "object",
+            additionalProperties: {
+              type: "object",
+              properties: {
+                status: {
+                  type: "string",
+                  enum: ["completed", "failed", "timed_out", "skipped"],
+                },
+                durationMs: { type: "integer" },
+                counts: {
+                  type: "object",
+                  additionalProperties: {
+                    type: "integer",
+                    nullable: true,
+                  },
+                },
+                error: { type: "string" },
+              },
+              required: ["status", "durationMs", "counts"],
+            },
+          },
+        },
+        required: [
+          "success",
+          "partial",
+          "startedAt",
+          "completedAt",
+          "durationMs",
+          "deadlineMs",
+          "phases",
+        ],
+      },
       CaseStudySummary: {
         type: "object",
         properties: {

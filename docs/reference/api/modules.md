@@ -190,6 +190,7 @@
 - [lib/services/garmin/garbage-collect/spec](lib/services/garmin/garbage-collect/spec/README.md)
 - [lib/services/garmin/sync-flash-storage/handler](lib/services/garmin/sync-flash-storage/handler/README.md)
 - [lib/services/garmin/sync-flash-storage/spec](lib/services/garmin/sync-flash-storage/spec/README.md)
+- [lib/services/maintenance-service](lib/services/maintenance-service/README.md)
 - [lib/services/privacy-service](lib/services/privacy-service/README.md)
 - [lib/services/service-result](lib/services/service-result/README.md)
 - [lib/services/telemetry-service](lib/services/telemetry-service/README.md)

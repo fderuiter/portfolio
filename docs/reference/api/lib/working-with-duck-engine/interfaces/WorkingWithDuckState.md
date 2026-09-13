@@ -388,7 +388,7 @@
 
 ### status
 
-> **status**: `"idle"` \| `"paused"` \| `"running"` \| `"failed"` \| `"won"`
+> **status**: `"idle"` \| `"paused"` \| `"failed"` \| `"running"` \| `"won"`
 
 ***
 
