@@ -20,6 +20,8 @@ import { FALLBACK_CASE_STUDIES } from "@/lib/case-studies-data";
 
 vi.mock("next/font/google", () => ({
   Inter: () => ({ variable: "--font-inter" }),
+  Lexend: () => ({ variable: "--font-lexend" }),
+  Atkinson_Hyperlegible: () => ({ variable: "--font-atkinson" }),
   Geist_Mono: () => ({ variable: "--font-geist-mono" }),
 }));
 

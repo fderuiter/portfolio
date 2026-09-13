@@ -10,6 +10,8 @@ import { useSearch } from "@/components/providers/SearchProvider";
 import { usePersona } from "@/components/providers/PersonaProvider";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useResizeObserver } from "@/hooks/useResizeObserver";
+import { useFontPreference } from "@/hooks/useFontPreference";
+import { useAnnouncer } from "@/components/providers/A11yProvider";
 import {
   IconVolume,
   IconVolumeOff,
@@ -118,6 +120,12 @@ const SYSTEMS_ITEMS: SubNavItem[] = [
     href: "/simulator",
     icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />,
   },
+  {
+    title: "Designing for My Brother",
+    subtitle: "Dyslexia-first typography & cognitive accessibility",
+    href: "/case-studies/designing-for-my-brother",
+    icon: <IconShieldCheck className="w-4 h-4 text-amber-400" />,
+  },
 ];
 
 export const Navbar: React.FC = () => {
@@ -132,6 +140,18 @@ export const Navbar: React.FC = () => {
   const { persona, setPersona } = usePersona();
   const [showAudioPanel, setShowAudioPanel] = useState(false);
   const [showPreferences, setShowPreferences] = useState(false);
+  const { isDyslexic, toggleDyslexiaMode } = useFontPreference();
+  const { announce } = useAnnouncer();
+
+  const handleToggleDyslexia = () => {
+    toggleDyslexiaMode();
+    announce(
+      isDyslexic
+        ? "Dyslexia font mode disabled. Using Atkinson Hyperlegible and Lexend."
+        : "Dyslexia font mode enabled. Using OpenDyslexic typeface.",
+      "assertive"
+    );
+  };
 
   const pathname = usePathname();
   const [prevPathname, setPrevPathname] = useState(pathname);
@@ -637,6 +657,38 @@ export const Navbar: React.FC = () => {
               </button>
             </div>
 
+            {/* Dyslexia Mode Toggle Pill Desktop */}
+            <div className="relative hidden xl:block shrink-0">
+              <button
+                type="button"
+                onClick={handleToggleDyslexia}
+                className={cn(
+                  "flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-full border transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-400/50 shrink-0 whitespace-nowrap text-xs font-mono font-bold",
+                  isDyslexic
+                    ? "border-amber-400/60 bg-amber-400/15 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.2)]"
+                    : "border-zinc-900 bg-zinc-900/40 hover:border-zinc-700 text-zinc-400 hover:text-foreground"
+                )}
+                aria-label={
+                  isDyslexic
+                    ? "Disable OpenDyslexic font mode"
+                    : "Enable OpenDyslexic font mode"
+                }
+                aria-pressed={isDyslexic}
+                title={
+                  isDyslexic
+                    ? "OpenDyslexic active - click to reset"
+                    : "Switch to OpenDyslexic typeface"
+                }
+              >
+                <span className="font-bold text-xs" aria-hidden="true">
+                  Aa
+                </span>
+                <span className="text-[10px] tracking-wider hidden 2xl:inline">
+                  {isDyslexic ? "OPENDYSLEXIC" : "DYSLEXIA"}
+                </span>
+              </button>
+            </div>
+
             {/* Audio Controller Desktop */}
             <div className="relative hidden 2xl:block shrink-0">
               <button
@@ -869,6 +921,30 @@ export const Navbar: React.FC = () => {
                         )}
                       </div>
                     </div>
+
+                    <div className="flex items-center justify-between pt-2 border-t border-zinc-900">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-mono font-bold text-zinc-300">
+                          Dyslexia Font
+                        </span>
+                        <span className="text-[9px] font-mono text-zinc-500">
+                          OpenDyslexic mode
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleToggleDyslexia}
+                        className={cn(
+                          "min-h-8 px-2.5 py-1 rounded-lg border text-[10px] font-mono font-bold transition-all cursor-pointer",
+                          isDyslexic
+                            ? "border-amber-400/50 bg-amber-400/15 text-amber-300"
+                            : "border-zinc-800 bg-zinc-900/50 text-zinc-400 hover:text-white hover:border-zinc-700"
+                        )}
+                      >
+                        {isDyslexic ? "ON" : "OFF"}
+                      </button>
+                    </div>
+
                     <a
                       href="https://github.com/fderuiter/portfolio"
                       target="_blank"
@@ -1133,6 +1209,33 @@ export const Navbar: React.FC = () => {
                     <span>RECRUITER</span>
                   </button>
                 </div>
+              </div>
+
+              {/* Mobile Dyslexia Toggle */}
+              <div className="border-t border-zinc-900/80 pt-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span
+                    className="font-bold text-sm text-amber-400"
+                    aria-hidden="true"
+                  >
+                    Aa
+                  </span>
+                  <span className="text-xs font-mono font-bold tracking-wider text-zinc-400">
+                    DYSLEXIA FONT
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleToggleDyslexia}
+                  className={cn(
+                    "min-h-11 px-4 py-2 rounded-xl text-xs font-mono font-bold border transition-all cursor-pointer flex items-center justify-center",
+                    isDyslexic
+                      ? "border-amber-400/50 bg-amber-400/15 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.2)]"
+                      : "border-zinc-800 bg-zinc-900/50 text-zinc-400 hover:text-white"
+                  )}
+                >
+                  {isDyslexic ? "OPENDYSLEXIC: ON" : "ENABLE OPENDYSLEXIC"}
+                </button>
               </div>
 
               {/* Mobile Audio Controls */}

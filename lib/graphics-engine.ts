@@ -1,6 +1,6 @@
 import { designManifest } from "./design-manifest";
 import { prepare, layout, type PreparedText } from "@chenglou/pretext";
-import { 
+import {
   type PreparedRichInline,
   type RichInlineLine,
 } from "@chenglou/pretext/rich-inline";
@@ -10,11 +10,17 @@ export * from "./graphics-math";
 
 // --- Global Caches ---
 export const textPrepareCache = new LRUCache<string, PreparedText>(500);
-export const textLayoutCache = new LRUCache<string, { height: number; lineCount: number }>(2000);
+export const textLayoutCache = new LRUCache<
+  string,
+  { height: number; lineCount: number }
+>(2000);
 
 export const richItemsCache = new LRUCache<string, unknown[]>(500);
 export const richPrepareCache = new LRUCache<string, PreparedRichInline>(500);
-export const richLayoutCache = new LRUCache<string, { height: number; lines: RichInlineLine[] }>(2000);
+export const richLayoutCache = new LRUCache<
+  string,
+  { height: number; lines: RichInlineLine[] }
+>(2000);
 
 // Bounded style and font caches with strict capacity limits to avoid memory growth
 export const cssPropertyCache = new LRUCache<string, string>(100);
@@ -37,14 +43,21 @@ export function isStylesheetLoaded(rootStyle?: CSSStyleDeclaration): boolean {
   if (!isBrowser()) {
     return false;
   }
-  if (typeof (globalThis as typeof globalThis & { __mockStylesheetLoaded?: boolean }).__mockStylesheetLoaded !== "undefined") {
-    return !!(globalThis as typeof globalThis & { __mockStylesheetLoaded?: boolean }).__mockStylesheetLoaded;
+  if (
+    typeof (
+      globalThis as typeof globalThis & { __mockStylesheetLoaded?: boolean }
+    ).__mockStylesheetLoaded !== "undefined"
+  ) {
+    return !!(
+      globalThis as typeof globalThis & { __mockStylesheetLoaded?: boolean }
+    ).__mockStylesheetLoaded;
   }
   if (stylesheetLoadedCache) {
     return true;
   }
   try {
-    const style = rootStyle || window.getComputedStyle(document.documentElement);
+    const style =
+      rootStyle || window.getComputedStyle(document.documentElement);
     const gap = style.getPropertyValue("--layout-gap").trim();
     const brandCyan = style.getPropertyValue("--brand-cyan").trim();
     const fontSizeSm = style.getPropertyValue("--font-size-sm").trim();
@@ -100,7 +113,13 @@ export function resolveCodeChipExtraWidth(): number {
     const marginLeft = parseFloat(style.marginLeft || "0");
     const marginRight = parseFloat(style.marginRight || "0");
 
-    const totalExtraWidth = paddingLeft + paddingRight + borderLeftWidth + borderRightWidth + marginLeft + marginRight;
+    const totalExtraWidth =
+      paddingLeft +
+      paddingRight +
+      borderLeftWidth +
+      borderRightWidth +
+      marginLeft +
+      marginRight;
 
     document.body.removeChild(dummy);
 
@@ -126,11 +145,24 @@ export function isBrowser(): boolean {
  * Resolves font family variable dynamically using Computed Style.
  * Returns designManifest sans-serif fallback if run in SSR, unready stylesheet states, or variables are missing.
  */
-export function resolveFontFamily(variableName: string = "--font-inter"): string {
+export function resolveFontFamily(
+  variableName: string = "--font-atkinson"
+): string {
+  const getFallback = (varName: string) => {
+    if (varName === "--font-heading" || varName === "--font-lexend") {
+      return (
+        (designManifest.typography.fonts as Record<string, string>).heading ||
+        "var(--font-lexend), system-ui, -apple-system, sans-serif"
+      );
+    }
+    if (varName === "--font-mono" || varName === "--font-geist-mono") {
+      return designManifest.typography.fonts.mono;
+    }
+    return designManifest.typography.fonts.sans;
+  };
+
   if (!isBrowser()) {
-    return variableName === "--font-mono"
-      ? designManifest.typography.fonts.mono
-      : designManifest.typography.fonts.sans;
+    return getFallback(variableName);
   }
 
   // Intercept repeated queries with the bounded cache FIRST
@@ -142,16 +174,14 @@ export function resolveFontFamily(variableName: string = "--font-inter"): string
   try {
     const rootStyle = window.getComputedStyle(document.documentElement);
     if (!isStylesheetLoaded(rootStyle)) {
-      return variableName === "--font-mono"
-        ? designManifest.typography.fonts.mono
-        : designManifest.typography.fonts.sans;
+      return getFallback(variableName);
     }
     const rawFontFamily = rootStyle.getPropertyValue(variableName).trim();
-    const resolved = rawFontFamily || designManifest.typography.fonts.sans;
+    const resolved = rawFontFamily || getFallback(variableName);
     cssPropertyCache.set(variableName, resolved);
     return resolved;
   } catch {
-    return designManifest.typography.fonts.sans;
+    return getFallback(variableName);
   }
 }
 
@@ -183,7 +213,9 @@ export function measureTextOffscreen({
 
   const prepareKey = `${text}|${fontString}`;
   const stylesheetLoaded = isStylesheetLoaded();
-  let prepared = stylesheetLoaded ? textPrepareCache.get(prepareKey) : undefined;
+  let prepared = stylesheetLoaded
+    ? textPrepareCache.get(prepareKey)
+    : undefined;
   if (!prepared) {
     prepared = prepare(text, fontString);
     if (stylesheetLoaded) {
@@ -210,7 +242,11 @@ import { getEnv } from "./env";
  * Expose a layout validation utility that warns in non-production environments
  * when calculated layout height and actual physical DOM measurement differs by more than 2px.
  */
-export function validateLayoutHeight(calculated: number, actual: number, contextMessage?: string) {
+export function validateLayoutHeight(
+  calculated: number,
+  actual: number,
+  contextMessage?: string
+) {
   if (getEnv().NODE_ENV !== "production") {
     if (actual === 0) {
       return;

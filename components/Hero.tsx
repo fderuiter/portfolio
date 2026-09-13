@@ -51,7 +51,7 @@ export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
     text,
     fontSize: 54,
     lineHeight: 60,
-    fontFamilyVariable: "--font-inter",
+    fontFamilyVariable: "--font-heading",
     getResponsiveMetrics: (width) => {
       if (width < 450) {
         return { fontSize: 32, lineHeight: 36 };
@@ -160,7 +160,7 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
     text,
     fontSize: 16,
     lineHeight: 28,
-    fontFamilyVariable: "--font-inter",
+    fontFamilyVariable: "--font-sans",
     getResponsiveMetrics: (width) => {
       if (width < 640) {
         return { fontSize: 14, lineHeight: 22 };
@@ -838,6 +838,13 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
               <span>CLINICAL OPERATIONS EXPERIENCE</span>
             </span>
+            <Link
+              href="/case-studies/designing-for-my-brother"
+              className="flex items-center gap-1.5 hover:text-amber-300 transition-colors"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              <span>ACCESSIBILITY: FOR MY BROTHER ↗</span>
+            </Link>
             <span className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
               <span>SOURCE ON GITHUB</span>

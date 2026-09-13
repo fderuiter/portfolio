@@ -204,7 +204,7 @@ curl -X POST http://localhost:3000/api/telemetry \
   events sit in Redis until that route drains them, they are not written to
   Postgres directly on ingestion.
 
-## Vercel Hosting, Cron, and Analytics
+## Vercel Hosting, Cron, Analytics, and Speed Insights
 
 ### Setup
 
@@ -224,6 +224,10 @@ curl -X POST http://localhost:3000/api/telemetry \
   already mounted in [`app/layout.tsx`](../../app/layout.tsx); Vercel
   Analytics requires no additional environment variable, only that
   Analytics is enabled for the project in the Vercel dashboard.
+- **Speed Insights**: `@vercel/speed-insights/next`'s `<SpeedInsights />`
+  component is mounted in [`app/layout.tsx`](../../app/layout.tsx); Vercel
+  Speed Insights requires no additional environment variable, only that
+  Speed Insights is enabled for the project in the Vercel dashboard (free tier).
 
 ### Verification
 
@@ -244,6 +248,10 @@ curl -X POST http://localhost:3000/api/telemetry \
 - **Analytics**: confirm data appears in the Vercel dashboard's Analytics
   tab after visiting pages on a real (non-local) deployment — Vercel
   Analytics does not report from `next dev`.
+- **Speed Insights**: confirm Real Experience Score (RES) and Core Web Vitals
+  (LCP, FID/INP, CLS) appear in the Vercel dashboard's Speed Insights tab after
+  visiting pages on a deployed preview or production URL. Speed Insights does
+  not emit telemetry during local `next dev` execution.
 
 ### Troubleshooting & recovery
 

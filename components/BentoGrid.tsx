@@ -16,7 +16,7 @@ export const BentoGrid = ({
     <div
       className={cn(
         "mx-auto grid max-w-7xl grid-cols-1 gap-4 md:grid-cols-3 items-start",
-        className,
+        className
       )}
     >
       {children}
@@ -89,7 +89,7 @@ export const Card = ({
     "--radius": "24px",
     "--easing": "ease",
     "--transition": "var(--duration) var(--easing)",
-    ...style
+    ...style,
   } as React.CSSProperties;
 
   const backgroundStyle = {
@@ -127,8 +127,12 @@ export const Card = ({
       ref={refElement}
       onPointerMove={(event) => {
         if (event.pointerType === "touch") return;
-        if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches) return;
-        
+        if (
+          typeof window !== "undefined" &&
+          window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches
+        )
+          return;
+
         if (!rectRef.current && refElement.current) {
           rectRef.current = refElement.current.getBoundingClientRect();
         }
@@ -202,7 +206,12 @@ export const Card = ({
 
         {/* Layer 3: High-Contrast Foreground Content (never degraded by blend modes or glare) */}
         <div className="relative z-10 [grid-area:1/1] h-full w-full flex flex-col min-w-0">
-          <div className={cn("h-full w-full p-5 flex flex-col justify-between flex-1 min-w-0", className)}>
+          <div
+            className={cn(
+              "h-full w-full p-5 flex flex-col justify-between flex-1 min-w-0",
+              className
+            )}
+          >
             {children}
           </div>
         </div>
@@ -225,12 +234,18 @@ export const CardTitle = ({
   style?: React.CSSProperties;
 }) => {
   const validTags = ["h1", "h2", "h3", "h4", "h5", "h6"];
-  const resolvedTag = as && typeof as === "string" && validTags.includes(as.toLowerCase()) ? as.toLowerCase() : "h3";
+  const resolvedTag =
+    as && typeof as === "string" && validTags.includes(as.toLowerCase())
+      ? as.toLowerCase()
+      : "h3";
   const Component = resolvedTag as React.ElementType;
 
   return (
     <Component
-      className={cn("my-2 font-sans font-bold text-neutral-100 group-hover:text-brand-cyan transition-colors duration-300 break-words text-balance min-w-0", className)}
+      className={cn(
+        "my-2 font-heading font-bold text-neutral-100 group-hover:text-brand-cyan transition-colors duration-300 break-words text-balance min-w-0",
+        className
+      )}
       style={style}
     >
       {children}
@@ -246,9 +261,13 @@ export const CardDescription = ({
   children: React.ReactNode;
 }) => {
   return (
-    <div className={cn("font-sans text-xs font-normal text-muted-strong leading-relaxed break-words min-w-0", className)}>
+    <div
+      className={cn(
+        "font-sans text-xs font-normal text-muted-strong leading-relaxed break-words min-w-0",
+        className
+      )}
+    >
       {children}
     </div>
   );
 };
-

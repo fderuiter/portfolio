@@ -15,7 +15,7 @@ Returns designManifest sans-serif fallback if run in SSR, unready stylesheet sta
 
 ### variableName?
 
-`string` = `"--font-inter"`
+`string` = `"--font-atkinson"`
 
 ## Returns
 

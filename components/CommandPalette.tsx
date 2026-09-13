@@ -35,6 +35,8 @@ import { useAudio } from "@/components/providers/AudioProvider";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { unlockAchievement, setVaultUnlocked } from "@/lib/meme-data";
 import { playMemeSound } from "@/lib/meme-audio";
+import { useFontPreference } from "@/hooks/useFontPreference";
+import { useAnnouncer } from "@/components/providers/A11yProvider";
 
 interface SearchCaseStudy {
   id: string;
@@ -74,6 +76,8 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
 
   const [activeIndex, setActiveIndex] = useState(0);
   const { playHover, playSubmit } = useAudio();
+  const { isDyslexic, toggleDyslexiaMode } = useFontPreference();
+  const { announce } = useAnnouncer();
 
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -880,6 +884,58 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
         url: "/admin",
         icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
       },
+      {
+        id: "action-toggle-dyslexia",
+        title: isDyslexic
+          ? "Disable Dyslexia Mode (Return to Atkinson/Lexend)"
+          : "Toggle Dyslexia Mode (OpenDyslexic)",
+        subtitle:
+          "Switch global typography and Pretext layout between OpenDyslexic and Atkinson Hyperlegible/Lexend.",
+        category: "navigation",
+        url: "action:toggle-dyslexia",
+        icon: <IconSparkles className="w-4 h-4 text-amber-400" />,
+        badge: isDyslexic ? "Active" : "A11y",
+        status: isDyslexic ? "OpenDyslexic Active" : "Cognitive A11y",
+        description:
+          "1-Click high-assurance dyslexia font toggle. Switches all headings, body text, and dynamic Pretext layout bounds.",
+        techStack: [
+          "OpenDyslexic",
+          "Atkinson Hyperlegible",
+          "ADR 0040",
+          "WCAG 2.1 AA",
+        ],
+        highlights: [
+          "Bottom-weighted letterforms for cognitive spatial anchoring",
+          "Expanded 1.75 line-height and +0.04em letter tracking",
+          "Dynamic zero-CLS Pretext text reflow",
+        ],
+      },
+      {
+        id: "case-study-designing-for-my-brother",
+        title: "Designing for My Brother: Accessible Typography",
+        subtitle:
+          "Dyslexia-first typography, cognitive accessibility, and zero-CLS Pretext text reflow.",
+        category: "navigation",
+        url: "/case-studies/designing-for-my-brother",
+        icon: <IconDirections className="w-4 h-4 text-amber-400" />,
+        badge: "Deep-Dive",
+        status: "Case Study",
+        description:
+          "Building reliable, accessible software for Frederick's brother who lives with dyslexia. High-assurance typography with Atkinson Hyperlegible, Lexend, and OpenDyslexic.",
+        techStack: [
+          "Next.js 16",
+          "Pretext",
+          "OpenDyslexic",
+          "Atkinson Hyperlegible",
+          "Lexend",
+          "WCAG 2.1 AA",
+        ],
+        highlights: [
+          "Clinical typography & low-vision character disambiguation",
+          "Bottom-weighted letterforms for mental orientation anchoring",
+          "Zero-CLS userland canvas text layout calibration",
+        ],
+      },
     ];
 
     const safeStudies = Array.isArray(studies) ? studies : [];
@@ -910,7 +966,7 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
     });
 
     return [...staticNavs, ...studyItems];
-  }, [studies]);
+  }, [studies, isDyslexic]);
 
   // 3. In-Memory Fuzzy filtering matching queries against titles, tags, and secret easter egg triggers
   const filteredItems = useMemo(() => {
@@ -1107,7 +1163,15 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
     // Handle special easter egg action commands
     if (item.url.startsWith("action:")) {
       const actionType = item.url.replace("action:", "");
-      if (actionType === "418") {
+      if (actionType === "toggle-dyslexia") {
+        toggleDyslexiaMode();
+        announce(
+          !isDyslexic
+            ? "Dyslexia mode activated. Using OpenDyslexic typeface with increased line spacing and letter tracking."
+            : "Dyslexia mode deactivated. Restored Atkinson Hyperlegible and Lexend typography.",
+          "assertive"
+        );
+      } else if (actionType === "418") {
         unlockAchievement("rfc-barista");
         playMemeSound("teapot-whistle");
       } else if (actionType === "duck") {

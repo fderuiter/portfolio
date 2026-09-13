@@ -26,20 +26,25 @@ describe("Pretext LRU Font and Style Cache Suite", () => {
     delete (globalThis as any).__mockStylesheetLoaded;
     vi.restoreAllMocks();
 
-    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation((contextId) => {
-      if (contextId === "2d") {
-        return {
-          measureText: vi.fn((text) => ({
-            width: (text || "").length * 8,
-          })),
-        } as any;
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(
+      (contextId) => {
+        if (contextId === "2d") {
+          return {
+            measureText: vi.fn((text) => ({
+              width: (text || "").length * 8,
+            })),
+          } as any;
+        }
+        return null;
       }
-      return null;
-    });
+    );
   });
 
   it("Requirement 1: Bounded style caches intercept repeated CSS property queries after the first DOM lookup", () => {
-    const getPropertyValueSpy = vi.spyOn(window.CSSStyleDeclaration.prototype, "getPropertyValue");
+    const getPropertyValueSpy = vi.spyOn(
+      window.CSSStyleDeclaration.prototype,
+      "getPropertyValue"
+    );
     getPropertyValueSpy.mockReturnValue("MockInterFamily");
 
     // First lookup
@@ -59,21 +64,25 @@ describe("Pretext LRU Font and Style Cache Suite", () => {
     for (let i = 0; i < 150; i++) {
       cssPropertyCache.set(`--var-${i}`, `font-${i}`);
     }
-    
+
     // The older entries should be evicted as the capacity is 100
     expect(cssPropertyCache.get("--var-0")).toBeUndefined();
     expect(cssPropertyCache.get("--var-149")).toBe("font-149");
   });
 
   it("Requirement 2: Layout hooks store previously resolved font settings in local references to skip DOM/cache queries when resizing", () => {
-    const resolveSpy = vi.spyOn(window.CSSStyleDeclaration.prototype, "getPropertyValue");
+    const resolveSpy = vi.spyOn(
+      window.CSSStyleDeclaration.prototype,
+      "getPropertyValue"
+    );
     resolveSpy.mockReturnValue("MockInterFamily");
 
     // Render hook
     const { rerender } = renderHook(
-      ({ text, fontSize }) => usePretextLayout({ text, fontSize, lineHeight: 20 }),
+      ({ text, fontSize }) =>
+        usePretextLayout({ text, fontSize, lineHeight: 20 }),
       {
-        initialProps: { text: "Hello", fontSize: 16 }
+        initialProps: { text: "Hello", fontSize: 16 },
       }
     );
 
@@ -89,7 +98,10 @@ describe("Pretext LRU Font and Style Cache Suite", () => {
   });
 
   it("Requirement 3: Translation mode or active theme change clears style and font cache", () => {
-    const getPropertyValueSpy = vi.spyOn(window.CSSStyleDeclaration.prototype, "getPropertyValue");
+    const getPropertyValueSpy = vi.spyOn(
+      window.CSSStyleDeclaration.prototype,
+      "getPropertyValue"
+    );
     getPropertyValueSpy.mockReturnValue("MockInterFamily");
 
     // Populated cache
@@ -98,9 +110,15 @@ describe("Pretext LRU Font and Style Cache Suite", () => {
 
     // Render hook with translationMode/activeTheme change triggers layout effect cache invalidation
     const { rerender } = renderHook(
-      ({ translationMode, activeTheme }) => usePretextLayout({ text: "Hello", lineHeight: 20, translationMode, activeTheme }),
+      ({ translationMode, activeTheme }) =>
+        usePretextLayout({
+          text: "Hello",
+          lineHeight: 20,
+          translationMode,
+          activeTheme,
+        }),
       {
-        initialProps: { translationMode: "en", activeTheme: "dark" }
+        initialProps: { translationMode: "en", activeTheme: "dark" },
       }
     );
 
@@ -121,7 +139,7 @@ describe("Pretext LRU Font and Style Cache Suite", () => {
     try {
       // In node env/SSR, window is undefined
       (globalThis as any).window = undefined;
-      
+
       const ssrFont = resolveSingleThemeFont(16, "--font-inter");
       expect(ssrFont).toContain("system-ui"); // default manifest fallback font
     } finally {
@@ -130,7 +148,10 @@ describe("Pretext LRU Font and Style Cache Suite", () => {
   });
 
   it("Requirement 4: Fall back to default typography settings on client errors", () => {
-    const getPropertyValueSpy = vi.spyOn(window.CSSStyleDeclaration.prototype, "getPropertyValue");
+    const getPropertyValueSpy = vi.spyOn(
+      window.CSSStyleDeclaration.prototype,
+      "getPropertyValue"
+    );
     getPropertyValueSpy.mockImplementation(() => {
       throw new Error("Simulated client CSS error");
     });
@@ -143,7 +164,7 @@ describe("Pretext LRU Font and Style Cache Suite", () => {
     // 1. Fully cached in both: should not query style
     cssPropertyCache.set("--font-inter", "MyInterFont");
     fontConfigCache.set("singleThemeFont|18|--font-inter", "18px MyInterFont");
-    
+
     const getComputedStyleSpy = vi.spyOn(window, "getComputedStyle");
     const fontValCached = resolveSingleThemeFont(18, "--font-inter");
     expect(fontValCached).toBe("18px MyInterFont");
@@ -153,7 +174,7 @@ describe("Pretext LRU Font and Style Cache Suite", () => {
     // Should NOT query getComputedStyle
     fontConfigCache.clear();
     getComputedStyleSpy.mockClear();
-    
+
     const fontValInnerHit = resolveSingleThemeFont(18, "--font-inter");
     expect(fontValInnerHit).toBe("18px MyInterFont");
     expect(getComputedStyleSpy).not.toHaveBeenCalled();
@@ -164,7 +185,10 @@ describe("Pretext LRU Font and Style Cache Suite", () => {
     fontConfigCache.clear();
     getComputedStyleSpy.mockClear();
 
-    const getPropertyValueSpy = vi.spyOn(window.CSSStyleDeclaration.prototype, "getPropertyValue");
+    const getPropertyValueSpy = vi.spyOn(
+      window.CSSStyleDeclaration.prototype,
+      "getPropertyValue"
+    );
     getPropertyValueSpy.mockReturnValue("NewInterFont");
 
     const fontValBothMiss = resolveSingleThemeFont(18, "--font-inter");
@@ -177,7 +201,7 @@ describe("Pretext LRU Font and Style Cache Suite", () => {
     // 1. Fully cached in both: should not query style
     cssPropertyCache.set("--font-inter", "MyInterFont");
     cssPropertyCache.set("--font-mono", "MyMonoFont");
-    
+
     const mockTheme = {
       baseFont: "400 18px MyInterFont",
       boldFont: "700 18px MyInterFont",
@@ -207,7 +231,10 @@ describe("Pretext LRU Font and Style Cache Suite", () => {
     fontConfigCache.clear();
     getComputedStyleSpy.mockClear();
 
-    const getPropertyValueSpy = vi.spyOn(window.CSSStyleDeclaration.prototype, "getPropertyValue");
+    const getPropertyValueSpy = vi.spyOn(
+      window.CSSStyleDeclaration.prototype,
+      "getPropertyValue"
+    );
     getPropertyValueSpy.mockReturnValue("NewMonoFont");
 
     const resultPartialMiss = resolveThemeFonts(18, "--font-inter");
@@ -218,7 +245,10 @@ describe("Pretext LRU Font and Style Cache Suite", () => {
   describe("Non-Destructive Stylesheet Load-Guard requirements", () => {
     it("Requirement 1 & 2: Checks presence of root variables to verify stylesheet loaded, and returns default fallbacks during unready state without writing to caches", () => {
       // Mock unready stylesheet state (all root style queries return empty string)
-      const getPropertyValueSpy = vi.spyOn(window.CSSStyleDeclaration.prototype, "getPropertyValue");
+      const getPropertyValueSpy = vi.spyOn(
+        window.CSSStyleDeclaration.prototype,
+        "getPropertyValue"
+      );
       getPropertyValueSpy.mockReturnValue("");
 
       // Caches are empty
@@ -229,7 +259,9 @@ describe("Pretext LRU Font and Style Cache Suite", () => {
       const fontSingle = resolveSingleThemeFont(16, "--font-inter");
       expect(fontSingle).toContain("system-ui"); // fallback font stack
       expect(cssPropertyCache.get("--font-inter")).toBeUndefined();
-      expect(fontConfigCache.get("singleThemeFont|16|--font-inter")).toBeUndefined();
+      expect(
+        fontConfigCache.get("singleThemeFont|16|--font-inter")
+      ).toBeUndefined();
 
       // resolveThemeFonts
       const fontsTheme = resolveThemeFonts(16, "--font-inter");
@@ -245,7 +277,10 @@ describe("Pretext LRU Font and Style Cache Suite", () => {
 
     it("Requirement 3: Skips caching dynamic measurements for temporary DOM elements until stylesheet loads", () => {
       // Mock unready stylesheet
-      const getPropertyValueSpy = vi.spyOn(window.CSSStyleDeclaration.prototype, "getPropertyValue");
+      const getPropertyValueSpy = vi.spyOn(
+        window.CSSStyleDeclaration.prototype,
+        "getPropertyValue"
+      );
       getPropertyValueSpy.mockReturnValue("");
 
       // Caches are empty
@@ -270,7 +305,10 @@ describe("Pretext LRU Font and Style Cache Suite", () => {
 
     it("Requirement 4: Cache is fully writable once stylesheet loaded check succeeds", () => {
       // Mock ready stylesheet
-      const getPropertyValueSpy = vi.spyOn(window.CSSStyleDeclaration.prototype, "getPropertyValue");
+      const getPropertyValueSpy = vi.spyOn(
+        window.CSSStyleDeclaration.prototype,
+        "getPropertyValue"
+      );
       getPropertyValueSpy.mockImplementation((prop) => {
         if (prop === "--layout-gap") return "16px";
         if (prop === "--brand-cyan") return "#06b6d4";
@@ -295,6 +333,67 @@ describe("Pretext LRU Font and Style Cache Suite", () => {
       // Caches must contain the resolved/measured keys
       expect(textPrepareCache.size).toBeGreaterThan(0);
       expect(textLayoutCache.size).toBeGreaterThan(0);
+    });
+  });
+
+  describe("Cognitive Accessibility Typography & Pretext Baseline Calibration (ADR 0040)", () => {
+    beforeEach(() => {
+      (globalThis as any).__mockStylesheetLoaded = true;
+    });
+
+    it("defaults to --font-atkinson when no font variable is passed to resolveSingleThemeFont", () => {
+      const getPropertyValueSpy = vi.spyOn(
+        window.CSSStyleDeclaration.prototype,
+        "getPropertyValue"
+      );
+      getPropertyValueSpy.mockImplementation((prop) => {
+        if (prop === "--font-atkinson")
+          return "Atkinson Hyperlegible, sans-serif";
+        return "";
+      });
+
+      const resolved = resolveSingleThemeFont(16);
+      expect(resolved).toContain("Atkinson Hyperlegible");
+      expect(cssPropertyCache.get("--font-atkinson")).toBe(
+        "Atkinson Hyperlegible, sans-serif"
+      );
+    });
+
+    it("resolves and caches --font-heading and --font-lexend properly", () => {
+      const getPropertyValueSpy = vi.spyOn(
+        window.CSSStyleDeclaration.prototype,
+        "getPropertyValue"
+      );
+      getPropertyValueSpy.mockImplementation((prop) => {
+        if (prop === "--font-heading" || prop === "--font-lexend")
+          return "Lexend, sans-serif";
+        return "";
+      });
+
+      const headingFont = resolveSingleThemeFont(32, "--font-heading");
+      expect(headingFont).toContain("Lexend");
+      expect(cssPropertyCache.get("--font-heading")).toBe("Lexend, sans-serif");
+
+      const lexendFont = resolveSingleThemeFont(32, "--font-lexend");
+      expect(lexendFont).toContain("Lexend");
+      expect(cssPropertyCache.get("--font-lexend")).toBe("Lexend, sans-serif");
+    });
+
+    it("defaults resolveThemeFonts to --font-atkinson baseFont with separate mono codeFont", () => {
+      const getPropertyValueSpy = vi.spyOn(
+        window.CSSStyleDeclaration.prototype,
+        "getPropertyValue"
+      );
+      getPropertyValueSpy.mockImplementation((prop) => {
+        if (prop === "--font-atkinson") return "Atkinson Hyperlegible";
+        if (prop === "--font-mono") return "Geist Mono";
+        return "";
+      });
+
+      const themeFonts = resolveThemeFonts(16);
+      expect(themeFonts.baseFont).toContain("Atkinson Hyperlegible");
+      expect(themeFonts.boldFont).toContain("Atkinson Hyperlegible");
+      expect(themeFonts.codeFont).toContain("Geist Mono");
     });
   });
 });

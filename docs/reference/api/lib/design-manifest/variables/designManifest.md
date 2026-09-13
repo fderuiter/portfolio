@@ -333,6 +333,12 @@ Original CSS Variable: --layout-masonry-padding-with-stats
 
 > `readonly` **fonts**: `object`
 
+#### typography.fonts.heading
+
+> `readonly` **heading**: `"var(--font-lexend), system-ui, -apple-system, sans-serif"` = `"var(--font-lexend), system-ui, -apple-system, sans-serif"`
+
+Font stack for heading
+
 #### typography.fonts.mono
 
 > `readonly` **mono**: `"var(--font-geist-mono), ui-monospace, monospace"` = `"var(--font-geist-mono), ui-monospace, monospace"`
@@ -341,7 +347,7 @@ Font stack for monospace
 
 #### typography.fonts.sans
 
-> `readonly` **sans**: `"var(--font-inter), system-ui, -apple-system, sans-serif"` = `"var(--font-inter), system-ui, -apple-system, sans-serif"`
+> `readonly` **sans**: `"var(--font-atkinson), system-ui, -apple-system, sans-serif"` = `"var(--font-atkinson), system-ui, -apple-system, sans-serif"`
 
 Font stack for sans-serif
 

@@ -41,7 +41,9 @@ export const designManifest = {
   typography: {
     fonts: {
       /** Font stack for sans-serif */
-      sans: "var(--font-inter), system-ui, -apple-system, sans-serif",
+      sans: "var(--font-atkinson), system-ui, -apple-system, sans-serif",
+      /** Font stack for heading */
+      heading: "var(--font-lexend), system-ui, -apple-system, sans-serif",
       /** Font stack for monospace */
       mono: "var(--font-geist-mono), ui-monospace, monospace",
     },

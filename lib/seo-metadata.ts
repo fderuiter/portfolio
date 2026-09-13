@@ -471,6 +471,27 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     locale: "en-US",
     isAccessibleForFree: true,
   },
+  designingForMyBrother: {
+    title: "Designing for My Brother: Cognitive Typography",
+    description:
+      "A personal case study on cognitive typography: replacing generic fonts with Lexend, Atkinson Hyperlegible, and OpenDyslexic with zero-CLS Pretext reflow.",
+    path: "/case-studies/designing-for-my-brother",
+    keywords: [
+      "Dyslexia Typography",
+      "OpenDyslexic",
+      "Atkinson Hyperlegible",
+      "Lexend",
+      "Cognitive Accessibility",
+      "Pretext Text Reflow",
+      "Zero CLS",
+      "WCAG 2.1 AA",
+      "ADR 0040",
+    ],
+    ogType: "article",
+    inLanguage: "en-US",
+    locale: "en-US",
+    isAccessibleForFree: true,
+  },
 };
 
 /**

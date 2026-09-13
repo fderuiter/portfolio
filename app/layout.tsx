@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Inter, Geist_Mono } from "next/font/google";
+import { Lexend, Atkinson_Hyperlegible, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { SkipToContent } from "@/components/SkipToContent";
 import { Navbar } from "@/components/Navbar";
@@ -16,13 +17,22 @@ import { TerminologyProvider } from "@/components/providers/TerminologyProvider"
 import { PersonaProvider } from "@/components/providers/PersonaProvider";
 import { RetroChaosOverlay } from "@/components/RetroChaosOverlay";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { SearchWrapper } from "@/components/SearchWrapper";
 import { resolveBaseUrl } from "@/lib/domain";
 
 import { SerwistRegister } from "@/components/providers/SerwistRegister";
 
-const inter = Inter({
-  variable: "--font-inter",
+const lexend = Lexend({
+  variable: "--font-lexend",
+  subsets: ["latin"],
+  display: "swap",
+  preload: true,
+});
+
+const atkinson = Atkinson_Hyperlegible({
+  variable: "--font-atkinson",
+  weight: ["400", "700"],
   subsets: ["latin"],
   display: "swap",
   preload: true,
@@ -33,6 +43,23 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
   display: "swap",
   preload: true,
+});
+
+const openDyslexic = localFont({
+  src: [
+    {
+      path: "../public/fonts/opendyslexic-regular.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/opendyslexic-bold.woff2",
+      weight: "700",
+      style: "normal",
+    },
+  ],
+  variable: "--font-opendyslexic",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -97,7 +124,7 @@ export default function RootLayout({
     <html
       lang="en"
       data-theme="dark"
-      className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${atkinson.variable} ${lexend.variable} ${geistMono.variable} ${openDyslexic.variable} h-full antialiased`}
     >
       <head>
         <script
@@ -112,6 +139,10 @@ export default function RootLayout({
                 (function() {
                   try {
                     document.documentElement.setAttribute('data-theme', 'dark');
+                    var storedFont = localStorage.getItem('portfolio-font-mode');
+                    if (storedFont === 'opendyslexic' || (storedFont && JSON.parse(storedFont) === 'opendyslexic')) {
+                      document.documentElement.setAttribute('data-font-mode', 'opendyslexic');
+                    }
                   } catch(e) {}
                 })();
               `,
@@ -136,6 +167,7 @@ export default function RootLayout({
                   <Footer />
                   <RetroChaosOverlay />
                   <Analytics />
+                  <SpeedInsights />
                   <SearchWrapper />
                   <SerwistRegister />
                 </AudioProvider>

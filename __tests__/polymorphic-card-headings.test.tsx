@@ -52,7 +52,9 @@ describe("Polymorphic CardTitle Heading Configuration", () => {
     it("renders h1-h6 when valid heading tag is passed as the 'as' prop", () => {
       const headingLevels: HeadingTag[] = ["h1", "h2", "h3", "h4", "h5", "h6"];
       headingLevels.forEach((level) => {
-        const { unmount } = render(<CardTitle as={level}>Level {level}</CardTitle>);
+        const { unmount } = render(
+          <CardTitle as={level}>Level {level}</CardTitle>
+        );
         const levelNum = parseInt(level[1]);
         const heading = screen.getByRole("heading", { level: levelNum });
         expect(heading).toBeDefined();
@@ -78,7 +80,7 @@ describe("Polymorphic CardTitle Heading Configuration", () => {
     it("preserves Tailwind transition classes and hover styling", () => {
       render(<CardTitle as="h2">Style Check</CardTitle>);
       const heading = screen.getByRole("heading", { level: 2 });
-      expect(heading.className).toContain("font-sans");
+      expect(heading.className).toContain("font-heading");
       expect(heading.className).toContain("font-bold");
       expect(heading.className).toContain("text-neutral-100");
       expect(heading.className).toContain("group-hover:text-brand-cyan");
@@ -94,14 +96,22 @@ describe("Polymorphic CardTitle Heading Configuration", () => {
 
   describe("PretextCard Integration", () => {
     it("renders nested CardTitle as h3 by default", () => {
-      render(<PretextCard title="Pretext Title" description="Some Description" />);
+      render(
+        <PretextCard title="Pretext Title" description="Some Description" />
+      );
       const heading = screen.getByRole("heading", { level: 3 });
       expect(heading).toBeDefined();
       expect(heading.textContent).toBe("Pretext Title");
     });
 
     it("renders alternative heading tag h4 when headingTag prop is specified", () => {
-      render(<PretextCard title="Pretext Title" description="Some Description" headingTag="h4" />);
+      render(
+        <PretextCard
+          title="Pretext Title"
+          description="Some Description"
+          headingTag="h4"
+        />
+      );
       const heading = screen.getByRole("heading", { level: 4 });
       expect(heading).toBeDefined();
       expect(heading.tagName.toLowerCase()).toBe("h4");
