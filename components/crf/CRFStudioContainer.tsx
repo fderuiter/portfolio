@@ -258,6 +258,12 @@ export const CRFStudioContainer: React.FC = () => {
   >("canvas");
   const [isMobileWidgetDrawerOpen, setIsMobileWidgetDrawerOpen] =
     useState(false);
+  // Section an in-flight "Add Field" palette open should insert into; null
+  // means "no explicit target", so handleAddField falls back to the
+  // selected field's section or the form's first section.
+  const [addFieldTargetSectionId, setAddFieldTargetSectionId] = useState<
+    string | null
+  >(null);
   // Escape dismissal is already handled by the global keyboard-shortcuts
   // effect below; this trap only owns initial focus, Tab containment, and
   // returning focus to the trigger button on close.
@@ -806,15 +812,25 @@ export const CRFStudioContainer: React.FC = () => {
   // Field CRUD
   const handleAddField = (field: CRFField) => {
     if (!activeForm) return;
-    const targetSection = activeForm.sections[0];
+    const selectedFieldSectionId = activeForm.sections.find((s) =>
+      s.fields.some((f) => f.id === selectedFieldId)
+    )?.id;
+    const targetSectionId =
+      addFieldTargetSectionId ??
+      selectedFieldSectionId ??
+      activeForm.sections[0]?.id;
+    const targetSection = activeForm.sections.find(
+      (s) => s.id === targetSectionId
+    );
     if (!targetSection) return;
 
-    const updatedSections = activeForm.sections.map((s, idx) =>
-      idx === 0 ? { ...s, fields: [...s.fields, field] } : s
+    const updatedSections = activeForm.sections.map((s) =>
+      s.id === targetSection.id ? { ...s, fields: [...s.fields, field] } : s
     );
 
     handleUpdateFormMeta({ sections: updatedSections });
     setSelectedFieldId(field.id);
+    setAddFieldTargetSectionId(null);
     setIsMobileWidgetDrawerOpen(false);
   };
 
@@ -1058,7 +1074,10 @@ export const CRFStudioContainer: React.FC = () => {
                     onDuplicateField={handleDuplicateField}
                     onDeleteField={handleDeleteField}
                     onUpdateField={handleUpdateField}
-                    onOpenPalette={() => setIsMobileWidgetDrawerOpen(true)}
+                    onOpenPalette={(sectionId) => {
+                      setAddFieldTargetSectionId(sectionId ?? null);
+                      setIsMobileWidgetDrawerOpen(true);
+                    }}
                   />
                 </div>
               )}
@@ -1098,7 +1117,8 @@ export const CRFStudioContainer: React.FC = () => {
                 onDuplicateField={handleDuplicateField}
                 onDeleteField={handleDeleteField}
                 onUpdateField={handleUpdateField}
-                onOpenPalette={() => {
+                onOpenPalette={(sectionId) => {
+                  setAddFieldTargetSectionId(sectionId ?? null);
                   setIsLeftSidebarOpen(true);
                   setLeftTab("palette");
                 }}

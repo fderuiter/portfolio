@@ -414,4 +414,82 @@ describe("CRFStudioContainer Component", () => {
       "not the authored study — recipients need their own copy of the study data"
     );
   });
+
+  it("inserts a new field into the section whose Add Field control was used, not always the form's first section (#669)", async () => {
+    await act(async () => {
+      root = createRoot(container);
+      root.render(<CRFStudioContainer />);
+    });
+
+    const designerBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Form Designer")
+    );
+    if (designerBtn) {
+      await act(async () => {
+        designerBtn.click();
+      });
+    }
+
+    const sectionIdsBefore = new Set(
+      Array.from(container.querySelectorAll("[data-section-id]")).map((el) =>
+        el.getAttribute("data-section-id")
+      )
+    );
+
+    const addSectionBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Add New Section to Form")
+    );
+    expect(addSectionBtn).toBeTruthy();
+
+    await act(async () => {
+      addSectionBtn!.click();
+    });
+
+    const newSectionId = Array.from(
+      container.querySelectorAll("[data-section-id]")
+    )
+      .map((el) => el.getAttribute("data-section-id"))
+      .find((id) => id && !sectionIdsBefore.has(id));
+    expect(newSectionId).toBeTruthy();
+
+    const newSectionEl = container.querySelector(
+      `[data-section-id="${newSectionId}"]`
+    ) as HTMLElement;
+    expect(newSectionEl).toBeTruthy();
+
+    const addFieldBtn = Array.from(
+      newSectionEl.querySelectorAll("button")
+    ).find((b) => b.getAttribute("aria-label")?.startsWith("Add field to")) as
+      HTMLButtonElement | undefined;
+    expect(addFieldBtn).toBeTruthy();
+
+    await act(async () => {
+      addFieldBtn!.click();
+    });
+
+    const widgetBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Single-Line Text")
+    ) as HTMLButtonElement | undefined;
+    expect(widgetBtn).toBeTruthy();
+
+    await act(async () => {
+      widgetBtn!.click();
+    });
+
+    // The picked widget's default field label must land inside the section
+    // whose Add Field control was actually used...
+    const newSectionAfter = container.querySelector(
+      `[data-section-id="${newSectionId}"]`
+    ) as HTMLElement;
+    expect(newSectionAfter.textContent).toContain("Text Question");
+
+    // ...and every other section (in particular, the form's original first
+    // section) must be untouched by it.
+    const otherSections = Array.from(
+      container.querySelectorAll("[data-section-id]")
+    ).filter((el) => el.getAttribute("data-section-id") !== newSectionId);
+    for (const el of otherSections) {
+      expect(el.textContent).not.toContain("Text Question");
+    }
+  });
 });

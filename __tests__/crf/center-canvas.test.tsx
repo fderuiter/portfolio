@@ -1,7 +1,9 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -150,7 +152,9 @@ describe("FormCanvas & FieldRenderer Component Suite", () => {
     });
 
     // Find column increment button
-    const plusBtn = container.querySelector('button[title="Expand column span"]');
+    const plusBtn = container.querySelector(
+      'button[title="Expand column span"]'
+    );
     expect(plusBtn).not.toBeNull();
 
     await act(async () => {
@@ -160,7 +164,9 @@ describe("FormCanvas & FieldRenderer Component Suite", () => {
     expect(onUpdateField).toHaveBeenCalledWith("f_height", { columnSpan: 7 });
 
     // Find column decrement button
-    const minusBtn = container.querySelector('button[title="Shrink column span"]');
+    const minusBtn = container.querySelector(
+      'button[title="Shrink column span"]'
+    );
     expect(minusBtn).not.toBeNull();
 
     await act(async () => {
@@ -194,7 +200,9 @@ describe("FormCanvas & FieldRenderer Component Suite", () => {
       );
     });
 
-    const duplicateBtn = container.querySelector('button[title="Duplicate Field"]');
+    const duplicateBtn = container.querySelector(
+      'button[title="Duplicate Field"]'
+    );
     expect(duplicateBtn).not.toBeNull();
 
     await act(async () => {
@@ -209,5 +217,96 @@ describe("FormCanvas & FieldRenderer Component Suite", () => {
       deleteBtn?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     expect(onDeleteField).toHaveBeenCalledWith("sec_1", "f_height");
+  });
+
+  // Regression coverage for #669: the "Add Field" triggers used to open the
+  // palette with no section context, so CRFStudioContainer.handleAddField
+  // always inserted the picked widget into the form's first section
+  // regardless of which section's control the author actually used.
+  it("carries the section id when opening the palette from a populated section's Add Field control (#669)", async () => {
+    const onOpenPalette = vi.fn();
+
+    await act(async () => {
+      root.render(
+        <FormCanvas
+          form={mockForm}
+          selectedFieldId={null}
+          viewport="desktop"
+          codelists={mockCodelists}
+          onChangeViewport={vi.fn()}
+          onSelectField={vi.fn()}
+          onUpdateFormMeta={vi.fn()}
+          onAddSection={vi.fn()}
+          onDeleteSection={vi.fn()}
+          onUpdateSectionTitle={vi.fn()}
+          onDuplicateField={vi.fn()}
+          onDeleteField={vi.fn()}
+          onOpenPalette={onOpenPalette}
+        />
+      );
+    });
+
+    const addFieldBtn = container.querySelector(
+      'button[aria-label="Add field to Subject Measurements"]'
+    ) as HTMLButtonElement;
+    expect(addFieldBtn).not.toBeNull();
+    expect(addFieldBtn.tagName).toBe("BUTTON");
+
+    await act(async () => {
+      addFieldBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    expect(onOpenPalette).toHaveBeenCalledWith("sec_1");
+  });
+
+  it("carries the section id when opening the palette from an empty section's placeholder, as a keyboard-operable button (#669)", async () => {
+    const onOpenPalette = vi.fn();
+    const formWithEmptySection: CRFForm = {
+      ...mockForm,
+      sections: [
+        ...mockForm.sections,
+        { id: "sec_2", title: "Follow-up Notes", fields: [] },
+      ],
+    };
+
+    await act(async () => {
+      root.render(
+        <FormCanvas
+          form={formWithEmptySection}
+          selectedFieldId={null}
+          viewport="desktop"
+          codelists={mockCodelists}
+          onChangeViewport={vi.fn()}
+          onSelectField={vi.fn()}
+          onUpdateFormMeta={vi.fn()}
+          onAddSection={vi.fn()}
+          onDeleteSection={vi.fn()}
+          onUpdateSectionTitle={vi.fn()}
+          onDuplicateField={vi.fn()}
+          onDeleteField={vi.fn()}
+          onOpenPalette={onOpenPalette}
+        />
+      );
+    });
+
+    const emptySectionEl = container.querySelector(
+      '[data-section-id="sec_2"]'
+    ) as HTMLElement;
+    expect(emptySectionEl).not.toBeNull();
+    expect(emptySectionEl.textContent).toContain(
+      "No fields in this section yet."
+    );
+
+    const addFieldBtn = emptySectionEl.querySelector(
+      'button[aria-label="Add field to Follow-up Notes"]'
+    ) as HTMLButtonElement;
+    expect(addFieldBtn).not.toBeNull();
+    expect(addFieldBtn.tagName).toBe("BUTTON");
+
+    await act(async () => {
+      addFieldBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    expect(onOpenPalette).toHaveBeenCalledWith("sec_2");
   });
 });
