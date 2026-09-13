@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { validateRouteInitialization, validateSyncRequest } from "@/lib/security";
+import {
+  validateRouteInitialization,
+  validateSyncRequest,
+} from "@/lib/security";
 import { NextRequest } from "next/server";
 
 describe("Telemetry Sync Route Security Utilities", () => {
@@ -36,6 +39,17 @@ describe("Telemetry Sync Route Security Utilities", () => {
       );
     });
 
+    it("stays fail-closed on a CI runner, which exports CI=true for every job", () => {
+      vi.stubEnv("NODE_ENV", "production");
+      vi.stubEnv("CI", "true");
+      vi.stubEnv("NEXT_PHASE", "");
+      vi.stubEnv("PLAYWRIGHT_TEST", "");
+      vi.stubEnv("CRON_SECRET", "");
+      expect(() => validateRouteInitialization()).toThrowError(
+        "Route initialization failed: Required validation secret is missing."
+      );
+    });
+
     it("should allow initialization in production when CRON_SECRET is present", () => {
       vi.stubEnv("NODE_ENV", "production");
       vi.stubEnv("CRON_SECRET", "super_secret_key");
@@ -47,10 +61,10 @@ describe("Telemetry Sync Route Security Utilities", () => {
     it("should reject requests in production if CRON_SECRET is missing", () => {
       vi.stubEnv("NODE_ENV", "production");
       vi.stubEnv("CRON_SECRET", "");
-      
+
       const req = new NextRequest("http://localhost/api/telemetry/sync");
       const result = validateSyncRequest(req);
-      
+
       expect(result.isValid).toBe(false);
       expect(result.errorResponse).toBeDefined();
       expect(result.errorResponse?.status).toBe(401);
@@ -73,8 +87,8 @@ describe("Telemetry Sync Route Security Utilities", () => {
 
       const req = new NextRequest("http://localhost/api/telemetry/sync", {
         headers: {
-          authorization: "Bearer wrong_secret"
-        }
+          authorization: "Bearer wrong_secret",
+        },
       });
       const result = validateSyncRequest(req);
 
@@ -88,8 +102,8 @@ describe("Telemetry Sync Route Security Utilities", () => {
 
       const req = new NextRequest("http://localhost/api/telemetry/sync", {
         headers: {
-          authorization: "Bearer prod_secret"
-        }
+          authorization: "Bearer prod_secret",
+        },
       });
       const result = validateSyncRequest(req);
 
@@ -114,8 +128,8 @@ describe("Telemetry Sync Route Security Utilities", () => {
 
       const req = new NextRequest("http://localhost/api/telemetry/sync", {
         headers: {
-          authorization: "Bearer wrong_dev_secret"
-        }
+          authorization: "Bearer wrong_dev_secret",
+        },
       });
       const result = validateSyncRequest(req);
 
@@ -129,8 +143,8 @@ describe("Telemetry Sync Route Security Utilities", () => {
 
       const req = new NextRequest("http://localhost/api/telemetry/sync", {
         headers: {
-          authorization: "Bearer dev_secret"
-        }
+          authorization: "Bearer dev_secret",
+        },
       });
       const result = validateSyncRequest(req);
 

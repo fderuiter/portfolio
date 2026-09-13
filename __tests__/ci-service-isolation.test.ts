@@ -47,6 +47,35 @@ describe("CI Service Container Isolation", () => {
     }
   );
 
+  /**
+   * Steps split into two kinds. The Prisma CLI (`migrate deploy`, `migrate
+   * diff`) talks to Postgres through the native migration engine and needs the
+   * service container. Everything else reaches the database through lib/db.ts,
+   * which is @neondatabase/serverless over a WebSocket and cannot speak to a
+   * plain Postgres server at all. Handing the service DSN to one of those steps
+   * is what made 25 unit tests bypass their `@/lib/db` mock and assert against
+   * a database they could never reach.
+   */
+  const steps = ci
+    .split(/^ {6}- name: /m)
+    .slice(1)
+    .map((block) => ({
+      name: block.split("\n")[0].trim(),
+      body: block,
+    }));
+
+  const MIGRATION_ENGINE_STEPS = /prisma migrate|release:gate|migrations:drift/;
+
+  const runtimeStepsWithServiceDsn = steps.filter((step) => {
+    const dsn = step.body.match(/DATABASE_URL:\s*"?([^"\n]+)"?/)?.[1];
+    if (!dsn || MIGRATION_ENGINE_STEPS.test(step.body)) return false;
+    return servicePorts.includes(Number(new URL(dsn).port));
+  });
+
+  it("keeps the service container DSN away from steps that run application code", () => {
+    expect(runtimeStepsWithServiceDsn.map((step) => step.name)).toEqual([]);
+  });
+
   it("bounds every job so a hang fails fast instead of running to the 6h default", () => {
     const jobsBlock = ci.slice(ci.indexOf("\njobs:"));
     const runsOn = (jobsBlock.match(/^\s{4}runs-on:/gm) ?? []).length;
