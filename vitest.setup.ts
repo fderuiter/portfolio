@@ -253,3 +253,12 @@ vi.mock("@clerk/themes", () => {
     dark: {},
   };
 });
+
+vi.mock("next/font/local", () => {
+  return {
+    default: () => ({
+      variable: "--font-opendyslexic",
+      className: "font-opendyslexic",
+    }),
+  };
+});

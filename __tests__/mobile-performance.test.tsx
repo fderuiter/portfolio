@@ -5,10 +5,14 @@ import { createRoot, type Root } from "react-dom/client";
 import { CommandPalette } from "@/components/CommandPalette";
 import { runPageBenchmarks, CANONICAL_ROUTES } from "@/lib/dx/page-bench";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 vi.mock("next/font/google", () => ({
   Inter: () => ({ variable: "--font-inter" }),
+  Lexend: () => ({ variable: "--font-lexend" }),
+  Atkinson_Hyperlegible: () => ({ variable: "--font-atkinson" }),
   Geist_Mono: () => ({ variable: "--font-geist-mono" }),
 }));
 
@@ -26,7 +30,10 @@ vi.mock("react-dom", async () => {
 });
 
 vi.mock("@/components/providers/AudioProvider", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/components/providers/AudioProvider")>();
+  const actual =
+    await importOriginal<
+      typeof import("@/components/providers/AudioProvider")
+    >();
   return {
     ...actual,
     useAudio: () => ({
@@ -37,7 +44,9 @@ vi.mock("@/components/providers/AudioProvider", async (importOriginal) => {
       volume: 0.3,
       muted: false,
     }),
-    AudioProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    AudioProvider: ({ children }: { children: React.ReactNode }) => (
+      <>{children}</>
+    ),
   };
 });
 
@@ -61,7 +70,9 @@ vi.mock("@/components/providers/SearchProvider", () => ({
     setIsOpen: mockSetIsOpen,
     closeSearch: mockCloseSearch,
   }),
-  SearchProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  SearchProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
 }));
 
 describe("Mobile Performance & Asset Optimization Suite", () => {
@@ -94,7 +105,10 @@ describe("Mobile Performance & Asset Optimization Suite", () => {
         const headers = await nextConfig.headers();
         expect(headers.length).toBeGreaterThanOrEqual(3);
 
-        const staticHeader = headers.find((h: { source: string }) => h.source.includes("glb") || h.source.includes("svg"));
+        const staticHeader = headers.find(
+          (h: { source: string }) =>
+            h.source.includes("glb") || h.source.includes("svg")
+        );
         expect(staticHeader).toBeDefined();
         expect(staticHeader?.source).toContain("woff");
         expect(staticHeader?.source).toContain("woff2");
@@ -103,11 +117,15 @@ describe("Mobile Performance & Asset Optimization Suite", () => {
         expect(staticHeader?.source).toContain("otf");
         expect(staticHeader?.headers[0]?.value).toContain("immutable");
 
-        const modelsHeader = headers.find((h: { source: string }) => h.source === "/models/:path*");
+        const modelsHeader = headers.find(
+          (h: { source: string }) => h.source === "/models/:path*"
+        );
         expect(modelsHeader).toBeDefined();
         expect(modelsHeader?.headers[0]?.value).toContain("max-age=31536000");
 
-        const duckHeader = headers.find((h: { source: string }) => h.source === "/duck/:path*");
+        const duckHeader = headers.find(
+          (h: { source: string }) => h.source === "/duck/:path*"
+        );
         expect(duckHeader).toBeDefined();
         expect(duckHeader?.headers[0]?.value).toContain("immutable");
       }
@@ -124,11 +142,22 @@ describe("Mobile Performance & Asset Optimization Suite", () => {
 
       RootLayout({ children: <div /> });
 
-      expect(mockPreconnect).not.toHaveBeenCalledWith("https://fonts.googleapis.com");
-      expect(mockPreconnect).not.toHaveBeenCalledWith("https://fonts.gstatic.com", expect.anything());
+      expect(mockPreconnect).not.toHaveBeenCalledWith(
+        "https://fonts.googleapis.com"
+      );
+      expect(mockPreconnect).not.toHaveBeenCalledWith(
+        "https://fonts.gstatic.com",
+        expect.anything()
+      );
 
-      expect(mockPreload).not.toHaveBeenCalledWith("/models/brain-surface.glb", expect.anything());
-      expect(mockPreload).not.toHaveBeenCalledWith("/models/brain.obj", expect.anything());
+      expect(mockPreload).not.toHaveBeenCalledWith(
+        "/models/brain-surface.glb",
+        expect.anything()
+      );
+      expect(mockPreload).not.toHaveBeenCalledWith(
+        "/models/brain.obj",
+        expect.anything()
+      );
     });
   });
 
@@ -150,7 +179,13 @@ describe("Mobile Performance & Asset Optimization Suite", () => {
 
     it("fetches /api/case-studies when the search palette is opened", async () => {
       const mockStudies = [
-        { id: "1", slug: "clinical-mapper", title: "Clinical Mapper", primary_language: "Python", tags: "sdtm,cdisc" },
+        {
+          id: "1",
+          slug: "clinical-mapper",
+          title: "Clinical Mapper",
+          primary_language: "Python",
+          tags: "sdtm,cdisc",
+        },
       ];
       const fetchSpy = vi.fn().mockResolvedValue({
         ok: true,

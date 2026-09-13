@@ -20,9 +20,12 @@ import {
   IconFileSpreadsheet,
   IconDeviceGamepad2,
   IconMessageCode,
+  IconDirections,
 } from "@tabler/icons-react";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { usePersona } from "@/components/providers/PersonaProvider";
+import { useFontPreference } from "@/hooks/useFontPreference";
+import { useAnnouncer } from "@/hooks/useAnnouncer";
 import { FooterStatusTicker } from "@/components/FooterStatusTicker";
 import { NewsletterForm } from "@/components/NewsletterForm";
 
@@ -30,6 +33,8 @@ export const Footer: React.FC = () => {
   const pathname = usePathname();
   const { playHover, playSuccess } = useAudio();
   const { persona } = usePersona();
+  const { isDyslexic, toggleDyslexiaMode } = useFontPreference();
+  const { announce } = useAnnouncer();
 
   const handleHover = (e: React.MouseEvent<HTMLElement>) => {
     if (typeof window === "undefined") return;
@@ -230,6 +235,16 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <Link
+                  href="/case-studies/designing-for-my-brother"
+                  onMouseEnter={handleHover}
+                  className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
+                >
+                  <IconDirections className="w-3 h-3 text-amber-400" />
+                  Designing for My Brother
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/stack"
                   onMouseEnter={handleHover}
                   className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
@@ -380,6 +395,38 @@ export const Footer: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => {
+                toggleDyslexiaMode();
+                announce(
+                  !isDyslexic
+                    ? "Dyslexia mode activated. Using OpenDyslexic typeface with increased line spacing."
+                    : "Dyslexia mode deactivated. Restored standard typography.",
+                  "assertive"
+                );
+              }}
+              onMouseEnter={handleHover}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[11px] transition-colors cursor-pointer ${
+                isDyslexic
+                  ? "bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/20"
+                  : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
+              }`}
+              aria-label={
+                isDyslexic
+                  ? "Disable Dyslexia Mode (OpenDyslexic font)"
+                  : "Enable Dyslexia Mode (OpenDyslexic font)"
+              }
+              aria-pressed={isDyslexic}
+            >
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${
+                  isDyslexic ? "bg-amber-400 animate-pulse" : "bg-zinc-600"
+                }`}
+              />
+              <span>{isDyslexic ? "Dyslexia: ON" : "Dyslexia Mode"}</span>
+            </button>
+            <span className="text-zinc-700">&bull;</span>
             <Link
               href="/proof"
               onMouseEnter={handleHover}

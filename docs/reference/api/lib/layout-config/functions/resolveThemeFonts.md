@@ -16,7 +16,7 @@
 
 ### fontFamilyVariable?
 
-`string` = `"--font-inter"`
+`string` = `"--font-atkinson"`
 
 ## Returns
 

@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 export interface ThemeGenerationOptions {
   sourceRoot?: string;
@@ -182,7 +183,11 @@ export function generateTheme({
     "    fonts: {",
     "      /** Font stack for sans-serif */",
     `      sans: ${JSON.stringify(
-      "var(--font-inter), system-ui, -apple-system, sans-serif"
+      "var(--font-atkinson), system-ui, -apple-system, sans-serif"
+    )},`,
+    "      /** Font stack for heading */",
+    `      heading: ${JSON.stringify(
+      "var(--font-lexend), system-ui, -apple-system, sans-serif"
     )},`,
     "      /** Font stack for monospace */",
     `      mono: ${JSON.stringify(
@@ -232,7 +237,10 @@ function readFlag(name: string): string | undefined {
   return index === -1 ? undefined : process.argv[index + 1];
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (
+  process.argv[1] &&
+  fileURLToPath(import.meta.url) === path.resolve(process.argv[1])
+) {
   try {
     const sourceRoot = readFlag("--source-root") ?? process.cwd();
     const outputPath = readFlag("--output");

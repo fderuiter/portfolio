@@ -90,8 +90,30 @@
   --color-error: var(--error);
   --color-warning: var(--warning);
 
-  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-sans: var(--font-atkinson), system-ui, -apple-system, sans-serif;
+  --font-heading: var(--font-lexend), system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+/* OpenDyslexic Accessibility Mode (ADR 0040) */
+[data-font-mode="opendyslexic"] {
+  --font-sans:
+    var(--font-opendyslexic), "OpenDyslexic3", "OpenDyslexic", system-ui,
+    sans-serif;
+  --font-heading:
+    var(--font-opendyslexic), "OpenDyslexic3", "OpenDyslexic", system-ui,
+    sans-serif;
+  line-height: 1.75;
+  letter-spacing: 0.04em;
+  word-spacing: 0.08em;
+}
+
+[data-font-mode="opendyslexic"] p,
+[data-font-mode="opendyslexic"] li,
+[data-font-mode="opendyslexic"] .fluid-body {
+  line-height: 1.75;
+  letter-spacing: 0.04em;
+  word-spacing: 0.08em;
 }
 
 /* Custom Scrollbars (Modern Web standard + WebKit fallback) */

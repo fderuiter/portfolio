@@ -395,7 +395,16 @@ export function checkSecretLeaks(root: string): DiagnosticCheckResult {
   const candidateFiles = findFiles(
     root,
     /\.(ts|tsx|js|mjs|json|yml|yaml|md)$/,
-    ["node_modules", ".git", ".next", "dist", "coverage", "__tests__", ".husky"]
+    [
+      "node_modules",
+      ".git",
+      ".next",
+      ".vercel",
+      "dist",
+      "coverage",
+      "__tests__",
+      ".husky",
+    ]
   );
 
   const ignoredFiles = [

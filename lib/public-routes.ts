@@ -139,6 +139,11 @@ export const PUBLIC_ROUTE_REGISTRY = [
     category: "case-study",
   },
   {
+    path: "/case-studies/designing-for-my-brother",
+    name: "CS: Designing for My Brother",
+    category: "case-study",
+  },
+  {
     path: "/arcade/working-with-duck",
     name: "Game: Duck Canvas Engine",
     category: "arcade",

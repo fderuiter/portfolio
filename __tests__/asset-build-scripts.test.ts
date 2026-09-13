@@ -167,7 +167,12 @@ describe("asset generation and staging workflow", () => {
 
   it("exports strongly typed runtime design tokens", () => {
     expect(designManifest.colors.background).toBeDefined();
-    expect(designManifest.typography.fonts.sans).toContain("var(--font-inter)");
+    expect(designManifest.typography.fonts.sans).toContain(
+      "var(--font-atkinson)"
+    );
+    expect(designManifest.typography.fonts.heading).toContain(
+      "var(--font-lexend)"
+    );
     expect(designManifest.motion.springs).toBeDefined();
   });
 

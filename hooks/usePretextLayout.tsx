@@ -23,6 +23,7 @@ import {
   type ThemeFonts,
 } from "@/lib/layout-config";
 import { useTerminology } from "@/components/providers/TerminologyProvider";
+import { useFontPreference } from "@/hooks/useFontPreference";
 import {
   parsePretextBlocks,
   calculateBlockHeight,
@@ -73,7 +74,7 @@ export function usePretextLayout({
   text,
   fontSize = 16,
   lineHeight,
-  fontFamilyVariable = "--font-inter",
+  fontFamilyVariable = "--font-atkinson",
   translationMode,
   activeTheme,
   getResponsiveMetrics,
@@ -85,6 +86,7 @@ export function usePretextLayout({
   });
 
   const { simplified } = useTerminology();
+  const { fontMode } = useFontPreference();
 
   const preparedTextRef = useRef<PreparedText | null>(null);
   const fontStringRef = useRef<string>("");
@@ -226,7 +228,7 @@ export function usePretextLayout({
     richPrepareCache.clear();
     richLayoutCache.clear();
     clearCache();
-  }, [simplified, translationMode, activeTheme]);
+  }, [simplified, translationMode, activeTheme, fontMode]);
 
   useLayoutEffect(() => {
     if (!isBrowser()) return;
@@ -274,6 +276,7 @@ export function usePretextLayout({
     translationMode,
     activeTheme,
     simplified,
+    fontMode,
   ]);
 
   // Removed custom ResizeObserver in favor of unified useResizeObserver hook
@@ -326,7 +329,7 @@ export const PretextText: React.FC<PretextTextProps> = ({
   text,
   fontSize = 16,
   lineHeight,
-  fontFamilyVariable = "--font-inter",
+  fontFamilyVariable = "--font-atkinson",
   translationMode,
   activeTheme,
   semanticTag = "p",
@@ -404,7 +407,7 @@ export function usePretextRichLayout({
   text,
   fontSize = designManifest.typography.sizes.sm.fontSize,
   lineHeight,
-  fontFamilyVariable = "--font-inter",
+  fontFamilyVariable = "--font-atkinson",
   translationMode,
   activeTheme,
 }: UsePretextRichLayoutOptions) {
@@ -421,6 +424,7 @@ export function usePretextRichLayout({
   });
 
   const { simplified } = useTerminology();
+  const { fontMode } = useFontPreference();
 
   const paragraphsRef = useRef<ParagraphData[]>([]);
   const itemsRef = useRef<ExtendedRichInlineItem[]>([]);
@@ -529,7 +533,7 @@ export function usePretextRichLayout({
     richPrepareCache.clear();
     richLayoutCache.clear();
     clearCache();
-  }, [simplified, translationMode, activeTheme]);
+  }, [simplified, translationMode, activeTheme, fontMode]);
 
   useLayoutEffect(() => {
     if (!isBrowser()) return;
@@ -615,6 +619,7 @@ export function usePretextRichLayout({
     translationMode,
     activeTheme,
     simplified,
+    fontMode,
   ]);
 
   // Removed custom ResizeObserver in favor of unified useResizeObserver hook

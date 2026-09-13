@@ -2,7 +2,12 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
-import { Card, CardTitle, CardDescription, type HeadingTag } from "@/components/BentoGrid";
+import {
+  Card,
+  CardTitle,
+  CardDescription,
+  type HeadingTag,
+} from "@/components/BentoGrid";
 import { usePretextLayout } from "@/hooks/usePretextLayout";
 
 interface PretextCardProps {
@@ -23,9 +28,9 @@ export const PretextCard: React.FC<PretextCardProps> = ({
   // Bind Pretext Layout observer
   const { ref, height, isReady } = usePretextLayout({
     text: description,
-    fontSize: 12,      // maps to CardDescription text-xs (12px)
-    lineHeight: 16,    // maps to standard line-height (16px)
-    fontFamilyVariable: "--font-inter",
+    fontSize: 12, // maps to CardDescription text-xs (12px)
+    lineHeight: 16, // maps to standard line-height (16px)
+    fontFamilyVariable: "--font-sans",
   });
 
   // Calculate strict heights
@@ -33,10 +38,17 @@ export const PretextCard: React.FC<PretextCardProps> = ({
 
   return (
     <Card
-      className={cn("min-h-[var(--pretext-card-height)] h-[var(--pretext-card-height)] transition-[height,min-height] duration-180 ease-[cubic-bezier(0.16,1,0.3,1)]", className)}
-      style={{
-        "--pretext-card-height": computedHeight ? `${computedHeight}px` : "auto",
-      } as React.CSSProperties}
+      className={cn(
+        "min-h-[var(--pretext-card-height)] h-[var(--pretext-card-height)] transition-[height,min-height] duration-180 ease-[cubic-bezier(0.16,1,0.3,1)]",
+        className
+      )}
+      style={
+        {
+          "--pretext-card-height": computedHeight
+            ? `${computedHeight}px`
+            : "auto",
+        } as React.CSSProperties
+      }
     >
       <div className="flex flex-col h-full justify-between min-w-0">
         <div className="mb-4 min-w-0">
@@ -51,7 +63,11 @@ export const PretextCard: React.FC<PretextCardProps> = ({
               data-pretext-layer="visual"
               className="select-none pointer-events-none"
             >
-              <CardDescription className={!isReady ? "invisible" : "transition-opacity duration-300"}>
+              <CardDescription
+                className={
+                  !isReady ? "invisible" : "transition-opacity duration-300"
+                }
+              >
                 {description}
               </CardDescription>
             </div>

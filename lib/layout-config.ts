@@ -1,5 +1,9 @@
 import { designManifest } from "@/lib/design-manifest";
-import { cssPropertyCache, fontConfigCache, isStylesheetLoaded } from "@/lib/graphics-engine";
+import {
+  cssPropertyCache,
+  fontConfigCache,
+  isStylesheetLoaded,
+} from "@/lib/graphics-engine";
 
 export const LAYOUT_CONFIG = {
   // Height offsets used for fallback and SSR
@@ -27,7 +31,7 @@ export const LAYOUT_CONFIG = {
     LG: 3,
     MD: 2,
     SM: 1,
-  }
+  },
 } as const;
 
 export interface ThemeFonts {
@@ -37,9 +41,28 @@ export interface ThemeFonts {
   codeFont: string;
 }
 
+function resolveFallbackFont(fontFamilyVariable: string): string {
+  if (
+    fontFamilyVariable === "--font-heading" ||
+    fontFamilyVariable === "--font-lexend"
+  ) {
+    return (
+      (designManifest.typography.fonts as Record<string, string>).heading ||
+      "var(--font-lexend), system-ui, -apple-system, sans-serif"
+    );
+  }
+  if (
+    fontFamilyVariable === "--font-mono" ||
+    fontFamilyVariable === "--font-geist-mono"
+  ) {
+    return designManifest.typography.fonts.mono;
+  }
+  return designManifest.typography.fonts.sans;
+}
+
 export function resolveThemeFonts(
   fontSize: number,
-  fontFamilyVariable: string = "--font-inter"
+  fontFamilyVariable: string = "--font-atkinson"
 ): ThemeFonts {
   const cacheKey = `themeFonts|${fontSize}|${fontFamilyVariable}`;
   const cached = fontConfigCache.get(cacheKey);
@@ -62,7 +85,7 @@ export function resolveThemeFonts(
   }
 
   if (typeof window === "undefined") {
-    const fallbackSans = designManifest.typography.fonts.sans;
+    const fallbackSans = resolveFallbackFont(fontFamilyVariable);
     const fallbackMono = designManifest.typography.fonts.mono;
     return {
       baseFont: `400 ${fontSize}px ${fallbackSans}`,
@@ -75,7 +98,7 @@ export function resolveThemeFonts(
   try {
     const rootStyle = window.getComputedStyle(document.documentElement);
     if (!isStylesheetLoaded(rootStyle)) {
-      const fallbackSans = designManifest.typography.fonts.sans;
+      const fallbackSans = resolveFallbackFont(fontFamilyVariable);
       const fallbackMono = designManifest.typography.fonts.mono;
       return {
         baseFont: `400 ${fontSize}px ${fallbackSans}`,
@@ -86,14 +109,20 @@ export function resolveThemeFonts(
     }
 
     if (!resolvedFontFamily) {
-      const rawFontFamily = rootStyle.getPropertyValue(fontFamilyVariable).trim();
-      resolvedFontFamily = rawFontFamily || designManifest.typography.fonts.sans;
+      const rawFontFamily = rootStyle
+        .getPropertyValue(fontFamilyVariable)
+        .trim();
+      resolvedFontFamily =
+        rawFontFamily || resolveFallbackFont(fontFamilyVariable);
       cssPropertyCache.set(fontFamilyVariable, resolvedFontFamily);
     }
 
     if (!resolvedMonoFamily) {
-      const rawMonoFamily = rootStyle.getPropertyValue("--font-mono").trim() || rootStyle.getPropertyValue("--font-geist-mono").trim();
-      resolvedMonoFamily = rawMonoFamily || designManifest.typography.fonts.mono;
+      const rawMonoFamily =
+        rootStyle.getPropertyValue("--font-mono").trim() ||
+        rootStyle.getPropertyValue("--font-geist-mono").trim();
+      resolvedMonoFamily =
+        rawMonoFamily || designManifest.typography.fonts.mono;
       cssPropertyCache.set("--font-mono", resolvedMonoFamily);
     }
 
@@ -106,7 +135,7 @@ export function resolveThemeFonts(
     fontConfigCache.set(cacheKey, result);
     return result;
   } catch {
-    const fallbackSans = designManifest.typography.fonts.sans;
+    const fallbackSans = resolveFallbackFont(fontFamilyVariable);
     const fallbackMono = designManifest.typography.fonts.mono;
     return {
       baseFont: `400 ${fontSize}px ${fallbackSans}`,
@@ -119,7 +148,7 @@ export function resolveThemeFonts(
 
 export function resolveSingleThemeFont(
   fontSize: number,
-  fontFamilyVariable: string = "--font-inter"
+  fontFamilyVariable: string = "--font-atkinson"
 ): string {
   const cacheKey = `singleThemeFont|${fontSize}|${fontFamilyVariable}`;
   const cached = fontConfigCache.get(cacheKey);
@@ -135,26 +164,27 @@ export function resolveSingleThemeFont(
   }
 
   if (typeof window === "undefined") {
-    const fallbackSans = designManifest.typography.fonts.sans;
+    const fallbackSans = resolveFallbackFont(fontFamilyVariable);
     return `${fontSize}px ${fallbackSans}`;
   }
 
   try {
     const rootStyle = window.getComputedStyle(document.documentElement);
     if (!isStylesheetLoaded(rootStyle)) {
-      const fallbackSans = designManifest.typography.fonts.sans;
+      const fallbackSans = resolveFallbackFont(fontFamilyVariable);
       return `${fontSize}px ${fallbackSans}`;
     }
 
     const rawFontFamily = rootStyle.getPropertyValue(fontFamilyVariable).trim();
-    resolvedFontFamily = rawFontFamily || designManifest.typography.fonts.sans;
+    resolvedFontFamily =
+      rawFontFamily || resolveFallbackFont(fontFamilyVariable);
     cssPropertyCache.set(fontFamilyVariable, resolvedFontFamily);
 
     const result = `${fontSize}px ${resolvedFontFamily}`;
     fontConfigCache.set(cacheKey, result);
     return result;
   } catch {
-    const fallbackSans = designManifest.typography.fonts.sans;
+    const fallbackSans = resolveFallbackFont(fontFamilyVariable);
     return `${fontSize}px ${fallbackSans}`;
   }
 }
