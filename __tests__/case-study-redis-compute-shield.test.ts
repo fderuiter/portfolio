@@ -16,6 +16,8 @@ const {
   mockRedisSadd,
   mockRedisSrem,
   mockRedisSmembers,
+  mockRedisLlen,
+  mockRedisConfigured,
   mockRedisLrange,
   mockRedisLmove,
   mockRedisLrem,
@@ -33,6 +35,8 @@ const {
   mockRedisSadd: vi.fn(),
   mockRedisSrem: vi.fn(),
   mockRedisSmembers: vi.fn(),
+  mockRedisLlen: vi.fn(),
+  mockRedisConfigured: { value: true },
   mockRedisLrange: vi.fn(),
   mockRedisLmove: vi.fn(),
   mockRedisLrem: vi.fn(),
@@ -67,6 +71,9 @@ vi.mock("@/lib/redis", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/redis")>();
   return {
     ...actual,
+    // These suites exercise the buffered Redis path specifically, so report
+    // Upstash as configured even though the test env has no credentials.
+    isRedisConfigured: () => mockRedisConfigured.value,
     redis: {
       get: mockRedisGet,
       set: mockRedisSet,
@@ -78,6 +85,7 @@ vi.mock("@/lib/redis", async (importOriginal) => {
       sadd: mockRedisSadd,
       srem: mockRedisSrem,
       smembers: mockRedisSmembers,
+      llen: mockRedisLlen,
       lrange: mockRedisLrange,
       lmove: mockRedisLmove,
       lrem: mockRedisLrem,
@@ -105,6 +113,8 @@ describe("CaseStudyService - Two-Tier Redis Compute Shield & Reaction Buffering"
   beforeEach(() => {
     vi.clearAllMocks();
     mockPipelineExec.mockResolvedValue([]);
+    mockRedisLlen.mockResolvedValue(0);
+    mockRedisConfigured.value = true;
     mockRedisDel.mockResolvedValue(1);
     mockRedisSet.mockResolvedValue("OK");
   });
@@ -404,15 +414,51 @@ describe("CaseStudyService - Two-Tier Redis Compute Shield & Reaction Buffering"
     });
   });
 
+  describe("Unconfigured Upstash credentials", () => {
+    it("writes reactions straight to Postgres without touching Redis", async () => {
+      mockRedisConfigured.value = false;
+
+      vi.mocked(prisma.caseStudyReaction.findFirst).mockResolvedValueOnce(null);
+      vi.mocked(prisma.caseStudyReaction.groupBy).mockResolvedValueOnce(
+        [] as never
+      );
+      vi.mocked(prisma.caseStudyReaction.findMany).mockResolvedValueOnce([]);
+
+      const result = await CaseStudyService.submitReaction(
+        { caseStudySlug: "cadence-clinical", reactionType: "insightful" },
+        "hash-nored"
+      );
+
+      expect(result.success).toBe(true);
+      expect(prisma.caseStudyReaction.create).toHaveBeenCalled();
+      // No dummy-endpoint round trips, and no 1500ms timeout per reaction.
+      expect(mockRedisSismember).not.toHaveBeenCalled();
+      expect(mockPipelineExec).not.toHaveBeenCalled();
+    });
+
+    it("skips the scheduled drain entirely", async () => {
+      mockRedisConfigured.value = false;
+
+      const result = await CaseStudyService.flushBufferedReactionsToDatabase();
+
+      expect(result).toEqual({ processed: 0, inserted: 0 });
+      expect(mockRedisLrange).not.toHaveBeenCalled();
+      expect(prisma.caseStudyReaction.createMany).not.toHaveBeenCalled();
+    });
+  });
+
   describe("Scheduled Maintenance: flushBufferedReactionsToDatabase", () => {
     it("returns { processed: 0, inserted: 0 } when no events in queue", async () => {
       mockRedisLrange.mockResolvedValueOnce([]); // no pending in processing
-      mockPipelineExec.mockResolvedValueOnce([]); // lmove moved 0
+      mockRedisLlen.mockResolvedValueOnce(0); // queue is empty
 
       const result = await CaseStudyService.flushBufferedReactionsToDatabase();
 
       expect(result).toEqual({ processed: 0, inserted: 0 });
       expect(prisma.caseStudyReaction.createMany).not.toHaveBeenCalled();
+      // An empty queue must not spend a single LMOVE against the daily budget.
+      expect(mockPipelineExec).not.toHaveBeenCalled();
+      expect(mockRedisLmove).not.toHaveBeenCalled();
     });
 
     it("persists buffered reactions in batch, decrements buffer counts, and clears processing queue", async () => {
@@ -441,6 +487,7 @@ describe("CaseStudyService - Two-Tier Redis Compute Shield & Reaction Buffering"
       ];
 
       mockRedisLrange.mockResolvedValueOnce([]); // no pending
+      mockRedisLlen.mockResolvedValueOnce(mockEvents.length); // queue depth
       mockPipelineExec.mockResolvedValueOnce(mockEvents); // newly moved events
 
       vi.mocked(prisma.caseStudyReaction.createMany).mockResolvedValueOnce({
@@ -477,6 +524,42 @@ describe("CaseStudyService - Two-Tier Redis Compute Shield & Reaction Buffering"
       expect(mockRedisDel).toHaveBeenCalledWith(
         getScopedRedisKey("cs:reactions_counts:cadence-clinical")
       );
+    });
+
+    it("pins the buffered event id so a replayed batch cannot double-insert", async () => {
+      const mockEvents = [
+        {
+          id: "evt-replay-1",
+          caseStudySlug: "cadence-clinical",
+          reactionType: "insightful",
+          connectionHash: "hash-1",
+          createdAt: new Date().toISOString(),
+        },
+      ];
+
+      // Events already sat in the processing queue: the previous run persisted
+      // them but died before acknowledging, so this run replays them.
+      mockRedisLrange.mockResolvedValueOnce(mockEvents);
+      vi.mocked(prisma.caseStudyReaction.createMany).mockResolvedValueOnce({
+        count: 0,
+      });
+      mockRedisHgetall.mockResolvedValueOnce({});
+
+      const result = await CaseStudyService.flushBufferedReactionsToDatabase();
+
+      // CaseStudyReaction has no unique constraint on the payload columns, so
+      // skipDuplicates only suppresses the replay if the primary key is pinned.
+      expect(prisma.caseStudyReaction.createMany).toHaveBeenCalledWith({
+        data: [
+          expect.objectContaining({
+            id: "evt-replay-1",
+            caseStudySlug: "cadence-clinical",
+            reactionType: "insightful",
+          }),
+        ],
+        skipDuplicates: true,
+      });
+      expect(result).toEqual({ processed: 1, inserted: 0 });
     });
 
     it("leaves events in processing queue if Prisma batch insert throws", async () => {

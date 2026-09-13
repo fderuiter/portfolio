@@ -204,7 +204,7 @@ Submits feedback for a case study with duplicate rate-limiting.
 
 ### submitReaction()
 
-> `static` **submitReaction**(`input`, `connectionHash`): `Promise`\<\{ `counts`: \{\[`key`: `string`\]: `number`; \}; `reactionType`: `string`; `success`: `boolean`; `userReactions`: `string`[]; \}\>
+> `static` **submitReaction**(`input`, `connectionHash`): `Promise`\<\{ `counts`: `Record`\<`string`, `number`\>; `reactionType`: `string`; `success`: `boolean`; `userReactions`: `string`[]; \}\>
 
 Submits a reaction for a case study.
 Employs Write-Buffering in Upstash Redis (ADR 0036):
@@ -222,4 +222,4 @@ Buffers reaction increments via HINCRBY and enqueues events without waking Neon 
 
 #### Returns
 
-`Promise`\<\{ `counts`: \{\[`key`: `string`\]: `number`; \}; `reactionType`: `string`; `success`: `boolean`; `userReactions`: `string`[]; \}\>
+`Promise`\<\{ `counts`: `Record`\<`string`, `number`\>; `reactionType`: `string`; `success`: `boolean`; `userReactions`: `string`[]; \}\>

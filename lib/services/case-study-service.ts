@@ -2,7 +2,7 @@ import { prisma } from "@/lib/db";
 import DOMPurify from "isomorphic-dompurify";
 import { env } from "@/lib/env";
 import { FALLBACK_CASE_STUDIES, CaseStudyData } from "@/lib/case-studies-data";
-import { redis, getScopedRedisKey } from "@/lib/redis";
+import { redis, getScopedRedisKey, isRedisConfigured } from "@/lib/redis";
 
 export type { CaseStudyData };
 
@@ -119,15 +119,17 @@ async function getBaseReactionCounts(
 ): Promise<Record<string, number>> {
   const baseKey = getScopedRedisKey(`cs:reactions_counts:${slug}`);
   try {
-    const cached = await Promise.race([
-      redis.get<Record<string, number>>(baseKey),
-      new Promise<null>((_, reject) =>
-        setTimeout(
-          () => reject(new Error("Redis getBaseReactionCounts timeout")),
-          1500
-        )
-      ),
-    ]);
+    const cached = !isRedisConfigured()
+      ? null
+      : await Promise.race([
+          redis.get<Record<string, number>>(baseKey),
+          new Promise<null>((_, reject) =>
+            setTimeout(
+              () => reject(new Error("Redis getBaseReactionCounts timeout")),
+              1500
+            )
+          ),
+        ]);
     if (cached && typeof cached === "object") {
       const counts = getDefaultReactionCounts();
       for (const r of ALLOWED_REACTIONS) {
@@ -155,18 +157,20 @@ async function getBaseReactionCounts(
       }
     }
     // Cache in Redis with 3600s TTL
-    try {
-      await Promise.race([
-        redis.set(baseKey, counts, { ex: 3600 }),
-        new Promise((_, reject) =>
-          setTimeout(
-            () => reject(new Error("Redis setBaseReactionCounts timeout")),
-            1500
-          )
-        ),
-      ]);
-    } catch {
-      // Tolerated
+    if (isRedisConfigured()) {
+      try {
+        await Promise.race([
+          redis.set(baseKey, counts, { ex: 3600 }),
+          new Promise((_, reject) =>
+            setTimeout(
+              () => reject(new Error("Redis setBaseReactionCounts timeout")),
+              1500
+            )
+          ),
+        ]);
+      } catch {
+        // Tolerated
+      }
     }
   } catch (err) {
     if (env.VERCEL_ENV === "production") {
@@ -186,6 +190,87 @@ async function getBaseReactionCounts(
   return counts;
 }
 
+/**
+ * Persists a reaction straight to Postgres, falling back to the in-memory
+ * mock store when the database is unreachable. Used when Upstash Redis is
+ * not configured at all, and as the recovery path when buffering fails.
+ */
+async function submitReactionDirect(
+  caseStudySlug: string,
+  reactionType: string,
+  connectionHash: string
+) {
+  try {
+    const existing = await prisma.caseStudyReaction.findFirst({
+      where: {
+        caseStudySlug,
+        reactionType,
+        connectionHash,
+      },
+    });
+
+    if (!existing) {
+      await prisma.caseStudyReaction.create({
+        data: {
+          caseStudySlug,
+          reactionType,
+          connectionHash,
+        },
+      });
+    }
+
+    const reactions = await prisma.caseStudyReaction.groupBy({
+      by: ["reactionType"],
+      where: { caseStudySlug },
+      _count: { id: true },
+    });
+
+    const userReactionsList = await prisma.caseStudyReaction.findMany({
+      where: { caseStudySlug, connectionHash },
+      select: { reactionType: true },
+    });
+
+    const counts = getDefaultReactionCounts();
+    for (const r of reactions) {
+      if (counts[r.reactionType] !== undefined) {
+        counts[r.reactionType] = r._count.id;
+      }
+    }
+
+    return {
+      success: true,
+      reactionType,
+      counts,
+      userReactions: userReactionsList.map((ur) => ur.reactionType),
+    };
+  } catch (dbErr) {
+    if (env.VERCEL_ENV === "production") {
+      console.error(
+        "Database reaction creation failed, using mock fallback:",
+        dbErr
+      );
+    }
+    if (!mockReactionsStore.has(caseStudySlug)) {
+      mockReactionsStore.set(caseStudySlug, new Map());
+    }
+    const slugMap = mockReactionsStore.get(caseStudySlug)!;
+    const currentCount = slugMap.get(reactionType) || 0;
+    slugMap.set(reactionType, currentCount + 1);
+
+    const counts = getDefaultReactionCounts();
+    for (const [r, count] of slugMap.entries()) {
+      counts[r] = count;
+    }
+
+    return {
+      success: true,
+      reactionType,
+      counts,
+      userReactions: [reactionType],
+    };
+  }
+}
+
 export class CaseStudyService {
   /**
    * Retrieves all published case studies combining database records with static fallbacks.
@@ -196,15 +281,18 @@ export class CaseStudyService {
 
     // Check Upstash Redis cache first
     try {
-      const cached = await Promise.race([
-        redis.get<CaseStudyData[]>(cacheKey),
-        new Promise<null>((_, reject) =>
-          setTimeout(
-            () => reject(new Error("Redis getAllPublishedCaseStudies timeout")),
-            1500
-          )
-        ),
-      ]);
+      const cached = !isRedisConfigured()
+        ? null
+        : await Promise.race([
+            redis.get<CaseStudyData[]>(cacheKey),
+            new Promise<null>((_, reject) =>
+              setTimeout(
+                () =>
+                  reject(new Error("Redis getAllPublishedCaseStudies timeout")),
+                1500
+              )
+            ),
+          ]);
 
       if (Array.isArray(cached) && cached.length > 0) {
         return cached.map((s) => ({
@@ -270,7 +358,7 @@ export class CaseStudyService {
     }
 
     // Populate Redis cache with 3600s TTL
-    if (merged.length > 0) {
+    if (merged.length > 0 && isRedisConfigured()) {
       try {
         await Promise.race([
           redis.set(cacheKey, merged, { ex: 3600 }),
@@ -301,12 +389,17 @@ export class CaseStudyService {
 
     // Tier 2: Check Upstash Redis read-through cache with 1500ms timeout
     try {
-      const cached = await Promise.race([
-        redis.get<CaseStudyData>(cacheKey),
-        new Promise<null>((_, reject) =>
-          setTimeout(() => reject(new Error("Redis cache read timeout")), 1500)
-        ),
-      ]);
+      const cached = !isRedisConfigured()
+        ? null
+        : await Promise.race([
+            redis.get<CaseStudyData>(cacheKey),
+            new Promise<null>((_, reject) =>
+              setTimeout(
+                () => reject(new Error("Redis cache read timeout")),
+                1500
+              )
+            ),
+          ]);
 
       if (cached && typeof cached === "object" && cached.slug === slug) {
         return {
@@ -369,7 +462,7 @@ export class CaseStudyService {
       dbResult ?? FALLBACK_CASE_STUDIES.find((s) => s.slug === slug) ?? null;
 
     // Populate Redis cache with 3600s TTL on resolution
-    if (finalResult) {
+    if (finalResult && isRedisConfigured()) {
       try {
         await Promise.race([
           redis.set(cacheKey, finalResult, { ex: 3600 }),
@@ -398,27 +491,31 @@ export class CaseStudyService {
     const allPublishedKey = getScopedRedisKey("cs:all_published");
 
     let evicted = false;
-    try {
-      await Promise.race([
-        Promise.all([
-          redis.del(cacheKey),
-          redis.del(reactionsBaseKey),
-          redis.del(allPublishedKey),
-        ]),
-        new Promise((_, reject) =>
-          setTimeout(
-            () => reject(new Error("Redis cache eviction timeout")),
-            1500
-          )
-        ),
-      ]);
-      evicted = true;
-    } catch (err) {
-      if (env.VERCEL_ENV === "production") {
-        console.warn(
-          `CaseStudyService.evictCaseStudyCache: Redis eviction failed for "${slug}":`,
-          err
-        );
+    // Without Upstash there is no cache to evict, but the ISR tags below must
+    // still be revalidated.
+    if (isRedisConfigured()) {
+      try {
+        await Promise.race([
+          Promise.all([
+            redis.del(cacheKey),
+            redis.del(reactionsBaseKey),
+            redis.del(allPublishedKey),
+          ]),
+          new Promise((_, reject) =>
+            setTimeout(
+              () => reject(new Error("Redis cache eviction timeout")),
+              1500
+            )
+          ),
+        ]);
+        evicted = true;
+      } catch (err) {
+        if (env.VERCEL_ENV === "production") {
+          console.warn(
+            `CaseStudyService.evictCaseStudyCache: Redis eviction failed for "${slug}":`,
+            err
+          );
+        }
       }
     }
 
@@ -689,18 +786,20 @@ export class CaseStudyService {
       const baseCounts = await getBaseReactionCounts(slug);
 
       // 2. Fetch buffered increments and user reactions from Redis with 1500ms timeout
-      const [rawBuffer, userReactionsRaw] = await Promise.race([
-        Promise.all([
-          redis.hgetall<Record<string, string | number>>(bufferKey),
-          redis.smembers(userKey),
-        ]),
-        new Promise<[null, null]>((_, reject) =>
-          setTimeout(
-            () => reject(new Error("Redis getReactions timeout")),
-            1500
-          )
-        ),
-      ]);
+      const [rawBuffer, userReactionsRaw] = !isRedisConfigured()
+        ? [null, null]
+        : await Promise.race([
+            Promise.all([
+              redis.hgetall<Record<string, string | number>>(bufferKey),
+              redis.smembers(userKey),
+            ]),
+            new Promise<[null, null]>((_, reject) =>
+              setTimeout(
+                () => reject(new Error("Redis getReactions timeout")),
+                1500
+              )
+            ),
+          ]);
 
       const counts = { ...baseCounts };
       if (rawBuffer && typeof rawBuffer === "object") {
@@ -818,6 +917,13 @@ export class CaseStudyService {
     const queueKey = getScopedRedisKey("cs:reactions_queue");
     const dirtyKey = getScopedRedisKey("cs:dirty_reactions");
 
+    // Local, test and preview runs without Upstash credentials have no usable
+    // Redis. Go straight to the durable path rather than spending two 1500ms
+    // timeouts per reaction before the catch below falls back anyway.
+    if (!isRedisConfigured()) {
+      return submitReactionDirect(caseStudySlug, reactionType, connectionHash);
+    }
+
     try {
       // 1. Check if user already reacted via Redis
       const isMember = await Promise.race([
@@ -914,76 +1020,7 @@ export class CaseStudyService {
         );
       }
 
-      // Fallback: direct database write (original behavior)
-      try {
-        const existing = await prisma.caseStudyReaction.findFirst({
-          where: {
-            caseStudySlug,
-            reactionType,
-            connectionHash,
-          },
-        });
-
-        if (!existing) {
-          await prisma.caseStudyReaction.create({
-            data: {
-              caseStudySlug,
-              reactionType,
-              connectionHash,
-            },
-          });
-        }
-
-        const reactions = await prisma.caseStudyReaction.groupBy({
-          by: ["reactionType"],
-          where: { caseStudySlug },
-          _count: { id: true },
-        });
-
-        const userReactionsList = await prisma.caseStudyReaction.findMany({
-          where: { caseStudySlug, connectionHash },
-          select: { reactionType: true },
-        });
-
-        const counts = getDefaultReactionCounts();
-        for (const r of reactions) {
-          if (counts[r.reactionType] !== undefined) {
-            counts[r.reactionType] = r._count.id;
-          }
-        }
-
-        return {
-          success: true,
-          reactionType,
-          counts,
-          userReactions: userReactionsList.map((ur) => ur.reactionType),
-        };
-      } catch (dbErr) {
-        if (env.VERCEL_ENV === "production") {
-          console.error(
-            "Database reaction creation failed, using mock fallback:",
-            dbErr
-          );
-        }
-        if (!mockReactionsStore.has(caseStudySlug)) {
-          mockReactionsStore.set(caseStudySlug, new Map());
-        }
-        const slugMap = mockReactionsStore.get(caseStudySlug)!;
-        const currentCount = slugMap.get(reactionType) || 0;
-        slugMap.set(reactionType, currentCount + 1);
-
-        const counts = getDefaultReactionCounts();
-        for (const [r, count] of slugMap.entries()) {
-          counts[r] = count;
-        }
-
-        return {
-          success: true,
-          reactionType,
-          counts,
-          userReactions: [reactionType],
-        };
-      }
+      return submitReactionDirect(caseStudySlug, reactionType, connectionHash);
     }
   }
 
@@ -998,6 +1035,12 @@ export class CaseStudyService {
     const processingKey = getScopedRedisKey("cs:reactions_processing");
     const dirtyKey = getScopedRedisKey("cs:dirty_reactions");
 
+    // Nothing can have been buffered without Redis, so the daily cron should
+    // not spend a round trip against a dummy endpoint.
+    if (!isRedisConfigured()) {
+      return { processed: 0, inserted: 0 };
+    }
+
     try {
       // 1. Fetch pending items from processing queue (if any from previous interrupted sync)
       const existingProcessing = (await redis.lrange(
@@ -1011,22 +1054,29 @@ export class CaseStudyService {
 
       // 2. Atomically move items from queue to processing if under batchSize
       if (events.length < batchSize) {
-        const needed = batchSize - events.length;
-        const p = redis.pipeline();
-        for (let i = 0; i < needed; i++) {
-          p.lmove(queueKey, processingKey, "right", "left");
-        }
-        p.expire(processingKey, 48 * 60 * 60);
-        const moveResults = await p.exec();
+        // Clamp to the real queue depth. A blind batchSize-wide pipeline burns
+        // one Upstash command per slot every run even when the queue is empty,
+        // which the 10k commands/day ceiling in AGENTS.md section 22 cannot absorb.
+        const queueDepth = await redis.llen(queueKey);
+        const needed = Math.min(batchSize - events.length, queueDepth);
 
-        const newlyMoved = moveResults.filter(
-          (item): item is BufferedReactionEvent =>
-            item !== null &&
-            typeof item === "object" &&
-            "id" in item &&
-            "caseStudySlug" in item
-        );
-        events = [...events, ...newlyMoved];
+        if (needed > 0) {
+          const p = redis.pipeline();
+          for (let i = 0; i < needed; i++) {
+            p.lmove(queueKey, processingKey, "right", "left");
+          }
+          p.expire(processingKey, 48 * 60 * 60);
+          const moveResults = await p.exec();
+
+          const newlyMoved = moveResults.filter(
+            (item): item is BufferedReactionEvent =>
+              item !== null &&
+              typeof item === "object" &&
+              "id" in item &&
+              "caseStudySlug" in item
+          );
+          events = [...events, ...newlyMoved];
+        }
       }
 
       if (events.length === 0) {
@@ -1038,6 +1088,11 @@ export class CaseStudyService {
       try {
         createResult = await prisma.caseStudyReaction.createMany({
           data: events.map((e) => ({
+            // Pin the primary key to the id minted when the event was buffered.
+            // CaseStudyReaction has no unique constraint on the payload columns,
+            // so this is what lets skipDuplicates make a replayed batch a no-op
+            // when acknowledgement failed after a successful write.
+            id: e.id,
             caseStudySlug: e.caseStudySlug,
             reactionType: e.reactionType,
             connectionHash: e.connectionHash,
