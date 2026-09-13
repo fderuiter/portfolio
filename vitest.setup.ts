@@ -30,7 +30,10 @@ class MockStorage implements Storage {
   }
 }
 
-if (typeof globalThis.localStorage === "undefined" || typeof globalThis.localStorage.getItem !== "function") {
+if (
+  typeof globalThis.localStorage === "undefined" ||
+  typeof globalThis.localStorage.getItem !== "function"
+) {
   const storageInstance = new MockStorage();
   Object.defineProperty(globalThis, "localStorage", {
     value: storageInstance,
@@ -46,7 +49,8 @@ if (typeof globalThis.ResizeObserver === "undefined") {
     unobserve = vi.fn();
     disconnect = vi.fn();
   }
-  globalThis.ResizeObserver = MockResizeObserver as unknown as typeof ResizeObserver;
+  globalThis.ResizeObserver =
+    MockResizeObserver as unknown as typeof ResizeObserver;
 }
 
 // Mock IntersectionObserver
@@ -57,7 +61,40 @@ if (typeof globalThis.IntersectionObserver === "undefined") {
     disconnect = vi.fn();
     takeRecords = vi.fn(() => []);
   }
-  globalThis.IntersectionObserver = MockIntersectionObserver as unknown as typeof IntersectionObserver;
+  globalThis.IntersectionObserver =
+    MockIntersectionObserver as unknown as typeof IntersectionObserver;
+}
+
+// Polyfill PointerEvent (unsupported by jsdom@26, pinned in package.json overrides)
+if (typeof globalThis.PointerEvent === "undefined") {
+  class PointerEventPolyfill extends MouseEvent {
+    pointerId: number;
+    width: number;
+    height: number;
+    pressure: number;
+    tangentialPressure: number;
+    tiltX: number;
+    tiltY: number;
+    twist: number;
+    pointerType: string;
+    isPrimary: boolean;
+
+    constructor(type: string, params: PointerEventInit = {}) {
+      super(type, params);
+      this.pointerId = params.pointerId ?? 0;
+      this.width = params.width ?? 1;
+      this.height = params.height ?? 1;
+      this.pressure = params.pressure ?? 0;
+      this.tangentialPressure = params.tangentialPressure ?? 0;
+      this.tiltX = params.tiltX ?? 0;
+      this.tiltY = params.tiltY ?? 0;
+      this.twist = params.twist ?? 0;
+      this.pointerType = params.pointerType ?? "mouse";
+      this.isPrimary = params.isPrimary ?? false;
+    }
+  }
+  globalThis.PointerEvent =
+    PointerEventPolyfill as unknown as typeof PointerEvent;
 }
 
 // Mock Canvas 2D and WebGL contexts
@@ -86,15 +123,17 @@ HTMLCanvasElement.prototype.getContext = function (
       createLinearGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
       createRadialGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
       createPattern: vi.fn(),
-      getImageData: vi.fn((_sx?: number, _sy?: number, sw?: number, sh?: number) => {
-        const width = typeof sw === "number" && sw > 0 ? sw : 256;
-        const height = typeof sh === "number" && sh > 0 ? sh : 256;
-        return {
-          width,
-          height,
-          data: new Uint8ClampedArray(width * height * 4),
-        };
-      }),
+      getImageData: vi.fn(
+        (_sx?: number, _sy?: number, sw?: number, sh?: number) => {
+          const width = typeof sw === "number" && sw > 0 ? sw : 256;
+          const height = typeof sh === "number" && sh > 0 ? sh : 256;
+          return {
+            width,
+            height,
+            data: new Uint8ClampedArray(width * height * 4),
+          };
+        }
+      ),
       putImageData: vi.fn(),
       createImageData: vi.fn((w?: number | ImageData, h?: number) => {
         const width = typeof w === "number" && w > 0 ? w : 256;
@@ -125,13 +164,20 @@ HTMLCanvasElement.prototype.getContext = function (
       quadraticCurveTo: vi.fn(),
       bezierCurveTo: vi.fn(),
       roundRect: vi.fn(),
-      measureText: vi.fn((text: string) => ({ width: (text || "").length * 8, height: 16 })),
+      measureText: vi.fn((text: string) => ({
+        width: (text || "").length * 8,
+        height: 16,
+      })),
       transform: vi.fn(),
       resetTransform: vi.fn(),
     } as unknown as RenderingContext;
   }
 
-  if (contextId === "webgl" || contextId === "webgl2" || contextId === "experimental-webgl") {
+  if (
+    contextId === "webgl" ||
+    contextId === "webgl2" ||
+    contextId === "experimental-webgl"
+  ) {
     return {
       canvas: this,
       getExtension: vi.fn(),
@@ -156,7 +202,9 @@ HTMLCanvasElement.prototype.getContext = function (
   }
 
   if (typeof originalGetContext === "function") {
-    return (originalGetContext as (...a: unknown[]) => RenderingContext | null).apply(this, [contextId, ...args]);
+    return (
+      originalGetContext as (...a: unknown[]) => RenderingContext | null
+    ).apply(this, [contextId, ...args]);
   }
   return null;
 } as typeof HTMLCanvasElement.prototype.getContext;
@@ -187,12 +235,16 @@ vi.mock("@clerk/nextjs/server", () => {
         return cb(mockAuth, req, ...args);
       };
     }),
-    createRouteMatcher: vi.fn((routes: string[]) => (req: { nextUrl: { pathname: string } }) => {
-      return routes.some((pattern) => {
-        const regex = new RegExp("^" + pattern.replace(/\(\.\*\)/g, ".*") + "$");
-        return regex.test(req.nextUrl.pathname);
-      });
-    }),
+    createRouteMatcher: vi.fn(
+      (routes: string[]) => (req: { nextUrl: { pathname: string } }) => {
+        return routes.some((pattern) => {
+          const regex = new RegExp(
+            "^" + pattern.replace(/\(\.\*\)/g, ".*") + "$"
+          );
+          return regex.test(req.nextUrl.pathname);
+        });
+      }
+    ),
   };
 });
 
@@ -201,4 +253,3 @@ vi.mock("@clerk/themes", () => {
     dark: {},
   };
 });
-
