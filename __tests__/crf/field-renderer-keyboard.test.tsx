@@ -91,7 +91,7 @@ describe("FieldRenderer keyboard activation boundary (#659)", () => {
       );
     });
 
-    const card = container.querySelector('[role="button"]') as HTMLElement;
+    const card = container.querySelector("[data-field-id]") as HTMLElement;
     expect(card).toBeTruthy();
 
     card.focus();

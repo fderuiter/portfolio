@@ -231,7 +231,7 @@ export const StudySpine: React.FC<StudySpineProps> = ({
         {activeTab === "spine" && (
           <div
             className="space-y-3"
-            role="tree"
+            role="group"
             aria-label="Study Spine Longitudinal Timeline"
           >
             <div className="flex items-center justify-between px-1">
@@ -259,9 +259,6 @@ export const StudySpine: React.FC<StudySpineProps> = ({
                   <div
                     key={epoch.id}
                     className="rounded-xl border border-zinc-850 bg-zinc-900/30 overflow-hidden"
-                    role="treeitem"
-                    aria-selected={false}
-                    aria-expanded={!isEpochCollapsed}
                   >
                     {/* Epoch Header */}
                     <div
@@ -335,6 +332,12 @@ export const StudySpine: React.FC<StudySpineProps> = ({
                                         toggleVisitCollapse(visit.id);
                                       }}
                                       className="p-0.5 hover:bg-zinc-800 rounded text-zinc-500 hover:text-zinc-300"
+                                      aria-label={
+                                        isVisitCollapsed
+                                          ? `Expand ${visit.name}`
+                                          : `Collapse ${visit.name}`
+                                      }
+                                      aria-expanded={!isVisitCollapsed}
                                     >
                                       {isVisitCollapsed ? (
                                         <IconChevronRight className="w-3 h-3" />
