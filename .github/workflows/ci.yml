@@ -17,7 +17,11 @@ jobs:
   rigor-pipeline:
     name: Rigor Ecosystem (Logic, Visual, Performance)
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # Setup through the fuzz gate takes ~10.5 min, so 45 left Playwright ~34
+    # min for 4 device projects x 144 tests at workers: 1. It was cancelled at
+    # 34m41s mid-suite. The cap exists to turn a hang into a diagnosable
+    # cancellation, which it did; it just has to sit above the honest runtime.
+    timeout-minutes: 70
 
     services:
       postgres:
