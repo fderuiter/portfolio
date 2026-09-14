@@ -305,6 +305,12 @@ export const CRFStudioContainer: React.FC = () => {
   >("canvas");
   const [isMobileWidgetDrawerOpen, setIsMobileWidgetDrawerOpen] =
     useState(false);
+  // Section an in-flight "Add Field" palette open should insert into; null
+  // means "no explicit target", so handleAddField falls back to the
+  // selected field's section or the form's first section.
+  const [addFieldTargetSectionId, setAddFieldTargetSectionId] = useState<
+    string | null
+  >(null);
   // Escape dismissal is already handled by the global keyboard-shortcuts
   // effect below; this trap only owns initial focus, Tab containment, and
   // returning focus to the trigger button on close.
@@ -1345,7 +1351,12 @@ export const CRFStudioContainer: React.FC = () => {
                   onDuplicateForm={handleDuplicateForm}
                   onDeleteForm={handleDeleteForm}
                   onOpenCdashScaffolder={() => setIsScaffolderOpen(true)}
-                  onAddField={handleAddField}
+                  onAddField={(field) => {
+                    handleAddField(field, {
+                      sectionId: addFieldTargetSectionId ?? undefined,
+                    });
+                    setAddFieldTargetSectionId(null);
+                  }}
                   onAssignFormToVisit={handleAssignFormToVisit}
                   onUnassignFormFromVisit={handleUnassignFormFromVisit}
                   onInjectCdashForm={handleInjectCdashForm}
@@ -1376,7 +1387,10 @@ export const CRFStudioContainer: React.FC = () => {
                     onDeleteForm={handleDeleteForm}
                     onOpenCdashScaffolder={() => setIsScaffolderOpen(true)}
                     onAddField={(field) => {
-                      handleAddField(field);
+                      handleAddField(field, {
+                        sectionId: addFieldTargetSectionId ?? undefined,
+                      });
+                      setAddFieldTargetSectionId(null);
                       setMobileActiveView("canvas");
                     }}
                     onAssignFormToVisit={handleAssignFormToVisit}
@@ -1402,7 +1416,10 @@ export const CRFStudioContainer: React.FC = () => {
                     onDuplicateField={handleDuplicateField}
                     onDeleteField={handleDeleteField}
                     onUpdateField={handleUpdateField}
-                    onOpenPalette={() => setIsMobileWidgetDrawerOpen(true)}
+                    onOpenPalette={(sectionId) => {
+                      setAddFieldTargetSectionId(sectionId ?? null);
+                      setIsMobileWidgetDrawerOpen(true);
+                    }}
                     onDuplicateForm={handleDuplicateForm}
                     onOpenSlashPalette={handleOpenSlashPalette}
                   />
@@ -1462,7 +1479,8 @@ export const CRFStudioContainer: React.FC = () => {
                 onDuplicateField={handleDuplicateField}
                 onDeleteField={handleDeleteField}
                 onUpdateField={handleUpdateField}
-                onOpenPalette={() => {
+                onOpenPalette={(sectionId) => {
+                  setAddFieldTargetSectionId(sectionId ?? null);
                   setIsLeftSidebarOpen(true);
                   setLeftTab("palette");
                 }}
@@ -1644,7 +1662,14 @@ export const CRFStudioContainer: React.FC = () => {
                 <IconX className="w-4 h-4" />
               </button>
             </div>
-            <WidgetPalette onAddField={handleAddField} />
+            <WidgetPalette
+              onAddField={(field) => {
+                handleAddField(field, {
+                  sectionId: addFieldTargetSectionId ?? undefined,
+                });
+                setAddFieldTargetSectionId(null);
+              }}
+            />
           </div>
         </>
       )}

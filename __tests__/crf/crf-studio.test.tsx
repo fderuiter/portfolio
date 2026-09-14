@@ -414,4 +414,90 @@ describe("CRFStudioContainer Component", () => {
       "not the authored study — recipients need their own copy of the study data"
     );
   });
+
+  it("inserts a new field into the section whose Add Field control was used, not always the form's first section (#669)", async () => {
+    await act(async () => {
+      root = createRoot(container);
+      root.render(<CRFStudioContainer />);
+    });
+
+    const designerBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Form Designer")
+    );
+    if (designerBtn) {
+      await act(async () => {
+        designerBtn.click();
+      });
+    }
+
+    const sectionIdsBefore = new Set(
+      Array.from(container.querySelectorAll("[data-section-id]")).map((el) =>
+        el.getAttribute("data-section-id")
+      )
+    );
+
+    const addSectionBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Add New Section to Form")
+    );
+    expect(addSectionBtn).toBeTruthy();
+
+    await act(async () => {
+      addSectionBtn!.click();
+    });
+
+    const newSectionId = Array.from(
+      container.querySelectorAll("[data-section-id]")
+    )
+      .map((el) => el.getAttribute("data-section-id"))
+      .find((id) => id && !sectionIdsBefore.has(id));
+    expect(newSectionId).toBeTruthy();
+
+    const newSectionEl = container.querySelector(
+      `[data-section-id="${newSectionId}"]`
+    ) as HTMLElement;
+    expect(newSectionEl).toBeTruthy();
+
+    const addFieldBtn = Array.from(
+      newSectionEl.querySelectorAll("button")
+    ).find((b) => b.getAttribute("aria-label")?.startsWith("Add field to")) as
+      HTMLButtonElement | undefined;
+    expect(addFieldBtn).toBeTruthy();
+
+    await act(async () => {
+      addFieldBtn!.click();
+    });
+
+    // The section's control opens the keyboard-accessible slash command
+    // palette (#538), which resolves the field to the section id the
+    // trigger passed it — not through the plain widget palette.
+    const slashDialog = container.querySelector(
+      '[role="dialog"][aria-labelledby="slash-palette-title"]'
+    ) as HTMLElement;
+    expect(slashDialog).toBeTruthy();
+
+    const insertTextBtn = slashDialog.querySelector(
+      'button[aria-label="Insert Single-Line Text"]'
+    ) as HTMLButtonElement | undefined;
+    expect(insertTextBtn).toBeTruthy();
+
+    await act(async () => {
+      insertTextBtn!.click();
+    });
+
+    // The inserted field's default label must land inside the section whose
+    // Add Field control was actually used...
+    const newSectionAfter = container.querySelector(
+      `[data-section-id="${newSectionId}"]`
+    ) as HTMLElement;
+    expect(newSectionAfter.textContent).toContain("Text Variable");
+
+    // ...and every other section (in particular, the form's original first
+    // section) must be untouched by it.
+    const otherSections = Array.from(
+      container.querySelectorAll("[data-section-id]")
+    ).filter((el) => el.getAttribute("data-section-id") !== newSectionId);
+    for (const el of otherSections) {
+      expect(el.textContent).not.toContain("Text Variable");
+    }
+  });
 });

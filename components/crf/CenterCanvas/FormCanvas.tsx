@@ -35,7 +35,9 @@ interface FormCanvasProps {
   onDuplicateField: (sectionId: string, fieldId: string) => void;
   onDeleteField: (sectionId: string, fieldId: string) => void;
   onUpdateField?: (fieldId: string, updates: Partial<CRFField>) => void;
-  onOpenPalette: () => void;
+  /** Opens the widget palette. Pass a section id so the field the author
+   * picks next is inserted into that section rather than a default one. */
+  onOpenPalette: (sectionId?: string) => void;
   onDuplicateForm?: (formId: string) => void;
   onOpenSlashPalette?: (targetSectionId?: string, targetIndex?: number) => void;
 }
@@ -388,6 +390,7 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
             return (
               <div
                 key={section.id}
+                data-section-id={section.id}
                 onDragOver={(e) =>
                   handleFieldDragOver(e, section.id, section.fields.length)
                 }
@@ -480,12 +483,12 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                         if (onOpenSlashPalette) {
                           onOpenSlashPalette(section.id, section.fields.length);
                         } else {
-                          onOpenPalette();
+                          onOpenPalette(section.id);
                         }
                       }}
                       className="p-1 rounded hover:bg-zinc-800 text-brand-cyan hover:text-white transition-colors ml-1"
                       title="Insert Field or Smart Block into Section (/)"
-                      aria-label="Insert into section"
+                      aria-label={`Add field to ${section.title}`}
                     >
                       <IconPlus className="w-3.5 h-3.5" />
                     </button>
@@ -507,16 +510,18 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
 
                 {/* 12-Column Responsive Grid */}
                 {section.fields.length === 0 ? (
-                  <div
+                  <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       if (onOpenSlashPalette) {
                         onOpenSlashPalette(section.id, 0);
                       } else {
-                        onOpenPalette();
+                        onOpenPalette(section.id);
                       }
                     }}
-                    className="p-6 sm:p-8 border-2 border-dashed border-zinc-800 hover:border-brand-cyan/40 rounded-xl text-center cursor-pointer transition-all bg-zinc-950/30 group"
+                    aria-label={`Add field to ${section.title}`}
+                    className="w-full p-6 sm:p-8 border-2 border-dashed border-zinc-800 hover:border-brand-cyan/40 rounded-xl text-center cursor-pointer transition-all bg-zinc-950/30 group"
                   >
                     <IconPlus className="w-5 h-5 sm:w-6 sm:h-6 text-zinc-600 group-hover:text-brand-cyan mx-auto mb-2 transition-colors" />
                     <p className="text-xs text-zinc-400 font-mono">
@@ -525,7 +530,7 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                     <p className="text-[11px] text-zinc-500 mt-1">
                       Tap or click to pick a widget or press / for Smart Blocks.
                     </p>
-                  </div>
+                  </button>
                 ) : (
                   <div className="grid grid-cols-12 gap-2.5 sm:gap-4">
                     {section.fields.map((field, fIdx) => (
