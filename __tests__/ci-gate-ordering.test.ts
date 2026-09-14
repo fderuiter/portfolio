@@ -73,4 +73,63 @@ describe("CI Gate Ordering", () => {
     expect(gitignore).toMatch(/^\/?\.benchmark-results\/?$/m);
     expect(gitignore).toMatch(/^\/?\.next\/?$/m);
   });
+
+  /**
+   * CI-02: `merge-gate` is the single required-status-check job, and it must
+   * physically depend (`needs:`) on every job that gates a merge. GitHub only
+   * schedules `merge-gate` once its `needs:` predecessors have finished, so
+   * this ordering is what makes "wait for every required job's real result"
+   * possible at all -- get the job order or the `needs:` graph wrong and the
+   * summary step can run (and pass) before the jobs it is meant to police.
+   */
+  describe("Merge Gate Dependency Ordering", () => {
+    /** Index of the line declaring a top-level job (2-space indent). */
+    const jobIndex = (job: string): number =>
+      ci.split("\n").findIndex((line) => line === `  ${job}:`);
+
+    it("declares fast-gate, security-gate, heavy-gate, and device-gate before merge-gate", () => {
+      const mergeGate = jobIndex("merge-gate");
+      expect(mergeGate).toBeGreaterThan(-1);
+
+      for (const predecessor of [
+        "fast-gate",
+        "security-gate",
+        "heavy-gate",
+        "device-gate",
+      ]) {
+        const index = jobIndex(predecessor);
+        expect(index, `expected a "${predecessor}:" job block`).toBeGreaterThan(
+          -1
+        );
+        expect(index).toBeLessThan(mergeGate);
+      }
+    });
+
+    it("lists merge-gate's needs so every gating job is included", () => {
+      const start = jobIndex("merge-gate");
+      const end = jobIndex("cross-device-matrix");
+      const lines = ci.split("\n");
+      const block = lines.slice(start, end).join("\n");
+
+      expect(block).toMatch(
+        /needs:\s*\[fast-gate,\s*security-gate,\s*heavy-gate,\s*device-gate\]/
+      );
+    });
+
+    it("keeps device-gate's own build before its device-specific Playwright run", () => {
+      const start = jobIndex("device-gate");
+      const end = jobIndex("merge-gate");
+      const lines = ci.split("\n");
+      const block = lines.slice(start, end).join("\n");
+
+      const build = block.indexOf("npm run build");
+      const playwright = block.indexOf(
+        "__tests__/e2e/visual.spec.ts __tests__/e2e/touch-controls.spec.ts"
+      );
+
+      expect(build).toBeGreaterThan(-1);
+      expect(playwright).toBeGreaterThan(-1);
+      expect(playwright).toBeGreaterThan(build);
+    });
+  });
 });

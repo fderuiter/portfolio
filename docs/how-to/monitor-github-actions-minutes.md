@@ -53,15 +53,101 @@ runs, repeated pushes while chasing a flaky test):
 - `heavy-gate` (build, bundle budget, Playwright, Web Vitals) runs only on
   PR pushes, and only against the `chromium` Playwright project instead of
   all four configured device projects.
-- `post-merge-device-smoke` runs only on the `main` push after a squash
-  merge, and only runs the two genuinely device-engine-dependent specs
-  (`visual.spec.ts`, `touch-controls.spec.ts`) against the three non-chromium
-  projects — coverage the PR run did not have, without repeating the full
-  suite a second time on identical code.
+- `device-gate` runs only on PR pushes, alongside `heavy-gate`, and runs the
+  two genuinely device-engine-dependent specs (`visual.spec.ts`,
+  `touch-controls.spec.ts`) against the three non-chromium projects —
+  coverage `heavy-gate`'s single `chromium` project does not have. This used
+  to be a separate `post-merge-device-smoke` job that ran only after a
+  squash-merge landed on `main` (see CI-02 below); it does not repeat the
+  full suite a second time on identical code.
+- `merge-gate` is a required-checks summary job: it `needs:` every job above
+  and fails deliberately unless each one that is supposed to run for the
+  triggering event actually reported success. See "Required branch
+  protection checks (#732)" below.
 - `cross-device-matrix` (the full four-device matrix against the full suite)
   is `workflow_dispatch`-only, for a release or a device-sensitive change
   that specifically warrants it.
 - The stale `dev` branch trigger was removed; `dev` no longer exists.
+
+## CI-02: targeted device coverage now gates the merge, not just `main`
+
+Before this change, `device-gate` was `post-merge-device-smoke`: it ran only
+on the `push` to `main` after a squash-merge, so a device-engine regression
+(a pixel-diff drift or a touch-only interaction bug) could land on `main`
+before anything caught it — the PR's own `heavy-gate` run only exercised
+`chromium`. `device-gate` now runs on the pull request itself, alongside
+`heavy-gate`, so both the full-suite `chromium` run and the targeted
+`Tablet Safari` / `Mobile Safari` / `Mobile Chrome` run of `visual.spec.ts`
+and `touch-controls.spec.ts` gate the merge. Nothing now re-runs that
+targeted suite a second time on the post-merge push — the reduced-scope
+split from #733/#775 (one four-device matrix run per merge, not per push and
+per PR) is unchanged, just relocated to before the merge instead of after.
+
+`main`-push confirmation stays deliberately bounded to `fast-gate` and
+`security-gate` — a safety net for a direct push that bypasses PR review
+(relevant only until #732's branch protection is confirmed active), not a
+repeat of the build/Playwright work the merged PR already did. The full
+four-device matrix remains a one-click `workflow_dispatch` job
+(`cross-device-matrix`); nothing here changes when or how often that runs
+automatically (it doesn't).
+
+### Required branch protection checks (#732)
+
+`.github/workflows/ci.yml` now exposes one job whose sole purpose is to be
+the required status check: **`Merge Gate (Required Checks Summary)`** (the
+`merge-gate` job's `name:`). Require exactly that check under Settings →
+Branches → branch protection rule for `main` → "Require status checks to
+pass before merging".
+
+This replaces the two check names #732 originally listed
+(`Rigor Ecosystem (Logic, Visual, Performance)` and
+`Security Gate (Vulnerability Audit)`) — the first no longer exists under
+that name since #775 split it into `fast-gate`/`heavy-gate`/`device-gate`.
+Requiring the individual job names directly does not work correctly here:
+`heavy-gate` and `device-gate` both carry an `if: github.event_name ==
+'pull_request'` condition, and GitHub's required-status-checks rule treats a
+job skipped by its own `if:` (or skipped as a side effect of a failed
+`needs:` predecessor) the same as a job that never applied — a "skipped"
+conclusion satisfies the requirement instead of blocking it. `merge-gate`
+runs with `if: always()` specifically to stay unaffected by that, then
+inspects `needs.<job>.result` for every job that should have run for the
+current event and fails unless each one is literally `"success"` — so a
+cancelled Playwright run, a failed `fast-gate`, or an unexpectedly skipped
+`device-gate` cannot produce a passing `merge-gate`, and requiring that one
+check is sufficient; requiring the four upstream jobs individually as well
+is redundant (harmless, but adds nothing `merge-gate` doesn't already
+depend on).
+
+`security-gate` remains unconditional (no `if:`), so its `"security-gate"`
+check name is safe to require directly as well if the repo owner wants
+defense-in-depth beyond `merge-gate` alone — but `merge-gate` failing
+already implies `security-gate` failed or was skipped, so it is not
+required for correctness.
+
+### What is still not measured (remaining cost gate)
+
+This task did not, and could not, produce a live CI run: GitHub Actions is
+currently blocked on this account by a billing/spending-limit issue
+(see #733's tracking comments), independent of the workflow content. That
+means:
+
+- The `timeout-minutes` values on `fast-gate` (20), `heavy-gate` (40), and
+  `device-gate` (25, inherited unchanged from the former
+  `post-merge-device-smoke`) are still the estimates #733/#775 documented as
+  provisional, not measurements. Moving `device-gate` to run pre-merge does
+  not change its own cost, only when it runs — but it now runs on every PR
+  push instead of only on every `main` push, which does change the
+  *aggregate* monthly cost and has not been measured either.
+  See "Check before a heavy iteration day" above and re-run that check after
+  this change ships and Actions minutes are available again.
+- Whether `merge-gate` behaves as designed against real GitHub scheduling
+  (a genuinely cancelled `heavy-gate` run, a genuinely skipped `device-gate`
+  outside a PR) is verified here only by unit tests against the workflow
+  YAML (`__tests__/ci-execution-policy.test.ts`,
+  `__tests__/ci-gate-ordering.test.ts`) — not by an actual run. Confirm with
+  one real PR once Actions minutes are available.
+- #733 is not closed by this change; its own acceptance criteria (a real
+  measured run confirming aggregate cost fits the allowance) remain open.
 
 ## Refresh this page
 
