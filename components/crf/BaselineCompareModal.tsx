@@ -30,7 +30,7 @@ export interface BaselineCompareNavigationTarget {
   visitId?: string;
 }
 
-export interface BaselineCompareModalProps {
+interface BaselineCompareModalProps {
   isOpen: boolean;
   onClose: () => void;
   study: StudyProtocol;

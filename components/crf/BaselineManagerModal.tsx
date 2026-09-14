@@ -25,7 +25,7 @@ import {
   importBaselinesBundle,
 } from "@/lib/crf/study-baselines";
 
-export interface BaselineManagerModalProps {
+interface BaselineManagerModalProps {
   isOpen: boolean;
   onClose: () => void;
   study: StudyProtocol;
