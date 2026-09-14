@@ -166,8 +166,10 @@ test.describe("Working With Duck - Interruption Suspension E2E (#602)", () => {
       .locator('button[title*="Scrapbook"]:visible')
       .first();
     await scrapbookBtn.click();
-    const dialog = page.getByRole("dialog");
-    await expect(dialog).toBeVisible({ timeout: 5000 });
+    const scrapbookDialog = page.locator(
+      '[aria-labelledby="duck-scrapbook-dialog-heading"]'
+    );
+    await expect(scrapbookDialog).toBeVisible({ timeout: 5000 });
 
     const pausedProgress = Number(
       await progressMeter.getAttribute("aria-valuenow")
@@ -175,7 +177,7 @@ test.describe("Working With Duck - Interruption Suspension E2E (#602)", () => {
 
     // 3. Dismiss scrapbook with Escape: manual pause must persist!
     await page.keyboard.press("Escape");
-    await expect(dialog).toBeHidden({ timeout: 5000 });
+    await expect(scrapbookDialog).toBeHidden({ timeout: 5000 });
 
     // Pause overlay MUST still be present
     await expect(pauseOverlay).toBeVisible({ timeout: 5000 });
@@ -201,5 +203,77 @@ test.describe("Working With Duck - Interruption Suspension E2E (#602)", () => {
       );
       expect(currentProgress).toBeGreaterThan(pausedProgress);
     }).toPass({ timeout: 10000 });
+  });
+
+  test("suspends simulation while wardrobe modal is open and resumes upon dismissal", async ({
+    page,
+  }) => {
+    await launchAndStartDuck(page);
+
+    const progressMeter = page.locator('[aria-label="Work Progress"]');
+    const wardrobeBtn = page
+      .locator('button[title*="Wardrobe"]:visible')
+      .first();
+    await expect(wardrobeBtn).toBeVisible({ timeout: 5000 });
+
+    // Open wardrobe
+    await wardrobeBtn.click();
+
+    // Verify wardrobe dialog is open
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible({ timeout: 5000 });
+    await expect(dialog.getByText("Duck's Wardrobe")).toBeVisible();
+
+    const pausedProgress = Number(
+      await progressMeter.getAttribute("aria-valuenow")
+    );
+
+    // Wait 1.5 seconds: simulation must be frozen
+    await page.waitForTimeout(1500);
+    const progressAfterWait = Number(
+      await progressMeter.getAttribute("aria-valuenow")
+    );
+    expect(progressAfterWait).toBe(pausedProgress);
+
+    // Dismiss dialog using Escape key
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden({ timeout: 5000 });
+
+    // Progress must resume advancing
+    await expect(async () => {
+      const currentProgress = Number(
+        await progressMeter.getAttribute("aria-valuenow")
+      );
+      expect(currentProgress).toBeGreaterThan(pausedProgress);
+    }).toPass({ timeout: 10000 });
+  });
+
+  test("ensures header pause button does not invert to Resume while reading overlay is open", async ({
+    page,
+  }) => {
+    await launchAndStartDuck(page);
+
+    // Open scrapbook
+    const scrapbookBtn = page
+      .locator('button[title*="Scrapbook"]:visible')
+      .first();
+    await scrapbookBtn.click();
+
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible({ timeout: 5000 });
+
+    // Header pause button must NOT display Resume Sprint while reading
+    const resumeBtn = page.locator('button[title*="Resume Sprint"]:visible');
+    await expect(resumeBtn).toHaveCount(0);
+
+    // Dismiss dialog
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden({ timeout: 5000 });
+
+    // Now header button is back to active Pause Sprint
+    const pauseBtn = page
+      .locator('button[title*="Pause Sprint"]:visible')
+      .first();
+    await expect(pauseBtn).toBeVisible();
   });
 });

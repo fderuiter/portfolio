@@ -95,23 +95,8 @@ import {
   enterBathtub,
 } from "@/lib/working-with-duck-engine";
 
-const storageStore: Record<string, string> = {};
-Object.defineProperty(globalThis, "localStorage", {
-  value: {
-    getItem: (k: string) => storageStore[k] || null,
-    setItem: (k: string, v: string) => {
-      storageStore[k] = String(v);
-    },
-    removeItem: (k: string) => {
-      delete storageStore[k];
-    },
-    clear: () => {
-      Object.keys(storageStore).forEach((k) => delete storageStore[k]);
-    },
-    key: () => null,
-    length: 0,
-  },
-  writable: true,
+beforeEach(() => {
+  localStorage.clear();
 });
 
 async function clickByText(container: HTMLElement, text: string | RegExp) {
@@ -166,7 +151,7 @@ describe("Working With Duck - Interruption Suspension (DUCK-01)", () => {
   let root: Root;
 
   beforeEach(() => {
-    Object.keys(storageStore).forEach((k) => delete storageStore[k]);
+    localStorage.clear();
     randomSpy = vi.spyOn(Math, "random").mockReturnValue(0.95);
     rafCallback = { current: null };
     originalRaf = window.requestAnimationFrame;
@@ -447,16 +432,24 @@ describe("Working With Duck - Interruption Suspension (DUCK-01)", () => {
     // 2. Open scrapbook while manually paused
     const scrapbookBtn = firstByTitle(container, "Duck Scrapbook & Facts");
     await clickEl(scrapbookBtn);
-    expect(container.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(
+      container.querySelector(
+        '[aria-labelledby="duck-scrapbook-dialog-heading"]'
+      )
+    ).not.toBeNull();
 
     const progressFrozen = readWorkProgressPercent(container);
 
     // 3. Close scrapbook: manual pause MUST persist!
     const closeBtn = container.querySelector(
-      '[role="dialog"] button'
+      '[aria-labelledby="duck-scrapbook-dialog-heading"] button'
     ) as HTMLElement;
     await clickEl(closeBtn);
-    expect(container.querySelector('[role="dialog"]')).toBeNull();
+    expect(
+      container.querySelector(
+        '[aria-labelledby="duck-scrapbook-dialog-heading"]'
+      )
+    ).toBeNull();
 
     // Pause overlay must still be active!
     expect(
@@ -764,5 +757,109 @@ describe("Working With Duck - Interruption Suspension (DUCK-01)", () => {
       document.dispatchEvent(new Event("visibilitychange"));
       window.dispatchEvent(new KeyboardEvent("keydown", { key: "p" }));
     }).not.toThrow();
+  });
+
+  it("suspends simulation while Field Manual is open and resumes when closed (#602)", async () => {
+    await act(async () => {
+      root.render(<WorkingWithDuck />);
+    });
+
+    await clickByText(container, /Start Sprint 1/);
+    await advanceFrames(10, 0);
+    const initialProgress = readWorkProgressPercent(container);
+
+    // Click Manual button
+    const manualBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Manual")
+    );
+    expect(manualBtn).toBeDefined();
+    await act(async () => {
+      manualBtn!.click();
+    });
+
+    // Verify modal is open
+    const manualModal = container.querySelector('[role="dialog"]');
+    expect(manualModal).not.toBeNull();
+
+    // Advance 60 frames while manual is open
+    await advanceFrames(60, 100);
+    expect(readWorkProgressPercent(container)).toBe(initialProgress);
+
+    // Close manual dialog by pressing Escape
+    await act(async () => {
+      window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    });
+
+    // Advance frames after closing: simulation resumes
+    await advanceFrames(30, 2000);
+    expect(readWorkProgressPercent(container)).toBeGreaterThan(initialProgress);
+  });
+
+  it("ensures pause button does not invert to Resume while reading modal is open (#602)", async () => {
+    await act(async () => {
+      root.render(<WorkingWithDuck />);
+    });
+
+    await clickByText(container, /Start Sprint 1/);
+    await advanceFrames(10, 0);
+
+    // Open scrapbook
+    const scrapbookBtn = firstByTitle(container, "Duck Scrapbook & Facts");
+    await clickEl(scrapbookBtn);
+
+    // Pause button in the background deck should NOT say Resume Sprint
+    const pauseBtn = container.querySelector(
+      'button[title*="Resume Sprint"], button[aria-label*="Resume Sprint"]'
+    );
+    expect(pauseBtn).toBeNull();
+
+    // Close scrapbook
+    await act(async () => {
+      window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    });
+
+    // Pause button still says Pause Sprint
+    const activePauseBtn = container.querySelector(
+      'button[title="Pause Sprint (P)"]'
+    );
+    expect(activePauseBtn).not.toBeNull();
+  });
+
+  it("uses dynamic Run copy instead of Sprint when playing in Endless Mode (#602)", async () => {
+    const endlessState = createInitialDuckGameState(1, "endless");
+    const testContainer = document.createElement("div");
+    document.body.appendChild(testContainer);
+    const testRoot = createRoot(testContainer);
+
+    await act(async () => {
+      testRoot.render(<WorkingWithDuck initialState={endlessState} />);
+    });
+
+    // Start Endless Mode
+    await clickByText(testContainer, /Start Endless Mode/);
+
+    // Check pause button copy
+    const pauseBtn = testContainer.querySelector<HTMLButtonElement>(
+      'button[title="Pause Run (P)"]'
+    );
+    expect(pauseBtn).not.toBeNull();
+
+    // Pause the run
+    await act(async () => {
+      pauseBtn!.click();
+    });
+
+    // Overlay heading should say Run Paused
+    const overlay = testContainer.querySelector(
+      '[data-testid="duck-pause-overlay"]'
+    );
+    expect(overlay).not.toBeNull();
+    expect(overlay!.textContent).toContain("Run Paused");
+    expect(overlay!.textContent).toContain("Resume Run");
+
+    await act(async () => {
+      testRoot.unmount();
+    });
+    testContainer.remove();
   });
 });

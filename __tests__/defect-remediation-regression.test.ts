@@ -1125,4 +1125,39 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
       expect(wiped4.fogLevel).toBe(0);
     });
   });
+
+  describe("Working With Duck - Interruption Suspension & State Preservation Regression (#602)", () => {
+    it("preserves work progress, bladder, and excitement invariantly when game status is paused", () => {
+      const state = createInitialDuckGameState(1);
+      state.status = "running";
+      state.workProgress = 42;
+      state.excitement = 75;
+      state.bladder = 30;
+
+      // In paused status, stepping must not advance progress or decay stats
+      const pausedState = { ...state, status: "paused" as const };
+      const afterPauseStep = stepDuckGame(pausedState);
+
+      expect(afterPauseStep.status).toBe("paused");
+      expect(afterPauseStep.workProgress).toBe(42);
+      expect(afterPauseStep.excitement).toBe(75);
+      expect(afterPauseStep.bladder).toBe(30);
+    });
+
+    it("ensures terminal win and failed states cannot be unpaused or mutated by stepping", () => {
+      const wonState = createInitialDuckGameState(1);
+      wonState.status = "won";
+      wonState.workProgress = 100;
+      const steppedWon = stepDuckGame(wonState);
+      expect(steppedWon.status).toBe("won");
+      expect(steppedWon.workProgress).toBe(100);
+
+      const failedState = createInitialDuckGameState(1);
+      failedState.status = "failed";
+      failedState.workProgress = 15;
+      const steppedFailed = stepDuckGame(failedState);
+      expect(steppedFailed.status).toBe("failed");
+      expect(steppedFailed.workProgress).toBe(15);
+    });
+  });
 });

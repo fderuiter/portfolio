@@ -1624,7 +1624,8 @@ function drawCanvas(
 
 // --- Main React Component ---
 
-type InterruptionReason = "manual" | "scrapbook" | "wardrobe" | "hidden";
+type InterruptionReason =
+  "manual" | "scrapbook" | "wardrobe" | "manual_guide" | "hidden";
 
 interface WorkingWithDuckProps {
   /**
@@ -1667,6 +1668,8 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
   const [uiState, setUiState] = useState<WorkingWithDuckState>(
     () => initialState ?? createDefaultState()
   );
+  const [isManualPauseActive, setIsManualPauseActive] = useState(false);
+  const isManuallyPaused = uiState.status === "paused" && isManualPauseActive;
   const [isScrapbookOpen, setIsScrapbookOpen] = useState(false);
   const [isWardrobeOpen, setIsWardrobeOpen] = useState(false);
   const [activeScrapbookIndex, setActiveScrapbookIndex] = useState(0);
@@ -1761,12 +1764,15 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
   const toggleManualPause = useCallback(() => {
     const currentStatus = gameStateRef.current.status;
     if (currentStatus === "running") {
+      setIsManualPauseActive(true);
       addInterruption("manual");
     } else if (currentStatus === "paused") {
       if (activeInterruptionsRef.current.has("manual")) {
+        setIsManualPauseActive(false);
         removeInterruption("manual");
       } else {
-        activeInterruptionsRef.current.add("manual");
+        setIsManualPauseActive(true);
+        addInterruption("manual");
       }
     }
   }, [addInterruption, removeInterruption]);
@@ -1791,22 +1797,16 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
     removeInterruption("wardrobe");
   }, [removeInterruption]);
 
-  // Synchronize scrapbook and wardrobe modal states with the interruption coordinator
-  useEffect(() => {
-    if (isScrapbookOpen) {
-      addInterruption("scrapbook");
-    } else {
-      removeInterruption("scrapbook");
-    }
-  }, [isScrapbookOpen, addInterruption, removeInterruption]);
-
-  useEffect(() => {
-    if (isWardrobeOpen) {
-      addInterruption("wardrobe");
-    } else {
-      removeInterruption("wardrobe");
-    }
-  }, [isWardrobeOpen, addInterruption, removeInterruption]);
+  const handleManualOpenChange = useCallback(
+    (isOpen: boolean) => {
+      if (isOpen) {
+        addInterruption("manual_guide");
+      } else {
+        removeInterruption("manual_guide");
+      }
+    },
+    [addInterruption, removeInterruption]
+  );
 
   // Document visibility change listener (suspends simulation when tab is backgrounded)
   useEffect(() => {
@@ -1867,6 +1867,16 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
   const scrapbookTrapRef = useFocusTrap<HTMLDivElement>(isScrapbookOpen, {
     onEscape: () => closeScrapbook(),
   });
+
+  const pauseTrapRef = useFocusTrap<HTMLDivElement>(
+    uiState.status === "paused" &&
+      isManuallyPaused &&
+      !isScrapbookOpen &&
+      !isWardrobeOpen,
+    {
+      onEscape: () => toggleManualPause(),
+    }
+  );
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { toGameCoordinates } = useResponsiveCanvas({
@@ -2401,14 +2411,23 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
         uiState.status === "running" &&
         lastAnnouncedStatusRef.current === "idle"
       ) {
-        announce("Sprint started.", "polite");
+        announce(
+          `${uiState.mode === "endless" ? "Run" : "Sprint"} started.`,
+          "polite"
+        );
       } else if (uiState.status === "paused") {
-        announce("Sprint paused.", "polite");
+        announce(
+          `${uiState.mode === "endless" ? "Run" : "Sprint"} paused.`,
+          "polite"
+        );
       } else if (
         uiState.status === "running" &&
         lastAnnouncedStatusRef.current === "paused"
       ) {
-        announce("Sprint resumed.", "polite");
+        announce(
+          `${uiState.mode === "endless" ? "Run" : "Sprint"} resumed.`,
+          "polite"
+        );
       }
       lastAnnouncedStatusRef.current = uiState.status;
     }
@@ -2841,6 +2860,40 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
     }
   }
 
+  const sessionLabel = uiState.mode === "endless" ? "Run" : "Sprint";
+
+  const renderPauseButton = (isQuickMeta: boolean) => (
+    <button
+      onClick={toggleManualPause}
+      disabled={uiState.status !== "running" && !isManuallyPaused}
+      className={`${
+        isQuickMeta ? "p-2" : "p-2.5"
+      } rounded-xl border transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-[0.98] ${
+        uiState.status !== "running" && !isManuallyPaused
+          ? "border-zinc-800/40 bg-zinc-900/30 text-zinc-600 cursor-not-allowed"
+          : isManuallyPaused
+            ? "border-amber-500/50 bg-amber-500/20 text-amber-300 hover:text-white cursor-pointer"
+            : "border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white cursor-pointer"
+      }`}
+      title={
+        isManuallyPaused
+          ? `Resume ${sessionLabel}${isQuickMeta ? " (P)" : ""}`
+          : `Pause ${sessionLabel}${isQuickMeta ? " (P)" : ""}`
+      }
+      aria-label={
+        isManuallyPaused
+          ? `Resume ${sessionLabel}${isQuickMeta ? " (P)" : ""}`
+          : `Pause ${sessionLabel}${isQuickMeta ? " (P)" : ""}`
+      }
+    >
+      {isManuallyPaused ? (
+        <IconPlayerPlay className="w-4 h-4 text-amber-400 fill-current" />
+      ) : (
+        <IconPlayerPause className="w-4 h-4" />
+      )}
+    </button>
+  );
+
   return (
     <div
       ref={containerRef}
@@ -3141,44 +3194,58 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                 <span>Wardrobe</span>
               </button>
 
-              <FieldManualButton manualId="working-with-duck" label="Manual" />
+              <FieldManualButton
+                manualId="working-with-duck"
+                label="Manual"
+                onOpenChange={handleManualOpenChange}
+              />
             </div>
           </div>
         )}
 
         {/* Paused Overlay Screen */}
-        {uiState.status === "paused" && !isScrapbookOpen && !isWardrobeOpen && (
-          <div
-            data-testid="duck-pause-overlay"
-            className="absolute inset-0 bg-black/85 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-6 text-center z-20 overflow-y-auto"
-          >
-            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-2 sm:mb-4 shrink-0">
-              <IconPlayerPause className="w-6 h-6 sm:w-8 sm:h-8" />
-            </div>
-            <h2 className="text-xl sm:text-3xl font-extrabold font-mono text-white mb-1 sm:mb-2">
-              Sprint <span className="text-amber-400">Paused</span>
-            </h2>
-            <p className="text-[11px] sm:text-xs font-mono text-amber-300 font-bold mb-1 sm:mb-2">
-              {uiState.mode === "endless"
-                ? "Endless Mode · Paused"
-                : `Sprint ${uiState.currentLevel} · Paused`}
-            </p>
-            <p className="max-w-md text-[11px] sm:text-sm text-zinc-300 font-mono mb-4 sm:mb-6 leading-relaxed">
-              Duck is taking a quick breather. Press{" "}
-              <kbd className="px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-amber-300 font-mono text-[11px]">
-                P
-              </kbd>{" "}
-              or click below to resume.
-            </p>
-            <button
-              onClick={toggleManualPause}
-              className="px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl bg-amber-400 text-black font-mono font-bold text-xs sm:text-sm hover:bg-white hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(251,191,36,0.4)] flex items-center gap-2 cursor-pointer min-h-[44px]"
+        {uiState.status === "paused" &&
+          isManuallyPaused &&
+          !isScrapbookOpen &&
+          !isWardrobeOpen && (
+            <div
+              ref={pauseTrapRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="duck-pause-overlay-heading"
+              data-testid="duck-pause-overlay"
+              className="absolute inset-0 bg-black/85 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-6 text-center z-20 overflow-y-auto"
             >
-              <IconPlayerPlay className="w-4 h-4 fill-current" />
-              <span>Resume Sprint</span>
-            </button>
-          </div>
-        )}
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-2 sm:mb-4 shrink-0">
+                <IconPlayerPause className="w-6 h-6 sm:w-8 sm:h-8" />
+              </div>
+              <h2
+                id="duck-pause-overlay-heading"
+                className="text-xl sm:text-3xl font-extrabold font-mono text-white mb-1 sm:mb-2"
+              >
+                {sessionLabel} <span className="text-amber-400">Paused</span>
+              </h2>
+              <p className="text-[11px] sm:text-xs font-mono text-amber-300 font-bold mb-1 sm:mb-2">
+                {uiState.mode === "endless"
+                  ? "Endless Mode · Paused"
+                  : `Sprint ${uiState.currentLevel} · Paused`}
+              </p>
+              <p className="max-w-md text-[11px] sm:text-sm text-zinc-300 font-mono mb-4 sm:mb-6 leading-relaxed">
+                Duck is taking a quick breather. Press{" "}
+                <kbd className="px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-amber-300 font-mono text-[11px]">
+                  P
+                </kbd>{" "}
+                or click below to resume.
+              </p>
+              <button
+                onClick={toggleManualPause}
+                className="px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl bg-amber-400 text-black font-mono font-bold text-xs sm:text-sm hover:bg-white hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(251,191,36,0.4)] flex items-center gap-2 cursor-pointer min-h-[44px]"
+              >
+                <IconPlayerPlay className="w-4 h-4 fill-current" />
+                <span>Resume {sessionLabel}</span>
+              </button>
+            </div>
+          )}
 
         {/* Combo Streak Notification Overlay */}
         {uiState.comboStreak >= 2 && (
@@ -3457,31 +3524,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
 
           {/* Mobile Meta Controls Strip */}
           <div className="flex flex-wrap items-center justify-center gap-1.5 pt-2 border-t border-zinc-800/80">
-            <button
-              onClick={toggleManualPause}
-              disabled={
-                uiState.status !== "running" && uiState.status !== "paused"
-              }
-              className={`p-2.5 rounded-xl border transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${
-                uiState.status !== "running" && uiState.status !== "paused"
-                  ? "border-zinc-800/40 bg-zinc-900/30 text-zinc-600 cursor-not-allowed"
-                  : uiState.status === "paused"
-                    ? "border-amber-500/50 bg-amber-500/20 text-amber-300 hover:text-white cursor-pointer"
-                    : "border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white cursor-pointer"
-              }`}
-              title={
-                uiState.status === "paused" ? "Resume Sprint" : "Pause Sprint"
-              }
-              aria-label={
-                uiState.status === "paused" ? "Resume Sprint" : "Pause Sprint"
-              }
-            >
-              {uiState.status === "paused" ? (
-                <IconPlayerPlay className="w-4 h-4 text-amber-400 fill-current" />
-              ) : (
-                <IconPlayerPause className="w-4 h-4" />
-              )}
-            </button>
+            {renderPauseButton(false)}
 
             <button
               onClick={openWardrobe}
@@ -3523,7 +3566,11 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
               )}
             </button>
 
-            <FieldManualButton manualId="working-with-duck" label="Manual" />
+            <FieldManualButton
+              manualId="working-with-duck"
+              label="Manual"
+              onOpenChange={handleManualOpenChange}
+            />
             <FullscreenButton
               isFullscreen={isFullscreen}
               onToggle={toggleFullscreen}
@@ -3773,35 +3820,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
 
             {/* Quick Meta Controls */}
             <div className="flex items-center gap-2">
-              <button
-                onClick={toggleManualPause}
-                disabled={
-                  uiState.status !== "running" && uiState.status !== "paused"
-                }
-                className={`p-2 rounded-xl border transition-colors ${
-                  uiState.status !== "running" && uiState.status !== "paused"
-                    ? "border-zinc-800/40 bg-zinc-900/30 text-zinc-600 cursor-not-allowed"
-                    : uiState.status === "paused"
-                      ? "border-amber-500/50 bg-amber-500/20 text-amber-300 hover:text-white cursor-pointer"
-                      : "border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white cursor-pointer"
-                }`}
-                title={
-                  uiState.status === "paused"
-                    ? "Resume Sprint (P)"
-                    : "Pause Sprint (P)"
-                }
-                aria-label={
-                  uiState.status === "paused"
-                    ? "Resume Sprint (P)"
-                    : "Pause Sprint (P)"
-                }
-              >
-                {uiState.status === "paused" ? (
-                  <IconPlayerPlay className="w-4 h-4 text-amber-400 fill-current" />
-                ) : (
-                  <IconPlayerPause className="w-4 h-4" />
-                )}
-              </button>
+              {renderPauseButton(true)}
 
               <button
                 onClick={openWardrobe}
@@ -3843,7 +3862,11 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                 )}
               </button>
 
-              <FieldManualButton manualId="working-with-duck" label="Manual" />
+              <FieldManualButton
+                manualId="working-with-duck"
+                label="Manual"
+                onOpenChange={handleManualOpenChange}
+              />
               <FullscreenButton
                 isFullscreen={isFullscreen}
                 onToggle={toggleFullscreen}
