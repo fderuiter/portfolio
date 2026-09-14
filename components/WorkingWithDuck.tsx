@@ -1672,6 +1672,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
   const isManuallyPaused = uiState.status === "paused" && isManualPauseActive;
   const [isScrapbookOpen, setIsScrapbookOpen] = useState(false);
   const [isWardrobeOpen, setIsWardrobeOpen] = useState(false);
+  const [isManualOpen, setIsManualOpen] = useState(false);
   const [activeScrapbookIndex, setActiveScrapbookIndex] = useState(0);
   const [scrapbookViewMode, setScrapbookViewMode] = useState<
     "photo" | "vector"
@@ -1797,12 +1798,23 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
     removeInterruption("wardrobe");
   }, [removeInterruption]);
 
+  const openManualsCountRef = useRef(0);
+
   const handleManualOpenChange = useCallback(
     (isOpen: boolean) => {
       if (isOpen) {
+        openManualsCountRef.current += 1;
+        setIsManualOpen(true);
         addInterruption("manual_guide");
       } else {
-        removeInterruption("manual_guide");
+        openManualsCountRef.current = Math.max(
+          0,
+          openManualsCountRef.current - 1
+        );
+        if (openManualsCountRef.current === 0) {
+          setIsManualOpen(false);
+          removeInterruption("manual_guide");
+        }
       }
     },
     [addInterruption, removeInterruption]
@@ -1833,6 +1845,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
     ) {
       wasRunningBeforeInterruptionRef.current = false;
       activeInterruptionsRef.current.clear();
+      openManualsCountRef.current = 0;
     }
   }, [uiState.status]);
 
@@ -1872,7 +1885,8 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
     uiState.status === "paused" &&
       isManuallyPaused &&
       !isScrapbookOpen &&
-      !isWardrobeOpen,
+      !isWardrobeOpen &&
+      !isManualOpen,
     {
       onEscape: () => toggleManualPause(),
     }
@@ -3198,6 +3212,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                 manualId="working-with-duck"
                 label="Manual"
                 onOpenChange={handleManualOpenChange}
+                isHotkeyOwner={false}
               />
             </div>
           </div>
@@ -3207,7 +3222,8 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
         {uiState.status === "paused" &&
           isManuallyPaused &&
           !isScrapbookOpen &&
-          !isWardrobeOpen && (
+          !isWardrobeOpen &&
+          !isManualOpen && (
             <div
               ref={pauseTrapRef}
               role="dialog"
@@ -3570,6 +3586,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
               manualId="working-with-duck"
               label="Manual"
               onOpenChange={handleManualOpenChange}
+              isHotkeyOwner={false}
             />
             <FullscreenButton
               isFullscreen={isFullscreen}
@@ -3866,6 +3883,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                 manualId="working-with-duck"
                 label="Manual"
                 onOpenChange={handleManualOpenChange}
+                isHotkeyOwner={true}
               />
               <FullscreenButton
                 isFullscreen={isFullscreen}
