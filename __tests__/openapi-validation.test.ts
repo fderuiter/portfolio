@@ -3,6 +3,7 @@ import { POST as telemetryPOST } from "@/app/api/telemetry/route";
 import { GET as syncGET } from "@/app/api/telemetry/sync/route";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
+import { openApiSpec } from "@/scripts/generate-openapi";
 
 // Mock database
 vi.mock("@/lib/db", () => {
@@ -119,7 +120,9 @@ describe("Declarative Zod Validation Endpoints", () => {
 
   describe("Sync Cron GET Validation", () => {
     it("successfully validates default query params", async () => {
-      vi.mocked(prisma.telemetryEvent.createMany).mockResolvedValue({ count: 0 });
+      vi.mocked(prisma.telemetryEvent.createMany).mockResolvedValue({
+        count: 0,
+      });
 
       const req = new NextRequest("http://localhost:3000/api/telemetry/sync", {
         method: "GET",
@@ -130,15 +133,36 @@ describe("Declarative Zod Validation Endpoints", () => {
     });
 
     it("fails validation if batch parameter is invalid", async () => {
-      const req = new NextRequest("http://localhost:3000/api/telemetry/sync?batch=-5", {
-        method: "GET",
-      });
+      const req = new NextRequest(
+        "http://localhost:3000/api/telemetry/sync?batch=-5",
+        {
+          method: "GET",
+        }
+      );
 
       const res = await syncGET(req);
       expect(res.status).toBe(400);
       const data = await res.json();
       expect(data.error).toBe("Validation failed");
       expect(data.details[0].path).toBe("batch");
+    });
+  });
+
+  describe("Admin blog draft collection contract", () => {
+    it("declares both authorized collection methods and their bounded contracts", () => {
+      const route = openApiSpec.paths["/api/admin/blog"];
+
+      expect(route.get).toBeDefined();
+      expect(route.post).toBeDefined();
+      expect(route.get?.parameters).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ name: "page" }),
+          expect.objectContaining({ name: "pageSize" }),
+        ])
+      );
+      expect(route.post?.requestBody).toBeDefined();
+      expect(openApiSpec.components.schemas.BlogDraftCreate).toBeDefined();
+      expect(openApiSpec.components.schemas.BlogDraftCollection).toBeDefined();
     });
   });
 });

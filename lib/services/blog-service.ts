@@ -3,8 +3,24 @@ import { env } from "@/lib/env";
 import { FALLBACK_BLOG_POSTS, BlogPostData } from "@/lib/fallback-blog-posts";
 import { redis, getScopedRedisKey, isRedisConfigured } from "@/lib/redis";
 import { CONTENT_PILLARS, type ContentPillar } from "@/lib/blog/types";
+import { sanitizeContentHtml } from "@/lib/content-sanitizer";
 
 export type { BlogPostData };
+
+export interface CreateBlogDraftInput {
+  title: string;
+  slug: string;
+  dek: string;
+  body: string;
+  pillar: ContentPillar;
+  tags: string;
+  hero_image_url: string | null;
+}
+
+export interface BlogDraftPagination {
+  page: number;
+  pageSize: number;
+}
 
 /**
  * Validates whether a pillar identifier matches the closed ContentPillar taxonomy.
@@ -241,6 +257,55 @@ async function safeRevalidateTag(tag: string): Promise<void> {
 }
 
 export class BlogPostService {
+  /**
+   * Retrieves only persisted unpublished drafts for the authenticated admin
+   * collection. This intentionally never consults the public fallback data.
+   */
+  static async getDraftBlogPosts({ page, pageSize }: BlogDraftPagination) {
+    const skip = (page - 1) * pageSize;
+    const [drafts, total] = await Promise.all([
+      prisma.blogPost.findMany({
+        where: { published: false },
+        orderBy: { updated_at: "desc" },
+        skip,
+        take: pageSize,
+      }),
+      prisma.blogPost.count({ where: { published: false } }),
+    ]);
+
+    return { drafts, total };
+  }
+
+  /**
+   * Persists an unpublished blog draft using server-owned publication state.
+   * The existing public cache is evicted only after Prisma confirms creation.
+   */
+  static async createDraftBlogPost(input: CreateBlogDraftInput) {
+    const sanitizedBody = sanitizeContentHtml(input.body);
+    const wordCount = sanitizedBody
+      .replace(/<[^>]*>/g, " ")
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean).length;
+
+    const created = await prisma.blogPost.create({
+      data: {
+        title: input.title,
+        slug: input.slug,
+        dek: input.dek,
+        body: sanitizedBody,
+        pillar: input.pillar,
+        tags: input.tags,
+        hero_image_url: input.hero_image_url,
+        reading_time_minutes: Math.max(1, Math.ceil(wordCount / 200)),
+        published: false,
+      },
+    });
+
+    await BlogPostService.evictBlogPostCache(input.slug);
+    return created;
+  }
+
   /**
    * Retrieves all published blog posts combining database records with
    * static fallbacks. Employs the Two-Tier Cache Shield (ADR 0036, ADR 0041):

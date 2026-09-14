@@ -771,6 +771,119 @@ export const openApiSpec = {
         },
       },
     },
+    "/api/admin/blog": {
+      get: {
+        summary: "List unpublished blog drafts",
+        description:
+          "Returns persisted unpublished BlogPost rows for authorized administrators only. Public fallback content is never used for this inventory.",
+        parameters: [
+          {
+            name: "page",
+            in: "query",
+            required: false,
+            schema: { type: "integer", minimum: 1, maximum: 10000, default: 1 },
+          },
+          {
+            name: "pageSize",
+            in: "query",
+            required: false,
+            schema: { type: "integer", minimum: 1, maximum: 100, default: 20 },
+          },
+        ],
+        responses: {
+          200: {
+            description: "Authenticated draft collection",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/BlogDraftCollection" },
+              },
+            },
+          },
+          400: {
+            description: "Invalid bounded pagination request",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ValidationError" },
+              },
+            },
+          },
+          403: {
+            description: "Administrator access required",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+          500: {
+            description: "Unable to load drafts from persistence",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+        },
+      },
+      post: {
+        summary: "Create an unpublished sanitized blog draft",
+        description:
+          "Creates a persisted BlogPost in server-owned unpublished state for an authorized administrator. Publication, identity, and timestamp fields are rejected.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/BlogDraftCreate" },
+            },
+          },
+        },
+        responses: {
+          201: {
+            description: "Sanitized unpublished draft created",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/BlogDraftCreateResponse",
+                },
+              },
+            },
+          },
+          400: {
+            description:
+              "Invalid body, taxonomy, field bounds, or mass-assignment attempt",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ValidationError" },
+              },
+            },
+          },
+          403: {
+            description: "Administrator access required",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+          409: {
+            description: "A draft with the slug already exists",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ValidationError" },
+              },
+            },
+          },
+          500: {
+            description: "Unable to create draft",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+        },
+      },
+    },
   },
   components: {
     schemas: {
@@ -864,6 +977,104 @@ export const openApiSpec = {
           },
         },
         required: ["title", "slug", "tags"],
+      },
+      BlogDraftCreate: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          title: { type: "string", minLength: 3, maxLength: 180 },
+          slug: {
+            type: "string",
+            minLength: 3,
+            maxLength: 120,
+            pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+          },
+          dek: { type: "string", minLength: 10, maxLength: 500 },
+          body: { type: "string", minLength: 1, maxLength: 50000 },
+          pillar: {
+            type: "string",
+            enum: [
+              "clinical-data-engineering",
+              "formal-verification",
+              "accessibility-engineering",
+              "browser-graphics-engineering",
+              "agent-first-dx",
+              "field-notes",
+            ],
+          },
+          tags: {
+            type: "array",
+            minItems: 1,
+            maxItems: 12,
+            items: { type: "string", minLength: 1, maxLength: 50 },
+          },
+          heroImageUrl: {
+            type: "string",
+            format: "uri",
+            maxLength: 2048,
+            nullable: true,
+          },
+        },
+        required: ["title", "slug", "dek", "body", "pillar", "tags"],
+      },
+      BlogDraft: {
+        type: "object",
+        properties: {
+          id: { type: "string" },
+          slug: { type: "string" },
+          title: { type: "string" },
+          dek: { type: "string" },
+          body: { type: "string", description: "Sanitized HTML" },
+          pillar: { type: "string" },
+          tags: {
+            type: "string",
+            description: "Persisted comma-separated tags",
+          },
+          published: { type: "boolean", enum: [false] },
+          reading_time_minutes: { type: "integer", minimum: 1, nullable: true },
+          hero_image_url: { type: "string", format: "uri", nullable: true },
+          created_at: { type: "string", format: "date-time" },
+          updated_at: { type: "string", format: "date-time" },
+        },
+        required: [
+          "id",
+          "slug",
+          "title",
+          "dek",
+          "body",
+          "pillar",
+          "tags",
+          "published",
+          "created_at",
+          "updated_at",
+        ],
+      },
+      BlogDraftCollection: {
+        type: "object",
+        properties: {
+          data: {
+            type: "array",
+            items: { $ref: "#/components/schemas/BlogDraft" },
+          },
+          pagination: {
+            type: "object",
+            properties: {
+              page: { type: "integer", minimum: 1 },
+              pageSize: { type: "integer", minimum: 1, maximum: 100 },
+              total: { type: "integer", minimum: 0 },
+            },
+            required: ["page", "pageSize", "total"],
+          },
+        },
+        required: ["data", "pagination"],
+      },
+      BlogDraftCreateResponse: {
+        type: "object",
+        properties: {
+          success: { type: "boolean", enum: [true] },
+          data: { $ref: "#/components/schemas/BlogDraft" },
+        },
+        required: ["success", "data"],
       },
       ErrorResponse: {
         type: "object",

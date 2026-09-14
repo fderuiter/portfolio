@@ -51,6 +51,7 @@
 - [lib/clinical-trial-chaos/sound-effects](lib/clinical-trial-chaos/sound-effects/README.md)
 - [lib/clinical-trial-chaos/types](lib/clinical-trial-chaos/types/README.md)
 - [lib/clipboard](lib/clipboard/README.md)
+- [lib/content-sanitizer](lib/content-sanitizer/README.md)
 - [lib/crf](lib/crf/README.md)
 - [lib/crf/ast-evaluator](lib/crf/ast-evaluator/README.md)
 - [lib/crf/branding-defaults](lib/crf/branding-defaults/README.md)
