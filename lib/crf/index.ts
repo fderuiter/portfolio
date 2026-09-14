@@ -37,5 +37,6 @@ export {
   CDASH_CORE_DOMAIN_VARIABLES,
 } from "./form-health";
 export * from "./study-auditor";
+export * from "./study-baseline-diff";
 export * from "./smart-blocks-engine";
 export * from "./presets";

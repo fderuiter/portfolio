@@ -82,6 +82,10 @@ const SpotlightTourOverlay = dynamic(
 import { StudioTerminal } from "./Terminal/StudioTerminal";
 import { SlashPaletteModal } from "./SlashPaletteModal";
 import { BaselineManagerModal } from "./BaselineManagerModal";
+import {
+  BaselineCompareModal,
+  type BaselineCompareNavigationTarget,
+} from "./BaselineCompareModal";
 import { SlashCommandItem } from "@/lib/crf/smart-blocks-engine";
 import type { StudyBaseline } from "@/lib/crf/types";
 import {
@@ -328,6 +332,21 @@ export const CRFStudioContainer: React.FC = () => {
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
   const [isSlashPaletteOpen, setIsSlashPaletteOpen] = useState(false);
   const [isBaselinesModalOpen, setIsBaselinesModalOpen] = useState(false);
+  const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
+  // Selected baseline for the comparison panel, seeded from the URL hash so
+  // reloading or reopening the page (#676) restores an equivalent comparison
+  // instead of silently dropping which baseline was being reviewed.
+  const [compareBaselineId, setCompareBaselineIdState] = useState<
+    string | null
+  >(() => {
+    if (typeof window !== "undefined") {
+      return (
+        new URLSearchParams(window.location.hash.slice(1)).get("compare") ||
+        null
+      );
+    }
+    return null;
+  });
   const [slashTargetSectionId, setSlashTargetSectionId] = useState<
     string | undefined
   >();
@@ -419,6 +438,20 @@ export const CRFStudioContainer: React.FC = () => {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setTheme("dark");
     }
+
+    const rawCompare = params.compare || null;
+    if (rawCompare !== compareBaselineId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setCompareBaselineIdState(rawCompare);
+    }
+    // Gated separately from the value-change check above: on first mount
+    // from a reopened/shared link, compareBaselineId is already seeded from
+    // the hash by its own initializer, so it can equal rawCompare on the
+    // very first effect run — this still needs to open the panel.
+    if (rawCompare && !isCompareModalOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setIsCompareModalOpen(true);
+    }
   }, [
     params,
     study?.forms,
@@ -429,6 +462,8 @@ export const CRFStudioContainer: React.FC = () => {
     selectedFieldId,
     leftTab,
     theme,
+    compareBaselineId,
+    isCompareModalOpen,
   ]);
 
   // Synchronized Setters with Hybrid Navigation
@@ -468,6 +503,14 @@ export const CRFStudioContainer: React.FC = () => {
     (fieldId: string | null) => {
       setSelectedFieldIdState(fieldId);
       setParam("field", fieldId, { replace: true });
+    },
+    [setParam]
+  );
+
+  const setCompareBaselineId = useCallback(
+    (baselineId: string | null) => {
+      setCompareBaselineIdState(baselineId);
+      setParam("compare", baselineId, { replace: true });
     },
     [setParam]
   );
@@ -1230,6 +1273,20 @@ export const CRFStudioContainer: React.FC = () => {
     setTimeout(() => setCopyToast(null), 4000);
   };
 
+  const handleCloseCompareModal = () => {
+    setIsCompareModalOpen(false);
+    setCompareBaselineId(null);
+  };
+
+  const handleNavigateFromCompare = (
+    target: BaselineCompareNavigationTarget
+  ) => {
+    setActiveMode(target.mode);
+    if (target.formId) setActiveFormId(target.formId);
+    if (target.visitId) setActiveVisitId(target.visitId);
+    setSelectedFieldId(target.fieldId || null);
+  };
+
   if (!study || !study.forms) {
     return <CRFStudioSkeleton />;
   }
@@ -1275,6 +1332,7 @@ export const CRFStudioContainer: React.FC = () => {
         onOpenBranding={() => setIsBrandingOpen(true)}
         onOpenExportDocument={() => setIsExportDocModalOpen(true)}
         onOpenBaselines={() => setIsBaselinesModalOpen(true)}
+        onOpenCompareBaseline={() => setIsCompareModalOpen(true)}
         onOpenWizard={() => setIsWizardOpen(true)}
         onStartSpotlightTour={() => setIsSpotlightTourOpen(true)}
         onCopyShareLink={handleCopyShareLink}
@@ -1966,6 +2024,15 @@ export const CRFStudioContainer: React.FC = () => {
         onClose={() => setIsBaselinesModalOpen(false)}
         study={study}
         onRestoreBaselineAsDraft={handleRestoreBaselineAsDraft}
+      />
+
+      <BaselineCompareModal
+        isOpen={isCompareModalOpen}
+        onClose={handleCloseCompareModal}
+        study={study}
+        initialBaselineId={compareBaselineId}
+        onSelectBaseline={setCompareBaselineId}
+        onNavigate={handleNavigateFromCompare}
       />
     </div>
   );
