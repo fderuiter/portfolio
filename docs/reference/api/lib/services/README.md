@@ -56,6 +56,18 @@ Re-exports [AllocateGarminMemorySpec](garmin/allocate-memory/spec/interfaces/All
 
 ***
 
+### BlogPostData
+
+Re-exports [BlogPostData](../fallback-blog-posts/interfaces/BlogPostData.md)
+
+***
+
+### BlogPostService
+
+Re-exports [BlogPostService](blog-service/classes/BlogPostService.md)
+
+***
+
 ### BufferedReactionEvent
 
 Re-exports [BufferedReactionEvent](case-study-service/interfaces/BufferedReactionEvent.md)
