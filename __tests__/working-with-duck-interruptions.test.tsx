@@ -1037,4 +1037,67 @@ describe("Working With Duck - Interruption Suspension (DUCK-01)", () => {
     });
     testContainer.remove();
   });
+
+  it("selects visible mobile manual owner on phone viewport and suspends simulation (DUCK-03)", async () => {
+    await act(async () => {
+      root.render(<WorkingWithDuck />);
+    });
+
+    await clickByText(container, /Start Sprint 1/);
+    let ts = await advanceFrames(10, 0);
+    const initialProgress = readWorkProgressPercent(container);
+
+    // Locate the mobile control deck manual button and the desktop hotbar manual button
+    const buttons = Array.from(
+      container.querySelectorAll<HTMLButtonElement>(
+        'button[aria-label*="Field Manual"]'
+      )
+    );
+
+    expect(buttons.length).toBeGreaterThanOrEqual(2);
+    // Find the mobile manual button (inside mobile dock) and desktop manual button
+    const mobileManualBtn = buttons[0];
+    const desktopManualBtn = buttons[1];
+
+    expect(mobileManualBtn).toBeDefined();
+    expect(desktopManualBtn).toBeDefined();
+
+    // Mock visibility for phone viewport: mobile visible, desktop hidden
+    mobileManualBtn!.checkVisibility = () => true;
+    desktopManualBtn!.checkVisibility = () => false;
+
+    // Press 'h' shortcut
+    await act(async () => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "h", bubbles: true })
+      );
+    });
+
+    // Modal opens inside the visible container
+    const dialog = container.querySelector('[role="dialog"]');
+    expect(dialog).not.toBeNull();
+    // Verify the dialog is attached to the visible mobile button hierarchy, NOT hidden desktop
+    const mobileContainer = mobileManualBtn!.closest(
+      'div[class*="[min-height:560px)]:hidden"]'
+    );
+    const desktopContainer = desktopManualBtn!.closest("div.hidden");
+    expect(mobileContainer?.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(desktopContainer?.querySelector('[role="dialog"]')).toBeNull();
+
+    // Advance 60 frames while manual is open: simulation remains suspended
+    ts = await advanceFrames(60, ts);
+    expect(readWorkProgressPercent(container)).toBe(initialProgress);
+
+    // Close manual dialog via 'h'
+    await act(async () => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "h", bubbles: true })
+      );
+    });
+    expect(container.querySelector('[role="dialog"]')).toBeNull();
+
+    // Resumes
+    await advanceFrames(30, ts);
+    expect(readWorkProgressPercent(container)).toBeGreaterThan(initialProgress);
+  });
 });

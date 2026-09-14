@@ -373,4 +373,70 @@ test.describe("Working With Duck - Interruption Suspension E2E (#602)", () => {
       expect(currentProgress).toBeGreaterThan(pausedProgress);
     }).toPass({ timeout: 10000 });
   });
+
+  test("suspends simulation on 1440x500 short desktop when Field Manual is opened via hotkey and resumes upon dismissal (DUCK-03)", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 500 });
+    await launchAndStartDuck(page);
+
+    const progressMeter = page.locator('[aria-label="Work Progress"]');
+
+    // Open Field Manual with '?' shortcut
+    await page.keyboard.press("?");
+
+    const manualDialog = page.locator('[aria-labelledby="manual-title"]');
+    await expect(manualDialog).toBeVisible({ timeout: 5000 });
+    await expect(
+      manualDialog.getByRole("heading", { name: /Working With Duck/i })
+    ).toBeVisible();
+
+    const pausedProgress = Number(
+      await progressMeter.getAttribute("aria-valuenow")
+    );
+
+    // Wait 1.5 seconds: simulation must remain suspended
+    await page.waitForTimeout(1500);
+    const progressAfterWait = Number(
+      await progressMeter.getAttribute("aria-valuenow")
+    );
+    expect(progressAfterWait).toBe(pausedProgress);
+
+    // Dismiss with Escape
+    await page.keyboard.press("Escape");
+    await expect(manualDialog).toBeHidden({ timeout: 5000 });
+
+    // Progress must resume advancing
+    await expect(async () => {
+      const currentProgress = Number(
+        await progressMeter.getAttribute("aria-valuenow")
+      );
+      expect(currentProgress).toBeGreaterThan(pausedProgress);
+    }).toPass({ timeout: 10000 });
+  });
+
+  test("coordinates Field Manual hotkey ownership across responsive viewport transitions (DUCK-03)", async ({
+    page,
+  }) => {
+    // Start at desktop size 1280x800
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await launchAndStartDuck(page);
+
+    // 1. Open and close on desktop
+    await page.keyboard.press("h");
+    const manualDialog = page.locator('[aria-labelledby="manual-title"]');
+    await expect(manualDialog).toBeVisible({ timeout: 5000 });
+    await page.keyboard.press("h");
+    await expect(manualDialog).toBeHidden({ timeout: 5000 });
+
+    // 2. Transition viewport down to phone size 375x667
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.waitForTimeout(300);
+
+    // Open on phone size: visible mobile control must capture shortcut
+    await page.keyboard.press("h");
+    await expect(manualDialog).toBeVisible({ timeout: 5000 });
+    await page.keyboard.press("Escape");
+    await expect(manualDialog).toBeHidden({ timeout: 5000 });
+  });
 });

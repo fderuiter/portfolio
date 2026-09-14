@@ -3586,7 +3586,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
               manualId="working-with-duck"
               label="Manual"
               onOpenChange={handleManualOpenChange}
-              isHotkeyOwner={false}
+              isHotkeyOwner={true}
             />
             <FullscreenButton
               isFullscreen={isFullscreen}
