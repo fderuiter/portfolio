@@ -58,7 +58,13 @@ describe("CI Workflow Dual Caching and Isolation Suite", () => {
         expect(restoreKeys).not.toBeNull();
 
         if (restoreKeys) {
-          expect(restoreKeys.length).toBeGreaterThanOrEqual(2);
+          // Exact, not >=: an unchecked third restore key -- e.g. an
+          // unscoped `playwright-chromium-` fallback with no branch or
+          // lockfile hash -- would silently restore *any* cache entry
+          // sharing that prefix, from any branch or lockfile version,
+          // defeating both isolation guarantees below without this test
+          // ever looking at it.
+          expect(restoreKeys.length).toBe(2);
           expect(restoreKeys[0]).toMatch(
             /playwright-chromium-\$\{\{\s*github\.head_ref\s*\|\|\s*github\.ref_name\s*\}\}-\$\{\{\s*hashFiles\(['"]package-lock\.json['"]\)\s*\}\}/
           );
@@ -84,7 +90,9 @@ describe("CI Workflow Dual Caching and Isolation Suite", () => {
         expect(restoreKeys).not.toBeNull();
 
         if (restoreKeys) {
-          expect(restoreKeys.length).toBeGreaterThanOrEqual(2);
+          // Exact, not >=: see the chromium block above for why an
+          // unchecked additional key is unsafe, not merely redundant.
+          expect(restoreKeys.length).toBe(2);
           expect(restoreKeys[0]).toMatch(
             /playwright-full-\$\{\{\s*github\.ref_name\s*\}\}-\$\{\{\s*hashFiles\(['"]package-lock\.json['"]\)\s*\}\}/
           );
@@ -147,6 +155,30 @@ describe("CI Workflow Dual Caching and Isolation Suite", () => {
           "          key: playwright-full-${{ github.ref_name }}-${{ hashFiles('package-lock.json') }}\n";
         expect(chromiumKeyPattern.test(chromiumFixture)).toBe(true);
         expect(fullKeyPattern.test(fullFixture)).toBe(true);
+      });
+
+      it("should reject a restore-keys fixture carrying an unsafe unscoped third fallback key", () => {
+        // The real assertions above used to accept `restoreKeys.length >=
+        // 2` and only ever looked at index 0 and 1, so a third key --
+        // however unsafe -- would never fail the test. `extractRestoreKeys`
+        // itself has no opinion on count; this fixture proves the parser
+        // faithfully returns all three lines, so the `toHaveLength(2)`
+        // assertions on the real cache blocks above are what must (and now
+        // do) reject this shape rather than silently accepting it.
+        const unsafeThirdKeyFixture =
+          "        restore-keys: |\n" +
+          "            playwright-chromium-${{ github.head_ref || github.ref_name }}-${{ hashFiles('package-lock.json') }}\n" +
+          "            playwright-chromium-main-${{ hashFiles('package-lock.json') }}\n" +
+          "            playwright-chromium-\n";
+
+        const restoreKeys = extractRestoreKeys(unsafeThirdKeyFixture);
+        expect(restoreKeys).not.toBeNull();
+        // A third, branch/lockfile-unscoped fallback like
+        // `playwright-chromium-` would restore *any* cache entry sharing
+        // that prefix -- any branch, any lockfile version -- silently
+        // reintroducing stale or cross-branch browser binaries.
+        expect(restoreKeys).toHaveLength(3);
+        expect(restoreKeys?.[2]).toBe("playwright-chromium-");
       });
     });
   });
