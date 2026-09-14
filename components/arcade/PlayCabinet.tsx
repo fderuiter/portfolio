@@ -68,6 +68,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
 
   const {
     isFullscreen,
+    isPseudoFullscreen,
     toggleFullscreen: toggleCabinetFullscreen,
     exitFullscreen,
   } = useFullscreen(cabinetRef, { enableKeyShortcut: false });
@@ -275,6 +276,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
           <div className="arcade-cabinet-toolbar self-end shrink-0 z-50 flex items-center gap-1.5 p-1 bg-black/85 backdrop-blur-md rounded-2xl border border-zinc-700/80 shadow-2xl select-none">
             <FullscreenButton
               isFullscreen={isFullscreen}
+              isPseudoFullscreen={isPseudoFullscreen}
               onToggle={toggleCabinetFullscreen}
               variant="header"
             />
@@ -310,6 +312,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
             <div className="flex items-center gap-1.5 shrink-0">
               <FullscreenButton
                 isFullscreen={isFullscreen}
+                isPseudoFullscreen={isPseudoFullscreen}
                 onToggle={toggleCabinetFullscreen}
                 variant="header"
               />
