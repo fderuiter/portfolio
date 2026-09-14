@@ -1,10 +1,25 @@
 name: CI Pipeline
 
+# ADR 0039 governs this file: GitHub Pro grants 3,000 Actions minutes/month on
+# standard runners for this private repo, with no authorized paid overage.
+# The previous single `rigor-pipeline` job ran the full four-device Playwright
+# matrix on every PR push AND again identically on the post-merge `main` push,
+# which exhausted a month's allowance in one active dev day (see #733). This
+# file splits fast checks from the expensive Playwright/Web-Vitals gate and
+# scopes device-matrix breadth by trigger instead of running the same full
+# suite twice per merge.
+
 on:
   push:
     branches: ["main"]
   pull_request:
-    branches: ["dev", "main"]
+    branches: ["main"]
+  workflow_dispatch:
+    inputs:
+      cross_device_matrix:
+        description: "Run the full four-device Playwright matrix on demand"
+        type: boolean
+        default: false
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -14,14 +29,18 @@ permissions:
   contents: read
 
 jobs:
-  rigor-pipeline:
-    name: Rigor Ecosystem (Logic, Visual, Performance)
+  # Typecheck, lint, docs/schema drift, unit tests and property fuzzing. This
+  # is the ~10-11 minute slice of the old single job that never needed a
+  # built app or a browser, so it runs first and gates the expensive jobs
+  # below via `needs:` — a broken build fails here before any Playwright
+  # minutes are spent.
+  fast-gate:
+    name: Fast Gate (Typecheck, Lint, Docs, Unit, Fuzz)
     runs-on: ubuntu-latest
-    # Setup through the fuzz gate takes ~10.5 min, so 45 left Playwright ~34
-    # min for 4 device projects x 144 tests at workers: 1. It was cancelled at
-    # 34m41s mid-suite. The cap exists to turn a hang into a diagnosable
-    # cancellation, which it did; it just has to sit above the honest runtime.
-    timeout-minutes: 70
+    # Provisional: the pre-split job's fast slice measured ~10.5 minutes.
+    # Revisit once a clean run confirms the honest post-#731 runtime (#733
+    # acceptance criterion) rather than guessing further.
+    timeout-minutes: 20
 
     services:
       postgres:
@@ -51,24 +70,6 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Cache Playwright Browsers
-        id: playwright-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ github.head_ref || github.ref_name }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            playwright-${{ github.head_ref || github.ref_name }}-${{ hashFiles('package-lock.json') }}
-            playwright-main-${{ hashFiles('package-lock.json') }}
-
-      - name: Install Playwright Browsers with Dependencies (Cache Miss)
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install chromium webkit --with-deps
-
-      - name: Install Playwright Dependencies Only (Cache Hit)
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps chromium webkit
-
       - name: Generate Theme and Prisma Schema (Pre-build steps)
         run: |
           npx tsx scripts/generate-theme.ts
@@ -96,6 +97,108 @@ jobs:
         run: |
           npm run typecheck
           npm run lint
+
+      - name: Run Logic Tests (Vitest)
+        id: vitest
+        run: npm run test:ci
+        env:
+          # Unit tests mock @/lib/db, but several suites bypass the mock and
+          # import the real client whenever DATABASE_URL names something other
+          # than a dummy host. The real client is @neondatabase/serverless over
+          # a WebSocket, which cannot speak to the plain Postgres container
+          # above, so pointing this at the service made 25 tests exercise a
+          # database they can never reach. The container exists for the Prisma
+          # CLI steps (migrate deploy / migrate diff), which use the native
+          # migration engine and do connect.
+          DATABASE_URL: "postgresql://dummy:dummy@127.0.0.1:59999/dummy"
+
+      - name: Run Shift-Left Property Fuzz Testing Gate
+        id: mutation
+        run: npm run test:mutation
+
+      - name: Fast Gate Summary
+        if: always()
+        run: |
+          echo "### ⚡ Fast Gate" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| Logic Tests (Vitest) | ${{ steps.vitest.outcome == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Property Fuzz Gate | ${{ steps.mutation.outcome == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
+
+  security-gate:
+    name: Security Gate (Vulnerability Audit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Execute Security Audit Gate
+        run: npm run audit:security
+
+  # The actual PR merge gate for build/visual/performance concerns. Runs only
+  # chromium against the full e2e suite — most specs in __tests__/e2e/ are not
+  # meaningfully device-dependent, and running all four configured Playwright
+  # projects here multiplies wall-clock (and billed) time by four for little
+  # additional signal on an ordinary PR push. Genuine cross-device coverage
+  # runs separately in `post-merge-device-smoke` (below) and on demand in
+  # `cross-device-matrix`.
+  heavy-gate:
+    name: Heavy Gate (Build, Bundle, Playwright, Web Vitals)
+    needs: fast-gate
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    # Provisional: this used to be part of a single 70-minute job dominated by
+    # a 4-device Playwright run; scoping to one device should cut that
+    # substantially, but the number below is not yet backed by a measured run
+    # (Actions minutes were exhausted while #733 was authored — see ADR 0039).
+    # Revisit once a clean run is available rather than guessing further.
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Cache Playwright Browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ github.head_ref || github.ref_name }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-chromium-${{ github.head_ref || github.ref_name }}-${{ hashFiles('package-lock.json') }}
+            playwright-chromium-main-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Playwright Browser with Dependencies (Cache Miss)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install chromium --with-deps
+
+      - name: Install Playwright Dependencies Only (Cache Hit)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      - name: Generate Theme and Prisma Schema (Pre-build steps)
+        run: |
+          npx tsx scripts/generate-theme.ts
+          npx prisma generate
 
       - name: Next.js Cache
         uses: actions/cache@v4
@@ -126,27 +229,9 @@ jobs:
         id: bundle
         run: npm run analyze:bundle -- --strict
 
-      - name: Run Logic Tests (Vitest)
-        id: vitest
-        run: npm run test:ci
-        env:
-          # Unit tests mock @/lib/db, but several suites bypass the mock and
-          # import the real client whenever DATABASE_URL names something other
-          # than a dummy host. The real client is @neondatabase/serverless over
-          # a WebSocket, which cannot speak to the plain Postgres container
-          # above, so pointing this at the service made 25 tests exercise a
-          # database they can never reach. The container exists for the Prisma
-          # CLI steps (migrate deploy / migrate diff), which use the native
-          # migration engine and do connect.
-          DATABASE_URL: "postgresql://dummy:dummy@127.0.0.1:59999/dummy"
-
-      - name: Run Shift-Left Property Fuzz Testing Gate
-        id: mutation
-        run: npm run test:mutation
-
-      - name: Run Visual & Drift Detection (Playwright)
+      - name: Run Visual & Drift Detection (Playwright, chromium)
         id: playwright
-        run: npx playwright test
+        run: npx playwright test --project=chromium
         env:
           DATABASE_URL: "postgresql://dummy:dummy@127.0.0.1:59999/dummy"
           CRON_SECRET: "ci_placeholder_cron_secret"
@@ -180,24 +265,36 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Verification Layer | Status | Description |" >> $GITHUB_STEP_SUMMARY
           echo "| --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Mathematical Logic** (Vitest) | ${{ steps.vitest.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Masonry scheduling algorithms & text metrics |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Shift-Left Property Fuzz Gate** | ${{ steps.mutation.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Fast-check generative invariants & property-based fuzz testing |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Visual & Drift Guard** (Playwright) | ${{ steps.playwright.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Sub-pixel pixel matching & layout constant sync |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Visual & Drift Guard** (Playwright, chromium) | ${{ steps.playwright.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Sub-pixel pixel matching & layout constant sync |" >> $GITHUB_STEP_SUMMARY
           echo "| **Accessibility Audits** (Playwright-Axe) | $ACC_STATUS | Automated WCAG compliance scans on interactive states |" >> $GITHUB_STEP_SUMMARY
           echo "| **Sub-Route Real-Browser Performance Gate** | ${{ steps.page-bench.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Real-browser Core Web Vitals (LCP, CLS, TTFB) SLA assertions across sub-routes |" >> $GITHUB_STEP_SUMMARY
           echo "| **Bundle Performance Budgets** | ${{ steps.bundle.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Initial bundle & chunk gzip performance limits |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "*(Generated via automated unified CI pipeline)*" >> $GITHUB_STEP_SUMMARY
+          echo "*(chromium only — see post-merge-device-smoke and the manual cross-device-matrix job for other devices)*" >> $GITHUB_STEP_SUMMARY
 
           if [ -f playwright-report/accessibility-summary.md ]; then
             echo "" >> $GITHUB_STEP_SUMMARY
             cat playwright-report/accessibility-summary.md >> $GITHUB_STEP_SUMMARY
           fi
 
-  security-gate:
-    name: Security Gate (Vulnerability Audit)
+  # Runs after a squash-merge lands on main. The PR that produced this exact
+  # tree already ran the full e2e suite on chromium (heavy-gate, above), so
+  # repeating build+bundle+full-suite+bench identically here would spend
+  # minutes checking nothing new. This job instead adds the coverage the PR
+  # gate did NOT have: the two specs that are genuinely device-engine
+  # dependent (pixel-diffing and touch-input emulation) run here against the
+  # three non-chromium projects, so real cross-device regressions still
+  # surface on every merge without paying for the full matrix every time.
+  post-merge-device-smoke:
+    name: Post-Merge Device Smoke (Tablet/Mobile Safari, Mobile Chrome)
+    needs: fast-gate
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Provisional, same caveat as heavy-gate: two spec files across three
+    # device projects plus one build, unmeasured. Revisit once real numbers
+    # exist.
+    timeout-minutes: 25
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v5
@@ -211,5 +308,95 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Execute Security Audit Gate
-        run: npm run audit:security
+      - name: Cache Playwright Browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-full-${{ github.ref_name }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-full-${{ github.ref_name }}-${{ hashFiles('package-lock.json') }}
+            playwright-full-main-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Playwright Browsers with Dependencies (Cache Miss)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install chromium webkit --with-deps
+
+      - name: Install Playwright Dependencies Only (Cache Hit)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium webkit
+
+      - name: Generate Theme and Prisma Schema (Pre-build steps)
+        run: |
+          npx tsx scripts/generate-theme.ts
+          npx prisma generate
+
+      - name: Build Production
+        run: npm run build
+        env:
+          DATABASE_URL: "postgresql://dummy:dummy@127.0.0.1:59999/dummy"
+
+      - name: Run Device-Dependent Specs (Tablet Safari, Mobile Safari, Mobile Chrome)
+        run: |
+          npx playwright test __tests__/e2e/visual.spec.ts __tests__/e2e/touch-controls.spec.ts \
+            --project="Tablet Safari" --project="Mobile Safari" --project="Mobile Chrome"
+        env:
+          DATABASE_URL: "postgresql://dummy:dummy@127.0.0.1:59999/dummy"
+          CRON_SECRET: "ci_placeholder_cron_secret"
+
+  # Full four-device matrix against the complete e2e suite, on demand only.
+  # This is the breadth the old job ran on every push; keeping it manual
+  # avoids paying for it automatically while still making it one click away
+  # when a release or a device-sensitive change warrants the full check.
+  cross-device-matrix:
+    name: Cross-Device Matrix (On Demand)
+    if: github.event_name == 'workflow_dispatch' && inputs.cross_device_matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Cache Playwright Browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-full-${{ github.ref_name }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-full-${{ github.ref_name }}-${{ hashFiles('package-lock.json') }}
+            playwright-full-main-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Playwright Browsers with Dependencies (Cache Miss)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install chromium webkit --with-deps
+
+      - name: Install Playwright Dependencies Only (Cache Hit)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium webkit
+
+      - name: Generate Theme and Prisma Schema (Pre-build steps)
+        run: |
+          npx tsx scripts/generate-theme.ts
+          npx prisma generate
+
+      - name: Build Production
+        run: npm run build
+        env:
+          DATABASE_URL: "postgresql://dummy:dummy@127.0.0.1:59999/dummy"
+
+      - name: Run Full Playwright Suite (All Devices)
+        run: npx playwright test
+        env:
+          DATABASE_URL: "postgresql://dummy:dummy@127.0.0.1:59999/dummy"
+          CRON_SECRET: "ci_placeholder_cron_secret"
