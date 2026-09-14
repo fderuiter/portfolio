@@ -98,6 +98,42 @@ Re-exports [BaseCRFFieldSchema](universal-schema/variables/BaseCRFFieldSchema.md
 
 ***
 
+### BaselineComparisonResult
+
+Re-exports [BaselineComparisonResult](study-baseline-diff/interfaces/BaselineComparisonResult.md)
+
+***
+
+### BaselineComparisonSummary
+
+Re-exports [BaselineComparisonSummary](study-baseline-diff/interfaces/BaselineComparisonSummary.md)
+
+***
+
+### BaselineDiffCategory
+
+Re-exports [BaselineDiffCategory](study-baseline-diff/type-aliases/BaselineDiffCategory.md)
+
+***
+
+### BaselineDiffCategorySummary
+
+Re-exports [BaselineDiffCategorySummary](study-baseline-diff/interfaces/BaselineDiffCategorySummary.md)
+
+***
+
+### BaselineDiffChangeType
+
+Re-exports [BaselineDiffChangeType](study-baseline-diff/type-aliases/BaselineDiffChangeType.md)
+
+***
+
+### BaselineDiffEntry
+
+Re-exports [BaselineDiffEntry](study-baseline-diff/interfaces/BaselineDiffEntry.md)
+
+***
+
 ### BiomedicalConcept
 
 Re-exports [BiomedicalConcept](types/interfaces/BiomedicalConcept.md)
@@ -296,6 +332,12 @@ Re-exports [combineConditionResults](expression-evaluator/functions/combineCondi
 
 ***
 
+### compareStudyToBaseline
+
+Re-exports [compareStudyToBaseline](study-baseline-diff/functions/compareStudyToBaseline.md)
+
+***
+
 ### ComplianceSeverity
 
 Re-exports [ComplianceSeverity](types/type-aliases/ComplianceSeverity.md)
@@ -377,6 +419,18 @@ Re-exports [DerivationInputDependency](expression-evaluator/interfaces/Derivatio
 ### DerivationStep
 
 Re-exports [DerivationStep](expression-evaluator/interfaces/DerivationStep.md)
+
+***
+
+### describeBaselineDiffCategory
+
+Re-exports [describeBaselineDiffCategory](study-baseline-diff/functions/describeBaselineDiffCategory.md)
+
+***
+
+### describeBaselineDiffChangeType
+
+Re-exports [describeBaselineDiffChangeType](study-baseline-diff/functions/describeBaselineDiffChangeType.md)
 
 ***
 
