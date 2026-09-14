@@ -34,17 +34,31 @@ describe("Prisma migration integrity", () => {
     expect(getLockProvider('provider = "postgresql"')).toBe("postgresql");
   });
 
+  const rootDir = process.cwd();
+  const migrationsDir = resolve(rootDir, "prisma/migrations");
+  const docPath = resolve(rootDir, "DATABASE_MIGRATIONS.md");
+
+  function readMigrationSql(migrationName: string): string {
+    return readFileSync(
+      resolve(migrationsDir, migrationName, "migration.sql"),
+      "utf8"
+    );
+  }
+
+  const EXPECTED_MIGRATIONS = [
+    "20260417215437_init",
+    "20260528000000_add_telemetry_event",
+    "20260814000000_add_simulated_telemetry",
+    "20260818000000_add_feedback_and_reactions",
+    "20261014000000_add_commands_and_playback",
+    "20261015000000_add_email_resilience",
+    "20261016000000_enforce_email_contracts",
+    "20261017000000_add_telemetry_daily_rollups",
+    "20261018000000_add_blog_post",
+  ];
+
   it("validates every checked-in migration file", () => {
-    expect(validateMigrationFiles("prisma/migrations")).toEqual([
-      "20260417215437_init",
-      "20260528000000_add_telemetry_event",
-      "20260814000000_add_simulated_telemetry",
-      "20260818000000_add_feedback_and_reactions",
-      "20261014000000_add_commands_and_playback",
-      "20261015000000_add_email_resilience",
-      "20261016000000_enforce_email_contracts",
-      "20261017000000_add_telemetry_daily_rollups",
-    ]);
+    expect(validateMigrationFiles(migrationsDir)).toEqual(EXPECTED_MIGRATIONS);
   });
 
   it("extracts migration identifiers from markdown documentation", () => {
@@ -62,26 +76,13 @@ describe("Prisma migration integrity", () => {
   });
 
   it("validates documentation parity against active repository migration assets", () => {
-    expect(
-      validateDocMigrations("DATABASE_MIGRATIONS.md", "prisma/migrations")
-    ).toEqual([
-      "20260417215437_init",
-      "20260528000000_add_telemetry_event",
-      "20260814000000_add_simulated_telemetry",
-      "20260818000000_add_feedback_and_reactions",
-      "20261014000000_add_commands_and_playback",
-      "20261015000000_add_email_resilience",
-      "20261016000000_enforce_email_contracts",
-      "20261017000000_add_telemetry_daily_rollups",
-    ]);
+    expect(validateDocMigrations(docPath, migrationsDir)).toEqual(
+      EXPECTED_MIGRATIONS
+    );
   });
 
   it("keeps the email resilience migration additive, indexed, and upgrade-safe", () => {
-    const migrationPath = resolve(
-      process.cwd(),
-      "prisma/migrations/20261015000000_add_email_resilience/migration.sql"
-    );
-    const migration = readFileSync(migrationPath, "utf8");
+    const migration = readMigrationSql("20261015000000_add_email_resilience");
 
     expect(migration).toContain('CREATE TABLE IF NOT EXISTS "SuppressionList"');
     expect(migration).toContain('"email" TEXT NOT NULL');
@@ -110,11 +111,9 @@ describe("Prisma migration integrity", () => {
   });
 
   it("keeps the telemetry rollup migration aligned with Prisma updatedAt semantics", () => {
-    const migrationPath = resolve(
-      process.cwd(),
-      "prisma/migrations/20261017000000_add_telemetry_daily_rollups/migration.sql"
+    const migration = readMigrationSql(
+      "20261017000000_add_telemetry_daily_rollups"
     );
-    const migration = readFileSync(migrationPath, "utf8");
 
     expect(migration).toContain(
       '"createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP'
@@ -125,35 +124,92 @@ describe("Prisma migration integrity", () => {
     );
   });
 
+  it("keeps the blog post migration additive, indexed, and non-destructive", () => {
+    const migration = readMigrationSql("20261018000000_add_blog_post");
+
+    expect(migration).toContain('CREATE TABLE "BlogPost"');
+    expect(migration).toContain('"slug" TEXT NOT NULL');
+    expect(migration).toContain('"published" BOOLEAN NOT NULL DEFAULT false');
+    expect(migration).toContain(
+      'CREATE UNIQUE INDEX "BlogPost_slug_key" ON "BlogPost"("slug")'
+    );
+    expect(migration).not.toMatch(/DROP\s+(TABLE|COLUMN)/i);
+  });
+
+  it("fails migration file validation when a migration asset is missing or empty", () => {
+    const fs = require("fs");
+    const path = require("path");
+    const os = require("os");
+
+    const tmpDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), "migration-asset-test-")
+    );
+    const brokenMigrationDir = path.join(
+      tmpDir,
+      "20260101000000_broken_migration"
+    );
+
+    try {
+      expect(() => validateMigrationFiles(tmpDir)).toThrow(
+        "No migration directories were found."
+      );
+
+      fs.mkdirSync(brokenMigrationDir, { recursive: true });
+      expect(() => validateMigrationFiles(tmpDir)).toThrow(
+        /Migration 20260101000000_broken_migration has no non-empty migration\.sql file\./
+      );
+
+      fs.writeFileSync(
+        path.join(brokenMigrationDir, "migration.sql"),
+        "   \n  \t\n"
+      );
+      expect(() => validateMigrationFiles(tmpDir)).toThrow(
+        /Migration 20260101000000_broken_migration has no non-empty migration\.sql file\./
+      );
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
   it("fails drift check with diagnostic error when documentation misses a migration folder", () => {
     const fs = require("fs");
     const path = require("path");
     const os = require("os");
 
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "doc-drift-test-"));
-    const migrationsDir = path.join(tmpDir, "migrations");
-    const docFile = path.join(tmpDir, "DATABASE_MIGRATIONS.md");
+    const tempMigrationsDir = path.join(tmpDir, "migrations");
+    const tempDocFile = path.join(tmpDir, "DATABASE_MIGRATIONS.md");
 
-    const mig1 = path.join(migrationsDir, "20260101000000_first_migration");
-    const mig2 = path.join(migrationsDir, "20260201000000_second_migration");
-    fs.mkdirSync(mig1, { recursive: true });
-    fs.mkdirSync(mig2, { recursive: true });
-    fs.writeFileSync(path.join(mig1, "migration.sql"), "-- first");
-    fs.writeFileSync(path.join(mig2, "migration.sql"), "-- second");
+    try {
+      const mig1 = path.join(
+        tempMigrationsDir,
+        "20260101000000_first_migration"
+      );
+      const mig2 = path.join(
+        tempMigrationsDir,
+        "20260201000000_second_migration"
+      );
+      fs.mkdirSync(mig1, { recursive: true });
+      fs.mkdirSync(mig2, { recursive: true });
+      fs.writeFileSync(path.join(mig1, "migration.sql"), "-- first");
+      fs.writeFileSync(path.join(mig2, "migration.sql"), "-- second");
 
-    fs.writeFileSync(
-      docFile,
-      "# Migrations\n- `20260101000000_first_migration`\n"
-    );
+      fs.writeFileSync(
+        tempDocFile,
+        "# Migrations\n- `20260101000000_first_migration`\n"
+      );
 
-    expect(() => validateDocMigrations(docFile, migrationsDir)).toThrowError(
-      /Documentation drift detected/
-    );
-    expect(() => validateDocMigrations(docFile, migrationsDir)).toThrowError(
-      /Missing in documentation: 20260201000000_second_migration/
-    );
-
-    fs.rmSync(tmpDir, { recursive: true, force: true });
+      expect(() =>
+        validateDocMigrations(tempDocFile, tempMigrationsDir)
+      ).toThrowError(/Documentation drift detected/);
+      expect(() =>
+        validateDocMigrations(tempDocFile, tempMigrationsDir)
+      ).toThrowError(
+        /Missing in documentation: 20260201000000_second_migration/
+      );
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
   });
 
   it("fails drift check with diagnostic error when documentation has mismatched or extra migrations", () => {
@@ -164,23 +220,30 @@ describe("Prisma migration integrity", () => {
     const tmpDir = fs.mkdtempSync(
       path.join(os.tmpdir(), "doc-drift-extra-test-")
     );
-    const migrationsDir = path.join(tmpDir, "migrations");
-    const docFile = path.join(tmpDir, "DATABASE_MIGRATIONS.md");
+    const tempMigrationsDir = path.join(tmpDir, "migrations");
+    const tempDocFile = path.join(tmpDir, "DATABASE_MIGRATIONS.md");
 
-    const mig1 = path.join(migrationsDir, "20260101000000_first_migration");
-    fs.mkdirSync(mig1, { recursive: true });
-    fs.writeFileSync(path.join(mig1, "migration.sql"), "-- first");
+    try {
+      const mig1 = path.join(
+        tempMigrationsDir,
+        "20260101000000_first_migration"
+      );
+      fs.mkdirSync(mig1, { recursive: true });
+      fs.writeFileSync(path.join(mig1, "migration.sql"), "-- first");
 
-    fs.writeFileSync(
-      docFile,
-      "# Migrations\n- `20260101000000_first_migration`\n- `20260909000000_obsolete_migration`\n"
-    );
+      fs.writeFileSync(
+        tempDocFile,
+        "# Migrations\n- `20260101000000_first_migration`\n- `20260909000000_obsolete_migration`\n"
+      );
 
-    expect(() => validateDocMigrations(docFile, migrationsDir)).toThrowError(
-      /Extra\/mismatched in documentation: 20260909000000_obsolete_migration/
-    );
-
-    fs.rmSync(tmpDir, { recursive: true, force: true });
+      expect(() =>
+        validateDocMigrations(tempDocFile, tempMigrationsDir)
+      ).toThrowError(
+        /Extra\/mismatched in documentation: 20260909000000_obsolete_migration/
+      );
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
   });
 
   it("rejects a datasource with no literal provider", () => {
@@ -200,22 +263,25 @@ describe("Prisma migration integrity", () => {
 
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "migration-test-"));
     const migrationDir = path.join(tmpDir, "20260901_drop_test");
-    fs.mkdirSync(migrationDir, { recursive: true });
-    fs.writeFileSync(
-      path.join(migrationDir, "migration.sql"),
-      'ALTER TABLE "CaseStudy" DROP COLUMN "title";'
-    );
 
-    expect(() => checkDestructiveMigrations(tmpDir, false)).toThrow(
-      "Destructive migrations are blocked"
-    );
-    expect(() => checkDestructiveMigrations(tmpDir, true)).not.toThrow();
+    try {
+      fs.mkdirSync(migrationDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(migrationDir, "migration.sql"),
+        'ALTER TABLE "CaseStudy" DROP COLUMN "title";'
+      );
 
-    fs.rmSync(tmpDir, { recursive: true, force: true });
+      expect(() => checkDestructiveMigrations(tmpDir, false)).toThrow(
+        "Destructive migrations are blocked"
+      );
+      expect(() => checkDestructiveMigrations(tmpDir, true)).not.toThrow();
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
   });
 
   it("validates that DATABASE_MIGRATIONS.md contains all required operational commands and environment variables", () => {
-    expect(() => validateDocCommands("DATABASE_MIGRATIONS.md")).not.toThrow();
+    expect(() => validateDocCommands(docPath)).not.toThrow();
   });
 
   it("fails validateDocCommands when mandatory operational commands are omitted from documentation", () => {
@@ -226,25 +292,27 @@ describe("Prisma migration integrity", () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "doc-cmd-test-"));
     const docFile = path.join(tmpDir, "DATABASE_MIGRATIONS.md");
 
-    // Documentation missing release:gate and check:migrations:drift
-    fs.writeFileSync(
-      docFile,
-      "# Migrations\nRun `npm run check:migrations` and set `ALLOW_DESTRUCTIVE_MIGRATIONS=true`.\n"
-    );
+    try {
+      // Documentation missing release:gate and check:migrations:drift
+      fs.writeFileSync(
+        docFile,
+        "# Migrations\nRun `npm run check:migrations` and set `ALLOW_DESTRUCTIVE_MIGRATIONS=true`.\n"
+      );
 
-    expect(() => validateDocCommands(docFile)).toThrow(
-      /Documentation completeness check failed/
-    );
-    expect(() => validateDocCommands(docFile)).toThrow(
-      /schema drift verification/
-    );
-    expect(() => validateDocCommands(docFile)).toThrow(
-      /pipeline release gate execution/
-    );
-    expect(() => validateDocCommands(docFile)).toThrow(
-      /disposable migration replay/
-    );
-
-    fs.rmSync(tmpDir, { recursive: true, force: true });
+      expect(() => validateDocCommands(docFile)).toThrow(
+        /Documentation completeness check failed/
+      );
+      expect(() => validateDocCommands(docFile)).toThrow(
+        /schema drift verification/
+      );
+      expect(() => validateDocCommands(docFile)).toThrow(
+        /pipeline release gate execution/
+      );
+      expect(() => validateDocCommands(docFile)).toThrow(
+        /disposable migration replay/
+      );
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
   });
 });
