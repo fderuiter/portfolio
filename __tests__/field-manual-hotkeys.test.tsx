@@ -379,4 +379,344 @@ describe("FieldManualButton - Hotkey & Ownership Safety (DUCK-02)", () => {
     expect(container.querySelectorAll('[role="dialog"]')).toHaveLength(0);
     expect(onOpenChange).toHaveBeenLastCalledWith(false);
   });
+
+  it("selects visible mobile manual owner on phone viewport (<768px)", async () => {
+    const onOpenDesktop = vi.fn();
+    const onOpenMobile = vi.fn();
+
+    function ResponsiveSetup() {
+      return (
+        <StrictMode>
+          <div>
+            <div data-testid="desktop-wrapper">
+              <FieldManualButton
+                manualId="working-with-duck"
+                label="Manual Desktop"
+                onOpenChange={onOpenDesktop}
+                isHotkeyOwner={true}
+              />
+            </div>
+            <div data-testid="mobile-wrapper">
+              <FieldManualButton
+                manualId="working-with-duck"
+                label="Manual Mobile"
+                onOpenChange={onOpenMobile}
+                isHotkeyOwner={true}
+              />
+            </div>
+          </div>
+        </StrictMode>
+      );
+    }
+
+    await act(async () => {
+      root.render(<ResponsiveSetup />);
+    });
+
+    const desktopBtn = container.querySelector<HTMLButtonElement>(
+      '[data-testid="desktop-wrapper"] button'
+    )!;
+    const mobileBtn = container.querySelector<HTMLButtonElement>(
+      '[data-testid="mobile-wrapper"] button'
+    )!;
+
+    // Isolated visibility mock: Phone viewport (desktop hidden, mobile visible)
+    desktopBtn.checkVisibility = () => false;
+    mobileBtn.checkVisibility = () => true;
+
+    // Press 'h' shortcut
+    await act(async () => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "h", bubbles: true })
+      );
+    });
+
+    // Exactly one dialog opens, owned by the visible mobile button
+    expect(container.querySelectorAll('[role="dialog"]')).toHaveLength(1);
+    expect(onOpenMobile).toHaveBeenCalledWith(true);
+    expect(onOpenDesktop).not.toHaveBeenCalled();
+
+    // Toggle closed with 'h'
+    await act(async () => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "h", bubbles: true })
+      );
+    });
+    expect(container.querySelectorAll('[role="dialog"]')).toHaveLength(0);
+    expect(onOpenMobile).toHaveBeenCalledWith(false);
+    expect(onOpenDesktop).not.toHaveBeenCalled();
+  });
+
+  it("selects visible mobile manual owner on 1440x500 short desktop viewport", async () => {
+    const onOpenDesktop = vi.fn();
+    const onOpenMobile = vi.fn();
+
+    function ShortDesktopSetup() {
+      return (
+        <StrictMode>
+          <div>
+            <div data-testid="desktop-wrapper">
+              <FieldManualButton
+                manualId="working-with-duck"
+                label="Manual Desktop"
+                onOpenChange={onOpenDesktop}
+                isHotkeyOwner={true}
+              />
+            </div>
+            <div data-testid="mobile-wrapper">
+              <FieldManualButton
+                manualId="working-with-duck"
+                label="Manual Mobile"
+                onOpenChange={onOpenMobile}
+                isHotkeyOwner={true}
+              />
+            </div>
+          </div>
+        </StrictMode>
+      );
+    }
+
+    await act(async () => {
+      root.render(<ShortDesktopSetup />);
+    });
+
+    const desktopBtn = container.querySelector<HTMLButtonElement>(
+      '[data-testid="desktop-wrapper"] button'
+    )!;
+    const mobileBtn = container.querySelector<HTMLButtonElement>(
+      '[data-testid="mobile-wrapper"] button'
+    )!;
+
+    // Isolated visibility mock: 1440x500 short desktop (desktop hidden by height, mobile deck visible)
+    desktopBtn.checkVisibility = () => false;
+    mobileBtn.checkVisibility = () => true;
+
+    // Press '?' shortcut
+    await act(async () => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "?", bubbles: true })
+      );
+    });
+
+    expect(container.querySelectorAll('[role="dialog"]')).toHaveLength(1);
+    expect(onOpenMobile).toHaveBeenCalledWith(true);
+    expect(onOpenDesktop).not.toHaveBeenCalled();
+
+    // Toggle closed with '?'
+    await act(async () => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "?", bubbles: true })
+      );
+    });
+    expect(container.querySelectorAll('[role="dialog"]')).toHaveLength(0);
+    expect(onOpenMobile).toHaveBeenCalledWith(false);
+  });
+
+  it("selects visible desktop manual owner on normal desktop viewport", async () => {
+    const onOpenDesktop = vi.fn();
+    const onOpenMobile = vi.fn();
+
+    function NormalDesktopSetup() {
+      return (
+        <StrictMode>
+          <div>
+            <div data-testid="desktop-wrapper">
+              <FieldManualButton
+                manualId="working-with-duck"
+                label="Manual Desktop"
+                onOpenChange={onOpenDesktop}
+                isHotkeyOwner={true}
+              />
+            </div>
+            <div data-testid="mobile-wrapper">
+              <FieldManualButton
+                manualId="working-with-duck"
+                label="Manual Mobile"
+                onOpenChange={onOpenMobile}
+                isHotkeyOwner={true}
+              />
+            </div>
+          </div>
+        </StrictMode>
+      );
+    }
+
+    await act(async () => {
+      root.render(<NormalDesktopSetup />);
+    });
+
+    const desktopBtn = container.querySelector<HTMLButtonElement>(
+      '[data-testid="desktop-wrapper"] button'
+    )!;
+    const mobileBtn = container.querySelector<HTMLButtonElement>(
+      '[data-testid="mobile-wrapper"] button'
+    )!;
+
+    // Isolated visibility mock: Normal desktop (desktop visible, mobile hidden)
+    desktopBtn.checkVisibility = () => true;
+    mobileBtn.checkVisibility = () => false;
+
+    // Press 'h' shortcut
+    await act(async () => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "h", bubbles: true })
+      );
+    });
+
+    expect(container.querySelectorAll('[role="dialog"]')).toHaveLength(1);
+    expect(onOpenDesktop).toHaveBeenCalledWith(true);
+    expect(onOpenMobile).not.toHaveBeenCalled();
+
+    // Toggle closed
+    await act(async () => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "h", bubbles: true })
+      );
+    });
+    expect(container.querySelectorAll('[role="dialog"]')).toHaveLength(0);
+    expect(onOpenDesktop).toHaveBeenCalledWith(false);
+  });
+
+  it("dynamically adapts ownership across responsive viewport transitions", async () => {
+    const onOpenDesktop = vi.fn();
+    const onOpenMobile = vi.fn();
+
+    function TransitionSetup() {
+      return (
+        <StrictMode>
+          <div>
+            <div data-testid="desktop-wrapper">
+              <FieldManualButton
+                manualId="working-with-duck"
+                label="Manual Desktop"
+                onOpenChange={onOpenDesktop}
+                isHotkeyOwner={true}
+              />
+            </div>
+            <div data-testid="mobile-wrapper">
+              <FieldManualButton
+                manualId="working-with-duck"
+                label="Manual Mobile"
+                onOpenChange={onOpenMobile}
+                isHotkeyOwner={true}
+              />
+            </div>
+          </div>
+        </StrictMode>
+      );
+    }
+
+    await act(async () => {
+      root.render(<TransitionSetup />);
+    });
+
+    const desktopBtn = container.querySelector<HTMLButtonElement>(
+      '[data-testid="desktop-wrapper"] button'
+    )!;
+    const mobileBtn = container.querySelector<HTMLButtonElement>(
+      '[data-testid="mobile-wrapper"] button'
+    )!;
+
+    // 1. Initial State: Normal Desktop (desktop visible, mobile hidden)
+    desktopBtn.checkVisibility = () => true;
+    mobileBtn.checkVisibility = () => false;
+
+    await act(async () => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "h", bubbles: true })
+      );
+    });
+
+    expect(onOpenDesktop).toHaveBeenCalledWith(true);
+    expect(onOpenMobile).not.toHaveBeenCalled();
+
+    // Dismiss with Escape
+    await act(async () => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
+      );
+    });
+    expect(onOpenDesktop).toHaveBeenCalledWith(false);
+
+    // 2. Viewport Transition: Desktop window resized down to phone / short desktop
+    desktopBtn.checkVisibility = () => false;
+    mobileBtn.checkVisibility = () => true;
+
+    // Press 'h' shortcut: now mobile must be the active owner!
+    await act(async () => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "h", bubbles: true })
+      );
+    });
+
+    expect(onOpenMobile).toHaveBeenCalledWith(true);
+    expect(onOpenDesktop).toHaveBeenCalledTimes(2); // open(true) + close(false) from earlier
+    expect(container.querySelectorAll('[role="dialog"]')).toHaveLength(1);
+
+    // Dismiss with 'h'
+    await act(async () => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "h", bubbles: true })
+      );
+    });
+    expect(container.querySelectorAll('[role="dialog"]')).toHaveLength(0);
+    expect(onOpenMobile).toHaveBeenCalledWith(false);
+  });
+
+  it("rejects hidden candidates when all mounted controls are hidden", async () => {
+    const onOpenDesktop = vi.fn();
+    const onOpenMobile = vi.fn();
+
+    function AllHiddenSetup() {
+      return (
+        <StrictMode>
+          <div>
+            <div data-testid="desktop-wrapper">
+              <FieldManualButton
+                manualId="working-with-duck"
+                label="Manual Desktop"
+                onOpenChange={onOpenDesktop}
+                isHotkeyOwner={true}
+              />
+            </div>
+            <div data-testid="mobile-wrapper">
+              <FieldManualButton
+                manualId="working-with-duck"
+                label="Manual Mobile"
+                onOpenChange={onOpenMobile}
+                isHotkeyOwner={true}
+              />
+            </div>
+          </div>
+        </StrictMode>
+      );
+    }
+
+    await act(async () => {
+      root.render(<AllHiddenSetup />);
+    });
+
+    const desktopBtn = container.querySelector<HTMLButtonElement>(
+      '[data-testid="desktop-wrapper"] button'
+    )!;
+    const mobileBtn = container.querySelector<HTMLButtonElement>(
+      '[data-testid="mobile-wrapper"] button'
+    )!;
+
+    // Both controls hidden (e.g. game in hidden drawer/tab)
+    desktopBtn.checkVisibility = () => false;
+    mobileBtn.checkVisibility = () => false;
+
+    // Press 'h' shortcut
+    await act(async () => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "h", bubbles: true })
+      );
+    });
+
+    // Zero dialogs opened, neither callback invoked!
+    expect(container.querySelectorAll('[role="dialog"]')).toHaveLength(0);
+    expect(onOpenDesktop).not.toHaveBeenCalled();
+    expect(onOpenMobile).not.toHaveBeenCalled();
+  });
 });

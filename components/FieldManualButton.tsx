@@ -53,6 +53,9 @@ function isEditableContext(target: HTMLElement | null): boolean {
 
 function isElementVisible(el: HTMLElement | null): boolean {
   if (!el) return false;
+  if (typeof el.isConnected === "boolean" && !el.isConnected) {
+    return false;
+  }
   if (typeof el.checkVisibility === "function") {
     try {
       return el.checkVisibility({
@@ -63,7 +66,14 @@ function isElementVisible(el: HTMLElement | null): boolean {
       return el.checkVisibility();
     }
   }
-  return el.offsetParent !== null;
+  if (el.offsetParent !== null) {
+    return true;
+  }
+  // In environments without layout engine or checkVisibility (e.g. unmocked JSDOM),
+  // check if element or any ancestor has hidden attribute or inline display: none
+  return !el.closest?.(
+    '[hidden], [style*="display: none"], [style*="display:none"]'
+  );
 }
 
 function selectCandidate(pool: ManualInstance[]): ManualInstance | undefined {
@@ -115,15 +125,12 @@ function handleGlobalCoordinatorKeyDown(e: KeyboardEvent) {
     return;
   }
 
-  // 1. Check visible candidates first (responsive runtime in browser)
+  // Check visible candidates only: hidden controls cannot capture the shortcut
   const visibleCandidates = candidates.filter((inst) =>
     isElementVisible(inst.buttonRef.current)
   );
 
-  const targetInstance =
-    visibleCandidates.length > 0
-      ? selectCandidate(visibleCandidates)
-      : selectCandidate(candidates);
+  const targetInstance = selectCandidate(visibleCandidates);
 
   if (targetInstance) {
     e.preventDefault();
