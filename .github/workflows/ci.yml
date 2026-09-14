@@ -8,6 +8,28 @@ name: CI Pipeline
 # file splits fast checks from the expensive Playwright/Web-Vitals gate and
 # scopes device-matrix breadth by trigger instead of running the same full
 # suite twice per merge.
+#
+# CI-02 (#733 follow-up): the split above originally left `device-gate`'s
+# targeted non-chromium coverage running only after a squash-merge landed on
+# `main` (as `post-merge-device-smoke`), so a device-specific visual or touch
+# regression could reach `main` before anything caught it. `device-gate` now
+# runs on the pull request itself, alongside `heavy-gate`, so both the
+# chromium suite and the targeted device coverage gate the merge — without
+# reintroducing the four-device-on-every-push cost #733 eliminated. `main`
+# push confirmation stays bounded to `fast-gate`/`security-gate` (a safety
+# net for a direct push that bypasses PR review, per #732), and the full
+# four-device matrix stays a one-click `workflow_dispatch` job
+# (`cross-device-matrix`), not something that runs automatically anywhere.
+#
+# `merge-gate` is the single job branch protection (#732) should require: a
+# job skipped via `if:` (e.g. `heavy-gate`/`device-gate` outside a PR) or
+# skipped because a `needs:` predecessor failed reports a neutral/skipped
+# conclusion, which a required-status-check rule treats as passing rather
+# than blocking. `merge-gate` inspects every gating job's actual result
+# with `if: always()` so a failed, cancelled, or skipped required
+# predecessor can never leave the merge gate green. See
+# docs/how-to/monitor-github-actions-minutes.md for the exact check name to
+# require.
 
 on:
   push:
@@ -145,13 +167,13 @@ jobs:
       - name: Execute Security Audit Gate
         run: npm run audit:security
 
-  # The actual PR merge gate for build/visual/performance concerns. Runs only
+  # Part of the PR merge gate for build/visual/performance concerns. Runs only
   # chromium against the full e2e suite — most specs in __tests__/e2e/ are not
   # meaningfully device-dependent, and running all four configured Playwright
   # projects here multiplies wall-clock (and billed) time by four for little
   # additional signal on an ordinary PR push. Genuine cross-device coverage
-  # runs separately in `post-merge-device-smoke` (below) and on demand in
-  # `cross-device-matrix`.
+  # runs alongside this job, pre-merge, in `device-gate` (below), and the full
+  # four-device breadth remains available on demand via `cross-device-matrix`.
   heavy-gate:
     name: Heavy Gate (Build, Bundle, Playwright, Web Vitals)
     needs: fast-gate
@@ -270,25 +292,28 @@ jobs:
           echo "| **Sub-Route Real-Browser Performance Gate** | ${{ steps.page-bench.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Real-browser Core Web Vitals (LCP, CLS, TTFB) SLA assertions across sub-routes |" >> $GITHUB_STEP_SUMMARY
           echo "| **Bundle Performance Budgets** | ${{ steps.bundle.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Initial bundle & chunk gzip performance limits |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "*(chromium only — see post-merge-device-smoke and the manual cross-device-matrix job for other devices)*" >> $GITHUB_STEP_SUMMARY
+          echo "*(chromium only — see device-gate and the manual cross-device-matrix job for other devices)*" >> $GITHUB_STEP_SUMMARY
 
           if [ -f playwright-report/accessibility-summary.md ]; then
             echo "" >> $GITHUB_STEP_SUMMARY
             cat playwright-report/accessibility-summary.md >> $GITHUB_STEP_SUMMARY
           fi
 
-  # Runs after a squash-merge lands on main. The PR that produced this exact
-  # tree already ran the full e2e suite on chromium (heavy-gate, above), so
-  # repeating build+bundle+full-suite+bench identically here would spend
-  # minutes checking nothing new. This job instead adds the coverage the PR
-  # gate did NOT have: the two specs that are genuinely device-engine
-  # dependent (pixel-diffing and touch-input emulation) run here against the
-  # three non-chromium projects, so real cross-device regressions still
-  # surface on every merge without paying for the full matrix every time.
-  post-merge-device-smoke:
-    name: Post-Merge Device Smoke (Tablet/Mobile Safari, Mobile Chrome)
+  # Runs on the pull request itself, alongside heavy-gate, so a device-engine
+  # regression is caught before merge instead of after (CI-02 / #733
+  # follow-up). heavy-gate already runs the full e2e suite on chromium; this
+  # job does not repeat that build+bundle+full-suite+bench work. It adds only
+  # the coverage heavy-gate's single chromium project does NOT have: the two
+  # specs that are genuinely device-engine dependent (pixel-diffing and
+  # touch-input emulation) against the three non-chromium projects. Because
+  # this now runs pre-merge, there is no separate post-merge repeat of it —
+  # the PR that produced the merged tree already carries this result, so
+  # re-running it on the `main` push would check nothing new (the same
+  # reasoning ADR 0039 applies to heavy-gate).
+  device-gate:
+    name: Device Coverage Gate (Tablet Safari, Mobile Safari, Mobile Chrome)
     needs: fast-gate
-    if: github.event_name == 'push'
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     # Provisional, same caveat as heavy-gate: two spec files across three
     # device projects plus one build, unmeasured. Revisit once real numbers
@@ -343,6 +368,66 @@ jobs:
         env:
           DATABASE_URL: "postgresql://dummy:dummy@127.0.0.1:59999/dummy"
           CRON_SECRET: "ci_placeholder_cron_secret"
+
+  # The single required status check branch protection (#732) should point
+  # at. GitHub's required-status-checks rule only understands a job's own
+  # reported conclusion for the commit under review: a job skipped by its own
+  # `if:` (heavy-gate/device-gate outside a pull_request) or skipped as a
+  # side effect of a failed `needs:` predecessor reports "skipped", and a
+  # required-status-check rule treats "skipped" as satisfied, not blocking.
+  # That would let a cancelled Playwright run or a failed fast-gate silently
+  # produce a mergeable PR. This job runs with `if: always()` specifically so
+  # it still executes when an upstream job failed, was cancelled, or (for a
+  # non-PR trigger) never ran, then fails deliberately unless every predecessor
+  # required for this event actually reported "success" — so a merge can never
+  # go green on anything other than a real pass of every required predecessor.
+  merge-gate:
+    name: Merge Gate (Required Checks Summary)
+    needs: [fast-gate, security-gate, heavy-gate, device-gate]
+    if: always() && github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Evaluate required job results
+        run: |
+          set -u
+
+          fail=0
+          check_required() {
+            local job="$1" result="$2"
+            echo "${job}: ${result}"
+            if [ "${result}" != "success" ]; then
+              echo "::error::Required job '${job}' did not succeed (result: ${result})"
+              fail=1
+            fi
+          }
+
+          # fast-gate and security-gate have no `if:` — they run, and must
+          # succeed, on every trigger this job runs for (pull_request and the
+          # direct-push safety net alike).
+          check_required "fast-gate" "${{ needs.fast-gate.result }}"
+          check_required "security-gate" "${{ needs.security-gate.result }}"
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            # heavy-gate and device-gate are pull_request-only by design (the
+            # reduced-scope split from #733/#775); on a PR trigger they are
+            # the pre-merge device and full-suite-chromium coverage this task
+            # exists to require, so a skip here is exactly the failure mode
+            # this job guards against, not an expected outcome.
+            check_required "heavy-gate" "${{ needs.heavy-gate.result }}"
+            check_required "device-gate" "${{ needs.device-gate.result }}"
+          else
+            # Outside a pull_request, heavy-gate/device-gate are expected to
+            # report "skipped" (their own `if:` excludes this event) — that is
+            # the bounded main-push confirmation this task calls for, not a
+            # gap: the merged PR already required both jobs to succeed before
+            # this push could happen.
+            echo "heavy-gate: ${{ needs.heavy-gate.result }} (not required outside pull_request)"
+            echo "device-gate: ${{ needs.device-gate.result }} (not required outside pull_request)"
+          fi
+
+          exit "${fail}"
 
   # Full four-device matrix against the complete e2e suite, on demand only.
   # This is the breadth the old job ran on every push; keeping it manual
