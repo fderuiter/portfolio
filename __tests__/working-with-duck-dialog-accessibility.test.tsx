@@ -232,4 +232,51 @@ describe("Working With Duck - dialog semantics and Escape ownership (#601)", () 
       container.querySelector('[aria-label="Enter Fullscreen (F)"]')
     ).not.toBeNull();
   });
+
+  it("exposes accessible pause/resume controls with proper labels and disabled states (#602)", async () => {
+    await mount();
+
+    // In idle, pause buttons are disabled
+    const desktopPauseBtn = container.querySelector<HTMLButtonElement>(
+      'button[aria-label="Pause Sprint (P)"]'
+    );
+    expect(desktopPauseBtn).not.toBeNull();
+    expect(desktopPauseBtn!.disabled).toBe(true);
+
+    // Start sprint
+    const startBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Start Sprint 1")
+    );
+    expect(startBtn).toBeDefined();
+    await clickEl(startBtn!);
+
+    // Now enabled
+    expect(desktopPauseBtn!.disabled).toBe(false);
+
+    // Pause via click
+    await clickEl(desktopPauseBtn!);
+
+    // Button label switches to Resume
+    expect(desktopPauseBtn!.getAttribute("aria-label")).toBe(
+      "Resume Sprint (P)"
+    );
+
+    // Pause overlay appears with resume button
+    const overlay = container.querySelector(
+      '[data-testid="duck-pause-overlay"]'
+    );
+    expect(overlay).not.toBeNull();
+    const resumeBtn = overlay!.querySelector("button");
+    expect(resumeBtn).not.toBeNull();
+    expect(resumeBtn!.textContent).toContain("Resume Sprint");
+
+    // Resume via overlay
+    await clickEl(resumeBtn!);
+    expect(
+      container.querySelector('[data-testid="duck-pause-overlay"]')
+    ).toBeNull();
+    expect(desktopPauseBtn!.getAttribute("aria-label")).toBe(
+      "Pause Sprint (P)"
+    );
+  });
 });

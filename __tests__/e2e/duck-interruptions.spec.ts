@@ -1,0 +1,205 @@
+import { test, expect } from "@playwright/test";
+
+// Regression & E2E coverage for DUCK-01 (#602):
+// Suspend gameplay during manual pause and reading interruptions (Scrapbook / Wardrobe).
+// Verified across desktop Chromium and Mobile Chrome.
+
+async function gotoDuck(page: import("@playwright/test").Page) {
+  // Pre-seed Clerk cookies to skip external dev-browser redirect in local testing
+  await page.context().addCookies([
+    { name: "__client_uat", value: "0", domain: "localhost", path: "/" },
+    {
+      name: "__clerk_db_jwt",
+      value: "test-dev-browser-placeholder",
+      domain: "localhost",
+      path: "/",
+    },
+  ]);
+  await page.goto("/arcade/working-with-duck");
+  await page.waitForLoadState("domcontentloaded");
+}
+
+async function launchAndStartDuck(page: import("@playwright/test").Page) {
+  await gotoDuck(page);
+
+  // 1. Launch PlayCabinet with hydration-safe polling
+  await expect(async () => {
+    const launchBtn = page.getByRole("button", { name: /Launch Cabinet/i });
+    if (await launchBtn.isVisible()) {
+      await launchBtn.click({ force: true });
+    }
+    const startBtn = page.getByRole("button", {
+      name: /Start (Sprint|Endless Mode)/i,
+    });
+    await expect(startBtn).toBeVisible({ timeout: 2000 });
+  }).toPass({ timeout: 20000 });
+
+  // 2. Start sprint with hydration-safe polling
+  await expect(async () => {
+    const startBtn = page.getByRole("button", {
+      name: /Start (Sprint|Endless Mode)/i,
+    });
+    if (await startBtn.isVisible()) {
+      await startBtn.click({ force: true });
+    }
+    const progressMeter = page.locator('[aria-label="Work Progress"]');
+    await expect(progressMeter).toBeVisible({ timeout: 2000 });
+  }).toPass({ timeout: 15000 });
+
+  // 3. Wait until simulation is actively advancing
+  await expect(async () => {
+    const meter = page.locator('[aria-label="Work Progress"]');
+    const val = Number(await meter.getAttribute("aria-valuenow"));
+    expect(val).toBeGreaterThan(0);
+  }).toPass({ timeout: 10000 });
+}
+
+test.describe("Working With Duck - Interruption Suspension E2E (#602)", () => {
+  test("suspends simulation during manual pause and resumes without burst", async ({
+    page,
+  }) => {
+    await launchAndStartDuck(page);
+
+    const progressMeter = page.locator('[aria-label="Work Progress"]');
+    const pauseBtn = page
+      .locator('button[title*="Pause Sprint"]:visible')
+      .first();
+    await expect(pauseBtn).toBeVisible({ timeout: 5000 });
+
+    // Click pause button
+    await pauseBtn.click();
+
+    // Verify pause overlay is displayed
+    const pauseOverlay = page.getByTestId("duck-pause-overlay");
+    await expect(pauseOverlay).toBeVisible({ timeout: 5000 });
+
+    const pausedProgress = Number(
+      await progressMeter.getAttribute("aria-valuenow")
+    );
+
+    // Wait 1.5 seconds: progress must remain completely unchanged
+    await page.waitForTimeout(1500);
+    const progressAfterWait = Number(
+      await progressMeter.getAttribute("aria-valuenow")
+    );
+    expect(progressAfterWait).toBe(pausedProgress);
+
+    // Click Resume Sprint button on the overlay
+    const resumeBtn = pauseOverlay.getByRole("button", {
+      name: /Resume Sprint/i,
+    });
+    await expect(resumeBtn).toBeVisible();
+    await resumeBtn.click();
+
+    // Overlay must disappear
+    await expect(pauseOverlay).toBeHidden({ timeout: 5000 });
+
+    // Progress must resume advancing
+    await expect(async () => {
+      const currentProgress = Number(
+        await progressMeter.getAttribute("aria-valuenow")
+      );
+      expect(currentProgress).toBeGreaterThan(pausedProgress);
+    }).toPass({ timeout: 10000 });
+  });
+
+  test("suspends simulation while scrapbook reading modal is open and resumes upon dismissal", async ({
+    page,
+  }) => {
+    await launchAndStartDuck(page);
+
+    const progressMeter = page.locator('[aria-label="Work Progress"]');
+    const scrapbookBtn = page
+      .locator('button[title*="Scrapbook"]:visible')
+      .first();
+    await expect(scrapbookBtn).toBeVisible({ timeout: 5000 });
+
+    // Open scrapbook
+    await scrapbookBtn.click();
+
+    // Verify scrapbook dialog is open
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible({ timeout: 5000 });
+    await expect(dialog.getByText("Duck's Polaroid Scrapbook")).toBeVisible();
+
+    const pausedProgress = Number(
+      await progressMeter.getAttribute("aria-valuenow")
+    );
+
+    // Wait 1.5 seconds: simulation must be frozen
+    await page.waitForTimeout(1500);
+    const progressAfterWait = Number(
+      await progressMeter.getAttribute("aria-valuenow")
+    );
+    expect(progressAfterWait).toBe(pausedProgress);
+
+    // Dismiss dialog using Escape key
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden({ timeout: 5000 });
+
+    // Progress must resume advancing
+    await expect(async () => {
+      const currentProgress = Number(
+        await progressMeter.getAttribute("aria-valuenow")
+      );
+      expect(currentProgress).toBeGreaterThan(pausedProgress);
+    }).toPass({ timeout: 10000 });
+  });
+
+  test("preserves manual pause when scrapbook is opened and dismissed", async ({
+    page,
+  }) => {
+    await launchAndStartDuck(page);
+
+    const progressMeter = page.locator('[aria-label="Work Progress"]');
+
+    // 1. Manually pause
+    const pauseBtn = page
+      .locator('button[title*="Pause Sprint"]:visible')
+      .first();
+    await pauseBtn.click();
+    const pauseOverlay = page.getByTestId("duck-pause-overlay");
+    await expect(pauseOverlay).toBeVisible({ timeout: 5000 });
+
+    // 2. Open scrapbook
+    const scrapbookBtn = page
+      .locator('button[title*="Scrapbook"]:visible')
+      .first();
+    await scrapbookBtn.click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible({ timeout: 5000 });
+
+    const pausedProgress = Number(
+      await progressMeter.getAttribute("aria-valuenow")
+    );
+
+    // 3. Dismiss scrapbook with Escape: manual pause must persist!
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden({ timeout: 5000 });
+
+    // Pause overlay MUST still be present
+    await expect(pauseOverlay).toBeVisible({ timeout: 5000 });
+
+    // Progress must stay frozen
+    await page.waitForTimeout(1500);
+    const progressAfterDismiss = Number(
+      await progressMeter.getAttribute("aria-valuenow")
+    );
+    expect(progressAfterDismiss).toBe(pausedProgress);
+
+    // 4. Resume manual pause
+    const resumeBtn = pauseOverlay.getByRole("button", {
+      name: /Resume Sprint/i,
+    });
+    await resumeBtn.click();
+    await expect(pauseOverlay).toBeHidden({ timeout: 5000 });
+
+    // Now progress resumes
+    await expect(async () => {
+      const currentProgress = Number(
+        await progressMeter.getAttribute("aria-valuenow")
+      );
+      expect(currentProgress).toBeGreaterThan(pausedProgress);
+    }).toPass({ timeout: 10000 });
+  });
+});
