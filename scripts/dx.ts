@@ -225,6 +225,10 @@ export async function handleVerifyCommand(
       console.error(
         `\n${colors.brightRed}❌ Invariant verification failed. Resolve highlighted issues or run 'npm run doctor:fix'.${colors.reset}\n`
       );
+    } else if (summary.hasWarnings) {
+      console.error(
+        `\n${colors.brightYellow}⚠️  Invariant verification failed: ${summary.totalWarned} warning(s) are treated as failures in strict mode. Resolve highlighted issues or run 'npm run doctor:fix'.${colors.reset}\n`
+      );
     } else {
       console.log(
         `\n${colors.brightGreen}✅ All AGENTS.md architectural invariants and security checks verified.${colors.reset}\n`
