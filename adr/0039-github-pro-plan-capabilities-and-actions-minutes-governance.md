@@ -55,6 +55,16 @@ replaces the client-side-only guardrails (`​.husky/pre-push`, `CODEOWNERS`)
 ADR 0037 and ADR 0038 relied on as a substitute for server-side enforcement.
 The client-side guardrails remain as defense-in-depth; they are not removed.
 
+> [!NOTE]
+> **Superseded (2026-09-14):** Requiring `Rigor Ecosystem (Logic, Visual,
+Performance)` reflected the pre-#775 monolithic pipeline. When the workflow
+> was partitioned, requiring individual tiered jobs (`heavy-gate`, `device-gate`)
+> directly proved unsafe because GitHub branch protection treats skipped checks
+> as passing. Under CI-02 (#779) and CI-03 (#781), branch protection policy was
+> updated to require the single fail-closed summary check **`Merge Gate (Required
+Checks Summary)`** (job ID `merge-gate`). See the 2026-09-14 update below and
+> [docs/how-to/monitor-github-actions-minutes.md](../docs/how-to/monitor-github-actions-minutes.md).
+
 Configure the `production-release` GitHub Environment (used by
 `.github/workflows/release.yml`) with required reviewers, which Free-plan
 private repositories cannot do but Pro can. This closes the gap ADR 0038
@@ -122,20 +132,41 @@ after minutes reset, not on guessing further from a starved account.
 
 ## Update 2026-09-14
 
-The follow-up issue's engineering plan is implemented: `.github/workflows/ci.yml`
-now splits `fast-gate` (typecheck, lint, docs/schema drift, unit tests,
-property fuzzing — runs on every push/PR) from `heavy-gate` (build, bundle
-budget, Playwright, Web Vitals — PR-only, `chromium` project only),
-`post-merge-device-smoke` (the two genuinely device-engine-dependent specs
-against the three non-chromium projects, `main`-push only, not a repeat of
-the PR's full-suite run), and `cross-device-matrix` (the full four-device
-matrix against the full suite, `workflow_dispatch`-only). The stale `dev`
-branch trigger is removed. See
-[docs/how-to/monitor-github-actions-minutes.md](../docs/how-to/monitor-github-actions-minutes.md)
-for the manual minutes-check habit this ADR calls for.
+The follow-up engineering plan is implemented in `.github/workflows/ci.yml`:
+the pipeline splits `fast-gate` (typecheck, lint, docs/schema drift, unit tests,
+property fuzzing — push and PR), `security-gate` (vulnerability audit — push and
+PR), `heavy-gate` (build, bundle budget, Playwright chromium, Web Vitals — PR-only),
+and `device-gate` (the two device-engine-dependent specs against the three
+non-chromium projects — PR-only).
 
-`timeout-minutes` values on the new jobs are provisional, not yet backed by a
-measured run — this ADR's own text called for measuring rather than guessing,
-and Actions minutes were still constrained at the time of this update. They
-need revisiting once a clean run confirms real per-job cost, per the
-follow-up issue's own acceptance criteria.
+Under CI-02 (#779), `device-gate` was relocated pre-merge to pull requests
+alongside `heavy-gate`, superseding the intermediate `post-merge-device-smoke` concept
+so that cross-device visual and touch regressions gate the merge rather than
+running after landing on `main`. Under CI-03 (#781), `merge-gate` (`Merge Gate
+(Required Checks Summary)`) was configured to run unconditionally (`if: always()`)
+and fail closed: on `pull_request` it asserts that all four gating jobs succeeded;
+on `push` to `main` it provides bounded confirmation requiring `fast-gate` and
+`security-gate`; on any unhandled trigger (including `workflow_dispatch`) it fails
+deliberately with an explicit error. Branch protection on `main` must require
+**`Merge Gate (Required Checks Summary)`** rather than the retired `Rigor
+Ecosystem` check. The full four-device matrix remains available on demand via
+`cross-device-matrix` (`workflow_dispatch`-only).
+
+### Implementation Evidence, Server Settings, and Deferred Measurements
+
+1. **Local Implementation Evidence**: Workflow topology, dependencies (`needs:`),
+   and the fail-closed evaluation logic of `merge-gate` are validated locally
+   by offline unit and shell execution test suites
+   (`__tests__/ci-execution-policy.test.ts` and `__tests__/ci-gate-ordering.test.ts`).
+2. **Unverified Server-Side Protection**: While branch protection rules on `main`
+   (requiring `Merge Gate (Required Checks Summary)`) and environment protection
+   rules on `production-release` (requiring reviewers) constitute required repository policy,
+   their enforcement on GitHub's servers remains an unverified administrative configuration
+   pending manual confirmation in repository settings.
+3. **Future Measured Actions Costs**: Job `timeout-minutes` caps (`fast-gate`: 20,
+   `security-gate`: 15, `heavy-gate`: 40, `device-gate`: 25, `merge-gate`: 5) remain
+   provisional estimates rather than verified runtime measurements. September
+   GitHub Actions minutes are exhausted on this account; per this ADR's
+   no-paid-overage invariant, no cloud workflows may be dispatched or retried until
+   next month's billing cycle reset. Live empirical measurement of runtime and
+   cost remains deferred under #733.
