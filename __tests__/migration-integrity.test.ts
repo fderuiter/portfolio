@@ -34,17 +34,22 @@ describe("Prisma migration integrity", () => {
     expect(getLockProvider('provider = "postgresql"')).toBe("postgresql");
   });
 
+  const EXPECTED_MIGRATIONS = [
+    "20260417215437_init",
+    "20260528000000_add_telemetry_event",
+    "20260814000000_add_simulated_telemetry",
+    "20260818000000_add_feedback_and_reactions",
+    "20261014000000_add_commands_and_playback",
+    "20261015000000_add_email_resilience",
+    "20261016000000_enforce_email_contracts",
+    "20261017000000_add_telemetry_daily_rollups",
+    "20261018000000_add_blog_post",
+  ];
+
   it("validates every checked-in migration file", () => {
-    expect(validateMigrationFiles("prisma/migrations")).toEqual([
-      "20260417215437_init",
-      "20260528000000_add_telemetry_event",
-      "20260814000000_add_simulated_telemetry",
-      "20260818000000_add_feedback_and_reactions",
-      "20261014000000_add_commands_and_playback",
-      "20261015000000_add_email_resilience",
-      "20261016000000_enforce_email_contracts",
-      "20261017000000_add_telemetry_daily_rollups",
-    ]);
+    expect(validateMigrationFiles("prisma/migrations")).toEqual(
+      EXPECTED_MIGRATIONS
+    );
   });
 
   it("extracts migration identifiers from markdown documentation", () => {
@@ -64,16 +69,7 @@ describe("Prisma migration integrity", () => {
   it("validates documentation parity against active repository migration assets", () => {
     expect(
       validateDocMigrations("DATABASE_MIGRATIONS.md", "prisma/migrations")
-    ).toEqual([
-      "20260417215437_init",
-      "20260528000000_add_telemetry_event",
-      "20260814000000_add_simulated_telemetry",
-      "20260818000000_add_feedback_and_reactions",
-      "20261014000000_add_commands_and_playback",
-      "20261015000000_add_email_resilience",
-      "20261016000000_enforce_email_contracts",
-      "20261017000000_add_telemetry_daily_rollups",
-    ]);
+    ).toEqual(EXPECTED_MIGRATIONS);
   });
 
   it("keeps the email resilience migration additive, indexed, and upgrade-safe", () => {
@@ -123,6 +119,57 @@ describe("Prisma migration integrity", () => {
     expect(migration).not.toMatch(
       /"updatedAt"\s+TIMESTAMP\(3\)\s+NOT NULL\s+DEFAULT\s+CURRENT_TIMESTAMP/
     );
+  });
+
+  it("keeps the blog post migration additive, indexed, and non-destructive", () => {
+    const migrationPath = resolve(
+      process.cwd(),
+      "prisma/migrations/20261018000000_add_blog_post/migration.sql"
+    );
+    const migration = readFileSync(migrationPath, "utf8");
+
+    expect(migration).toContain('CREATE TABLE "BlogPost"');
+    expect(migration).toContain('"slug" TEXT NOT NULL');
+    expect(migration).toContain('"published" BOOLEAN NOT NULL DEFAULT false');
+    expect(migration).toContain(
+      'CREATE UNIQUE INDEX "BlogPost_slug_key" ON "BlogPost"("slug")'
+    );
+    expect(migration).not.toMatch(/DROP\s+(TABLE|COLUMN)/i);
+  });
+
+  it("fails migration file validation when a migration asset is missing or empty", () => {
+    const fs = require("fs");
+    const path = require("path");
+    const os = require("os");
+
+    const tmpDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), "migration-asset-test-")
+    );
+    const brokenMigrationDir = path.join(
+      tmpDir,
+      "20260101000000_broken_migration"
+    );
+
+    try {
+      expect(() => validateMigrationFiles(tmpDir)).toThrow(
+        "No migration directories were found."
+      );
+
+      fs.mkdirSync(brokenMigrationDir, { recursive: true });
+      expect(() => validateMigrationFiles(tmpDir)).toThrow(
+        /Migration 20260101000000_broken_migration has no non-empty migration\.sql file\./
+      );
+
+      fs.writeFileSync(
+        path.join(brokenMigrationDir, "migration.sql"),
+        "   \n  \t\n"
+      );
+      expect(() => validateMigrationFiles(tmpDir)).toThrow(
+        /Migration 20260101000000_broken_migration has no non-empty migration\.sql file\./
+      );
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
   });
 
   it("fails drift check with diagnostic error when documentation misses a migration folder", () => {
