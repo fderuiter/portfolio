@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { spawnSync } from "child_process";
 import fs from "fs";
 import path from "path";
 
@@ -13,6 +14,18 @@ import path from "path";
  * job (`merge-gate`) must be unable to report success unless every job that
  * gates the merge actually succeeded -- not merely "didn't block" by being
  * skipped or cancelled.
+ *
+ * CI-03 (#779 follow-up): `merge-gate` originally excluded itself on
+ * `workflow_dispatch` (`if: always() && github.event_name !=
+ * 'workflow_dispatch'`), which is the same skip-is-a-pass hazard one level
+ * up -- a job skipped by its own `if:` still posts a "skipped" conclusion
+ * under the required check name, and GitHub treats that as satisfied. The
+ * "merge-gate script" describe block below does not just check substrings:
+ * it extracts the job's literal `run: |` script, substitutes concrete
+ * values for its `${{ }}` expressions the same way GitHub does before the
+ * runner sees it, and actually executes the result with bash, asserting on
+ * the real exit code for pull_request, push, workflow_dispatch, and
+ * unrecognized events alike.
  *
  * No YAML parser is used here (js-yaml is present only as a transitive
  * `overrides` pin for eslint, not a direct dependency this repo can rely on
@@ -196,14 +209,18 @@ describe("CI Execution Policy", () => {
       );
     });
 
-    it("runs with if: always() so it cannot be skipped by a failed or cancelled predecessor", () => {
-      expect(field(block, "if")).toMatch(/\balways\(\)/);
-    });
-
-    it("does not fire for a bare workflow_dispatch run (the manual full-matrix job has its own gate)", () => {
-      const ifCondition = field(block, "if") ?? "";
-      expect(ifCondition).toContain("workflow_dispatch");
-      expect(ifCondition).toMatch(/!=\s*'workflow_dispatch'/);
+    it("runs with if: always(), unconditionally for every trigger (no event carve-out)", () => {
+      // CI-03 regression guard: this used to read
+      // `always() && github.event_name != 'workflow_dispatch'`, which made
+      // the whole job skip itself on a manual dispatch -- and a job skipped
+      // by its own `if:` still posts a "skipped" conclusion under this
+      // exact required check name, which required-status-checks treats as
+      // satisfied rather than blocking. The condition must be exactly
+      // `always()`, not `always()` narrowed by any event exclusion, so the
+      // job -- and therefore the shell script's own fail-closed default,
+      // exercised for real below -- always gets to run and report a real
+      // conclusion.
+      expect(field(block, "if")).toBe("always()");
     });
 
     it("inspects every required predecessor's actual .result rather than trusting needs: alone", () => {
@@ -226,16 +243,230 @@ describe("CI Execution Policy", () => {
     });
 
     it("only requires heavy-gate/device-gate to have succeeded when the event is pull_request", () => {
-      const marker = 'if [ "${{ github.event_name }}" = "pull_request" ]; then';
-      expect(block).toContain(marker);
-      const guardedBlock = block.split(marker)[1];
+      const marker = "pull_request)";
+      const start = block.indexOf(marker);
+      expect(start).toBeGreaterThan(-1);
+      const end = block.indexOf(";;", start);
+      expect(end).toBeGreaterThan(start);
+      const guardedBlock = block.slice(start, end);
       expect(guardedBlock).toContain("heavy-gate");
       expect(guardedBlock).toContain("device-gate");
+    });
+
+    it("declares an explicit catch-all default that fails closed for any other event", () => {
+      // Belt-and-suspenders string check alongside the real-execution suite
+      // below: the case statement must dispatch on the literal event value
+      // and carry a `*)` default arm that sets fail=1, not merely omit
+      // handling for unrecognized events (which is what let workflow_dispatch
+      // slip through before CI-03 -- the job simply never ran for it).
+      expect(block).toContain('case "${event}" in');
+      const defaultStart = block.indexOf("\n            *)");
+      expect(defaultStart).toBeGreaterThan(-1);
+      const defaultEnd = block.indexOf(";;", defaultStart);
+      const defaultArm = block.slice(defaultStart, defaultEnd);
+      expect(defaultArm).toContain("fail=1");
     });
 
     it("declares a timeout so the summary step itself cannot hang unbounded", () => {
       const timeout = Number(field(block, "timeout-minutes"));
       expect(timeout).toBeGreaterThan(0);
+    });
+  });
+
+  describe("merge-gate script: real execution against controlled event/result inputs", () => {
+    // Everything above only checks that certain substrings exist in the
+    // YAML -- it would not notice if, say, someone flipped `!=` to `==`, or
+    // dropped the default case's `fail=1`, while leaving every string this
+    // file already asserts on intact. This suite extracts the literal shell
+    // script GitHub Actions would run, substitutes concrete values for its
+    // `${{ }}` expressions the same way GitHub itself does before the
+    // runner ever sees the script, and actually executes the result with
+    // bash, asserting on the real exit code -- the only way to prove
+    // failure actually propagates rather than merely reading as if it
+    // should.
+    const block = jobBlock("merge-gate");
+
+    /**
+     * Extracts the body of the single `run: |` step in a job block, using
+     * the step's own indentation (10 spaces here) to find where the script
+     * starts and ends.
+     */
+    const extractRunScript = (jobBlockText: string): string => {
+      const marker = "run: |\n";
+      const idx = jobBlockText.indexOf(marker);
+      if (idx === -1) {
+        throw new Error("no `run: |` step found in job block");
+      }
+      const after = jobBlockText.slice(idx + marker.length);
+      const scriptLines: string[] = [];
+      for (const line of after.split("\n")) {
+        if (line.trim() === "") {
+          scriptLines.push("");
+          continue;
+        }
+        const indent = line.match(/^ */)?.[0].length ?? 0;
+        if (indent < 10) break;
+        scriptLines.push(line.slice(10));
+      }
+      return scriptLines.join("\n");
+    };
+
+    const script = extractRunScript(block);
+
+    it("extracted a non-trivial script containing the fail-closed default", () => {
+      expect(script.length).toBeGreaterThan(0);
+      expect(script).toContain('case "${event}" in');
+      expect(script).toContain('exit "${fail}"');
+    });
+
+    type ResultsMap = Record<
+      "fast-gate" | "security-gate" | "heavy-gate" | "device-gate",
+      string
+    >;
+
+    const ALL_SUCCESS: ResultsMap = {
+      "fast-gate": "success",
+      "security-gate": "success",
+      "heavy-gate": "success",
+      "device-gate": "success",
+    };
+
+    /** Substitutes GitHub Actions `${{ }}` expressions with literal test values. */
+    const renderScript = (event: string, results: ResultsMap): string => {
+      let out = script.replace(/\$\{\{\s*github\.event_name\s*\}\}/g, event);
+      for (const job of Object.keys(results) as (keyof ResultsMap)[]) {
+        const re = new RegExp(
+          `\\$\\{\\{\\s*needs\\.${job}\\.result\\s*\\}\\}`,
+          "g"
+        );
+        out = out.replace(re, results[job]);
+      }
+      // Any remaining `${{ }}` means a substitution above missed an
+      // expression the real script actually contains -- fail loudly here
+      // rather than letting bash choke on invalid `${{` syntax with a
+      // confusing error.
+      if (/\$\{\{/.test(out)) {
+        throw new Error(
+          `unsubstituted GitHub Actions expression remains in rendered script:\n${out}`
+        );
+      }
+      return out;
+    };
+
+    const runScript = (
+      event: string,
+      results: ResultsMap
+    ): { status: number | null; stderr: string } => {
+      const rendered = renderScript(event, results);
+      const result = spawnSync("bash", ["-c", rendered], { encoding: "utf-8" });
+      if (result.error) {
+        throw result.error;
+      }
+      return { status: result.status, stderr: result.stderr };
+    };
+
+    const FAILURE_MODES = ["failure", "cancelled", "skipped"] as const;
+
+    describe("pull_request", () => {
+      it("exits 0 when every required predecessor succeeded", () => {
+        expect(runScript("pull_request", ALL_SUCCESS).status).toBe(0);
+      });
+
+      const prRequiredJobs = [
+        "fast-gate",
+        "security-gate",
+        "heavy-gate",
+        "device-gate",
+      ] as const;
+      const prFailureCases = prRequiredJobs.flatMap((job) =>
+        FAILURE_MODES.map((mode) => [job, mode] as const)
+      );
+
+      it.each(prFailureCases)(
+        "exits 1 (never 0) when %s reports %s",
+        (job, result) => {
+          const results: ResultsMap = { ...ALL_SUCCESS, [job]: result };
+          expect(runScript("pull_request", results).status).toBe(1);
+        }
+      );
+    });
+
+    describe("push", () => {
+      it("exits 0 when fast-gate/security-gate succeed even though heavy-gate/device-gate are skipped", () => {
+        const results: ResultsMap = {
+          ...ALL_SUCCESS,
+          "heavy-gate": "skipped",
+          "device-gate": "skipped",
+        };
+        expect(runScript("push", results).status).toBe(0);
+      });
+
+      const pushRequiredJobs = ["fast-gate", "security-gate"] as const;
+      const pushFailureCases = pushRequiredJobs.flatMap((job) =>
+        FAILURE_MODES.map((mode) => [job, mode] as const)
+      );
+
+      it.each(pushFailureCases)(
+        "exits 1 (never 0) when %s reports %s, regardless of heavy-gate/device-gate",
+        (job, result) => {
+          const results: ResultsMap = {
+            ...ALL_SUCCESS,
+            "heavy-gate": "skipped",
+            "device-gate": "skipped",
+            [job]: result,
+          };
+          expect(runScript("push", results).status).toBe(1);
+        }
+      );
+    });
+
+    describe("workflow_dispatch (manual execution) -- CI-03 regression", () => {
+      it("fails closed (exit 1, never skipped/0) even when every job that ran actually succeeded", () => {
+        // This is the exact scenario the bug allowed: an operator manually
+        // dispatches the workflow against a ref that also has an open PR
+        // pointing at the same commit. fast-gate/security-gate run and pass
+        // (they carry no `if:`); heavy-gate/device-gate are skipped by their
+        // own pull_request-only `if:`. Before CI-03, the whole merge-gate
+        // job was itself skipped for this event, which posts a "skipped"
+        // conclusion for the required check name -- and required-status-checks
+        // treats a skipped required check as satisfied, not blocking. The
+        // fix must make this scenario a hard failure, not a skip and not a
+        // pass.
+        const results: ResultsMap = {
+          ...ALL_SUCCESS,
+          "heavy-gate": "skipped",
+          "device-gate": "skipped",
+        };
+        const outcome = runScript("workflow_dispatch", results);
+        expect(outcome.status).toBe(1);
+      });
+
+      it("fails closed even when every job improbably reports success", () => {
+        // Belt-and-suspenders: even if every predecessor somehow reported
+        // success, a bare manual dispatch must still not be able to satisfy
+        // this required check -- there is no event-specific validation
+        // branch for workflow_dispatch at all, by design.
+        expect(runScript("workflow_dispatch", ALL_SUCCESS).status).toBe(1);
+      });
+    });
+
+    describe("unsupported/unrecognized events", () => {
+      it.each(["schedule", "repository_dispatch", "made_up_event"])(
+        "fails closed (exit 1) for event '%s' even when every job succeeded",
+        (event) => {
+          expect(runScript(event, ALL_SUCCESS).status).toBe(1);
+        }
+      );
+    });
+
+    it("never lets every-job-failed exit 0 on the event with the most required predecessors", () => {
+      const results: ResultsMap = {
+        "fast-gate": "failure",
+        "security-gate": "failure",
+        "heavy-gate": "failure",
+        "device-gate": "failure",
+      };
+      expect(runScript("pull_request", results).status).toBe(1);
     });
   });
 

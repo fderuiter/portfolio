@@ -124,6 +124,42 @@ defense-in-depth beyond `merge-gate` alone — but `merge-gate` failing
 already implies `security-gate` failed or was skipped, so it is not
 required for correctness.
 
+### CI-03: manual (`workflow_dispatch`) and unrecognized triggers now fail closed
+
+`merge-gate` originally carried `if: always() && github.event_name !=
+'workflow_dispatch'` at the job level. That exclusion made the *entire job*
+skip on a manual dispatch — and a job skipped by its own `if:` still posts
+a "skipped" conclusion under the exact required check name above, which
+GitHub's required-status-checks rule treats as satisfied, not blocking.
+Concretely: an operator who ran `workflow_dispatch` against a branch that
+also had an open PR pointing at the same commit SHA would post a fresh
+"skipped" `Merge Gate (Required Checks Summary)` check run for that SHA —
+superseding whatever the PR's own `pull_request`-triggered run had
+reported, and satisfying the required check regardless of whether
+`heavy-gate`/`device-gate` had ever actually run or passed.
+
+`merge-gate` now runs unconditionally (`if: always()`, no event exclusion),
+and its shell script dispatches explicitly on `github.event_name`:
+`pull_request` requires all four jobs; `push` requires `fast-gate`/
+`security-gate` only (the bounded main-push confirmation, unchanged); any
+other event — `workflow_dispatch` included, and any future trigger this
+workflow does not yet have — hits an explicit default branch that fails the
+job outright (`echo "::error::..."; fail=1`), regardless of whether the
+jobs that happened to run all reported success. A manual or unrecognized
+trigger can therefore never produce a "skipped" conclusion (satisfied by
+default) or an accidental "success" (from a partial check) for this shared
+required check name — only a hard, visible failure that a fresh
+`pull_request`/`push` run supersedes once one actually runs.
+
+This does mean dispatching `cross-device-matrix` against a branch that also
+carries an open PR will post a failing `Merge Gate` check on that SHA until
+the PR's branch next receives a real `pull_request` event (e.g. a new
+push). That is an accepted, visible cost of failing closed, not a bug: the
+alternative — letting a manual trigger silently satisfy or skip the
+required check — is exactly the gap this fix closes. In practice, dispatch
+`cross-device-matrix` against `main` or a release branch with no open PR
+against it, and this never comes up.
+
 ### What is still not measured (remaining cost gate)
 
 This task did not, and could not, produce a live CI run: GitHub Actions is
@@ -148,6 +184,20 @@ means:
   one real PR once Actions minutes are available.
 - #733 is not closed by this change; its own acceptance criteria (a real
   measured run confirming aggregate cost fits the allowance) remain open.
+- CI-03's fail-closed behavior (a real `workflow_dispatch` run producing a
+  hard failure rather than a skip, and real `pull_request`/`push` runs
+  still passing under the new `case`-based script) is verified here only by
+  the same means: unit tests that extract the literal script from
+  `.github/workflows/ci.yml` and actually execute it with bash against
+  controlled event/result inputs (`__tests__/ci-execution-policy.test.ts`),
+  not a live GitHub Actions run. GitHub Actions minutes for this account
+  are exhausted for the current billing cycle (ADR 0039's no-paid-overage
+  policy), so live validation — confirming `merge-gate` actually reports
+  failure for a real `workflow_dispatch` run and actually reports success
+  for a real PR under the new script — can only happen next month, after
+  the allowance resets. Until then, the unit tests above are the only
+  evidence this change behaves as designed; no workflow was dispatched,
+  retried, or otherwise run against GitHub Actions to produce this page.
 
 ## Refresh this page
 

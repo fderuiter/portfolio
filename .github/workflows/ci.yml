@@ -30,6 +30,16 @@ name: CI Pipeline
 # predecessor can never leave the merge gate green. See
 # docs/how-to/monitor-github-actions-minutes.md for the exact check name to
 # require.
+#
+# CI-03: `merge-gate` itself used to carry `&& github.event_name !=
+# 'workflow_dispatch'`, so a manual dispatch made the job skip entirely --
+# which still posts a "skipped" conclusion under this exact required check
+# name, and GitHub treats that as satisfied, not blocking (the same
+# skip-is-a-pass gap the paragraph above closes for its predecessors, one
+# level up). `merge-gate` now runs unconditionally and fails closed for any
+# event it has no defined validation for (workflow_dispatch included), so
+# this required check can never be satisfied by a skip, and a manual
+# trigger can never manufacture a silent pass either.
 
 on:
   push:
@@ -376,15 +386,22 @@ jobs:
   # side effect of a failed `needs:` predecessor reports "skipped", and a
   # required-status-check rule treats "skipped" as satisfied, not blocking.
   # That would let a cancelled Playwright run or a failed fast-gate silently
-  # produce a mergeable PR. This job runs with `if: always()` specifically so
-  # it still executes when an upstream job failed, was cancelled, or (for a
-  # non-PR trigger) never ran, then fails deliberately unless every predecessor
-  # required for this event actually reported "success" — so a merge can never
-  # go green on anything other than a real pass of every required predecessor.
+  # produce a mergeable PR. This job runs with `if: always()` -- unconditionally,
+  # for every trigger this workflow has, including workflow_dispatch -- so it
+  # still executes when an upstream job failed, was cancelled, or never ran,
+  # then fails deliberately unless every predecessor required for this event
+  # actually reported "success". CI-03: the step below only knows how to
+  # validate `pull_request` and `push`; any other event (workflow_dispatch's
+  # manual runs included) hits an explicit default branch that fails the job
+  # outright, so a manual trigger can produce neither a "skipped" conclusion
+  # (satisfied by default under required-status-checks) nor an accidental
+  # "success" from a partial validation -- a merge can never go green on
+  # anything other than a real pass of every required predecessor for a
+  # recognized event.
   merge-gate:
     name: Merge Gate (Required Checks Summary)
     needs: [fast-gate, security-gate, heavy-gate, device-gate]
-    if: always() && github.event_name != 'workflow_dispatch'
+    if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
@@ -403,29 +420,50 @@ jobs:
             fi
           }
 
-          # fast-gate and security-gate have no `if:` — they run, and must
-          # succeed, on every trigger this job runs for (pull_request and the
-          # direct-push safety net alike).
-          check_required "fast-gate" "${{ needs.fast-gate.result }}"
-          check_required "security-gate" "${{ needs.security-gate.result }}"
+          event="${{ github.event_name }}"
 
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            # heavy-gate and device-gate are pull_request-only by design (the
-            # reduced-scope split from #733/#775); on a PR trigger they are
-            # the pre-merge device and full-suite-chromium coverage this task
-            # exists to require, so a skip here is exactly the failure mode
-            # this job guards against, not an expected outcome.
-            check_required "heavy-gate" "${{ needs.heavy-gate.result }}"
-            check_required "device-gate" "${{ needs.device-gate.result }}"
-          else
-            # Outside a pull_request, heavy-gate/device-gate are expected to
-            # report "skipped" (their own `if:` excludes this event) — that is
-            # the bounded main-push confirmation this task calls for, not a
-            # gap: the merged PR already required both jobs to succeed before
-            # this push could happen.
-            echo "heavy-gate: ${{ needs.heavy-gate.result }} (not required outside pull_request)"
-            echo "device-gate: ${{ needs.device-gate.result }} (not required outside pull_request)"
-          fi
+          case "${event}" in
+            pull_request)
+              # fast-gate and security-gate have no `if:` -- they run, and
+              # must succeed, on every trigger this job runs for. heavy-gate
+              # and device-gate are pull_request-only by design (the
+              # reduced-scope split from #733/#775); on a PR trigger they are
+              # the pre-merge device and full-suite-chromium coverage this
+              # task exists to require, so a skip here is exactly the failure
+              # mode this job guards against, not an expected outcome.
+              check_required "fast-gate" "${{ needs.fast-gate.result }}"
+              check_required "security-gate" "${{ needs.security-gate.result }}"
+              check_required "heavy-gate" "${{ needs.heavy-gate.result }}"
+              check_required "device-gate" "${{ needs.device-gate.result }}"
+              ;;
+            push)
+              # Bounded main-push confirmation (#732's direct-push safety
+              # net): heavy-gate/device-gate are expected to report "skipped"
+              # here (their own `if:` excludes this event) -- the merged PR
+              # already required both to succeed before this push could
+              # happen, so re-requiring them adds no signal, only cost.
+              check_required "fast-gate" "${{ needs.fast-gate.result }}"
+              check_required "security-gate" "${{ needs.security-gate.result }}"
+              echo "heavy-gate: ${{ needs.heavy-gate.result }} (not required outside pull_request)"
+              echo "device-gate: ${{ needs.device-gate.result }} (not required outside pull_request)"
+              ;;
+            *)
+              # CI-03: every other trigger -- workflow_dispatch (a manual run,
+              # with or without the cross_device_matrix input) and any
+              # future/unrecognized event -- has no defined validation here.
+              # Without this branch, an unhandled event previously left this
+              # job's own `if:` excluding it entirely, so GitHub recorded a
+              # "skipped" conclusion for the exact check name branch
+              # protection requires, and GitHub treats a skipped required
+              # check as satisfied rather than blocking. Failing here
+              # deliberately means a manual or unrecognized trigger can never
+              # produce a "skipped" result, and can never produce an
+              # accidental "success" either, for this shared required
+              # context.
+              echo "::error::Merge Gate has no defined validation for event '${event}'; failing closed so this required check can never be satisfied by an unsupported trigger."
+              fail=1
+              ;;
+          esac
 
           exit "${fail}"
 
