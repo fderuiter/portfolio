@@ -362,6 +362,24 @@ Re-exports [DEFAULT_STUDY_BRANDING](branding-defaults/variables/DEFAULT_STUDY_BR
 
 ***
 
+### DerivationExplanation
+
+Re-exports [DerivationExplanation](expression-evaluator/interfaces/DerivationExplanation.md)
+
+***
+
+### DerivationInputDependency
+
+Re-exports [DerivationInputDependency](expression-evaluator/interfaces/DerivationInputDependency.md)
+
+***
+
+### DerivationStep
+
+Re-exports [DerivationStep](expression-evaluator/interfaces/DerivationStep.md)
+
+***
+
 ### describeCondition
 
 Re-exports [describeCondition](expression-evaluator/functions/describeCondition.md)
@@ -563,6 +581,12 @@ Re-exports [executeVisitCommand](cli-engine/functions/executeVisitCommand.md)
 ### ExpandedRField
 
 Re-exports [ExpandedRField](export-r/interfaces/ExpandedRField.md)
+
+***
+
+### explainCalculationDerivation
+
+Re-exports [explainCalculationDerivation](expression-evaluator/functions/explainCalculationDerivation.md)
 
 ***
 
@@ -884,6 +908,12 @@ Re-exports [isCdiscNullFlavor](precision-date/functions/isCdiscNullFlavor.md)
 
 ***
 
+### isDraftDirty
+
+Re-exports [isDraftDirty](study-draft-storage/functions/isDraftDirty.md)
+
+***
+
 ### isFutureDate
 
 Re-exports [isFutureDate](precision-date/functions/isFutureDate.md)
@@ -914,6 +944,12 @@ Re-exports [lintFormula](formula-linter/functions/lintFormula.md)
 
 ***
 
+### listStudySnapshots
+
+Re-exports [listStudySnapshots](study-draft-storage/functions/listStudySnapshots.md)
+
+***
+
 ### loadStudyDraft
 
 Re-exports [loadStudyDraft](study-draft-storage/functions/loadStudyDraft.md)
@@ -929,6 +965,12 @@ Re-exports [LoadStudyDraftResult](study-draft-storage/type-aliases/LoadStudyDraf
 ### mapPresetToFormVariables
 
 Re-exports [mapPresetToFormVariables](formula-presets/functions/mapPresetToFormVariables.md)
+
+***
+
+### normalizeStudyForComparison
+
+Re-exports [normalizeStudyForComparison](study-draft-storage/functions/normalizeStudyForComparison.md)
 
 ***
 
@@ -1025,6 +1067,18 @@ Re-exports [saveStudyDraft](study-draft-storage/functions/saveStudyDraft.md)
 ### SaveStudyDraftResult
 
 Re-exports [SaveStudyDraftResult](study-draft-storage/type-aliases/SaveStudyDraftResult.md)
+
+***
+
+### saveStudySnapshot
+
+Re-exports [saveStudySnapshot](study-draft-storage/functions/saveStudySnapshot.md)
+
+***
+
+### SaveStudySnapshotResult
+
+Re-exports [SaveStudySnapshotResult](study-draft-storage/type-aliases/SaveStudySnapshotResult.md)
 
 ***
 
@@ -1160,6 +1214,12 @@ Re-exports [STUDY_PRESETS](presets/variables/STUDY_PRESETS.md)
 
 ***
 
+### STUDY\_SNAPSHOTS\_STORAGE\_KEY
+
+Re-exports [STUDY_SNAPSHOTS_STORAGE_KEY](study-draft-storage/variables/STUDY_SNAPSHOTS_STORAGE_KEY.md)
+
+***
+
 ### StudyArm
 
 Re-exports [StudyArm](types/interfaces/StudyArm.md)
@@ -1223,6 +1283,12 @@ Re-exports [StudyEpochSchema](universal-schema/variables/StudyEpochSchema.md)
 ### StudyProtocol
 
 Re-exports [StudyProtocol](types/interfaces/StudyProtocol.md)
+
+***
+
+### StudySnapshot
+
+Re-exports [StudySnapshot](study-draft-storage/interfaces/StudySnapshot.md)
 
 ***
 

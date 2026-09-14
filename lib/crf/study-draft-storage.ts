@@ -137,3 +137,136 @@ function preserveCorruptDraft(storage: Storage, raw: string): void {
     // Best-effort only; if the store is unavailable there's nowhere to preserve it.
   }
 }
+
+/**
+ * Storage key for user-saved study snapshots
+ */
+export const STUDY_SNAPSHOTS_STORAGE_KEY = "crf_studio_snapshots_v1";
+
+export interface StudySnapshot {
+  id: string;
+  label: string;
+  savedAt: string;
+  study: StudyProtocol;
+}
+
+export type SaveStudySnapshotResult =
+  | { status: "saved"; snapshot: StudySnapshot }
+  | { status: "unavailable" }
+  | { status: "error"; message: string };
+
+function generateSnapshotId(): string {
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.randomUUID === "function"
+  ) {
+    return `snap_${crypto.randomUUID()}`;
+  }
+  const rand = Math.random().toString(36).slice(2, 11);
+  return `snap_${rand}`;
+}
+
+/**
+ * Persists a labeled snapshot of the current study into snapshot storage.
+ * Retains the 20 most recent snapshots to prevent storage exhaustion.
+ */
+export function saveStudySnapshot(
+  study: StudyProtocol,
+  label?: string,
+  storage?: Storage
+): SaveStudySnapshotResult {
+  const target = resolveStorage(storage);
+  if (!target) return { status: "unavailable" };
+
+  const savedAt = new Date().toISOString();
+  const snapshot: StudySnapshot = {
+    id: generateSnapshotId(),
+    label: label || `Snapshot ${new Date(savedAt).toLocaleTimeString()}`,
+    savedAt,
+    study,
+  };
+
+  try {
+    const existing = listStudySnapshots(target);
+    const updated = [snapshot, ...existing].slice(0, 20);
+    target.setItem(STUDY_SNAPSHOTS_STORAGE_KEY, JSON.stringify(updated));
+    return { status: "saved", snapshot };
+  } catch (err) {
+    return {
+      status: "error",
+      message:
+        err instanceof Error ? err.message : "Failed to persist snapshot",
+    };
+  }
+}
+
+/**
+ * Lists all persisted study snapshots in reverse chronological order.
+ */
+export function listStudySnapshots(storage?: Storage): StudySnapshot[] {
+  const target = resolveStorage(storage);
+  if (!target) return [];
+
+  try {
+    const raw = target.getItem(STUDY_SNAPSHOTS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (s): s is StudySnapshot =>
+        typeof s?.id === "string" &&
+        typeof s?.savedAt === "string" &&
+        isStudyProtocolShape(s?.study)
+    );
+  } catch {
+    return [];
+  }
+}
+
+function deterministicStringify(obj: unknown): string {
+  if (obj === null || typeof obj !== "object") {
+    return JSON.stringify(obj);
+  }
+  if (Array.isArray(obj)) {
+    return `[${obj.map(deterministicStringify).join(",")}]`;
+  }
+  const record = obj as Record<string, unknown>;
+  const sortedKeys = Object.keys(record)
+    .filter((k) => k !== "lastModified")
+    .sort();
+  const entries = sortedKeys
+    .filter((k) => record[k] !== undefined)
+    .map((k) => `${JSON.stringify(k)}:${deterministicStringify(record[k])}`);
+  return `{${entries.join(",")}}`;
+}
+
+/**
+ * Serializes a study protocol omitting volatile timestamp fields for equality checks.
+ */
+export function normalizeStudyForComparison(study: StudyProtocol): string {
+  if (!study || typeof study !== "object") return "";
+  return deterministicStringify(study);
+}
+
+/**
+ * Evaluates whether the current study draft differs from a saved baseline protocol
+ * or the active storage draft if baseline is not explicitly provided.
+ */
+export function isDraftDirty(
+  current: StudyProtocol,
+  baseline?: StudyProtocol | null,
+  storage?: Storage
+): boolean {
+  let targetBaseline = baseline;
+  if (!targetBaseline) {
+    const loaded = loadStudyDraft(storage);
+    if (loaded.status === "recovered") {
+      targetBaseline = loaded.study;
+    }
+  }
+  if (!targetBaseline) return false;
+  return (
+    normalizeStudyForComparison(current) !==
+    normalizeStudyForComparison(targetBaseline)
+  );
+}

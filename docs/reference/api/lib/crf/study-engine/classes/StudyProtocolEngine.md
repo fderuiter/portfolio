@@ -142,9 +142,9 @@ Add Study Epoch to Protocol Graph
 
 ### addField()
 
-> `static` **addField**(`study`, `domainOrFormId`, `fieldData`, `sectionIndex?`): `object`
+> `static` **addField**(`study`, `domainOrFormId`, `fieldData`, `sectionIndexOrOptions?`): `object`
 
-Add Clinical Field to Form
+Add Clinical Field to Form (Appends or Inserts at Target Index)
 
 #### Parameters
 
@@ -160,9 +160,9 @@ Add Clinical Field to Form
 
 `Partial`\<[`CRFField`](../../types/interfaces/CRFField.md)\> & `object`
 
-##### sectionIndex?
+##### sectionIndexOrOptions?
 
-`number` = `0`
+`number` \| \{ `sectionId?`: `string`; `sectionIndex?`: `number`; `targetIndex?`: `number`; \}
 
 #### Returns
 
@@ -281,6 +281,48 @@ Add Dynamic AST Edit Check / Calculation Rule to Form
 ##### rule?
 
 > `optional` **rule?**: [`EditCheckRule`](../../types/interfaces/EditCheckRule.md)
+
+##### study
+
+> **study**: [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+***
+
+### addSection()
+
+> `static` **addSection**(`study`, `domainOrFormId`, `titleOrSection`): `object`
+
+Add Section to Form
+
+#### Parameters
+
+##### study
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### domainOrFormId
+
+`string`
+
+##### titleOrSection
+
+`string` \| `Partial`\<[`CRFSection`](../../types/interfaces/CRFSection.md)\>
+
+#### Returns
+
+`object`
+
+##### error?
+
+> `optional` **error?**: `string`
+
+##### form?
+
+> `optional` **form?**: [`CRFForm`](../../types/interfaces/CRFForm.md)
+
+##### section?
+
+> `optional` **section?**: [`CRFSection`](../../types/interfaces/CRFSection.md)
 
 ##### study
 
@@ -438,6 +480,100 @@ Semantic Diff between Two Protocols
 
 ***
 
+### duplicateField()
+
+> `static` **duplicateField**(`study`, `domainOrFormId`, `fieldIdOrVar`, `targetSectionId?`): `object`
+
+Duplicate Clinical Field with Unique Identity and Nonconflicting CDASH Variable Name
+
+#### Parameters
+
+##### study
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### domainOrFormId
+
+`string`
+
+##### fieldIdOrVar
+
+`string`
+
+##### targetSectionId?
+
+`string`
+
+#### Returns
+
+`object`
+
+##### duplicatedField?
+
+> `optional` **duplicatedField?**: [`CRFField`](../../types/interfaces/CRFField.md)
+
+##### error?
+
+> `optional` **error?**: `string`
+
+##### form?
+
+> `optional` **form?**: [`CRFForm`](../../types/interfaces/CRFForm.md)
+
+##### study
+
+> **study**: [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+***
+
+### duplicateForm()
+
+> `static` **duplicateForm**(`study`, `formIdOrDomain`, `options?`): `object`
+
+Duplicate Form with Fresh Identities, Deep Cloning, and Internal Rule Remapping
+
+#### Parameters
+
+##### study
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### formIdOrDomain
+
+`string`
+
+##### options?
+
+###### customName?
+
+`string`
+
+###### newDomain?
+
+`string`
+
+###### renameVariables?
+
+`boolean`
+
+#### Returns
+
+`object`
+
+##### duplicatedForm?
+
+> `optional` **duplicatedForm?**: [`CRFForm`](../../types/interfaces/CRFForm.md)
+
+##### error?
+
+> `optional` **error?**: `string`
+
+##### study
+
+> **study**: [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+***
+
 ### exportProtocol()
 
 > `static` **exportProtocol**(`study`, `format`): `object`
@@ -477,6 +613,32 @@ Multi-Format Regulatory Export Compilation
 ##### success
 
 > **success**: `boolean`
+
+***
+
+### findFieldReferences()
+
+> `static` **findFieldReferences**(`study`, `fieldIdOrVar`, `formId?`): [`FieldReferenceLocation`](../interfaces/FieldReferenceLocation.md)[]
+
+Find All References to a Field Across Rules, Conditions, Formulas, Calculations, and Grids (#542)
+
+#### Parameters
+
+##### study
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### fieldIdOrVar
+
+`string`
+
+##### formId?
+
+`string`
+
+#### Returns
+
+[`FieldReferenceLocation`](../interfaces/FieldReferenceLocation.md)[]
 
 ***
 
@@ -546,6 +708,62 @@ Find Form by ID or Domain (Case-Insensitive)
 
 ***
 
+### insertField()
+
+> `static` **insertField**(`study`, `domainOrFormId`, `fieldData`, `options?`): `object`
+
+Insert Clinical Field into Specified Section and Position
+
+#### Parameters
+
+##### study
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### domainOrFormId
+
+`string`
+
+##### fieldData
+
+`Partial`\<[`CRFField`](../../types/interfaces/CRFField.md)\> & `object`
+
+##### options?
+
+###### sectionId?
+
+`string`
+
+###### sectionIndex?
+
+`number`
+
+###### targetIndex?
+
+`number`
+
+#### Returns
+
+`object`
+
+##### error?
+
+> `optional` **error?**: `string`
+
+##### field?
+
+> `optional` **field?**: [`CRFField`](../../types/interfaces/CRFField.md)
+
+##### form?
+
+> `optional` **form?**: [`CRFForm`](../../types/interfaces/CRFForm.md)
+
+##### study
+
+> **study**: [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+***
+
 ### listDomains()
 
 > `static` **listDomains**(): [`DomainMetadata`](../interfaces/DomainMetadata.md)[]
@@ -601,6 +819,88 @@ Load Preset by ID
 ##### study
 
 > **study**: [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+***
+
+### previewFieldRemoval()
+
+> `static` **previewFieldRemoval**(`study`, `domainOrFormId`, `fieldIdOrVar`): [`FieldImpactPreview`](../interfaces/FieldImpactPreview.md)
+
+Preview Blast Radius Before Deleting a Field (#542)
+
+#### Parameters
+
+##### study
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### domainOrFormId
+
+`string`
+
+##### fieldIdOrVar
+
+`string`
+
+#### Returns
+
+[`FieldImpactPreview`](../interfaces/FieldImpactPreview.md)
+
+***
+
+### previewFormRemoval()
+
+> `static` **previewFormRemoval**(`study`, `formIdOrDomain`): `object`
+
+Preview Form Removal Impact on Visit & Arm Schedule
+
+#### Parameters
+
+##### study
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### formIdOrDomain
+
+`string`
+
+#### Returns
+
+`object`
+
+##### affectedArms
+
+> **affectedArms**: [`StudyArm`](../../types/interfaces/StudyArm.md)[]
+
+##### affectedVisits
+
+> **affectedVisits**: [`StudyVisit`](../../types/interfaces/StudyVisit.md)[]
+
+***
+
+### previewSectionRemoval()
+
+> `static` **previewSectionRemoval**(`study`, `domainOrFormId`, `sectionId`): [`SectionImpactPreview`](../interfaces/SectionImpactPreview.md)
+
+Preview Blast Radius Before Deleting a Section (#542)
+
+#### Parameters
+
+##### study
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### domainOrFormId
+
+`string`
+
+##### sectionId
+
+`string`
+
+#### Returns
+
+[`SectionImpactPreview`](../interfaces/SectionImpactPreview.md)
 
 ***
 
@@ -696,9 +996,9 @@ Remove Study Epoch from Protocol Graph
 
 ### removeField()
 
-> `static` **removeField**(`study`, `domainOrFormId`, `fieldIdOrVar`): `object`
+> `static` **removeField**(`study`, `domainOrFormId`, `fieldIdOrVar`, `options?`): `object`
 
-Remove Field from Form & Prune AST Rules
+Remove Field from Form & Prune AST Rules (Backwards-compatible wrapper over removeFieldWithCascade)
 
 #### Parameters
 
@@ -714,9 +1014,19 @@ Remove Field from Form & Prune AST Rules
 
 `string`
 
+##### options?
+
+###### purgeReferencingRules?
+
+`boolean`
+
 #### Returns
 
 `object`
+
+##### affectedReferences?
+
+> `optional` **affectedReferences?**: [`FieldReferenceLocation`](../interfaces/FieldReferenceLocation.md)[]
 
 ##### error?
 
@@ -734,13 +1044,97 @@ Remove Field from Form & Prune AST Rules
 
 > **study**: [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
 
+##### undo?
+
+> `optional` **undo?**: (`currentStudy`) => [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+###### Parameters
+
+###### currentStudy
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+###### Returns
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+***
+
+### removeFieldWithCascade()
+
+> `static` **removeFieldWithCascade**(`study`, `domainOrFormId`, `fieldIdOrVar`, `options?`): `object`
+
+Remove Field with Cascade: Prunes referencing rules/conditions with 1-operation undo (#542)
+
+#### Parameters
+
+##### study
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### domainOrFormId
+
+`string`
+
+##### fieldIdOrVar
+
+`string`
+
+##### options?
+
+###### purgeReferencingRules?
+
+`boolean`
+
+#### Returns
+
+`object`
+
+##### affectedReferences
+
+> **affectedReferences**: [`FieldReferenceLocation`](../interfaces/FieldReferenceLocation.md)[]
+
+##### error?
+
+> `optional` **error?**: `string`
+
+##### removedAtIndex?
+
+> `optional` **removedAtIndex?**: `number`
+
+##### removedField?
+
+> `optional` **removedField?**: [`CRFField`](../../types/interfaces/CRFField.md)
+
+##### removedFromSectionId?
+
+> `optional` **removedFromSectionId?**: `string`
+
+##### study
+
+> **study**: [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### undo?
+
+> `optional` **undo?**: (`currentStudy`) => [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+###### Parameters
+
+###### currentStudy
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+###### Returns
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
 ***
 
 ### removeForm()
 
 > `static` **removeForm**(`study`, `formIdOrDomain`): `object`
 
-Remove Form & Automatically Prune Schedule of Activities (SoA) References
+Remove Form & Automatically Prune Visit and Arm Assignments
 
 #### Parameters
 
@@ -756,6 +1150,14 @@ Remove Form & Automatically Prune Schedule of Activities (SoA) References
 
 `object`
 
+##### affectedArms?
+
+> `optional` **affectedArms?**: [`StudyArm`](../../types/interfaces/StudyArm.md)[]
+
+##### affectedVisits?
+
+> `optional` **affectedVisits?**: [`StudyVisit`](../../types/interfaces/StudyVisit.md)[]
+
 ##### removedForm?
 
 > `optional` **removedForm?**: [`CRFForm`](../../types/interfaces/CRFForm.md)
@@ -763,6 +1165,90 @@ Remove Form & Automatically Prune Schedule of Activities (SoA) References
 ##### study
 
 > **study**: [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### undo?
+
+> `optional` **undo?**: (`currentStudy`) => [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+###### Parameters
+
+###### currentStudy
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+###### Returns
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+***
+
+### removeSectionWithCascade()
+
+> `static` **removeSectionWithCascade**(`study`, `domainOrFormId`, `sectionId`, `options?`): `object`
+
+Remove Containing Section with Cascade: Removes section, all contained fields, and cleans up referencing rules (#542)
+
+#### Parameters
+
+##### study
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### domainOrFormId
+
+`string`
+
+##### sectionId
+
+`string`
+
+##### options?
+
+###### purgeReferencingRules?
+
+`boolean`
+
+#### Returns
+
+`object`
+
+##### affectedReferences
+
+> **affectedReferences**: [`FieldReferenceLocation`](../interfaces/FieldReferenceLocation.md)[]
+
+##### error?
+
+> `optional` **error?**: `string`
+
+##### removedAtIndex?
+
+> `optional` **removedAtIndex?**: `number`
+
+##### removedFields
+
+> **removedFields**: [`CRFField`](../../types/interfaces/CRFField.md)[]
+
+##### removedSection?
+
+> `optional` **removedSection?**: [`CRFSection`](../../types/interfaces/CRFSection.md)
+
+##### study
+
+> **study**: [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### undo?
+
+> `optional` **undo?**: (`currentStudy`) => [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+###### Parameters
+
+###### currentStudy
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+###### Returns
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
 
 ***
 
@@ -793,6 +1279,158 @@ Remove Study Visit from SoA Matrix
 ##### study
 
 > **study**: [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+***
+
+### renameFieldEverywhere()
+
+> `static` **renameFieldEverywhere**(`study`, `domainOrFormId`, `fieldIdOrVar`, `newVariableName`, `newLabel?`): `object`
+
+Rename Field Everywhere: Atomically updates variable name and all AST rules, conditions, and formulas (#542)
+
+#### Parameters
+
+##### study
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### domainOrFormId
+
+`string`
+
+##### fieldIdOrVar
+
+`string`
+
+##### newVariableName
+
+`string`
+
+##### newLabel?
+
+`string`
+
+#### Returns
+
+`object`
+
+##### affectedReferencesCount
+
+> **affectedReferencesCount**: `number`
+
+##### error?
+
+> `optional` **error?**: `string`
+
+##### study
+
+> **study**: [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### updatedField?
+
+> `optional` **updatedField?**: [`CRFField`](../../types/interfaces/CRFField.md)
+
+***
+
+### restoreField()
+
+> `static` **restoreField**(`study`, `formId`, `field`, `sectionId?`, `fieldIndex?`, `restoredRules?`): [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+Restore Field and Associated Rules to Specified Section and Position (#542)
+
+#### Parameters
+
+##### study
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### formId
+
+`string`
+
+##### field
+
+[`CRFField`](../../types/interfaces/CRFField.md)
+
+##### sectionId?
+
+`string`
+
+##### fieldIndex?
+
+`number`
+
+##### restoredRules?
+
+[`EditCheckRule`](../../types/interfaces/EditCheckRule.md)[]
+
+#### Returns
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+***
+
+### restoreForm()
+
+> `static` **restoreForm**(`study`, `form`, `originalAssignments?`, `originalIndex?`): [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+Restore Form and its Associated Visit / Arm Assignments
+
+#### Parameters
+
+##### study
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### form
+
+[`CRFForm`](../../types/interfaces/CRFForm.md)
+
+##### originalAssignments?
+
+[`StudyVisit`](../../types/interfaces/StudyVisit.md)[] \| `object`[]
+
+##### originalIndex?
+
+`number`
+
+#### Returns
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+***
+
+### restoreSection()
+
+> `static` **restoreSection**(`study`, `formId`, `section`, `sectionIndex?`, `restoredRules?`): [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+Restore Section and Associated Fields / Rules (#542)
+
+#### Parameters
+
+##### study
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### formId
+
+`string`
+
+##### section
+
+[`CRFSection`](../../types/interfaces/CRFSection.md)
+
+##### sectionIndex?
+
+`number`
+
+##### restoredRules?
+
+[`EditCheckRule`](../../types/interfaces/EditCheckRule.md)[]
+
+#### Returns
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
 
 ***
 

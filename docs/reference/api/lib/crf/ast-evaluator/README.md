@@ -74,6 +74,24 @@ Re-exports [ConditionExplanation](../expression-evaluator/interfaces/ConditionEx
 
 ***
 
+### DerivationExplanation
+
+Re-exports [DerivationExplanation](../expression-evaluator/interfaces/DerivationExplanation.md)
+
+***
+
+### DerivationInputDependency
+
+Re-exports [DerivationInputDependency](../expression-evaluator/interfaces/DerivationInputDependency.md)
+
+***
+
+### DerivationStep
+
+Re-exports [DerivationStep](../expression-evaluator/interfaces/DerivationStep.md)
+
+***
+
 ### describeCondition
 
 Re-exports [describeCondition](../expression-evaluator/functions/describeCondition.md)
@@ -113,6 +131,12 @@ Re-exports [evaluateRule](../expression-evaluator/functions/evaluateRule.md)
 ### evaluateRuleResult
 
 Re-exports [evaluateRuleResult](../expression-evaluator/functions/evaluateRuleResult.md)
+
+***
+
+### explainCalculationDerivation
+
+Re-exports [explainCalculationDerivation](../expression-evaluator/functions/explainCalculationDerivation.md)
 
 ***
 

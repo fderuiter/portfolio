@@ -7,6 +7,7 @@ import {
   evaluateFormula,
   CLINICAL_FORMULA_PRESETS,
   mapPresetToFormVariables,
+  explainCalculationDerivation,
   HighlightToken,
   FormulaDiagnostic,
   ClinicalFormulaPreset,
@@ -34,10 +35,10 @@ interface AstRuleEditorProps {
 }
 
 const BRACKET_DEPTH_CLASSES = [
-  "text-sky-400 font-bold",      // Depth 0
-  "text-purple-400 font-bold",   // Depth 1
-  "text-amber-400 font-bold",    // Depth 2
-  "text-emerald-400 font-bold",  // Depth 3
+  "text-sky-400 font-bold", // Depth 0
+  "text-purple-400 font-bold", // Depth 1
+  "text-amber-400 font-bold", // Depth 2
+  "text-emerald-400 font-bold", // Depth 3
 ];
 
 const DEFAULT_SAMPLE_VALUES: Record<string, number> = {
@@ -123,6 +124,24 @@ export const AstRuleEditor: React.FC<AstRuleEditorProps> = ({
     }
   }, [formula, fields, lintResult.isValid, referencedVars, getTestValue]);
 
+  const currentField = useMemo(() => {
+    return fields.find((f) => f.id === currentFieldId);
+  }, [fields, currentFieldId]);
+
+  const derivationExplanation = useMemo(() => {
+    if (!formula.trim()) return null;
+    const mergedValues: Record<string, number> = {};
+    referencedVars.forEach((v) => {
+      mergedValues[v.name] = getTestValue(v.name);
+    });
+    return explainCalculationDerivation(
+      formula,
+      mergedValues,
+      fields,
+      currentField
+    );
+  }, [formula, referencedVars, getTestValue, fields, currentField]);
+
   // Insert token at cursor
   const insertToken = (tokenToInsert: string) => {
     if (readOnly) return;
@@ -156,7 +175,9 @@ export const AstRuleEditor: React.FC<AstRuleEditorProps> = ({
   // Render tokens inside syntax highlighter
   const renderHighlightedContent = () => {
     if (!formula) {
-      return <span className="text-zinc-600 italic select-none">{placeholder}</span>;
+      return (
+        <span className="text-zinc-600 italic select-none">{placeholder}</span>
+      );
     }
 
     if (lintResult.tokens.length === 0) {
@@ -181,11 +202,15 @@ export const AstRuleEditor: React.FC<AstRuleEditorProps> = ({
       if (token.type === "FUNCTION") {
         colorClass = "text-brand-cyan font-bold";
       } else if (token.type === "IDENTIFIER") {
-        const ref = referencedVars.find((r) => r.name.toLowerCase() === token.value.toLowerCase());
+        const ref = referencedVars.find(
+          (r) => r.name.toLowerCase() === token.value.toLowerCase()
+        );
         if (ref && !ref.exists) {
-          colorClass = "text-rose-400 underline decoration-rose-500/80 decoration-wavy";
+          colorClass =
+            "text-rose-400 underline decoration-rose-500/80 decoration-wavy";
         } else if (ref && !ref.isNumeric) {
-          colorClass = "text-amber-400 underline decoration-amber-500/80 decoration-wavy";
+          colorClass =
+            "text-amber-400 underline decoration-amber-500/80 decoration-wavy";
         } else {
           colorClass = "text-emerald-400 font-semibold";
         }
@@ -197,13 +222,15 @@ export const AstRuleEditor: React.FC<AstRuleEditorProps> = ({
         colorClass = "text-zinc-400";
       } else if (token.type === "LPAREN" || token.type === "RPAREN") {
         if (token.unmatched) {
-          colorClass = "text-rose-400 bg-rose-500/20 ring-1 ring-rose-500 rounded px-0.5 font-bold";
+          colorClass =
+            "text-rose-400 bg-rose-500/20 ring-1 ring-rose-500 rounded px-0.5 font-bold";
         } else {
           const depthIdx = (token.depth ?? 0) % BRACKET_DEPTH_CLASSES.length;
           colorClass = BRACKET_DEPTH_CLASSES[depthIdx];
         }
       } else if (token.type === "INVALID") {
-        colorClass = "text-rose-400 bg-rose-500/20 underline decoration-rose-500 font-bold";
+        colorClass =
+          "text-rose-400 bg-rose-500/20 underline decoration-rose-500 font-bold";
       }
 
       elements.push(
@@ -217,18 +244,18 @@ export const AstRuleEditor: React.FC<AstRuleEditorProps> = ({
 
     // Trailing characters if any
     if (lastIndex < formula.length) {
-      elements.push(
-        <span key="trailing">
-          {formula.substring(lastIndex)}
-        </span>
-      );
+      elements.push(<span key="trailing">{formula.substring(lastIndex)}</span>);
     }
 
     return elements;
   };
 
-  const errorCount = lintResult.diagnostics.filter((d: FormulaDiagnostic) => d.severity === "error").length;
-  const warningCount = lintResult.diagnostics.filter((d: FormulaDiagnostic) => d.severity === "warning").length;
+  const errorCount = lintResult.diagnostics.filter(
+    (d: FormulaDiagnostic) => d.severity === "error"
+  ).length;
+  const warningCount = lintResult.diagnostics.filter(
+    (d: FormulaDiagnostic) => d.severity === "warning"
+  ).length;
 
   return (
     <div className={`space-y-2.5 ${className}`}>
@@ -346,12 +373,16 @@ export const AstRuleEditor: React.FC<AstRuleEditorProps> = ({
             {errorCount > 0 ? (
               <span className="text-rose-400 flex items-center gap-1 font-semibold">
                 <IconAlertCircle className="w-3 h-3" />
-                <span>{errorCount} {errorCount === 1 ? "Error" : "Errors"}</span>
+                <span>
+                  {errorCount} {errorCount === 1 ? "Error" : "Errors"}
+                </span>
               </span>
             ) : warningCount > 0 ? (
               <span className="text-amber-400 flex items-center gap-1 font-semibold">
                 <IconAlertTriangle className="w-3 h-3" />
-                <span>{warningCount} {warningCount === 1 ? "Warning" : "Warnings"}</span>
+                <span>
+                  {warningCount} {warningCount === 1 ? "Warning" : "Warnings"}
+                </span>
               </span>
             ) : formula.trim() ? (
               <span className="text-emerald-400 flex items-center gap-1 font-semibold">
@@ -373,42 +404,46 @@ export const AstRuleEditor: React.FC<AstRuleEditorProps> = ({
       {/* Real-time Diagnostics List */}
       {lintResult.diagnostics.length > 0 && formula.trim().length > 0 && (
         <div className="space-y-1" role="status" aria-live="polite">
-          {lintResult.diagnostics.map((diag: FormulaDiagnostic, dIdx: number) => {
-            const isErr = diag.severity === "error";
-            const isWarn = diag.severity === "warning";
-            return (
-              <div
-                key={`diag_${dIdx}_${diag.code}`}
-                className={`px-2.5 py-1.5 rounded-lg border text-[11px] font-mono flex items-start gap-2 ${
-                  isErr
-                    ? "bg-rose-950/40 border-rose-800/50 text-rose-300"
-                    : isWarn
-                    ? "bg-amber-950/40 border-amber-800/50 text-amber-300"
-                    : "bg-zinc-900 border-zinc-800 text-zinc-400"
-                }`}
-              >
-                {isErr ? (
-                  <IconAlertCircle className="w-3.5 h-3.5 text-rose-400 shrink-0 mt-0.5" />
-                ) : isWarn ? (
-                  <IconAlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
-                ) : (
-                  <IconCheck className="w-3.5 h-3.5 text-brand-cyan shrink-0 mt-0.5" />
-                )}
-                <div className="min-w-0 flex-1">
-                  <div className="leading-tight">{diag.message}</div>
-                  {diag.start !== undefined && diag.end !== undefined && diag.start < diag.end && (
-                    <div className="text-[9px] text-zinc-500 mt-0.5">
-                      Column {diag.start + 1} - {diag.end}
-                    </div>
+          {lintResult.diagnostics.map(
+            (diag: FormulaDiagnostic, dIdx: number) => {
+              const isErr = diag.severity === "error";
+              const isWarn = diag.severity === "warning";
+              return (
+                <div
+                  key={`diag_${dIdx}_${diag.code}`}
+                  className={`px-2.5 py-1.5 rounded-lg border text-[11px] font-mono flex items-start gap-2 ${
+                    isErr
+                      ? "bg-rose-950/40 border-rose-800/50 text-rose-300"
+                      : isWarn
+                        ? "bg-amber-950/40 border-amber-800/50 text-amber-300"
+                        : "bg-zinc-900 border-zinc-800 text-zinc-400"
+                  }`}
+                >
+                  {isErr ? (
+                    <IconAlertCircle className="w-3.5 h-3.5 text-rose-400 shrink-0 mt-0.5" />
+                  ) : isWarn ? (
+                    <IconAlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+                  ) : (
+                    <IconCheck className="w-3.5 h-3.5 text-brand-cyan shrink-0 mt-0.5" />
                   )}
+                  <div className="min-w-0 flex-1">
+                    <div className="leading-tight">{diag.message}</div>
+                    {diag.start !== undefined &&
+                      diag.end !== undefined &&
+                      diag.start < diag.end && (
+                        <div className="text-[9px] text-zinc-500 mt-0.5">
+                          Column {diag.start + 1} - {diag.end}
+                        </div>
+                      )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            }
+          )}
         </div>
       )}
 
-      {/* Live Sample Evaluation Tester Box */}
+      {/* Live Sample Evaluation Tester Box (#671) */}
       {showTester && (
         <div className="p-3 rounded-xl bg-zinc-950 border border-emerald-900/40 space-y-2.5 animate-in fade-in">
           <div className="flex items-center justify-between border-b border-zinc-850 pb-1.5">
@@ -416,10 +451,46 @@ export const AstRuleEditor: React.FC<AstRuleEditorProps> = ({
               <IconPlayerPlay className="w-3.5 h-3.5" />
               Live Evaluation Preview
             </span>
-            <div className="text-xs font-mono font-bold text-white bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-700/50">
-              Result: {previewResult !== null ? previewResult : ""}
+            <div className="flex items-center gap-1.5">
+              {derivationExplanation && (
+                <span
+                  className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border uppercase ${
+                    derivationExplanation.status === "success"
+                      ? "bg-emerald-950/80 text-emerald-300 border-emerald-700/50"
+                      : derivationExplanation.status === "missing_inputs"
+                        ? "bg-amber-950/80 text-amber-300 border-amber-700/50"
+                        : derivationExplanation.status === "invalid_unit"
+                          ? "bg-purple-950/80 text-purple-300 border-purple-700/50"
+                          : "bg-rose-950/80 text-rose-300 border-rose-700/50"
+                  }`}
+                >
+                  {derivationExplanation.status.replace("_", " ")}
+                </span>
+              )}
+              <div className="text-xs font-mono font-bold text-white bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-700/50">
+                Result:{" "}
+                {derivationExplanation?.result !== null &&
+                derivationExplanation?.result !== undefined
+                  ? derivationExplanation.result
+                  : previewResult !== null
+                    ? previewResult
+                    : "—"}
+              </div>
             </div>
           </div>
+
+          {/* Diagnostics Alert if any */}
+          {derivationExplanation?.diagnostics &&
+            derivationExplanation.diagnostics.length > 0 && (
+              <div className="p-2 rounded bg-amber-950/40 border border-amber-800/40 text-[10px] font-mono text-amber-300 space-y-1">
+                {derivationExplanation.diagnostics.map((diag, i) => (
+                  <div key={`diag_${i}`} className="flex items-start gap-1.5">
+                    <IconAlertTriangle className="w-3 h-3 shrink-0 mt-0.5 text-amber-400" />
+                    <span>{diag}</span>
+                  </div>
+                ))}
+              </div>
+            )}
 
           {referencedVars.length === 0 ? (
             <p className="text-[10px] font-mono text-zinc-500">
@@ -427,24 +498,69 @@ export const AstRuleEditor: React.FC<AstRuleEditorProps> = ({
             </p>
           ) : (
             <div className="grid grid-cols-2 gap-2">
-              {referencedVars.map((v) => (
-                <div key={`test_val_${v.name}`} className="space-y-0.5">
-                  <label className="block text-[9px] font-mono text-zinc-400 truncate">
-                    {v.name} {v.field?.unit ? `(${v.field.unit})` : ""}
-                  </label>
-                  <input
-                    type="number"
-                    value={getTestValue(v.name)}
-                    onChange={(e) =>
-                      setTestValues({
-                        ...testValues,
-                        [v.name]: parseFloat(e.target.value) || 0,
-                      })
-                    }
-                    className="w-full px-2 py-1 bg-zinc-900 border border-zinc-800 rounded text-xs text-white font-mono focus:border-emerald-500 focus:outline-none"
-                  />
+              {referencedVars.map((v) => {
+                const dep = derivationExplanation?.dependencies.find(
+                  (d) => d.variableName.toUpperCase() === v.name.toUpperCase()
+                );
+                return (
+                  <div key={`test_val_${v.name}`} className="space-y-0.5">
+                    <div className="flex items-center justify-between text-[9px] font-mono text-zinc-400">
+                      <span className="truncate">{v.name}</span>
+                      <span className="text-zinc-500">
+                        {dep?.actualUnit ||
+                          v.field?.unit ||
+                          dep?.expectedUnit ||
+                          ""}
+                      </span>
+                    </div>
+                    <input
+                      type="number"
+                      value={getTestValue(v.name)}
+                      onChange={(e) =>
+                        setTestValues({
+                          ...testValues,
+                          [v.name]: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                      className="w-full px-2 py-1 bg-zinc-900 border border-zinc-800 rounded text-xs text-white font-mono focus:border-emerald-500 focus:outline-none"
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Step-by-Step Clinical Derivation Breakdown */}
+          {derivationExplanation?.steps &&
+            derivationExplanation.steps.length > 0 && (
+              <div className="space-y-1.5 pt-2 border-t border-zinc-850">
+                <span className="text-[10px] font-mono font-semibold text-zinc-400 uppercase tracking-wider">
+                  Derivation Steps ({derivationExplanation.steps.length})
+                </span>
+                <div className="space-y-1 bg-zinc-900/60 rounded-lg p-2 border border-zinc-800/80">
+                  {derivationExplanation.steps.map((step) => (
+                    <div
+                      key={`step_${step.stepNumber}`}
+                      className="text-[10px] font-mono space-y-0.5"
+                    >
+                      <div className="text-zinc-400 font-semibold flex items-center gap-1">
+                        <span className="w-3.5 h-3.5 rounded-full bg-zinc-800 text-zinc-300 inline-flex items-center justify-center text-[8px] font-bold">
+                          {step.stepNumber}
+                        </span>
+                        <span>{step.description}</span>
+                      </div>
+                      <div className="pl-4 text-emerald-400 font-mono">
+                        <code>{step.expression}</code>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+            )}
+
+          {derivationExplanation?.summary && (
+            <div className="text-[10px] font-mono text-zinc-400 italic pt-0.5">
+              {derivationExplanation.summary}
             </div>
           )}
         </div>
@@ -457,14 +573,30 @@ export const AstRuleEditor: React.FC<AstRuleEditorProps> = ({
             Supported Math Functions
           </div>
           <div className="grid grid-cols-2 gap-1 text-zinc-400">
-            <div><code>round(x, n)</code> - Round decimals</div>
-            <div><code>sqrt(x)</code> - Square root</div>
-            <div><code>abs(x)</code> - Absolute value</div>
-            <div><code>max(a, b)</code> - Maximum</div>
-            <div><code>min(a, b)</code> - Minimum</div>
-            <div><code>log(x)</code> - Natural log</div>
-            <div><code>exp(x)</code> - Exponential</div>
-            <div><code>base ^ exp</code> - Power</div>
+            <div>
+              <code>round(x, n)</code> - Round decimals
+            </div>
+            <div>
+              <code>sqrt(x)</code> - Square root
+            </div>
+            <div>
+              <code>abs(x)</code> - Absolute value
+            </div>
+            <div>
+              <code>max(a, b)</code> - Maximum
+            </div>
+            <div>
+              <code>min(a, b)</code> - Minimum
+            </div>
+            <div>
+              <code>log(x)</code> - Natural log
+            </div>
+            <div>
+              <code>exp(x)</code> - Exponential
+            </div>
+            <div>
+              <code>base ^ exp</code> - Power
+            </div>
           </div>
         </div>
       )}
@@ -499,7 +631,9 @@ export const AstRuleEditor: React.FC<AstRuleEditorProps> = ({
                   title={`${f.label} (${f.dataType})`}
                 >
                   <IconPlus className="w-2.5 h-2.5 opacity-60" />
-                  <span className="font-semibold">{f.variableName || f.id}</span>
+                  <span className="font-semibold">
+                    {f.variableName || f.id}
+                  </span>
                   <span className="text-[8px] opacity-60 uppercase">
                     {f.dataType.slice(0, 3)}
                   </span>

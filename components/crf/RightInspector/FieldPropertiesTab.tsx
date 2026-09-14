@@ -1,7 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { CRFField, CodelistDefinition, CodelistOption, ClinicalDataType } from "@/lib/crf/types";
+import {
+  CRFField,
+  CodelistDefinition,
+  CodelistOption,
+  ClinicalDataType,
+} from "@/lib/crf/types";
 import { validateCdashVariableName } from "@/lib/crf/precision-date";
 import { generateId } from "@/lib/utils";
 import { AstRuleEditor } from "./AstRuleEditor";
@@ -23,6 +28,7 @@ interface FieldPropertiesTabProps {
   codelists: CodelistDefinition[];
   onUpdateField: (updates: Partial<CRFField>) => void;
   onSaveToStudyCodelist?: (codelist: CodelistDefinition) => void;
+  onRenameEverywhere?: (newVar: string) => void;
 }
 
 const DATA_TYPES: { type: ClinicalDataType; label: string }[] = [
@@ -30,7 +36,10 @@ const DATA_TYPES: { type: ClinicalDataType; label: string }[] = [
   { type: "textarea", label: "Multiline Textarea" },
   { type: "number", label: "Decimal Number (Float)" },
   { type: "integer", label: "Integer Count" },
-  { type: "precision_date", label: "Precision Date (Segmented / Partial ISO 8601)" },
+  {
+    type: "precision_date",
+    label: "Precision Date (Segmented / Partial ISO 8601)",
+  },
   { type: "date", label: "Standard Date" },
   { type: "partial_date", label: "Partial Date (UN-UNK-YYYY)" },
   { type: "datetime", label: "Date & Time Stamp" },
@@ -64,8 +73,18 @@ const QUICK_TEMPLATES: QuickTemplate[] = [
     badge: "Safety",
     options: [
       { code: "NORMAL", label: "Normal", nciCode: "C14165", order: 1 },
-      { code: "ABNORMAL_NCS", label: "Abnormal (Not Clinically Significant)", nciCode: "C112042", order: 2 },
-      { code: "ABNORMAL_CS", label: "Abnormal (Clinically Significant)", nciCode: "C112043", order: 3 },
+      {
+        code: "ABNORMAL_NCS",
+        label: "Abnormal (Not Clinically Significant)",
+        nciCode: "C112042",
+        order: 2,
+      },
+      {
+        code: "ABNORMAL_CS",
+        label: "Abnormal (Clinically Significant)",
+        nciCode: "C112043",
+        order: 3,
+      },
     ],
   },
   {
@@ -92,17 +111,42 @@ const QUICK_TEMPLATES: QuickTemplate[] = [
     name: "Pass / Fail",
     badge: "Screening",
     options: [
-      { code: "PASS", label: "Pass / Criteria Met", nciCode: "C48288", order: 1 },
-      { code: "FAIL", label: "Fail / Criteria Not Met", nciCode: "C48289", order: 2 },
+      {
+        code: "PASS",
+        label: "Pass / Criteria Met",
+        nciCode: "C48288",
+        order: 1,
+      },
+      {
+        code: "FAIL",
+        label: "Fail / Criteria Not Met",
+        nciCode: "C48289",
+        order: 2,
+      },
     ],
   },
   {
     name: "Device Status",
     badge: "ISO 14155",
     options: [
-      { code: "ACTIVE", label: "Implanted & Active In-Situ", nciCode: "C112034", order: 1 },
-      { code: "EXPLANTED", label: "Explanted / Removed", nciCode: "C112029", order: 2 },
-      { code: "DEPLOY_FAILED", label: "Deployment Failed / Discarded", nciCode: "C112035", order: 3 },
+      {
+        code: "ACTIVE",
+        label: "Implanted & Active In-Situ",
+        nciCode: "C112034",
+        order: 1,
+      },
+      {
+        code: "EXPLANTED",
+        label: "Explanted / Removed",
+        nciCode: "C112029",
+        order: 2,
+      },
+      {
+        code: "DEPLOY_FAILED",
+        label: "Deployment Failed / Discarded",
+        nciCode: "C112035",
+        order: 3,
+      },
     ],
   },
   {
@@ -110,10 +154,30 @@ const QUICK_TEMPLATES: QuickTemplate[] = [
     badge: "Oncology",
     options: [
       { code: "GRADE 1", label: "Grade 1 - Mild", nciCode: "C48275", order: 1 },
-      { code: "GRADE 2", label: "Grade 2 - Moderate", nciCode: "C48276", order: 2 },
-      { code: "GRADE 3", label: "Grade 3 - Severe", nciCode: "C48277", order: 3 },
-      { code: "GRADE 4", label: "Grade 4 - Life-Threatening", nciCode: "C48278", order: 4 },
-      { code: "GRADE 5", label: "Grade 5 - Death", nciCode: "C48279", order: 5 },
+      {
+        code: "GRADE 2",
+        label: "Grade 2 - Moderate",
+        nciCode: "C48276",
+        order: 2,
+      },
+      {
+        code: "GRADE 3",
+        label: "Grade 3 - Severe",
+        nciCode: "C48277",
+        order: 3,
+      },
+      {
+        code: "GRADE 4",
+        label: "Grade 4 - Life-Threatening",
+        nciCode: "C48278",
+        order: 4,
+      },
+      {
+        code: "GRADE 5",
+        label: "Grade 5 - Death",
+        nciCode: "C48279",
+        order: 5,
+      },
     ],
   },
 ];
@@ -124,19 +188,25 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
   codelists,
   onUpdateField,
   onSaveToStudyCodelist,
+  onRenameEverywhere,
 }) => {
   const isCodelistField =
     field.dataType === "single_select" ||
     field.dataType === "radio" ||
     field.dataType === "multi_select";
 
-  const hasCustomOptions = !!(field.customOptions && field.customOptions.length > 0);
+  const hasCustomOptions = !!(
+    field.customOptions && field.customOptions.length > 0
+  );
   const [optionMode, setOptionMode] = useState<"standard" | "custom">(
     hasCustomOptions ? "custom" : "standard"
   );
   const [isBulkOpen, setIsBulkOpen] = useState(false);
   const [bulkInput, setBulkInput] = useState("");
-  const [saveSuccessMessage, setSaveSuccessMessage] = useState<string | null>(null);
+  const [saveSuccessMessage, setSaveSuccessMessage] = useState<string | null>(
+    null
+  );
+  const [renameSuccess, setRenameSuccess] = useState<string | null>(null);
 
   // Active options list (custom or resolved from codelist)
   const currentCodelist = codelists.find((cl) => cl.id === field.codelistId);
@@ -185,7 +255,10 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
     onUpdateField({ customOptions: updated });
   };
 
-  const handleUpdateOptionItem = (index: number, updates: Partial<CodelistOption>) => {
+  const handleUpdateOptionItem = (
+    index: number,
+    updates: Partial<CodelistOption>
+  ) => {
     if (!field.customOptions) return;
     const updated = field.customOptions.map((opt, i) =>
       i === index ? { ...opt, ...updates } : opt
@@ -236,12 +309,13 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
 
     const generated: CodelistOption[] = lines.map((line, idx) => {
       // Create a clean submission code (alphanumeric uppercase with underscores)
-      const sanitizedCode = line
-        .toUpperCase()
-        .replace(/[^A-Z0-9]/g, "_")
-        .replace(/_+/g, "_")
-        .replace(/^_|_$/g, "")
-        .slice(0, 16) || `OPT_${idx + 1}`;
+      const sanitizedCode =
+        line
+          .toUpperCase()
+          .replace(/[^A-Z0-9]/g, "_")
+          .replace(/_+/g, "_")
+          .replace(/^_|_$/g, "")
+          .slice(0, 16) || `OPT_${idx + 1}`;
 
       return {
         code: sanitizedCode,
@@ -260,9 +334,16 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
   };
 
   const handleSaveAsStudyCodelist = () => {
-    if (!field.customOptions || field.customOptions.length === 0 || !onSaveToStudyCodelist) return;
+    if (
+      !field.customOptions ||
+      field.customOptions.length === 0 ||
+      !onSaveToStudyCodelist
+    )
+      return;
 
-    const codelistId = generateId(`CL_${field.variableName || "CUSTOM"}_`).toUpperCase();
+    const codelistId = generateId(
+      `CL_${field.variableName || "CUSTOM"}_`
+    ).toUpperCase();
     const newCodelist: CodelistDefinition = {
       id: codelistId,
       name: `${field.label || field.variableName} (${field.customOptions.length} Options)`,
@@ -288,7 +369,8 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
       <div>
         <div className="flex items-center justify-between mb-1">
           <label className="block text-[11px] font-mono text-zinc-400">
-            CDASH / SDTM Variable Name <span className="text-brand-cyan">*</span>
+            CDASH / SDTM Variable Name{" "}
+            <span className="text-brand-cyan">*</span>
           </label>
           <span className="text-[10px] font-mono text-zinc-500">
             {field.variableName.length}/8 chars
@@ -298,7 +380,9 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
           type="text"
           maxLength={8}
           value={field.variableName}
-          onChange={(e) => onUpdateField({ variableName: e.target.value.toUpperCase() })}
+          onChange={(e) =>
+            onUpdateField({ variableName: e.target.value.toUpperCase() })
+          }
           className={`w-full px-2.5 py-1.5 bg-zinc-950 border rounded-lg text-white font-mono uppercase focus:outline-none ${
             !varValidation.isValid && field.variableName
               ? "border-red-500/70 focus:border-red-400 ring-1 ring-red-500/20"
@@ -310,6 +394,27 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
           <p className="text-[10px] text-red-400 font-mono mt-1">
             ⚠ {varValidation.error}
           </p>
+        )}
+        {onRenameEverywhere && varValidation.isValid && field.variableName && (
+          <div className="mt-1.5 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                onRenameEverywhere(field.variableName);
+                setRenameSuccess("Renamed everywhere");
+                setTimeout(() => setRenameSuccess(null), 3000);
+              }}
+              className="px-2 py-0.5 rounded bg-brand-cyan/10 hover:bg-brand-cyan/20 border border-brand-cyan/30 text-[10px] font-mono text-brand-cyan flex items-center gap-1 transition-colors"
+              title="Atomically updates variable name and all AST rules, conditions, and formulas"
+            >
+              <span>Rename Everywhere (Atomic)</span>
+            </button>
+            {renameSuccess && (
+              <span className="text-[10px] font-mono text-emerald-400 animate-in fade-in">
+                ✓ {renameSuccess}
+              </span>
+            )}
+          </div>
         )}
       </div>
 
@@ -347,7 +452,9 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
           </label>
           <select
             value={field.dataType}
-            onChange={(e) => onUpdateField({ dataType: e.target.value as ClinicalDataType })}
+            onChange={(e) =>
+              onUpdateField({ dataType: e.target.value as ClinicalDataType })
+            }
             className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-white font-sans focus:border-brand-cyan focus:outline-none"
           >
             {DATA_TYPES.map((dt) => (
@@ -364,12 +471,21 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
           </label>
           <select
             value={field.columnSpan}
-            onChange={(e) => onUpdateField({ columnSpan: parseInt(e.target.value, 10) })}
+            onChange={(e) =>
+              onUpdateField({ columnSpan: parseInt(e.target.value, 10) })
+            }
             className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-white font-mono focus:border-brand-cyan focus:outline-none"
           >
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((col) => (
               <option key={col} value={col}>
-                {col} {col === 12 ? "(Full Width)" : col === 6 ? "(Half Width)" : col === 4 ? "(1/3 Width)" : "cols"}
+                {col}{" "}
+                {col === 12
+                  ? "(Full Width)"
+                  : col === 6
+                    ? "(Half Width)"
+                    : col === 4
+                      ? "(1/3 Width)"
+                      : "cols"}
               </option>
             ))}
           </select>
@@ -383,16 +499,20 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
             3-Tier Missing Data Engine
           </label>
           <span className="text-[10px] font-mono text-brand-cyan">
-            {field.requirementTier || (field.required ? "hard_stop" : "optional")}
+            {field.requirementTier ||
+              (field.required ? "hard_stop" : "optional")}
           </span>
         </div>
 
         <div className="grid grid-cols-3 gap-1.5">
           <button
             type="button"
-            onClick={() => onUpdateField({ requirementTier: "optional", required: false })}
+            onClick={() =>
+              onUpdateField({ requirementTier: "optional", required: false })
+            }
             className={`px-2 py-1.5 rounded-lg text-[10px] font-mono font-bold transition-all border ${
-              field.requirementTier === "optional" || (!field.requirementTier && !field.required)
+              field.requirementTier === "optional" ||
+              (!field.requirementTier && !field.required)
                 ? "bg-zinc-800 text-white border-zinc-600 shadow-sm"
                 : "bg-zinc-900/60 text-zinc-400 border-zinc-800 hover:text-zinc-200"
             }`}
@@ -401,9 +521,12 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
           </button>
           <button
             type="button"
-            onClick={() => onUpdateField({ requirementTier: "hard_stop", required: true })}
+            onClick={() =>
+              onUpdateField({ requirementTier: "hard_stop", required: true })
+            }
             className={`px-2 py-1.5 rounded-lg text-[10px] font-mono font-bold transition-all border ${
-              field.requirementTier === "hard_stop" || (!field.requirementTier && field.required)
+              field.requirementTier === "hard_stop" ||
+              (!field.requirementTier && field.required)
                 ? "bg-red-500/20 text-red-300 border-red-500/40 shadow-sm"
                 : "bg-zinc-900/60 text-zinc-400 border-zinc-800 hover:text-red-300"
             }`}
@@ -412,7 +535,9 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
           </button>
           <button
             type="button"
-            onClick={() => onUpdateField({ requirementTier: "auto_query", required: true })}
+            onClick={() =>
+              onUpdateField({ requirementTier: "auto_query", required: true })
+            }
             className={`px-2 py-1.5 rounded-lg text-[10px] font-mono font-bold transition-all border ${
               field.requirementTier === "auto_query"
                 ? "bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-sm"
@@ -426,9 +551,10 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
         <p className="text-[10px] text-zinc-400 leading-normal">
           {field.requirementTier === "auto_query"
             ? "Allows form save when empty, but registers an open EDC discrepancy query ticket."
-            : field.requirementTier === "hard_stop" || (!field.requirementTier && field.required)
-            ? "Mandatory variable. Physically blocks saving form with red error border if empty."
-            : "Optional variable. May be left blank without errors or queries."}
+            : field.requirementTier === "hard_stop" ||
+                (!field.requirementTier && field.required)
+              ? "Mandatory variable. Physically blocks saving form with red error border if empty."
+              : "Optional variable. May be left blank without errors or queries."}
         </p>
 
         <div className="pt-1 flex items-center gap-4">
@@ -456,25 +582,33 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
           <div className="space-y-2">
             <label className="flex items-center justify-between cursor-pointer p-1.5 rounded-lg bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700">
               <div>
-                <span className="text-xs text-zinc-200 block font-medium">Allow Partial Dates</span>
+                <span className="text-xs text-zinc-200 block font-medium">
+                  Allow Partial Dates
+                </span>
                 <span className="text-[10px] text-zinc-400">
-                  Permit missing/unknown day or month (e.g. 2026-08-UNK, 2026-UNK-UNK)
+                  Permit missing/unknown day or month (e.g. 2026-08-UNK,
+                  2026-UNK-UNK)
                 </span>
               </div>
               <input
                 type="checkbox"
                 checked={
                   field.allowPartial ??
-                  (field.dataType === "partial_date" || field.dataType === "precision_date")
+                  (field.dataType === "partial_date" ||
+                    field.dataType === "precision_date")
                 }
-                onChange={(e) => onUpdateField({ allowPartial: e.target.checked })}
+                onChange={(e) =>
+                  onUpdateField({ allowPartial: e.target.checked })
+                }
                 className="rounded border-zinc-700 bg-zinc-900 text-brand-cyan focus:ring-0 ml-2"
               />
             </label>
 
             <label className="flex items-center justify-between cursor-pointer p-1.5 rounded-lg bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700">
               <div>
-                <span className="text-xs text-zinc-200 block font-medium">Prevent Future Dates</span>
+                <span className="text-xs text-zinc-200 block font-medium">
+                  Prevent Future Dates
+                </span>
                 <span className="text-[10px] text-zinc-400">
                   Enforce boundary check against current UTC timestamp
                 </span>
@@ -482,7 +616,9 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
               <input
                 type="checkbox"
                 checked={field.preventFutureDate ?? false}
-                onChange={(e) => onUpdateField({ preventFutureDate: e.target.checked })}
+                onChange={(e) =>
+                  onUpdateField({ preventFutureDate: e.target.checked })
+                }
                 className="rounded border-zinc-700 bg-zinc-900 text-brand-cyan focus:ring-0 ml-2"
               />
             </label>
@@ -498,22 +634,29 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
         <div className="space-y-2">
           <label className="flex items-center justify-between cursor-pointer p-1.5 rounded-lg bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700">
             <div>
-              <span className="text-xs text-zinc-200 block font-medium">Allow CDISC Null Flavors</span>
+              <span className="text-xs text-zinc-200 block font-medium">
+                Allow CDISC Null Flavors
+              </span>
               <span className="text-[10px] text-zinc-400">
-                Attach compact ND (Not Done), NA (Not Applicable), UNK (Unknown) badges
+                Attach compact ND (Not Done), NA (Not Applicable), UNK (Unknown)
+                badges
               </span>
             </div>
             <input
               type="checkbox"
               checked={field.allowNullFlavor ?? false}
-              onChange={(e) => onUpdateField({ allowNullFlavor: e.target.checked })}
+              onChange={(e) =>
+                onUpdateField({ allowNullFlavor: e.target.checked })
+              }
               className="rounded border-zinc-700 bg-zinc-900 text-brand-cyan focus:ring-0 ml-2"
             />
           </label>
 
           <label className="flex items-center justify-between cursor-pointer p-1.5 rounded-lg bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700">
             <div>
-              <span className="text-xs text-zinc-200 block font-medium">Requires SDV (CRA Monitor)</span>
+              <span className="text-xs text-zinc-200 block font-medium">
+                Requires SDV (CRA Monitor)
+              </span>
               <span className="text-[10px] text-zinc-400">
                 Flag variable for mandatory Source Document Verification audit
               </span>
@@ -528,7 +671,9 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
 
           <label className="flex items-center justify-between cursor-pointer p-1.5 rounded-lg bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700">
             <div>
-              <span className="text-xs text-zinc-200 block font-medium">Blinded Variable</span>
+              <span className="text-xs text-zinc-200 block font-medium">
+                Blinded Variable
+              </span>
               <span className="text-[10px] text-zinc-400">
                 Mask observation from sponsor roles until database lock
               </span>
@@ -544,14 +689,18 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
       </div>
 
       {/* Specific Properties for Numeric Fields */}
-      {(field.dataType === "number" || field.dataType === "integer" || field.dataType === "calculated") && (
+      {(field.dataType === "number" ||
+        field.dataType === "integer" ||
+        field.dataType === "calculated") && (
         <div className="space-y-3 pt-2 border-t border-zinc-850">
           <div className="text-[11px] font-mono text-zinc-400 font-semibold uppercase">
             Numeric Boundaries &amp; Units
           </div>
           <div className="grid grid-cols-3 gap-2">
             <div>
-              <label className="block text-[10px] font-mono text-zinc-500 mb-1">Unit</label>
+              <label className="block text-[10px] font-mono text-zinc-500 mb-1">
+                Unit
+              </label>
               <input
                 type="text"
                 value={field.unit || ""}
@@ -561,24 +710,38 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
               />
             </div>
             <div>
-              <label className="block text-[10px] font-mono text-zinc-500 mb-1">Min Value</label>
+              <label className="block text-[10px] font-mono text-zinc-500 mb-1">
+                Min Value
+              </label>
               <input
                 type="number"
                 value={field.minValue !== undefined ? field.minValue : ""}
                 onChange={(e) =>
-                  onUpdateField({ minValue: e.target.value === "" ? undefined : parseFloat(e.target.value) })
+                  onUpdateField({
+                    minValue:
+                      e.target.value === ""
+                        ? undefined
+                        : parseFloat(e.target.value),
+                  })
                 }
                 className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 rounded text-xs text-white font-mono"
                 placeholder="None"
               />
             </div>
             <div>
-              <label className="block text-[10px] font-mono text-zinc-500 mb-1">Max Value</label>
+              <label className="block text-[10px] font-mono text-zinc-500 mb-1">
+                Max Value
+              </label>
               <input
                 type="number"
                 value={field.maxValue !== undefined ? field.maxValue : ""}
                 onChange={(e) =>
-                  onUpdateField({ maxValue: e.target.value === "" ? undefined : parseFloat(e.target.value) })
+                  onUpdateField({
+                    maxValue:
+                      e.target.value === ""
+                        ? undefined
+                        : parseFloat(e.target.value),
+                  })
                 }
                 className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 rounded text-xs text-white font-mono"
                 placeholder="None"
@@ -597,7 +760,8 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
               <span>Options &amp; Terminology</span>
             </span>
             <span className="text-[10px] font-mono text-zinc-400">
-              {currentOptions.length} choice{currentOptions.length === 1 ? "" : "s"}
+              {currentOptions.length} choice
+              {currentOptions.length === 1 ? "" : "s"}
             </span>
           </div>
 
@@ -652,7 +816,8 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
                 <option value="">-- Choose Standard / Study Codelist --</option>
                 {codelists.map((cl) => (
                   <option key={cl.id} value={cl.id}>
-                    {cl.name} ({cl.options.length} options) {cl.isStandard ? "[CDISC]" : "[Custom]"}
+                    {cl.name} ({cl.options.length} options){" "}
+                    {cl.isStandard ? "[CDISC]" : "[Custom]"}
                   </option>
                 ))}
               </select>
@@ -674,7 +839,8 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
                         key={opt.code}
                         className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-[10px] text-zinc-300 font-sans"
                       >
-                        {opt.label} <code className="text-zinc-500">({opt.code})</code>
+                        {opt.label}{" "}
+                        <code className="text-zinc-500">({opt.code})</code>
                       </span>
                     ))}
                   </div>
@@ -717,7 +883,11 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
                     className="text-[10px] font-mono text-zinc-400 hover:text-brand-cyan flex items-center gap-1 transition-colors"
                   >
                     <IconClipboardText className="w-3 h-3 text-brand-cyan" />
-                    <span>{isBulkOpen ? "Hide Bulk Paste Tool" : "Bulk Paste Options (Line/Comma List)"}</span>
+                    <span>
+                      {isBulkOpen
+                        ? "Hide Bulk Paste Tool"
+                        : "Bulk Paste Options (Line/Comma List)"}
+                    </span>
                   </button>
                 </div>
 
@@ -771,21 +941,31 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
                       <input
                         type="text"
                         value={opt.label}
-                        onChange={(e) => handleUpdateOptionItem(idx, { label: e.target.value })}
+                        onChange={(e) =>
+                          handleUpdateOptionItem(idx, { label: e.target.value })
+                        }
                         className="col-span-5 px-1.5 py-1 text-[11px] bg-zinc-950 border border-zinc-800 rounded text-white font-sans focus:border-brand-cyan focus:outline-none"
                         placeholder="Choice Label"
                       />
                       <input
                         type="text"
                         value={opt.code}
-                        onChange={(e) => handleUpdateOptionItem(idx, { code: e.target.value.toUpperCase() })}
+                        onChange={(e) =>
+                          handleUpdateOptionItem(idx, {
+                            code: e.target.value.toUpperCase(),
+                          })
+                        }
                         className="col-span-3 px-1.5 py-1 text-[10px] bg-zinc-950 border border-zinc-800 rounded text-brand-cyan font-mono uppercase focus:border-brand-cyan focus:outline-none"
                         placeholder="CODE"
                       />
                       <input
                         type="text"
                         value={opt.nciCode || ""}
-                        onChange={(e) => handleUpdateOptionItem(idx, { nciCode: e.target.value.toUpperCase() })}
+                        onChange={(e) =>
+                          handleUpdateOptionItem(idx, {
+                            nciCode: e.target.value.toUpperCase(),
+                          })
+                        }
                         className="col-span-2 px-1 py-1 text-[9px] bg-zinc-950 border border-zinc-800 rounded text-zinc-400 font-mono uppercase focus:border-brand-cyan focus:outline-none"
                         placeholder="C-Code"
                       />
@@ -800,7 +980,9 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
                         </button>
                         <button
                           onClick={() => handleMoveOption(idx, 1)}
-                          disabled={idx === (field.customOptions?.length || 0) - 1}
+                          disabled={
+                            idx === (field.customOptions?.length || 0) - 1
+                          }
                           className="p-0.5 text-zinc-500 hover:text-white disabled:opacity-20"
                           title="Move Down"
                         >
@@ -817,9 +999,11 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
                     </div>
                   ))}
 
-                  {(!field.customOptions || field.customOptions.length === 0) && (
+                  {(!field.customOptions ||
+                    field.customOptions.length === 0) && (
                     <div className="text-center p-3 rounded-lg border border-dashed border-zinc-800 text-zinc-500 text-[11px]">
-                      No custom choices defined yet. Click &quot;Add Option&quot; or select a template above.
+                      No custom choices defined yet. Click &quot;Add
+                      Option&quot; or select a template above.
                     </div>
                   )}
                 </div>
@@ -834,16 +1018,17 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
                     <span>Add Option</span>
                   </button>
 
-                  {onSaveToStudyCodelist && (field.customOptions?.length || 0) > 0 && (
-                    <button
-                      onClick={handleSaveAsStudyCodelist}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-brand-cyan/15 hover:bg-brand-cyan/25 text-brand-cyan border border-brand-cyan/40 text-[10px] font-mono font-bold transition-all"
-                      title="Promote these choices into a reusable study-level controlled codelist"
-                    >
-                      <IconDeviceFloppy className="w-3 h-3" />
-                      <span>Save to Study Codelists</span>
-                    </button>
-                  )}
+                  {onSaveToStudyCodelist &&
+                    (field.customOptions?.length || 0) > 0 && (
+                      <button
+                        onClick={handleSaveAsStudyCodelist}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-brand-cyan/15 hover:bg-brand-cyan/25 text-brand-cyan border border-brand-cyan/40 text-[10px] font-mono font-bold transition-all"
+                        title="Promote these choices into a reusable study-level controlled codelist"
+                      >
+                        <IconDeviceFloppy className="w-3 h-3" />
+                        <span>Save to Study Codelists</span>
+                      </button>
+                    )}
                 </div>
               </div>
             </div>
@@ -856,7 +1041,9 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
         <div className="pt-2 border-t border-zinc-850">
           <AstRuleEditor
             formula={field.calculationFormula || ""}
-            onChange={(newFormula) => onUpdateField({ calculationFormula: newFormula })}
+            onChange={(newFormula) =>
+              onUpdateField({ calculationFormula: newFormula })
+            }
             fields={allFieldsInForm}
             currentFieldId={field.id}
           />
@@ -867,7 +1054,9 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
       {field.dataType === "vas_scale" && (
         <div className="grid grid-cols-2 gap-2 pt-2 border-t border-zinc-850">
           <div>
-            <label className="block text-[10px] font-mono text-zinc-500 mb-1">Min Label (0mm)</label>
+            <label className="block text-[10px] font-mono text-zinc-500 mb-1">
+              Min Label (0mm)
+            </label>
             <input
               type="text"
               value={field.scaleMinLabel || ""}
@@ -877,7 +1066,9 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
             />
           </div>
           <div>
-            <label className="block text-[10px] font-mono text-zinc-500 mb-1">Max Label (100mm)</label>
+            <label className="block text-[10px] font-mono text-zinc-500 mb-1">
+              Max Label (100mm)
+            </label>
             <input
               type="text"
               value={field.scaleMaxLabel || ""}

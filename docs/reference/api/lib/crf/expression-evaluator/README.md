@@ -13,6 +13,9 @@
 ## Interfaces
 
 - [ConditionExplanation](interfaces/ConditionExplanation.md)
+- [DerivationExplanation](interfaces/DerivationExplanation.md)
+- [DerivationInputDependency](interfaces/DerivationInputDependency.md)
+- [DerivationStep](interfaces/DerivationStep.md)
 - [GroupExplanation](interfaces/GroupExplanation.md)
 - [RuleExplanation](interfaces/RuleExplanation.md)
 - [Token](interfaces/Token.md)
@@ -37,6 +40,7 @@
 - [evaluateFormula](functions/evaluateFormula.md)
 - [evaluateRule](functions/evaluateRule.md)
 - [evaluateRuleResult](functions/evaluateRuleResult.md)
+- [explainCalculationDerivation](functions/explainCalculationDerivation.md)
 - [explainRule](functions/explainRule.md)
 - [getRuleGroups](functions/getRuleGroups.md)
 - [isMissingOrNullFlavor](functions/isMissingOrNullFlavor.md)

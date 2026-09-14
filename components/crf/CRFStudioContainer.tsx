@@ -15,7 +15,19 @@ import {
   StudyVisit,
 } from "@/lib/crf/types";
 import { getPresetByIdSync, getOncologyPresetSync } from "@/lib/crf/presets";
-import { loadStudyDraft } from "@/lib/crf/study-draft-storage";
+import {
+  loadStudyDraft,
+  saveStudyDraft,
+  saveStudySnapshot,
+  isDraftDirty,
+} from "@/lib/crf/study-draft-storage";
+import {
+  StudyProtocolEngine,
+  generateCdashVariableName,
+  generateEngineId,
+  FieldImpactPreview,
+  SectionImpactPreview,
+} from "@/lib/crf/study-engine";
 import { useStudyAutosave } from "@/hooks/useStudyAutosave";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { StudioHeader } from "./StudioHeader";
@@ -168,6 +180,37 @@ export const CRFStudioContainer: React.FC = () => {
 
   const [history, setHistory] = useState<StudyProtocol[]>([]);
   const [future, setFuture] = useState<StudyProtocol[]>([]);
+  const [baselineStudy, setBaselineStudy] = useState<StudyProtocol>(study);
+  const [pendingStudyReplacement, setPendingStudyReplacement] = useState<{
+    targetStudy: StudyProtocol;
+    label: string;
+  } | null>(null);
+  const replaceStudyModalRef = useFocusTrap<HTMLDivElement>(
+    !!pendingStudyReplacement,
+    {
+      onEscape: () => setPendingStudyReplacement(null),
+    }
+  );
+  const [impactPendingDeletion, setImpactPendingDeletion] = useState<
+    | {
+        type: "field";
+        field: CRFField;
+        sectionId: string;
+        preview: FieldImpactPreview;
+      }
+    | {
+        type: "section";
+        section: CRFSection;
+        preview: SectionImpactPreview;
+      }
+    | null
+  >(null);
+  const impactDeletionModalRef = useFocusTrap<HTMLDivElement>(
+    impactPendingDeletion !== null,
+    {
+      onEscape: () => setImpactPendingDeletion(null),
+    }
+  );
 
   const { params, setParam, setParams } = useStudioHashParams();
   const { playSuccess } = useAudio();
@@ -620,70 +663,84 @@ export const CRFStudioContainer: React.FC = () => {
     }
   };
 
+  // Study Replacement Handler with Unsaved Draft Dirty Checking
+  const requestStudyReplacement = useCallback(
+    (targetStudy: StudyProtocol, label: string) => {
+      if (isDraftDirty(study, baselineStudy)) {
+        setPendingStudyReplacement({ targetStudy, label });
+      } else {
+        setBaselineStudy(targetStudy);
+        updateStudyWithHistory(targetStudy);
+        setActiveFormId(targetStudy.forms[0]?.id || "");
+        setActiveVisitId(targetStudy.visits[0]?.id || "");
+        setSelectedFieldId(null);
+      }
+    },
+    [
+      study,
+      baselineStudy,
+      updateStudyWithHistory,
+      setActiveFormId,
+      setActiveVisitId,
+      setSelectedFieldId,
+    ]
+  );
+
   // Preset Selector Handler
   const handleSelectPreset = (presetId: string) => {
     const preset = getPresetByIdSync(presetId);
     if (preset) {
-      updateStudyWithHistory(preset);
-      setActiveFormId(preset.forms[0]?.id || "");
-      setSelectedFieldId(null);
+      requestStudyReplacement(
+        preset,
+        `Preset "${preset.studyName || presetId}"`
+      );
     }
   };
 
   // Form CRUD
   const handleAddForm = () => {
-    const newForm: CRFForm = {
-      id: `form_custom_${Date.now()}`,
-      name: `New Custom Form ${study.forms.length + 1}`,
-      domain: "CRF",
-      description: "Custom clinical observation module",
-      version: "1.0",
-      rules: [],
-      sections: [
-        {
-          id: `sec_init_${Date.now()}`,
-          title: "General Section",
-          fields: [],
-        },
-      ],
-    };
+    const { study: updatedStudy, form: newForm } = StudyProtocolEngine.addForm(
+      study,
+      "CRF",
+      `New Custom Form ${study.forms.length + 1}`
+    );
 
-    updateStudyWithHistory({
-      ...study,
-      forms: [...study.forms, newForm],
-    });
+    updateStudyWithHistory(updatedStudy);
     setActiveFormId(newForm.id);
     setSelectedFieldId(null);
     setMobileActiveView("canvas");
   };
 
   const handleDuplicateForm = (formId: string) => {
-    const formToDup = study.forms.find((f) => f.id === formId);
-    if (!formToDup) return;
+    const { study: updatedStudy, duplicatedForm } =
+      StudyProtocolEngine.duplicateForm(study, formId);
+    if (!duplicatedForm) return;
 
-    const dupForm: CRFForm = {
-      ...JSON.parse(JSON.stringify(formToDup)),
-      id: `form_dup_${Date.now()}`,
-      name: `${formToDup.name} (Copy)`,
-    };
-
-    updateStudyWithHistory({
-      ...study,
-      forms: [...study.forms, dupForm],
-    });
-    setActiveFormId(dupForm.id);
+    updateStudyWithHistory(updatedStudy);
+    setActiveFormId(duplicatedForm.id);
+    setSelectedFieldId(null);
     setMobileActiveView("canvas");
   };
 
   const handleDeleteForm = (formId: string) => {
     if (study.forms.length <= 1) return;
-    const remaining = study.forms.filter((f) => f.id !== formId);
-    updateStudyWithHistory({
-      ...study,
-      forms: remaining,
-    });
-    setActiveFormId(remaining[0].id);
-    setSelectedFieldId(null);
+    const { study: updatedStudy, removedForm } = StudyProtocolEngine.removeForm(
+      study,
+      formId
+    );
+    if (!removedForm) return;
+
+    updateStudyWithHistory(updatedStudy);
+
+    // If active form was deleted, gracefully transition to first remaining form
+    if (
+      activeFormId === formId ||
+      !updatedStudy.forms.some((f) => f.id === activeFormId)
+    ) {
+      const nextActiveForm = updatedStudy.forms[0]?.id || "";
+      setActiveFormId(nextActiveForm);
+      setSelectedFieldId(null);
+    }
   };
 
   const handleAssignFormToVisit = useCallback(
@@ -795,10 +852,29 @@ export const CRFStudioContainer: React.FC = () => {
 
   const handleDeleteSection = (sectionId: string) => {
     if (!activeForm || activeForm.sections.length <= 1) return;
-    const updatedSections = activeForm.sections.filter(
-      (s) => s.id !== sectionId
+    const preview = StudyProtocolEngine.previewSectionRemoval(
+      study,
+      activeForm.id,
+      sectionId
     );
-    handleUpdateFormMeta({ sections: updatedSections });
+    if (!preview.canSafelyDelete && preview.totalReferencesCount > 0) {
+      const foundSec = activeForm.sections.find((s) => s.id === sectionId);
+      if (foundSec) {
+        setImpactPendingDeletion({
+          type: "section",
+          section: foundSec,
+          preview,
+        });
+        return;
+      }
+    }
+    const { study: updatedStudy } =
+      StudyProtocolEngine.removeSectionWithCascade(
+        study,
+        activeForm.id,
+        sectionId
+      );
+    updateStudyWithHistory(updatedStudy);
   };
 
   const handleUpdateSectionTitle = (sectionId: string, title: string) => {
@@ -810,27 +886,98 @@ export const CRFStudioContainer: React.FC = () => {
   };
 
   // Field CRUD
-  const handleAddField = (field: CRFField) => {
+  const handleAddField = (
+    field: CRFField,
+    options?: { sectionId?: string; targetIndex?: number }
+  ) => {
     if (!activeForm) return;
-    const selectedFieldSectionId = activeForm.sections.find((s) =>
-      s.fields.some((f) => f.id === selectedFieldId)
-    )?.id;
-    const targetSectionId =
-      addFieldTargetSectionId ??
-      selectedFieldSectionId ??
-      activeForm.sections[0]?.id;
-    const targetSection = activeForm.sections.find(
-      (s) => s.id === targetSectionId
-    );
-    if (!targetSection) return;
 
-    const updatedSections = activeForm.sections.map((s) =>
-      s.id === targetSection.id ? { ...s, fields: [...s.fields, field] } : s
-    );
+    let targetSectionId = options?.sectionId;
+    let targetIndex = options?.targetIndex;
 
-    handleUpdateFormMeta({ sections: updatedSections });
-    setSelectedFieldId(field.id);
-    setAddFieldTargetSectionId(null);
+    // If neither section nor index is provided, position relative to currently selected field
+    if (!targetSectionId && selectedFieldId) {
+      for (const s of activeForm.sections) {
+        const fIdx = s.fields.findIndex((f) => f.id === selectedFieldId);
+        if (fIdx !== -1) {
+          targetSectionId = s.id;
+          if (targetIndex === undefined) {
+            targetIndex = fIdx + 1;
+          }
+          break;
+        }
+      }
+    }
+
+    if (!targetSectionId && activeForm.sections.length > 0) {
+      targetSectionId = activeForm.sections[0].id;
+    }
+
+    // Ensure variable name is nonconflicting
+    const existingVars = new Set<string>();
+    for (const s of activeForm.sections) {
+      for (const f of s.fields) {
+        existingVars.add(f.variableName.toUpperCase());
+        if (f.repeatingColumns) {
+          for (const rc of f.repeatingColumns) {
+            existingVars.add(rc.variableName.toUpperCase());
+          }
+        }
+      }
+    }
+
+    let variableName = field.variableName;
+    if (existingVars.has(variableName.toUpperCase())) {
+      variableName = generateCdashVariableName(variableName, existingVars);
+    }
+    existingVars.add(variableName.toUpperCase());
+
+    let repeatingColumns = field.repeatingColumns;
+    if (repeatingColumns && repeatingColumns.length > 0) {
+      repeatingColumns = repeatingColumns.map((rc) => {
+        let rcVar = rc.variableName;
+        if (existingVars.has(rcVar.toUpperCase())) {
+          rcVar = generateCdashVariableName(rcVar, existingVars);
+        }
+        existingVars.add(rcVar.toUpperCase());
+        return {
+          ...rc,
+          id: generateEngineId("fld"),
+          variableName: rcVar,
+        };
+      });
+    }
+
+    const fieldToInsert: CRFField = {
+      ...field,
+      variableName,
+      ...(repeatingColumns ? { repeatingColumns } : {}),
+    };
+
+    const { study: updatedStudy, field: insertedField } =
+      StudyProtocolEngine.insertField(study, activeForm.id, fieldToInsert, {
+        sectionId: targetSectionId,
+        targetIndex,
+      });
+
+    if (insertedField) {
+      updateStudyWithHistory(updatedStudy);
+      setSelectedFieldId(insertedField.id);
+    } else {
+      // Fallback manual splice
+      const updatedSections = activeForm.sections.map((sec) => {
+        if (sec.id !== targetSectionId) return sec;
+        const fields = [...sec.fields];
+        const insertAt =
+          targetIndex !== undefined
+            ? Math.max(0, Math.min(targetIndex, fields.length))
+            : fields.length;
+        fields.splice(insertAt, 0, fieldToInsert);
+        return { ...sec, fields };
+      });
+      handleUpdateFormMeta({ sections: updatedSections });
+      setSelectedFieldId(fieldToInsert.id);
+    }
     setIsMobileWidgetDrawerOpen(false);
   };
 
@@ -847,37 +994,95 @@ export const CRFStudioContainer: React.FC = () => {
 
   const handleDuplicateField = (sectionId: string, fieldId: string) => {
     if (!activeForm) return;
-    const updatedSections = activeForm.sections.map((s) => {
-      if (s.id !== sectionId) return s;
-      const fIdx = s.fields.findIndex((f) => f.id === fieldId);
-      if (fIdx === -1) return s;
+    const { study: updatedStudy, duplicatedField } =
+      StudyProtocolEngine.duplicateField(
+        study,
+        activeForm.id,
+        fieldId,
+        sectionId
+      );
+    if (!duplicatedField) return;
 
-      const original = s.fields[fIdx];
-      const duplicated: CRFField = {
-        ...JSON.parse(JSON.stringify(original)),
-        id: `f_${Date.now()}`,
-        variableName: `${original.variableName}_COPY`,
-        label: `${original.label} (Copy)`,
-      };
-
-      const newFields = [...s.fields];
-      newFields.splice(fIdx + 1, 0, duplicated);
-      return { ...s, fields: newFields };
-    });
-
-    handleUpdateFormMeta({ sections: updatedSections });
+    updateStudyWithHistory(updatedStudy);
+    setSelectedFieldId(duplicatedField.id);
   };
 
   const handleDeleteField = (sectionId: string, fieldId: string) => {
     if (!activeForm) return;
-    const updatedSections = activeForm.sections.map((s) => ({
-      ...s,
-      fields: s.fields.filter((f) => f.id !== fieldId),
-    }));
-    handleUpdateFormMeta({ sections: updatedSections });
+    const preview = StudyProtocolEngine.previewFieldRemoval(
+      study,
+      activeForm.id,
+      fieldId
+    );
+    if (!preview.canSafelyDelete && preview.references.length > 0) {
+      const foundField = activeForm.sections
+        .flatMap((s) => s.fields)
+        .find((f) => f.id === fieldId);
+      if (foundField) {
+        setImpactPendingDeletion({
+          type: "field",
+          field: foundField,
+          sectionId,
+          preview,
+        });
+        return;
+      }
+    }
+    const { study: updatedStudy } = StudyProtocolEngine.removeField(
+      study,
+      activeForm.id,
+      fieldId
+    );
+    updateStudyWithHistory(updatedStudy);
     if (selectedFieldId === fieldId) {
       setSelectedFieldId(null);
     }
+  };
+
+  const handleConfirmImpactDeletion = () => {
+    if (!activeForm || !impactPendingDeletion) return;
+    if (impactPendingDeletion.type === "field") {
+      const { study: updatedStudy } =
+        StudyProtocolEngine.removeFieldWithCascade(
+          study,
+          activeForm.id,
+          impactPendingDeletion.field.id,
+          { purgeReferencingRules: true }
+        );
+      updateStudyWithHistory(updatedStudy);
+      if (selectedFieldId === impactPendingDeletion.field.id) {
+        setSelectedFieldId(null);
+      }
+    } else if (impactPendingDeletion.type === "section") {
+      const { study: updatedStudy } =
+        StudyProtocolEngine.removeSectionWithCascade(
+          study,
+          activeForm.id,
+          impactPendingDeletion.section.id,
+          { purgeReferencingRules: true }
+        );
+      updateStudyWithHistory(updatedStudy);
+    }
+    setImpactPendingDeletion(null);
+  };
+
+  const handleRenameFieldEverywhere = (
+    fieldId: string,
+    newVariableName: string
+  ) => {
+    if (!activeForm) return;
+    const { study: updatedStudy, error } =
+      StudyProtocolEngine.renameFieldEverywhere(
+        study,
+        activeForm.id,
+        fieldId,
+        newVariableName
+      );
+    if (error) {
+      console.warn("Failed to rename field everywhere:", error);
+      return;
+    }
+    updateStudyWithHistory(updatedStudy);
   };
 
   const handleUpdateRules = (rules: EditCheckRule[]) => {
@@ -1017,7 +1222,12 @@ export const CRFStudioContainer: React.FC = () => {
                   onDuplicateForm={handleDuplicateForm}
                   onDeleteForm={handleDeleteForm}
                   onOpenCdashScaffolder={() => setIsScaffolderOpen(true)}
-                  onAddField={handleAddField}
+                  onAddField={(field) => {
+                    handleAddField(field, {
+                      sectionId: addFieldTargetSectionId ?? undefined,
+                    });
+                    setAddFieldTargetSectionId(null);
+                  }}
                   onAssignFormToVisit={handleAssignFormToVisit}
                   onUnassignFormFromVisit={handleUnassignFormFromVisit}
                   onInjectCdashForm={handleInjectCdashForm}
@@ -1048,7 +1258,10 @@ export const CRFStudioContainer: React.FC = () => {
                     onDeleteForm={handleDeleteForm}
                     onOpenCdashScaffolder={() => setIsScaffolderOpen(true)}
                     onAddField={(field) => {
-                      handleAddField(field);
+                      handleAddField(field, {
+                        sectionId: addFieldTargetSectionId ?? undefined,
+                      });
+                      setAddFieldTargetSectionId(null);
                       setMobileActiveView("canvas");
                     }}
                     onAssignFormToVisit={handleAssignFormToVisit}
@@ -1078,6 +1291,7 @@ export const CRFStudioContainer: React.FC = () => {
                       setAddFieldTargetSectionId(sectionId ?? null);
                       setIsMobileWidgetDrawerOpen(true);
                     }}
+                    onDuplicateForm={handleDuplicateForm}
                   />
                 </div>
               )}
@@ -1096,6 +1310,24 @@ export const CRFStudioContainer: React.FC = () => {
                     onUpdateFormMeta={handleUpdateFormMeta}
                     onUpdateRules={handleUpdateRules}
                     onSaveCodelist={handleSaveCodelist}
+                    onDuplicateField={(fId) => {
+                      if (activeForm) {
+                        const sec = activeForm.sections.find((s) =>
+                          s.fields.some((f) => f.id === fId)
+                        );
+                        if (sec) handleDuplicateField(sec.id, fId);
+                      }
+                    }}
+                    onDuplicateForm={(fId) => handleDuplicateForm(fId)}
+                    onRenameEverywhere={
+                      selectedField
+                        ? (newVar) =>
+                            handleRenameFieldEverywhere(
+                              selectedField.id,
+                              newVar
+                            )
+                        : undefined
+                    }
                   />
                 </div>
               )}
@@ -1122,6 +1354,7 @@ export const CRFStudioContainer: React.FC = () => {
                   setIsLeftSidebarOpen(true);
                   setLeftTab("palette");
                 }}
+                onDuplicateForm={handleDuplicateForm}
               />
             </div>
 
@@ -1140,6 +1373,21 @@ export const CRFStudioContainer: React.FC = () => {
                   onUpdateFormMeta={handleUpdateFormMeta}
                   onUpdateRules={handleUpdateRules}
                   onSaveCodelist={handleSaveCodelist}
+                  onDuplicateField={(fId) => {
+                    if (activeForm) {
+                      const sec = activeForm.sections.find((s) =>
+                        s.fields.some((f) => f.id === fId)
+                      );
+                      if (sec) handleDuplicateField(sec.id, fId);
+                    }
+                  }}
+                  onDuplicateForm={(fId) => handleDuplicateForm(fId)}
+                  onRenameEverywhere={
+                    selectedField
+                      ? (newVar) =>
+                          handleRenameFieldEverywhere(selectedField.id, newVar)
+                      : undefined
+                  }
                 />
               </aside>
             )}
@@ -1170,9 +1418,7 @@ export const CRFStudioContainer: React.FC = () => {
           <ExportImportModal
             study={study}
             onImportStudy={(imported) => {
-              updateStudyWithHistory(imported);
-              setActiveFormId(imported.forms[0]?.id || "");
-              setSelectedFieldId(null);
+              requestStudyReplacement(imported, "Imported Study");
             }}
             onOpenExportDocument={() => setIsExportDocModalOpen(true)}
             onOpenBranding={() => setIsBrandingOpen(true)}
@@ -1285,7 +1531,14 @@ export const CRFStudioContainer: React.FC = () => {
                 <IconX className="w-4 h-4" />
               </button>
             </div>
-            <WidgetPalette onAddField={handleAddField} />
+            <WidgetPalette
+              onAddField={(field) => {
+                handleAddField(field, {
+                  sectionId: addFieldTargetSectionId ?? undefined,
+                });
+                setAddFieldTargetSectionId(null);
+              }}
+            />
           </div>
         </>
       )}
@@ -1337,10 +1590,7 @@ export const CRFStudioContainer: React.FC = () => {
         onSwitchMode={setActiveMode}
         onLoadPreset={handleSelectPreset}
         onApplyStudy={(updated) => {
-          updateStudyWithHistory(updated);
-          if (updated.forms[0]) {
-            setActiveFormId(updated.forms[0].id);
-          }
+          requestStudyReplacement(updated, "Wizard Protocol");
           playSuccess();
         }}
         onStartSpotlightTour={() => setIsSpotlightTourOpen(true)}
@@ -1351,6 +1601,222 @@ export const CRFStudioContainer: React.FC = () => {
         isOpen={isSpotlightTourOpen}
         onClose={() => setIsSpotlightTourOpen(false)}
       />
+
+      {/* Study Replacement Unsaved Changes Confirmation Modal */}
+      {pendingStudyReplacement && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="replace-study-modal-title"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150"
+          onClick={() => setPendingStudyReplacement(null)}
+        >
+          <div
+            ref={replaceStudyModalRef}
+            className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-2xl p-5 shadow-2xl space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1">
+                <h3
+                  id="replace-study-modal-title"
+                  className="text-sm font-bold font-mono text-white"
+                >
+                  Unsaved Changes in Current Draft
+                </h3>
+                <p className="text-xs text-zinc-400 font-sans">
+                  You have unsaved changes in your current study draft. Loading{" "}
+                  <span className="font-mono text-brand-cyan font-bold">
+                    {pendingStudyReplacement.label}
+                  </span>{" "}
+                  will replace your active workspace.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPendingStudyReplacement(null)}
+                className="p-1 rounded text-zinc-400 hover:text-white hover:bg-zinc-850 transition-colors"
+                aria-label="Cancel study replacement"
+              >
+                <IconX className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-[11px] text-zinc-400 font-sans leading-relaxed">
+              Choose &quot;Save Snapshot &amp; Replace&quot; to preserve your
+              current work in local snapshots before replacing, or &quot;Discard
+              &amp; Replace&quot; to switch without saving.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setPendingStudyReplacement(null)}
+                className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-750 text-xs font-mono text-zinc-300 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const target = pendingStudyReplacement.targetStudy;
+                  setBaselineStudy(target);
+                  updateStudyWithHistory(target);
+                  setActiveFormId(target.forms[0]?.id || "");
+                  setActiveVisitId(target.visits[0]?.id || "");
+                  setSelectedFieldId(null);
+                  setPendingStudyReplacement(null);
+                }}
+                className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-red-500/20 text-xs font-mono text-zinc-400 hover:text-red-400 border border-zinc-700 transition-colors"
+              >
+                Discard &amp; Replace
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  saveStudySnapshot(
+                    study,
+                    `Snapshot before loading ${pendingStudyReplacement.label}`
+                  );
+                  saveStudyDraft(study);
+                  const target = pendingStudyReplacement.targetStudy;
+                  setBaselineStudy(target);
+                  updateStudyWithHistory(target);
+                  setActiveFormId(target.forms[0]?.id || "");
+                  setActiveVisitId(target.visits[0]?.id || "");
+                  setSelectedFieldId(null);
+                  setPendingStudyReplacement(null);
+                }}
+                className="px-3.5 py-1.5 rounded-lg bg-brand-cyan hover:bg-brand-cyan/90 text-xs font-mono font-bold text-black transition-colors shadow-sm"
+              >
+                Save Snapshot &amp; Replace
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Dependency Web Sentinel Impact Warning & Deletion Confirmation Modal (#542) */}
+      {impactPendingDeletion && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="impact-deletion-modal-title"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150"
+          onClick={() => setImpactPendingDeletion(null)}
+        >
+          <div
+            ref={impactDeletionModalRef}
+            className="w-full max-w-lg bg-zinc-900 border border-zinc-800 rounded-2xl p-5 shadow-2xl space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shrink-0" />
+                  <h3
+                    id="impact-deletion-modal-title"
+                    className="text-sm font-bold font-mono text-white"
+                  >
+                    Dependency Sentinel: Blast Radius Preview
+                  </h3>
+                </div>
+                <p className="text-xs text-zinc-400 font-sans">
+                  {impactPendingDeletion.type === "field" ? (
+                    <>
+                      Field{" "}
+                      <span className="font-mono text-brand-cyan font-bold">
+                        {impactPendingDeletion.field.variableName}
+                      </span>{" "}
+                      (&quot;{impactPendingDeletion.field.label}&quot;) is
+                      actively referenced in your study protocol.
+                    </>
+                  ) : (
+                    <>
+                      Section{" "}
+                      <span className="font-mono text-brand-cyan font-bold">
+                        {impactPendingDeletion.section.title}
+                      </span>{" "}
+                      contains fields with active dependencies in your study
+                      protocol.
+                    </>
+                  )}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setImpactPendingDeletion(null)}
+                className="p-1 rounded text-zinc-400 hover:text-white hover:bg-zinc-850 transition-colors"
+                aria-label="Cancel deletion"
+              >
+                <IconX className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* References Blast Radius Details */}
+            <div className="bg-zinc-950/80 rounded-xl p-3 border border-zinc-850 space-y-2 max-h-52 overflow-y-auto">
+              <div className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider font-semibold flex items-center justify-between">
+                <span>
+                  Active References (
+                  {impactPendingDeletion.type === "field"
+                    ? impactPendingDeletion.preview.references.length
+                    : impactPendingDeletion.preview.totalReferencesCount}
+                  )
+                </span>
+                <span className="text-amber-400 text-[10px]">
+                  Cascading Cleanup
+                </span>
+              </div>
+              <ul className="space-y-1.5">
+                {(impactPendingDeletion.type === "field"
+                  ? impactPendingDeletion.preview.references
+                  : impactPendingDeletion.preview.allReferences
+                ).map((ref, idx) => (
+                  <li
+                    key={`ref_${idx}`}
+                    className="text-xs font-mono text-zinc-300 p-2 rounded bg-zinc-900/60 border border-zinc-800/80 space-y-0.5"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase font-bold text-brand-cyan">
+                        {ref.type.replace(/_/g, " ")}
+                      </span>
+                      <span className="text-[10px] text-zinc-500">
+                        {ref.formName}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-zinc-300 font-sans">
+                      {ref.description}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <p className="text-[11px] text-zinc-400 font-sans leading-relaxed">
+              Confirming deletion will cleanly prune all referencing rules,
+              triggers, and conditions across the protocol in a single commit,
+              preserving 1-operation undo.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setImpactPendingDeletion(null)}
+                className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-750 text-xs font-mono text-zinc-300 transition-colors"
+              >
+                Cancel (Keep Field)
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmImpactDeletion}
+                className="px-3.5 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-xs font-mono font-bold text-white transition-colors shadow-sm"
+              >
+                Delete &amp; Cascade Prune
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

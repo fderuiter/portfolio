@@ -10,6 +10,7 @@ import {
   IconArrowUp,
   IconArrowDown,
   IconSparkles,
+  IconCopy,
 } from "@tabler/icons-react";
 import {
   CRFForm,
@@ -37,6 +38,7 @@ interface FormCanvasProps {
   /** Opens the widget palette. Pass a section id so the field the author
    * picks next is inserted into that section rather than a default one. */
   onOpenPalette: (sectionId?: string) => void;
+  onDuplicateForm?: (formId: string) => void;
 }
 
 export const FormCanvas: React.FC<FormCanvasProps> = ({
@@ -54,6 +56,7 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
   onDeleteField,
   onUpdateField,
   onOpenPalette,
+  onDuplicateForm,
 }) => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [titleInput, setTitleInput] = useState(form.name);
@@ -324,20 +327,37 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                   </p>
                 </div>
 
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setTitleInput(form.name);
-                    setDescInput(form.description);
-                    setDomainInput(form.domain);
-                    setIsEditingTitle(true);
-                  }}
-                  className="p-1.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-white border border-zinc-700/60 transition-all opacity-80 sm:opacity-0 sm:group-hover:opacity-100 shrink-0"
-                  title="Edit Form Properties"
-                  aria-label="Edit Form Properties"
-                >
-                  <IconEdit className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-1 shrink-0">
+                  {onDuplicateForm && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDuplicateForm(form.id);
+                      }}
+                      className="p-1.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-white border border-zinc-700/60 transition-all opacity-80 sm:opacity-0 sm:group-hover:opacity-100 shrink-0"
+                      title="Duplicate Form"
+                      aria-label={`Duplicate form ${form.name}`}
+                    >
+                      <IconCopy className="w-4 h-4 text-brand-cyan" />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setTitleInput(form.name);
+                      setDescInput(form.description);
+                      setDomainInput(form.domain);
+                      setIsEditingTitle(true);
+                    }}
+                    className="p-1.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-white border border-zinc-700/60 transition-all opacity-80 sm:opacity-0 sm:group-hover:opacity-100 shrink-0"
+                    title="Edit Form Properties"
+                    aria-label="Edit Form Properties"
+                  >
+                    <IconEdit className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             )}
           </div>
