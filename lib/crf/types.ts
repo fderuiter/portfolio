@@ -323,6 +323,7 @@ export interface StudyProtocol {
   epochs?: StudyEpoch[];
   cohorts?: StudyCohort[];
   biomedicalConcepts?: BiomedicalConcept[];
+  provenance?: StudyProvenance;
 }
 
 export interface EDCQuery {
@@ -418,3 +419,45 @@ export type StudioMode =
 export type DeviceViewport = "desktop" | "tablet" | "mobile";
 
 export type StudioTheme = "dark" | "light";
+
+/**
+ * Historical lineage and provenance tracking for studies restored from baselines or external sources.
+ */
+export interface StudyProvenance {
+  derivedFromBaselineId?: string;
+  derivedFromVersionTag?: string;
+  restoredAt?: string;
+  restoredBy?: string;
+  notes?: string;
+}
+
+/**
+ * Local author or investigator actor metadata declared upon baseline creation.
+ */
+export interface StudyBaselineActor {
+  name: string;
+  role?: string;
+  email?: string;
+}
+
+/**
+ * Immutable, version-tagged study baseline snapshot.
+ */
+export interface StudyBaseline {
+  id: string;
+  versionTag: string;
+  label: string;
+  description?: string;
+  createdAt: string;
+  actor: StudyBaselineActor;
+  study: StudyProtocol;
+  checksum?: string;
+  provenance?: {
+    parentBaselineId?: string;
+    parentVersionTag?: string;
+    totalForms: number;
+    totalVisits: number;
+    totalRules: number;
+    totalFields: number;
+  };
+}

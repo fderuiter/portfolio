@@ -458,6 +458,28 @@ Create Initial Blank Study Protocol
 
 ***
 
+### deleteBaseline()
+
+> `static` **deleteBaseline**(`baselineId`, `storage?`): `boolean`
+
+Removes a specific baseline from storage by ID.
+
+#### Parameters
+
+##### baselineId
+
+`string`
+
+##### storage?
+
+`Storage`
+
+#### Returns
+
+`boolean`
+
+***
+
 ### diffProtocols()
 
 > `static` **diffProtocols**(`studyA`, `studyB`): [`ProtocolDiffSummary`](../../universal-schema/interfaces/ProtocolDiffSummary.md)
@@ -657,6 +679,28 @@ Constructs an arm-aware visit matrix reflecting form assignments across study ar
 #### Returns
 
 `object`[] \| `object`[]
+
+***
+
+### getBaseline()
+
+> `static` **getBaseline**(`baselineIdOrTag`, `storage?`): [`StudyBaseline`](../../types/interfaces/StudyBaseline.md) \| `null`
+
+Retrieves a single persisted study baseline by its unique ID or exact version tag.
+
+#### Parameters
+
+##### baselineIdOrTag
+
+`string`
+
+##### storage?
+
+`Storage`
+
+#### Returns
+
+[`StudyBaseline`](../../types/interfaces/StudyBaseline.md) \| `null`
 
 ***
 
@@ -886,6 +930,24 @@ IDs, CDASH non-conflicting variable names, and remapped rule conditions/formulas
 ###### Returns
 
 [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+***
+
+### listBaselines()
+
+> `static` **listBaselines**(`storage?`): [`StudyBaseline`](../../types/interfaces/StudyBaseline.md)[]
+
+Lists all persisted study baselines in reverse chronological order.
+
+#### Parameters
+
+##### storage?
+
+`Storage`
+
+#### Returns
+
+[`StudyBaseline`](../../types/interfaces/StudyBaseline.md)[]
 
 ***
 
@@ -1457,6 +1519,32 @@ Rename Field Everywhere: Atomically updates variable name and all AST rules, con
 
 ***
 
+### restoreBaselineAsDraft()
+
+> `static` **restoreBaselineAsDraft**(`baselineOrId`, `options?`, `storage?`): [`RestoreStudyBaselineResult`](../../study-baselines/type-aliases/RestoreStudyBaselineResult.md)
+
+Restores an immutable baseline snapshot into a fresh working draft with provenance.
+
+#### Parameters
+
+##### baselineOrId
+
+`string` \| [`StudyBaseline`](../../types/interfaces/StudyBaseline.md)
+
+##### options?
+
+[`RestoreStudyBaselineOptions`](../../study-baselines/interfaces/RestoreStudyBaselineOptions.md)
+
+##### storage?
+
+`Storage`
+
+#### Returns
+
+[`RestoreStudyBaselineResult`](../../study-baselines/type-aliases/RestoreStudyBaselineResult.md)
+
+***
+
 ### restoreField()
 
 > `static` **restoreField**(`study`, `formId`, `field`, `sectionId?`, `fieldIndex?`, `restoredRules?`): [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
@@ -1556,6 +1644,32 @@ Restore Section and Associated Fields / Rules (#542)
 #### Returns
 
 [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+***
+
+### saveBaseline()
+
+> `static` **saveBaseline**(`study`, `options`, `storage?`): [`SaveStudyBaselineResult`](../../study-baselines/type-aliases/SaveStudyBaselineResult.md)
+
+Persists an immutable, version-tagged baseline snapshot of the study.
+
+#### Parameters
+
+##### study
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### options
+
+[`SaveStudyBaselineOptions`](../../study-baselines/interfaces/SaveStudyBaselineOptions.md)
+
+##### storage?
+
+`Storage`
+
+#### Returns
+
+[`SaveStudyBaselineResult`](../../study-baselines/type-aliases/SaveStudyBaselineResult.md)
 
 ***
 

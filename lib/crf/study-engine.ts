@@ -18,7 +18,30 @@ import {
   StudyEpoch,
   StudyCohort,
   BiomedicalConcept,
+  StudyBaseline,
+  StudyBaselineActor,
+  StudyProvenance,
 } from "./types";
+import {
+  saveStudyBaseline,
+  listStudyBaselines,
+  getStudyBaseline,
+  restoreBaselineAsDraft,
+  deleteStudyBaseline,
+  clearStudyBaselines,
+  exportBaselinesBundle,
+  importBaselinesBundle,
+  incrementStudyVersion,
+  computeStudyChecksum,
+  STUDY_BASELINES_STORAGE_KEY,
+  STUDY_BASELINES_CORRUPT_BACKUP_KEY,
+  STUDY_BASELINES_MAX_COUNT,
+  type SaveStudyBaselineOptions,
+  type SaveStudyBaselineResult,
+  type RestoreStudyBaselineOptions,
+  type RestoreStudyBaselineResult,
+  type BaselinesExportBundle,
+} from "./study-baselines";
 import {
   validateCdashVariableName,
   generateEngineId,
@@ -3061,4 +3084,78 @@ export class StudyProtocolEngine {
       };
     }
   }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Study Baselines & Restoration Engine (#672)
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Persists an immutable, version-tagged baseline snapshot of the study.
+   */
+  static saveBaseline(
+    study: StudyProtocol,
+    options: SaveStudyBaselineOptions,
+    storage?: Storage
+  ): SaveStudyBaselineResult {
+    return saveStudyBaseline(study, options, storage);
+  }
+
+  /**
+   * Lists all persisted study baselines in reverse chronological order.
+   */
+  static listBaselines(storage?: Storage): StudyBaseline[] {
+    return listStudyBaselines(storage);
+  }
+
+  /**
+   * Retrieves a single persisted study baseline by its unique ID or exact version tag.
+   */
+  static getBaseline(
+    baselineIdOrTag: string,
+    storage?: Storage
+  ): StudyBaseline | null {
+    return getStudyBaseline(baselineIdOrTag, storage);
+  }
+
+  /**
+   * Restores an immutable baseline snapshot into a fresh working draft with provenance.
+   */
+  static restoreBaselineAsDraft(
+    baselineOrId: StudyBaseline | string,
+    options?: RestoreStudyBaselineOptions,
+    storage?: Storage
+  ): RestoreStudyBaselineResult {
+    return restoreBaselineAsDraft(baselineOrId, options, storage);
+  }
+
+  /**
+   * Removes a specific baseline from storage by ID.
+   */
+  static deleteBaseline(baselineId: string, storage?: Storage): boolean {
+    return deleteStudyBaseline(baselineId, storage);
+  }
 }
+
+export {
+  saveStudyBaseline,
+  listStudyBaselines,
+  getStudyBaseline,
+  restoreBaselineAsDraft,
+  deleteStudyBaseline,
+  clearStudyBaselines,
+  exportBaselinesBundle,
+  importBaselinesBundle,
+  incrementStudyVersion,
+  computeStudyChecksum,
+  STUDY_BASELINES_STORAGE_KEY,
+  STUDY_BASELINES_CORRUPT_BACKUP_KEY,
+  STUDY_BASELINES_MAX_COUNT,
+  type SaveStudyBaselineOptions,
+  type SaveStudyBaselineResult,
+  type RestoreStudyBaselineOptions,
+  type RestoreStudyBaselineResult,
+  type BaselinesExportBundle,
+  type StudyBaseline,
+  type StudyBaselineActor,
+  type StudyProvenance,
+};

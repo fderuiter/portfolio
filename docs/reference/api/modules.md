@@ -82,6 +82,7 @@
 - [lib/crf/presets/pk-dose-escalation](lib/crf/presets/pk-dose-escalation/README.md)
 - [lib/crf/smart-blocks-engine](lib/crf/smart-blocks-engine/README.md)
 - [lib/crf/study-auditor](lib/crf/study-auditor/README.md)
+- [lib/crf/study-baselines](lib/crf/study-baselines/README.md)
 - [lib/crf/study-draft-storage](lib/crf/study-draft-storage/README.md)
 - [lib/crf/study-engine](lib/crf/study-engine/README.md)
 - [lib/crf/types](lib/crf/types/README.md)

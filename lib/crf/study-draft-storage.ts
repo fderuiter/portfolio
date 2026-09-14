@@ -33,7 +33,7 @@ export type LoadStudyDraftResult =
   | { status: "empty" }
   | { status: "corrupt" };
 
-function isStudyProtocolShape(value: unknown): value is StudyProtocol {
+export function isStudyProtocolShape(value: unknown): value is StudyProtocol {
   if (!value || typeof value !== "object") return false;
   const candidate = value as Record<string, unknown>;
   return (
@@ -56,7 +56,7 @@ function isStudyDraftEnvelopeShape(
   );
 }
 
-function resolveStorage(storage?: Storage): Storage | undefined {
+export function resolveStorage(storage?: Storage): Storage | undefined {
   if (storage) return storage;
   if (typeof window === "undefined") return undefined;
   return typeof window.localStorage?.getItem === "function" &&
@@ -223,7 +223,7 @@ export function listStudySnapshots(storage?: Storage): StudySnapshot[] {
   }
 }
 
-function deterministicStringify(obj: unknown): string {
+export function deterministicStringify(obj: unknown): string {
   if (obj === null || typeof obj !== "object") {
     return JSON.stringify(obj);
   }
