@@ -36,7 +36,7 @@ import {
 } from "@/lib/crf/smart-blocks-engine";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 
-export interface SlashPaletteModalProps {
+interface SlashPaletteModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSelectCommand: (item: SlashCommandItem) => void;
