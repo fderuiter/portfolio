@@ -39,6 +39,7 @@ interface FormCanvasProps {
    * picks next is inserted into that section rather than a default one. */
   onOpenPalette: (sectionId?: string) => void;
   onDuplicateForm?: (formId: string) => void;
+  onOpenSlashPalette?: (targetSectionId?: string, targetIndex?: number) => void;
 }
 
 export const FormCanvas: React.FC<FormCanvasProps> = ({
@@ -57,6 +58,7 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
   onUpdateField,
   onOpenPalette,
   onDuplicateForm,
+  onOpenSlashPalette,
 }) => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [titleInput, setTitleInput] = useState(form.name);
@@ -230,6 +232,25 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
             onChangeViewport={onChangeViewport}
             gridCols={12}
           />
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onOpenSlashPalette) {
+                onOpenSlashPalette();
+              } else {
+                onOpenPalette();
+              }
+            }}
+            className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-brand-cyan/10 hover:bg-brand-cyan/20 border border-brand-cyan/40 text-brand-cyan text-xs font-mono transition-all shadow-sm"
+            title="Open Slash Command Palette (/)"
+          >
+            <IconSparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Slash Commands</span>
+            <span className="sm:hidden">/</span>
+            <kbd className="hidden md:inline-block text-[9px] px-1 py-0.2 rounded bg-zinc-900 border border-zinc-700 text-zinc-400">
+              /
+            </kbd>
+          </button>
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -456,6 +477,21 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                       {section.fields.length}{" "}
                       {section.fields.length === 1 ? "field" : "fields"}
                     </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onOpenSlashPalette) {
+                          onOpenSlashPalette(section.id, section.fields.length);
+                        } else {
+                          onOpenPalette(section.id);
+                        }
+                      }}
+                      className="p-1 rounded hover:bg-zinc-800 text-brand-cyan hover:text-white transition-colors ml-1"
+                      title="Insert Field or Smart Block into Section (/)"
+                      aria-label={`Add field to ${section.title}`}
+                    >
+                      <IconPlus className="w-3.5 h-3.5" />
+                    </button>
                     {form.sections.length > 1 && (
                       <button
                         onClick={(e) => {
@@ -478,7 +514,11 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onOpenPalette(section.id);
+                      if (onOpenSlashPalette) {
+                        onOpenSlashPalette(section.id, 0);
+                      } else {
+                        onOpenPalette(section.id);
+                      }
                     }}
                     aria-label={`Add field to ${section.title}`}
                     className="w-full p-6 sm:p-8 border-2 border-dashed border-zinc-800 hover:border-brand-cyan/40 rounded-xl text-center cursor-pointer transition-all bg-zinc-950/30 group"
@@ -488,7 +528,7 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                       No fields in this section yet.
                     </p>
                     <p className="text-[11px] text-zinc-500 mt-1">
-                      Tap or click to pick a widget from the palette.
+                      Tap or click to pick a widget or press / for Smart Blocks.
                     </p>
                   </button>
                 ) : (
@@ -535,21 +575,6 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                       </React.Fragment>
                     ))}
                   </div>
-                )}
-
-                {section.fields.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onOpenPalette(section.id);
-                    }}
-                    aria-label={`Add field to ${section.title}`}
-                    className="mt-2.5 sm:mt-4 w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-dashed border-zinc-800 hover:border-brand-cyan/40 text-zinc-500 hover:text-brand-cyan text-xs font-mono transition-all"
-                  >
-                    <IconPlus className="w-3.5 h-3.5" />
-                    <span>Add Field to {section.title}</span>
-                  </button>
                 )}
               </div>
             );

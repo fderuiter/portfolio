@@ -24,6 +24,8 @@
 
 - [daysInMonth](functions/daysInMonth.md)
 - [formatPrecisionDate](functions/formatPrecisionDate.md)
+- [generateCdashVariableName](functions/generateCdashVariableName.md)
+- [generateEngineId](functions/generateEngineId.md)
 - [isCdiscNullFlavor](functions/isCdiscNullFlavor.md)
 - [isFutureDate](functions/isFutureDate.md)
 - [parsePrecisionDate](functions/parsePrecisionDate.md)

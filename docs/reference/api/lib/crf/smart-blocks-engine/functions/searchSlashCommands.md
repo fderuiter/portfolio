@@ -6,15 +6,19 @@
 
 # Function: searchSlashCommands()
 
-> **searchSlashCommands**(`query`): [`SlashCommandItem`](../interfaces/SlashCommandItem.md)[]
+> **searchSlashCommands**(`query`, `category?`): [`SlashCommandItem`](../interfaces/SlashCommandItem.md)[]
 
-Searches and ranks slash commands by match relevance
+Searches and ranks slash commands by match relevance and optional category
 
 ## Parameters
 
 ### query
 
 `string`
+
+### category?
+
+[`SlashCommandCategory`](../type-aliases/SlashCommandCategory.md)
 
 ## Returns
 

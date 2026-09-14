@@ -467,21 +467,29 @@ describe("CRFStudioContainer Component", () => {
       addFieldBtn!.click();
     });
 
-    const widgetBtn = Array.from(container.querySelectorAll("button")).find(
-      (b) => b.textContent?.includes("Single-Line Text")
+    // The section's control opens the keyboard-accessible slash command
+    // palette (#538), which resolves the field to the section id the
+    // trigger passed it — not through the plain widget palette.
+    const slashDialog = container.querySelector(
+      '[role="dialog"][aria-labelledby="slash-palette-title"]'
+    ) as HTMLElement;
+    expect(slashDialog).toBeTruthy();
+
+    const insertTextBtn = slashDialog.querySelector(
+      'button[aria-label="Insert Single-Line Text"]'
     ) as HTMLButtonElement | undefined;
-    expect(widgetBtn).toBeTruthy();
+    expect(insertTextBtn).toBeTruthy();
 
     await act(async () => {
-      widgetBtn!.click();
+      insertTextBtn!.click();
     });
 
-    // The picked widget's default field label must land inside the section
-    // whose Add Field control was actually used...
+    // The inserted field's default label must land inside the section whose
+    // Add Field control was actually used...
     const newSectionAfter = container.querySelector(
       `[data-section-id="${newSectionId}"]`
     ) as HTMLElement;
-    expect(newSectionAfter.textContent).toContain("Text Question");
+    expect(newSectionAfter.textContent).toContain("Text Variable");
 
     // ...and every other section (in particular, the form's original first
     // section) must be untouched by it.
@@ -489,7 +497,7 @@ describe("CRFStudioContainer Component", () => {
       container.querySelectorAll("[data-section-id]")
     ).filter((el) => el.getAttribute("data-section-id") !== newSectionId);
     for (const el of otherSections) {
-      expect(el.textContent).not.toContain("Text Question");
+      expect(el.textContent).not.toContain("Text Variable");
     }
   });
 });

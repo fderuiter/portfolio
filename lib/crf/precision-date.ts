@@ -29,7 +29,7 @@ export function isCdiscNullFlavor(val: unknown): val is CdiscNullFlavorCode {
 export interface ParsedPrecisionDate {
   year: number | null;
   month: number | null; // 1 - 12
-  day: number | null;   // 1 - 31
+  day: number | null; // 1 - 31
   isPartial: boolean;
   isValid: boolean;
   nullFlavor?: CdiscNullFlavorCode;
@@ -44,7 +44,9 @@ export interface ParsedPrecisionDate {
  * - YYYY-UNK-UNK / YYYY (Unknown month & day: e.g. 2026-UNK-UNK, 2026)
  * - CDISC Null Flavor (e.g. ND, NA, UNK)
  */
-export function parsePrecisionDate(raw: string | null | undefined): ParsedPrecisionDate {
+export function parsePrecisionDate(
+  raw: string | null | undefined
+): ParsedPrecisionDate {
   if (!raw || typeof raw !== "string" || raw.trim() === "") {
     return {
       year: null,
@@ -88,7 +90,14 @@ export function parsePrecisionDate(raw: string | null | undefined): ParsedPrecis
         isoString: trimmed,
       };
     }
-    return { year: y, month: m, day: d, isPartial: false, isValid: false, isoString: trimmed };
+    return {
+      year: y,
+      month: m,
+      day: d,
+      isPartial: false,
+      isValid: false,
+      isoString: trimmed,
+    };
   }
 
   // 2. Partial with Unknown Day: YYYY-MM-UNK or YYYY-MM
@@ -106,11 +115,20 @@ export function parsePrecisionDate(raw: string | null | undefined): ParsedPrecis
         isoString: `${String(y).padStart(4, "0")}-${String(m).padStart(2, "0")}-UNK`,
       };
     }
-    return { year: y, month: m, day: null, isPartial: true, isValid: false, isoString: trimmed };
+    return {
+      year: y,
+      month: m,
+      day: null,
+      isPartial: true,
+      isValid: false,
+      isoString: trimmed,
+    };
   }
 
   // 3. Partial with Unknown Month & Day: YYYY-UNK-UNK or YYYY
-  const yearOnlyMatch = /^(\d{4})(?:-(?:UNK|UN|\?\?)-(?:UNK|UN|\?\?))?$/.exec(trimmed);
+  const yearOnlyMatch = /^(\d{4})(?:-(?:UNK|UN|\?\?)-(?:UNK|UN|\?\?))?$/.exec(
+    trimmed
+  );
   if (yearOnlyMatch) {
     const y = parseInt(yearOnlyMatch[1], 10);
     if (y >= 1000 && y <= 9999) {
@@ -123,7 +141,14 @@ export function parsePrecisionDate(raw: string | null | undefined): ParsedPrecis
         isoString: `${String(y).padStart(4, "0")}-UNK-UNK`,
       };
     }
-    return { year: y, month: null, day: null, isPartial: true, isValid: false, isoString: trimmed };
+    return {
+      year: y,
+      month: null,
+      day: null,
+      isPartial: true,
+      isValid: false,
+      isoString: trimmed,
+    };
   }
 
   return {
@@ -144,7 +169,11 @@ export function formatPrecisionDate(
   month?: number | string | null,
   day?: number | string | null
 ): string {
-  if (!year || String(year).trim() === "" || String(year).toUpperCase() === "UNK") {
+  if (
+    !year ||
+    String(year).trim() === "" ||
+    String(year).toUpperCase() === "UNK"
+  ) {
     return "";
   }
 
@@ -153,7 +182,10 @@ export function formatPrecisionDate(
 
   const yStr = String(yNum).padStart(4, "0");
 
-  const mRaw = month !== undefined && month !== null ? String(month).trim().toUpperCase() : "";
+  const mRaw =
+    month !== undefined && month !== null
+      ? String(month).trim().toUpperCase()
+      : "";
   if (!mRaw || mRaw === "UNK" || mRaw === "0" || mRaw === "") {
     return `${yStr}-UNK-UNK`;
   }
@@ -164,7 +196,8 @@ export function formatPrecisionDate(
   }
   const mStr = String(mNum).padStart(2, "0");
 
-  const dRaw = day !== undefined && day !== null ? String(day).trim().toUpperCase() : "";
+  const dRaw =
+    day !== undefined && day !== null ? String(day).trim().toUpperCase() : "";
   if (!dRaw || dRaw === "UNK" || dRaw === "0" || dRaw === "") {
     return `${yStr}-${mStr}-UNK`;
   }
@@ -189,7 +222,10 @@ export function daysInMonth(year: number, month: number): number {
 /**
  * Checks if a parsed or raw date is in the future relative to the reference date (UTC).
  */
-export function isFutureDate(dateStr: string, referenceDate: Date = new Date()): boolean {
+export function isFutureDate(
+  dateStr: string,
+  referenceDate: Date = new Date()
+): boolean {
   const parsed = parsePrecisionDate(dateStr);
   if (!parsed.isValid || parsed.year === null || parsed.nullFlavor) {
     return false;
@@ -276,7 +312,8 @@ export function validatePrecisionDate(
   if (parsed.isPartial && options.allowPartial === false) {
     return {
       isValid: false,
-      error: "Partial dates are not allowed for this field. Complete YYYY-MM-DD required.",
+      error:
+        "Partial dates are not allowed for this field. Complete YYYY-MM-DD required.",
       isPartial: true,
       parsed,
     };
@@ -312,7 +349,11 @@ export function validateCdashVariableName(name: string): {
   sanitized: string;
 } {
   if (!name || typeof name !== "string" || name.trim() === "") {
-    return { isValid: false, error: "Variable name cannot be blank.", sanitized: "" };
+    return {
+      isValid: false,
+      error: "Variable name cannot be blank.",
+      sanitized: "",
+    };
   }
 
   const trimmed = name.trim();
@@ -350,4 +391,82 @@ export function validateCdashVariableName(name: string): {
     isValid: true,
     sanitized: upper,
   };
+}
+
+/**
+ * Generate Collision-Resistant ID using crypto.randomUUID or Random Fallback
+ */
+export function generateEngineId(prefix: string): string {
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.randomUUID === "function"
+  ) {
+    return `${prefix}_${crypto.randomUUID()}`;
+  }
+  const rand = Math.random().toString(36).slice(2, 11);
+  const rand2 = Math.random().toString(36).slice(2, 11);
+  return `${prefix}_${rand}_${rand2}`;
+}
+
+/**
+ * Generate Valid CDASH Nonconflicting Variable Name (<= 8 Characters)
+ */
+export function generateCdashVariableName(
+  baseName: string,
+  existingVarNames: Set<string> | string[] | Iterable<string>
+): string {
+  const existing =
+    existingVarNames instanceof Set
+      ? existingVarNames
+      : new Set(Array.from(existingVarNames).map((v) => v.toUpperCase()));
+
+  // Clean non-alphanumeric/underscore and ensure uppercase
+  let cleaned = (baseName || "VAR").toUpperCase().replace(/[^A-Z0-9_]/g, "");
+  // CDASH variables must start with an alphabetic character [A-Z]
+  if (!cleaned || /^[^A-Z]/.test(cleaned)) {
+    const stripped = cleaned.replace(/^[^A-Z]+/, "");
+    cleaned = `V_${stripped || "VAR"}`.replace(/[^A-Z0-9_]/g, "");
+  }
+
+  // If base already ends in _<digits>, parse stem and counter
+  const match = cleaned.match(/^(.*?)_([0-9]+)$/);
+  const stem =
+    match && match[1].length > 0
+      ? match[1].replace(/_+$/, "")
+      : cleaned.replace(/_+$/, "");
+  let counter = match ? parseInt(match[2], 10) + 1 : 2;
+
+  // Try numerical suffixes within 8-character CDASH limit
+  while (counter < 1000) {
+    const suffix = `_${counter}`;
+    const maxStemLen = Math.max(1, 8 - suffix.length);
+    const truncatedStem = stem.slice(0, maxStemLen).replace(/_+$/, "");
+    const candidate = `${truncatedStem}${suffix}`;
+
+    if (!existing.has(candidate)) {
+      return candidate;
+    }
+    counter++;
+  }
+
+  // Fallback to letter suffixes within 8-character limit
+  for (let code = 65; code <= 90; code++) {
+    const letter = String.fromCharCode(code);
+    const suffix = `_${letter}`;
+    const maxStemLen = Math.max(1, 8 - suffix.length);
+    const truncatedStem = stem.slice(0, maxStemLen).replace(/_+$/, "");
+    const candidate = `${truncatedStem}${suffix}`;
+    if (!existing.has(candidate)) {
+      return candidate;
+    }
+  }
+
+  // Ultimate fallback within 8 characters (guaranteed unique)
+  while (true) {
+    const rand = Math.random().toString(36).slice(2, 8).toUpperCase();
+    const candidate = `V_${rand}`.slice(0, 8);
+    if (!existing.has(candidate)) {
+      return candidate;
+    }
+  }
 }

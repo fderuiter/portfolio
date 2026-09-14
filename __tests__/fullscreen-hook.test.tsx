@@ -62,10 +62,22 @@ describe("useFullscreen Hook - Unit & Edge Matrix Suite", () => {
     if (mockElement && mockElement.parentNode) {
       mockElement.parentNode.removeChild(mockElement);
     }
+    delete (document as any).fullscreenEnabled;
+    delete (document as any).webkitFullscreenEnabled;
+    delete (document.documentElement as any).requestFullscreen;
+    delete (document.documentElement as any).webkitRequestFullscreen;
     vi.restoreAllMocks();
   });
 
-  it("1. initializes with isFullscreen false and isSupported true by default", () => {
+  it("1. initializes with isFullscreen false, and isSupported true when the browser exposes the Fullscreen API", () => {
+    // jsdom doesn't implement the Fullscreen API itself, so a supported
+    // browser has to be arranged explicitly rather than assumed.
+    Object.defineProperty(document, "fullscreenEnabled", {
+      value: true,
+      writable: true,
+      configurable: true,
+    });
+
     const { result, unmount } = renderHookHelper(() =>
       useFullscreen(elementRef)
     );
@@ -332,5 +344,47 @@ describe("useFullscreen Hook - Unit & Edge Matrix Suite", () => {
       root.unmount();
     });
     container.remove();
+  });
+
+  it("12. isSupported is false when the browser exposes no Fullscreen API at all (real iPhone Safari)", () => {
+    // Real iPhone Safari doesn't implement fullscreenEnabled,
+    // webkitFullscreenEnabled, or a request method on arbitrary elements at
+    // all (it only supports native fullscreen on <video>, via a different
+    // API this hook doesn't use). jsdom matches that shape by default, but
+    // this test states the absence explicitly rather than relying on it.
+    delete (document as any).fullscreenEnabled;
+    delete (document as any).webkitFullscreenEnabled;
+    delete (document.documentElement as any).requestFullscreen;
+    delete (document.documentElement as any).webkitRequestFullscreen;
+
+    const { result, unmount } = renderHookHelper(() =>
+      useFullscreen(elementRef)
+    );
+    unmountCurrent = unmount;
+
+    expect(result.current.isSupported).toBe(false);
+  });
+
+  it("13. falls back to pseudo-fullscreen when neither requestFullscreen nor webkitRequestFullscreen exist on the element (no throw)", async () => {
+    // This is the actual real-iPhone-Safari path through enterFullscreen:
+    // both methods are simply undefined, so the `else` branch runs, not the
+    // `catch`. Every other test that reaches pseudo-fullscreen does so via
+    // a rejected/throwing mock, which never exercises this branch.
+    delete (mockElement as any).requestFullscreen;
+    delete (mockElement as any).webkitRequestFullscreen;
+    const onFullscreenChange = vi.fn();
+
+    const { result, unmount } = renderHookHelper(() =>
+      useFullscreen(elementRef, { onFullscreenChange })
+    );
+    unmountCurrent = unmount;
+
+    await act(async () => {
+      await result.current.enterFullscreen();
+    });
+
+    expect(result.current.isFullscreen).toBe(true);
+    expect(result.current.isPseudoFullscreen).toBe(true);
+    expect(onFullscreenChange).toHaveBeenCalledWith(true);
   });
 });

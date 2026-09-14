@@ -11,6 +11,7 @@ import {
   ClinicalDataType,
   AstCondition,
 } from "./types";
+import { generateEngineId, generateCdashVariableName } from "./precision-date";
 
 export type SlashCommandCategory = "smart_block" | "widget" | "layout";
 
@@ -200,7 +201,12 @@ export const CLINICAL_SMART_BLOCKS: ClinicalSmartBlockDefinition[] = [
       ];
 
       const conditions: AstCondition[] = [
-        { fieldId: `f_sysbp_${now}`, operator: "lte", value: 60 },
+        {
+          fieldId: `f_sysbp_${now}`,
+          operator: "lte",
+          value: "",
+          compareFieldId: `f_diabp_${now}`,
+        },
       ];
 
       const rules: EditCheckRule[] = [
@@ -945,6 +951,20 @@ export const CLINICAL_SMART_BLOCKS: ClinicalSmartBlockDefinition[] = [
           ],
           logicalOperator: "AND",
         },
+        {
+          id: `rule_age_eligibility_${now}`,
+          name: "Adult Age Eligibility Requirement",
+          description:
+            "Verifies that subject meets the minimum age requirement of 18 years.",
+          querySeverity: "error",
+          triggerFieldIds: [`f_age_${now}`],
+          targetFieldId: `f_age_${now}`,
+          actionType: "raise_query",
+          queryMessage:
+            "Subject must be at least 18 years of age at screening.",
+          conditions: [{ fieldId: `f_age_${now}`, operator: "lt", value: 18 }],
+          logicalOperator: "AND",
+        },
       ];
 
       return {
@@ -1653,13 +1673,21 @@ export const ALL_SLASH_COMMANDS: SlashCommandItem[] = [
 ];
 
 /**
- * Searches and ranks slash commands by match relevance
+ * Searches and ranks slash commands by match relevance and optional category
  */
-export function searchSlashCommands(query: string): SlashCommandItem[] {
-  const clean = query.trim().toLowerCase().replace(/^\//, "");
-  if (!clean) return ALL_SLASH_COMMANDS;
+export function searchSlashCommands(
+  query: string,
+  category?: SlashCommandCategory
+): SlashCommandItem[] {
+  let items = ALL_SLASH_COMMANDS;
+  if (category) {
+    items = items.filter((item) => item.category === category);
+  }
 
-  return ALL_SLASH_COMMANDS.filter((item) => {
+  const clean = query.trim().toLowerCase().replace(/^\//, "");
+  if (!clean) return items;
+
+  return items.filter((item) => {
     if (item.command.toLowerCase().includes(clean)) return true;
     if (item.title.toLowerCase().includes(clean)) return true;
     if (item.description.toLowerCase().includes(clean)) return true;
@@ -1667,37 +1695,154 @@ export function searchSlashCommands(query: string): SlashCommandItem[] {
   });
 }
 
-/**
- * Instantiates a compound Clinical Smart Block by ID
- */
-export function instantiateSmartBlock(blockId: string): {
+export interface InstantiateSmartBlockOptions {
+  existingVariableNames?: Iterable<string>;
+  existingIds?: Iterable<string>;
+}
+
+export interface InstantiatedSmartBlock {
   section: CRFSection;
   rules: EditCheckRule[];
-} {
+  variableMap: Record<string, string>;
+  idMap: Record<string, string>;
+}
+
+/**
+ * Instantiates a compound Clinical Smart Block by ID with collision-resistant IDs
+ * and automatic CDASH non-conflicting variable name remapping.
+ */
+export function instantiateSmartBlock(
+  blockId: string,
+  options?: InstantiateSmartBlockOptions
+): InstantiatedSmartBlock {
   const definition = CLINICAL_SMART_BLOCKS.find((b) => b.id === blockId);
   if (!definition) {
     throw new Error(`Unknown clinical smart block: "${blockId}"`);
   }
-  return definition.factory();
+  const raw = definition.factory();
+
+  // Deep clone to prevent mutating template objects
+  const section: CRFSection = JSON.parse(JSON.stringify(raw.section));
+  const rules: EditCheckRule[] = JSON.parse(JSON.stringify(raw.rules));
+
+  const variableMap: Record<string, string> = {};
+  const idMap: Record<string, string> = {};
+
+  const existingVars = new Set(
+    Array.from(options?.existingVariableNames || []).map((v) => v.toUpperCase())
+  );
+
+  // Remap section ID
+  const newSecId = generateEngineId("sec");
+  idMap[section.id] = newSecId;
+  section.id = newSecId;
+
+  // Remap fields: assign unique IDs and generate nonconflicting CDASH variable names
+  for (const field of section.fields) {
+    const oldFldId = field.id;
+    const newFldId = generateEngineId("fld");
+    idMap[oldFldId] = newFldId;
+    field.id = newFldId;
+
+    const originalVar = field.variableName.toUpperCase();
+    if (existingVars.has(originalVar)) {
+      const newVar = generateCdashVariableName(originalVar, existingVars);
+      variableMap[originalVar] = newVar;
+      field.variableName = newVar;
+      existingVars.add(newVar);
+    } else {
+      variableMap[originalVar] = originalVar;
+      existingVars.add(originalVar);
+    }
+  }
+
+  // Remap calculation formulas if variables changed
+  for (const field of section.fields) {
+    if (field.calculationFormula) {
+      let updatedFormula = field.calculationFormula;
+      for (const [oldVar, newVar] of Object.entries(variableMap)) {
+        if (oldVar !== newVar) {
+          updatedFormula = updatedFormula.replace(
+            new RegExp(`\\b${oldVar}\\b`, "g"),
+            newVar
+          );
+        }
+      }
+      field.calculationFormula = updatedFormula;
+    }
+  }
+
+  // Remap rules: IDs, targetFieldId, triggerFieldIds, conditions, conditionGroups
+  for (const rule of rules) {
+    const newRuleId = generateEngineId("rule");
+    idMap[rule.id] = newRuleId;
+    rule.id = newRuleId;
+
+    if (idMap[rule.targetFieldId]) {
+      rule.targetFieldId = idMap[rule.targetFieldId];
+    }
+    rule.triggerFieldIds = (rule.triggerFieldIds || []).map(
+      (tid) => idMap[tid] || tid
+    );
+
+    for (const cond of rule.conditions || []) {
+      if (idMap[cond.fieldId]) {
+        cond.fieldId = idMap[cond.fieldId];
+      }
+      if (cond.compareFieldId && idMap[cond.compareFieldId]) {
+        cond.compareFieldId = idMap[cond.compareFieldId];
+      }
+    }
+
+    for (const group of rule.conditionGroups || []) {
+      for (const cond of group.conditions || []) {
+        if (idMap[cond.fieldId]) {
+          cond.fieldId = idMap[cond.fieldId];
+        }
+        if (cond.compareFieldId && idMap[cond.compareFieldId]) {
+          cond.compareFieldId = idMap[cond.compareFieldId];
+        }
+      }
+    }
+  }
+
+  return { section, rules, variableMap, idMap };
+}
+
+export interface InstantiateAtomicFieldOptions {
+  existingVariableNames?: Iterable<string>;
+  indexOffset?: number;
 }
 
 /**
- * Instantiates an atomic CRF Field from a slash command
+ * Instantiates an atomic CRF Field from a slash command with valid CDASH variable naming (<= 8 chars)
  */
 export function instantiateAtomicField(
   commandId: string,
-  indexOffset = 0
+  optionsOrOffset: InstantiateAtomicFieldOptions | number = 0
 ): CRFField {
+  const options: InstantiateAtomicFieldOptions =
+    typeof optionsOrOffset === "number"
+      ? { indexOffset: optionsOrOffset }
+      : optionsOrOffset || {};
+
   const item = ATOMIC_SLASH_COMMANDS.find((c) => c.id === commandId);
-  const now = Date.now() + indexOffset;
   const template = item?.fieldTemplate || {};
   const dataType: ClinicalDataType = template.dataType || "text";
 
+  const existingVars = new Set(
+    Array.from(options.existingVariableNames || []).map((v) => v.toUpperCase())
+  );
+
+  const rawBase = template.variableName || dataType.toUpperCase();
+  const baseVar = rawBase.slice(0, 8);
+  const varName = existingVars.has(baseVar)
+    ? generateCdashVariableName(baseVar, existingVars)
+    : baseVar;
+
   return {
-    id: `f_${dataType}_${now}`,
-    variableName: template.variableName
-      ? `${template.variableName}_${now % 1000}`
-      : `VAR_${now % 1000}`,
+    id: generateEngineId("fld"),
+    variableName: varName,
     label: template.label || "New Field",
     dataType,
     unit: template.unit,

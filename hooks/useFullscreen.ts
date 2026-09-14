@@ -26,6 +26,7 @@ export interface UseFullscreenReturn {
 
 interface WebKitDocument extends Document {
   webkitFullscreenElement?: Element;
+  webkitFullscreenEnabled?: boolean;
   webkitExitFullscreen?: () => Promise<void>;
 }
 
@@ -48,13 +49,18 @@ export function useFullscreen(
   const [isSupported] = useState<boolean>(() => {
     if (typeof document === "undefined") return true;
     const doc = document as WebKitDocument;
-    return doc.fullscreenEnabled !== undefined
-      ? !!doc.fullscreenEnabled
-      : !!(
-          doc.documentElement?.requestFullscreen ||
-          (doc.documentElement as WebKitHTMLElement)?.webkitRequestFullscreen ||
-          true
-        );
+    if (doc.fullscreenEnabled !== undefined) return !!doc.fullscreenEnabled;
+    if (doc.webkitFullscreenEnabled !== undefined) {
+      return !!doc.webkitFullscreenEnabled;
+    }
+    // Neither capability flag exists (e.g. real iPhone Safari, which never
+    // implements the Fullscreen API for arbitrary elements): fall back to
+    // detecting the request methods themselves. Do not default to `true`
+    // here — that would hide the case this branch exists to catch.
+    return !!(
+      doc.documentElement?.requestFullscreen ||
+      (doc.documentElement as WebKitHTMLElement)?.webkitRequestFullscreen
+    );
   });
 
   const handleFullscreenChange = useCallback(() => {

@@ -80,6 +80,8 @@ const SpotlightTourOverlay = dynamic(
 );
 
 import { StudioTerminal } from "./Terminal/StudioTerminal";
+import { SlashPaletteModal } from "./SlashPaletteModal";
+import { SlashCommandItem } from "@/lib/crf/smart-blocks-engine";
 import {
   VisitMatrixEditorSkeleton,
   RuleGraphStudioSkeleton,
@@ -322,6 +324,13 @@ export const CRFStudioContainer: React.FC = () => {
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [isSpotlightTourOpen, setIsSpotlightTourOpen] = useState(false);
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
+  const [isSlashPaletteOpen, setIsSlashPaletteOpen] = useState(false);
+  const [slashTargetSectionId, setSlashTargetSectionId] = useState<
+    string | undefined
+  >();
+  const [slashTargetIndex, setSlashTargetIndex] = useState<
+    number | undefined
+  >();
   const [activeVisitId, setActiveVisitIdState] = useState<string>(() => {
     if (typeof window !== "undefined") {
       const rawVisit = new URLSearchParams(window.location.hash.slice(1)).get(
@@ -546,10 +555,11 @@ export const CRFStudioContainer: React.FC = () => {
         target?.isContentEditable ||
         !!target?.closest?.("[data-keyboard-boundary]");
 
-      // Escape key to close mobile drawers or clear selection. Runs regardless of
+      // Escape key to close mobile drawers, slash palette, or clear selection. Runs regardless of
       // focus so it can still dismiss a drawer while a field inside it is focused.
       if (e.key === "Escape") {
         setIsMobileWidgetDrawerOpen(false);
+        setIsSlashPaletteOpen(false);
         if (selectedFieldId) {
           setSelectedFieldId(null);
         }
@@ -560,6 +570,15 @@ export const CRFStudioContainer: React.FC = () => {
       // Ctrl/Cmd+I are native bold/italic in rich-text fields, and none of the
       // others should hijack keystrokes meant for whatever the author is typing.
       if (isInput) {
+        return;
+      }
+
+      // Slash Command Palette (/)
+      if (e.key === "/" && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        e.preventDefault();
+        setSlashTargetSectionId(undefined);
+        setSlashTargetIndex(undefined);
+        setIsSlashPaletteOpen(true);
         return;
       }
 
@@ -981,6 +1000,96 @@ export const CRFStudioContainer: React.FC = () => {
     setIsMobileWidgetDrawerOpen(false);
   };
 
+  const handleOpenSlashPalette = useCallback(
+    (targetSectionId?: string, targetIndex?: number) => {
+      let resolvedSectionId = targetSectionId;
+      let resolvedIndex = targetIndex;
+
+      if (!resolvedSectionId && selectedFieldId && activeForm) {
+        for (const s of activeForm.sections) {
+          const fIdx = s.fields.findIndex((f) => f.id === selectedFieldId);
+          if (fIdx !== -1) {
+            resolvedSectionId = s.id;
+            if (resolvedIndex === undefined) {
+              resolvedIndex = fIdx + 1;
+            }
+            break;
+          }
+        }
+      }
+
+      if (!resolvedSectionId && activeForm?.sections.length) {
+        resolvedSectionId = activeForm.sections[0].id;
+      }
+
+      setSlashTargetSectionId(resolvedSectionId);
+      setSlashTargetIndex(resolvedIndex);
+      setIsSlashPaletteOpen(true);
+    },
+    [activeForm, selectedFieldId]
+  );
+
+  const handleSelectSlashCommand = (item: SlashCommandItem) => {
+    if (!activeForm) return;
+
+    let targetSecId = slashTargetSectionId;
+    let targetIdx = slashTargetIndex;
+
+    if (!targetSecId && selectedFieldId) {
+      for (const s of activeForm.sections) {
+        const fIdx = s.fields.findIndex((f) => f.id === selectedFieldId);
+        if (fIdx !== -1) {
+          targetSecId = s.id;
+          if (targetIdx === undefined) {
+            targetIdx = fIdx + 1;
+          }
+          break;
+        }
+      }
+    }
+
+    if (!targetSecId && activeForm.sections.length > 0) {
+      targetSecId = activeForm.sections[0].id;
+    }
+
+    if (item.action === "insert_smart_block" && item.smartBlockId) {
+      const res = StudyProtocolEngine.insertSmartBlock(
+        study,
+        activeForm.id,
+        item.smartBlockId,
+        {
+          targetSectionId: targetSecId,
+          targetIndex: targetIdx,
+        }
+      );
+      if (!res.error) {
+        updateStudyWithHistory(res.study);
+        if (res.insertedFields.length > 0) {
+          setSelectedFieldId(res.insertedFields[0].id);
+        }
+        playSuccess();
+      }
+    } else if (item.action === "insert_section") {
+      handleAddSection();
+      playSuccess();
+    } else if (item.action === "insert_field") {
+      const res = StudyProtocolEngine.insertAtomicSlashField(
+        study,
+        activeForm.id,
+        item.id,
+        {
+          targetSectionId: targetSecId,
+          targetIndex: targetIdx,
+        }
+      );
+      if (!res.error && res.insertedField) {
+        updateStudyWithHistory(res.study);
+        setSelectedFieldId(res.insertedField.id);
+        playSuccess();
+      }
+    }
+  };
+
   const handleUpdateField = (fieldId: string, updates: Partial<CRFField>) => {
     if (!activeForm) return;
     const updatedSections = activeForm.sections.map((s) => ({
@@ -1292,6 +1401,7 @@ export const CRFStudioContainer: React.FC = () => {
                       setIsMobileWidgetDrawerOpen(true);
                     }}
                     onDuplicateForm={handleDuplicateForm}
+                    onOpenSlashPalette={handleOpenSlashPalette}
                   />
                 </div>
               )}
@@ -1355,6 +1465,7 @@ export const CRFStudioContainer: React.FC = () => {
                   setLeftTab("palette");
                 }}
                 onDuplicateForm={handleDuplicateForm}
+                onOpenSlashPalette={handleOpenSlashPalette}
               />
             </div>
 
@@ -1817,6 +1928,17 @@ export const CRFStudioContainer: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Keyboard-Accessible Slash Command Palette (#538) */}
+      <SlashPaletteModal
+        isOpen={isSlashPaletteOpen}
+        onClose={() => setIsSlashPaletteOpen(false)}
+        onSelectCommand={handleSelectSlashCommand}
+        targetSectionTitle={
+          activeForm?.sections.find((s) => s.id === slashTargetSectionId)?.title
+        }
+        targetIndex={slashTargetIndex}
+      />
     </div>
   );
 };

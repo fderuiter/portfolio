@@ -223,7 +223,7 @@ describe("FormCanvas & FieldRenderer Component Suite", () => {
   // palette with no section context, so CRFStudioContainer.handleAddField
   // always inserted the picked widget into the form's first section
   // regardless of which section's control the author actually used.
-  it("carries the section id when opening the palette from a populated section's Add Field control (#669)", async () => {
+  it("carries the section id to onOpenPalette from a populated section's insertion control when no slash palette is wired (#669)", async () => {
     const onOpenPalette = vi.fn();
 
     await act(async () => {
@@ -257,6 +257,47 @@ describe("FormCanvas & FieldRenderer Component Suite", () => {
     });
 
     expect(onOpenPalette).toHaveBeenCalledWith("sec_1");
+  });
+
+  it("prefers the slash palette (with section id and end index) over the plain palette when wired, for a populated section's insertion control (#669)", async () => {
+    const onOpenPalette = vi.fn();
+    const onOpenSlashPalette = vi.fn();
+
+    await act(async () => {
+      root.render(
+        <FormCanvas
+          form={mockForm}
+          selectedFieldId={null}
+          viewport="desktop"
+          codelists={mockCodelists}
+          onChangeViewport={vi.fn()}
+          onSelectField={vi.fn()}
+          onUpdateFormMeta={vi.fn()}
+          onAddSection={vi.fn()}
+          onDeleteSection={vi.fn()}
+          onUpdateSectionTitle={vi.fn()}
+          onDuplicateField={vi.fn()}
+          onDeleteField={vi.fn()}
+          onOpenPalette={onOpenPalette}
+          onOpenSlashPalette={onOpenSlashPalette}
+        />
+      );
+    });
+
+    const addFieldBtn = container.querySelector(
+      'button[aria-label="Add field to Subject Measurements"]'
+    ) as HTMLButtonElement;
+    expect(addFieldBtn).not.toBeNull();
+
+    await act(async () => {
+      addFieldBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    // mockForm's "Subject Measurements" section has 2 fields, so a new one
+    // inserted from this control must land at the end (index 2), not always
+    // index 0 or the form's first section.
+    expect(onOpenSlashPalette).toHaveBeenCalledWith("sec_1", 2);
+    expect(onOpenPalette).not.toHaveBeenCalled();
   });
 
   it("carries the section id when opening the palette from an empty section's placeholder, as a keyboard-operable button (#669)", async () => {
