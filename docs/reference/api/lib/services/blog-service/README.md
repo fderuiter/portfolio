@@ -10,6 +10,14 @@
 
 - [BlogPostService](classes/BlogPostService.md)
 
+## Functions
+
+- [compareBlogPostsNewestFirst](functions/compareBlogPostsNewestFirst.md)
+- [isValidBlogPost](functions/isValidBlogPost.md)
+- [isValidPillar](functions/isValidPillar.md)
+- [parseBlogPostDates](functions/parseBlogPostDates.md)
+- [parseValidDate](functions/parseValidDate.md)
+
 ## References
 
 ### BlogPostData

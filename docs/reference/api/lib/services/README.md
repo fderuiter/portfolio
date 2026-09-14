@@ -98,6 +98,12 @@ Re-exports [CaseStudySubmissionInput](case-study-service/interfaces/CaseStudySub
 
 ***
 
+### compareBlogPostsNewestFirst
+
+Re-exports [compareBlogPostsNewestFirst](blog-service/functions/compareBlogPostsNewestFirst.md)
+
+***
+
 ### ContactDispatchResult
 
 Re-exports [ContactDispatchResult](email-service/interfaces/ContactDispatchResult.md)
@@ -350,6 +356,18 @@ Re-exports [InteractHazardSpec](duck/interact-hazard/spec/interfaces/InteractHaz
 
 ***
 
+### isValidBlogPost
+
+Re-exports [isValidBlogPost](blog-service/functions/isValidBlogPost.md)
+
+***
+
+### isValidPillar
+
+Re-exports [isValidPillar](blog-service/functions/isValidPillar.md)
+
+***
+
 ### LintFormErrorCode
 
 Re-exports [LintFormErrorCode](crf-evaluator/lint-form/spec/variables/LintFormErrorCode.md)
@@ -431,6 +449,18 @@ Re-exports [LocalCacheEntry](telemetry-service/interfaces/LocalCacheEntry.md)
 ### OutboundEmailStatus
 
 Re-exports [OutboundEmailStatus](../db/variables/OutboundEmailStatus.md)
+
+***
+
+### parseBlogPostDates
+
+Re-exports [parseBlogPostDates](blog-service/functions/parseBlogPostDates.md)
+
+***
+
+### parseValidDate
+
+Re-exports [parseValidDate](blog-service/functions/parseValidDate.md)
 
 ***
 

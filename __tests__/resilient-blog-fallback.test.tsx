@@ -7,7 +7,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 import { prisma } from "@/lib/db";
 import { redis, isRedisConfigured } from "@/lib/redis";
-import { revalidateTag } from "next/cache";
+import { revalidateTag, revalidatePath } from "next/cache";
 import { BlogPostService } from "@/lib/services/blog-service";
 import BlogIndexPage from "@/app/blog/page";
 import BlogPostPage, {
@@ -36,6 +36,7 @@ vi.mock("@/lib/redis", () => ({
 
 vi.mock("next/cache", () => ({
   revalidateTag: vi.fn(),
+  revalidatePath: vi.fn(),
 }));
 
 vi.mock("@/lib/fallback-blog-posts", () => ({
@@ -220,6 +221,115 @@ describe("Resilient Hybrid Blog Post Fallback Suite", () => {
       expect(result).toBeNull();
       expect(prisma.blogPost.findUnique).toHaveBeenCalled();
     });
+
+    it("rejects post with invalid Date object from Redis cache and queries DB", async () => {
+      vi.mocked(isRedisConfigured).mockReturnValue(true);
+      const cachedInvalidDate = {
+        id: "cached-invalid-date",
+        slug: "invalid-date-post",
+        title: "Invalid Date Post",
+        dek: "Has NaN Date",
+        body: "<p>Body</p>",
+        pillar: "field-notes",
+        tags: "date",
+        published: true,
+        reading_time_minutes: 2,
+        hero_image_url: null,
+        created_at: new Date(NaN),
+        updated_at: new Date(NaN),
+      };
+
+      vi.mocked(redis.get).mockResolvedValueOnce(cachedInvalidDate as never);
+      vi.mocked(prisma.blogPost.findUnique).mockResolvedValueOnce(null);
+
+      const result =
+        await BlogPostService.getBlogPostBySlug("invalid-date-post");
+      expect(result).toBeNull();
+      expect(prisma.blogPost.findUnique).toHaveBeenCalledWith({
+        where: { slug: "invalid-date-post" },
+      });
+    });
+
+    it("rejects post with unparsable date string from Redis cache and queries DB", async () => {
+      vi.mocked(isRedisConfigured).mockReturnValue(true);
+      const cachedUnparsable = {
+        id: "cached-unparsable",
+        slug: "unparsable-post",
+        title: "Unparsable Post",
+        dek: "Has invalid date string",
+        body: "<p>Body</p>",
+        pillar: "field-notes",
+        tags: "date",
+        published: true,
+        reading_time_minutes: 2,
+        hero_image_url: null,
+        created_at: "not-a-valid-date-timestamp",
+        updated_at: "2026-99-99T99:99:99.999Z",
+      };
+
+      vi.mocked(redis.get).mockResolvedValueOnce(cachedUnparsable as never);
+      vi.mocked(prisma.blogPost.findUnique).mockResolvedValueOnce(null);
+
+      const result = await BlogPostService.getBlogPostBySlug("unparsable-post");
+      expect(result).toBeNull();
+      expect(prisma.blogPost.findUnique).toHaveBeenCalledWith({
+        where: { slug: "unparsable-post" },
+      });
+    });
+
+    it("rejects post with out-of-range timestamp from Redis cache and queries DB", async () => {
+      vi.mocked(isRedisConfigured).mockReturnValue(true);
+      const cachedOutOfRange = {
+        id: "cached-oor",
+        slug: "oor-post",
+        title: "Out of Range Post",
+        dek: "Has out of range timestamp",
+        body: "<p>Body</p>",
+        pillar: "field-notes",
+        tags: "date",
+        published: true,
+        reading_time_minutes: 2,
+        hero_image_url: null,
+        created_at: 1e30,
+        updated_at: -1e30,
+      };
+
+      vi.mocked(redis.get).mockResolvedValueOnce(cachedOutOfRange as never);
+      vi.mocked(prisma.blogPost.findUnique).mockResolvedValueOnce(null);
+
+      const result = await BlogPostService.getBlogPostBySlug("oor-post");
+      expect(result).toBeNull();
+      expect(prisma.blogPost.findUnique).toHaveBeenCalledWith({
+        where: { slug: "oor-post" },
+      });
+    });
+
+    it("rejects post with unknown pillar from Redis cache and queries DB", async () => {
+      vi.mocked(isRedisConfigured).mockReturnValue(true);
+      const cachedUnknownPillar = {
+        id: "cached-bad-pillar",
+        slug: "bad-pillar-post",
+        title: "Bad Pillar Post",
+        dek: "Has non-whitelisted pillar",
+        body: "<p>Body</p>",
+        pillar: "growth-hacking-crypto",
+        tags: "marketing",
+        published: true,
+        reading_time_minutes: 2,
+        hero_image_url: null,
+        created_at: "2026-03-01T00:00:00.000Z",
+        updated_at: "2026-03-01T00:00:00.000Z",
+      };
+
+      vi.mocked(redis.get).mockResolvedValueOnce(cachedUnknownPillar as never);
+      vi.mocked(prisma.blogPost.findUnique).mockResolvedValueOnce(null);
+
+      const result = await BlogPostService.getBlogPostBySlug("bad-pillar-post");
+      expect(result).toBeNull();
+      expect(prisma.blogPost.findUnique).toHaveBeenCalledWith({
+        where: { slug: "bad-pillar-post" },
+      });
+    });
   });
 
   describe("BlogPostService.getAllPublishedBlogPosts", () => {
@@ -349,6 +459,89 @@ describe("Resilient Hybrid Blog Post Fallback Suite", () => {
       expect(prisma.blogPost.findMany).not.toHaveBeenCalled();
     });
 
+    it("sorts cached array newest-first even if Redis returns an unsorted list", async () => {
+      vi.mocked(isRedisConfigured).mockReturnValue(true);
+      const unsortedCached = [
+        {
+          id: "cached-old",
+          slug: "cached-older-post",
+          title: "Older Post",
+          dek: "Older",
+          body: "<p>Old</p>",
+          pillar: "field-notes",
+          tags: "old",
+          published: true,
+          reading_time_minutes: 2,
+          hero_image_url: null,
+          created_at: "2026-01-01T00:00:00.000Z",
+          updated_at: "2026-01-01T00:00:00.000Z",
+        },
+        {
+          id: "cached-new",
+          slug: "cached-newer-post",
+          title: "Newer Post",
+          dek: "Newer",
+          body: "<p>New</p>",
+          pillar: "browser-graphics-engineering",
+          tags: "new",
+          published: true,
+          reading_time_minutes: 3,
+          hero_image_url: null,
+          created_at: "2026-03-01T00:00:00.000Z",
+          updated_at: "2026-03-01T00:00:00.000Z",
+        },
+      ];
+
+      vi.mocked(redis.get).mockResolvedValueOnce(unsortedCached as never);
+
+      const results = await BlogPostService.getAllPublishedBlogPosts();
+      expect(results.length).toBe(2);
+      expect(results[0].slug).toBe("cached-newer-post");
+      expect(results[1].slug).toBe("cached-older-post");
+      expect(prisma.blogPost.findMany).not.toHaveBeenCalled();
+    });
+
+    it("falls back to DB when cached array contains only malformed or invalid entries", async () => {
+      vi.mocked(isRedisConfigured).mockReturnValue(true);
+      const allMalformed = [
+        {
+          id: "bad-1",
+          slug: "bad-1",
+          title: "Bad Pillar",
+          dek: "Invalid",
+          body: "<p>Bad</p>",
+          pillar: "unknown-pillar",
+          tags: "bad",
+          published: true,
+          reading_time_minutes: 1,
+          hero_image_url: null,
+          created_at: "2026-03-01T00:00:00.000Z",
+          updated_at: "2026-03-01T00:00:00.000Z",
+        },
+        {
+          id: "bad-2",
+          slug: "bad-2",
+          title: "Bad Date",
+          dek: "Invalid",
+          body: "<p>Bad</p>",
+          pillar: "field-notes",
+          tags: "bad",
+          published: true,
+          reading_time_minutes: 1,
+          hero_image_url: null,
+          created_at: "invalid-date",
+          updated_at: 1e30,
+        },
+      ];
+
+      vi.mocked(redis.get).mockResolvedValueOnce(allMalformed as never);
+      vi.mocked(prisma.blogPost.findMany).mockResolvedValueOnce([]);
+
+      const results = await BlogPostService.getAllPublishedBlogPosts();
+      expect(prisma.blogPost.findMany).toHaveBeenCalled();
+      expect(results.some((p) => p.slug === "fallback-dispatch")).toBe(true);
+    });
+
     it("writes empty array to cache when database has no published posts and fallbacks are empty", async () => {
       vi.mocked(isRedisConfigured).mockReturnValue(true);
       vi.mocked(redis.get).mockResolvedValueOnce(null as never);
@@ -420,7 +613,7 @@ describe("Resilient Hybrid Blog Post Fallback Suite", () => {
       expect(results).toBeDefined();
     });
 
-    it("evictBlogPostCache batches key deletions and revalidates Next.js ISR tags", async () => {
+    it("evictBlogPostCache batches key deletions, revalidates paths, and revalidates Next.js ISR tags", async () => {
       vi.mocked(isRedisConfigured).mockReturnValue(true);
       vi.mocked(redis.del).mockResolvedValueOnce(2 as never);
 
@@ -433,6 +626,12 @@ describe("Resilient Hybrid Blog Post Fallback Suite", () => {
         "test:blog:slug:zero-cls-canvas-text",
         "test:blog:all_published"
       );
+      expect(revalidatePath).toHaveBeenCalledWith(
+        "/blog/zero-cls-canvas-text",
+        undefined
+      );
+      expect(revalidatePath).toHaveBeenCalledWith("/blog", undefined);
+      expect(revalidatePath).toHaveBeenCalledWith("/sitemap.xml", undefined);
       expect(revalidateTag).toHaveBeenCalledWith(
         "blog-post-zero-cls-canvas-text",
         "max"
@@ -440,7 +639,7 @@ describe("Resilient Hybrid Blog Post Fallback Suite", () => {
       expect(revalidateTag).toHaveBeenCalledWith("blog-posts", "max");
     });
 
-    it("evictBlogPostCache revalidates ISR tags even when Redis is not configured", async () => {
+    it("evictBlogPostCache revalidates paths and ISR tags even when Redis is not configured", async () => {
       vi.mocked(isRedisConfigured).mockReturnValue(false);
 
       const evicted = await BlogPostService.evictBlogPostCache(
@@ -449,6 +648,12 @@ describe("Resilient Hybrid Blog Post Fallback Suite", () => {
 
       expect(evicted).toBe(false);
       expect(redis.del).not.toHaveBeenCalled();
+      expect(revalidatePath).toHaveBeenCalledWith(
+        "/blog/zero-cls-canvas-text",
+        undefined
+      );
+      expect(revalidatePath).toHaveBeenCalledWith("/blog", undefined);
+      expect(revalidatePath).toHaveBeenCalledWith("/sitemap.xml", undefined);
       expect(revalidateTag).toHaveBeenCalledWith(
         "blog-post-zero-cls-canvas-text",
         "max"
@@ -456,7 +661,7 @@ describe("Resilient Hybrid Blog Post Fallback Suite", () => {
       expect(revalidateTag).toHaveBeenCalledWith("blog-posts", "max");
     });
 
-    it("evictBlogPostCache revalidates ISR tags even when Redis deletion fails", async () => {
+    it("evictBlogPostCache revalidates paths and ISR tags even when Redis deletion fails", async () => {
       vi.mocked(isRedisConfigured).mockReturnValue(true);
       vi.mocked(redis.del).mockRejectedValueOnce(
         new Error("Redis eviction timeout")
@@ -467,6 +672,12 @@ describe("Resilient Hybrid Blog Post Fallback Suite", () => {
       );
 
       expect(evicted).toBe(false);
+      expect(revalidatePath).toHaveBeenCalledWith(
+        "/blog/zero-cls-canvas-text",
+        undefined
+      );
+      expect(revalidatePath).toHaveBeenCalledWith("/blog", undefined);
+      expect(revalidatePath).toHaveBeenCalledWith("/sitemap.xml", undefined);
       expect(revalidateTag).toHaveBeenCalledWith(
         "blog-post-zero-cls-canvas-text",
         "max"
@@ -499,6 +710,33 @@ describe("Resilient Hybrid Blog Post Fallback Suite", () => {
 
       const meta = await generateMetadata({
         params: Promise.resolve({ slug: "invalid-random-slug" }),
+      });
+
+      expect(meta.title).toBe("Dispatch Not Found");
+    });
+
+    it("generateMetadata safely handles cached post with invalid dates and returns Dispatch Not Found without throwing RangeError", async () => {
+      vi.mocked(isRedisConfigured).mockReturnValue(true);
+      const cachedInvalidDate = {
+        id: "bad-meta",
+        slug: "bad-meta-slug",
+        title: "Bad Meta Post",
+        dek: "Dek",
+        body: "<p>Body</p>",
+        pillar: "field-notes",
+        tags: "meta",
+        published: true,
+        reading_time_minutes: 1,
+        hero_image_url: null,
+        created_at: "not-a-valid-date",
+        updated_at: 1e30,
+      };
+
+      vi.mocked(redis.get).mockResolvedValueOnce(cachedInvalidDate as never);
+      vi.mocked(prisma.blogPost.findUnique).mockResolvedValueOnce(null);
+
+      const meta = await generateMetadata({
+        params: Promise.resolve({ slug: "bad-meta-slug" }),
       });
 
       expect(meta.title).toBe("Dispatch Not Found");
