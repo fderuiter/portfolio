@@ -9,7 +9,7 @@
 > **getBlogPostBySlug**(`slug`): `Promise`\<[`BlogPost`](../types/interfaces/BlogPost.md) \| `null`\>
 
 Returns one published post by slug, or `null` if it doesn't exist or
-isn't published. Stubbed until #760 (M3) — see `getAllPublishedBlogPosts`.
+isn't published.
 
 ## Parameters
 

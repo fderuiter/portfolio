@@ -29,6 +29,21 @@ model CaseStudy {
   updated_at              DateTime @updatedAt
 }
 
+model BlogPost {
+  id                   String   @id @default(cuid())
+  slug                 String   @unique
+  title                String
+  dek                  String   // Short standfirst/summary shown on the /blog index grid
+  body                 String   // Sanitized HTML — same allowlist as CaseStudy.architectural_narrative
+  pillar               String   // One of ADR 0041's content-pillar taxonomy
+  tags                 String   // Comma-separated string, same convention as CaseStudy.tags
+  published            Boolean  @default(false)
+  reading_time_minutes Int?
+  hero_image_url       String?
+  created_at           DateTime @default(now())
+  updated_at           DateTime @updatedAt
+}
+
 model TelemetryEvent {
   id          String   @id @default(cuid())
   projectSlug String
