@@ -302,6 +302,16 @@ Formal inference rules used to derive logical steps from valid premises:
 - **FluentUI Case Study Easter Egg**: A scoped Office Fluent Design System visual override active on `/case-studies/crf-xl` evoking classic Microsoft Excel taskpane aesthetics without compromising global dark-mode layout integrity.
 - **Tracer-Bullet Case Study Rollout**: The phased verification protocol establishing generalized UI contracts and multi-source telemetry first before sequentially integrating, testing, and closing individual case study issues.
 
+## Blog & Engineering Dispatch Editorial Architecture
+
+### Scope & Governance
+
+- **`BlogPost`**: The Prisma-backed content type (governed by ADR 0041) representing a single long-form blog post — cross-project, retrospective, or narrative writing that carries no requirement to be anchored to a shippable artifact. Authored via `/admin` through the same content pipeline and sanitization boundary as `CaseStudy`, not as in-repo MDX.
+- **Blog/Case-Study Scope Boundary**: The governing distinction (ADR 0041 §2) that a piece requiring a `github_url` or primary artifact to make sense is a `CaseStudy`, while a piece that would still make sense with zero code attached is a `BlogPost`. `BlogPost` never adopts the mandatory 5-section High-Assurance Systems Case Study Standard.
+- **Systems Dispatch Archive**: The blog's role as the permanent, indexable, RSS-syndicated home for the previously-homeless **Systems Dispatch Newsletter** (`lib/services/email-service.ts`), giving periodic technical retrospectives a permalink instead of only an outbound email.
+- **Content Pillar Taxonomy**: The closed six-value enum (`BlogPost.pillar`) organizing all posts — Clinical Data Engineering & CDISC Standards, Formal Verification & AST/Compiler Theory, Accessibility & Cognitive-Reading Engineering, Browser Graphics/Canvas & Game Engineering, Agent-First DX & Tooling, and Field Notes: Make Things Better — each mapped to a tier of the Target Search Intent Hierarchy.
+- **`BlogPostReaction`**: The reader-engagement schema mirroring `CaseStudyReaction` exactly (keyed by `blogPostSlug` instead of `caseStudySlug`), providing the blog's entire reader-response surface — deliberately excluding any discussion-forum-style comment system.
+
 ## Search Engine Optimization & Discovery Architecture
 
 ### Search Strategy & Intent Hierarchy

@@ -17,6 +17,11 @@ export const PUBLIC_ROUTE_REGISTRY = [
     name: "Case Studies Index",
     category: "top-level",
   },
+  {
+    path: "/blog",
+    name: "Blog / Engineering Dispatches",
+    category: "top-level",
+  },
   { path: "/arcade", name: "Arcade Hub", category: "top-level" },
   { path: "/proof", name: "Formal Proof Studio", category: "tool" },
   { path: "/neuro", name: "Neuro 3D Simulator", category: "tool" },

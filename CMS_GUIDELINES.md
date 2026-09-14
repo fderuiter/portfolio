@@ -83,11 +83,60 @@ model CaseStudyReaction {
    - The `connectionHash` field stores a SHA-256 hash computed from client connection context (`IP:User-Agent`).
    - Prevents duplicate feedback submissions within a 1-hour sliding window (returning HTTP 429) and identifies active user reactions while guaranteeing zero raw IP address or PII retention.
 
+## Blog Content Schema (`BlogPost`)
+
+Per ADR 0041, blog posts are authored as Prisma-backed rows through `/admin` — the same content pipeline as `CaseStudy`, not a separate in-repo MDX system. The primary schema:
+
+```prisma
+model BlogPost {
+  id                   String   @id @default(cuid())
+  slug                 String   @unique
+  title                String
+  dek                  String   // short standfirst/summary shown on the /blog index grid
+  body                 String   // sanitized HTML — same allowlist as CaseStudy.architectural_narrative
+  pillar               String   // one of ADR 0041's content-pillar taxonomy
+  tags                 String   // comma-separated, same convention as CaseStudy.tags
+  published            Boolean  @default(false)
+  reading_time_minutes Int?
+  hero_image_url       String?
+  created_at           DateTime @default(now())
+  updated_at           DateTime @updatedAt
+}
+```
+
+### Schema Design Rules for `BlogPost`
+
+1. **No artifact-pairing requirement**: unlike `CaseStudy`, `BlogPost` has no `github_url` / `external_platform_url` field. A post that needs one to make sense belongs in `CaseStudy` instead (ADR 0041 §2).
+2. **`pillar` is a closed taxonomy, not free text**: values come from ADR 0041's six content pillars (Clinical Data Engineering & CDISC Standards, Formal Verification & AST/Compiler Theory, Accessibility & Cognitive-Reading Engineering, Browser Graphics/Canvas & Game Engineering, Agent-First DX & Tooling, Field Notes: Make Things Better). Validate against this enum at the API boundary rather than accepting arbitrary strings.
+3. **`published` gates visibility everywhere**: identical semantics to `CaseStudy.published` — unpublished rows must never appear in `/blog`, `/blog/[slug]`, the sitemap, or the RSS feed.
+4. **`reading_time_minutes` is computed, not authored**: derive it from `body` word count at save time rather than trusting manual entry.
+
+### Blog Reaction Schema (`BlogPostReaction`)
+
+Reader engagement reuses the `CaseStudyReaction` shape exactly, keyed by `blogPostSlug` instead of `caseStudySlug`:
+
+```prisma
+model BlogPostReaction {
+  id             String   @id @default(cuid())
+  blogPostSlug   String
+  reactionType   String
+  connectionHash String
+  createdAt      DateTime @default(now())
+
+  @@index([blogPostSlug])
+  @@index([blogPostSlug, reactionType])
+  @@index([connectionHash])
+}
+```
+
+Per ADR 0041, the blog explicitly does not have a discussion-forum-style comment system — reactions (plus the existing rate-limited `/contact` path for anything more substantive) are the full extent of reader response.
+
 ## Prototyping Workflows
 
 During development, we utilize a serverless Neon PostgreSQL datastore. This provides low-latency cloud data persistence.
 
 **To create a tracked schema change on a disposable development database, run:**
+
 ```bash
 npx prisma migrate dev --name <descriptive_name>
 ```
@@ -104,10 +153,12 @@ for the production runbook and CI guarantees.
 To ensure the portfolio displays narratives with high aesthetic quality and robust security, editors contributing to the Prisma dynamic `CaseStudy` fields must conform to strict content formatting guidelines.
 
 ### 1. `editorial_content` Field
+
 - **Purpose:** Brief introductory summaries or thesis highlights shown on primary feed grids.
 - **Formatting:** Markdown strings are permitted (e.g., `**bold**`, `*italic*`, `` `inline code` ``). These tags are automatically stripped during SEO parsing but are parsed inside UI showcases via `@chenglou/pretext`.
 
 ### 2. `architectural_narrative` Field
+
 - **Purpose:** Long-form technical explanation layout blocks.
 - **Formatting:** Safe, pre-formatted HTML elements are permitted. To prevent Stored XSS vectors and maintain styling uniformity, the rendering pipeline sanitizes inputs against a strict element allowlist:
   - **Permitted Headers:** `<h2>`, `<h3>`, `<h4>` (e.g., `<h3>The Challenge</h3>`)
@@ -116,3 +167,7 @@ To ensure the portfolio displays narratives with high aesthetic quality and robu
   - **Permitted Inline Elements:** `<strong>`, `<em>`, `<a>`, `<span>`, `<abbr>` (with optional `class`, `href`, `target`, `rel`, `data-term`, `data-definition`, `data-key`, `role`, `tabindex`, `aria-label`, `aria-describedby`, `aria-hidden`, `aria-expanded`, and `aria-checked` attributes)
 - **Forbidden Elements:** Prohibits `<script>`, `<iframe>`, `<img onerror="...">`, or custom inline inline-styles to maintain strict data integrity boundaries.
 
+### 3. `BlogPost.body` Field
+
+- **Purpose:** Long-form post prose.
+- **Formatting:** Sanitized against the **exact same allowlist** as `architectural_narrative` above — no second sanitization boundary is introduced for blog content (ADR 0041 §4). The same forbidden-elements list applies.
