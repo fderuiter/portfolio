@@ -2,8 +2,183 @@ import { prisma } from "@/lib/db";
 import { env } from "@/lib/env";
 import { FALLBACK_BLOG_POSTS, BlogPostData } from "@/lib/fallback-blog-posts";
 import { redis, getScopedRedisKey, isRedisConfigured } from "@/lib/redis";
+import { CONTENT_PILLARS, type ContentPillar } from "@/lib/blog/types";
 
 export type { BlogPostData };
+
+/**
+ * Validates whether a pillar identifier matches the closed ContentPillar taxonomy.
+ */
+export function isValidPillar(pillar: unknown): pillar is ContentPillar {
+  return (
+    typeof pillar === "string" &&
+    (CONTENT_PILLARS as readonly string[]).includes(pillar)
+  );
+}
+
+/**
+ * Safely parses and validates a date value into a concrete Date instance.
+ * Rejects NaN dates, unparsable strings, and out-of-range timestamps.
+ */
+export function parseValidDate(value: unknown): Date | null {
+  if (value === null || value === undefined) return null;
+
+  if (
+    value instanceof Date ||
+    Object.prototype.toString.call(value) === "[object Date]"
+  ) {
+    const d = value as Date;
+    const time = d.getTime();
+    if (Number.isNaN(time)) return null;
+    const year = d.getUTCFullYear();
+    if (year < 1970 || year > 9999) return null;
+    try {
+      d.toISOString();
+      return new Date(time);
+    } catch {
+      return null;
+    }
+  }
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+    const d = new Date(trimmed);
+    const time = d.getTime();
+    if (Number.isNaN(time)) return null;
+    const year = d.getUTCFullYear();
+    if (year < 1970 || year > 9999) return null;
+    try {
+      d.toISOString();
+      return new Date(time);
+    } catch {
+      return null;
+    }
+  }
+
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) return null;
+    if (value < 0 || value > 253402300799999) return null;
+    const d = new Date(value);
+    const time = d.getTime();
+    if (Number.isNaN(time)) return null;
+    const year = d.getUTCFullYear();
+    if (year < 1970 || year > 9999) return null;
+    try {
+      d.toISOString();
+      return new Date(time);
+    } catch {
+      return null;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Asserts whether an unknown item satisfies the BlogPostData contract with
+ * validated dates, non-empty identity fields, and closed pillar taxonomy.
+ */
+export function isValidBlogPost(item: unknown): item is BlogPostData {
+  if (!item || typeof item !== "object") return false;
+  const p = item as Record<string, unknown>;
+  if (
+    typeof p.id !== "string" ||
+    !p.id.trim() ||
+    typeof p.slug !== "string" ||
+    !p.slug.trim() ||
+    typeof p.title !== "string" ||
+    !p.title.trim() ||
+    typeof p.dek !== "string" ||
+    typeof p.body !== "string" ||
+    !isValidPillar(p.pillar) ||
+    typeof p.tags !== "string" ||
+    p.published !== true
+  ) {
+    return false;
+  }
+
+  if (
+    p.reading_time_minutes !== null &&
+    p.reading_time_minutes !== undefined &&
+    (typeof p.reading_time_minutes !== "number" ||
+      !Number.isFinite(p.reading_time_minutes) ||
+      p.reading_time_minutes < 0)
+  ) {
+    return false;
+  }
+
+  if (
+    p.hero_image_url !== null &&
+    p.hero_image_url !== undefined &&
+    typeof p.hero_image_url !== "string"
+  ) {
+    return false;
+  }
+
+  const createdAt = parseValidDate(p.created_at);
+  const updatedAt = parseValidDate(p.updated_at);
+  if (!createdAt || !updatedAt) {
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Coerces created_at and updated_at on a BlogPostData record into validated Date instances.
+ * Throws a TypeError if either date is invalid.
+ */
+export function parseBlogPostDates(post: BlogPostData): BlogPostData {
+  const createdAt = parseValidDate(post.created_at);
+  const updatedAt = parseValidDate(post.updated_at);
+  if (!createdAt || !updatedAt) {
+    throw new TypeError(
+      `parseBlogPostDates: Invalid date contract for blog post "${post?.slug ?? "unknown"}"`
+    );
+  }
+  return {
+    ...post,
+    created_at: createdAt,
+    updated_at: updatedAt,
+  };
+}
+
+/**
+ * Deterministic newest-first sort comparator for blog post items.
+ * Uses created_at descending with slug ascending as a tie-breaker.
+ * Handles invalid or missing dates safely without returning NaN.
+ */
+export function compareBlogPostsNewestFirst<
+  T extends { created_at: Date; slug: string },
+>(a: T, b: T): number {
+  const timeA =
+    a.created_at instanceof Date
+      ? a.created_at.getTime()
+      : new Date(a.created_at).getTime();
+  const timeB =
+    b.created_at instanceof Date
+      ? b.created_at.getTime()
+      : new Date(b.created_at).getTime();
+
+  const validA = !Number.isNaN(timeA);
+  const validB = !Number.isNaN(timeB);
+
+  if (validA && validB) {
+    const timeDiff = timeB - timeA;
+    if (timeDiff !== 0) {
+      return timeDiff;
+    }
+  } else if (validA && !validB) {
+    return -1;
+  } else if (!validA && validB) {
+    return 1;
+  }
+
+  const slugA = typeof a.slug === "string" ? a.slug : "";
+  const slugB = typeof b.slug === "string" ? b.slug : "";
+  return slugA.localeCompare(slugB);
+}
 
 /**
  * Executes a promise with an upper timeout bound, always clearing the underlying
@@ -30,44 +205,39 @@ async function withTimeout<T>(
   }
 }
 
+async function safeRevalidatePath(
+  path: string,
+  type?: "layout" | "page"
+): Promise<void> {
+  try {
+    const { revalidatePath } = await import("next/cache");
+    if (typeof revalidatePath === "function") {
+      revalidatePath(path, type);
+    }
+  } catch (err) {
+    if (env.VERCEL_ENV === "production") {
+      console.warn(
+        `BlogPostService.safeRevalidatePath: Path revalidation failed for "${path}":`,
+        err
+      );
+    }
+  }
+}
+
 async function safeRevalidateTag(tag: string): Promise<void> {
   try {
     const { revalidateTag } = await import("next/cache");
     if (typeof revalidateTag === "function") {
       revalidateTag(tag, "max");
     }
-  } catch {
-    // Tolerated outside of Next.js server runtime (e.g. unit tests)
+  } catch (err) {
+    if (env.VERCEL_ENV === "production") {
+      console.warn(
+        `BlogPostService.safeRevalidateTag: Tag revalidation failed for "${tag}":`,
+        err
+      );
+    }
   }
-}
-
-function isValidBlogPost(item: unknown): item is BlogPostData {
-  if (!item || typeof item !== "object") return false;
-  const p = item as Record<string, unknown>;
-  return (
-    typeof p.id === "string" &&
-    typeof p.slug === "string" &&
-    typeof p.title === "string" &&
-    typeof p.dek === "string" &&
-    typeof p.body === "string" &&
-    typeof p.pillar === "string" &&
-    typeof p.tags === "string" &&
-    p.published === true &&
-    (p.created_at instanceof Date ||
-      typeof p.created_at === "string" ||
-      typeof p.created_at === "number") &&
-    (p.updated_at instanceof Date ||
-      typeof p.updated_at === "string" ||
-      typeof p.updated_at === "number")
-  );
-}
-
-function parseBlogPostDates(post: BlogPostData): BlogPostData {
-  return {
-    ...post,
-    created_at: new Date(post.created_at),
-    updated_at: new Date(post.updated_at),
-  };
 }
 
 export class BlogPostService {
@@ -98,7 +268,13 @@ export class BlogPostService {
           if (cached.length === 0) {
             return [];
           }
-          return cached.filter(isValidBlogPost).map(parseBlogPostDates);
+          const valid = cached.filter(isValidBlogPost).map(parseBlogPostDates);
+          if (valid.length > 0) {
+            valid.sort(compareBlogPostsNewestFirst);
+            return valid;
+          }
+          // If cached had entries but NONE were valid, the cached array is malformed.
+          // Fall through to DB query to heal and serve fresh data.
         }
       }
     } catch {
@@ -116,7 +292,7 @@ export class BlogPostService {
       for (const r of records) {
         dbSlugs.add(r.slug);
         if (r.published) {
-          dbPosts.push({
+          const rawItem = {
             id: r.id,
             slug: r.slug,
             title: r.title,
@@ -129,7 +305,10 @@ export class BlogPostService {
             hero_image_url: r.hero_image_url,
             created_at: new Date(r.created_at),
             updated_at: new Date(r.updated_at),
-          });
+          };
+          if (isValidBlogPost(rawItem)) {
+            dbPosts.push(parseBlogPostDates(rawItem));
+          }
         }
       }
     } catch (err) {
@@ -139,27 +318,27 @@ export class BlogPostService {
           err
         );
       }
-      return FALLBACK_BLOG_POSTS.filter((p) => p.published)
+      return FALLBACK_BLOG_POSTS.filter(
+        (p) => p.published && isValidBlogPost(p)
+      )
         .map(parseBlogPostDates)
-        .sort(
-          (a, b) =>
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
+        .sort(compareBlogPostsNewestFirst);
     }
 
     const merged: BlogPostData[] = [...dbPosts];
 
     for (const fallback of FALLBACK_BLOG_POSTS) {
-      if (fallback.published && !dbSlugs.has(fallback.slug)) {
+      if (
+        fallback.published &&
+        !dbSlugs.has(fallback.slug) &&
+        isValidBlogPost(fallback)
+      ) {
         merged.push(parseBlogPostDates(fallback));
         dbSlugs.add(fallback.slug);
       }
     }
 
-    merged.sort(
-      (a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
+    merged.sort(compareBlogPostsNewestFirst);
 
     if (isRedisConfigured()) {
       try {
@@ -185,7 +364,12 @@ export class BlogPostService {
    * - If a record exists in DB with `published === false`, returns `null` (draft precedence).
    */
   static async getBlogPostBySlug(slug: string): Promise<BlogPostData | null> {
-    const cacheKey = getScopedRedisKey(`blog:slug:${slug}`);
+    const trimmedSlug = typeof slug === "string" ? slug.trim() : "";
+    if (!trimmedSlug) {
+      return null;
+    }
+
+    const cacheKey = getScopedRedisKey(`blog:slug:${trimmedSlug}`);
 
     try {
       if (isRedisConfigured()) {
@@ -197,7 +381,7 @@ export class BlogPostService {
 
         if (
           isValidBlogPost(cached) &&
-          cached.slug === slug &&
+          cached.slug === trimmedSlug &&
           cached.published === true
         ) {
           return parseBlogPostDates(cached);
@@ -206,7 +390,7 @@ export class BlogPostService {
     } catch (cacheErr) {
       if (env.VERCEL_ENV === "production") {
         console.warn(
-          `BlogPostService.getBlogPostBySlug: Redis cache read failed for "${slug}", falling back:`,
+          `BlogPostService.getBlogPostBySlug: Redis cache read failed for "${trimmedSlug}", falling back:`,
           cacheErr
         );
       }
@@ -216,11 +400,13 @@ export class BlogPostService {
     let dbResult: BlogPostData | null = null;
 
     try {
-      const r = await prisma.blogPost.findUnique({ where: { slug } });
+      const r = await prisma.blogPost.findUnique({
+        where: { slug: trimmedSlug },
+      });
       if (r) {
         dbRecordFound = true;
         if (r.published) {
-          dbResult = {
+          const rawItem = {
             id: r.id,
             slug: r.slug,
             title: r.title,
@@ -234,17 +420,21 @@ export class BlogPostService {
             created_at: new Date(r.created_at),
             updated_at: new Date(r.updated_at),
           };
+          if (isValidBlogPost(rawItem)) {
+            dbResult = parseBlogPostDates(rawItem);
+          }
         }
       }
     } catch (err) {
       if (env.VERCEL_ENV === "production") {
         console.warn(
-          `BlogPostService.getBlogPostBySlug: DB query failed for slug "${slug}", falling back:`,
+          `BlogPostService.getBlogPostBySlug: DB query failed for slug "${trimmedSlug}", falling back:`,
           err
         );
       }
       const fallback = FALLBACK_BLOG_POSTS.find(
-        (p) => p.slug === slug && p.published === true
+        (p) =>
+          p.slug === trimmedSlug && p.published === true && isValidBlogPost(p)
       );
       return fallback ? parseBlogPostDates(fallback) : null;
     }
@@ -268,7 +458,8 @@ export class BlogPostService {
     }
 
     const fallback = FALLBACK_BLOG_POSTS.find(
-      (p) => p.slug === slug && p.published === true
+      (p) =>
+        p.slug === trimmedSlug && p.published === true && isValidBlogPost(p)
     );
     const finalResult = fallback ? parseBlogPostDates(fallback) : null;
 
@@ -289,11 +480,23 @@ export class BlogPostService {
 
   /**
    * Explicitly evicts a blog post from the Upstash Redis read-through cache
-   * and dispatches on-demand Next.js ISR tag revalidations. Called by the
-   * `/admin` publish flow (#761 / M4).
+   * and dispatches on-demand Next.js ISR path revalidations for rendered routes
+   * (`/blog`, `/blog/[slug]`) and associated cache tags.
+   *
+   * Note: Integration with the `/admin` publishing flow is pending (#761);
+   * production callers do not exist yet.
+   *
+   * @param slug - The unique URL slug of the blog post to evict.
+   * @returns True if the Redis cache keys were successfully deleted; false if Redis
+   *          was unconfigured, timed out, or encountered a deletion error.
    */
   static async evictBlogPostCache(slug: string): Promise<boolean> {
-    const cacheKey = getScopedRedisKey(`blog:slug:${slug}`);
+    const trimmedSlug = typeof slug === "string" ? slug.trim() : "";
+    if (!trimmedSlug) {
+      return false;
+    }
+
+    const cacheKey = getScopedRedisKey(`blog:slug:${trimmedSlug}`);
     const allPublishedKey = getScopedRedisKey("blog:all_published");
 
     let evicted = false;
@@ -308,14 +511,17 @@ export class BlogPostService {
       } catch (err) {
         if (env.VERCEL_ENV === "production") {
           console.warn(
-            `BlogPostService.evictBlogPostCache: Redis eviction failed for "${slug}":`,
+            `BlogPostService.evictBlogPostCache: Redis eviction failed for "${trimmedSlug}":`,
             err
           );
         }
       }
     }
 
-    await safeRevalidateTag(`blog-post-${slug}`);
+    await safeRevalidatePath(`/blog/${trimmedSlug}`);
+    await safeRevalidatePath("/blog");
+    await safeRevalidatePath("/sitemap.xml");
+    await safeRevalidateTag(`blog-post-${trimmedSlug}`);
     await safeRevalidateTag("blog-posts");
 
     return evicted;

@@ -23,8 +23,11 @@
 > `static` **evictBlogPostCache**(`slug`): `Promise`\<`boolean`\>
 
 Explicitly evicts a blog post from the Upstash Redis read-through cache
-and dispatches on-demand Next.js ISR tag revalidations. Called by the
-`/admin` publish flow (#761 / M4).
+and dispatches on-demand Next.js ISR path revalidations for rendered routes
+(`/blog`, `/blog/[slug]`) and associated cache tags.
+
+Note: Integration with the `/admin` publishing flow is pending (#761);
+production callers do not exist yet.
 
 #### Parameters
 
@@ -32,9 +35,14 @@ and dispatches on-demand Next.js ISR tag revalidations. Called by the
 
 `string`
 
+The unique URL slug of the blog post to evict.
+
 #### Returns
 
 `Promise`\<`boolean`\>
+
+True if the Redis cache keys were successfully deleted; false if Redis
+         was unconfigured, timed out, or encountered a deletion error.
 
 ***
 

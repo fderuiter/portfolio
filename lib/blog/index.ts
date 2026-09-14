@@ -1,24 +1,37 @@
 export * from "./types";
 export * from "./presets";
 
-import { BlogPostService } from "@/lib/services/blog-service";
+import {
+  BlogPostService,
+  isValidBlogPost,
+  parseBlogPostDates,
+} from "@/lib/services/blog-service";
 import type { BlogPostData } from "@/lib/fallback-blog-posts";
 import type { BlogPost, BlogPostSummary, ContentPillar } from "./types";
 
 function toBlogPostSummary(data: BlogPostData): BlogPostSummary {
+  const parsed = parseBlogPostDates(data);
   return {
-    slug: data.slug,
-    title: data.title,
-    dek: data.dek,
-    pillar: data.pillar as ContentPillar,
-    tags: data.tags
+    slug: parsed.slug,
+    title: parsed.title,
+    dek: parsed.dek,
+    pillar: parsed.pillar as ContentPillar,
+    tags: (typeof parsed.tags === "string" ? parsed.tags : "")
       .split(",")
       .map((t) => t.trim())
       .filter(Boolean),
-    publishedAt: data.created_at,
-    updatedAt: data.updated_at,
-    readingTimeMinutes: data.reading_time_minutes,
-    heroImageUrl: data.hero_image_url,
+    publishedAt: parsed.created_at,
+    updatedAt: parsed.updated_at,
+    readingTimeMinutes:
+      typeof parsed.reading_time_minutes === "number" &&
+      Number.isFinite(parsed.reading_time_minutes) &&
+      parsed.reading_time_minutes >= 0
+        ? parsed.reading_time_minutes
+        : null,
+    heroImageUrl:
+      typeof parsed.hero_image_url === "string" && parsed.hero_image_url.trim()
+        ? parsed.hero_image_url.trim()
+        : null,
   };
 }
 
@@ -27,21 +40,34 @@ function toBlogPostSummary(data: BlogPostData): BlogPostSummary {
  *
  * Backed by `BlogPostService`'s Resilient Hybrid Fallback (Neon, Redis
  * read-through cache, then the static `FALLBACK_BLOG_POSTS` safety net).
+ * Guarantees valid date and pillar contracts and deterministic newest-first ordering.
  */
 export async function getAllPublishedBlogPosts(): Promise<BlogPostSummary[]> {
   const posts = await BlogPostService.getAllPublishedBlogPosts();
-  return posts.map(toBlogPostSummary);
+  return posts
+    .filter(isValidBlogPost)
+    .map(toBlogPostSummary)
+    .sort((a, b) => {
+      const timeDiff = b.publishedAt.getTime() - a.publishedAt.getTime();
+      if (timeDiff !== 0) {
+        return timeDiff;
+      }
+      return a.slug.localeCompare(b.slug);
+    });
 }
 
 /**
- * Returns one published post by slug, or `null` if it doesn't exist or
- * isn't published.
+ * Returns one published post by slug, or `null` if it doesn't exist,
+ * isn't published, or has invalid contracts.
  */
 export async function getBlogPostBySlug(
   slug: string
 ): Promise<BlogPost | null> {
+  if (!slug || typeof slug !== "string" || !slug.trim()) {
+    return null;
+  }
   const post = await BlogPostService.getBlogPostBySlug(slug);
-  if (!post) {
+  if (!post || !isValidBlogPost(post)) {
     return null;
   }
   return {

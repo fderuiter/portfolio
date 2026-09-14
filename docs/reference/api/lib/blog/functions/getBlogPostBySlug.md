@@ -8,8 +8,8 @@
 
 > **getBlogPostBySlug**(`slug`): `Promise`\<[`BlogPost`](../types/interfaces/BlogPost.md) \| `null`\>
 
-Returns one published post by slug, or `null` if it doesn't exist or
-isn't published.
+Returns one published post by slug, or `null` if it doesn't exist,
+isn't published, or has invalid contracts.
 
 ## Parameters
 
