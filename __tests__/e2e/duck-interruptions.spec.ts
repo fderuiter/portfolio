@@ -276,4 +276,101 @@ test.describe("Working With Duck - Interruption Suspension E2E (#602)", () => {
       .first();
     await expect(pauseBtn).toBeVisible();
   });
+
+  test("suspends simulation while Field Manual is opened via hotkey and resumes upon dismissal (DUCK-02)", async ({
+    page,
+  }) => {
+    await launchAndStartDuck(page);
+
+    const progressMeter = page.locator('[aria-label="Work Progress"]');
+
+    // Open Field Manual with 'h' shortcut
+    await page.keyboard.press("h");
+
+    const manualDialog = page.locator('[aria-labelledby="manual-title"]');
+    await expect(manualDialog).toBeVisible({ timeout: 5000 });
+    await expect(
+      manualDialog.getByRole("heading", { name: /Working With Duck/i })
+    ).toBeVisible();
+
+    const pausedProgress = Number(
+      await progressMeter.getAttribute("aria-valuenow")
+    );
+
+    // Wait 1.5 seconds: simulation must remain suspended
+    await page.waitForTimeout(1500);
+    const progressAfterWait = Number(
+      await progressMeter.getAttribute("aria-valuenow")
+    );
+    expect(progressAfterWait).toBe(pausedProgress);
+
+    // Dismiss with 'h' shortcut
+    await page.keyboard.press("h");
+    await expect(manualDialog).toBeHidden({ timeout: 5000 });
+
+    // Progress must resume advancing
+    await expect(async () => {
+      const currentProgress = Number(
+        await progressMeter.getAttribute("aria-valuenow")
+      );
+      expect(currentProgress).toBeGreaterThan(pausedProgress);
+    }).toPass({ timeout: 10000 });
+  });
+
+  test("preserves active manual pause when Field Manual is toggled via keyboard shortcut (DUCK-02)", async ({
+    page,
+  }) => {
+    await launchAndStartDuck(page);
+
+    const progressMeter = page.locator('[aria-label="Work Progress"]');
+
+    // 1. Manually pause via button
+    const pauseBtn = page
+      .locator('button[title*="Pause Sprint"]:visible')
+      .first();
+    await pauseBtn.click();
+    const pauseOverlay = page.getByTestId("duck-pause-overlay");
+    await expect(pauseOverlay).toBeVisible({ timeout: 5000 });
+
+    const pausedProgress = Number(
+      await progressMeter.getAttribute("aria-valuenow")
+    );
+
+    // 2. Open Field Manual via 'h' shortcut
+    await page.keyboard.press("h");
+    const manualDialog = page.locator('[aria-labelledby="manual-title"]');
+    await expect(manualDialog).toBeVisible({ timeout: 5000 });
+
+    // Wait 1.5 seconds: progress remains unchanged
+    await page.waitForTimeout(1500);
+    expect(Number(await progressMeter.getAttribute("aria-valuenow"))).toBe(
+      pausedProgress
+    );
+
+    // 3. Dismiss Field Manual with Escape
+    await page.keyboard.press("Escape");
+    await expect(manualDialog).toBeHidden({ timeout: 5000 });
+
+    // Pause overlay must still be visible and simulation frozen
+    await expect(pauseOverlay).toBeVisible({ timeout: 5000 });
+    await page.waitForTimeout(1500);
+    expect(Number(await progressMeter.getAttribute("aria-valuenow"))).toBe(
+      pausedProgress
+    );
+
+    // 4. Resume manual pause
+    const resumeBtn = pauseOverlay.getByRole("button", {
+      name: /Resume Sprint/i,
+    });
+    await resumeBtn.click();
+    await expect(pauseOverlay).toBeHidden({ timeout: 5000 });
+
+    // Progress resumes
+    await expect(async () => {
+      const currentProgress = Number(
+        await progressMeter.getAttribute("aria-valuenow")
+      );
+      expect(currentProgress).toBeGreaterThan(pausedProgress);
+    }).toPass({ timeout: 10000 });
+  });
 });

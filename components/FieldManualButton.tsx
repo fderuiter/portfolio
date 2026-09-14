@@ -1,6 +1,13 @@
 "use client";
 
-import React, { useState, useEffect, useSyncExternalStore } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useId,
+  useSyncExternalStore,
+} from "react";
 import { IconHelp, IconBook2 } from "@tabler/icons-react";
 import { GAME_MANUALS } from "@/lib/game-manuals";
 import { FieldManualModal } from "@/components/FieldManualModal";
@@ -12,6 +19,133 @@ interface FieldManualButtonProps {
   variant?: "header" | "card" | "inline";
   label?: string;
   onOpenChange?: (isOpen: boolean) => void;
+  isHotkeyOwner?: boolean;
+}
+
+interface ManualInstance {
+  id: string;
+  manualId: string;
+  isHotkeyOwner: boolean;
+  isExplicitOwner: boolean;
+  buttonRef: React.RefObject<HTMLButtonElement | null>;
+  getIsOpen: () => boolean;
+  open: () => void;
+  close: () => void;
+}
+
+const registeredInstances: ManualInstance[] = [];
+
+function isEditableContext(target: HTMLElement | null): boolean {
+  if (!target) return false;
+  if (
+    target.tagName === "INPUT" ||
+    target.tagName === "TEXTAREA" ||
+    target.isContentEditable ||
+    target.getAttribute?.("contenteditable") === "true" ||
+    target.getAttribute?.("contenteditable") === "" ||
+    Boolean(target.closest?.('[contenteditable="true"]')) ||
+    Boolean(target.closest?.('[contenteditable=""]'))
+  ) {
+    return true;
+  }
+  return false;
+}
+
+function isElementVisible(el: HTMLElement | null): boolean {
+  if (!el) return false;
+  if (typeof el.checkVisibility === "function") {
+    try {
+      return el.checkVisibility({
+        checkOpacity: false,
+        checkVisibilityCSS: true,
+      });
+    } catch {
+      return el.checkVisibility();
+    }
+  }
+  return el.offsetParent !== null;
+}
+
+function selectCandidate(pool: ManualInstance[]): ManualInstance | undefined {
+  if (pool.length === 0) return undefined;
+  return (
+    pool.find((inst) => inst.isExplicitOwner) ??
+    pool.find((inst) => inst.isHotkeyOwner) ??
+    pool[0]
+  );
+}
+
+function handleGlobalCoordinatorKeyDown(e: KeyboardEvent) {
+  const target = e.target as HTMLElement | null;
+  if (isEditableContext(target)) {
+    return;
+  }
+
+  const isManualKey =
+    e.key === "?" || (e.key === "h" && !e.metaKey && !e.ctrlKey && !e.altKey);
+
+  if (!isManualKey) {
+    return;
+  }
+
+  // If any instance is currently open, toggle it closed
+  const openInstance = registeredInstances.find((inst) => inst.getIsOpen());
+  if (openInstance) {
+    e.preventDefault();
+    openInstance.close();
+    return;
+  }
+
+  // Filter candidates that allow hotkeys and are not blocked by a foreign keyboard boundary
+  const targetBoundary = target?.closest?.("[data-keyboard-boundary]");
+  const candidates = registeredInstances.filter((inst) => {
+    if (!inst.isHotkeyOwner) return false;
+    if (targetBoundary) {
+      const instBoundary = inst.buttonRef.current?.closest?.(
+        "[data-keyboard-boundary]"
+      );
+      if (instBoundary !== targetBoundary) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  if (candidates.length === 0) {
+    return;
+  }
+
+  // 1. Check visible candidates first (responsive runtime in browser)
+  const visibleCandidates = candidates.filter((inst) =>
+    isElementVisible(inst.buttonRef.current)
+  );
+
+  const targetInstance =
+    visibleCandidates.length > 0
+      ? selectCandidate(visibleCandidates)
+      : selectCandidate(candidates);
+
+  if (targetInstance) {
+    e.preventDefault();
+    targetInstance.open();
+  }
+}
+
+function registerManualInstance(instance: ManualInstance) {
+  registeredInstances.push(instance);
+  if (registeredInstances.length === 1 && typeof window !== "undefined") {
+    window.addEventListener("keydown", handleGlobalCoordinatorKeyDown);
+  }
+}
+
+function unregisterManualInstance(id: string) {
+  const idx = registeredInstances.findIndex((inst) => inst.id === id);
+  if (idx !== -1) {
+    registeredInstances.splice(idx, 1);
+  }
+  if (registeredInstances.length === 0 && typeof window !== "undefined") {
+    window.removeEventListener("keydown", handleGlobalCoordinatorKeyDown);
+  }
 }
 
 function subscribeStorage(callback: () => void) {
@@ -25,11 +159,69 @@ export function FieldManualButton({
   variant = "header",
   label = "Field Manual",
   onOpenChange,
+  isHotkeyOwner,
 }: FieldManualButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const isOpenRef = useRef(isOpen);
+  const onOpenChangeRef = useRef(onOpenChange);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const id = useId();
   const { playHover } = useAudio();
 
   const manual = GAME_MANUALS[manualId];
+
+  useEffect(() => {
+    isOpenRef.current = isOpen;
+  }, [isOpen]);
+
+  useEffect(() => {
+    onOpenChangeRef.current = onOpenChange;
+  }, [onOpenChange]);
+
+  const open = useCallback(() => {
+    if (isOpenRef.current) return;
+    isOpenRef.current = true;
+    setIsOpen(true);
+    onOpenChangeRef.current?.(true);
+    try {
+      if (typeof window.localStorage?.setItem === "function") {
+        window.localStorage.setItem(`seen_manual_${manualId}`, "true");
+        window.dispatchEvent(new Event("storage"));
+      }
+    } catch {}
+  }, [manualId]);
+
+  const close = useCallback(() => {
+    if (!isOpenRef.current) return;
+    isOpenRef.current = false;
+    setIsOpen(false);
+    onOpenChangeRef.current?.(false);
+  }, []);
+
+  useEffect(() => {
+    const isExplicitOwner = isHotkeyOwner === true;
+    const effectiveOwner =
+      isHotkeyOwner !== undefined ? isHotkeyOwner : variant !== "card";
+
+    const instance: ManualInstance = {
+      id,
+      manualId,
+      isHotkeyOwner: effectiveOwner,
+      isExplicitOwner,
+      buttonRef,
+      getIsOpen: () => isOpenRef.current,
+      open,
+      close,
+    };
+
+    registerManualInstance(instance);
+    return () => {
+      if (isOpenRef.current) {
+        onOpenChangeRef.current?.(false);
+      }
+      unregisterManualInstance(id);
+    };
+  }, [id, manualId, isHotkeyOwner, variant, open, close]);
 
   // Client-safe localStorage read with useSyncExternalStore
   const hasSeenGuide = useSyncExternalStore(
@@ -37,7 +229,12 @@ export function FieldManualButton({
     () => {
       if (typeof window === "undefined" || !manualId) return true;
       try {
-        return localStorage.getItem(`seen_manual_${manualId}`) === "true";
+        if (typeof window.localStorage?.getItem === "function") {
+          return (
+            window.localStorage.getItem(`seen_manual_${manualId}`) === "true"
+          );
+        }
+        return true;
       } catch {
         return true;
       }
@@ -45,51 +242,13 @@ export function FieldManualButton({
     () => true
   );
 
-  // Global hotkey listener ('?' or 'h' / 'H')
-  useEffect(() => {
-    const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger if user is typing in an input, textarea, contentEditable, or within a keyboard boundary zone
-      const target = e.target as HTMLElement | null;
-      if (
-        !target ||
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.isContentEditable ||
-        target.closest?.("[data-keyboard-boundary]")
-      ) {
-        return;
-      }
-
-      if (
-        e.key === "?" ||
-        (e.key === "h" && !e.metaKey && !e.ctrlKey && !e.altKey)
-      ) {
-        e.preventDefault();
-        setIsOpen((prev) => {
-          const next = !prev;
-          onOpenChange?.(next);
-          return next;
-        });
-      }
-    };
-
-    window.addEventListener("keydown", handleGlobalKeyDown);
-    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
-  }, [onOpenChange]);
-
   const handleOpen = (e?: React.MouseEvent) => {
     e?.stopPropagation();
-    setIsOpen(true);
-    onOpenChange?.(true);
-    try {
-      localStorage.setItem(`seen_manual_${manualId}`, "true");
-      window.dispatchEvent(new Event("storage"));
-    } catch {}
+    open();
   };
 
   const handleClose = () => {
-    setIsOpen(false);
-    onOpenChange?.(false);
+    close();
   };
 
   if (!manual) return null;
@@ -98,6 +257,7 @@ export function FieldManualButton({
     return (
       <>
         <button
+          ref={buttonRef}
           type="button"
           onClick={handleOpen}
           onMouseEnter={() => playHover()}
@@ -121,6 +281,7 @@ export function FieldManualButton({
     return (
       <>
         <button
+          ref={buttonRef}
           type="button"
           onClick={handleOpen}
           onMouseEnter={() => playHover()}
@@ -148,6 +309,7 @@ export function FieldManualButton({
     <>
       <div className="relative inline-flex items-center">
         <button
+          ref={buttonRef}
           type="button"
           onClick={handleOpen}
           onMouseEnter={() => playHover()}

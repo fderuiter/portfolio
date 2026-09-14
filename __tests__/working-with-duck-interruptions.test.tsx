@@ -795,6 +795,181 @@ describe("Working With Duck - Interruption Suspension (DUCK-01)", () => {
     expect(readWorkProgressPercent(container)).toBeGreaterThan(initialProgress);
   });
 
+  it("coordinates Field Manual hotkey toggles and suspends simulation across mounted responsive controls (DUCK-02)", async () => {
+    await act(async () => {
+      root.render(<WorkingWithDuck />);
+    });
+
+    await clickByText(container, /Start Sprint 1/);
+    let ts = await advanceFrames(10, 0);
+    const initialProgress = readWorkProgressPercent(container);
+
+    // Press '?' to toggle Field Manual open
+    await act(async () => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "?", bubbles: true })
+      );
+    });
+
+    // Exactly one manual dialog is open
+    const dialogs = container.querySelectorAll('[role="dialog"]');
+    expect(dialogs).toHaveLength(1);
+    expect(dialogs[0].textContent).toContain("Working With Duck");
+
+    // Advance 60 frames while manual is open
+    ts = await advanceFrames(60, ts);
+    expect(readWorkProgressPercent(container)).toBe(initialProgress);
+
+    // Toggle closed with '?' hotkey
+    await act(async () => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "?", bubbles: true })
+      );
+    });
+    expect(container.querySelectorAll('[role="dialog"]')).toHaveLength(0);
+
+    // Simulation resumes
+    await advanceFrames(30, ts);
+    expect(readWorkProgressPercent(container)).toBeGreaterThan(initialProgress);
+  });
+
+  it("preserves active manual pause when Field Manual is opened and dismissed via hotkey (DUCK-02)", async () => {
+    await act(async () => {
+      root.render(<WorkingWithDuck />);
+    });
+
+    await clickByText(container, /Start Sprint 1/);
+    let ts = await advanceFrames(10, 0);
+
+    const gameContainer = container.querySelector<HTMLElement>(
+      '[data-keyboard-boundary="true"]'
+    )!;
+    expect(gameContainer).not.toBeNull();
+    gameContainer.focus();
+
+    // 1. Manually pause via keyboard shortcut 'P'
+    await act(async () => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "p", bubbles: true })
+      );
+    });
+    const pauseOverlay = container.querySelector(
+      '[data-testid="duck-pause-overlay"]'
+    );
+    expect(pauseOverlay).not.toBeNull();
+
+    ts = await advanceFrames(10, ts);
+    const pausedProgress = readWorkProgressPercent(container);
+
+    // 2. Open Field Manual via 'h' hotkey while manually paused
+    await act(async () => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "h", bubbles: true })
+      );
+    });
+    const manualDialog = container.querySelector('[role="dialog"]');
+    expect(manualDialog).not.toBeNull();
+
+    // Advance 60 frames while both interruptions active
+    ts = await advanceFrames(60, ts);
+    expect(readWorkProgressPercent(container)).toBe(pausedProgress);
+
+    // 3. Dismiss Field Manual via 'h' hotkey: manual pause MUST persist
+    await act(async () => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "h", bubbles: true })
+      );
+    });
+
+    // Advance 60 frames: simulation MUST stay frozen
+    ts = await advanceFrames(60, ts);
+    expect(readWorkProgressPercent(container)).toBe(pausedProgress);
+
+    // Pause overlay must still be present
+    expect(
+      container.querySelector('[data-testid="duck-pause-overlay"]')
+    ).not.toBeNull();
+
+    // 4. Finally resume manual pause via 'P'
+    gameContainer.focus();
+    await act(async () => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "p", bubbles: true })
+      );
+    });
+    expect(
+      container.querySelector('[data-testid="duck-pause-overlay"]')
+    ).toBeNull();
+
+    // Simulation resumes
+    await advanceFrames(30, ts);
+    expect(readWorkProgressPercent(container)).toBeGreaterThan(pausedProgress);
+  });
+
+  it("preserves document hidden suspension when Field Manual is opened and closed while tab is hidden (DUCK-02)", async () => {
+    let visibilityState = "visible";
+    const originalDescriptor = Object.getOwnPropertyDescriptor(
+      document,
+      "visibilityState"
+    );
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      get: () => visibilityState,
+    });
+
+    try {
+      await act(async () => {
+        root.render(<WorkingWithDuck />);
+      });
+
+      await clickByText(container, /Start Sprint 1/);
+      let ts = await advanceFrames(10, 0);
+      const initialProgress = readWorkProgressPercent(container);
+
+      // 1. Open Field Manual
+      await act(async () => {
+        window.dispatchEvent(
+          new KeyboardEvent("keydown", { key: "?", bubbles: true })
+        );
+      });
+      ts = await advanceFrames(10, ts);
+      expect(readWorkProgressPercent(container)).toBe(initialProgress);
+
+      // 2. Hide document tab while manual is open
+      await act(async () => {
+        visibilityState = "hidden";
+        document.dispatchEvent(new Event("visibilitychange"));
+      });
+
+      // 3. Close Field Manual
+      await act(async () => {
+        window.dispatchEvent(
+          new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
+        );
+      });
+
+      // Advance frames: simulation must remain suspended because document is hidden
+      ts = await advanceFrames(60, ts);
+      expect(readWorkProgressPercent(container)).toBe(initialProgress);
+
+      // 4. Restore document visibility
+      await act(async () => {
+        visibilityState = "visible";
+        document.dispatchEvent(new Event("visibilitychange"));
+      });
+
+      // Simulation resumes
+      await advanceFrames(30, ts);
+      expect(readWorkProgressPercent(container)).toBeGreaterThan(
+        initialProgress
+      );
+    } finally {
+      if (originalDescriptor) {
+        Object.defineProperty(document, "visibilityState", originalDescriptor);
+      }
+    }
+  });
+
   it("ensures pause button does not invert to Resume while reading modal is open (#602)", async () => {
     await act(async () => {
       root.render(<WorkingWithDuck />);
