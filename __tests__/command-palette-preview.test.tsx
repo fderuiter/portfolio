@@ -143,7 +143,7 @@ describe("Command Palette Preview Tooltips & Master-Detail Navigation Suite", ()
     const previewPane = document.querySelector("#palette-preview-pane");
     expect(previewPane?.textContent).toContain("Work");
 
-    // Press ArrowDown to navigate to second item (About System Architect)
+    // Press ArrowDown to navigate to second item (Blog)
     await act(async () => {
       combobox.dispatchEvent(
         new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true })
@@ -151,13 +151,11 @@ describe("Command Palette Preview Tooltips & Master-Detail Navigation Suite", ()
     });
 
     expect(mockPlayHover).toHaveBeenCalledTimes(1);
-    expect(previewPane?.textContent).toContain(
-      "About Frederick (Bio & Timeline)"
-    );
-    expect(previewPane?.textContent).toContain("Origin Story");
-    expect(previewPane?.textContent).toContain("Mayo Clinic Operations");
+    expect(previewPane?.textContent).toContain("Blog");
+    expect(previewPane?.textContent).toContain("Dispatches");
+    expect(previewPane?.textContent).toContain("Engineering Writing");
 
-    // Press ArrowDown again to navigate to third item (Say Hi & Connect)
+    // Press ArrowDown again to navigate to third item (About System Architect)
     await act(async () => {
       combobox.dispatchEvent(
         new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true })
@@ -165,6 +163,20 @@ describe("Command Palette Preview Tooltips & Master-Detail Navigation Suite", ()
     });
 
     expect(mockPlayHover).toHaveBeenCalledTimes(2);
+    expect(previewPane?.textContent).toContain(
+      "About Frederick (Bio & Timeline)"
+    );
+    expect(previewPane?.textContent).toContain("Origin Story");
+    expect(previewPane?.textContent).toContain("Mayo Clinic Operations");
+
+    // Press ArrowDown again to navigate to fourth item (Say Hi & Connect)
+    await act(async () => {
+      combobox.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true })
+      );
+    });
+
+    expect(mockPlayHover).toHaveBeenCalledTimes(3);
     expect(previewPane?.textContent).toContain("Contact");
     expect(previewPane?.textContent).toContain("Contact Form");
 
@@ -175,7 +187,7 @@ describe("Command Palette Preview Tooltips & Master-Detail Navigation Suite", ()
       );
     });
 
-    expect(mockPlayHover).toHaveBeenCalledTimes(3);
+    expect(mockPlayHover).toHaveBeenCalledTimes(4);
     expect(previewPane?.textContent).toContain(
       "About Frederick (Bio & Timeline)"
     );
@@ -189,11 +201,11 @@ describe("Command Palette Preview Tooltips & Master-Detail Navigation Suite", ()
     });
 
     const options = document.querySelectorAll('div[role="option"]');
-    expect(options.length).toBeGreaterThan(3);
+    expect(options.length).toBeGreaterThan(4);
 
-    // Hover or focus 4th option (Arcade Games Hub)
+    // Hover or focus 5th option (Arcade Games Hub)
     await act(async () => {
-      options[3].dispatchEvent(
+      options[4].dispatchEvent(
         new MouseEvent("mouseover", {
           bubbles: true,
           relatedTarget: document.body,
@@ -222,13 +234,16 @@ describe("Command Palette Preview Tooltips & Master-Detail Navigation Suite", ()
     await act(async () => {
       combobox.dispatchEvent(
         new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true })
-      ); // index 1
+      ); // index 1 (Blog)
       combobox.dispatchEvent(
         new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true })
-      ); // index 2
+      ); // index 2 (About)
       combobox.dispatchEvent(
         new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true })
-      ); // index 3
+      ); // index 3 (Contact)
+      combobox.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true })
+      ); // index 4 (Arcade)
     });
 
     // Press Enter

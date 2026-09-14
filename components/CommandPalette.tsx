@@ -19,6 +19,7 @@ import {
   IconTerminal,
   IconFileCode,
   IconDirections,
+  IconArticle,
   IconCornerDownLeft,
   IconCalendar,
   IconBrain,
@@ -176,6 +177,25 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
           "Project summaries and technical writeups",
           "Live telemetry event logging",
           "Direct GitHub repository & demo links",
+        ],
+      },
+      {
+        id: "nav-blog",
+        title: "Blog",
+        subtitle:
+          "Cross-project retrospectives, technique write-ups, and field notes.",
+        category: "navigation",
+        url: "/blog",
+        icon: <IconArticle className="w-4 h-4 text-brand-cyan" />,
+        badge: "Dispatches",
+        status: "Engineering Writing",
+        description:
+          "Cross-project retrospectives, technique write-ups, and field notes — the long-tail arm of the search funnel and the home of the Systems Dispatch Newsletter archive.",
+        techStack: ["Next.js 16", "Prisma", "Neon Postgres"],
+        highlights: [
+          "Clinical data engineering & CDISC standards",
+          "Formal verification & AST/compiler theory",
+          "Accessibility, canvas graphics & DX tooling",
         ],
       },
       {

@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { CaseStudyService } from "@/lib/services/case-study-service";
+import { getAllPublishedBlogPosts } from "@/lib/blog";
 import { resolveBaseUrl } from "@/lib/domain";
 import { ROUTE_METADATA_CONFIGS } from "@/lib/seo-metadata";
 import { getRouteLastModified } from "@/lib/fs-stat-mapping";
@@ -43,11 +44,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const config of Object.values(ROUTE_METADATA_CONFIGS)) {
     if (config.path === "/offline") continue;
     const url = `${baseUrl}${config.path.startsWith("/") ? config.path : "/" + config.path}`;
-    
-    let priority = 0.8;
-    let changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"] = "weekly";
 
-    if (config.path === "/crf" || config.path === "/stack" || config.path === "/work/laser-loon") {
+    let priority = 0.8;
+    let changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"] =
+      "weekly";
+
+    if (
+      config.path === "/crf" ||
+      config.path === "/stack" ||
+      config.path === "/work/laser-loon"
+    ) {
       priority = 0.9;
     } else if (config.path === "/schedule" || config.path === "/contact") {
       priority = 0.8;
@@ -74,7 +80,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
+  // 4. Fetch all published blog posts to attach dynamic blog post URLs.
+  // Returns an empty array until #760 (M3) lands `BlogPostService` — the
+  // `/blog` index itself is already covered by step 2 via ROUTE_METADATA_CONFIGS.
+  const posts = await getAllPublishedBlogPosts();
+  for (const post of posts) {
+    const url = `${baseUrl}/blog/${post.slug}`;
+    sitemapMap.set(url, {
+      url,
+      lastModified: post.updatedAt,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    });
+  }
+
   return Array.from(sitemapMap.values());
 }
-
-

@@ -86,6 +86,12 @@
 
 ***
 
+### provenance?
+
+> `optional` **provenance?**: [`StudyProvenance`](StudyProvenance.md)
+
+***
+
 ### rules?
 
 > `optional` **rules?**: [`EditCheckRule`](EditCheckRule.md)[]

@@ -21,6 +21,7 @@ import {
   IconDeviceGamepad2,
   IconMessageCode,
   IconDirections,
+  IconArticle,
 } from "@tabler/icons-react";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { usePersona } from "@/components/providers/PersonaProvider";
@@ -231,6 +232,16 @@ export const Footer: React.FC = () => {
                   className="text-zinc-400 hover:text-brand-cyan transition-colors"
                 >
                   Work
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/blog"
+                  onMouseEnter={handleHover}
+                  className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
+                >
+                  <IconArticle className="w-3 h-3 text-brand-cyan" />
+                  Blog
                 </Link>
               </li>
               <li>

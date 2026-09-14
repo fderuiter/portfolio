@@ -26,9 +26,12 @@
 
 ## Functions
 
+- [deterministicStringify](functions/deterministicStringify.md)
 - [isDraftDirty](functions/isDraftDirty.md)
+- [isStudyProtocolShape](functions/isStudyProtocolShape.md)
 - [listStudySnapshots](functions/listStudySnapshots.md)
 - [loadStudyDraft](functions/loadStudyDraft.md)
 - [normalizeStudyForComparison](functions/normalizeStudyForComparison.md)
+- [resolveStorage](functions/resolveStorage.md)
 - [saveStudyDraft](functions/saveStudyDraft.md)
 - [saveStudySnapshot](functions/saveStudySnapshot.md)

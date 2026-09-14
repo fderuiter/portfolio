@@ -81,7 +81,9 @@ const SpotlightTourOverlay = dynamic(
 
 import { StudioTerminal } from "./Terminal/StudioTerminal";
 import { SlashPaletteModal } from "./SlashPaletteModal";
+import { BaselineManagerModal } from "./BaselineManagerModal";
 import { SlashCommandItem } from "@/lib/crf/smart-blocks-engine";
+import type { StudyBaseline } from "@/lib/crf/types";
 import {
   VisitMatrixEditorSkeleton,
   RuleGraphStudioSkeleton,
@@ -325,6 +327,7 @@ export const CRFStudioContainer: React.FC = () => {
   const [isSpotlightTourOpen, setIsSpotlightTourOpen] = useState(false);
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
   const [isSlashPaletteOpen, setIsSlashPaletteOpen] = useState(false);
+  const [isBaselinesModalOpen, setIsBaselinesModalOpen] = useState(false);
   const [slashTargetSectionId, setSlashTargetSectionId] = useState<
     string | undefined
   >();
@@ -1211,6 +1214,22 @@ export const CRFStudioContainer: React.FC = () => {
     });
   };
 
+  const handleRestoreBaselineAsDraft = (
+    restoredStudy: StudyProtocol,
+    baseline: StudyBaseline
+  ) => {
+    setHistory([]);
+    setFuture([]);
+    setStudy(restoredStudy);
+    setBaselineStudy(restoredStudy);
+    setActiveFormId(restoredStudy.forms[0]?.id || "");
+    setActiveVisitId(restoredStudy.visits[0]?.id || "");
+    setSelectedFieldId(null);
+    playSuccess();
+    setCopyToast(`Restored draft from baseline ${baseline.versionTag}`);
+    setTimeout(() => setCopyToast(null), 4000);
+  };
+
   if (!study || !study.forms) {
     return <CRFStudioSkeleton />;
   }
@@ -1255,6 +1274,7 @@ export const CRFStudioContainer: React.FC = () => {
         onOpenCdashScaffolder={() => setIsScaffolderOpen(true)}
         onOpenBranding={() => setIsBrandingOpen(true)}
         onOpenExportDocument={() => setIsExportDocModalOpen(true)}
+        onOpenBaselines={() => setIsBaselinesModalOpen(true)}
         onOpenWizard={() => setIsWizardOpen(true)}
         onStartSpotlightTour={() => setIsSpotlightTourOpen(true)}
         onCopyShareLink={handleCopyShareLink}
@@ -1938,6 +1958,14 @@ export const CRFStudioContainer: React.FC = () => {
           activeForm?.sections.find((s) => s.id === slashTargetSectionId)?.title
         }
         targetIndex={slashTargetIndex}
+      />
+
+      {/* Study Baselines & Version History Manager (#672) */}
+      <BaselineManagerModal
+        isOpen={isBaselinesModalOpen}
+        onClose={() => setIsBaselinesModalOpen(false)}
+        study={study}
+        onRestoreBaselineAsDraft={handleRestoreBaselineAsDraft}
       />
     </div>
   );
