@@ -386,6 +386,12 @@ Re-exports [describeCondition](expression-evaluator/functions/describeCondition.
 
 ***
 
+### deterministicStringify
+
+Re-exports [deterministicStringify](study-draft-storage/functions/deterministicStringify.md)
+
+***
+
 ### DEVICE\_CARDIOVASCULAR\_IMPLANT\_PRESET
 
 Re-exports [DEVICE_CARDIOVASCULAR_IMPLANT_PRESET](presets/device-cardiovascular-implant/variables/DEVICE_CARDIOVASCULAR_IMPLANT_PRESET.md)
@@ -956,6 +962,12 @@ Re-exports [isMissingOrNullFlavor](expression-evaluator/functions/isMissingOrNul
 
 ***
 
+### isStudyProtocolShape
+
+Re-exports [isStudyProtocolShape](study-draft-storage/functions/isStudyProtocolShape.md)
+
+***
+
 ### KNOWN\_MATH\_FUNCTIONS
 
 Re-exports [KNOWN_MATH_FUNCTIONS](formula-linter/variables/KNOWN_MATH_FUNCTIONS.md)
@@ -1067,6 +1079,12 @@ Re-exports [PresetCatalogItem](presets/interfaces/PresetCatalogItem.md)
 ### ProtocolDiffSummary
 
 Re-exports [ProtocolDiffSummary](universal-schema/interfaces/ProtocolDiffSummary.md)
+
+***
+
+### resolveStorage
+
+Re-exports [resolveStorage](study-draft-storage/functions/resolveStorage.md)
 
 ***
 
@@ -1274,6 +1292,18 @@ Re-exports [StudyAuditReport](study-auditor/interfaces/StudyAuditReport.md)
 
 ***
 
+### StudyBaseline
+
+Re-exports [StudyBaseline](types/interfaces/StudyBaseline.md)
+
+***
+
+### StudyBaselineActor
+
+Re-exports [StudyBaselineActor](types/interfaces/StudyBaselineActor.md)
+
+***
+
 ### StudyBranding
 
 Re-exports [StudyBranding](types/interfaces/StudyBranding.md)
@@ -1313,6 +1343,12 @@ Re-exports [StudyEpochSchema](universal-schema/variables/StudyEpochSchema.md)
 ### StudyProtocol
 
 Re-exports [StudyProtocol](types/interfaces/StudyProtocol.md)
+
+***
+
+### StudyProvenance
+
+Re-exports [StudyProvenance](types/interfaces/StudyProvenance.md)
 
 ***
 

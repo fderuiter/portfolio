@@ -18,6 +18,7 @@ import {
   IconBug,
   IconCheck,
   IconPalette,
+  IconBookmark,
   IconFileSpreadsheet,
   IconDotsVertical,
   IconLayoutSidebarLeftCollapse,
@@ -55,6 +56,7 @@ interface StudioHeaderProps {
   onOpenCdashScaffolder: () => void;
   onOpenBranding: () => void;
   onOpenExportDocument: () => void;
+  onOpenBaselines?: () => void;
   onOpenWizard: () => void;
   onStartSpotlightTour?: () => void;
   onCopyShareLink?: () => void;
@@ -81,6 +83,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
   onOpenCdashScaffolder,
   onOpenBranding,
   onOpenExportDocument,
+  onOpenBaselines,
   onOpenWizard,
   onStartSpotlightTour,
   onCopyShareLink,
@@ -310,6 +313,18 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
             <span>Docx / PDF</span>
           </button>
 
+          {/* Study Baselines & History Trigger */}
+          {onOpenBaselines && (
+            <button
+              onClick={onOpenBaselines}
+              className="hidden 2xl:inline-flex items-center gap-1 px-2.5 py-1 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white font-mono text-xs font-bold rounded-lg border border-zinc-700 transition-all shadow-xs shrink-0 whitespace-nowrap"
+              title="Save Study Baseline Snapshots and Restore into New Drafts"
+            >
+              <IconBookmark className="w-3.5 h-3.5 text-brand-cyan shrink-0" />
+              <span>Baselines</span>
+            </button>
+          )}
+
           {/* More Actions Trigger Button */}
           <div className="relative">
             <button
@@ -404,6 +419,24 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
                       </div>
                     </div>
                   </button>
+
+                  {onOpenBaselines && (
+                    <button
+                      onClick={() => {
+                        setIsMoreMenuOpen(false);
+                        onOpenBaselines();
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-xs font-mono rounded-xl bg-zinc-950 hover:bg-zinc-800 text-zinc-200 transition-colors"
+                    >
+                      <IconBookmark className="w-4 h-4 text-brand-cyan" />
+                      <div className="flex-1">
+                        <div className="font-bold">Study Baselines</div>
+                        <div className="text-[10px] text-zinc-500">
+                          Save snapshots &amp; restore into new drafts
+                        </div>
+                      </div>
+                    </button>
+                  )}
 
                   {onCopyShareLink && (
                     <button

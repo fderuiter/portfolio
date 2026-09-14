@@ -28,10 +28,13 @@
 - [ExportROptions](interfaces/ExportROptions.md)
 - [ExportSasOptions](interfaces/ExportSasOptions.md)
 - [StudyArm](interfaces/StudyArm.md)
+- [StudyBaseline](interfaces/StudyBaseline.md)
+- [StudyBaselineActor](interfaces/StudyBaselineActor.md)
 - [StudyBranding](interfaces/StudyBranding.md)
 - [StudyCohort](interfaces/StudyCohort.md)
 - [StudyEpoch](interfaces/StudyEpoch.md)
 - [StudyProtocol](interfaces/StudyProtocol.md)
+- [StudyProvenance](interfaces/StudyProvenance.md)
 - [StudyVisit](interfaces/StudyVisit.md)
 - [SubjectFormStatus](interfaces/SubjectFormStatus.md)
 
