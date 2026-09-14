@@ -50,6 +50,8 @@ runs, repeated pushes while chasing a flaky test):
 - `fast-gate` (typecheck, lint, docs/schema drift, unit tests, property
   fuzzing) runs on every push and PR — cheap, and gates the expensive jobs
   below via `needs:`.
+- `security-gate` (vulnerability audit) runs on every push and PR — independent
+  and fast.
 - `heavy-gate` (build, bundle budget, Playwright, Web Vitals) runs only on
   PR pushes, and only against the `chromium` Playwright project instead of
   all four configured device projects.
@@ -118,86 +120,84 @@ check is sufficient; requiring the four upstream jobs individually as well
 is redundant (harmless, but adds nothing `merge-gate` doesn't already
 depend on).
 
-`security-gate` remains unconditional (no `if:`), so its `"security-gate"`
-check name is safe to require directly as well if the repo owner wants
-defense-in-depth beyond `merge-gate` alone — but `merge-gate` failing
-already implies `security-gate` failed or was skipped, so it is not
+`security-gate` remains unconditional (no `if:`), so its `"Security Gate
+(Vulnerability Audit)"` check name is safe to require directly as well if the
+repo owner wants defense-in-depth beyond `merge-gate` alone — but `merge-gate`
+failing already implies `security-gate` failed or was skipped, so it is not
 required for correctness.
 
 ### CI-03: manual (`workflow_dispatch`) and unrecognized triggers now fail closed
 
 `merge-gate` originally carried `if: always() && github.event_name !=
 'workflow_dispatch'` at the job level. That exclusion made the *entire job*
-skip on a manual dispatch — and a job skipped by its own `if:` still posts
-a "skipped" conclusion under the exact required check name above, which
-GitHub's required-status-checks rule treats as satisfied, not blocking.
-Concretely: an operator who ran `workflow_dispatch` against a branch that
-also had an open PR pointing at the same commit SHA would post a fresh
-"skipped" `Merge Gate (Required Checks Summary)` check run for that SHA —
-superseding whatever the PR's own `pull_request`-triggered run had
-reported, and satisfying the required check regardless of whether
-`heavy-gate`/`device-gate` had ever actually run or passed.
+skip on a manual dispatch. Understanding why this matters requires examining
+how GitHub evaluates required status checks on pull requests versus head commits,
+as documented in official GitHub guidance on
+[Troubleshooting required status checks](https://docs.github.com/en/pull-requests/how-tos/merge-and-close-pull-requests/troubleshooting-required-status-checks):
 
-`merge-gate` now runs unconditionally (`if: always()`, no event exclusion),
-and its shell script dispatches explicitly on `github.event_name`:
-`pull_request` requires all four jobs; `push` requires `fast-gate`/
-`security-gate` only (the bounded main-push confirmation, unchanged); any
-other event — `workflow_dispatch` included, and any future trigger this
-workflow does not yet have — hits an explicit default branch that fails the
-job outright (`echo "::error::..."; fail=1`), regardless of whether the
-jobs that happened to run all reported success. A manual or unrecognized
-trigger can therefore never produce a "skipped" conclusion (satisfied by
-default) or an accidental "success" (from a partial check) for this shared
-required check name — only a hard, visible failure that a fresh
-`pull_request`/`push` run supersedes once one actually runs.
+1. **Test-merge versus head check evaluation**: When a pull request triggers a
+   workflow via `pull_request`, GitHub creates a temporary test merge commit
+   (`refs/pull/<number>/merge`). GitHub displays "Showing checks for the merge
+   commit" in the pull request status checks box, and the checks associated with
+   that test merge commit determine whether the PR can be merged. GitHub only
+   falls back to evaluating checks reported on the head commit SHA if no checks
+   exist for the test merge commit. A check run reported on the head commit does
+   not unconditionally overwrite or replace an existing test-merge check run.
+2. **Evaluated event scopes**: GitHub evaluates workflow jobs for pull request
+   status checks only when triggered by specific events: `push`, `pull_request`,
+   `pull_request_review`, `pull_request_target`, `deployment`, or `deployment_status`.
+   Checks created by `workflow_dispatch` do not appear in the pull request's
+   status checks section and cannot satisfy a required status check in a branch ruleset.
+3. **The genuine skip-is-a-pass hazard**: If `merge-gate` were skipped via `if:`,
+   GitHub would report its conclusion as "skipped". In any evaluation context
+   where checks are assessed against a commit directly (such as direct branch pushes
+   or head-check fallback when merge checks are absent), GitHub's required-status-checks
+   rule treats "skipped" as satisfied rather than blocking. That could allow an
+   unsupported trigger to post a passing conclusion without validating requirements.
 
-This does mean dispatching `cross-device-matrix` against a branch that also
-carries an open PR will post a failing `Merge Gate` check on that SHA until
-the PR's branch next receives a real `pull_request` event (e.g. a new
-push). That is an accepted, visible cost of failing closed, not a bug: the
-alternative — letting a manual trigger silently satisfy or skip the
-required check — is exactly the gap this fix closes. In practice, dispatch
-`cross-device-matrix` against `main` or a release branch with no open PR
-against it, and this never comes up.
+To eliminate this gap, `merge-gate` runs unconditionally (`if: always()`, no
+event exclusion), and its shell script dispatches explicitly on `github.event_name`:
 
-### What is still not measured (remaining cost gate)
+- `pull_request`: requires all four predecessor jobs (`fast-gate`, `security-gate`,
+  `heavy-gate`, `device-gate`) to report literal `"success"`.
+- `push`: requires `fast-gate` and `security-gate` only (the bounded main-push
+  confirmation, since PR review already validated heavy-gate and device-gate).
+- `*` (default): any other event — `workflow_dispatch` included, and any future
+  trigger this workflow does not yet have — hits an explicit default branch that
+  fails the job outright (`echo "::error::..."; fail=1`).
 
-This task did not, and could not, produce a live CI run: GitHub Actions is
-currently blocked on this account by a billing/spending-limit issue
-(see #733's tracking comments), independent of the workflow content. That
-means:
+A manual or unrecognized trigger can therefore never produce a "skipped" conclusion
+(satisfied by default) or an accidental "success" for this required check name.
 
-- The `timeout-minutes` values on `fast-gate` (20), `heavy-gate` (40), and
-  `device-gate` (25, inherited unchanged from the former
-  `post-merge-device-smoke`) are still the estimates #733/#775 documented as
-  provisional, not measurements. Moving `device-gate` to run pre-merge does
-  not change its own cost, only when it runs — but it now runs on every PR
-  push instead of only on every `main` push, which does change the
-  *aggregate* monthly cost and has not been measured either.
-  See "Check before a heavy iteration day" above and re-run that check after
-  this change ships and Actions minutes are available again.
-- Whether `merge-gate` behaves as designed against real GitHub scheduling
-  (a genuinely cancelled `heavy-gate` run, a genuinely skipped `device-gate`
-  outside a PR) is verified here only by unit tests against the workflow
-  YAML (`__tests__/ci-execution-policy.test.ts`,
-  `__tests__/ci-gate-ordering.test.ts`) — not by an actual run. Confirm with
-  one real PR once Actions minutes are available.
-- #733 is not closed by this change; its own acceptance criteria (a real
-  measured run confirming aggregate cost fits the allowance) remain open.
-- CI-03's fail-closed behavior (a real `workflow_dispatch` run producing a
-  hard failure rather than a skip, and real `pull_request`/`push` runs
-  still passing under the new `case`-based script) is verified here only by
-  the same means: unit tests that extract the literal script from
-  `.github/workflows/ci.yml` and actually execute it with bash against
-  controlled event/result inputs (`__tests__/ci-execution-policy.test.ts`),
-  not a live GitHub Actions run. GitHub Actions minutes for this account
-  are exhausted for the current billing cycle (ADR 0039's no-paid-overage
-  policy), so live validation — confirming `merge-gate` actually reports
-  failure for a real `workflow_dispatch` run and actually reports success
-  for a real PR under the new script — can only happen next month, after
-  the allowance resets. Until then, the unit tests above are the only
-  evidence this change behaves as designed; no workflow was dispatched,
-  retried, or otherwise run against GitHub Actions to produce this page.
+### Implementation evidence, server settings, and deferred cost measurements
+
+Because GitHub Actions minutes for the account are currently exhausted, this
+guidance clearly separates what is locally verified from unverified server settings
+and future measured costs:
+
+- **Local implementation evidence**: Workflow YAML topology, step dependencies
+  (`needs:`), and the literal bash evaluation logic of `merge-gate` are verified
+  locally by offline unit and shell execution test suites
+  (`__tests__/ci-execution-policy.test.ts` and `__tests__/ci-gate-ordering.test.ts`).
+  These tests extract the exact bash script from `.github/workflows/ci.yml` and
+  execute it across simulated event and status permutations (`pull_request`,
+  `push`, `workflow_dispatch`, `success`, `failure`, `cancelled`, `skipped`).
+- **Unverified server-side protection**: While branch protection rules on `main`
+  (requiring `Merge Gate (Required Checks Summary)`) and environment protection
+  rules on `production-release` (requiring reviewers) represent declared repository
+  policy, their activation on GitHub's servers remains an unverified administrative
+  setting until confirmed by the repository owner under Settings → Branches.
+- **Future measured Actions costs**: The `timeout-minutes` values on `fast-gate` (20),
+  `security-gate` (15), `heavy-gate` (40), `device-gate` (25), and `merge-gate` (5)
+  remain provisional estimates. Real runtime and billable minutes consumption
+  cannot be measured until the account's Actions minutes allowance resets in the
+  next monthly billing cycle.
+- **Operating constraint**: September Actions minutes remain exhausted on this
+  account. In strict accordance with ADR 0039's no-paid-overage governance, no
+  additional minutes will be purchased, and no cloud workflows may be dispatched
+  or retried until next month's billing cycle reset (without assuming or inventing
+  an exact calendar reset day). All live validation and timeout tuning remain
+  deferred under #733.
 
 ## Refresh this page
 
