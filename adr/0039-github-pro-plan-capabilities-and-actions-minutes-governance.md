@@ -119,3 +119,23 @@ after minutes reset, not on guessing further from a starved account.
   superseded by this ADR for that specific claim; ADR 0037's branch-topology
   decision (single trunk, short-lived topic branches) is unaffected and
   remains active.
+
+## Update 2026-09-14
+
+The follow-up issue's engineering plan is implemented: `.github/workflows/ci.yml`
+now splits `fast-gate` (typecheck, lint, docs/schema drift, unit tests,
+property fuzzing — runs on every push/PR) from `heavy-gate` (build, bundle
+budget, Playwright, Web Vitals — PR-only, `chromium` project only),
+`post-merge-device-smoke` (the two genuinely device-engine-dependent specs
+against the three non-chromium projects, `main`-push only, not a repeat of
+the PR's full-suite run), and `cross-device-matrix` (the full four-device
+matrix against the full suite, `workflow_dispatch`-only). The stale `dev`
+branch trigger is removed. See
+[docs/how-to/monitor-github-actions-minutes.md](../docs/how-to/monitor-github-actions-minutes.md)
+for the manual minutes-check habit this ADR calls for.
+
+`timeout-minutes` values on the new jobs are provisional, not yet backed by a
+measured run — this ADR's own text called for measuring rather than guessing,
+and Actions minutes were still constrained at the time of this update. They
+need revisiting once a clean run confirms real per-job cost, per the
+follow-up issue's own acceptance criteria.
