@@ -9,6 +9,14 @@ interface FullscreenButtonProps {
   onToggle: () => void;
   variant?: "header" | "floating";
   className?: string;
+  /**
+   * True when `isFullscreen` reflects the CSS-overlay fallback rather than
+   * the real Fullscreen API (always the case on iPhone Safari, which never
+   * exposes `requestFullscreen` on arbitrary elements). Surfaced only as a
+   * label suffix so screen-reader users and anyone debugging a device
+   * report aren't left guessing why fullscreen looks/behaves differently.
+   */
+  isPseudoFullscreen?: boolean;
 }
 
 export const FullscreenButton: React.FC<FullscreenButtonProps> = ({
@@ -16,9 +24,13 @@ export const FullscreenButton: React.FC<FullscreenButtonProps> = ({
   onToggle,
   variant = "header",
   className = "",
+  isPseudoFullscreen = false,
 }) => {
   const cabinetFullscreen = useContext(CabinetFullscreenContext);
   if (cabinetFullscreen) return null;
+
+  const compatibilitySuffix =
+    isFullscreen && isPseudoFullscreen ? " (Compatibility Mode)" : "";
 
   if (variant === "floating") {
     if (!isFullscreen) return null;
@@ -26,8 +38,8 @@ export const FullscreenButton: React.FC<FullscreenButtonProps> = ({
       <button
         type="button"
         onClick={onToggle}
-        aria-label="Exit Fullscreen (Esc or F)"
-        title="Exit Fullscreen (Esc or F)"
+        aria-label={`Exit Fullscreen${compatibilitySuffix} (Esc or F)`}
+        title={`Exit Fullscreen${compatibilitySuffix} (Esc or F)`}
         className={`absolute top-3 right-3 z-50 p-2.5 rounded-xl bg-black/85 hover:bg-black text-zinc-300 hover:text-white border border-zinc-700/80 shadow-2xl backdrop-blur-md transition-all active:scale-[0.96] cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-500/50 focus-visible:outline-none ${className}`}
       >
         <IconMinimize className="w-5 h-5 text-amber-400" />
@@ -39,8 +51,16 @@ export const FullscreenButton: React.FC<FullscreenButtonProps> = ({
     <button
       type="button"
       onClick={onToggle}
-      aria-label={isFullscreen ? "Exit Fullscreen (F)" : "Enter Fullscreen (F)"}
-      title={isFullscreen ? "Exit Fullscreen (F)" : "Enter Fullscreen (F)"}
+      aria-label={
+        isFullscreen
+          ? `Exit Fullscreen${compatibilitySuffix} (F)`
+          : "Enter Fullscreen (F)"
+      }
+      title={
+        isFullscreen
+          ? `Exit Fullscreen${compatibilitySuffix} (F)`
+          : "Enter Fullscreen (F)"
+      }
       className={`min-h-12 min-w-12 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer select-none active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-amber-500/50 focus-visible:outline-none ${
         isFullscreen
           ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 shadow-[0_0_12px_rgba(245,158,11,0.2)]"
