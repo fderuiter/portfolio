@@ -347,4 +347,73 @@ describe("Working With Duck - Fixed-Timestep Simulation (#600)", () => {
     window.requestAnimationFrame = originalRaf;
     window.cancelAnimationFrame = originalCancelRaf;
   });
+
+  it("resets step accumulation across pause and resume without bursting on resume (#602)", async () => {
+    const rafCallback: { current: FrameRequestCallback | null } = {
+      current: null,
+    };
+    const originalRaf = window.requestAnimationFrame;
+    const originalCancelRaf = window.cancelAnimationFrame;
+    window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
+      rafCallback.current = cb;
+      return 1;
+    }) as any;
+    window.cancelAnimationFrame = (() => {}) as any;
+
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const root = createRoot(container);
+
+    await act(async () => {
+      root.render(<WorkingWithDuck />);
+    });
+    await clickByText(container, /Start Sprint 1/);
+
+    await act(async () => {
+      rafCallback.current!(0);
+    });
+    const beforePause = readWorkProgressPercent(container);
+
+    // Pause the game
+    const pauseBtn = container.querySelector<HTMLElement>(
+      'button[title="Pause Sprint (P)"]'
+    );
+    expect(pauseBtn).not.toBeNull();
+    await act(async () => {
+      pauseBtn!.click();
+    });
+
+    // Advance RAF frames with large time increments during pause
+    await act(async () => {
+      rafCallback.current!(5000);
+      rafCallback.current!(10000);
+    });
+    const duringPause = readWorkProgressPercent(container);
+    expect(duringPause).toBe(beforePause);
+
+    // Resume the game
+    const resumeBtn = container.querySelector<HTMLElement>(
+      'button[title="Resume Sprint (P)"]'
+    );
+    expect(resumeBtn).not.toBeNull();
+    await act(async () => {
+      resumeBtn!.click();
+    });
+
+    // First frame after resume
+    await act(async () => {
+      rafCallback.current!(10000 + 1000 / 60);
+    });
+    const justAfterResume = readWorkProgressPercent(container);
+
+    // Only one fixed step's worth of progress, zero catch-up burst
+    expect(justAfterResume - duringPause).toBeLessThanOrEqual(2);
+
+    await act(async () => {
+      root.unmount();
+    });
+    container.remove();
+    window.requestAnimationFrame = originalRaf;
+    window.cancelAnimationFrame = originalCancelRaf;
+  });
 });

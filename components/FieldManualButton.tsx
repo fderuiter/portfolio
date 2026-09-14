@@ -11,6 +11,7 @@ interface FieldManualButtonProps {
   className?: string;
   variant?: "header" | "card" | "inline";
   label?: string;
+  onOpenChange?: (isOpen: boolean) => void;
 }
 
 function subscribeStorage(callback: () => void) {
@@ -23,6 +24,7 @@ export function FieldManualButton({
   className = "",
   variant = "header",
   label = "Field Manual",
+  onOpenChange,
 }: FieldManualButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { playHover } = useAudio();
@@ -63,17 +65,22 @@ export function FieldManualButton({
         (e.key === "h" && !e.metaKey && !e.ctrlKey && !e.altKey)
       ) {
         e.preventDefault();
-        setIsOpen((prev) => !prev);
+        setIsOpen((prev) => {
+          const next = !prev;
+          onOpenChange?.(next);
+          return next;
+        });
       }
     };
 
     window.addEventListener("keydown", handleGlobalKeyDown);
     return () => window.removeEventListener("keydown", handleGlobalKeyDown);
-  }, []);
+  }, [onOpenChange]);
 
   const handleOpen = (e?: React.MouseEvent) => {
     e?.stopPropagation();
     setIsOpen(true);
+    onOpenChange?.(true);
     try {
       localStorage.setItem(`seen_manual_${manualId}`, "true");
       window.dispatchEvent(new Event("storage"));
@@ -82,6 +89,7 @@ export function FieldManualButton({
 
   const handleClose = () => {
     setIsOpen(false);
+    onOpenChange?.(false);
   };
 
   if (!manual) return null;
