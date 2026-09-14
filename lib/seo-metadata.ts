@@ -13,6 +13,24 @@ export interface RouteMetaConfig {
 }
 
 export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
+  blog: {
+    title: "Engineering Dispatches: Blog",
+    description:
+      "Cross-project retrospectives and technique write-ups on clinical data engineering, formal verification, accessibility, and browser graphics by Fred de Ruiter.",
+    path: "/blog",
+    keywords: [
+      "Engineering Blog",
+      "Clinical Data Engineering",
+      "Formal Verification",
+      "Accessibility Engineering",
+      "Canvas Graphics Engineering",
+      "Systems Dispatch Newsletter",
+    ],
+    ogType: "website",
+    inLanguage: "en-US",
+    locale: "en-US",
+    isAccessibleForFree: true,
+  },
   crf: {
     title: "CRF Studio: Clinical Form Designer",
     description:

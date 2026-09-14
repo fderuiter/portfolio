@@ -382,6 +382,21 @@ export const Navbar: React.FC = () => {
                 Work
               </Link>
 
+              {/* Blog Pillar */}
+              <Link
+                href="/blog"
+                onClick={() => setActiveDropdown(null)}
+                onMouseEnter={handleLinkHover}
+                className={cn(
+                  "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 whitespace-nowrap shrink-0",
+                  pathname === "/blog" || pathname.startsWith("/blog/")
+                    ? "text-brand-cyan font-bold"
+                    : "text-muted"
+                )}
+              >
+                Blog
+              </Link>
+
               {/* Arcade Dropdown */}
               <div className="relative shrink-0">
                 <button
@@ -1060,6 +1075,14 @@ export const Navbar: React.FC = () => {
                     className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-neutral-200 hover:text-brand-cyan hover:border-brand-cyan/30 flex items-center justify-between active:scale-[0.99] transition-all"
                   >
                     <span>Work</span>
+                    <span className="text-xs font-mono text-zinc-500">→</span>
+                  </Link>
+                  <Link
+                    href="/blog"
+                    onClick={() => setIsOpen(false)}
+                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-neutral-200 hover:text-brand-cyan hover:border-brand-cyan/30 flex items-center justify-between active:scale-[0.99] transition-all"
+                  >
+                    <span>Blog</span>
                     <span className="text-xs font-mono text-zinc-500">→</span>
                   </Link>
                   <Link
