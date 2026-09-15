@@ -1759,19 +1759,19 @@ flowchart TD
 flowchart TD
     Client[Browser / HTMX Client] -->|HTTP / Form Data| Router[FastAPI Application Gateway]
 
-    subgraph Routing & Middleware
+    subgraph routing["Routing & Middleware"]
         Router --> ErrorDecorator[@api_error_handler Decorator]
         Router --> Registry[Action Registry Dispatcher]
     end
 
-    subgraph Service Layer
+    subgraph serviceLayer["Service Layer"]
         Registry --> AVService[AVTransport Client]
         Registry --> RenderService[RenderingControl Client]
         Router --> ZoneService[Zone & Topology Service]
         Router --> RadioService[Radio Service / pyradios]
     end
 
-    subgraph Hardware Integration
+    subgraph hardwareIntegration["Hardware Integration"]
         AVService -->|SOAP / XML POST| SonosHW[Sonos Speaker - Port 1400]
         RenderService -->|SOAP / XML POST| SonosHW
         ZoneService -->|SOAP / XML POST| SonosHW
