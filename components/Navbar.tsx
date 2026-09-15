@@ -103,6 +103,12 @@ const SYSTEMS_ITEMS: SubNavItem[] = [
     icon: <IconFileSpreadsheet className="w-4 h-4 text-brand-cyan" />,
   },
   {
+    title: "Patrol Shift",
+    subtitle: "Midwest ski-patrol judgment & triage simulator",
+    href: "/patrol",
+    icon: <IconShieldCheck className="w-4 h-4 text-brand-cyan" />,
+  },
+  {
     title: "Proof Workspace",
     subtitle: "Build a proof, one step at a time",
     href: "/proof",
@@ -325,6 +331,8 @@ export const Navbar: React.FC = () => {
     pathname === "/proof" ||
     pathname === "/simulator" ||
     pathname === "/crf" ||
+    pathname === "/patrol" ||
+    pathname.startsWith("/patrol") ||
     pathname === "/neuro" ||
     pathname === "/stack";
 
@@ -1161,6 +1169,19 @@ export const Navbar: React.FC = () => {
                     </span>
                     <span className="text-[10px] font-mono text-brand-cyan px-1.5 py-0.5 rounded bg-brand-cyan/10 shrink-0">
                       CDISC
+                    </span>
+                  </Link>
+                  <Link
+                    href="/patrol"
+                    onClick={(e) => handleNavClick(e, "/patrol")}
+                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between gap-2 active:scale-[0.99] transition-all min-w-0"
+                  >
+                    <span className="flex items-center gap-2 min-w-0">
+                      <IconShieldCheck className="w-4 h-4 text-brand-cyan shrink-0" />
+                      <span className="truncate">Patrol Shift</span>
+                    </span>
+                    <span className="text-[10px] font-mono text-brand-cyan px-1.5 py-0.5 rounded bg-brand-cyan/10 shrink-0">
+                      OET
                     </span>
                   </Link>
                   <Link

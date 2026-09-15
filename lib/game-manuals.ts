@@ -17,32 +17,38 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
     controls: [
       {
         action: "Select & Connect Node",
-        description: "Click any source node (e.g. Node C), then click the target node (e.g. Node E) to establish a deductive dependency edge.",
+        description:
+          "Click any source node (e.g. Node C), then click the target node (e.g. Node E) to establish a deductive dependency edge.",
         key: "Click Node",
       },
       {
         action: "Drag Node Position",
-        description: "Click and drag any node across the canvas to customize visual layout; click 'Reset Layout' to return to canonical graph coordinates.",
+        description:
+          "Click and drag any node across the canvas to customize visual layout; click 'Reset Layout' to return to canonical graph coordinates.",
         key: "Drag Node",
       },
       {
         action: "Switch Theorem Scenario",
-        description: "Select from 5 engineering proof scenarios (Modus Ponens, Modus Tollens, Hypothetical Syllogism, Disjunctive Syllogism, Resolution) using the top toolbar tabs or CLI.",
+        description:
+          "Select from 5 engineering proof scenarios (Modus Ponens, Modus Tollens, Hypothetical Syllogism, Disjunctive Syllogism, Resolution) using the top toolbar tabs or CLI.",
         key: "Toolbar / CLI",
       },
       {
         action: "Guided Tactic Step",
-        description: "Click 'Apply Next Tactic' in the Guided Proof Assistant to automatically evaluate and apply the next valid deduction step.",
+        description:
+          "Click 'Apply Next Tactic' in the Guided Proof Assistant to automatically evaluate and apply the next valid deduction step.",
         key: "1-Click Tactic",
       },
       {
         action: "CLI Split Console",
-        description: "Open the terminal and run commands such as `theorem mt`, `connect C E`, `inspect C`, `ledger`, `export lean`, `simulate normal`, or `clear`.",
+        description:
+          "Open the terminal and run commands such as `theorem mt`, `connect C E`, `inspect C`, `ledger`, `export lean`, `simulate normal`, or `clear`.",
         key: "Ctrl + \\",
       },
       {
         action: "Export Verified Proof",
-        description: "Click 'Export Proof' to copy production-ready Lean 4 formal code, LaTeX deduction trees, Markdown audit tables, or Mermaid diagrams.",
+        description:
+          "Click 'Export Proof' to copy production-ready Lean 4 formal code, LaTeX deduction trees, Markdown audit tables, or Mermaid diagrams.",
         key: "Export Button",
       },
     ],
@@ -82,7 +88,69 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
       title: "Why Formal Verification Matters in Modern Software",
       story:
         "Traditional testing (unit, integration, end-to-end) only tests sample inputs. Formal verification uses mathematical logic to prove that software satisfies specifications across all possible execution states. From NASA flight software and cryptographic microkernels (seL4) to blockchain smart contracts and compiler verification (CompCert), formal logic guarantees the complete absence of whole classes of bugs.",
-      realWorldTech: ["Lean 4", "Coq / Rocq", "Z3 SMT Solver", "Curry-Howard Isomorphism", "seL4 Microkernel"],
+      realWorldTech: [
+        "Lean 4",
+        "Coq / Rocq",
+        "Z3 SMT Solver",
+        "Curry-Howard Isomorphism",
+        "seL4 Microkernel",
+      ],
+    },
+  },
+
+  patrol: {
+    id: "patrol",
+    title: "Patrol Shift Studio",
+    subtitle: "Midwest Ski Patrol Judgment & Triage Simulation",
+    genre: "Emergency Triage",
+    badge: "OET Triage Suite",
+    route: "/patrol",
+    accentColor: "from-cyan-500/20 via-cyan-500/5 to-transparent",
+    badgeBg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/30",
+    objective:
+      "Manage cold-weather trauma and environmental exposure cases on Midwest slopes using Outdoor Emergency Transportation (OET) protocols.",
+    quickSummary:
+      "Select scenarios, assess scene safety, evaluate patient vitals, execute protocol actions, and review performance in automated debrief reports.",
+    controls: [
+      {
+        action: "Select Scenario",
+        description:
+          "Choose an active patrol scenario from the scenario sidebar catalog.",
+        key: "Click Scenario",
+      },
+      {
+        action: "Execute Protocol Action",
+        description:
+          "Click available protocol actions (Assessment, Treatment, Transport) to advance the incident timeline.",
+        key: "Click Action",
+      },
+      {
+        action: "Complete Shift & Debrief",
+        description:
+          "Finish the incident to trigger OET rule evaluation and review score and feedback.",
+        key: "Debrief Button",
+      },
+    ],
+    rules: [
+      {
+        title: "Outdoor Emergency Transportation Protocol",
+        detail:
+          "Actions are evaluated against OET guidelines for scene safety, spine management, and cold exposure.",
+        badge: "OET Rules",
+      },
+    ],
+    proTips: [
+      "Always perform scene size-up and C-spine stabilization prior to movement.",
+    ],
+    lore: {
+      title: "Ski Patrol Triage & Judgment",
+      story:
+        "Ski patrolling requires split-second clinical judgment in freezing temperatures and hazardous mountain environments.",
+      realWorldTech: [
+        "Finite State Machines",
+        "OET Protocols",
+        "Automated Rule Engines",
+      ],
     },
   },
 
@@ -103,27 +171,32 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
     controls: [
       {
         action: "Active Code Burst",
-        description: "Press Spacebar while at your desk to rapidly push code commits and squash bugs with Good Boy multiplier bonuses.",
+        description:
+          "Press Spacebar while at your desk to rapidly push code commits and squash bugs with Good Boy multiplier bonuses.",
         key: "Spacebar / Desk Click",
       },
       {
         action: "Training Tricks",
-        description: "Press Q (Sit), W (High Five/Paw), E (Drop It), or R (Spin) for immediate obedience, focus recovery, and Good Boy score multipliers.",
+        description:
+          "Press Q (Sit), W (High Five/Paw), E (Drop It), or R (Spin) for immediate obedience, focus recovery, and Good Boy score multipliers.",
         key: "Q, W, E, R",
       },
       {
         action: "Toss Toys & Treats",
-        description: "Press 1 (Tennis Ball), 2 (Kong Chew), 3 (Squeaky Toy), or 4 (Treat) to divert Duck away from server cables and trade stolen items.",
+        description:
+          "Press 1 (Tennis Ball), 2 (Kong Chew), 3 (Squeaky Toy), or 4 (Treat) to divert Duck away from server cables and trade stolen items.",
         key: "1, 2, 3, 4 Hotkeys",
       },
       {
         action: "Bathtub Wash & Rinse",
-        description: "When Duck gets muddy at the Dog Park, drag him to the Bathtub station, scrub lather with your mouse, and shower rinse for a sparkling clean coat.",
+        description:
+          "When Duck gets muddy at the Dog Park, drag him to the Bathtub station, scrub lather with your mouse, and shower rinse for a sparkling clean coat.",
         key: "Bathtub Click / Drag",
       },
       {
         action: "Agility Jump & Whistle",
-        description: "In the Dog Park, tap Spacebar to leap over agility hurdles and recall Duck with the ultrasonic whistle.",
+        description:
+          "In the Dog Park, tap Spacebar to leap over agility hurdles and recall Duck with the ultrasonic whistle.",
         key: "Spacebar / Whistle",
       },
     ],
@@ -162,7 +235,12 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
       title: "Autonomous Behavior Trees in Canvas 2D",
       story:
         "Building lifelike virtual pets requires combining finite state machines with weighted steering behaviors (Craig Reynolds' Boids algorithms). Duck's wandering pathing computes avoidance vectors around furniture while evaluating hunger, joy, and fatigue curves rendered in 60 FPS Canvas 2D with procedural particle fur shaders.",
-      realWorldTech: ["Craig Reynolds Steering", "Finite State Machines", "Web Audio API Synths", "Canvas 2D Physics"],
+      realWorldTech: [
+        "Craig Reynolds Steering",
+        "Finite State Machines",
+        "Web Audio API Synths",
+        "Canvas 2D Physics",
+      ],
     },
   },
 
@@ -183,22 +261,26 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
     controls: [
       {
         action: "Aim & Fire Laser Arsenal",
-        description: "Aim crosshair with cursor or touch; left-click or drag to fire active laser beam (Ruby Laser, Cyan Pulse, Aurora Wave, or Cryo Mortar).",
+        description:
+          "Aim crosshair with cursor or touch; left-click or drag to fire active laser beam (Ruby Laser, Cyan Pulse, Aurora Wave, or Cryo Mortar).",
         key: "Left Click / Drag",
       },
       {
         action: "The Haunting Loon Tremolo (Ultimate)",
-        description: "When the energy meter hits 100%, trigger a screen-wide synthesized cryogenic loon screech that freezes and shatters all obstacles!",
+        description:
+          "When the energy meter hits 100%, trigger a screen-wide synthesized cryogenic loon screech that freezes and shatters all obstacles!",
         key: "Spacebar / Ultimate Button",
       },
       {
         action: "Cycle Laser Modes",
-        description: "Switch between Ruby Eye Laser (1), Cyan Pulse (2), Aurora Borealis Wave (3), and Glacial Cryo-Mortar (4).",
+        description:
+          "Switch between Ruby Eye Laser (1), Cyan Pulse (2), Aurora Borealis Wave (3), and Glacial Cryo-Mortar (4).",
         key: "Keys 1 - 4 / Weapon Bar",
       },
       {
         action: "Loon Movement & Gliding",
-        description: "Glide Laser Loon smoothly along the lake surface or committee floor to collect power-ups and dodge boss projectiles.",
+        description:
+          "Glide Laser Loon smoothly along the lake surface or committee floor to collect power-ups and dodge boss projectiles.",
         key: "W/A/S/D or Arrow Keys",
       },
     ],
@@ -231,7 +313,12 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
       title: "The Grassroots Legend of Submission F277",
       story:
         "In late 2023, the Minnesota State Emblems Redesign Commission invited citizen submissions. Fred deRuiter submitted 'F277: Laser Loon'—a majestic common loon blasting twin crimson lasers across azure waters. The design became a worldwide viral sensation, featured in The New York Times, The Washington Post, and NPR. Fred released F277 into the public domain (CC0), launching a grassroots civic campaign that raised over $13,500 for the Saint Paul Public Library Foundation.",
-      realWorldTech: ["Raycast Collision Vectors", "Web Audio Dual-Oscillator Synthesis", "Multi-Phase Boss AI", "Deterministic State Progression"],
+      realWorldTech: [
+        "Raycast Collision Vectors",
+        "Web Audio Dual-Oscillator Synthesis",
+        "Multi-Phase Boss AI",
+        "Deterministic State Progression",
+      ],
     },
   },
 
@@ -252,27 +339,32 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
     controls: [
       {
         action: "Apply Proof Tactic",
-        description: "Click or drag tactic cards (`intro`, `apply`, `exact`, `cases`, `rw`, `ring`, `norm_num`, `simp`, `omega`, `linarith`) onto AST nodes to transform goals.",
+        description:
+          "Click or drag tactic cards (`intro`, `apply`, `exact`, `cases`, `rw`, `ring`, `norm_num`, `simp`, `omega`, `linarith`) onto AST nodes to transform goals.",
         key: "Click / Drag Tactic",
       },
       {
         action: "Branch & Multi-Goal Navigation",
-        description: "Tactics like `cases` split goals into multiple subgoals. Use the branch tabs to switch between active goals until all are discharged.",
+        description:
+          "Tactics like `cases` split goals into multiple subgoals. Use the branch tabs to switch between active goals until all are discharged.",
         key: "Subgoal Tabs",
       },
       {
         action: "Progressive Hint Coach",
-        description: "Toggle progressive 3-tier hints for conceptual strategy, target subtree highlights, and recommended tactics.",
+        description:
+          "Toggle progressive 3-tier hints for conceptual strategy, target subtree highlights, and recommended tactics.",
         key: "Hints Button (H)",
       },
       {
         action: "Lean 4 IDE Inspector",
-        description: "Inspect live generated Lean 4 code in real time (`theorem ... := by ...`) and copy directly to Lean Web Editor.",
+        description:
+          "Inspect live generated Lean 4 code in real time (`theorem ... := by ...`) and copy directly to Lean Web Editor.",
         key: "Lean IDE (C)",
       },
       {
         action: "The 'Sorry' Escape Valve",
-        description: "Admit defeat on the current branch using `sorry`. This keeps the engine running but permanently incurs a -100 Morality Penalty.",
+        description:
+          "Admit defeat on the current branch using `sorry`. This keeps the engine running but permanently incurs a -100 Morality Penalty.",
         key: "Sorry Button",
       },
     ],
@@ -313,7 +405,12 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
       title: "The Curry-Howard Isomorphism & Lean 4",
       story:
         "The Curry-Howard correspondence establishes that computer programs and mathematical proofs are the exact same mathematical objects: propositions are types, and proofs are programs. Interactive theorem provers like Lean 4, developed at Microsoft Research and Carnegie Mellon, enable mathematicians and engineers to formally verify complex mathematics (such as Peter Scholze's Liquid Tensor Experiment) and verify production microcode.",
-      realWorldTech: ["Lean 4", "Dependent Type Theory", "Homotopy Type Theory", "Calculus of Constructions"],
+      realWorldTech: [
+        "Lean 4",
+        "Dependent Type Theory",
+        "Homotopy Type Theory",
+        "Calculus of Constructions",
+      ],
     },
   },
 
@@ -334,22 +431,26 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
     controls: [
       {
         action: "Bezel Buttons",
-        description: "Click the physical watch bezel buttons: UP, DOWN, SELECT, and BACK to navigate watch apps and menus.",
+        description:
+          "Click the physical watch bezel buttons: UP, DOWN, SELECT, and BACK to navigate watch apps and menus.",
         key: "Bezel Clicks",
       },
       {
         action: "Wipe Thermal Fog",
-        description: "Click and drag your cursor across the circular glass face to wipe away condensation built up from high heart-rate intervals.",
+        description:
+          "Click and drag your cursor across the circular glass face to wipe away condensation built up from high heart-rate intervals.",
         key: "Drag Across Screen",
       },
       {
         action: "Sensor Rate Toggle",
-        description: "Switch GPS, Optical HR, and Accelerometer polling frequencies to balance telemetry fidelity against battery drain.",
+        description:
+          "Switch GPS, Optical HR, and Accelerometer polling frequencies to balance telemetry fidelity against battery drain.",
         key: "Sensor Toggles",
       },
       {
         action: "Force Garbage Collection",
-        description: "Execute manual memory compaction to reclaim abandoned object references before hitting the 32KB heap ceiling.",
+        description:
+          "Execute manual memory compaction to reclaim abandoned object references before hitting the 32KB heap ceiling.",
         key: "GC Button",
       },
     ],
@@ -382,7 +483,13 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
       title: "Engineering for Wearable Hardware Constraints",
       story:
         "Smartwatches like the Garmin Forerunner and Fenix utilize ultra-low-power Memory-in-Pixel (MIP) displays and ultra-constrained microcontrollers capable of running for 14+ days on a single charge. Developing for Garmin's Monkey C language demands relentless memory optimization—reusing object pools, avoiding dynamic closures, and managing strict byte-aligned bitmaps.",
-      realWorldTech: ["Garmin Connect IQ", "Monkey C VM", "MIP Display Tech", "Object Pooling", "ARM Cortex-M"],
+      realWorldTech: [
+        "Garmin Connect IQ",
+        "Monkey C VM",
+        "MIP Display Tech",
+        "Object Pooling",
+        "ARM Cortex-M",
+      ],
     },
   },
 
@@ -403,27 +510,32 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
     controls: [
       {
         action: "Validate Clinical Observation",
-        description: "Click any unverified observation card to open the Multi-Choice Validation Drawer and select the compliant CDISC standard, MedDRA Preferred Term, or ISO-8601 date.",
+        description:
+          "Click any unverified observation card to open the Multi-Choice Validation Drawer and select the compliant CDISC standard, MedDRA Preferred Term, or ISO-8601 date.",
         key: "Click Observation / Multi-Choice",
       },
       {
         action: "Route to EDC Domain Desk",
-        description: "Submit validated dossiers to active EDC stations: [1] Demographics (DM), [2] Vital Signs (VS), [3] Adverse Events (AE), [4] Laboratory (LB), [5] Concomitant Meds (CM), [6] Drug Exposure (EX).",
+        description:
+          "Submit validated dossiers to active EDC stations: [1] Demographics (DM), [2] Vital Signs (VS), [3] Adverse Events (AE), [4] Laboratory (LB), [5] Concomitant Meds (CM), [6] Drug Exposure (EX).",
         key: "Keys [1-6] or Click Station",
       },
       {
         action: "Deploy Regulatory Lifelines",
-        description: "Deploy combo-charged power-ups: [Q] FDA Coffee Break (freeze auditor), [W] CDISC Auto-Clean (clean active dossier), [E] Site Query Extension (+12s), [R] Fast-Track 21 CFR Pass (instant sign).",
+        description:
+          "Deploy combo-charged power-ups: [Q] FDA Coffee Break (freeze auditor), [W] CDISC Auto-Clean (clean active dossier), [E] Site Query Extension (+12s), [R] Fast-Track 21 CFR Pass (instant sign).",
         key: "Keys [Q, W, E, R]",
       },
       {
         action: "21 CFR Electronic Signature Lock",
-        description: "Verify legal signature intent and authenticate with password to permanently lock records and cooldown auditor suspicion.",
+        description:
+          "Verify legal signature intent and authenticate with password to permanently lock records and cooldown auditor suspicion.",
         key: "Enter / Confirm Signature",
       },
       {
         action: "Cycle Active Queue & Switch View",
-        description: "Press [Tab] to cycle between conveyor parcels. Toggle between Conveyor Floor, Live SDTM Studio, and Audit Trail Log tabs to export XML/CSV datasets.",
+        description:
+          "Press [Tab] to cycle between conveyor parcels. Toggle between Conveyor Floor, Live SDTM Studio, and Audit Trail Log tabs to export XML/CSV datasets.",
         key: "Tab / Tab Switcher",
       },
     ],
@@ -463,7 +575,13 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
       title: "Biotech Data Governance & Regulatory Lifecycles",
       story:
         "Bringing a novel therapeutic drug or medical device from Phase I trials through FDA/EMA approval requires processing millions of patient data points under strict federal regulations. CDISC standards (SDTM, ADaM, and ODM) ensure universal semantic interoperability, while FDA 21 CFR Part 11 guarantees that electronic records have the identical legal standing and auditability as traditional paper records.",
-      realWorldTech: ["CDISC SDTM / ADaM / ODM", "FDA 21 CFR Part 11", "Electronic Data Capture (EDC)", "MedDRA / WHO-Drug", "GxP Validation"],
+      realWorldTech: [
+        "CDISC SDTM / ADaM / ODM",
+        "FDA 21 CFR Part 11",
+        "Electronic Data Capture (EDC)",
+        "MedDRA / WHO-Drug",
+        "GxP Validation",
+      ],
     },
   },
 
@@ -484,22 +602,26 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
     controls: [
       {
         action: "Move Netrunner Avatar",
-        description: "Navigate through procedural subnet corridors and step onto discovery nodes.",
+        description:
+          "Navigate through procedural subnet corridors and step onto discovery nodes.",
         key: "WASD / Arrow Keys",
       },
       {
         action: "Deploy Cyber Exploits",
-        description: "Execute exploits: [1] Nmap / npm i (Recon / AoE), [2] Buffer Overflow (Burst / Crit), [3] Zero-Day (Piercer / Snippet), [4] MitM Spoof (Confuse), [5] Ransomware (Freeze & Bounty).",
+        description:
+          "Execute exploits: [1] Nmap / npm i (Recon / AoE), [2] Buffer Overflow (Burst / Crit), [3] Zero-Day (Piercer / Snippet), [4] MitM Spoof (Confuse), [5] Ransomware (Freeze & Bounty).",
         key: "1, 2, 3, 4, 5 Keys",
       },
       {
         action: "EMP Kernel Surge",
-        description: "Discharge an electromagnetic surge to stun all security drones and camera sentinels in the sector.",
+        description:
+          "Discharge an electromagnetic surge to stun all security drones and camera sentinels in the sector.",
         key: "Spacebar / Touch Action A",
       },
       {
         action: "Toggle CRT Phosphor Scanlines",
-        description: "Toggle retro CRT phosphor curvature, bloom, and scanline shader post-processing filters.",
+        description:
+          "Toggle retro CRT phosphor curvature, bloom, and scanline shader post-processing filters.",
         key: "C Key",
       },
     ],
@@ -532,7 +654,14 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
       title: "Red Team Infiltration & Legacy Code Archaeology",
       story:
         "Every engineer has explored legacy codebases that feel like ancient, crumbling dungeons filled with deprecated dependencies, undocumented endpoints, and zombie cron jobs. Retro Labyrinth turns code maintenance and cybersecurity into a playable roguelike using cellular automata dungeon generation, raycasted field-of-view, Web Audio 8-bit sound synthesis, and real-time 3D vector wireframe rendering.",
-      realWorldTech: ["Cellular Automata", "Bresenham FOV Raycasting", "CVE Vulnerability Models", "Hex Buffer Matrix", "Web Audio API", "3D Wireframe Projection"],
+      realWorldTech: [
+        "Cellular Automata",
+        "Bresenham FOV Raycasting",
+        "CVE Vulnerability Models",
+        "Hex Buffer Matrix",
+        "Web Audio API",
+        "3D Wireframe Projection",
+      ],
     },
   },
 
@@ -552,22 +681,26 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
     controls: [
       {
         action: "Select Strategic Option",
-        description: "Click option cards to choose your leadership decision for the active stage. Each option carries distinct 4-axis trade-offs.",
+        description:
+          "Click option cards to choose your leadership decision for the active stage. Each option carries distinct 4-axis trade-offs.",
         key: "Click Option Card",
       },
       {
         action: "Review Dimension Impact",
-        description: "Hover over option descriptions to preview the systemic consequences on Tech Depth, Team Alignment, UI Polish, and Resilience.",
+        description:
+          "Hover over option descriptions to preview the systemic consequences on Tech Depth, Team Alignment, UI Polish, and Resilience.",
         key: "Hover Impact",
       },
       {
         action: "Copy Leadership Assessment",
-        description: "At the conclusion of the simulation, generate and copy a Markdown/JSON report of your leadership archetype and decision log.",
+        description:
+          "At the conclusion of the simulation, generate and copy a Markdown/JSON report of your leadership archetype and decision log.",
         key: "Export Button",
       },
       {
         action: "Restart Simulation",
-        description: "Reset the decision tree to explore alternative incident mitigation pathways and divergent architectural strategies.",
+        description:
+          "Reset the decision tree to explore alternative incident mitigation pathways and divergent architectural strategies.",
         key: "Reset Button",
       },
     ],
@@ -600,7 +733,12 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
       title: "Staff+ and Engineering Management Decision Frameworks",
       story:
         "Great engineering leaders don't just write clean code; they manage risk, mentor teams through high-severity outages, and make architectural decisions that compound positively over years. This interactive simulation models real-world Staff+ engineering trade-offs—from Expand-and-Contract schema migrations to blameless post-mortem cultures.",
-      realWorldTech: ["Expand-and-Contract Migrations", "SRE SLO/SLA Frameworks", "Blameless Post-Mortems", "Circuit Breakers"],
+      realWorldTech: [
+        "Expand-and-Contract Migrations",
+        "SRE SLO/SLA Frameworks",
+        "Blameless Post-Mortems",
+        "Circuit Breakers",
+      ],
     },
   },
 };

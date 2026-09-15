@@ -25,6 +25,7 @@ app/                                       # Next.js 16 App Router routes, layou
 │   │   └── [slug]/page.tsx                # Case study narrative route
 │   ├── crf/page.tsx                       # CRF Studio workspace route
 │   ├── neuro/page.tsx                     # Neuroimaging 3D/slice viewer route
+│   ├── patrol/page.tsx                    # Patrol Shift studio workspace route
 │   ├── proof/page.tsx                     # Formal proof AST workspace route
 │   ├── schedule/page.tsx                  # Interactive calendar & schedule route
 │   ├── simulator/page.tsx                 # Recruiter simulator route
@@ -49,6 +50,7 @@ components/                                # React UI Component Ecosystem
 ├── arcade/                                # Game canvas clients & cabinet wrappers
 ├── crf/                                   # CRF builder canvas, sidebars & export modals
 ├── neuro/                                 # 3D brain viewer, slice canvas & terminal
+├── patrol/                                # Patrol Shift studio container & skeletons
 ├── proof/                                 # Interactive truth tables & proof DAG canvas
 ├── providers/                             # React context providers (A11y, Audio, Persona, Search)
 ├── stack/                                 # Pretext benchmark lab & audio synth components

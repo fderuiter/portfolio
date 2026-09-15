@@ -276,6 +276,16 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <Link
+                  href="/patrol"
+                  onMouseEnter={handleHover}
+                  className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
+                >
+                  <IconShieldCheck className="w-3 h-3 text-brand-cyan" />
+                  Patrol Shift Studio
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/proof"
                   onMouseEnter={handleHover}
                   className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
