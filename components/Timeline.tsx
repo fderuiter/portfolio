@@ -3,11 +3,16 @@
 import React, { useState } from "react";
 import { hexToRgba } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { IconBriefcase, IconFlame, IconSwitchHorizontal } from "@tabler/icons-react";
+import {
+  IconBriefcase,
+  IconFlame,
+  IconSwitchHorizontal,
+} from "@tabler/icons-react";
 import { designManifest } from "@/lib/design-manifest";
 import { RichNarrative } from "@/components/RichNarrative";
 import { usePersona } from "@/components/providers/PersonaProvider";
 import { useTerminology } from "@/components/providers/TerminologyProvider";
+import { useAnnouncer } from "@/components/providers/A11yProvider";
 import { dictionary, TimelineItem } from "@/lib/i18n-dictionary";
 
 export type { TimelineItem };
@@ -15,10 +20,16 @@ export type { TimelineItem };
 export const Timeline: React.FC = () => {
   const { persona, setPersona } = usePersona();
   const { simplified } = useTerminology();
-  const [localMode, setLocalMode] = useState<"recruiter" | "reality" | null>(null);
-  const [cardOverrides, setCardOverrides] = useState<Record<number, "recruiter" | "reality">>({});
+  const { announce } = useAnnouncer();
+  const [localMode, setLocalMode] = useState<"recruiter" | "reality" | null>(
+    null
+  );
+  const [cardOverrides, setCardOverrides] = useState<
+    Record<number, "recruiter" | "reality">
+  >({});
 
-  const globalMode = localMode ?? (persona === "technical" ? "reality" : "recruiter");
+  const globalMode =
+    localMode ?? (persona === "technical" ? "reality" : "recruiter");
 
   const [prevPersona, setPrevPersona] = useState(persona);
   if (persona !== prevPersona) {
@@ -31,6 +42,12 @@ export const Timeline: React.FC = () => {
     setLocalMode(mode);
     setPersona(mode === "reality" ? "technical" : "recruiter");
     setCardOverrides({});
+    announce(
+      mode === "reality"
+        ? "Switched timeline perspective to Hands-On Reality: Deep technical architecture details."
+        : "Switched timeline perspective to Formal Summary: Executive overview and key impact.",
+      "assertive"
+    );
   };
 
   const handleCardToggle = (idx: number) => {
@@ -53,15 +70,34 @@ export const Timeline: React.FC = () => {
     <div className="w-full max-w-3xl mx-auto py-6 sm:py-8 relative select-none">
       {/* Global View Switcher */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 mb-12 sm:mb-16 px-4 py-3 bg-[#13151a]/90 border border-white/10 rounded-2xl backdrop-blur-md w-full shadow-lg">
-        <div className="flex items-center gap-2 text-xs font-mono text-zinc-400 self-start sm:self-center">
-          <span className="w-2 h-2 rounded-full bg-amber-400" />
-          <span className="font-bold text-zinc-200">Perspective:</span>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 text-xs font-mono text-zinc-400 self-start sm:self-center">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-400" />
+            <span className="font-bold text-zinc-200">Perspective:</span>
+          </div>
+          <span
+            id="timeline-perspective-desc"
+            className="text-[11px] text-zinc-400"
+          >
+            {globalMode === "reality"
+              ? "Deep technical architecture & execution"
+              : "Executive summary & leadership impact"}
+          </span>
         </div>
 
-        <div className="flex p-0.5 bg-black/60 border border-white/10 rounded-xl text-xs font-mono w-full sm:w-auto">
+        <div
+          className="flex p-0.5 bg-black/60 border border-white/10 rounded-xl text-xs font-mono w-full sm:w-auto"
+          role="group"
+          aria-label="Timeline Reading Perspective"
+          aria-describedby="timeline-perspective-desc"
+        >
           <button
+            type="button"
             onClick={() => handleGlobalToggle("reality")}
-            className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 min-h-10 px-3.5 py-2 rounded-lg font-bold transition-all duration-200 cursor-pointer ${
+            aria-pressed={globalMode === "reality"}
+            aria-label="Hands-On Reality Mode: Deep technical architecture and code implementation"
+            title="Hands-On Reality Mode — Deep technical architecture and code implementation"
+            className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 min-h-[44px] px-3.5 py-2 rounded-lg font-bold transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
               globalMode === "reality"
                 ? "bg-[#1f232d] text-amber-300 border border-amber-500/40 shadow-sm"
                 : "text-zinc-400 hover:text-zinc-200 border border-transparent"
@@ -71,8 +107,12 @@ export const Timeline: React.FC = () => {
             <span className="text-[11px] sm:text-xs">HANDS-ON REALITY</span>
           </button>
           <button
+            type="button"
             onClick={() => handleGlobalToggle("recruiter")}
-            className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 min-h-10 px-3.5 py-2 rounded-lg font-bold transition-all duration-200 cursor-pointer ${
+            aria-pressed={globalMode === "recruiter"}
+            aria-label="Formal Summary Mode: High-level executive overview and business outcomes"
+            title="Formal Summary Mode — High-level executive overview and business outcomes"
+            className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 min-h-[44px] px-3.5 py-2 rounded-lg font-bold transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
               globalMode === "recruiter"
                 ? "bg-[#1f232d] text-cyan-300 border border-cyan-500/40 shadow-sm"
                 : "text-zinc-400 hover:text-zinc-200 border border-transparent"
@@ -99,7 +139,11 @@ export const Timeline: React.FC = () => {
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8, delay: idx * 0.08, ...designManifest.motion.springs.timeline }}
+              transition={{
+                duration: 0.8,
+                delay: idx * 0.08,
+                ...designManifest.motion.springs.timeline,
+              }}
               className={`relative flex flex-col md:flex-row items-start md:items-center ${
                 isLeft ? "md:flex-row-reverse" : ""
               }`}
@@ -118,7 +162,9 @@ export const Timeline: React.FC = () => {
               </div>
 
               {/* Card Container */}
-              <div className={`w-full md:w-[46%] pl-7 sm:pl-10 md:pl-0 ${isLeft ? "md:pr-10 md:text-right" : "md:pl-10"}`}>
+              <div
+                className={`w-full md:w-[46%] pl-7 sm:pl-10 md:pl-0 ${isLeft ? "md:pr-10 md:text-right" : "md:pl-10"}`}
+              >
                 <div
                   style={
                     {
@@ -130,10 +176,14 @@ export const Timeline: React.FC = () => {
                     } as React.CSSProperties
                   }
                   className={`p-4 sm:p-6 bg-[#13151a]/85 border rounded-2xl backdrop-blur-md transition-all duration-300 group shadow-lg ${
-                    isReality ? "border-amber-500/25 hover:border-amber-500/45" : "border-white/10 hover:border-white/20"
+                    isReality
+                      ? "border-amber-500/25 hover:border-amber-500/45"
+                      : "border-white/10 hover:border-white/20"
                   }`}
                 >
-                  <div className={`flex items-center justify-between gap-2 mb-3 ${isLeft ? "md:flex-row-reverse" : ""}`}>
+                  <div
+                    className={`flex items-center justify-between gap-2 mb-3 ${isLeft ? "md:flex-row-reverse" : ""}`}
+                  >
                     <span
                       className={`text-[10px] font-mono font-bold tracking-wider uppercase px-2.5 py-0.5 border rounded-md transition-colors duration-300 ${
                         isReality
@@ -176,18 +226,26 @@ export const Timeline: React.FC = () => {
                         exit={{ opacity: 0, y: -6 }}
                         transition={{ duration: 0.2 }}
                         className={`text-xs leading-relaxed font-sans ${
-                          isReality ? "text-amber-200/90 italic" : "text-zinc-300"
+                          isReality
+                            ? "text-amber-200/90 italic"
+                            : "text-zinc-300"
                         }`}
                       >
                         <RichNarrative
-                          html={isReality ? item.realityDescription : item.recruiterDescription}
+                          html={
+                            isReality
+                              ? item.realityDescription
+                              : item.recruiterDescription
+                          }
                         />
                       </motion.div>
                     </AnimatePresence>
                   </div>
 
                   {/* Tag Chips */}
-                  <div className={`flex flex-wrap gap-1.5 mt-4 ${isLeft ? "md:justify-end" : ""}`}>
+                  <div
+                    className={`flex flex-wrap gap-1.5 mt-4 ${isLeft ? "md:justify-end" : ""}`}
+                  >
                     {item.tags.map((tag) => (
                       <span
                         key={tag}
