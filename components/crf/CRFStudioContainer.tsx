@@ -38,6 +38,8 @@ import { FormCanvas } from "./CenterCanvas/FormCanvas";
 import { InspectorPanel } from "./RightInspector/InspectorPanel";
 import dynamic from "next/dynamic";
 
+import { ActiveFormGrid } from "./Modes/ActiveFormGrid";
+
 const AcrfOverlayViewer = dynamic(
   () =>
     import("./Modes/AcrfOverlayViewer").then((mod) => mod.AcrfOverlayViewer),
@@ -232,9 +234,15 @@ export const CRFStudioContainer: React.FC = () => {
       ) as StudioMode;
       if (
         rawMode &&
-        ["designer", "matrix", "rules", "edc", "acrf", "export"].includes(
-          rawMode
-        )
+        [
+          "designer",
+          "grid",
+          "matrix",
+          "rules",
+          "edc",
+          "acrf",
+          "export",
+        ].includes(rawMode)
       ) {
         return rawMode;
       }
@@ -1544,6 +1552,7 @@ export const CRFStudioContainer: React.FC = () => {
                 }}
                 onDuplicateForm={handleDuplicateForm}
                 onOpenSlashPalette={handleOpenSlashPalette}
+                onSwitchMode={setActiveMode}
               />
             </div>
 
@@ -1581,6 +1590,60 @@ export const CRFStudioContainer: React.FC = () => {
               </aside>
             )}
           </>
+        )}
+
+        {activeMode === "grid" && activeForm && (
+          <div className="flex-1 flex overflow-hidden w-full h-full">
+            <ActiveFormGrid
+              form={activeForm}
+              study={study}
+              selectedFieldId={selectedFieldId}
+              onSelectField={handleSelectField}
+              onUpdateField={handleUpdateField}
+              onRenameEverywhere={(fId, newVar) =>
+                handleRenameFieldEverywhere(fId, newVar)
+              }
+              onUpdateStudy={updateStudyWithHistory}
+              onSwitchMode={setActiveMode}
+              onAddField={(secId) => {
+                setAddFieldTargetSectionId(secId ?? null);
+                setIsLeftSidebarOpen(true);
+                setLeftTab("palette");
+              }}
+            />
+            {isRightInspectorOpen && (
+              <aside
+                aria-label="Field inspector"
+                className="hidden lg:flex w-80 bg-zinc-950 shrink-0 flex-col transition-all border-l border-zinc-800"
+              >
+                <InspectorPanel
+                  form={activeForm}
+                  selectedField={selectedField}
+                  codelists={study.codelists}
+                  onClose={() => setSelectedFieldId(null)}
+                  onUpdateField={handleUpdateField}
+                  onUpdateFormMeta={handleUpdateFormMeta}
+                  onUpdateRules={handleUpdateRules}
+                  onSaveCodelist={handleSaveCodelist}
+                  onDuplicateField={(fId) => {
+                    if (activeForm) {
+                      const sec = activeForm.sections.find((s) =>
+                        s.fields.some((f) => f.id === fId)
+                      );
+                      if (sec) handleDuplicateField(sec.id, fId);
+                    }
+                  }}
+                  onDuplicateForm={(fId) => handleDuplicateForm(fId)}
+                  onRenameEverywhere={
+                    selectedField
+                      ? (newVar) =>
+                          handleRenameFieldEverywhere(selectedField.id, newVar)
+                      : undefined
+                  }
+                />
+              </aside>
+            )}
+          </div>
         )}
 
         {activeMode === "matrix" && (
