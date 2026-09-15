@@ -37,6 +37,24 @@ The existing public cache is evicted only after Prisma confirms creation.
 
 ***
 
+### deleteBlogPost()
+
+> `static` **deleteBlogPost**(`id`): `Promise`\<\{ `body`: `string`; `created_at`: `Date`; `dek`: `string`; `hero_image_url`: `string` \| `null`; `id`: `string`; `pillar`: `string`; `published`: `boolean`; `reading_time_minutes`: `number` \| `null`; `slug`: `string`; `tags`: `string`; `title`: `string`; `updated_at`: `Date`; \} \| `null`\>
+
+Deletes a persisted blog post or draft by ID and evicts associated caches.
+
+#### Parameters
+
+##### id
+
+`string`
+
+#### Returns
+
+`Promise`\<\{ `body`: `string`; `created_at`: `Date`; `dek`: `string`; `hero_image_url`: `string` \| `null`; `id`: `string`; `pillar`: `string`; `published`: `boolean`; `reading_time_minutes`: `number` \| `null`; `slug`: `string`; `tags`: `string`; `title`: `string`; `updated_at`: `Date`; \} \| `null`\>
+
+***
+
 ### evictBlogPostCache()
 
 > `static` **evictBlogPostCache**(`slug`): `Promise`\<`boolean`\>
@@ -82,6 +100,24 @@ Guarantees:
 #### Returns
 
 `Promise`\<[`BlogPostData`](../../../fallback-blog-posts/interfaces/BlogPostData.md)[]\>
+
+***
+
+### getBlogPostById()
+
+> `static` **getBlogPostById**(`id`): `Promise`\<\{ `body`: `string`; `created_at`: `Date`; `dek`: `string`; `hero_image_url`: `string` \| `null`; `id`: `string`; `pillar`: `string`; `published`: `boolean`; `reading_time_minutes`: `number` \| `null`; `slug`: `string`; `tags`: `string`; `title`: `string`; `updated_at`: `Date`; \} \| `null`\>
+
+Retrieves a persisted blog post by ID (published or draft) for admin inspection.
+
+#### Parameters
+
+##### id
+
+`string`
+
+#### Returns
+
+`Promise`\<\{ `body`: `string`; `created_at`: `Date`; `dek`: `string`; `hero_image_url`: `string` \| `null`; `id`: `string`; `pillar`: `string`; `published`: `boolean`; `reading_time_minutes`: `number` \| `null`; `slug`: `string`; `tags`: `string`; `title`: `string`; `updated_at`: `Date`; \} \| `null`\>
 
 ***
 
@@ -150,10 +186,8 @@ collection. This intentionally never consults the public fallback data.
 
 > `static` **updateDraftBlogPost**(`id`, `input`): `Promise`\<\{ `body`: `string`; `created_at`: `Date`; `dek`: `string`; `hero_image_url`: `string` \| `null`; `id`: `string`; `pillar`: `string`; `published`: `boolean`; `reading_time_minutes`: `number` \| `null`; `slug`: `string`; `tags`: `string`; `title`: `string`; `updated_at`: `Date`; \} \| `null`\>
 
-Applies a partial edit to an unpublished draft. The database predicate makes
-the unpublished state part of the write itself, preventing a concurrent
-publication from receiving a draft-only edit. Cache eviction runs only after
-persistence returns the updated record.
+Applies a partial edit to a blog post or draft. Handles publishing state transitions.
+Cache eviction runs only after persistence returns the updated record.
 
 #### Parameters
 

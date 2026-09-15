@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 import { isCurrentUserAdmin } from "@/lib/auth/admin";
 import { prisma } from "@/lib/db";
 import { redis, isRedisConfigured } from "@/lib/redis";
-import { GET, PATCH } from "@/app/api/admin/blog/[id]/route";
+import { GET, PATCH, DELETE } from "@/app/api/admin/blog/[id]/route";
 
 vi.mock("@/lib/auth/admin", () => ({
   isCurrentUserAdmin: vi.fn(),
@@ -13,7 +13,9 @@ vi.mock("@/lib/db", () => ({
   prisma: {
     blogPost: {
       findFirst: vi.fn(),
+      findUnique: vi.fn(),
       updateManyAndReturn: vi.fn(),
+      delete: vi.fn(),
     },
   },
 }));
@@ -243,5 +245,35 @@ describe("GET and PATCH /api/admin/blog/[id]", () => {
       data: { title: "Edited Draft Title" },
     });
     expect(redis.del).not.toHaveBeenCalled();
+  });
+
+  it("denies anonymous deletion and deletes post when authorized", async () => {
+    vi.mocked(isCurrentUserAdmin).mockResolvedValueOnce(false);
+
+    const denied = await DELETE(
+      new NextRequest("http://localhost:3000/api/admin/blog/draft-1", {
+        method: "DELETE",
+      }),
+      routeContext
+    );
+
+    expect(denied.status).toBe(403);
+    expect(prisma.blogPost.delete).not.toHaveBeenCalled();
+
+    vi.mocked(isCurrentUserAdmin).mockResolvedValue(true);
+    vi.mocked(prisma.blogPost.findUnique).mockResolvedValue(originalDraft);
+    vi.mocked(prisma.blogPost.delete).mockResolvedValue(originalDraft);
+
+    const allowed = await DELETE(
+      new NextRequest("http://localhost:3000/api/admin/blog/draft-1", {
+        method: "DELETE",
+      }),
+      routeContext
+    );
+
+    expect(allowed.status).toBe(200);
+    expect(prisma.blogPost.delete).toHaveBeenCalledWith({
+      where: { id: originalDraft.id },
+    });
   });
 });
