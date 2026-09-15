@@ -21,7 +21,9 @@
 
 - [ALLOWED\_REACTIONS](variables/ALLOWED_REACTIONS.md)
 - [BlogDraftCreateSchema](variables/BlogDraftCreateSchema.md)
+- [BlogDraftIdParamsSchema](variables/BlogDraftIdParamsSchema.md)
 - [BlogDraftPaginationSchema](variables/BlogDraftPaginationSchema.md)
+- [BlogDraftUpdateSchema](variables/BlogDraftUpdateSchema.md)
 - [CaseStudyListResponseSchema](variables/CaseStudyListResponseSchema.md)
 - [CaseStudySubmissionSchema](variables/CaseStudySubmissionSchema.md)
 - [CaseStudySummarySchema](variables/CaseStudySummarySchema.md)

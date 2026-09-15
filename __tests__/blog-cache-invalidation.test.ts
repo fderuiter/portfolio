@@ -20,6 +20,7 @@ import {
 vi.mock("@/lib/db", () => ({
   prisma: {
     blogPost: {
+      create: vi.fn(),
       findMany: vi.fn(),
       findUnique: vi.fn(),
     },
@@ -216,6 +217,91 @@ describe("Blog Cache Contracts & Concrete Invalidation Suite", () => {
       );
       expect(redis.del).not.toHaveBeenCalled();
       expect(revalidatePath).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("Draft shadowing of warmed public fallbacks", () => {
+    it("evicts a warmed fallback and keeps a same-slug draft out of public detail and list contracts", async () => {
+      vi.mocked(isRedisConfigured).mockReturnValue(true);
+      vi.mocked(redis.get)
+        .mockResolvedValueOnce(null as never)
+        .mockResolvedValueOnce(null as never)
+        .mockResolvedValueOnce(null as never)
+        .mockResolvedValueOnce(null as never);
+      vi.mocked(redis.del).mockResolvedValue(2 as never);
+
+      vi.mocked(prisma.blogPost.findUnique)
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce({
+          id: "draft-shadow-1",
+          slug: "conflicting-draft-slug",
+          title: "Same Slug Draft",
+          dek: "This persisted draft shadows the static fallback.",
+          body: "<p>Draft body.</p>",
+          pillar: "field-notes",
+          tags: "draft",
+          published: false,
+          reading_time_minutes: 1,
+          hero_image_url: null,
+          created_at: new Date("2026-09-14T00:00:00.000Z"),
+          updated_at: new Date("2026-09-14T00:00:00.000Z"),
+        });
+      vi.mocked(prisma.blogPost.findMany)
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([
+          {
+            id: "draft-shadow-1",
+            slug: "conflicting-draft-slug",
+            title: "Same Slug Draft",
+            dek: "This persisted draft shadows the static fallback.",
+            body: "<p>Draft body.</p>",
+            pillar: "field-notes",
+            tags: "draft",
+            published: false,
+            reading_time_minutes: 1,
+            hero_image_url: null,
+            created_at: new Date("2026-09-14T00:00:00.000Z"),
+            updated_at: new Date("2026-09-14T00:00:00.000Z"),
+          },
+        ]);
+      vi.mocked(prisma.blogPost.create).mockResolvedValue({
+        id: "draft-shadow-1",
+        slug: "conflicting-draft-slug",
+        title: "Same Slug Draft",
+        dek: "This persisted draft shadows the static fallback.",
+        body: "<p>Draft body.</p>",
+        pillar: "field-notes",
+        tags: "draft",
+        published: false,
+        reading_time_minutes: 1,
+        hero_image_url: null,
+        created_at: new Date("2026-09-14T00:00:00.000Z"),
+        updated_at: new Date("2026-09-14T00:00:00.000Z"),
+      });
+
+      const warmedFallback = await getBlogPostBySlug("conflicting-draft-slug");
+      await getAllPublishedBlogPosts();
+      await BlogPostService.createDraftBlogPost({
+        title: "Same Slug Draft",
+        slug: "conflicting-draft-slug",
+        dek: "This persisted draft shadows the static fallback.",
+        body: "<p>Draft body.</p>",
+        pillar: "field-notes",
+        tags: "draft",
+        hero_image_url: null,
+      });
+      const publicDetail = await getBlogPostBySlug("conflicting-draft-slug");
+      const publicList = await getAllPublishedBlogPosts();
+
+      expect(warmedFallback?.slug).toBe("conflicting-draft-slug");
+      expect(redis.del).toHaveBeenCalledWith(
+        "test:blog:slug:conflicting-draft-slug",
+        "test:blog:all_published"
+      );
+      expect(publicDetail).toBeNull();
+      expect(publicList).not.toContainEqual(
+        expect.objectContaining({ slug: "conflicting-draft-slug" })
+      );
     });
   });
 

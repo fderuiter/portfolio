@@ -590,6 +590,12 @@ Re-exports [TelemetryService](telemetry-service/classes/TelemetryService.md)
 
 ***
 
+### UpdateBlogDraftInput
+
+Re-exports [UpdateBlogDraftInput](blog-service/interfaces/UpdateBlogDraftInput.md)
+
+***
+
 ### VariableTypeSchema
 
 Re-exports [VariableTypeSchema](garmin/allocate-memory/spec/variables/VariableTypeSchema.md)

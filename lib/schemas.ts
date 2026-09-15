@@ -27,6 +27,38 @@ export const BlogDraftCreateSchema = z
     hero_image_url: data.heroImageUrl || null,
   }));
 
+/** Runtime contract for an existing BlogPost draft route parameter. */
+export const BlogDraftIdParamsSchema = z
+  .object({
+    id: z.string().trim().min(1).max(191),
+  })
+  .strict();
+
+/**
+ * Runtime contract for a partial, server-owned BlogPost draft edit. Publication,
+ * identity, and timestamp fields are intentionally omitted and rejected by strict mode.
+ */
+export const BlogDraftUpdateSchema = z
+  .object({
+    title: z.string().trim().min(3).max(180).optional(),
+    slug: z
+      .string()
+      .trim()
+      .min(3)
+      .max(120)
+      .regex(BLOG_SLUG_PATTERN, "Slug must be lowercase kebab-case")
+      .optional(),
+    dek: z.string().trim().min(10).max(500).optional(),
+    body: z.string().trim().min(1).max(50_000).optional(),
+    pillar: z.enum(CONTENT_PILLARS).optional(),
+    tags: z.array(z.string().trim().min(1).max(50)).min(1).max(12).optional(),
+    heroImageUrl: z.string().trim().url().max(2048).nullable().optional(),
+  })
+  .strict()
+  .refine((data) => Object.keys(data).length > 0, {
+    message: "At least one editable draft field is required",
+  });
+
 /** Runtime contract for bounded, deterministic admin draft collection pagination. */
 export const BlogDraftPaginationSchema = z
   .object({

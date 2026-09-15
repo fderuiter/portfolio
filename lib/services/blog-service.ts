@@ -17,6 +17,16 @@ export interface CreateBlogDraftInput {
   hero_image_url: string | null;
 }
 
+export interface UpdateBlogDraftInput {
+  title?: string;
+  slug?: string;
+  dek?: string;
+  body?: string;
+  pillar?: ContentPillar;
+  tags?: string[];
+  heroImageUrl?: string | null;
+}
+
 export interface BlogDraftPagination {
   page: number;
   pageSize: number;
@@ -266,7 +276,7 @@ export class BlogPostService {
     const [drafts, total] = await Promise.all([
       prisma.blogPost.findMany({
         where: { published: false },
-        orderBy: { updated_at: "desc" },
+        orderBy: [{ updated_at: "desc" }, { id: "asc" }],
         skip,
         take: pageSize,
       }),
@@ -304,6 +314,73 @@ export class BlogPostService {
 
     await BlogPostService.evictBlogPostCache(input.slug);
     return created;
+  }
+
+  /**
+   * Retrieves a persisted unpublished draft for an authorized admin item read.
+   * Static public fallbacks are deliberately excluded from this private workflow.
+   */
+  static async getDraftBlogPostById(id: string) {
+    return prisma.blogPost.findFirst({
+      where: { id, published: false },
+    });
+  }
+
+  /**
+   * Applies a partial edit to an unpublished draft. The database predicate makes
+   * the unpublished state part of the write itself, preventing a concurrent
+   * publication from receiving a draft-only edit. Cache eviction runs only after
+   * persistence returns the updated record.
+   */
+  static async updateDraftBlogPost(id: string, input: UpdateBlogDraftInput) {
+    const existing = await BlogPostService.getDraftBlogPostById(id);
+    if (!existing) {
+      return null;
+    }
+
+    const data: {
+      title?: string;
+      slug?: string;
+      dek?: string;
+      body?: string;
+      pillar?: ContentPillar;
+      tags?: string;
+      hero_image_url?: string | null;
+      reading_time_minutes?: number;
+    } = {};
+
+    if (input.title !== undefined) data.title = input.title;
+    if (input.slug !== undefined) data.slug = input.slug;
+    if (input.dek !== undefined) data.dek = input.dek;
+    if (input.pillar !== undefined) data.pillar = input.pillar;
+    if (input.tags !== undefined) data.tags = input.tags.join(", ");
+    if (input.heroImageUrl !== undefined) {
+      data.hero_image_url = input.heroImageUrl;
+    }
+    if (input.body !== undefined) {
+      const sanitizedBody = sanitizeContentHtml(input.body);
+      const wordCount = sanitizedBody
+        .replace(/<[^>]*>/g, " ")
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean).length;
+      data.body = sanitizedBody;
+      data.reading_time_minutes = Math.max(1, Math.ceil(wordCount / 200));
+    }
+
+    const [updated] = await prisma.blogPost.updateManyAndReturn({
+      where: { id, published: false },
+      data,
+    });
+    if (!updated) {
+      return null;
+    }
+
+    const slugs = new Set([existing.slug, updated.slug]);
+    await Promise.all(
+      [...slugs].map((slug) => BlogPostService.evictBlogPostCache(slug))
+    );
+    return updated;
   }
 
   /**
@@ -548,8 +625,7 @@ export class BlogPostService {
    * and dispatches on-demand Next.js ISR path revalidations for rendered routes
    * (`/blog`, `/blog/[slug]`) and associated cache tags.
    *
-   * Note: Integration with the `/admin` publishing flow is pending (#761);
-   * production callers do not exist yet.
+   * Admin draft creation and editing invoke this after confirmed persistence.
    *
    * @param slug - The unique URL slug of the blog post to evict.
    * @returns True if the Redis cache keys were successfully deleted; false if Redis
