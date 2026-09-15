@@ -45,8 +45,7 @@ Explicitly evicts a blog post from the Upstash Redis read-through cache
 and dispatches on-demand Next.js ISR path revalidations for rendered routes
 (`/blog`, `/blog/[slug]`) and associated cache tags.
 
-Note: Integration with the `/admin` publishing flow is pending (#761);
-production callers do not exist yet.
+Admin draft creation and editing invoke this after confirmed persistence.
 
 #### Parameters
 
@@ -109,6 +108,25 @@ Employs the Two-Tier Cache Shield (ADR 0036):
 
 ***
 
+### getDraftBlogPostById()
+
+> `static` **getDraftBlogPostById**(`id`): `Promise`\<\{ `body`: `string`; `created_at`: `Date`; `dek`: `string`; `hero_image_url`: `string` \| `null`; `id`: `string`; `pillar`: `string`; `published`: `boolean`; `reading_time_minutes`: `number` \| `null`; `slug`: `string`; `tags`: `string`; `title`: `string`; `updated_at`: `Date`; \} \| `null`\>
+
+Retrieves a persisted unpublished draft for an authorized admin item read.
+Static public fallbacks are deliberately excluded from this private workflow.
+
+#### Parameters
+
+##### id
+
+`string`
+
+#### Returns
+
+`Promise`\<\{ `body`: `string`; `created_at`: `Date`; `dek`: `string`; `hero_image_url`: `string` \| `null`; `id`: `string`; `pillar`: `string`; `published`: `boolean`; `reading_time_minutes`: `number` \| `null`; `slug`: `string`; `tags`: `string`; `title`: `string`; `updated_at`: `Date`; \} \| `null`\>
+
+***
+
 ### getDraftBlogPosts()
 
 > `static` **getDraftBlogPosts**(`__namedParameters`): `Promise`\<\{ `drafts`: `object`[]; `total`: `number`; \}\>
@@ -125,3 +143,28 @@ collection. This intentionally never consults the public fallback data.
 #### Returns
 
 `Promise`\<\{ `drafts`: `object`[]; `total`: `number`; \}\>
+
+***
+
+### updateDraftBlogPost()
+
+> `static` **updateDraftBlogPost**(`id`, `input`): `Promise`\<\{ `body`: `string`; `created_at`: `Date`; `dek`: `string`; `hero_image_url`: `string` \| `null`; `id`: `string`; `pillar`: `string`; `published`: `boolean`; `reading_time_minutes`: `number` \| `null`; `slug`: `string`; `tags`: `string`; `title`: `string`; `updated_at`: `Date`; \} \| `null`\>
+
+Applies a partial edit to an unpublished draft. The database predicate makes
+the unpublished state part of the write itself, preventing a concurrent
+publication from receiving a draft-only edit. Cache eviction runs only after
+persistence returns the updated record.
+
+#### Parameters
+
+##### id
+
+`string`
+
+##### input
+
+[`UpdateBlogDraftInput`](../interfaces/UpdateBlogDraftInput.md)
+
+#### Returns
+
+`Promise`\<\{ `body`: `string`; `created_at`: `Date`; `dek`: `string`; `hero_image_url`: `string` \| `null`; `id`: `string`; `pillar`: `string`; `published`: `boolean`; `reading_time_minutes`: `number` \| `null`; `slug`: `string`; `tags`: `string`; `title`: `string`; `updated_at`: `Date`; \} \| `null`\>

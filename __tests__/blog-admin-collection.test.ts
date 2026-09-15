@@ -96,7 +96,7 @@ describe("GET and POST /api/admin/blog", () => {
     expect(prisma.blogPost.create).not.toHaveBeenCalled();
   });
 
-  it("lists only drafts with bounded pagination and never uses public fallbacks", async () => {
+  it("lists only drafts with deterministic tied-timestamp pagination and never uses public fallbacks", async () => {
     vi.mocked(prisma.blogPost.findMany).mockResolvedValue([createdDraft]);
     vi.mocked(prisma.blogPost.count).mockResolvedValue(3);
 
@@ -111,7 +111,7 @@ describe("GET and POST /api/admin/blog", () => {
     });
     expect(prisma.blogPost.findMany).toHaveBeenCalledWith({
       where: { published: false },
-      orderBy: { updated_at: "desc" },
+      orderBy: [{ updated_at: "desc" }, { id: "asc" }],
       skip: 1,
       take: 1,
     });

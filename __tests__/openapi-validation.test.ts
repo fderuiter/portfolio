@@ -165,4 +165,23 @@ describe("Declarative Zod Validation Endpoints", () => {
       expect(openApiSpec.components.schemas.BlogDraftCollection).toBeDefined();
     });
   });
+
+  describe("Admin blog draft item contract", () => {
+    it("declares authorized draft read and partial edit contracts", () => {
+      const route = openApiSpec.paths["/api/admin/blog/{id}"];
+
+      expect(route.get).toBeDefined();
+      expect(route.patch).toBeDefined();
+      expect(route.get?.parameters).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ name: "id", in: "path", required: true }),
+        ])
+      );
+      expect(route.patch?.requestBody).toBeDefined();
+      expect(openApiSpec.components.schemas.BlogDraftUpdate).toBeDefined();
+      expect(
+        openApiSpec.components.schemas.BlogDraftUpdateResponse
+      ).toBeDefined();
+    });
+  });
 });

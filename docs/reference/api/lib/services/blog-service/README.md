@@ -14,6 +14,7 @@
 
 - [BlogDraftPagination](interfaces/BlogDraftPagination.md)
 - [CreateBlogDraftInput](interfaces/CreateBlogDraftInput.md)
+- [UpdateBlogDraftInput](interfaces/UpdateBlogDraftInput.md)
 
 ## Functions
 
