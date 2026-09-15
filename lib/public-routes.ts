@@ -26,6 +26,7 @@ export const PUBLIC_ROUTE_REGISTRY = [
   { path: "/proof", name: "Formal Proof Studio", category: "tool" },
   { path: "/neuro", name: "Neuro 3D Simulator", category: "tool" },
   { path: "/crf", name: "CRF Builder & AST", category: "tool" },
+  { path: "/patrol", name: "Patrol Shift Studio", category: "tool" },
   {
     path: "/simulator",
     name: "System Dynamics Simulator",

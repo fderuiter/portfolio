@@ -29,6 +29,7 @@ import {
   IconSparkles,
   IconCoffee,
   IconFlame,
+  IconShieldCheck,
 } from "@tabler/icons-react";
 import { filterFuzzySearch } from "@/lib/search-utils";
 import { useSearch } from "@/components/providers/SearchProvider";
@@ -783,6 +784,30 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
           "12-column clinical grid & visit schedule",
           "Automated CDASH regulatory remediation",
           "Multi-role simulated investigator sign-off",
+        ],
+      },
+      {
+        id: "nav-patrol-shift",
+        title: "Patrol Shift Studio: Midwest Ski Patrol Simulator",
+        subtitle:
+          "Midwest ski-patrol judgment and triage simulator powered by Outdoor Emergency Transportation (OET) domain logic.",
+        category: "navigation",
+        url: "/patrol",
+        icon: <IconShieldCheck className="w-4 h-4 text-brand-cyan" />,
+        badge: "Emergency Triage",
+        status: "OET Engine Active",
+        description:
+          "Midwest ski-patrol judgment and triage simulator powered by Outdoor Emergency Transportation (OET) domain logic.",
+        techStack: [
+          "OET Protocol Rules",
+          "Finite State Machine",
+          "Triage Engine",
+          "React 19",
+        ],
+        highlights: [
+          "Outdoor Emergency Transportation protocol rules",
+          "Real-time triage state transitions",
+          "Automated performance debrief reports",
         ],
       },
       {

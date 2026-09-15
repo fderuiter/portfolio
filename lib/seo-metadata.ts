@@ -49,6 +49,23 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     locale: "en-US",
     isAccessibleForFree: true,
   },
+  patrol: {
+    title: "Patrol Shift Studio: Midwest Ski Patrol Simulator",
+    description:
+      "An interactive Midwest ski-patrol judgment and emergency triage simulator powered by Outdoor Emergency Transportation (OET) domain logic and FSM transitions.",
+    path: "/patrol",
+    keywords: [
+      "Patrol Shift Studio",
+      "Ski Patrol Simulator",
+      "Outdoor Emergency Transportation",
+      "OET Triage Engine",
+      "Winter Emergency Response",
+      "Clinical Judgment Engine",
+    ],
+    inLanguage: "en-US",
+    locale: "en-US",
+    isAccessibleForFree: true,
+  },
   arcade: {
     title: "Arcade & Browser Games | Fred de Ruiter",
     description:
