@@ -353,6 +353,130 @@
         }
       }
     },
+    "/api/blog/reactions": {
+      "get": {
+        "summary": "Retrieve blog post reaction counts",
+        "description": "Fetches aggregate quick reaction counts for a blog post slug.",
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "query",
+            "required": false,
+            "description": "Blog post slug identifier (interchangeable with blogPostSlug)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "blogPostSlug",
+            "in": "query",
+            "required": false,
+            "description": "Blog post slug identifier (interchangeable with slug)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful retrieval of reaction counts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlogPostReactionGetResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing required query parameter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Submit blog post reaction badge",
+        "description": "Increments quick reaction badge count for a published blog post slug.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlogPostReactionSubmission"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reaction registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReactionPostResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error on payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Blog post not found or unpublished",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/telemetry": {
       "get": {
         "summary": "Retrieve compiled telemetry metrics",
@@ -1799,6 +1923,54 @@
         "required": [
           "caseStudySlug",
           "reactionType"
+        ]
+      },
+      "BlogPostReactionSubmission": {
+        "type": "object",
+        "properties": {
+          "blogPostSlug": {
+            "type": "string"
+          },
+          "reactionType": {
+            "type": "string",
+            "enum": [
+              "insightful",
+              "mind_blowing",
+              "actionable",
+              "thorough"
+            ]
+          }
+        },
+        "required": [
+          "blogPostSlug",
+          "reactionType"
+        ]
+      },
+      "BlogPostReactionGetResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "blogPostSlug": {
+            "type": "string"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/ReactionCounts"
+          },
+          "userReactions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Reaction types submitted by current user connection hash"
+          }
+        },
+        "required": [
+          "success",
+          "blogPostSlug",
+          "counts",
+          "userReactions"
         ]
       },
       "ReactionCounts": {

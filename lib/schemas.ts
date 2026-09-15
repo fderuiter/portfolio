@@ -339,6 +339,20 @@ export const ReactionSubmissionSchema = z.object({
 });
 
 /**
+ * Schema for Blog Post Reaction POST payload validation
+ */
+export const BlogPostReactionSubmissionSchema = z.object({
+  blogPostSlug: z
+    .string()
+    .trim()
+    .min(1, "blogPostSlug must be a non-empty string"),
+  reactionType: z.enum(ALLOWED_REACTIONS, {
+    message:
+      "Allowed reactionType values: 'insightful', 'mind_blowing', 'actionable', 'thorough'",
+  }),
+});
+
+/**
  * Allowed intent categories for visitor contact submissions
  */
 export const CONTACT_INTENTS = [

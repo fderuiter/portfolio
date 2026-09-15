@@ -1,0 +1,375 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { BlogPostService } from "@/lib/services/blog-service";
+import { prisma } from "@/lib/db";
+import { getScopedRedisKey } from "@/lib/redis";
+
+const {
+  mockRedisGet,
+  mockRedisSet,
+  mockRedisDel,
+  mockRedisHgetall,
+  mockRedisHincrby,
+  mockRedisSismember,
+  mockRedisSadd,
+  mockRedisSrem,
+  mockRedisSmembers,
+  mockRedisLlen,
+  mockRedisConfigured,
+  mockRedisLrange,
+  mockRedisLmove,
+  mockRedisLrem,
+  mockRedisRpush,
+  mockRedisExpire,
+  mockPipelineExec,
+} = vi.hoisted(() => ({
+  mockRedisGet: vi.fn(),
+  mockRedisSet: vi.fn(),
+  mockRedisDel: vi.fn(),
+  mockRedisHgetall: vi.fn(),
+  mockRedisHincrby: vi.fn(),
+  mockRedisSismember: vi.fn(),
+  mockRedisSadd: vi.fn(),
+  mockRedisSrem: vi.fn(),
+  mockRedisSmembers: vi.fn(),
+  mockRedisLlen: vi.fn(),
+  mockRedisConfigured: { value: true },
+  mockRedisLrange: vi.fn(),
+  mockRedisLmove: vi.fn(),
+  mockRedisLrem: vi.fn(),
+  mockRedisRpush: vi.fn(),
+  mockRedisExpire: vi.fn(),
+  mockPipelineExec: vi.fn(),
+}));
+
+const mockPublishedPost = {
+  id: "blog-1",
+  slug: "cdisc-crf-compiler-architecture",
+  title: "CDISC CRF Compiler Architecture",
+  dek: "Deep dive into CDISC ODM and CRF standards.",
+  body: "<p>Content body</p>",
+  pillar: "formal-verification",
+  tags: "cdisc, compiler",
+  published: true,
+  reading_time_minutes: 5,
+  hero_image_url: null,
+  created_at: new Date("2026-01-01T00:00:00Z"),
+  updated_at: new Date("2026-01-01T00:00:00Z"),
+};
+
+vi.mock("@/lib/db", () => ({
+  prisma: {
+    blogPost: {
+      findUnique: vi.fn(),
+      findFirst: vi.fn(),
+      findMany: vi.fn(),
+    },
+    blogPostReaction: {
+      groupBy: vi.fn(),
+      findMany: vi.fn(),
+      findFirst: vi.fn(),
+      create: vi.fn(),
+      createMany: vi.fn(),
+    },
+  },
+}));
+
+vi.mock("@/lib/redis", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/redis")>();
+  return {
+    ...actual,
+    isRedisConfigured: () => mockRedisConfigured.value,
+    redis: {
+      get: mockRedisGet,
+      set: mockRedisSet,
+      del: mockRedisDel,
+      hgetall: mockRedisHgetall,
+      hincrby: mockRedisHincrby,
+      sismember: mockRedisSismember,
+      sadd: mockRedisSadd,
+      srem: mockRedisSrem,
+      smembers: mockRedisSmembers,
+      llen: mockRedisLlen,
+      lrange: mockRedisLrange,
+      lmove: mockRedisLmove,
+      lrem: mockRedisLrem,
+      rpush: mockRedisRpush,
+      expire: mockRedisExpire,
+      pipeline: vi.fn(() => ({
+        sadd: mockRedisSadd,
+        expire: mockRedisExpire,
+        hincrby: mockRedisHincrby,
+        rpush: mockRedisRpush,
+        lmove: mockRedisLmove,
+        lrem: mockRedisLrem,
+        del: mockRedisDel,
+        exec: mockPipelineExec,
+      })),
+    },
+  };
+});
+
+describe("BlogPostService - Two-Tier Redis Compute Shield & Reaction Buffering", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockRedisConfigured.value = true;
+    mockPipelineExec.mockResolvedValue([]);
+
+    vi.mocked(prisma.blogPost.findUnique).mockResolvedValue(
+      mockPublishedPost as never
+    );
+    vi.mocked(prisma.blogPost.findFirst).mockResolvedValue(
+      mockPublishedPost as never
+    );
+  });
+
+  describe("Read Path: getReactions", () => {
+    it("merges cached base counts and Redis buffer increments without hitting Neon Postgres", async () => {
+      mockRedisGet.mockResolvedValueOnce({
+        insightful: 5,
+        mind_blowing: 2,
+        actionable: 0,
+        thorough: 1,
+      });
+
+      mockRedisHgetall.mockResolvedValueOnce({
+        insightful: 3,
+        mind_blowing: 1,
+      });
+
+      mockRedisSmembers.mockResolvedValueOnce(["insightful"]);
+
+      const result = await BlogPostService.getReactions(
+        "cdisc-crf-compiler-architecture",
+        "test-conn-hash"
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.counts).toEqual({
+        insightful: 8,
+        mind_blowing: 3,
+        actionable: 0,
+        thorough: 1,
+      });
+      expect(result.userReactions).toEqual(["insightful"]);
+
+      expect(prisma.blogPostReaction.groupBy).not.toHaveBeenCalled();
+      expect(prisma.blogPostReaction.findMany).not.toHaveBeenCalled();
+    });
+
+    it("fetches base counts from Postgres on Redis cache miss and sets Redis base cache", async () => {
+      mockRedisGet.mockResolvedValueOnce(null); // Cache miss
+
+      vi.mocked(prisma.blogPostReaction.groupBy).mockResolvedValueOnce([
+        { reactionType: "actionable", _count: { id: 12 } },
+      ] as never);
+
+      mockRedisHgetall.mockResolvedValueOnce({});
+      mockRedisSmembers.mockResolvedValueOnce([]);
+
+      vi.mocked(prisma.blogPostReaction.findMany).mockResolvedValueOnce([]);
+
+      const result = await BlogPostService.getReactions(
+        "cdisc-crf-compiler-architecture",
+        "conn-123"
+      );
+
+      expect(result.counts.actionable).toBe(12);
+      expect(prisma.blogPostReaction.groupBy).toHaveBeenCalledWith({
+        by: ["reactionType"],
+        where: { blogPostSlug: "cdisc-crf-compiler-architecture" },
+        _count: { id: true },
+      });
+
+      expect(mockRedisSet).toHaveBeenCalledWith(
+        getScopedRedisKey(
+          "blog:reactions_counts:cdisc-crf-compiler-architecture"
+        ),
+        expect.objectContaining({ actionable: 12 }),
+        { ex: 3600 }
+      );
+    });
+  });
+
+  describe("Write Path: submitReaction", () => {
+    it("buffers reaction via Upstash Redis pipeline without waking Neon Postgres", async () => {
+      // Mock post lookup in Redis (cache hit for getBlogPostBySlug)
+      mockRedisGet.mockResolvedValueOnce(mockPublishedPost);
+
+      mockRedisSismember.mockResolvedValueOnce(0); // Not yet reacted
+      mockPipelineExec.mockResolvedValueOnce(["OK", 1, 1, 1, 1]);
+      mockRedisSmembers.mockResolvedValueOnce(["insightful"]);
+
+      mockRedisGet.mockResolvedValueOnce({
+        insightful: 10,
+        mind_blowing: 0,
+        actionable: 0,
+        thorough: 0,
+      });
+      mockRedisHgetall.mockResolvedValueOnce({ insightful: 1 });
+
+      const result = await BlogPostService.submitReaction(
+        {
+          blogPostSlug: "cdisc-crf-compiler-architecture",
+          reactionType: "insightful",
+        },
+        "conn-hash-abc"
+      );
+
+      expect(result.success).toBe(true);
+      expect(mockRedisSadd).toHaveBeenCalledWith(
+        getScopedRedisKey(
+          "blog:user_reactions:cdisc-crf-compiler-architecture:conn-hash-abc"
+        ),
+        "insightful"
+      );
+      expect(mockRedisHincrby).toHaveBeenCalledWith(
+        getScopedRedisKey(
+          "blog:reactions_buffer:cdisc-crf-compiler-architecture"
+        ),
+        "insightful",
+        1
+      );
+      expect(mockRedisRpush).toHaveBeenCalledWith(
+        getScopedRedisKey("blog:reactions_queue"),
+        expect.objectContaining({
+          blogPostSlug: "cdisc-crf-compiler-architecture",
+          reactionType: "insightful",
+          connectionHash: "conn-hash-abc",
+        })
+      );
+      expect(mockRedisSadd).toHaveBeenCalledWith(
+        getScopedRedisKey("blog:dirty_reactions"),
+        "cdisc-crf-compiler-architecture"
+      );
+      expect(prisma.blogPostReaction.create).not.toHaveBeenCalled();
+    });
+
+    it("prevents duplicate reaction increment if user already reacted", async () => {
+      mockRedisGet.mockResolvedValueOnce(mockPublishedPost);
+
+      mockRedisSismember.mockResolvedValueOnce(1); // Already reacted
+      mockRedisSmembers.mockResolvedValueOnce(["insightful"]);
+
+      mockRedisGet.mockResolvedValueOnce({
+        insightful: 10,
+        mind_blowing: 0,
+        actionable: 0,
+        thorough: 0,
+      });
+      mockRedisHgetall.mockResolvedValueOnce({});
+
+      const result = await BlogPostService.submitReaction(
+        {
+          blogPostSlug: "cdisc-crf-compiler-architecture",
+          reactionType: "insightful",
+        },
+        "conn-hash-abc"
+      );
+
+      expect(result.success).toBe(true);
+      expect(mockRedisHincrby).not.toHaveBeenCalled();
+      expect(mockRedisRpush).not.toHaveBeenCalled();
+      expect(prisma.blogPostReaction.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("Unconfigured Upstash credentials", () => {
+    it("writes reactions directly to Postgres without touching Redis", async () => {
+      mockRedisConfigured.value = false;
+
+      vi.mocked(prisma.blogPostReaction.findFirst).mockResolvedValueOnce(null);
+      vi.mocked(prisma.blogPostReaction.groupBy).mockResolvedValueOnce(
+        [] as never
+      );
+      vi.mocked(prisma.blogPostReaction.findMany).mockResolvedValueOnce([]);
+
+      const result = await BlogPostService.submitReaction(
+        {
+          blogPostSlug: "cdisc-crf-compiler-architecture",
+          reactionType: "insightful",
+        },
+        "hash-nored"
+      );
+
+      expect(result.success).toBe(true);
+      expect(prisma.blogPostReaction.create).toHaveBeenCalled();
+      expect(mockRedisSismember).not.toHaveBeenCalled();
+      expect(mockPipelineExec).not.toHaveBeenCalled();
+    });
+
+    it("skips scheduled drain when Redis is unconfigured", async () => {
+      mockRedisConfigured.value = false;
+
+      const result = await BlogPostService.flushBufferedReactionsToDatabase();
+
+      expect(result).toEqual({ processed: 0, inserted: 0 });
+      expect(mockRedisLrange).not.toHaveBeenCalled();
+      expect(prisma.blogPostReaction.createMany).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("Scheduled Maintenance: flushBufferedReactionsToDatabase", () => {
+    it("pops buffered reaction events via atomic LMOVE, inserts into Postgres, and adjusts buffer", async () => {
+      mockRedisLrange.mockResolvedValueOnce([]); // No items in processing
+      mockRedisLlen.mockResolvedValueOnce(2); // 2 queued items
+
+      const mockEvent1 = {
+        id: "evt-1",
+        blogPostSlug: "cdisc-crf-compiler-architecture",
+        reactionType: "insightful",
+        connectionHash: "hash-1",
+        createdAt: new Date().toISOString(),
+      };
+      const mockEvent2 = {
+        id: "evt-2",
+        blogPostSlug: "cdisc-crf-compiler-architecture",
+        reactionType: "mind_blowing",
+        connectionHash: "hash-2",
+        createdAt: new Date().toISOString(),
+      };
+
+      mockPipelineExec.mockResolvedValueOnce([mockEvent1, mockEvent2]);
+
+      vi.mocked(prisma.blogPostReaction.createMany).mockResolvedValueOnce({
+        count: 2,
+      });
+
+      mockPipelineExec.mockResolvedValueOnce([]); // Ack pipeline
+      mockRedisHgetall.mockResolvedValueOnce({}); // Buffer empty
+
+      const result = await BlogPostService.flushBufferedReactionsToDatabase(50);
+
+      expect(result).toEqual({ processed: 2, inserted: 2 });
+      expect(prisma.blogPostReaction.createMany).toHaveBeenCalledWith({
+        data: expect.arrayContaining([
+          expect.objectContaining({
+            id: "evt-1",
+            blogPostSlug: "cdisc-crf-compiler-architecture",
+            reactionType: "insightful",
+            connectionHash: "hash-1",
+          }),
+        ]),
+        skipDuplicates: true,
+      });
+
+      expect(mockRedisLrem).toHaveBeenCalledWith(
+        getScopedRedisKey("blog:reactions_processing"),
+        1,
+        mockEvent1
+      );
+      expect(mockRedisHincrby).toHaveBeenCalledWith(
+        getScopedRedisKey(
+          "blog:reactions_buffer:cdisc-crf-compiler-architecture"
+        ),
+        "insightful",
+        -1
+      );
+      expect(mockRedisDel).toHaveBeenCalledWith(
+        getScopedRedisKey(
+          "blog:reactions_counts:cdisc-crf-compiler-architecture"
+        )
+      );
+    });
+  });
+});

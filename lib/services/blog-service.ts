@@ -4,8 +4,186 @@ import { FALLBACK_BLOG_POSTS, BlogPostData } from "@/lib/fallback-blog-posts";
 import { redis, getScopedRedisKey, isRedisConfigured } from "@/lib/redis";
 import { CONTENT_PILLARS, type ContentPillar } from "@/lib/blog/types";
 import { sanitizeContentHtml } from "@/lib/content-sanitizer";
+import { ALLOWED_REACTIONS } from "@/lib/schemas";
 
 export type { BlogPostData };
+
+export interface BlogPostReactionSubmissionInput {
+  blogPostSlug: string;
+  reactionType: string;
+}
+
+export interface BufferedBlogReactionEvent {
+  id: string;
+  blogPostSlug: string;
+  reactionType: string;
+  connectionHash: string;
+  createdAt: string;
+}
+
+const mockBlogReactionsStore = new Map<string, Map<string, number>>();
+
+function getDefaultBlogReactionCounts(): Record<string, number> {
+  const counts: Record<string, number> = {};
+  for (const r of ALLOWED_REACTIONS) {
+    counts[r] = 0;
+  }
+  return counts;
+}
+
+async function getBaseBlogReactionCounts(
+  slug: string
+): Promise<Record<string, number>> {
+  const baseKey = getScopedRedisKey(`blog:reactions_counts:${slug}`);
+  try {
+    const cached = !isRedisConfigured()
+      ? null
+      : await Promise.race([
+          redis.get<Record<string, number>>(baseKey),
+          new Promise<null>((_, reject) =>
+            setTimeout(
+              () =>
+                reject(new Error("Redis getBaseBlogReactionCounts timeout")),
+              1500
+            )
+          ),
+        ]);
+    if (cached && typeof cached === "object") {
+      const counts = getDefaultBlogReactionCounts();
+      for (const r of ALLOWED_REACTIONS) {
+        if (typeof cached[r] === "number") {
+          counts[r] = cached[r];
+        }
+      }
+      return counts;
+    }
+  } catch {
+    // Tolerated, fall through to database query
+  }
+
+  const counts = getDefaultBlogReactionCounts();
+  try {
+    const reactions = await prisma.blogPostReaction.groupBy({
+      by: ["reactionType"],
+      where: { blogPostSlug: slug },
+      _count: { id: true },
+    });
+    for (const r of reactions) {
+      if (counts[r.reactionType] !== undefined) {
+        counts[r.reactionType] = r._count.id;
+      }
+    }
+    if (isRedisConfigured()) {
+      try {
+        await Promise.race([
+          redis.set(baseKey, counts, { ex: 3600 }),
+          new Promise((_, reject) =>
+            setTimeout(
+              () =>
+                reject(new Error("Redis setBaseBlogReactionCounts timeout")),
+              1500
+            )
+          ),
+        ]);
+      } catch {
+        // Tolerated
+      }
+    }
+  } catch (err) {
+    if (env.VERCEL_ENV === "production") {
+      console.warn(
+        `BlogPostService: Failed to query base reactions for ${slug}:`,
+        err
+      );
+    }
+    const slugMap = mockBlogReactionsStore.get(slug);
+    if (slugMap) {
+      for (const [r, count] of slugMap.entries()) {
+        counts[r] = count;
+      }
+    }
+  }
+
+  return counts;
+}
+
+async function submitBlogReactionDirect(
+  blogPostSlug: string,
+  reactionType: string,
+  connectionHash: string
+) {
+  try {
+    const existing = await prisma.blogPostReaction.findFirst({
+      where: {
+        blogPostSlug,
+        reactionType,
+        connectionHash,
+      },
+    });
+
+    if (!existing) {
+      await prisma.blogPostReaction.create({
+        data: {
+          blogPostSlug,
+          reactionType,
+          connectionHash,
+        },
+      });
+    }
+
+    const reactions = await prisma.blogPostReaction.groupBy({
+      by: ["reactionType"],
+      where: { blogPostSlug },
+      _count: { id: true },
+    });
+
+    const userReactionsList = await prisma.blogPostReaction.findMany({
+      where: { blogPostSlug, connectionHash },
+      select: { reactionType: true },
+    });
+
+    const counts = getDefaultBlogReactionCounts();
+    for (const r of reactions) {
+      if (counts[r.reactionType] !== undefined) {
+        counts[r.reactionType] = r._count.id;
+      }
+    }
+
+    return {
+      success: true,
+      reactionType,
+      counts,
+      userReactions: userReactionsList.map((ur) => ur.reactionType),
+    };
+  } catch (err) {
+    if (env.VERCEL_ENV === "production") {
+      console.warn(
+        "Database blog reaction creation failed, using mock fallback:",
+        err
+      );
+    }
+
+    let slugMap = mockBlogReactionsStore.get(blogPostSlug);
+    if (!slugMap) {
+      slugMap = new Map();
+      mockBlogReactionsStore.set(blogPostSlug, slugMap);
+    }
+    const currentCount = slugMap.get(reactionType) || 0;
+    slugMap.set(reactionType, currentCount + 1);
+
+    const counts = getDefaultBlogReactionCounts();
+    for (const [r, count] of slugMap.entries()) {
+      counts[r] = count;
+    }
+
+    return {
+      success: true,
+      reactionType,
+      counts,
+      userReactions: [reactionType],
+    };
+  }
+}
 
 export interface CreateBlogDraftInput {
   title: string;
@@ -666,5 +844,416 @@ export class BlogPostService {
     await safeRevalidateTag("blog-posts");
 
     return evicted;
+  }
+
+  /**
+   * Gets aggregated reactions for a blog post.
+   * Employs Two-Tier Compute Shield:
+   * Reads cached base counts (3600s TTL) and merges uncommitted Redis write-buffer increments,
+   * completely avoiding database queries during active browsing.
+   */
+  static async getReactions(slug: string, connectionHash: string) {
+    const bufferKey = getScopedRedisKey(`blog:reactions_buffer:${slug}`);
+    const userKey = getScopedRedisKey(
+      `blog:user_reactions:${slug}:${connectionHash}`
+    );
+
+    try {
+      const baseCounts = await getBaseBlogReactionCounts(slug);
+
+      const [rawBuffer, userReactionsRaw] = !isRedisConfigured()
+        ? [null, null]
+        : await Promise.race([
+            Promise.all([
+              redis.hgetall<Record<string, string | number>>(bufferKey),
+              redis.smembers(userKey),
+            ]),
+            new Promise<[null, null]>((_, reject) =>
+              setTimeout(
+                () => reject(new Error("Redis getBlogReactions timeout")),
+                1500
+              )
+            ),
+          ]);
+
+      const counts = { ...baseCounts };
+      if (rawBuffer && typeof rawBuffer === "object") {
+        for (const [r, inc] of Object.entries(rawBuffer)) {
+          if (counts[r] !== undefined) {
+            counts[r] = (counts[r] || 0) + Math.max(0, Number(inc) || 0);
+          }
+        }
+      }
+
+      let userReactions: string[] = Array.isArray(userReactionsRaw)
+        ? userReactionsRaw
+        : [];
+
+      if (userReactions.length === 0) {
+        try {
+          const urList = await prisma.blogPostReaction.findMany({
+            where: { blogPostSlug: slug, connectionHash },
+            select: { reactionType: true },
+          });
+          if (urList.length > 0) {
+            userReactions = urList.map((ur) => ur.reactionType);
+            try {
+              const p = redis.pipeline();
+              for (const ur of userReactions) {
+                p.sadd(userKey, ur);
+              }
+              p.expire(userKey, 30 * 24 * 60 * 60);
+              await p.exec();
+            } catch {
+              // Tolerated
+            }
+          }
+        } catch {
+          // Tolerated
+        }
+      }
+
+      return {
+        success: true,
+        blogPostSlug: slug,
+        counts,
+        userReactions,
+      };
+    } catch (err) {
+      if (env.VERCEL_ENV === "production") {
+        console.warn(
+          "BlogPostService.getReactions: Redis path failed, falling back to DB/mock:",
+          err
+        );
+      }
+
+      try {
+        const reactions = await prisma.blogPostReaction.groupBy({
+          by: ["reactionType"],
+          where: { blogPostSlug: slug },
+          _count: { id: true },
+        });
+
+        const userReactionsList = await prisma.blogPostReaction.findMany({
+          where: { blogPostSlug: slug, connectionHash },
+          select: { reactionType: true },
+        });
+
+        const counts = getDefaultBlogReactionCounts();
+        for (const r of reactions) {
+          if (counts[r.reactionType] !== undefined) {
+            counts[r.reactionType] = r._count.id;
+          }
+        }
+
+        return {
+          success: true,
+          blogPostSlug: slug,
+          counts,
+          userReactions: userReactionsList.map((ur) => ur.reactionType),
+        };
+      } catch (dbErr) {
+        if (env.VERCEL_ENV === "production") {
+          console.error("Failed to query blog post reactions from DB:", dbErr);
+        }
+        const counts = getDefaultBlogReactionCounts();
+        const slugMap = mockBlogReactionsStore.get(slug);
+        if (slugMap) {
+          for (const [r, count] of slugMap.entries()) {
+            counts[r] = count;
+          }
+        }
+        return {
+          success: true,
+          blogPostSlug: slug,
+          counts,
+          userReactions: [],
+        };
+      }
+    }
+  }
+
+  /**
+   * Submits a reaction for a published blog post.
+   * Buffers reaction increments via HINCRBY in Upstash Redis without waking Neon Postgres.
+   */
+  static async submitReaction(
+    input: BlogPostReactionSubmissionInput,
+    connectionHash: string
+  ): Promise<{
+    success: boolean;
+    notFound?: boolean;
+    message?: string;
+    reactionType?: string;
+    counts?: Record<string, number>;
+    userReactions?: string[];
+  }> {
+    const { blogPostSlug, reactionType } = input;
+
+    const post = await BlogPostService.getBlogPostBySlug(blogPostSlug);
+    if (!post || !post.published) {
+      return {
+        success: false,
+        notFound: true,
+        message: "Blog post not found or not published",
+      };
+    }
+
+    const userKey = getScopedRedisKey(
+      `blog:user_reactions:${blogPostSlug}:${connectionHash}`
+    );
+    const bufferKey = getScopedRedisKey(
+      `blog:reactions_buffer:${blogPostSlug}`
+    );
+    const queueKey = getScopedRedisKey("blog:reactions_queue");
+    const dirtyKey = getScopedRedisKey("blog:dirty_reactions");
+
+    if (!isRedisConfigured()) {
+      const res = await submitBlogReactionDirect(
+        blogPostSlug,
+        reactionType,
+        connectionHash
+      );
+      return { ...res, notFound: false };
+    }
+
+    try {
+      const isMember = await Promise.race([
+        redis.sismember(userKey, reactionType),
+        new Promise<number>((_, reject) =>
+          setTimeout(() => reject(new Error("Redis sismember timeout")), 1500)
+        ),
+      ]);
+
+      let userReactions: string[] = [];
+
+      if (isMember === 1) {
+        let members: unknown = null;
+        try {
+          members = await redis.smembers(userKey);
+        } catch {
+          // Tolerated
+        }
+        userReactions = Array.isArray(members)
+          ? (members as string[])
+          : [reactionType];
+      } else {
+        const eventId = crypto.randomUUID();
+        const event: BufferedBlogReactionEvent = {
+          id: eventId,
+          blogPostSlug,
+          reactionType,
+          connectionHash,
+          createdAt: new Date().toISOString(),
+        };
+
+        const p = redis.pipeline();
+        p.sadd(userKey, reactionType);
+        p.expire(userKey, 30 * 24 * 60 * 60);
+        p.hincrby(bufferKey, reactionType, 1);
+        p.rpush(queueKey, event);
+        p.sadd(dirtyKey, blogPostSlug);
+
+        await Promise.race([
+          p.exec(),
+          new Promise((_, reject) =>
+            setTimeout(
+              () =>
+                reject(new Error("Redis submitBlogReaction pipeline timeout")),
+              1500
+            )
+          ),
+        ]);
+
+        let members: unknown = null;
+        try {
+          members = await redis.smembers(userKey);
+        } catch {
+          // Tolerated
+        }
+        userReactions = Array.isArray(members)
+          ? (members as string[])
+          : [reactionType];
+        if (!userReactions.includes(reactionType)) {
+          userReactions.push(reactionType);
+        }
+      }
+
+      const baseCounts = await getBaseBlogReactionCounts(blogPostSlug);
+      let rawBuffer: Record<string, string | number> | null = null;
+      try {
+        rawBuffer =
+          await redis.hgetall<Record<string, string | number>>(bufferKey);
+      } catch {
+        // Tolerated
+      }
+      const counts = { ...baseCounts };
+      if (rawBuffer && typeof rawBuffer === "object") {
+        for (const [r, inc] of Object.entries(rawBuffer)) {
+          if (counts[r] !== undefined) {
+            counts[r] = (counts[r] || 0) + Math.max(0, Number(inc) || 0);
+          }
+        }
+      }
+
+      return {
+        success: true,
+        reactionType,
+        counts,
+        userReactions,
+      };
+    } catch (err) {
+      if (env.VERCEL_ENV === "production") {
+        console.warn(
+          "BlogPostService.submitReaction: Redis buffering failed, falling back to DB/mock:",
+          err
+        );
+      }
+
+      const res = await submitBlogReactionDirect(
+        blogPostSlug,
+        reactionType,
+        connectionHash
+      );
+      return { ...res, notFound: false };
+    }
+  }
+
+  /**
+   * Flushes buffered blog post reactions from Upstash Redis to Neon Postgres in batches.
+   * Executed during scheduled maintenance.
+   */
+  static async flushBufferedReactionsToDatabase(
+    batchSize = 500
+  ): Promise<{ processed: number; inserted: number }> {
+    const queueKey = getScopedRedisKey("blog:reactions_queue");
+    const processingKey = getScopedRedisKey("blog:reactions_processing");
+    const dirtyKey = getScopedRedisKey("blog:dirty_reactions");
+
+    if (!isRedisConfigured()) {
+      return { processed: 0, inserted: 0 };
+    }
+
+    try {
+      const existingProcessing = (await redis.lrange(
+        processingKey,
+        0,
+        -1
+      )) as BufferedBlogReactionEvent[];
+      let events: BufferedBlogReactionEvent[] = Array.isArray(
+        existingProcessing
+      )
+        ? existingProcessing
+        : [];
+
+      if (events.length < batchSize) {
+        const queueDepth = await redis.llen(queueKey);
+        const needed = Math.min(batchSize - events.length, queueDepth);
+
+        if (needed > 0) {
+          const p = redis.pipeline();
+          for (let i = 0; i < needed; i++) {
+            p.lmove(queueKey, processingKey, "right", "left");
+          }
+          p.expire(processingKey, 48 * 60 * 60);
+          const moveResults = await p.exec();
+
+          const newlyMoved = moveResults.filter(
+            (item): item is BufferedBlogReactionEvent =>
+              item !== null &&
+              typeof item === "object" &&
+              "id" in item &&
+              "blogPostSlug" in item
+          );
+          events = [...events, ...newlyMoved];
+        }
+      }
+
+      if (events.length === 0) {
+        return { processed: 0, inserted: 0 };
+      }
+
+      let createResult: { count: number };
+      try {
+        createResult = await prisma.blogPostReaction.createMany({
+          data: events.map((e) => ({
+            id: e.id,
+            blogPostSlug: e.blogPostSlug,
+            reactionType: e.reactionType,
+            connectionHash: e.connectionHash,
+            createdAt: new Date(e.createdAt),
+          })),
+          skipDuplicates: true,
+        });
+      } catch (dbErr) {
+        console.error(
+          "BlogPostService.flushBufferedReactionsToDatabase: DB write failed; events remain in processing queue:",
+          dbErr
+        );
+        throw dbErr;
+      }
+
+      const flushedCountsBySlug: Record<string, Record<string, number>> = {};
+      for (const e of events) {
+        if (!flushedCountsBySlug[e.blogPostSlug]) {
+          flushedCountsBySlug[e.blogPostSlug] = {};
+        }
+        flushedCountsBySlug[e.blogPostSlug][e.reactionType] =
+          (flushedCountsBySlug[e.blogPostSlug][e.reactionType] || 0) + 1;
+      }
+
+      const ack = redis.pipeline();
+      for (const event of events) {
+        ack.lrem(processingKey, 1, event);
+      }
+
+      for (const [slug, typeCounts] of Object.entries(flushedCountsBySlug)) {
+        const bufferKey = getScopedRedisKey(`blog:reactions_buffer:${slug}`);
+        const baseKey = getScopedRedisKey(`blog:reactions_counts:${slug}`);
+
+        for (const [type, count] of Object.entries(typeCounts)) {
+          ack.hincrby(bufferKey, type, -count);
+        }
+        ack.del(baseKey);
+      }
+
+      await ack.exec();
+
+      for (const slug of Object.keys(flushedCountsBySlug)) {
+        const bufferKey = getScopedRedisKey(`blog:reactions_buffer:${slug}`);
+        let remainingBuffer: Record<string, string | number> | null = null;
+        try {
+          remainingBuffer =
+            await redis.hgetall<Record<string, string | number>>(bufferKey);
+        } catch {
+          // Tolerated
+        }
+
+        const isBufferEmpty =
+          !remainingBuffer ||
+          Object.values(remainingBuffer).every((val) => Number(val) <= 0);
+
+        if (isBufferEmpty) {
+          try {
+            await redis.srem(dirtyKey, slug);
+          } catch {
+            // Tolerated
+          }
+        }
+      }
+
+      return {
+        processed: events.length,
+        inserted: createResult.count,
+      };
+    } catch (err) {
+      if (env.VERCEL_ENV === "production") {
+        console.error(
+          "BlogPostService.flushBufferedReactionsToDatabase encountered error:",
+          err
+        );
+      }
+      return { processed: 0, inserted: 0 };
+    }
   }
 }

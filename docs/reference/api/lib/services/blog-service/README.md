@@ -13,6 +13,8 @@
 ## Interfaces
 
 - [BlogDraftPagination](interfaces/BlogDraftPagination.md)
+- [BlogPostReactionSubmissionInput](interfaces/BlogPostReactionSubmissionInput.md)
+- [BufferedBlogReactionEvent](interfaces/BufferedBlogReactionEvent.md)
 - [CreateBlogDraftInput](interfaces/CreateBlogDraftInput.md)
 - [UpdateBlogDraftInput](interfaces/UpdateBlogDraftInput.md)
 
