@@ -202,6 +202,7 @@
 - [lib/services/garmin/sync-flash-storage/spec](lib/services/garmin/sync-flash-storage/spec/README.md)
 - [lib/services/maintenance-service](lib/services/maintenance-service/README.md)
 - [lib/services/privacy-service](lib/services/privacy-service/README.md)
+- [lib/services/project-image-service](lib/services/project-image-service/README.md)
 - [lib/services/service-result](lib/services/service-result/README.md)
 - [lib/services/telemetry-service](lib/services/telemetry-service/README.md)
 - [lib/telemetry](lib/telemetry/README.md)

@@ -18,6 +18,7 @@ export interface CaseStudyData {
   benchmarks?: Record<string, string | number> | null;
   commands_json?: string;
   playback_json?: string;
+  hero_image_url?: string | null;
   created_at: Date;
   updated_at: Date;
 }

@@ -892,7 +892,10 @@ export function checkOpenApiParity(
   // 1. Discover all app/api routes
   const routeFiles = findFiles(apiDir, /^route\.(ts|js)$/);
   const expectedRoutes = routeFiles.map((file) => {
-    const rel = path.relative(apiDir, path.dirname(file)).replace(/\\/g, "/");
+    const rel = path
+      .relative(apiDir, path.dirname(file))
+      .replace(/\\/g, "/")
+      .replace(/\[([^\]/]+)\]/g, "{$1}");
     return rel === "" ? "/api" : `/api/${rel}`;
   });
 

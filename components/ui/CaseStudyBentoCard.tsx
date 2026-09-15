@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Card, CardTitle, type HeadingTag } from "@/components/BentoGrid";
 import { type ExtendedRichInlineItem } from "@/hooks/usePretextLayout";
@@ -422,6 +423,19 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
           >
             {study.title}
           </CardTitle>
+
+          {/* Project Media Asset Image Banner */}
+          {study.hero_image_url && (
+            <div className="relative w-full h-32 rounded-lg border border-zinc-800 overflow-hidden mb-3 bg-zinc-900 shadow-sm">
+              <Image
+                src={study.hero_image_url}
+                alt={`Validated project media for ${study.title}`}
+                fill
+                className="object-cover"
+                unoptimized
+              />
+            </div>
+          )}
 
           {/* Premium Segmented Mode Switcher */}
           <div className="flex p-0.5 bg-zinc-950/80 border border-zinc-900/80 rounded-lg mb-3 text-xs font-mono relative z-10 w-fit backdrop-blur-sm">

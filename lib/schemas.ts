@@ -169,6 +169,8 @@ export const CaseStudySubmissionSchema = z
       { message: "Tags are required" }
     ),
     github_url: z.string().trim().optional(),
+    hero_image_url: z.string().trim().url().max(2048).nullable().optional(),
+    heroImageUrl: z.string().trim().url().max(2048).nullable().optional(),
   })
   .superRefine((data, ctx) => {
     const lang = data.primary_language || data.language;
@@ -507,3 +509,10 @@ export const ResendWebhookResponseSchema = z.object({
 });
 
 export type ResendWebhookResponse = z.infer<typeof ResendWebhookResponseSchema>;
+
+/**
+ * Schema for route parameters targeting a specific project/case study slug.
+ */
+export const ProjectSlugParamSchema = z.object({
+  slug: z.string().trim().min(1, "Project slug is required"),
+});
