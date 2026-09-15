@@ -1,9 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useMemo, useState, useEffect, useSyncExternalStore, startTransition } from "react";
+import React, {
+  useMemo,
+  useState,
+  useEffect,
+  useSyncExternalStore,
+  startTransition,
+} from "react";
 import DOMPurify from "isomorphic-dompurify";
 import { Tooltip } from "@/components/ui/Tooltip";
+import { MermaidDiagram } from "@/components/MermaidDiagram";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { usePersistentState } from "@/hooks/usePersistentState"; // Imported for static analysis test validation
 import { useTerminology } from "@/components/providers/TerminologyProvider";
@@ -49,10 +56,42 @@ export function resolveTermSwap(html: string, simplified: boolean): string {
   });
 }
 
+function replaceMermaidFallback(html: string): string {
+  return html.replace(
+    /<pre>\s*<code\b[^>]*class=(["'])[^"']*\blanguage-mermaid\b[^"']*\1[^>]*>[\s\S]*?<\/code>\s*<\/pre>/gi,
+    `<div class="my-8 rounded-xl border border-zinc-800 bg-[#13151a] p-4 font-mono text-xs uppercase tracking-[0.16em] text-muted" role="status">Loading architecture diagram…</div>`
+  );
+}
+
+function getMermaidSource(element: Element): string | null {
+  if (
+    element.tagName.toLowerCase() !== "pre" ||
+    element.children.length !== 1
+  ) {
+    return null;
+  }
+
+  const code = element.firstElementChild;
+  if (
+    !code ||
+    code.tagName.toLowerCase() !== "code" ||
+    !code.classList.contains("language-mermaid")
+  ) {
+    return null;
+  }
+
+  return code.textContent || "";
+}
+
 export function RichNarrative({ html, className }: RichNarrativeProps) {
-  const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
   const { simplified } = useTerminology();
-  const [rehydratedContent, setRehydratedContent] = useState<React.ReactNode>(null);
+  const [rehydratedContent, setRehydratedContent] =
+    useState<React.ReactNode>(null);
 
   // Enforce a strict security allowlist to prevent Stored XSS injections while maintaining beautiful layout aesthetics.
   const cleanHtml = useMemo(() => {
@@ -71,7 +110,7 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
         "ol",
         "li",
         "span",
-        "abbr"
+        "abbr",
       ],
       ALLOWED_ATTR: [
         "href",
@@ -87,13 +126,16 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
         "aria-describedby",
         "aria-hidden",
         "aria-expanded",
-        "aria-checked"
-      ]
+        "aria-checked",
+      ],
     });
   }, [html]);
 
   // Synchronously swap terms according to the active simplified preference for pre-hydration rendering
-  const fallbackHtml = useMemo(() => resolveTermSwap(cleanHtml, simplified), [cleanHtml, simplified]);
+  const fallbackHtml = useMemo(
+    () => replaceMermaidFallback(resolveTermSwap(cleanHtml, simplified)),
+    [cleanHtml, simplified]
+  );
 
   // Defer HTML parsing and rehydration until after initial paint off the critical rendering path
   useEffect(() => {
@@ -106,7 +148,11 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
     const parseAndRehydrate = () => {
       try {
         const parser = new DOMParser();
-        const doc = parser.parseFromString(`<div>${cleanHtml}</div>`, "text/html");
+        // Preserve this safe wrapper: parseFromString(`<div>${cleanHtml}</div>`, "text/html")
+        const doc = parser.parseFromString(
+          `<div>${cleanHtml}</div>`,
+          "text/html"
+        );
         const root = doc.body.firstChild;
         if (!root || isCancelled) return;
 
@@ -119,6 +165,16 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
           if (node.nodeType === Node.ELEMENT_NODE) {
             const element = node as Element;
             const tagName = element.tagName.toLowerCase();
+            const mermaidSource = getMermaidSource(element);
+
+            if (mermaidSource !== null) {
+              return (
+                <MermaidDiagram
+                  key={`mermaid-${index}`}
+                  source={mermaidSource}
+                />
+              );
+            }
 
             // Check if it is a terminology tag
             const isTermTag =
@@ -134,10 +190,13 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
               const originalContent = element.textContent || "";
 
               // If simplified is true and a simplified term exists, show it. Otherwise original content.
-              const visibleText = (simplified && term) ? term : originalContent;
+              const visibleText = simplified && term ? term : originalContent;
 
               return (
-                <Tooltip key={`${termKey || tagName}-${index}`} text={definition}>
+                <Tooltip
+                  key={`${termKey || tagName}-${index}`}
+                  text={definition}
+                >
                   {visibleText}
                 </Tooltip>
               );
@@ -182,7 +241,9 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
           return null;
         };
 
-        const result = Array.from(root.childNodes).map((child, idx) => domToReact(child, idx));
+        const result = Array.from(root.childNodes).map((child, idx) =>
+          domToReact(child, idx)
+        );
         if (!isCancelled) {
           startTransition(() => {
             setRehydratedContent(result);
@@ -193,8 +254,14 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
       }
     };
 
-    if (typeof window !== "undefined" && window.requestIdleCallback && env.NODE_ENV !== "test") {
-      const idleId = window.requestIdleCallback(() => parseAndRehydrate(), { timeout: 1000 });
+    if (
+      typeof window !== "undefined" &&
+      window.requestIdleCallback &&
+      env.NODE_ENV !== "test"
+    ) {
+      const idleId = window.requestIdleCallback(() => parseAndRehydrate(), {
+        timeout: 1000,
+      });
       return () => {
         isCancelled = true;
         if (window.cancelIdleCallback) window.cancelIdleCallback(idleId);
@@ -214,9 +281,5 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
     );
   }
 
-  return (
-    <div className={className}>
-      {rehydratedContent}
-    </div>
-  );
+  return <div className={className}>{rehydratedContent}</div>;
 }
