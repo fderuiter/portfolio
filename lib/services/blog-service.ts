@@ -25,6 +25,7 @@ export interface UpdateBlogDraftInput {
   pillar?: ContentPillar;
   tags?: string[];
   heroImageUrl?: string | null;
+  published?: boolean;
 }
 
 export interface BlogDraftPagination {
@@ -317,6 +318,15 @@ export class BlogPostService {
   }
 
   /**
+   * Retrieves a persisted blog post by ID (published or draft) for admin inspection.
+   */
+  static async getBlogPostById(id: string) {
+    return prisma.blogPost.findUnique({
+      where: { id },
+    });
+  }
+
+  /**
    * Retrieves a persisted unpublished draft for an authorized admin item read.
    * Static public fallbacks are deliberately excluded from this private workflow.
    */
@@ -327,13 +337,14 @@ export class BlogPostService {
   }
 
   /**
-   * Applies a partial edit to an unpublished draft. The database predicate makes
-   * the unpublished state part of the write itself, preventing a concurrent
-   * publication from receiving a draft-only edit. Cache eviction runs only after
-   * persistence returns the updated record.
+   * Applies a partial edit to a blog post or draft. Handles publishing state transitions.
+   * Cache eviction runs only after persistence returns the updated record.
    */
   static async updateDraftBlogPost(id: string, input: UpdateBlogDraftInput) {
-    const existing = await BlogPostService.getDraftBlogPostById(id);
+    let existing = await BlogPostService.getDraftBlogPostById(id);
+    if (!existing) {
+      existing = await BlogPostService.getBlogPostById(id);
+    }
     if (!existing) {
       return null;
     }
@@ -347,6 +358,7 @@ export class BlogPostService {
       tags?: string;
       hero_image_url?: string | null;
       reading_time_minutes?: number;
+      published?: boolean;
     } = {};
 
     if (input.title !== undefined) data.title = input.title;
@@ -354,6 +366,7 @@ export class BlogPostService {
     if (input.dek !== undefined) data.dek = input.dek;
     if (input.pillar !== undefined) data.pillar = input.pillar;
     if (input.tags !== undefined) data.tags = input.tags.join(", ");
+    if (input.published !== undefined) data.published = input.published;
     if (input.heroImageUrl !== undefined) {
       data.hero_image_url = input.heroImageUrl;
     }
@@ -368,10 +381,22 @@ export class BlogPostService {
       data.reading_time_minutes = Math.max(1, Math.ceil(wordCount / 200));
     }
 
-    const [updated] = await prisma.blogPost.updateManyAndReturn({
-      where: { id, published: false },
-      data,
-    });
+    let updated: typeof existing | undefined;
+    if (!existing.published) {
+      const [res] = await prisma.blogPost.updateManyAndReturn({
+        where: { id, published: false },
+        data,
+      });
+      updated = res;
+    }
+    if (!updated) {
+      const [res] = await prisma.blogPost.updateManyAndReturn({
+        where: { id },
+        data,
+      });
+      updated = res;
+    }
+
     if (!updated) {
       return null;
     }
@@ -381,6 +406,25 @@ export class BlogPostService {
       [...slugs].map((slug) => BlogPostService.evictBlogPostCache(slug))
     );
     return updated;
+  }
+
+  /**
+   * Deletes a persisted blog post or draft by ID and evicts associated caches.
+   */
+  static async deleteBlogPost(id: string) {
+    const existing = await prisma.blogPost.findUnique({
+      where: { id },
+    });
+    if (!existing) {
+      return null;
+    }
+
+    await prisma.blogPost.delete({
+      where: { id },
+    });
+
+    await BlogPostService.evictBlogPostCache(existing.slug);
+    return existing;
   }
 
   /**

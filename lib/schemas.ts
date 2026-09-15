@@ -53,6 +53,7 @@ export const BlogDraftUpdateSchema = z
     pillar: z.enum(CONTENT_PILLARS).optional(),
     tags: z.array(z.string().trim().min(1).max(50)).min(1).max(12).optional(),
     heroImageUrl: z.string().trim().url().max(2048).nullable().optional(),
+    published: z.boolean().optional(),
   })
   .strict()
   .refine((data) => Object.keys(data).length > 0, {
