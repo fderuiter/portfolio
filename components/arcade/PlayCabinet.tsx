@@ -203,6 +203,15 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
     return () => clearInterval(timer);
   }, [isWarmingUp, isLoaded]);
 
+  useEffect(() => {
+    if (isLaunched && cabinetRef.current) {
+      const timer = setTimeout(() => {
+        cabinetRef.current?.focus({ preventScroll: true });
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [isLaunched]);
+
   const handleExit = () => {
     setIsLaunched(false);
     setIsWarmingUp(false);
@@ -247,6 +256,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
             else void toggleCabinetFullscreen();
           }
         }}
+        tabIndex={-1}
         data-arcade-cabinet={gameId}
         data-fullscreen={isFullscreen}
         className={`arcade-cabinet w-full flex flex-col items-center max-w-full min-w-0 @container ${
