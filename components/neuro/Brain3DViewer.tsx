@@ -22,6 +22,7 @@ import { useWebGLContextLoss } from "@/hooks/useWebGLContextLoss";
 import { ProgressHUD } from "./ProgressHUD";
 import {
   Icon3dCubeSphere,
+  IconAlertTriangle,
   IconCheck,
   IconLayersSubtract,
   IconRefresh,
@@ -54,6 +55,7 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
   const threeRef = useRef<typeof THREE | null>(null);
 
   const [contextKey, setContextKey] = useState(0);
+  const [webglError, setWebglError] = useState(false);
   const isContextLostRef = useRef(false);
 
   const {
@@ -210,8 +212,9 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
         container.appendChild(renderer.domElement);
         rendererRef.current = renderer;
         bindCanvas(renderer.domElement);
+        setWebglError(false);
       } catch {
-        // Fallback for headless / test environments
+        setWebglError(true);
         return;
       }
 
@@ -689,9 +692,36 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
         </div>
       )}
 
+      {/* WebGL Fallback Card when graphics capability is unsupported */}
+      {webglError && (
+        <div
+          role="status"
+          aria-live="polite"
+          data-testid="webgl-fallback-card"
+          className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 bg-zinc-950/95 text-center gap-3 border border-amber-500/30 rounded-2xl"
+        >
+          <div className="p-3 bg-amber-500/10 rounded-2xl border border-amber-500/20 text-amber-400">
+            <IconAlertTriangle className="w-8 h-8" />
+          </div>
+          <div className="space-y-1">
+            <h4 className="text-sm font-bold font-mono text-white">
+              3D WebGL Surface Renderer Unavailable
+            </h4>
+            <p className="text-xs text-zinc-400 max-w-sm">
+              Your device or browser graphics context does not support WebGL
+              hardware acceleration. 2D multi-planar orthoview slice inspection
+              remains fully operational below.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* 3D Canvas Container */}
       <div
         ref={containerRef}
+        role="img"
+        tabIndex={0}
+        aria-label="Interactive 3D Cortical Surface Visualizer. Touch or drag to orbit brain mesh, click surface to synchronize 2D slice crosshairs."
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
