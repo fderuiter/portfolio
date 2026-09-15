@@ -18,6 +18,25 @@
 
 ## Methods
 
+### createDraftBlogPost()
+
+> `static` **createDraftBlogPost**(`input`): `Promise`\<\{ `body`: `string`; `created_at`: `Date`; `dek`: `string`; `hero_image_url`: `string` \| `null`; `id`: `string`; `pillar`: `string`; `published`: `boolean`; `reading_time_minutes`: `number` \| `null`; `slug`: `string`; `tags`: `string`; `title`: `string`; `updated_at`: `Date`; \}\>
+
+Persists an unpublished blog draft using server-owned publication state.
+The existing public cache is evicted only after Prisma confirms creation.
+
+#### Parameters
+
+##### input
+
+[`CreateBlogDraftInput`](../interfaces/CreateBlogDraftInput.md)
+
+#### Returns
+
+`Promise`\<\{ `body`: `string`; `created_at`: `Date`; `dek`: `string`; `hero_image_url`: `string` \| `null`; `id`: `string`; `pillar`: `string`; `published`: `boolean`; `reading_time_minutes`: `number` \| `null`; `slug`: `string`; `tags`: `string`; `title`: `string`; `updated_at`: `Date`; \}\>
+
+***
+
 ### evictBlogPostCache()
 
 > `static` **evictBlogPostCache**(`slug`): `Promise`\<`boolean`\>
@@ -87,3 +106,22 @@ Employs the Two-Tier Cache Shield (ADR 0036):
 #### Returns
 
 `Promise`\<[`BlogPostData`](../../../fallback-blog-posts/interfaces/BlogPostData.md) \| `null`\>
+
+***
+
+### getDraftBlogPosts()
+
+> `static` **getDraftBlogPosts**(`__namedParameters`): `Promise`\<\{ `drafts`: `object`[]; `total`: `number`; \}\>
+
+Retrieves only persisted unpublished drafts for the authenticated admin
+collection. This intentionally never consults the public fallback data.
+
+#### Parameters
+
+##### \_\_namedParameters
+
+[`BlogDraftPagination`](../interfaces/BlogDraftPagination.md)
+
+#### Returns
+
+`Promise`\<\{ `drafts`: `object`[]; `total`: `number`; \}\>

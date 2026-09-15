@@ -56,6 +56,12 @@ Re-exports [AllocateGarminMemorySpec](garmin/allocate-memory/spec/interfaces/All
 
 ***
 
+### BlogDraftPagination
+
+Re-exports [BlogDraftPagination](blog-service/interfaces/BlogDraftPagination.md)
+
+***
+
 ### BlogPostData
 
 Re-exports [BlogPostData](../fallback-blog-posts/interfaces/BlogPostData.md)
@@ -107,6 +113,12 @@ Re-exports [compareBlogPostsNewestFirst](blog-service/functions/compareBlogPosts
 ### ContactDispatchResult
 
 Re-exports [ContactDispatchResult](email-service/interfaces/ContactDispatchResult.md)
+
+***
+
+### CreateBlogDraftInput
+
+Re-exports [CreateBlogDraftInput](blog-service/interfaces/CreateBlogDraftInput.md)
 
 ***
 

@@ -20,6 +20,8 @@
 ## Variables
 
 - [ALLOWED\_REACTIONS](variables/ALLOWED_REACTIONS.md)
+- [BlogDraftCreateSchema](variables/BlogDraftCreateSchema.md)
+- [BlogDraftPaginationSchema](variables/BlogDraftPaginationSchema.md)
 - [CaseStudyListResponseSchema](variables/CaseStudyListResponseSchema.md)
 - [CaseStudySubmissionSchema](variables/CaseStudySubmissionSchema.md)
 - [CaseStudySummarySchema](variables/CaseStudySummarySchema.md)

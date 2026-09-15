@@ -10,6 +10,11 @@
 
 - [BlogPostService](classes/BlogPostService.md)
 
+## Interfaces
+
+- [BlogDraftPagination](interfaces/BlogDraftPagination.md)
+- [CreateBlogDraftInput](interfaces/CreateBlogDraftInput.md)
+
 ## Functions
 
 - [compareBlogPostsNewestFirst](functions/compareBlogPostsNewestFirst.md)
