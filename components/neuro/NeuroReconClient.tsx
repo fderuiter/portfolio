@@ -36,7 +36,7 @@ import { NeuroReconSkeleton } from "./NeuroReconSkeleton";
 
 const Brain3DViewerSkeleton: React.FC = () => {
   return (
-    <div 
+    <div
       className="relative w-full h-[460px] bg-zinc-950 rounded-2xl border border-zinc-800/80 overflow-hidden flex flex-col justify-between p-4 select-none animate-pulse"
       data-testid="brain-3d-skeleton"
     >
@@ -100,6 +100,9 @@ import {
   IconShieldCheck,
   IconLink,
   IconCalendar,
+  IconX,
+  IconCompass,
+  IconAlertCircle,
 } from "@tabler/icons-react";
 
 export const NeuroReconClient: React.FC = () => {
@@ -110,18 +113,36 @@ export const NeuroReconClient: React.FC = () => {
 
   const [activeScenarioId, setActiveScenarioId] = useState<ScenarioId>(() => {
     if (typeof window !== "undefined") {
-      const rawSc = new URLSearchParams(window.location.hash.slice(1)).get("scenario") as ScenarioId;
-      if (rawSc && ["dura_inclusion", "wm_hypointensity", "skull_strip_erosion", "sandbox"].includes(rawSc)) {
+      const rawSc = new URLSearchParams(window.location.hash.slice(1)).get(
+        "scenario"
+      ) as ScenarioId;
+      if (
+        rawSc &&
+        [
+          "dura_inclusion",
+          "wm_hypointensity",
+          "skull_strip_erosion",
+          "sandbox",
+        ].includes(rawSc)
+      ) {
         return rawSc;
       }
     }
     return "dura_inclusion";
   });
 
-  const [scenarios, setScenarios] = useState<Record<ScenarioId, ScenarioConfig>>(() => getNeuroScenariosSync());
-  const [datasetConfigs, setDatasetConfigs] = useState<Record<DatasetSource, DatasetConfig>>(() => getNeuroDatasetConfigsSync());
-  const [scenarioList, setScenarioList] = useState<ScenarioId[]>(() => getNeuroScenarioListSync());
-  const [volume, setVolume] = useState<SyntheticVolume>(() => computeSyntheticVolumeSync(activeScenarioId));
+  const [scenarios, setScenarios] = useState<
+    Record<ScenarioId, ScenarioConfig>
+  >(() => getNeuroScenariosSync());
+  const [datasetConfigs, setDatasetConfigs] = useState<
+    Record<DatasetSource, DatasetConfig>
+  >(() => getNeuroDatasetConfigsSync());
+  const [scenarioList, setScenarioList] = useState<ScenarioId[]>(() =>
+    getNeuroScenarioListSync()
+  );
+  const [volume, setVolume] = useState<SyntheticVolume>(() =>
+    computeSyntheticVolumeSync(activeScenarioId)
+  );
   const [qaMetrics, setQaMetrics] = useState<QAMetrics>(() => {
     const scs = getNeuroScenariosSync();
     const vol = computeSyntheticVolumeSync(activeScenarioId);
@@ -156,11 +177,20 @@ export const NeuroReconClient: React.FC = () => {
 
   const currentScenario = scenarios ? scenarios[activeScenarioId] : null;
 
-  const [crosshair, setCrosshair] = useState<VoxelCoord>({ x: 42, y: 58, z: 28 });
+  const [crosshair, setCrosshair] = useState<VoxelCoord>({
+    x: 42,
+    y: 58,
+    z: 28,
+  });
   const [toolMode, setToolModeState] = useState<ToolMode>(() => {
     if (typeof window !== "undefined") {
-      const rawTool = new URLSearchParams(window.location.hash.slice(1)).get("tool") as ToolMode;
-      if (rawTool && ["inspect", "control_point", "paint", "erase"].includes(rawTool)) {
+      const rawTool = new URLSearchParams(window.location.hash.slice(1)).get(
+        "tool"
+      ) as ToolMode;
+      if (
+        rawTool &&
+        ["inspect", "control_point", "paint", "erase"].includes(rawTool)
+      ) {
         return rawTool;
       }
     }
@@ -170,7 +200,11 @@ export const NeuroReconClient: React.FC = () => {
   useEffect(() => {
     if (currentScenario) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setCrosshair((prev) => (prev.x === 42 && prev.y === 58 && prev.z === 28 ? currentScenario.targetCoords : prev));
+      setCrosshair((prev) =>
+        prev.x === 42 && prev.y === 58 && prev.z === 28
+          ? currentScenario.targetCoords
+          : prev
+      );
     }
   }, [currentScenario]);
 
@@ -180,7 +214,9 @@ export const NeuroReconClient: React.FC = () => {
   const [showWmContour, setShowWmContour] = useState(true);
   const [viewMode, setViewModeState] = useState<"split" | "3d" | "2d">(() => {
     if (typeof window !== "undefined") {
-      const rawView = new URLSearchParams(window.location.hash.slice(1)).get("view") as "split" | "3d" | "2d";
+      const rawView = new URLSearchParams(window.location.hash.slice(1)).get(
+        "view"
+      ) as "split" | "3d" | "2d";
       if (rawView && ["split", "3d", "2d"].includes(rawView)) {
         return rawView;
       }
@@ -189,7 +225,9 @@ export const NeuroReconClient: React.FC = () => {
   });
   const [activeDataset, setActiveDatasetState] = useState<DatasetSource>(() => {
     if (typeof window !== "undefined") {
-      const rawDs = new URLSearchParams(window.location.hash.slice(1)).get("dataset") as DatasetSource;
+      const rawDs = new URLSearchParams(window.location.hash.slice(1)).get(
+        "dataset"
+      ) as DatasetSource;
       if (rawDs && ["case_study", "mni152", "oasis"].includes(rawDs)) {
         return rawDs;
       }
@@ -202,6 +240,7 @@ export const NeuroReconClient: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isFieldManualOpen, setIsFieldManualOpen] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(true);
   const reconTimerRef = React.useRef<NodeJS.Timeout | null>(null);
 
   const [scoreState, setScoreState] = useState<ScoreState>({
@@ -233,42 +272,47 @@ export const NeuroReconClient: React.FC = () => {
   ]);
 
   // Apply Scenario State locally without pushing history
-  const applyScenarioState = useCallback(async (scenarioId: ScenarioId) => {
-    if (reconTimerRef.current !== null) {
-      clearTimeout(reconTimerRef.current);
-      reconTimerRef.current = null;
-      setIsProcessing(false);
-    }
+  const applyScenarioState = useCallback(
+    async (scenarioId: ScenarioId) => {
+      if (reconTimerRef.current !== null) {
+        clearTimeout(reconTimerRef.current);
+        reconTimerRef.current = null;
+        setIsProcessing(false);
+      }
 
-    setActiveScenarioId(scenarioId);
-    const scs = scenarios || await getNeuroScenarios();
-    const newConfig = scs[scenarioId];
-    const newVol = await computeSyntheticVolume(scenarioId);
-    setVolume(newVol);
-    if (newConfig) {
-      setCrosshair(newConfig.targetCoords);
-      setToolModeState(newConfig.recommendedTool);
-    }
-    setControlPoints([]);
-    setVoxelEdits([]);
-    setShowSuccessModal(false);
+      setActiveScenarioId(scenarioId);
+      const scs = scenarios || (await getNeuroScenarios());
+      const newConfig = scs[scenarioId];
+      const newVol = await computeSyntheticVolume(scenarioId);
+      setVolume(newVol);
+      if (newConfig) {
+        setCrosshair(newConfig.targetCoords);
+        setToolModeState(newConfig.recommendedTool);
+      }
+      setControlPoints([]);
+      setVoxelEdits([]);
+      setShowSuccessModal(false);
 
-    setLogs((prev) => [
-      ...prev,
-      {
-        id: `log-sw-${Date.now()}`,
-        type: "command",
-        text: `switch-scenario --case=${scenarioId}`,
-        timestamp: new Date().toLocaleTimeString(),
-      },
-      {
-        id: `log-sw-out-${Date.now()}`,
-        type: "info",
-        text: newConfig ? `Loaded ${newConfig.title}. ${newConfig.defectDescription}` : `Loaded ${scenarioId}`,
-        timestamp: new Date().toLocaleTimeString(),
-      },
-    ]);
-  }, [scenarios]);;
+      setLogs((prev) => [
+        ...prev,
+        {
+          id: `log-sw-${Date.now()}`,
+          type: "command",
+          text: `switch-scenario --case=${scenarioId}`,
+          timestamp: new Date().toLocaleTimeString(),
+        },
+        {
+          id: `log-sw-out-${Date.now()}`,
+          type: "info",
+          text: newConfig
+            ? `Loaded ${newConfig.title}. ${newConfig.defectDescription}`
+            : `Loaded ${scenarioId}`,
+          timestamp: new Date().toLocaleTimeString(),
+        },
+      ]);
+    },
+    [scenarios]
+  );
 
   // Switch Scenario Handler (User Click)
   const handleSelectScenario = useCallback(
@@ -290,32 +334,47 @@ export const NeuroReconClient: React.FC = () => {
 
   // Synchronize incoming hash state on mount or browser Back/Forward navigation
   useEffect(() => {
-    const rawSc = (params.scenario as ScenarioId | undefined) || "dura_inclusion";
+    const rawSc =
+      (params.scenario as ScenarioId | undefined) || "dura_inclusion";
     if (scenarios && scenarios[rawSc] && rawSc !== activeScenarioId) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       applyScenarioState(rawSc);
     }
-    const rawView = (params.view as "split" | "3d" | "2d" | undefined) || "split";
+    const rawView =
+      (params.view as "split" | "3d" | "2d" | undefined) || "split";
     if (["split", "3d", "2d"].includes(rawView) && rawView !== viewMode) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setViewModeState(rawView);
     }
     const rawDs = (params.dataset as DatasetSource | undefined) || "case_study";
-    if (["case_study", "mni152", "oasis"].includes(rawDs) && rawDs !== activeDataset) {
+    if (
+      ["case_study", "mni152", "oasis"].includes(rawDs) &&
+      rawDs !== activeDataset
+    ) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveDatasetState(rawDs);
     }
     const rawTool = params.tool as ToolMode | undefined;
     const recommendedTool = currentScenario?.recommendedTool || "inspect";
-    const targetTool = rawTool && ["inspect", "control_point", "paint", "erase"].includes(rawTool)
-      ? rawTool
-      : recommendedTool;
+    const targetTool =
+      rawTool &&
+      ["inspect", "control_point", "paint", "erase"].includes(rawTool)
+        ? rawTool
+        : recommendedTool;
     if (targetTool !== toolMode) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setToolModeState(targetTool);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params, activeScenarioId, viewMode, activeDataset, toolMode, currentScenario, applyScenarioState]);
+  }, [
+    params,
+    activeScenarioId,
+    viewMode,
+    activeDataset,
+    toolMode,
+    currentScenario,
+    applyScenarioState,
+  ]);
 
   const setViewMode = (mode: "split" | "3d" | "2d") => {
     setViewModeState(mode);
@@ -324,13 +383,22 @@ export const NeuroReconClient: React.FC = () => {
 
   const setActiveDataset = (dataset: DatasetSource) => {
     setActiveDatasetState(dataset);
-    setParam("dataset", dataset === "case_study" ? null : dataset, { replace: true });
+    setParam("dataset", dataset === "case_study" ? null : dataset, {
+      replace: true,
+    });
   };
 
-  const setToolMode = useCallback((tool: ToolMode) => {
-    setToolModeState(tool);
-    setParam("tool", tool === (currentScenario?.recommendedTool || "inspect") ? null : tool, { replace: true });
-  }, [currentScenario, setParam]);
+  const setToolMode = useCallback(
+    (tool: ToolMode) => {
+      setToolModeState(tool);
+      setParam(
+        "tool",
+        tool === (currentScenario?.recommendedTool || "inspect") ? null : tool,
+        { replace: true }
+      );
+    },
+    [currentScenario, setParam]
+  );
 
   const { copy: copyShareLink } = useClipboard({
     successMessage: "NeuroRecon Studio link copied to clipboard!",
@@ -362,16 +430,20 @@ export const NeuroReconClient: React.FC = () => {
   useEffect(() => {
     if (!currentScenario || !volume) return;
     let isMounted = true;
-    computeQAMetrics(currentScenario, volume, controlPoints, voxelEdits).then((metrics) => {
-      if (isMounted) setQaMetrics(metrics);
-    });
+    computeQAMetrics(currentScenario, volume, controlPoints, voxelEdits).then(
+      (metrics) => {
+        if (isMounted) setQaMetrics(metrics);
+      }
+    );
     return () => {
       isMounted = false;
     };
   }, [currentScenario, volume, controlPoints, voxelEdits]);
 
   // Add Control Point Handler
-  const handleAddControlPoint = (point: Omit<ControlPoint, "id" | "timestamp">) => {
+  const handleAddControlPoint = (
+    point: Omit<ControlPoint, "id" | "timestamp">
+  ) => {
     const newCP: ControlPoint = {
       ...point,
       id: `cp-${Date.now()}`,
@@ -458,8 +530,8 @@ export const NeuroReconClient: React.FC = () => {
       toolMode === "control_point"
         ? "recon-all -s sub-01 -autorecon2-cp"
         : activeScenarioId === "topological_handle"
-        ? "recon-all -s sub-01 -autorecon2-wm -fix-topology"
-        : "recon-all -s sub-01 -autorecon2 -autorecon3";
+          ? "recon-all -s sub-01 -autorecon2-wm -fix-topology"
+          : "recon-all -s sub-01 -autorecon2 -autorecon3";
 
     setLogs((prev) => [
       ...prev,
@@ -471,7 +543,12 @@ export const NeuroReconClient: React.FC = () => {
       },
     ]);
 
-    const metrics = await computeQAMetrics(currentScenario, volume, controlPoints, voxelEdits);
+    const metrics = await computeQAMetrics(
+      currentScenario,
+      volume,
+      controlPoints,
+      voxelEdits
+    );
 
     reconTimerRef.current = setTimeout(() => {
       reconTimerRef.current = null;
@@ -484,7 +561,9 @@ export const NeuroReconClient: React.FC = () => {
           score: prev.score + 500 * prev.multiplier,
           multiplier: Math.min(4, prev.multiplier + 1),
           streak: prev.streak + 1,
-          resolvedScenarios: Array.from(new Set([...prev.resolvedScenarios, activeScenarioId])),
+          resolvedScenarios: Array.from(
+            new Set([...prev.resolvedScenarios, activeScenarioId])
+          ),
         }));
 
         setLogs((prev) => [
@@ -511,7 +590,18 @@ export const NeuroReconClient: React.FC = () => {
         ]);
       }
     }, 850);
-  }, [toolMode, activeScenarioId, currentScenario, volume, controlPoints, voxelEdits, playNote, playSuccess, recordEvent, setLogs]);
+  }, [
+    toolMode,
+    activeScenarioId,
+    currentScenario,
+    volume,
+    controlPoints,
+    voxelEdits,
+    playNote,
+    playSuccess,
+    recordEvent,
+    setLogs,
+  ]);
 
   // CLI Command Execution Router
   const handleExecuteCliCommand = async (cmd: string) => {
@@ -567,27 +657,46 @@ export const NeuroReconClient: React.FC = () => {
       if (controlPoints.length === 0) {
         setLogs((prev) => [
           ...prev,
-          { id: `out-cp-empty-${Date.now()}`, type: "info", text: "No control points placed yet. Use tool [2] or 'C' key.", timestamp },
+          {
+            id: `out-cp-empty-${Date.now()}`,
+            type: "info",
+            text: "No control points placed yet. Use tool [2] or 'C' key.",
+            timestamp,
+          },
         ]);
       } else {
         const cpListStr = controlPoints
-          .map((cp, idx) => `  ${idx + 1}. [${cp.label || "CP"}] (${cp.x}, ${cp.y}, ${cp.z}) -> Target Int: ${cp.intensity}`)
+          .map(
+            (cp, idx) =>
+              `  ${idx + 1}. [${cp.label || "CP"}] (${cp.x}, ${cp.y}, ${cp.z}) -> Target Int: ${cp.intensity}`
+          )
           .join("\n");
         setLogs((prev) => [
           ...prev,
-          { id: `out-cp-list-${Date.now()}`, type: "output", text: `Active Control Points (${controlPoints.length}):\n${cpListStr}`, timestamp },
+          {
+            id: `out-cp-list-${Date.now()}`,
+            type: "output",
+            text: `Active Control Points (${controlPoints.length}):\n${cpListStr}`,
+            timestamp,
+          },
         ]);
       }
     } else if (trimmed.startsWith("dataset")) {
       const parts = trimmed.split(" ");
       const target = parts[1];
-      if (target === "mni152" || target === "oasis" || target === "cases" || target === "case_study") {
-        const dId = target === "cases" ? "case_study" : (target as DatasetSource);
+      if (
+        target === "mni152" ||
+        target === "oasis" ||
+        target === "cases" ||
+        target === "case_study"
+      ) {
+        const dId =
+          target === "cases" ? "case_study" : (target as DatasetSource);
         setActiveDataset(dId);
         if (dId !== "case_study") {
           handleSelectScenario("sandbox");
         }
-        const dCfgs = datasetConfigs || await getNeuroDatasetConfigs();
+        const dCfgs = datasetConfigs || (await getNeuroDatasetConfigs());
         const dCfg = dCfgs[dId];
         setLogs((prev) => [
           ...prev,
@@ -662,7 +771,8 @@ export const NeuroReconClient: React.FC = () => {
   // Next Scenario Advancer
   const handleAdvanceNextScenario = async () => {
     setShowSuccessModal(false);
-    const scList = scenarioList.length > 0 ? scenarioList : await getNeuroScenarioList();
+    const scList =
+      scenarioList.length > 0 ? scenarioList : await getNeuroScenarioList();
     const currIdx = scList.indexOf(activeScenarioId);
     if (currIdx < scList.length - 1) {
       handleSelectScenario(scList[currIdx + 1]);
@@ -671,14 +781,106 @@ export const NeuroReconClient: React.FC = () => {
     }
   };
 
-  if (!scenarios || !datasetConfigs || !volume || !qaMetrics || !currentScenario) {
+  if (
+    !scenarios ||
+    !datasetConfigs ||
+    !volume ||
+    !qaMetrics ||
+    !currentScenario
+  ) {
     return <NeuroReconSkeleton />;
   }
 
   const activeDatasetConfig = datasetConfigs[activeDataset];
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6" data-keyboard-boundary="true">
+    <div
+      className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6"
+      data-keyboard-boundary="true"
+    >
+      {/* Interactive First Action Guide & Onboarding Banner */}
+      {showOnboarding && (
+        <div
+          data-testid="neuro-onboarding-banner"
+          className="bg-zinc-900/90 border border-brand-cyan/30 rounded-3xl p-4 sm:p-5 backdrop-blur-xl relative overflow-hidden space-y-3"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-2 text-brand-cyan">
+              <IconCompass className="w-5 h-5 shrink-0" />
+              <h2 className="text-sm font-bold font-mono uppercase tracking-wider text-white">
+                First Action Guide · How to Repair Cortical Surfaces
+              </h2>
+            </div>
+            <button
+              onClick={() => setShowOnboarding(false)}
+              title="Dismiss Guide"
+              aria-label="Dismiss First Action Guide"
+              className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
+            >
+              <IconX className="w-4 h-4" />
+            </button>
+          </div>
+
+          <p className="text-xs text-zinc-300 leading-relaxed font-sans">
+            Welcome to <strong>NeuroRecon Studio</strong>, an interactive CAD
+            simulator for FreeSurfer cortical surface reconstruction and
+            topological defect repair.
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs font-mono">
+            <div className="bg-zinc-950/80 p-3 rounded-2xl border border-zinc-800 space-y-1">
+              <div className="text-brand-cyan font-bold">1. SELECT CASE</div>
+              <p className="text-[11px] text-zinc-400 leading-snug">
+                Choose a defect scenario (e.g. Dura Over-Inclusion or
+                Hypointensity) or load real MNI152 / OASIS scans.
+              </p>
+            </div>
+            <div className="bg-zinc-950/80 p-3 rounded-2xl border border-zinc-800 space-y-1">
+              <div className="text-emerald-400 font-bold">2. EDIT VOXELS</div>
+              <p className="text-[11px] text-zinc-400 leading-snug">
+                Use Control Points <kbd className="text-brand-cyan">[2]</kbd> or
+                Paint/Erase Brushes{" "}
+                <kbd className="text-emerald-400">[3/4]</kbd> on 2D slices.
+              </p>
+            </div>
+            <div className="bg-zinc-950/80 p-3 rounded-2xl border border-zinc-800 space-y-1">
+              <div className="text-amber-400 font-bold">3. RUN RECON-ALL</div>
+              <p className="text-[11px] text-zinc-400 leading-snug">
+                Click{" "}
+                <strong className="text-brand-cyan">[RUN RECON-ALL]</strong> or
+                press <kbd>[Space]</kbd> to verify Euler characteristic χ = 2
+                ($S^2$).
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-zinc-800/60 text-xs font-mono">
+            <div className="flex items-center gap-1.5 text-amber-400/90 text-[11px]">
+              <IconAlertCircle className="w-4 h-4 shrink-0 text-amber-400" />
+              <span>
+                <strong>Educational Simulation Notice:</strong> Illustrative
+                visualization for software & neuroimaging engineering. Not for
+                clinical diagnosis or medical decision-making.
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsFieldManualOpen(true)}
+                className="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-brand-cyan font-bold transition-all min-h-[44px] flex items-center justify-center"
+              >
+                Field Manual [M]
+              </button>
+              <button
+                onClick={() => setShowOnboarding(false)}
+                className="px-3 py-1.5 rounded-xl bg-brand-cyan text-zinc-950 font-bold hover:bg-brand-cyan/90 transition-all min-h-[44px] flex items-center justify-center"
+              >
+                Start Editing
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Top Banner / Scenario Selector Header */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-zinc-900/90 border border-zinc-800 p-4 rounded-3xl backdrop-blur-xl">
         <div className="flex items-center gap-3.5">
@@ -705,7 +907,7 @@ export const NeuroReconClient: React.FC = () => {
           {/* Share Link Button */}
           <button
             onClick={handleCopyShareLink}
-            className="flex items-center gap-1.5 px-3 py-2 bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 rounded-xl text-xs font-mono text-zinc-300 hover:text-white transition-all shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 rounded-xl text-xs font-mono text-zinc-300 hover:text-white transition-all shadow-sm"
             title="Copy Shareable Link for Current Scenario & View"
           >
             <IconLink className="w-3.5 h-3.5 text-brand-cyan" />
@@ -714,30 +916,38 @@ export const NeuroReconClient: React.FC = () => {
 
           {/* Dataset Source Selector */}
           <div className="flex items-center gap-1 bg-zinc-950 p-1 rounded-xl border border-zinc-800 text-xs font-mono">
-            {(["case_study", "mni152", "oasis"] as DatasetSource[]).map((dId) => {
-              const dCfg = datasetConfigs[dId];
-              const isSelected = activeDataset === dId;
-              return (
-                <button
-                  key={dId}
-                  onClick={() => {
-                    setActiveDataset(dId);
-                    if (dId !== "case_study") {
-                      handleSelectScenario("sandbox");
-                    }
-                    playNote(440, 0.08);
-                  }}
-                  title={dCfg ? dCfg.subtitle : dId}
-                  className={`px-2.5 py-1 rounded-lg transition-all ${
-                    isSelected
-                      ? "bg-zinc-800 text-white font-bold border border-zinc-700 shadow-sm"
-                      : "text-zinc-400 hover:text-white"
-                  }`}
-                >
-                  <span>{dId === "case_study" ? "QA Scenarios" : dId === "mni152" ? "MNI152 (GLB)" : "OASIS (OBJ)"}</span>
-                </button>
-              );
-            })}
+            {(["case_study", "mni152", "oasis"] as DatasetSource[]).map(
+              (dId) => {
+                const dCfg = datasetConfigs[dId];
+                const isSelected = activeDataset === dId;
+                return (
+                  <button
+                    key={dId}
+                    onClick={() => {
+                      setActiveDataset(dId);
+                      if (dId !== "case_study") {
+                        handleSelectScenario("sandbox");
+                      }
+                      playNote(440, 0.08);
+                    }}
+                    title={dCfg ? dCfg.subtitle : dId}
+                    className={`px-2.5 py-2 min-h-[44px] flex items-center justify-center rounded-lg transition-all ${
+                      isSelected
+                        ? "bg-zinc-800 text-white font-bold border border-zinc-700 shadow-sm"
+                        : "text-zinc-400 hover:text-white"
+                    }`}
+                  >
+                    <span>
+                      {dId === "case_study"
+                        ? "QA Scenarios"
+                        : dId === "mni152"
+                          ? "MNI152 (GLB)"
+                          : "OASIS (OBJ)"}
+                    </span>
+                  </button>
+                );
+              }
+            )}
           </div>
 
           {/* Scenario Carousel Tabs */}
@@ -749,14 +959,18 @@ export const NeuroReconClient: React.FC = () => {
                 <button
                   key={scId}
                   onClick={() => handleSelectScenario(scId)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-all whitespace-nowrap ${
+                  className={`flex items-center gap-1.5 px-3 py-2 min-h-[44px] rounded-xl text-xs font-mono transition-all whitespace-nowrap ${
                     isActive
                       ? "bg-brand-cyan text-zinc-950 font-bold shadow-md"
                       : "text-zinc-400 hover:text-white hover:bg-zinc-900"
                   }`}
                 >
-                  <span>{scId === "sandbox" ? "Sandbox" : `Case 0${idx + 1}`}</span>
-                  {isResolved && <IconCheck className="w-3.5 h-3.5 text-emerald-400" />}
+                  <span>
+                    {scId === "sandbox" ? "Sandbox" : `Case 0${idx + 1}`}
+                  </span>
+                  {isResolved && (
+                    <IconCheck className="w-3.5 h-3.5 text-emerald-400" />
+                  )}
                 </button>
               );
             })}
@@ -856,7 +1070,9 @@ export const NeuroReconClient: React.FC = () => {
             <Brain3DViewer
               surfaceMode={surfaceMode}
               crosshair={crosshair}
-              modelUrl={activeDatasetConfig?.modelUrl || "/models/brain-surface.glb"}
+              modelUrl={
+                activeDatasetConfig?.modelUrl || "/models/brain-surface.glb"
+              }
               onSurfaceChange={setSurfaceMode}
               onCrosshairChange={setCrosshair}
             />
@@ -931,7 +1147,9 @@ export const NeuroReconClient: React.FC = () => {
               <div className="grid grid-cols-3 gap-2 bg-zinc-950 p-3 rounded-2xl border border-zinc-800 text-xs font-mono">
                 <div>
                   <div className="text-zinc-400">EULER</div>
-                  <div className="font-bold text-emerald-400">χ = {qaMetrics.eulerCharacteristic}</div>
+                  <div className="font-bold text-emerald-400">
+                    χ = {qaMetrics.eulerCharacteristic}
+                  </div>
                 </div>
                 <div>
                   <div className="text-zinc-400">DICE</div>
