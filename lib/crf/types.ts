@@ -410,6 +410,7 @@ export interface SubjectFormStatus {
 
 export type StudioMode =
   | "designer" // 12-Column Responsive Form Canvas
+  | "grid" // Active-Form Grid Metadata Editor (#539 / active-form Grid)
   | "matrix" // Visit x Form Matrix
   | "rules" // Visual Logic & AST Edit Check Graph
   | "edc" // Live 21 CFR Part 11 EDC Simulator

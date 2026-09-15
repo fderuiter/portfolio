@@ -7,6 +7,7 @@ import { getStudyPresetsSync } from "@/lib/crf/presets";
 import { useDebouncedDiagnostics } from "@/hooks/useDebouncedDiagnostics";
 import {
   IconLayoutGrid,
+  IconTable,
   IconCalendar,
   IconMathFunction,
   IconShieldCheck,
@@ -122,38 +123,45 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
       icon: <IconLayoutGrid className="w-3.5 h-3.5" />,
     },
     {
+      mode: "grid",
+      label: "Active-Form Grid",
+      shortLabel: "Grid Editor",
+      shortcut: "2",
+      icon: <IconTable className="w-3.5 h-3.5 text-amber-400" />,
+    },
+    {
       mode: "matrix",
       label: "Visit Matrix (SoA)",
       shortLabel: "Matrix (SoA)",
-      shortcut: "2",
+      shortcut: "3",
       icon: <IconCalendar className="w-3.5 h-3.5" />,
     },
     {
       mode: "rules",
       label: "Logic & AST Rules",
       shortLabel: "AST Rules",
-      shortcut: "3",
+      shortcut: "4",
       icon: <IconMathFunction className="w-3.5 h-3.5" />,
     },
     {
       mode: "edc",
       label: "Live 21 CFR EDC",
       shortLabel: "Live EDC",
-      shortcut: "4",
+      shortcut: "5",
       icon: <IconShieldCheck className="w-3.5 h-3.5" />,
     },
     {
       mode: "acrf",
       label: "Annotated aCRF",
       shortLabel: "aCRF Viewer",
-      shortcut: "5",
+      shortcut: "6",
       icon: <IconFileCode className="w-3.5 h-3.5" />,
     },
     {
       mode: "export",
       label: "CDISC / Exports",
       shortLabel: "Exports",
-      shortcut: "6",
+      shortcut: "7",
       icon: <IconCode className="w-3.5 h-3.5" />,
     },
   ];

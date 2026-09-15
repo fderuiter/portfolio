@@ -38,6 +38,14 @@ import { FormCanvas } from "./CenterCanvas/FormCanvas";
 import { InspectorPanel } from "./RightInspector/InspectorPanel";
 import dynamic from "next/dynamic";
 
+const ActiveFormGridEditor = dynamic(
+  () =>
+    import("./Modes/ActiveFormGridEditor").then((mod) => ({
+      default: mod.ActiveFormGridEditor,
+    })),
+  { ssr: false }
+);
+
 const AcrfOverlayViewer = dynamic(
   () =>
     import("./Modes/AcrfOverlayViewer").then((mod) => mod.AcrfOverlayViewer),
@@ -232,9 +240,15 @@ export const CRFStudioContainer: React.FC = () => {
       ) as StudioMode;
       if (
         rawMode &&
-        ["designer", "matrix", "rules", "edc", "acrf", "export"].includes(
-          rawMode
-        )
+        [
+          "designer",
+          "grid",
+          "matrix",
+          "rules",
+          "edc",
+          "acrf",
+          "export",
+        ].includes(rawMode)
       ) {
         return rawMode;
       }
@@ -385,7 +399,7 @@ export const CRFStudioContainer: React.FC = () => {
   useEffect(() => {
     const targetMode = (params.mode as StudioMode | undefined) || "designer";
     if (
-      ["designer", "matrix", "rules", "edc", "acrf", "export"].includes(
+      ["designer", "grid", "matrix", "rules", "edc", "acrf", "export"].includes(
         targetMode
       )
     ) {
@@ -1240,6 +1254,43 @@ export const CRFStudioContainer: React.FC = () => {
     updateStudyWithHistory(updatedStudy);
   };
 
+  const handleBatchUpdateFields = useCallback(
+    (batch: import("./Modes/ActiveFormGridEditor").BatchFieldUpdate[]) => {
+      if (!activeForm || batch.length === 0) return;
+
+      let currentStudy = study;
+
+      for (const item of batch) {
+        if (Object.keys(item.updates).length > 0) {
+          const res = StudyProtocolEngine.updateField(
+            currentStudy,
+            activeForm.id,
+            item.fieldId,
+            item.updates
+          );
+          if (!res.error && res.study) {
+            currentStudy = res.study;
+          }
+        }
+
+        if (item.newVariableName) {
+          const res = StudyProtocolEngine.renameFieldEverywhere(
+            currentStudy,
+            activeForm.id,
+            item.fieldId,
+            item.newVariableName
+          );
+          if (!res.error && res.study) {
+            currentStudy = res.study;
+          }
+        }
+      }
+
+      updateStudyWithHistory(currentStudy);
+    },
+    [activeForm, study, updateStudyWithHistory]
+  );
+
   const handleUpdateRules = (rules: EditCheckRule[]) => {
     handleUpdateFormMeta({ rules });
   };
@@ -1581,6 +1632,25 @@ export const CRFStudioContainer: React.FC = () => {
               </aside>
             )}
           </>
+        )}
+
+        {activeMode === "grid" && activeForm && (
+          <ActiveFormGridEditor
+            study={study}
+            activeForm={activeForm}
+            selectedFieldId={selectedFieldId}
+            codelists={study.codelists || []}
+            onSelectField={handleSelectField}
+            onUpdateField={handleUpdateField}
+            onBatchUpdateFields={handleBatchUpdateFields}
+            onRenameFieldEverywhere={handleRenameFieldEverywhere}
+            onSwitchMode={(mode) => {
+              setActiveModeState(mode);
+              setParam("mode", mode === "designer" ? null : mode, {
+                replace: false,
+              });
+            }}
+          />
         )}
 
         {activeMode === "matrix" && (
