@@ -5,9 +5,9 @@ import DOMPurify from "isomorphic-dompurify";
 import mermaid from "mermaid";
 
 if (typeof window !== "undefined") {
-  (window as unknown as Record<string, unknown>).DOMPurify = DOMPurify;
+  Object.assign(window, { DOMPurify });
 }
-(globalThis as unknown as Record<string, unknown>).DOMPurify = DOMPurify;
+Object.assign(globalThis, { DOMPurify });
 
 mermaid.initialize({ startOnLoad: false, securityLevel: "strict" });
 
