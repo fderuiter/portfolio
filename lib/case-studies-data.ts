@@ -1760,7 +1760,7 @@ flowchart TD
     Client[Browser / HTMX Client] -->|HTTP / Form Data| Router[FastAPI Application Gateway]
 
     subgraph routing["Routing & Middleware"]
-        Router --> ErrorDecorator[@api_error_handler Decorator]
+        Router --> ErrorDecorator["@api_error_handler Decorator"]
         Router --> Registry[Action Registry Dispatcher]
     end
 
