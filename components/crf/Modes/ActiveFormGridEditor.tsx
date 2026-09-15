@@ -74,31 +74,18 @@ const REQUIREMENT_TIERS = [
   { value: "auto_query", label: "Auto Query" },
 ];
 
-export interface GridCellLocation {
+interface GridCellLocation {
   rowIndex: number;
   colIndex: number;
 }
 
-export interface CellValidationError {
+interface CellValidationError {
   rowIndex: number;
   colKey: keyof CRFField | "variableName";
   message: string;
 }
 
-export interface ParsedPasteRow {
-  fieldId: string;
-  variableName: string;
-  label: string;
-  dataType: ClinicalDataType;
-  required: boolean;
-  columnSpan: number;
-  codelistId?: string;
-  unit?: string;
-  requirementTier?: "optional" | "hard_stop" | "auto_query";
-  description?: string;
-}
-
-export interface PastePreviewItem {
+interface PastePreviewItem {
   rowNumber: number;
   fieldId: string;
   sectionTitle: string;
