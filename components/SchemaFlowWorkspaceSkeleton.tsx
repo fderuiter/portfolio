@@ -25,7 +25,7 @@ export function SchemaFlowWorkspaceSkeleton() {
           </div>
 
           {/* Interactive Declarative SVG Proof Tree Canvas Placeholder */}
-          <div className="w-full h-[360px] bg-zinc-900/40 rounded-2xl border border-zinc-900 relative flex flex-col justify-between p-4">
+          <div className="w-full min-h-[360px] h-auto bg-zinc-900/40 rounded-2xl border border-zinc-900 relative flex flex-col justify-between p-4">
             {/* SVG Node mock graphic grid */}
             <svg
               className="w-full h-full select-none opacity-40"
@@ -33,16 +33,80 @@ export function SchemaFlowWorkspaceSkeleton() {
               xmlns="http://www.w3.org/2000/svg"
             >
               {/* Mock Edge lines */}
-              <path d="M 190 120 L 450 220" stroke="#27272a" strokeWidth="2" strokeDasharray="6 4" fill="none" />
-              <path d="M 190 320 L 450 220" stroke="#27272a" strokeWidth="2" strokeDasharray="6 4" fill="none" />
-              <path d="M 450 220 L 710 300" stroke="#27272a" strokeWidth="2" strokeDasharray="6 4" fill="none" />
+              <path
+                d="M 190 120 L 450 220"
+                stroke="#27272a"
+                strokeWidth="2"
+                strokeDasharray="6 4"
+                fill="none"
+              />
+              <path
+                d="M 190 320 L 450 220"
+                stroke="#27272a"
+                strokeWidth="2"
+                strokeDasharray="6 4"
+                fill="none"
+              />
+              <path
+                d="M 450 220 L 710 300"
+                stroke="#27272a"
+                strokeWidth="2"
+                strokeDasharray="6 4"
+                fill="none"
+              />
 
               {/* Mock Node cards */}
-              <rect x="100" y="80" width="180" height="80" rx="12" fill="#09090b" stroke="#27272a" strokeWidth="1.5" />
-              <rect x="100" y="280" width="180" height="80" rx="12" fill="#09090b" stroke="#27272a" strokeWidth="1.5" />
-              <rect x="360" y="180" width="180" height="80" rx="12" fill="#09090b" stroke="#06b6d4" strokeWidth="1.5" strokeDasharray="4" />
-              <rect x="360" y="340" width="180" height="80" rx="12" fill="#09090b" stroke="#27272a" strokeWidth="1.5" />
-              <rect x="620" y="260" width="180" height="80" rx="12" fill="#09090b" stroke="#27272a" strokeWidth="1.5" />
+              <rect
+                x="100"
+                y="80"
+                width="180"
+                height="80"
+                rx="12"
+                fill="#09090b"
+                stroke="#27272a"
+                strokeWidth="1.5"
+              />
+              <rect
+                x="100"
+                y="280"
+                width="180"
+                height="80"
+                rx="12"
+                fill="#09090b"
+                stroke="#27272a"
+                strokeWidth="1.5"
+              />
+              <rect
+                x="360"
+                y="180"
+                width="180"
+                height="80"
+                rx="12"
+                fill="#09090b"
+                stroke="#06b6d4"
+                strokeWidth="1.5"
+                strokeDasharray="4"
+              />
+              <rect
+                x="360"
+                y="340"
+                width="180"
+                height="80"
+                rx="12"
+                fill="#09090b"
+                stroke="#27272a"
+                strokeWidth="1.5"
+              />
+              <rect
+                x="620"
+                y="260"
+                width="180"
+                height="80"
+                rx="12"
+                fill="#09090b"
+                stroke="#27272a"
+                strokeWidth="1.5"
+              />
             </svg>
 
             {/* Floating prompt guidance placeholder */}
@@ -100,7 +164,9 @@ export function SchemaFlowWorkspaceSkeleton() {
           </div>
 
           <div className="border-t border-zinc-900 bg-zinc-950 px-4 py-3 flex items-center gap-2">
-            <span className="text-zinc-700 font-mono text-[10px]">~ tactic-cli $</span>
+            <span className="text-zinc-700 font-mono text-[10px]">
+              ~ tactic-cli $
+            </span>
             <div className="h-3 w-32 bg-zinc-900 rounded" />
           </div>
         </div>

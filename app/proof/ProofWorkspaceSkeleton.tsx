@@ -90,7 +90,7 @@ export function ProofWorkspaceSkeleton() {
             {Array.from({ length: 6 }).map((_, idx) => (
               <div
                 key={idx}
-                className="flex flex-col text-left p-2.5 rounded-xl border bg-slate-900/60 border-slate-800 h-[62px]"
+                className="flex flex-col text-left p-2.5 rounded-xl border bg-slate-900/60 border-slate-800 min-h-[62px] h-auto"
               >
                 <div className="flex items-center justify-between gap-1 mb-1">
                   <span className="w-12 h-3.5 rounded bg-slate-800 animate-pulse" />

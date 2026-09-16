@@ -1189,7 +1189,7 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
           !isDyslexic
             ? "Dyslexia mode activated. Using OpenDyslexic typeface with increased line spacing and letter tracking."
             : "Dyslexia mode deactivated. Restored Atkinson Hyperlegible and Lexend typography.",
-          "assertive"
+          "polite"
         );
       } else if (actionType === "418") {
         unlockAchievement("rfc-barista");

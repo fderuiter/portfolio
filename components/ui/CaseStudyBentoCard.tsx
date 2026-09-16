@@ -543,7 +543,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
               )}
 
               {/* Monospace terminal logs commits feed */}
-              <div className="bg-black/60 border border-zinc-900/60 rounded-xl p-2.5 font-mono text-[9.5px] leading-tight space-y-1 h-[115px] flex flex-col justify-start overflow-hidden">
+              <div className="bg-black/60 border border-zinc-900/60 rounded-xl p-2.5 font-mono text-[9.5px] leading-tight space-y-1 min-h-[115px] h-auto flex flex-col justify-start overflow-hidden">
                 <div className="flex items-center text-zinc-400 border-b border-zinc-900/60 pb-1 mb-1">
                   <IconTerminal className="w-3.5 h-3.5 mr-1 text-zinc-400 shrink-0" />
                   <span className="truncate">

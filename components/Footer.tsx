@@ -414,7 +414,7 @@ export const Footer: React.FC = () => {
                   !isDyslexic
                     ? "Dyslexia mode activated. Using OpenDyslexic typeface with increased line spacing."
                     : "Dyslexia mode deactivated. Restored standard typography.",
-                  "assertive"
+                  "polite"
                 );
               }}
               onMouseEnter={handleHover}
