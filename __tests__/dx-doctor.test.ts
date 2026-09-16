@@ -347,6 +347,31 @@ describe("DX Invariant Doctor Engine", () => {
       expect(result.status).toBe("pass");
       expect(result.message).toContain("All app/api routes are documented");
     });
+
+    it("normalizes a dynamic route segment from [id] to its OpenAPI {id} path", () => {
+      const apiDir = path.join(tempDir, "app", "api", "case-studies", "[id]");
+      fs.mkdirSync(apiDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(apiDir, "route.ts"),
+        "export async function GET() { return null; }"
+      );
+
+      const scriptsDir = path.join(tempDir, "scripts");
+      fs.mkdirSync(scriptsDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(scriptsDir, "generate-openapi.ts"),
+        "// generator"
+      );
+      fs.writeFileSync(
+        path.join(tempDir, "openapi.json"),
+        JSON.stringify({
+          openapi: "3.0.0",
+          paths: { "/api/case-studies/{id}": {} },
+        })
+      );
+
+      expect(checkOpenApiParity(tempDir, false).status).toBe("pass");
+    });
   });
 
   describe("checkAccessibilityStandards", () => {
