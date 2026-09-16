@@ -57,6 +57,18 @@ Original CSS Variable: --breakpoint-xl
 
 Original CSS Variable: --background
 
+#### colors.badge-muted-bg
+
+> `readonly` **badge-muted-bg**: `"#1e293b"` = `"#1e293b"`
+
+Original CSS Variable: --badge-muted-bg
+
+#### colors.badge-muted-text
+
+> `readonly` **badge-muted-text**: `"#7dd3fc"` = `"#7dd3fc"`
+
+Original CSS Variable: --badge-muted-text
+
 #### colors.border
 
 > `readonly` **border**: `"rgba(255, 255, 255, 0.08)"` = `"rgba(255, 255, 255, 0.08)"`
@@ -99,6 +111,18 @@ Original CSS Variable: --brand-cyan-glow
 
 Original CSS Variable: --brand-dark
 
+#### colors.cyan-glow
+
+> `readonly` **cyan-glow**: `"#38bdf8"` = `"#38bdf8"`
+
+Original CSS Variable: --cyan-glow
+
+#### colors.emerald-accent
+
+> `readonly` **emerald-accent**: `"#4ade80"` = `"#4ade80"`
+
+Original CSS Variable: --emerald-accent
+
 #### colors.error
 
 > `readonly` **error**: `"#f87171"` = `"#f87171"`
@@ -140,6 +164,12 @@ Original CSS Variable: --surface-1
 > `readonly` **surface-2**: `"rgba(28, 31, 39, 0.55)"` = `"rgba(28, 31, 39, 0.55)"`
 
 Original CSS Variable: --surface-2
+
+#### colors.text-secondary
+
+> `readonly` **text-secondary**: `"#94a3b8"` = `"#94a3b8"`
+
+Original CSS Variable: --text-secondary
 
 #### colors.warning
 
