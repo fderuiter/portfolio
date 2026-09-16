@@ -5,7 +5,6 @@ import { LiveEdcSimulator } from "@/components/crf/Modes/LiveEdcSimulator";
 import { VisitMatrixEditor } from "@/components/crf/Modes/VisitMatrixEditor";
 import { A11yProvider } from "@/components/providers/A11yProvider";
 import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets";
-import { StudyProtocol } from "@/lib/crf/types";
 
 describe("Dynamic eCRF Input ARIA Bindings & Edit Check Validation", () => {
   test("links labels and inputs via deterministic HTML id and htmlFor attributes", () => {

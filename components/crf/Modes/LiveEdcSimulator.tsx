@@ -1443,7 +1443,6 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
                                 id={inputId}
                                 role="group"
                                 aria-labelledby={inputId}
-                                aria-invalid={fieldError ? "true" : undefined}
                                 aria-describedby={
                                   fieldError ? errorId : undefined
                                 }
@@ -1476,6 +1475,12 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
                                       <input
                                         type="checkbox"
                                         checked={isChecked}
+                                        aria-invalid={
+                                          fieldError ? "true" : undefined
+                                        }
+                                        aria-describedby={
+                                          fieldError ? errorId : undefined
+                                        }
                                         onChange={(e) => {
                                           const updated = e.target.checked
                                             ? [...selectedArray, opt.code]
