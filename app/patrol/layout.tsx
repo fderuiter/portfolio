@@ -19,10 +19,10 @@ export default function PatrolLayout({
           __html: getWebApplicationSchema({
             name: "Patrol Shift Studio: Midwest Ski Patrol Simulator",
             description:
-              "A Midwest ski-patrol judgment and triage simulator powered by Outdoor Emergency Transportation (OET) domain logic.",
+              "A Midwest ski-patrol operational judgment simulation and state machine foundation.",
             url: "/patrol",
             applicationCategory: "SimulationApplication",
-            genre: "Ski Patrol Triage & Judgment Engine",
+            genre: "Ski Patrol Operational Simulation",
           }),
         }}
       />

@@ -8,5 +8,8 @@
 
 > `const` **INITIAL\_PATROL\_SCENARIOS**: [`PatrolScenario`](../../../types/interfaces/PatrolScenario.md)[]
 
-Initial catalog of Patrol Shift scenarios.
+Scaffold catalog of Patrol Shift operational scenarios for M1 foundation architecture.
+
+Notice: This software is an educational simulation prototype (Issues #744 / #747).
+It does NOT provide clinical advice, medical protocol guidance, or certified emergency training.
 Private implementation file stored inside internal package subfolder.

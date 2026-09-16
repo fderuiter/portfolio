@@ -139,14 +139,19 @@ export const LaserLoon: React.FC = () => {
   const [isPaused, setIsPaused] = useState(false);
 
   const { announce } = useAnnouncer();
+  const isInitialPauseRef = useRef(true);
 
   const togglePause = useCallback(() => {
-    setIsPaused((prev) => {
-      const next = !prev;
-      announce(next ? "Game paused." : "Game resumed.", "assertive");
-      return next;
-    });
-  }, [announce]);
+    setIsPaused((prev) => !prev);
+  }, []);
+
+  useEffect(() => {
+    if (isInitialPauseRef.current) {
+      isInitialPauseRef.current = false;
+      return;
+    }
+    announce(isPaused ? "Game paused." : "Game resumed.", "assertive");
+  }, [isPaused, announce]);
 
   const museumTrapRef = useFocusTrap<HTMLDivElement>(showMuseum, {
     onEscape: () => setShowMuseum(false),
@@ -624,20 +629,21 @@ export const LaserLoon: React.FC = () => {
     if (gameState !== "playing" || mode !== "arcade" || isPaused) return;
 
     const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          setGameState("gameover");
-          playSuccess();
-          recordEvent("laser_loon_complete", "project_click").catch(() => {});
-          return 0;
-        }
-        return prev - 1;
-      });
+      setTimeLeft((prev) => Math.max(0, prev - 1));
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [gameState, mode, isPaused, playSuccess, recordEvent]);
+  }, [gameState, mode, isPaused]);
+
+  // Handle countdown expiration outside functional state updater
+  useEffect(() => {
+    if (gameState === "playing" && mode === "arcade" && timeLeft === 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setGameState("gameover");
+      playSuccess();
+      recordEvent("laser_loon_complete", "project_click").catch(() => {});
+    }
+  }, [gameState, mode, timeLeft, playSuccess, recordEvent]);
 
   // Active Power-Up timer
   useEffect(() => {
@@ -811,18 +817,16 @@ export const LaserLoon: React.FC = () => {
     const handleContextRestored = () => {
       isContextLost = false;
       lastFrameTime = performance.now();
-      animFrameIdRef.current = requestAnimationFrame(renderLoop);
+      if (!isPaused) {
+        animFrameIdRef.current = requestAnimationFrame(renderLoop);
+      }
     };
 
     canvas.addEventListener("contextlost", handleContextLost);
     canvas.addEventListener("contextrestored", handleContextRestored);
 
     const renderLoop = (time: number) => {
-      if (isContextLost) return;
-      if (isPaused) {
-        animFrameIdRef.current = requestAnimationFrame(renderLoop);
-        return;
-      }
+      if (isContextLost || isPaused) return;
       const dt = Math.min(32, time - lastFrameTime) / 16.666;
       lastFrameTime = time;
 
@@ -1396,10 +1400,14 @@ export const LaserLoon: React.FC = () => {
 
       ctx.restore();
 
-      animFrameIdRef.current = requestAnimationFrame(renderLoop);
+      if (!isPaused) {
+        animFrameIdRef.current = requestAnimationFrame(renderLoop);
+      }
     };
 
-    animFrameIdRef.current = requestAnimationFrame(renderLoop);
+    if (!isPaused) {
+      animFrameIdRef.current = requestAnimationFrame(renderLoop);
+    }
 
     return () => {
       canvas.removeEventListener("contextlost", handleContextLost);

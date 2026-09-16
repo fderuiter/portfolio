@@ -101,55 +101,55 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
   patrol: {
     id: "patrol",
     title: "Patrol Shift Studio",
-    subtitle: "Midwest Ski Patrol Judgment & Triage Simulation",
-    genre: "Emergency Triage",
-    badge: "OET Triage Suite",
+    subtitle: "Midwest Ski Patrol Judgment Simulation Foundation",
+    genre: "Simulation Framework",
+    badge: "Foundation Scaffold",
     route: "/patrol",
     accentColor: "from-cyan-500/20 via-cyan-500/5 to-transparent",
     badgeBg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/30",
     objective:
-      "Manage cold-weather trauma and environmental exposure cases on Midwest slopes using Outdoor Emergency Transportation (OET) protocols.",
+      "Explore the architectural foundation for the Midwest ski patrol judgment simulation. Educational prototype only — does not provide certified clinical protocols or medical guidance.",
     quickSummary:
-      "Select scenarios, assess scene safety, evaluate patient vitals, execute protocol actions, and review performance in automated debrief reports.",
+      "Inspect patrol operational scenarios, review state machine transitions, and explore the modular architecture governing future scenario and debrief engines.",
     controls: [
       {
         action: "Select Scenario",
         description:
-          "Choose an active patrol scenario from the scenario sidebar catalog.",
+          "Choose an active patrol operational routine from the sidebar catalog.",
         key: "Click Scenario",
       },
       {
-        action: "Execute Protocol Action",
+        action: "Execute Operational Action",
         description:
-          "Click available protocol actions (Assessment, Treatment, Transport) to advance the incident timeline.",
+          "Click available operational actions to advance the shift timeline.",
         key: "Click Action",
       },
       {
-        action: "Complete Shift & Debrief",
+        action: "Complete Shift & Review",
         description:
-          "Finish the incident to trigger OET rule evaluation and review score and feedback.",
-        key: "Debrief Button",
+          "Complete the shift routine to inspect state machine results and rule evaluations.",
+        key: "Review Button",
       },
     ],
     rules: [
       {
-        title: "Outdoor Emergency Transportation Protocol",
+        title: "Educational Simulation Notice",
         detail:
-          "Actions are evaluated against OET guidelines for scene safety, spine management, and cold exposure.",
-        badge: "OET Rules",
+          "Patrol Shift is an educational simulation framework under development (Issue #747). It does not provide medical guidance or clinical training.",
+        badge: "Disclaimer",
       },
     ],
     proTips: [
-      "Always perform scene size-up and C-spine stabilization prior to movement.",
+      "Review the architectural decisions in ADR 0042 to understand how the headless shift engine operates.",
     ],
     lore: {
-      title: "Ski Patrol Triage & Judgment",
+      title: "Patrol Operations & Systems Architecture",
       story:
-        "Ski patrolling requires split-second clinical judgment in freezing temperatures and hazardous mountain environments.",
+        "Patrol Shift models the complex coordination, dispatch, and environmental operations of ski patrollers through deterministic state machines.",
       realWorldTech: [
         "Finite State Machines",
-        "OET Protocols",
-        "Automated Rule Engines",
+        "Deep Modules",
+        "Declarative Rule Engines",
       ],
     },
   },

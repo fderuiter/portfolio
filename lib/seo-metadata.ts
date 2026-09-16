@@ -52,15 +52,15 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
   patrol: {
     title: "Patrol Shift Studio: Midwest Ski Patrol Simulator",
     description:
-      "An interactive Midwest ski-patrol judgment and emergency triage simulator powered by Outdoor Emergency Transportation (OET) domain logic and FSM transitions.",
+      "An interactive Midwest ski-patrol judgment simulation foundation powered by deterministic FSM transitions and operational dispatch routines.",
     path: "/patrol",
     keywords: [
       "Patrol Shift Studio",
       "Ski Patrol Simulator",
-      "Outdoor Emergency Transportation",
-      "OET Triage Engine",
-      "Winter Emergency Response",
-      "Clinical Judgment Engine",
+      "Mountain Dispatch",
+      "Operational Judgment",
+      "Finite State Machine",
+      "Winter Operations",
     ],
     inLanguage: "en-US",
     locale: "en-US",

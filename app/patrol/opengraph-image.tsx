@@ -14,16 +14,16 @@ export const contentType = OG_IMAGE_CONTENT_TYPE;
 export default function Image() {
   const config = ROUTE_METADATA_CONFIGS.patrol;
   return createSocialImageResponse({
-    category: "EMERGENCY SYSTEMS // PATROL SIMULATOR",
+    category: "OPERATIONAL SYSTEMS // PATROL SIMULATOR",
     title: config.title,
     description: config.description,
-    badge: "OET ENGINE // TRIAGE FSM",
+    badge: "FOUNDATION SCAFFOLD // FSM",
     tags: [
       "Ski Patrol",
-      "OET Evaluation",
-      "Triage FSM",
-      "Clinical Judgment",
-      "Winter Response",
+      "Operational Judgment",
+      "Shift FSM",
+      "Dispatch Protocols",
+      "Winter Operations",
     ],
     systemStatus: "SIMULATOR ONLINE // SHIFT ACTIVE",
   });

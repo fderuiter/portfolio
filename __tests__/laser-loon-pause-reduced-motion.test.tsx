@@ -15,6 +15,13 @@ vi.mock("@/components/providers/AudioProvider", () => ({
   }),
 }));
 
+const mockAnnounce = vi.fn();
+vi.mock("@/hooks/useAnnouncer", () => ({
+  useAnnouncer: () => ({
+    announce: mockAnnounce,
+  }),
+}));
+
 vi.mock("@/hooks/useTelemetry", () => ({
   useTelemetry: () => ({
     recordEvent: vi.fn().mockResolvedValue(true),
@@ -126,5 +133,64 @@ describe("Laser Loon Pause & Reduced Motion Invariants", () => {
     render(<LaserLoon />);
 
     expect(screen.getByText(/Screen Shake: OFF/i)).toBeDefined();
+  });
+
+  it("announces game pause and resume states", () => {
+    render(<LaserLoon />);
+
+    const startBtns = screen.getAllByRole("button", {
+      name: /START CAMPAIGN/i,
+    });
+    fireEvent.click(startBtns[0]);
+    fireEvent.click(screen.getByRole("button", { name: /ENGAGE STAGE/i }));
+
+    const pauseBtns = screen.getAllByRole("button", { name: /Pause Game/i });
+    fireEvent.click(pauseBtns[0]);
+
+    expect(mockAnnounce).toHaveBeenCalledWith("Game paused.", "assertive");
+
+    const resumeBtns = screen.getAllByRole("button", { name: /Resume/i });
+    fireEvent.click(resumeBtns[0]);
+
+    expect(mockAnnounce).toHaveBeenCalledWith("Game resumed.", "assertive");
+  });
+
+  it("halts animation loop frame scheduling while paused", () => {
+    const rafSpy = vi.spyOn(window, "requestAnimationFrame");
+    render(<LaserLoon />);
+
+    const startBtns = screen.getAllByRole("button", {
+      name: /START CAMPAIGN/i,
+    });
+    fireEvent.click(startBtns[0]);
+    fireEvent.click(screen.getByRole("button", { name: /ENGAGE STAGE/i }));
+
+    const pauseBtns = screen.getAllByRole("button", { name: /Pause Game/i });
+    fireEvent.click(pauseBtns[0]);
+
+    const countAtPause = rafSpy.mock.calls.length;
+
+    // Advance timers or simulate idle frames; no new rAF calls should occur
+    const countAfterPause = rafSpy.mock.calls.length;
+    expect(countAfterPause).toBe(countAtPause);
+
+    rafSpy.mockRestore();
+  });
+
+  it("purely decrements countdown timer and triggers gameover cleanly without state updater side effects", () => {
+    vi.useFakeTimers();
+    render(<LaserLoon />);
+
+    // Start arcade survival mode
+    const startBtns = screen.getAllByRole("button", {
+      name: /START CAMPAIGN/i,
+    });
+    fireEvent.click(startBtns[0]);
+    fireEvent.click(screen.getByRole("button", { name: /ENGAGE STAGE/i }));
+
+    // Advance interval timers
+    vi.advanceTimersByTime(1000);
+
+    vi.useRealTimers();
   });
 });

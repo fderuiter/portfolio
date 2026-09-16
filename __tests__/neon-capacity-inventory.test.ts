@@ -21,16 +21,16 @@ describe("Neon Capacity & Branch Inventory", () => {
     "neon-capacity-inventory.md"
   );
 
-  it("captures authoritative storage meters under Neon 0.5 GiB free tier limit", () => {
+  it("captures policy storage meters and records provider usage as unobserved locally under Neon 0.5 GiB free tier limit", () => {
     expect(inventory.plan).toContain("Neon Free Tier");
     expect(inventory.scope).toContain("Neon Postgres");
+    expect(inventory.providerInventoryAvailable).toBe(false);
 
     const meter = inventory.storageMeter;
     expect(meter.limitBytes).toBe(NEON_FREE_TIER_LIMIT_BYTES);
     expect(meter.limitGiB).toBe(NEON_FREE_TIER_LIMIT_GIB);
-    expect(meter.usedGiB).toBe(0.308);
-    expect(meter.headroomGiB).toBe(0.192);
-    expect(meter.headroomPercentage).toBe(38.5);
+    expect(meter.providerStatus).toBe("unavailable_locally");
+    expect(inventory.summary.providerDataStatus).toBe("unavailable_locally");
   });
 
   it("enforces compute policies (0.25 CU, 5-minute auto-suspend)", () => {
@@ -71,17 +71,13 @@ describe("Neon Capacity & Branch Inventory", () => {
     expect(PROTECTED_NEON_TARGETS[1].branchName).toBe("dev");
   });
 
-  it("identifies stale candidates with recoverable storage capacity", () => {
-    expect(inventory.candidates).toHaveLength(4);
-    expect(inventory.summary.candidateCount).toBe(4);
-
-    const totalRecoverable = inventory.candidates.reduce(
-      (sum, c) => sum + c.storageMiB,
-      0
+  it("enforces zero approved candidates until an authorized provider snapshot is captured (Issue #621)", () => {
+    expect(inventory.candidates).toHaveLength(0);
+    expect(inventory.summary.candidateCount).toBe(0);
+    expect(inventory.summary.expectedRecoverableStorageMiB).toBe(0);
+    expect(inventory.summary.projectedPostCleanupHeadroomGiB).toBe(
+      NEON_FREE_TIER_LIMIT_GIB
     );
-    expect(totalRecoverable).toBe(160); // 40 + 40 + 45 + 35
-    expect(inventory.summary.expectedRecoverableStorageMiB).toBe(160);
-    expect(inventory.summary.projectedPostCleanupHeadroomGiB).toBe(0.349);
   });
 
   it("verifies the non-destructive invariant across all candidates", () => {
@@ -108,7 +104,7 @@ describe("Neon Capacity & Branch Inventory", () => {
       {
         targetId: "br-main-prod-corrupted",
         targetType: "branch",
-        projectId: "ep-portfolio-main-prod",
+        projectId: "portfolio",
         branchName: "main",
         environment: "preview",
         storageBytes: 100,
@@ -135,16 +131,22 @@ describe("Neon Capacity & Branch Inventory", () => {
     const docContent = fs.readFileSync(docPath, "utf-8");
 
     // All protected branches must be cited in doc
-    expect(docContent).toContain("ep-portfolio-main-prod");
+    expect(docContent).toContain("neon-gray-drum");
     expect(docContent).toContain("`main`");
     expect(docContent).toContain("`dev`");
 
-    // Capacity & compute numbers must be represented
-    expect(docContent).toContain("0.308 GiB");
+    // Policy bounds & governance must be represented
+    expect(docContent).toContain("0.500 GiB");
     expect(docContent).toContain("5 minutes");
-    expect(docContent).toContain("160 MiB");
     expect(docContent).toContain("DATABASE_URL");
     expect(docContent).toContain("DIRECT_URL");
     expect(docContent).toContain("ADR 0036");
+    expect(docContent).toContain("Issue #621");
+
+    // Must not contain fabricated provider IDs or fake claims
+    expect(docContent).not.toContain("0.308 GiB");
+    expect(docContent).not.toContain("ep-portfolio-main-prod");
+    expect(docContent).not.toContain("ep-legacy-wedding-db");
+    expect(docContent).not.toContain("br-preview-pr-687");
   });
 });

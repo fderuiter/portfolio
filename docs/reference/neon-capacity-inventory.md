@@ -1,33 +1,32 @@
 # Neon Capacity & Branch Inventory
 
-Last verified: 2026-09-15 11:34 UTC
+Last verified: 2026-09-10 (Issue #621 audit)
 
-Scope: `fderuiter/portfolio`, Neon Free Tier, All Projects & Branches
+Scope: `fderuiter/portfolio`, Neon Free Tier, Vercel Resource `neon-gray-drum`
 
-Sources: Neon usage dashboard, environment configurations, and repository source (`lib/db.ts`, `prisma/schema.prisma`, `lib/env.ts`)
+Sources: Vercel integration inspection (`neon-gray-drum` attached to `portfolio`), environment configuration names (`vercel env ls`), and repository source (`lib/db.ts`, `prisma/schema.prisma`, `lib/env.ts`)
 
-This is the authoritative capacity, connection hygiene, and retention record for Neon Postgres under [ADR 0036](../../adr/0036-free-tier-offloading-and-provider-quota-governance.md).
+This is the evidence-backed capacity, connection hygiene, and retention record for Neon Postgres under [ADR 0036](../../adr/0036-free-tier-offloading-and-provider-quota-governance.md).
 
-## Capacity Snapshot
+> [!NOTE]
+> **Provider-Side Inventory Gap (Issue #621)**: No Neon API credential (`NEON_API_KEY`) or authenticated Neon CLI profile is available in this local workspace. Provider-side storage measurements, branch lifecycles, and compute usage are explicitly recorded as unobserved locally rather than estimated or fabricated. No deletion candidates are approved without an authenticated provider snapshot.
 
-| Meter | Used | Limit | Headroom | Status |
+## Capacity & Policy Baseline
+
+| Meter | Observed Usage | Governed Limit | Policy Headroom | Status |
 | --- | ---: | ---: | ---: | --- |
-| Storage Capacity | **0.308 GiB** (~315 MiB) | 0.500 GiB (512 MiB) | 0.192 GiB (38.5%) | Healthy |
+| Storage Capacity | *Unobserved locally* | 0.500 GiB (512 MiB) | 0.500 GiB (100%) | Governed Policy Limit |
 | Compute Auto-Suspend | **5 minutes** (300s) | 5 minutes | 0s delay | Optimal |
 | Compute Unit Limit | **0.25 CU** | 0.25 CU | 0 CU | Bounded |
 
 Neon's free plan provides 0.5 GiB storage and auto-suspends compute after 5 minutes of inactivity. Direct un-cached public queries wake compute, adding 1–3s cold-start latency and consuming monthly compute hours.
 
-## Project & Branch Inventory
+## Project & Branch Inventory (Policy Baseline)
 
-| Project ID | Project Name | Branch | Environment | Protection Status | Storage | Role |
+| Project / Resource | Target Name | Branch | Environment | Protection Status | Provider Storage | Role |
 | --- | --- | --- | --- | --- | ---: | --- |
-| `ep-portfolio-main-prod` | `portfolio` | `main` | Production | **Protected** | 120 MiB | Canonical production database backing www.deruiter.dev |
-| `ep-portfolio-main-prod` | `portfolio` | `dev` | Development | **Protected** | 35 MiB | Long-lived integration branch database for schema rehearsal |
-| `ep-portfolio-main-prod` | `portfolio` | `preview/pr-687` | Preview | Ephemeral | 45 MiB | Stale preview database for closed PR #687 |
-| `ep-portfolio-main-prod` | `portfolio` | `dev-experimental-01` | Experimental | Ephemeral | 35 MiB | Abandoned experimental feature branch |
-| `ep-legacy-wedding-db` | `wedding-legacy` | `main` | Unconnected | Ephemeral | 40 MiB | Unconnected legacy database project from previous release |
-| `ep-orphan-prototype-02` | `portfolio-orphan` | `main` | Unconnected | Ephemeral | 40 MiB | Orphaned prototype project from early setup phase |
+| `neon-gray-drum` | `portfolio` | `main` | Production | **Protected** | *Unobserved* | Canonical production database backing www.deruiter.dev |
+| `neon-gray-drum` | `portfolio` | `dev` | Development | **Protected** | *Unobserved* | Long-lived integration branch database for schema rehearsal |
 
 ## Resource Classification & Retention Policy
 
@@ -84,29 +83,17 @@ To guarantee Neon compute remains suspended in zero-compute sleep states across 
 2. **Tier 2 (Upstash Redis Read-Through Cache)**: Dynamic data queries in `CaseStudyService` query Upstash Redis first with a 1-hour TTL. Only cache misses wake Neon Postgres.
 3. **Write Buffering**: Visitor reactions and telemetry events are buffered in Upstash Redis (`HINCRBY`, `RPUSH`) rather than issuing immediate mutative SQL queries per request, and drained once daily by `/api/cron/maintenance`.
 
-## Human-Reviewable Cleanup Plan
+## Cleanup Governance & Candidate Status
 
-No cloud mutations, drops, or deletions are executed by this inventory ticket. Below is the audited cleanup plan for operator authorization.
+No cloud mutations, drops, or deletions are executed by this inventory ticket. Zero deletion candidates are approved today:
 
-### Exact Candidate Targets
-
-| Target ID | Target Type | Project / Branch | Environment | Capacity Recovered | Required Approval |
-| --- | --- | --- | --- | ---: | --- |
-| `ep-legacy-wedding-db` | Project | `wedding-legacy/main` | Unconnected Legacy | 40 MiB | Operator confirmation that no legacy routes require database access |
-| `ep-orphan-prototype-02` | Project | `portfolio-orphan/main` | Unconnected Legacy | 40 MiB | Operator sign-off after confirming zero active connections |
-| `br-preview-pr-687` | Branch | `portfolio/preview/pr-687` | Closed PR Preview | 45 MiB | Operator sign-off confirming PR #687 merge and closure |
-| `br-dev-experimental-01` | Branch | `portfolio/dev-experimental-01` | Abandoned Dev | 35 MiB | Operator sign-off prior to branch deletion |
-
-### Expected Capacity Recovery Summary
-
-- **Total Current Capacity Used**: 315 MiB (0.308 GiB / 61.5% of quota)
-- **Expected Recoverable Capacity**: **160 MiB** (0.156 GiB / 31.2% of total quota)
-- **Projected Post-Cleanup Usage**: 155 MiB (0.151 GiB / 30.3% of total quota)
-- **Projected Post-Cleanup Headroom**: **0.349 GiB** (69.7% headroom remaining)
+- **Approved Candidates**: 0 targets.
+- **Recoverable Capacity**: 0 MiB (unobserved locally without provider credentials).
+- **Protected Targets**: `main` (production) and `dev` (integration) branches are strictly excluded from candidates.
 
 ### Operating Constraints & Approval Workflow
 
-1. Obtain explicit operator sign-off for candidate target IDs before triggering deletion in Neon Console or CLI.
+1. Obtain explicit operator sign-off with authenticated provider credentials before identifying any candidate target IDs in Neon Console or CLI.
 2. Never delete `main` or `dev` branches under any circumstances.
 3. Post-cleanup verification: Run `npm run check:migrations:drift` and verify HTTP 200 on `https://www.deruiter.dev/`.
 

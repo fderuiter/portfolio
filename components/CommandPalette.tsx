@@ -790,24 +790,24 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
         id: "nav-patrol-shift",
         title: "Patrol Shift Studio: Midwest Ski Patrol Simulator",
         subtitle:
-          "Midwest ski-patrol judgment and triage simulator powered by Outdoor Emergency Transportation (OET) domain logic.",
+          "Midwest ski-patrol operational judgment simulation and state machine foundation.",
         category: "navigation",
         url: "/patrol",
         icon: <IconShieldCheck className="w-4 h-4 text-brand-cyan" />,
-        badge: "Emergency Triage",
-        status: "OET Engine Active",
+        badge: "Foundation Scaffold",
+        status: "M1 Scaffold Active",
         description:
-          "Midwest ski-patrol judgment and triage simulator powered by Outdoor Emergency Transportation (OET) domain logic.",
+          "Midwest ski-patrol operational judgment simulation and state machine foundation.",
         techStack: [
-          "OET Protocol Rules",
           "Finite State Machine",
-          "Triage Engine",
+          "Operational Protocols",
+          "Deep Modules",
           "React 19",
         ],
         highlights: [
-          "Outdoor Emergency Transportation protocol rules",
-          "Real-time triage state transitions",
-          "Automated performance debrief reports",
+          "Operational trail sweep and dispatch routines",
+          "Deterministic shift phase transitions",
+          "Automated operational debrief reports",
         ],
       },
       {

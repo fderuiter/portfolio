@@ -45,7 +45,7 @@ export const PatrolShiftSkeleton: React.FC = () => {
           </div>
           <div className="flex items-center justify-between text-xs font-mono text-zinc-500 pt-4">
             <span>LOADING PATROL SHIFT SIMULATOR...</span>
-            <span>INITIALIZING OET ENGINE</span>
+            <span>INITIALIZING SIMULATION ENGINE</span>
           </div>
         </div>
       </div>

@@ -13,21 +13,23 @@ import {
   CRFSection,
   EditCheckRule,
   StudyVisit,
-} from "@/lib/crf/types";
-import { getPresetByIdSync, getOncologyPresetSync } from "@/lib/crf/presets";
-import {
+  StudyBaseline,
+  CodelistDefinition,
+  StudyBranding,
+  getPresetByIdSync,
+  getOncologyPresetSync,
   loadStudyDraft,
   saveStudyDraft,
   saveStudySnapshot,
   isDraftDirty,
-} from "@/lib/crf/study-draft-storage";
-import {
   StudyProtocolEngine,
   generateCdashVariableName,
   generateEngineId,
   FieldImpactPreview,
   SectionImpactPreview,
-} from "@/lib/crf/study-engine";
+  SlashCommandItem,
+  getStudyBranding,
+} from "@/lib/crf";
 import { useStudyAutosave } from "@/hooks/useStudyAutosave";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { StudioHeader } from "./StudioHeader";
@@ -88,8 +90,6 @@ import {
   BaselineCompareModal,
   type BaselineCompareNavigationTarget,
 } from "./BaselineCompareModal";
-import { SlashCommandItem } from "@/lib/crf/smart-blocks-engine";
-import type { StudyBaseline } from "@/lib/crf/types";
 import {
   VisitMatrixEditorSkeleton,
   RuleGraphStudioSkeleton,
@@ -133,7 +133,6 @@ const WorkflowWizardModal = dynamic(
     loading: () => <WorkflowWizardModalSkeleton />,
   }
 );
-import { getStudyBranding } from "@/lib/crf/branding-defaults";
 import { useStudioHashParams } from "@/hooks/useStudioHashParams";
 import { useAudio } from "@/components/providers/AudioProvider";
 import {
@@ -708,7 +707,7 @@ export const CRFStudioContainer: React.FC = () => {
   ]);
 
   const handleSaveCodelist = useCallback(
-    (newCodelist: import("@/lib/crf/types").CodelistDefinition) => {
+    (newCodelist: CodelistDefinition) => {
       if (!study) return;
       updateStudyWithHistory({
         ...study,
@@ -1256,9 +1255,7 @@ export const CRFStudioContainer: React.FC = () => {
     updateStudyWithHistory({ ...study, visits });
   };
 
-  const handleUpdateBranding = (
-    newBranding: import("@/lib/crf/types").StudyBranding
-  ) => {
+  const handleUpdateBranding = (newBranding: StudyBranding) => {
     updateStudyWithHistory({
       ...study,
       branding: newBranding,

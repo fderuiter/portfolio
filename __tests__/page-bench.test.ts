@@ -88,7 +88,9 @@ describe("Page Benchmark Suite Utilities & Statistical Aggregator", () => {
       for (const r of CANONICAL_ROUTES) {
         expect(r.path.startsWith("/")).toBe(true);
         expect(r.name.length).toBeGreaterThan(0);
-        expect(["top-level", "case-study", "arcade", "tool"]).toContain(r.category);
+        expect(["top-level", "case-study", "arcade", "tool"]).toContain(
+          r.category
+        );
       }
     });
 
@@ -100,6 +102,7 @@ describe("Page Benchmark Suite Utilities & Statistical Aggregator", () => {
       expect(paths).toContain("/proof");
       expect(paths).toContain("/neuro");
       expect(paths).toContain("/crf");
+      expect(paths).toContain("/patrol");
       expect(paths).toContain("/simulator");
       expect(paths).toContain("/schedule");
       expect(paths).toContain("/arcade/working-with-duck");

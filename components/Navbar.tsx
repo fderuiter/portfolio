@@ -104,7 +104,7 @@ const SYSTEMS_ITEMS: SubNavItem[] = [
   },
   {
     title: "Patrol Shift",
-    subtitle: "Midwest ski-patrol judgment & triage simulator",
+    subtitle: "Midwest ski-patrol operational judgment simulator",
     href: "/patrol",
     icon: <IconShieldCheck className="w-4 h-4 text-brand-cyan" />,
   },
@@ -1181,7 +1181,7 @@ export const Navbar: React.FC = () => {
                       <span className="truncate">Patrol Shift</span>
                     </span>
                     <span className="text-[10px] font-mono text-brand-cyan px-1.5 py-0.5 rounded bg-brand-cyan/10 shrink-0">
-                      OET
+                      M1
                     </span>
                   </Link>
                   <Link

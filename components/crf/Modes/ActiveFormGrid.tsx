@@ -7,9 +7,10 @@ import {
   StudyProtocol,
   StudioMode,
   ClinicalDataType,
-} from "@/lib/crf/types";
-import { StudyProtocolEngine } from "@/lib/crf/study-engine";
-import { validateCdashVariableName } from "@/lib/crf/precision-date";
+  StudyProtocolEngine,
+  validateCdashVariableName,
+} from "@/lib/crf";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import {
   IconLayoutGrid,
   IconPlus,
@@ -21,7 +22,7 @@ import {
   IconTable,
 } from "@tabler/icons-react";
 
-export interface ActiveFormGridProps {
+interface ActiveFormGridProps {
   form: CRFForm;
   study: StudyProtocol;
   selectedFieldId: string | null;
@@ -33,7 +34,7 @@ export interface ActiveFormGridProps {
   onAddField?: (sectionId?: string) => void;
 }
 
-export type GridColumnKey =
+type GridColumnKey =
   | "id"
   | "variableName"
   | "label"
@@ -45,7 +46,7 @@ export type GridColumnKey =
   | "codelistId"
   | "acrfAnnotation";
 
-export interface GridColumnDef {
+interface GridColumnDef {
   key: GridColumnKey;
   label: string;
   width: string;
@@ -54,13 +55,13 @@ export interface GridColumnDef {
   options?: { value: string; label: string }[];
 }
 
-export interface GridRowData {
+interface GridRowData {
   field: CRFField;
   sectionId: string;
   sectionTitle: string;
 }
 
-export interface CellUpdate {
+interface CellUpdate {
   rowIndex: number;
   colIndex: number;
   fieldId: string;
@@ -229,6 +230,10 @@ export const ActiveFormGrid: React.FC<ActiveFormGridProps> = ({
   const [pendingBatchUpdates, setPendingBatchUpdates] = useState<CellUpdate[]>(
     []
   );
+
+  const pasteModalRef = useFocusTrap<HTMLDivElement>(pasteModalOpen, {
+    onEscape: () => setPasteModalOpen(false),
+  });
 
   const gridRef = useRef<HTMLDivElement>(null);
 
@@ -473,6 +478,7 @@ export const ActiveFormGrid: React.FC<ActiveFormGridProps> = ({
         .filter((l) => l.length > 0);
 
       const updates: CellUpdate[] = [];
+      const batchAssignedVars = new Set<string>();
 
       lines.forEach((line, rOffset) => {
         const targetRowIdx = startRow + rOffset;
@@ -500,6 +506,9 @@ export const ActiveFormGrid: React.FC<ActiveFormGridProps> = ({
             if (!valRes.isValid) {
               isValid = false;
               error = valRes.error || "Invalid CDASH variable format";
+            } else if (batchAssignedVars.has(upperVar)) {
+              isValid = false;
+              error = `Duplicate variable name '${upperVar}' in paste batch`;
             } else {
               // Check collision within form rows
               const exists = rows.some(
@@ -510,7 +519,32 @@ export const ActiveFormGrid: React.FC<ActiveFormGridProps> = ({
               if (exists) {
                 isValid = false;
                 error = `Variable name '${upperVar}' already exists in form`;
+              } else {
+                // Test Sentinel rename via StudyProtocolEngine
+                const testRename = StudyProtocolEngine.renameFieldEverywhere(
+                  study,
+                  form.id,
+                  row.field.id,
+                  upperVar
+                );
+                if (testRename.error) {
+                  isValid = false;
+                  error = testRename.error;
+                }
               }
+            }
+            if (isValid) {
+              batchAssignedVars.add(upperVar);
+            }
+          } else if (col.key === "sectionId") {
+            const matchedSec = form.sections.find(
+              (s) =>
+                s.id === newVal ||
+                s.title.trim().toLowerCase() === newVal.trim().toLowerCase()
+            );
+            if (!matchedSec) {
+              isValid = false;
+              error = `Section '${newVal}' does not exist in form '${form.name}'`;
             }
           } else if (col.key === "dataType") {
             const validTypes = DATA_TYPE_OPTIONS.map((o) => o.value);
@@ -557,7 +591,7 @@ export const ActiveFormGrid: React.FC<ActiveFormGridProps> = ({
 
       return updates;
     },
-    [rows, columns, getCellValue, study.codelists]
+    [rows, columns, getCellValue, study, form]
   );
 
   // Handle clipboard paste event
@@ -583,14 +617,17 @@ export const ActiveFormGrid: React.FC<ActiveFormGridProps> = ({
 
   // Apply batch updates atomically (1 undo entry)
   const commitBatchUpdates = () => {
-    if (pendingBatchUpdates.some((u) => !u.isValid)) {
-      return; // Cannot commit invalid batch
+    if (
+      pendingBatchUpdates.length === 0 ||
+      pendingBatchUpdates.some((u) => !u.isValid)
+    ) {
+      return; // Cannot commit invalid or empty batch
     }
 
     let currentStudy = study;
 
     // Apply variable renames first via Sentinel / renameFieldEverywhere
-    pendingBatchUpdates.forEach((upd) => {
+    for (const upd of pendingBatchUpdates) {
       if (upd.colKey === "variableName") {
         const res = StudyProtocolEngine.renameFieldEverywhere(
           currentStudy,
@@ -598,62 +635,101 @@ export const ActiveFormGrid: React.FC<ActiveFormGridProps> = ({
           upd.fieldId,
           upd.newValue
         );
-        if (!res.error) {
-          currentStudy = res.study;
+        if (res.error) {
+          // Sentinel rename failed: abort batch atomically with zero mutations!
+          return;
         }
+        currentStudy = res.study;
       }
-    });
+    }
 
-    // Apply other property updates
+    // Apply other property updates and sectionId movements
     const targetForm = currentStudy.forms.find((f) => f.id === form.id);
     if (!targetForm) return;
 
-    const nextSections = targetForm.sections.map((sec) => ({
-      ...sec,
-      fields: sec.fields.map((fld) => {
-        let updated = fld;
-        pendingBatchUpdates.forEach((upd) => {
-          if (upd.fieldId === fld.id && upd.colKey !== "variableName") {
+    // Group updates by fieldId
+    const updatesByFieldId = new Map<string, CellUpdate[]>();
+    for (const upd of pendingBatchUpdates) {
+      if (upd.colKey !== "variableName") {
+        const list = updatesByFieldId.get(upd.fieldId) || [];
+        list.push(upd);
+        updatesByFieldId.set(upd.fieldId, list);
+      }
+    }
+
+    // Map every field in targetForm and track its target sectionId
+    const fieldMap = new Map<
+      string,
+      { field: CRFField; targetSectionId: string }
+    >();
+
+    for (const sec of targetForm.sections) {
+      for (const fld of sec.fields) {
+        const updatedField = { ...fld };
+        let targetSecId = sec.id;
+
+        const fieldUpdates = updatesByFieldId.get(fld.id);
+        if (fieldUpdates) {
+          for (const upd of fieldUpdates) {
             if (upd.colKey === "label") {
-              updated = { ...updated, label: upd.newValue };
+              updatedField.label = upd.newValue;
             } else if (upd.colKey === "dataType") {
-              updated = {
-                ...updated,
-                dataType: upd.newValue as ClinicalDataType,
-              };
+              updatedField.dataType = upd.newValue as ClinicalDataType;
             } else if (upd.colKey === "required") {
-              const req =
-                upd.newValue.toLowerCase() === "true" ||
-                upd.newValue === "1" ||
-                upd.newValue.toLowerCase() === "yes";
-              updated = { ...updated, required: req };
+              const lower = upd.newValue.toLowerCase();
+              updatedField.required =
+                lower === "true" || lower === "1" || lower === "yes";
             } else if (upd.colKey === "unit") {
-              updated = { ...updated, unit: upd.newValue };
+              updatedField.unit = upd.newValue;
             } else if (upd.colKey === "columnSpan") {
-              updated = { ...updated, columnSpan: parseInt(upd.newValue, 10) };
+              updatedField.columnSpan = parseInt(upd.newValue, 10);
             } else if (upd.colKey === "codelistId") {
-              updated = {
-                ...updated,
-                codelistId: upd.newValue || undefined,
-              };
+              updatedField.codelistId = upd.newValue || undefined;
             } else if (upd.colKey === "acrfAnnotation") {
-              const meta = updated.cdashMetadata || {
+              const meta = updatedField.cdashMetadata || {
                 domain: targetForm.domain,
-                sdtmVariable: updated.variableName,
-                cdashLabel: updated.label,
+                sdtmVariable: updatedField.variableName,
+                cdashLabel: updatedField.label,
                 core: "O",
                 acrfAnnotation: upd.newValue,
               };
-              updated = {
-                ...updated,
-                cdashMetadata: { ...meta, acrfAnnotation: upd.newValue },
+              updatedField.cdashMetadata = {
+                ...meta,
+                acrfAnnotation: upd.newValue,
               };
+            } else if (upd.colKey === "sectionId") {
+              const matchedSec = targetForm.sections.find(
+                (s) =>
+                  s.id === upd.newValue ||
+                  s.title.trim().toLowerCase() ===
+                    upd.newValue.trim().toLowerCase()
+              );
+              if (!matchedSec) {
+                // Section invalid: abort batch atomically with zero changes!
+                return;
+              }
+              targetSecId = matchedSec.id;
             }
           }
+        }
+
+        fieldMap.set(fld.id, {
+          field: updatedField,
+          targetSectionId: targetSecId,
         });
-        return updated;
-      }),
-    }));
+      }
+    }
+
+    // Rebuild sections with fields placed in targetSectionId
+    const nextSections = targetForm.sections.map((sec) => {
+      const secFields: CRFField[] = [];
+      for (const [_, item] of fieldMap.entries()) {
+        if (item.targetSectionId === sec.id) {
+          secFields.push(item.field);
+        }
+      }
+      return { ...sec, fields: secFields };
+    });
 
     const nextForms = currentStudy.forms.map((f) =>
       f.id === form.id ? { ...f, sections: nextSections } : f
@@ -705,6 +781,7 @@ export const ActiveFormGrid: React.FC<ActiveFormGridProps> = ({
           )}
 
           <button
+            type="button"
             onClick={() => {
               const startR = activeCell ? activeCell.rowIndex : 0;
               const startC = activeCell ? activeCell.colIndex : 1;
@@ -720,6 +797,7 @@ export const ActiveFormGrid: React.FC<ActiveFormGridProps> = ({
 
           {onAddField && (
             <button
+              type="button"
               onClick={() => onAddField()}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-cyan text-zinc-950 hover:bg-brand-cyan/90 text-xs font-mono font-bold transition-all"
             >
@@ -889,17 +967,31 @@ export const ActiveFormGrid: React.FC<ActiveFormGridProps> = ({
 
       {/* Batch Paste Preview Modal */}
       {pasteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl w-full max-w-3xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh]">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+          role="presentation"
+        >
+          <div
+            ref={pasteModalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="paste-modal-title"
+            className="bg-zinc-950 border border-zinc-800 rounded-2xl w-full max-w-3xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh]"
+          >
             <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/50">
               <div className="flex items-center gap-2">
                 <IconSparkles className="w-5 h-5 text-brand-cyan" />
-                <h3 className="font-mono text-sm font-bold text-zinc-100">
-                  Batch Metadata Paste Validation & Preview
+                <h3
+                  id="paste-modal-title"
+                  className="font-mono text-sm font-bold text-zinc-100"
+                >
+                  Batch Metadata Paste Validation &amp; Preview
                 </h3>
               </div>
               <button
+                type="button"
                 onClick={() => setPasteModalOpen(false)}
+                aria-label="Close dialog"
                 className="text-zinc-400 hover:text-zinc-200 p-1 rounded-lg hover:bg-zinc-800"
               >
                 <IconX className="w-4 h-4" />
@@ -1016,6 +1108,7 @@ export const ActiveFormGrid: React.FC<ActiveFormGridProps> = ({
             {/* Action Bar */}
             <div className="p-4 border-t border-zinc-800 bg-zinc-900/50 flex items-center justify-between">
               <button
+                type="button"
                 onClick={() => setPasteModalOpen(false)}
                 className="px-4 py-2 rounded-xl bg-zinc-850 hover:bg-zinc-800 text-zinc-300 text-xs font-mono transition-all"
               >
@@ -1023,6 +1116,7 @@ export const ActiveFormGrid: React.FC<ActiveFormGridProps> = ({
               </button>
 
               <button
+                type="button"
                 disabled={invalidCount > 0 || pendingBatchUpdates.length === 0}
                 onClick={commitBatchUpdates}
                 className="px-5 py-2 rounded-xl bg-brand-cyan text-zinc-950 font-bold text-xs font-mono hover:bg-brand-cyan/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md"

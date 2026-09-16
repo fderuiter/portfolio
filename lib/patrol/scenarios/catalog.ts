@@ -1,129 +1,120 @@
 import type { PatrolScenario } from "../types";
 
 /**
- * Initial catalog of Patrol Shift scenarios.
+ * Scaffold catalog of Patrol Shift operational scenarios for M1 foundation architecture.
+ *
+ * Notice: This software is an educational simulation prototype (Issues #744 / #747).
+ * It does NOT provide clinical advice, medical protocol guidance, or certified emergency training.
  * Private implementation file stored inside internal package subfolder.
  */
 export const INITIAL_PATROL_SCENARIOS: PatrolScenario[] = [
   {
-    id: "pine-ridge-trauma",
-    title: "Pine Ridge Trauma",
-    subtitle: "High-speed collision on a black diamond run",
+    id: "pine-ridge-sweep",
+    title: "Pine Ridge Morning Sweep",
+    subtitle: "Routine trail marker and boundary inspection",
     description:
-      "A skier collided with a tree near the Pine Ridge glades. Dispatch reports lower extremity deformity and severe pain.",
-    difficulty: "intermediate",
-    estimatedMinutes: 25,
+      "Opening patrol sweep across Pine Ridge. Verify trail signage, rope line integrity, and establish radio contact with mountain dispatch.",
+    difficulty: "beginner",
+    estimatedMinutes: 15,
     location: "Pine Ridge Glades - Chair 4",
-    initialVitals: {
-      heartRate: 112,
-      respiration: 22,
-      bpSystolic: 128,
-      bpDiastolic: 82,
-      spo2: 96,
-      temperature: 36.5,
-      gcs: 15,
-    },
     actions: [
       {
-        id: "scene-sizeup",
-        label: "Scene Size-Up & Safety",
+        id: "radio-check",
+        label: "Establish Radio Comms",
         description:
-          "Set up crossed skis above incident site and assess scene hazards.",
-        category: "assessment",
+          "Perform repeater check with Patrol Base dispatch on primary channel.",
+        category: "communication",
         costMinutes: 2,
       },
       {
-        id: "primary-assessment",
-        label: "Primary Assessment (ABCDE)",
+        id: "boundary-inspection",
+        label: "Inspect Boundary Ropes",
         description:
-          "Assess airway, breathing, circulation, disability, and exposure.",
+          "Check closure signage and rope line tension along glade boundary.",
         category: "assessment",
+        costMinutes: 5,
+      },
+      {
+        id: "hazard-marking",
+        label: "Mark Trail Hazard",
+        description:
+          "Set up warning bamboo stakes and crossing poles above exposed rock outcrop.",
+        category: "decision",
+        costMinutes: 5,
+        requiredEquipment: ["bamboo-poles", "warning-signs"],
+      },
+      {
+        id: "log-sweep-completion",
+        label: "Log Trail Opening",
+        description:
+          "Transmit trail clearance confirmation to dispatch to approve opening.",
+        category: "communication",
         costMinutes: 3,
-      },
-      {
-        id: "c-spine-stabilization",
-        label: "C-Spine Stabilization",
-        description:
-          "Manually stabilize cervical spine and apply cervical collar.",
-        category: "treatment",
-        costMinutes: 2,
-        requiredEquipment: ["c-collar"],
-      },
-      {
-        id: "splint-extremity",
-        label: "Apply Traction / Rigid Splint",
-        description: "Immobilize fractured limb before transport.",
-        category: "treatment",
-        costMinutes: 8,
-        requiredEquipment: ["traction-splint"],
-      },
-      {
-        id: "toboggan-transport",
-        label: "Toboggan Transport",
-        description:
-          "Secure patient on backboard in toboggan and transport to Patrol Base.",
-        category: "transport",
-        costMinutes: 10,
-        requiredEquipment: ["toboggan", "backboard"],
       },
     ],
     debriefRules: [
       {
-        id: "rule-scene-safety",
-        title: "Scene Safety First",
+        id: "rule-comms",
+        title: "Dispatch Communication",
         category: "protocol",
         passed: true,
-        score: 20,
-        feedback: "Crossed skis deployed prior to entering the incident zone.",
+        score: 50,
+        feedback: "Radio contact established and maintained with Patrol Base.",
       },
       {
-        id: "rule-cspine",
-        title: "C-Spine Management",
-        category: "clinical",
+        id: "rule-hazard-marking",
+        title: "Trail Safety Standards",
+        category: "protocol",
         passed: true,
-        score: 30,
-        feedback: "C-spine stabilized early during primary assessment.",
+        score: 50,
+        feedback:
+          "Boundary hazards marked and trail opened according to operational protocols.",
       },
     ],
   },
   {
-    id: "summit-hypothermia",
-    title: "Summit Ridge Hypothermia",
-    subtitle: "Exposed stranded snowboarder in sub-zero winds",
+    id: "summit-weather-monitoring",
+    title: "Summit Ridge Weather Monitor",
+    subtitle: "Observation of summit wind conditions and ridge visibility",
     description:
-      "Cold exposure case near Summit Ridge after rider lost orientation in heavy fog.",
+      "Mid-morning weather check at Summit Ridge top station. Monitor gust speed, icing on lift infrastructure, and fog encroachment.",
     difficulty: "beginner",
-    estimatedMinutes: 15,
+    estimatedMinutes: 10,
     location: "Summit Ridge Top Station",
-    initialVitals: {
-      heartRate: 58,
-      respiration: 12,
-      bpSystolic: 102,
-      bpDiastolic: 64,
-      spo2: 94,
-      temperature: 33.8,
-      gcs: 14,
-    },
     actions: [
       {
-        id: "passive-rewarming",
-        label: "Passive Active Rewarming",
+        id: "anemometer-reading",
+        label: "Record Anemometer Reading",
         description:
-          "Remove wet clothing, wrap in heat blankets and space bag.",
-        category: "treatment",
-        costMinutes: 5,
-        requiredEquipment: ["wool-blanket", "heat-pack"],
+          "Log continuous 2-minute wind speed and peak gust velocity.",
+        category: "assessment",
+        costMinutes: 3,
+      },
+      {
+        id: "lift-clearance",
+        label: "Inspect Terminal Clearance",
+        description: "Verify chairlift unload ramp grade and surface traction.",
+        category: "assessment",
+        costMinutes: 4,
+      },
+      {
+        id: "advisory-broadcast",
+        label: "Transmit Weather Advisory",
+        description:
+          "Report ridge conditions and visibility assessment to mountain operations.",
+        category: "communication",
+        costMinutes: 3,
       },
     ],
     debriefRules: [
       {
-        id: "rule-rewarming",
-        title: "Gentle Handling & Rewarming",
-        category: "clinical",
+        id: "rule-weather-log",
+        title: "Weather Documentation",
+        category: "protocol",
         passed: true,
-        score: 50,
+        score: 100,
         feedback:
-          "Patient kept horizontal and handled gently to prevent ventricular fibrillation.",
+          "Wind readings and ramp conditions accurately reported to mountain operations.",
       },
     ],
   },
