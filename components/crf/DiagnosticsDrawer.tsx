@@ -6,7 +6,6 @@ import {
   ComplianceViolation,
   ComplianceSeverity,
 } from "@/lib/crf/types";
-import { lintForm } from "@/lib/crf/ast-evaluator";
 import {
   validateStudyCompliance,
   autoFixViolation,
@@ -19,6 +18,7 @@ import {
   IconWand,
 } from "@tabler/icons-react";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { useCrfService } from "@/hooks/useCrfService";
 
 interface DiagnosticsDrawerProps {
   isOpen: boolean;
@@ -35,6 +35,7 @@ export const DiagnosticsDrawer: React.FC<DiagnosticsDrawerProps> = ({
   onSelectForm,
   onUpdateStudy,
 }) => {
+  const { lintForm } = useCrfService();
   const [filterSeverity, setFilterSeverity] = useState<
     "all" | ComplianceSeverity
   >("all");
@@ -65,7 +66,8 @@ export const DiagnosticsDrawer: React.FC<DiagnosticsDrawerProps> = ({
         severity: string;
       }[] = [];
       study.forms.forEach((form) => {
-        const items = lintForm(form);
+        const res = lintForm({ form });
+        const items = res.success ? res.data : [];
         items.forEach((item) => {
           astDiags.push({
             id: `${form.id}_${item.id}`,
@@ -94,7 +96,7 @@ export const DiagnosticsDrawer: React.FC<DiagnosticsDrawerProps> = ({
         totalErrors: errs,
         totalWarnings: warns,
       };
-    }, [isOpen, study]);
+    }, [isOpen, study, lintForm]);
 
   if (!isOpen) return null;
 

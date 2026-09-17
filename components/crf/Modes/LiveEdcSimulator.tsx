@@ -9,7 +9,8 @@ import {
   ElectronicSignature,
   SubjectFormStatus,
 } from "@/lib/crf/types";
-import { evaluateFormula, evaluateRule } from "@/lib/crf/ast-evaluator";
+import { evaluateRule } from "@/lib/crf/ast-evaluator";
+import { useCrfService } from "@/hooks/useCrfService";
 import { generateId } from "@/lib/utils";
 import {
   parsePrecisionDate,
@@ -60,6 +61,7 @@ type EdcSubView = "form_entry" | "subject_matrix" | "audit_trail" | "queries";
 export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
   study,
 }) => {
+  const { evaluateFormula } = useCrfService();
   const { announce } = useAnnouncer();
   const [subView, setSubView] = useState<EdcSubView>("form_entry");
   const [subjectId, setSubjectId] = useState("001-101");
@@ -184,11 +186,12 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
     // 1. Evaluate Calculated Fields
     fields.forEach((field) => {
       if (field.dataType === "calculated" && field.calculationFormula) {
-        const calculatedVal = evaluateFormula(
-          field.calculationFormula,
-          subjectVals,
-          fields
-        );
+        const evalRes = evaluateFormula({
+          formula: field.calculationFormula,
+          fieldValues: subjectVals,
+          fieldsList: fields,
+        });
+        const calculatedVal = evalRes.success ? evalRes.data.value : null;
         const key = `${subjectId}_${activeVisitId}_${field.id}`;
         if (formValues[key] !== calculatedVal) {
           setFormValues((prev) => ({ ...prev, [key]: calculatedVal }));
@@ -236,7 +239,7 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
         });
       }
     });
-  }, [formValues, activeForm, activeVisitId, subjectId]);
+  }, [formValues, activeForm, activeVisitId, subjectId, evaluateFormula]);
 
   const handleFieldChange = (
     field: CRFField,

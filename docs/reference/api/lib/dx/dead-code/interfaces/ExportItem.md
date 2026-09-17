@@ -16,7 +16,7 @@
 
 ### kind
 
-> **kind**: `"function"` \| `"default"` \| `"type"` \| `"enum"` \| `"const"` \| `"interface"` \| `"class"`
+> **kind**: `"function"` \| `"type"` \| `"enum"` \| `"default"` \| `"const"` \| `"interface"` \| `"class"`
 
 ***
 

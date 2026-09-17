@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { StudyProtocol } from "@/lib/crf/types";
-import { evaluateFormula } from "@/lib/crf/ast-evaluator";
+import { useCrfService } from "@/hooks/useCrfService";
 import {
   IconSparkles,
   IconArrowRight,
@@ -16,13 +16,12 @@ interface RuleGraphStudioProps {
 }
 
 export const RuleGraphStudio: React.FC<RuleGraphStudioProps> = ({ study }) => {
+  const { evaluateFormula } = useCrfService();
   // Extract all rules and fields across forms
   const allForms = study.forms;
   const allRulesWithForm = useMemo(
     () =>
-      allForms.flatMap((form) =>
-        form.rules.map((rule) => ({ rule, form }))
-      ),
+      allForms.flatMap((form) => form.rules.map((rule) => ({ rule, form }))),
     [allForms]
   );
   const allFields = useMemo(
@@ -55,7 +54,12 @@ export const RuleGraphStudio: React.FC<RuleGraphStudioProps> = ({ study }) => {
     qseval4: 2,
   });
 
-  const calculatedResult = evaluateFormula(testFormula, sampleVars, allFields);
+  const evalRes = evaluateFormula({
+    formula: testFormula,
+    fieldValues: sampleVars,
+    fieldsList: allFields,
+  });
+  const calculatedResult = evalRes.success ? evalRes.data.value : null;
 
   // Cycle Detection Algorithm for the rule DAG
   const cycleDetection = useMemo(() => {
@@ -121,7 +125,8 @@ export const RuleGraphStudio: React.FC<RuleGraphStudioProps> = ({ study }) => {
             </h1>
           </div>
           <p className="text-xs text-zinc-400 font-sans mt-1">
-            Visual directed acyclic graph for cross-field edit checks, execution flows, and mathematical derivation sandboxing.
+            Visual directed acyclic graph for cross-field edit checks, execution
+            flows, and mathematical derivation sandboxing.
           </p>
         </div>
 
@@ -129,7 +134,10 @@ export const RuleGraphStudio: React.FC<RuleGraphStudioProps> = ({ study }) => {
           {cycleDetection.hasCycle ? (
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 font-mono text-xs">
               <IconAlertTriangle className="w-4 h-4" />
-              <span>Circular Dependency Detected ({cycleDetection.cycleFields.join(" → ")})</span>
+              <span>
+                Circular Dependency Detected (
+                {cycleDetection.cycleFields.join(" → ")})
+              </span>
             </div>
           ) : (
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono text-xs">
@@ -166,7 +174,9 @@ export const RuleGraphStudio: React.FC<RuleGraphStudioProps> = ({ study }) => {
           <div className="space-y-4">
             {allRulesWithForm.map(({ rule, form }) => {
               const isSelected = selectedRuleId === rule.id;
-              const targetField = allFields.find((f) => f.id === rule.targetFieldId);
+              const targetField = allFields.find(
+                (f) => f.id === rule.targetFieldId
+              );
 
               return (
                 <div
@@ -183,7 +193,9 @@ export const RuleGraphStudio: React.FC<RuleGraphStudioProps> = ({ study }) => {
                       <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-cyan/15 text-brand-cyan font-mono border border-brand-cyan/30">
                         {form.domain}
                       </span>
-                      <span className="text-xs font-bold text-white font-mono">{rule.name}</span>
+                      <span className="text-xs font-bold text-white font-mono">
+                        {rule.name}
+                      </span>
                     </div>
 
                     <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-zinc-900 text-zinc-300 border border-zinc-800">
@@ -212,11 +224,14 @@ export const RuleGraphStudio: React.FC<RuleGraphStudioProps> = ({ study }) => {
 
                     {/* Condition Box */}
                     <div className="p-2 rounded-lg bg-zinc-900/90 border border-zinc-750 text-[11px] text-zinc-300 flex items-center gap-2">
-                      <span className="text-amber-400 font-bold">{rule.logicalOperator}</span>
+                      <span className="text-amber-400 font-bold">
+                        {rule.logicalOperator}
+                      </span>
                       <span>(</span>
                       {rule.conditions.map((c, i) => (
                         <span key={i} className="text-zinc-300">
-                          {c.operator} &quot;{String(c.value)}&quot;{i < rule.conditions.length - 1 ? ", " : ""}
+                          {c.operator} &quot;{String(c.value)}&quot;
+                          {i < rule.conditions.length - 1 ? ", " : ""}
                         </span>
                       ))}
                       <span>)</span>
@@ -278,21 +293,27 @@ export const RuleGraphStudio: React.FC<RuleGraphStudioProps> = ({ study }) => {
           <div className="flex flex-wrap items-center gap-1.5 text-xs font-mono">
             <button
               onClick={() =>
-                setTestFormula("round(weight / ((height / 100) * (height / 100)), 1)")
+                setTestFormula(
+                  "round(weight / ((height / 100) * (height / 100)), 1)"
+                )
               }
               className="px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs border border-zinc-700"
             >
               BMI (kg/m²)
             </button>
             <button
-              onClick={() => setTestFormula("round(sqrt((height * weight) / 3600), 2)")}
+              onClick={() =>
+                setTestFormula("round(sqrt((height * weight) / 3600), 2)")
+              }
               className="px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs border border-zinc-700"
             >
               Mosteller BSA (m²)
             </button>
             <button
               onClick={() =>
-                setTestFormula("round(0.007184 * (height ^ 0.725) * (weight ^ 0.425), 2)")
+                setTestFormula(
+                  "round(0.007184 * (height ^ 0.725) * (weight ^ 0.425), 2)"
+                )
               }
               className="px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs border border-zinc-700"
             >
@@ -300,7 +321,9 @@ export const RuleGraphStudio: React.FC<RuleGraphStudioProps> = ({ study }) => {
             </button>
             <button
               onClick={() =>
-                setTestFormula("round(((140 - age) * weight) / (72 * serum_cr), 1)")
+                setTestFormula(
+                  "round(((140 - age) * weight) / (72 * serum_cr), 1)"
+                )
               }
               className="px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs border border-zinc-700"
             >
@@ -314,7 +337,9 @@ export const RuleGraphStudio: React.FC<RuleGraphStudioProps> = ({ study }) => {
             </button>
             <button
               onClick={() =>
-                setTestFormula("round(((trl1 + trl2 - trsldbase) / trsldbase) * 100, 1)")
+                setTestFormula(
+                  "round(((trl1 + trl2 - trsldbase) / trsldbase) * 100, 1)"
+                )
               }
               className="px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs border border-zinc-700"
             >
@@ -347,25 +372,40 @@ export const RuleGraphStudio: React.FC<RuleGraphStudioProps> = ({ study }) => {
               />
               <div className="px-4 py-2 bg-brand-cyan/15 border border-brand-cyan/40 rounded-xl font-mono text-sm font-bold text-white flex items-center gap-2 shrink-0">
                 <span className="text-zinc-400 text-xs">=</span>
-                <span className="text-brand-cyan">{calculatedResult !== null ? calculatedResult : ""}</span>
+                <span className="text-brand-cyan">
+                  {calculatedResult !== null ? calculatedResult : ""}
+                </span>
               </div>
             </div>
           </div>
 
           {/* Clickable Token Insertion Pills */}
           <div className="flex flex-wrap items-center gap-1.5 pt-1 text-xs font-mono">
-            <span className="text-[10px] text-zinc-500 mr-1">Insert Tokens:</span>
-            {["+", "-", "*", "/", "^", "(", ")", "round(", "sqrt(", "abs(", "max(", "min("].map(
-              (tok) => (
-                <button
-                  key={tok}
-                  onClick={() => handleInsertToken(tok)}
-                  className="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-brand-cyan font-mono text-[11px] border border-zinc-700"
-                >
-                  {tok}
-                </button>
-              )
-            )}
+            <span className="text-[10px] text-zinc-500 mr-1">
+              Insert Tokens:
+            </span>
+            {[
+              "+",
+              "-",
+              "*",
+              "/",
+              "^",
+              "(",
+              ")",
+              "round(",
+              "sqrt(",
+              "abs(",
+              "max(",
+              "min(",
+            ].map((tok) => (
+              <button
+                key={tok}
+                onClick={() => handleInsertToken(tok)}
+                className="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-brand-cyan font-mono text-[11px] border border-zinc-700"
+              >
+                {tok}
+              </button>
+            ))}
           </div>
 
           {/* Sample Variables Mock Grid */}
@@ -376,7 +416,9 @@ export const RuleGraphStudio: React.FC<RuleGraphStudioProps> = ({ study }) => {
             <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2">
               {Object.entries(sampleVars).map(([key, val]) => (
                 <div key={key}>
-                  <label className="block text-[9px] font-mono text-zinc-500 truncate">{key}</label>
+                  <label className="block text-[9px] font-mono text-zinc-500 truncate">
+                    {key}
+                  </label>
                   <input
                     type="number"
                     value={val}

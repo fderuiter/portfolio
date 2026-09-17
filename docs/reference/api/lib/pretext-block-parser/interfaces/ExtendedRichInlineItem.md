@@ -54,4 +54,4 @@
 
 ### type
 
-> **type**: `"text"` \| `"code"` \| `"bold"` \| `"italic"`
+> **type**: `"code"` \| `"text"` \| `"bold"` \| `"italic"`
