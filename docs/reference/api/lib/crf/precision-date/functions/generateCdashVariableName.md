@@ -18,7 +18,7 @@ Generate Valid CDASH Nonconflicting Variable Name (<= 8 Characters)
 
 ### existingVarNames
 
-`string`[] \| `Set`\<`string`\> \| `Iterable`\<`string`, `any`, `any`\>
+`Set`\<`string`\> \| `string`[] \| `Iterable`\<`string`, `any`, `any`\>
 
 ## Returns
 

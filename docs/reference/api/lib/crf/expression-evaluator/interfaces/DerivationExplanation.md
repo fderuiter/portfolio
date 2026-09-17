@@ -40,7 +40,7 @@
 
 ### status
 
-> **status**: `"invalid_unit"` \| `"success"` \| `"missing_inputs"` \| `"division_by_zero"` \| `"cyclic_dependency"` \| `"syntax_error"`
+> **status**: `"success"` \| `"invalid_unit"` \| `"missing_inputs"` \| `"division_by_zero"` \| `"cyclic_dependency"` \| `"syntax_error"`
 
 ***
 

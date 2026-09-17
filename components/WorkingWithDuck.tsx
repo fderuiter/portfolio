@@ -18,6 +18,7 @@ import { DynamicTabletOrientationHint as TabletOrientationHint } from "@/compone
 import { useGameFullscreen as useFullscreen } from "@/components/arcade/CabinetFullscreen";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useAnnouncer } from "@/hooks/useAnnouncer";
+import { useDuckService } from "@/hooks/useDuckService";
 import { useResponsiveCanvas } from "@/hooks/useResponsiveCanvas";
 import {
   IconPlayerPlay,
@@ -52,30 +53,21 @@ import {
   DuckAccessory,
   createInitialDuckGameState,
   stepDuckGame,
-  throwBall,
-  applySqueakyToy,
-  applyKongToy,
-  giveTreat,
-  scrubBelly,
   startDraggingDuck,
   dragDuckTo,
   releaseDuck,
-  performTrick,
   activeCodeBurst,
-  interactStation,
   mopIndoorPuddle,
   enterBathtub,
   scrubBathtub,
   rinseBathtub,
   exitBathtub,
-  equipAccessory,
   enterDogPark,
   throwParkBall,
   jumpParkHurdle,
   steerParkDuck,
   tapParkWhistle,
   exitDogPark,
-  advanceToNextLevel,
   shouldSyncDuckHudState,
   CANVAS_WIDTH,
   CANVAS_HEIGHT,
@@ -1686,6 +1678,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
   const [isMusicMuted, setIsMusicMuted] = useState(false);
 
   const { announce } = useAnnouncer();
+  const { dispatchCommand, interactHazard } = useDuckService();
 
   // Single gateway for every gameStateRef mutation: gameStateRef.current and
   // uiState are always written together from the same computed value, so the
@@ -1708,6 +1701,40 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
     },
     []
   );
+
+  const handleGiveTreat = useCallback(() => {
+    applyTransition((state) => {
+      const res = dispatchCommand({ type: "treat", state });
+      return res.success ? res.data.state : state;
+    });
+  }, [applyTransition, dispatchCommand]);
+
+  const handlePerformTrick = useCallback(
+    (trick: "SIT" | "HIGH_FIVE" | "DROP_IT" | "SPIN") => {
+      applyTransition((state) => {
+        const res = dispatchCommand({ type: "trick", state, trick });
+        return res.success ? res.data.state : state;
+      });
+    },
+    [applyTransition, dispatchCommand]
+  );
+
+  const handleEquipAccessory = useCallback(
+    (accessory: DuckAccessory) => {
+      applyTransition((state) => {
+        const res = dispatchCommand({ type: "accessory", state, accessory });
+        return res.success ? res.data.state : state;
+      });
+    },
+    [applyTransition, dispatchCommand]
+  );
+
+  const handleAdvanceLevel = useCallback(() => {
+    applyTransition((state) => {
+      const res = dispatchCommand({ type: "advance_level", state });
+      return res.success ? res.data.state : state;
+    });
+  }, [applyTransition, dispatchCommand]);
 
   // Fixed-timestep simulation clock: the engine's tick balance (work
   // increments, timers, combo decay) was tuned assuming 60 ticks/sec, so
@@ -1851,7 +1878,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
 
   const winTrapRef = useFocusTrap<HTMLDivElement>(uiState.status === "won", {
     onEscape: () => {
-      applyTransition((state) => advanceToNextLevel(state));
+      handleAdvanceLevel();
     },
   });
 
@@ -2224,14 +2251,14 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
       } else if (e.key === "3") {
         applyTransition((state) => ({ ...state, selectedItem: "squeaky-toy" }));
       } else if (e.key === "4") {
-        applyTransition((state) => giveTreat(state));
+        handleGiveTreat();
       } else if (e.key === "q" || e.key === "Q") {
         if (!state.inDogPark && !state.inBathtub) {
-          applyTransition((state) => performTrick(state, "SIT"));
+          handlePerformTrick("SIT");
         }
       } else if (e.key === "w" || e.key === "W") {
         if (!state.inDogPark && !state.inBathtub) {
-          applyTransition((state) => performTrick(state, "HIGH_FIVE"));
+          handlePerformTrick("HIGH_FIVE");
         } else if (state.inDogPark) {
           applyTransition((state) =>
             steerParkDuck(state, state.parkState.duckY - 25)
@@ -2239,11 +2266,11 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
         }
       } else if (e.key === "e" || e.key === "E") {
         if (!state.inDogPark && !state.inBathtub) {
-          applyTransition((state) => performTrick(state, "DROP_IT"));
+          handlePerformTrick("DROP_IT");
         }
       } else if (e.key === "r" || e.key === "R") {
         if (!state.inDogPark && !state.inBathtub) {
-          applyTransition((state) => performTrick(state, "SPIN"));
+          handlePerformTrick("SPIN");
         }
       } else if (e.code === "Space") {
         e.preventDefault();
@@ -2345,7 +2372,13 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [announce, applyTransition, toggleManualPause]);
+  }, [
+    announce,
+    applyTransition,
+    toggleManualPause,
+    handleGiveTreat,
+    handlePerformTrick,
+  ]);
 
   // Global Window Pointer Up & Cancel Handler (Prevents Drag Locking Off-Canvas)
   useEffect(() => {
@@ -2583,7 +2616,14 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
       y >= WATER_BOWL_BOUNDS.y &&
       y <= WATER_BOWL_BOUNDS.y + WATER_BOWL_BOUNDS.height
     ) {
-      applyTransition((state) => interactStation(state, "water"));
+      applyTransition((state) => {
+        const res = dispatchCommand({
+          type: "station",
+          state,
+          station: "water",
+        });
+        return res.success ? res.data.state : state;
+      });
       return;
     }
 
@@ -2593,7 +2633,14 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
       y >= FOOD_BOWL_BOUNDS.y &&
       y <= FOOD_BOWL_BOUNDS.y + FOOD_BOWL_BOUNDS.height
     ) {
-      applyTransition((state) => interactStation(state, "food"));
+      applyTransition((state) => {
+        const res = dispatchCommand({
+          type: "station",
+          state,
+          station: "food",
+        });
+        return res.success ? res.data.state : state;
+      });
       return;
     }
 
@@ -2622,7 +2669,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
     const duckDist = Math.hypot(x - state.duck.x, y - state.duck.y);
     if (duckDist < 38) {
       if (state.duck.state === "NO_TAKE_THROW") {
-        applyTransition((state) => giveTreat(state));
+        handleGiveTreat();
         return;
       }
       applyTransition(
@@ -2636,13 +2683,32 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
     // Use Selected Hotbar Item on Canvas click
     applyTransition((state) => {
       if (state.selectedItem === "squeaky-toy") {
-        return applySqueakyToy(state, x, y);
+        const res = interactHazard({
+          state,
+          action: "distract_with_squeaky",
+          x,
+          y,
+        });
+        return res.success ? res.data.state : state;
       } else if (state.selectedItem === "kong") {
-        return applyKongToy(state, x, y);
+        const res = interactHazard({
+          state,
+          action: "distract_with_kong",
+          x,
+          y,
+        });
+        return res.success ? res.data.state : state;
       } else if (state.selectedItem === "tennis-ball") {
-        return throwBall(state, x, y);
+        const res = dispatchCommand({
+          type: "throw_ball",
+          state,
+          targetX: x,
+          targetY: y,
+        });
+        return res.success ? res.data.state : state;
       } else if (state.selectedItem === "treat") {
-        return giveTreat(state);
+        const res = dispatchCommand({ type: "treat", state });
+        return res.success ? res.data.state : state;
       }
       return state;
     });
@@ -2699,7 +2765,10 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
       );
       if (movedDist > 12) {
         lastBellyScrubPosRef.current = { x, y };
-        applyTransition((state) => scrubBelly(state, x, y));
+        applyTransition((state) => {
+          const res = dispatchCommand({ type: "pet", state, x, y });
+          return res.success ? res.data.state : state;
+        });
       }
     }
   };
@@ -3389,9 +3458,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
               </button>
 
               <button
-                onClick={() => {
-                  applyTransition((state) => giveTreat(state));
-                }}
+                onClick={handleGiveTreat}
                 className="p-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 text-amber-300 active:bg-amber-500/20 text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
               >
                 <span>🍖 Give Treat</span>
@@ -3403,36 +3470,28 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
           {mobileTab === "tricks" && (
             <div className="grid grid-cols-2 gap-2 animate-fadeIn">
               <button
-                onClick={() => {
-                  applyTransition((state) => performTrick(state, "SIT"));
-                }}
+                onClick={() => handlePerformTrick("SIT")}
                 className="p-3 rounded-2xl border border-sky-500/40 bg-sky-500/10 text-sky-300 active:bg-sky-500/20 text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
               >
                 <span>🪑 Sit (Calm)</span>
               </button>
 
               <button
-                onClick={() => {
-                  applyTransition((state) => performTrick(state, "HIGH_FIVE"));
-                }}
+                onClick={() => handlePerformTrick("HIGH_FIVE")}
                 className="p-3 rounded-2xl border border-pink-500/40 bg-pink-500/10 text-pink-300 active:bg-pink-500/20 text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
               >
                 <span>🐾 High Five</span>
               </button>
 
               <button
-                onClick={() => {
-                  applyTransition((state) => performTrick(state, "DROP_IT"));
-                }}
+                onClick={() => handlePerformTrick("DROP_IT")}
                 className="p-3 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 active:bg-emerald-500/20 text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
               >
                 <span>✋ Drop It!</span>
               </button>
 
               <button
-                onClick={() => {
-                  applyTransition((state) => performTrick(state, "SPIN"));
-                }}
+                onClick={() => handlePerformTrick("SPIN")}
                 className="p-3 rounded-2xl border border-purple-500/40 bg-purple-500/10 text-purple-300 active:bg-purple-500/20 text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
               >
                 <span>🌀 Spin Trick</span>
@@ -3668,9 +3727,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
               </button>
 
               <button
-                onClick={() => {
-                  applyTransition((state) => giveTreat(state));
-                }}
+                onClick={handleGiveTreat}
                 aria-pressed={uiState.selectedItem === "treat"}
                 className="px-3 py-1.5 rounded-xl border border-zinc-800 bg-zinc-900/70 text-amber-300 hover:border-amber-500/40 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                 title="Give treat (trades ball during No Take Only Throw)"
@@ -3685,9 +3742,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
             {/* Training Tricks [Q-W-E-R] */}
             <div className="flex items-center gap-1.5 flex-wrap">
               <button
-                onClick={() => {
-                  applyTransition((state) => performTrick(state, "SIT"));
-                }}
+                onClick={() => handlePerformTrick("SIT")}
                 className="px-3 py-1.5 rounded-xl border border-sky-500/40 bg-sky-500/10 text-sky-300 hover:bg-sky-500/20 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                 title="Command Sit: Calms Excitement (-20) & boosts Good Boy scale"
               >
@@ -3698,9 +3753,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
               </button>
 
               <button
-                onClick={() => {
-                  applyTransition((state) => performTrick(state, "HIGH_FIVE"));
-                }}
+                onClick={() => handlePerformTrick("HIGH_FIVE")}
                 className="px-3 py-1.5 rounded-xl border border-pink-500/40 bg-pink-500/10 text-pink-300 hover:bg-pink-500/20 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                 title="Command High Five: Morale boost (+45 pts) & tail wag"
               >
@@ -3711,9 +3764,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
               </button>
 
               <button
-                onClick={() => {
-                  applyTransition((state) => performTrick(state, "DROP_IT"));
-                }}
+                onClick={() => handlePerformTrick("DROP_IT")}
                 className="px-3 py-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                 title="Command Drop It: Immediately drops stolen hazards or ball (+60-75 pts)"
               >
@@ -3724,9 +3775,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
               </button>
 
               <button
-                onClick={() => {
-                  applyTransition((state) => performTrick(state, "SPIN"));
-                }}
+                onClick={() => handlePerformTrick("SPIN")}
                 className="px-3 py-1.5 rounded-xl border border-purple-500/40 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                 title="Command Spin: Playful trick (+50 pts) with 360 rotation"
               >
@@ -3958,9 +4007,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
             {/* Progression CTA - Immediate & Prominent on Mobile */}
             <div className="mb-4">
               <button
-                onClick={() => {
-                  applyTransition((state) => advanceToNextLevel(state));
-                }}
+                onClick={handleAdvanceLevel}
                 className="w-full py-3 px-4 rounded-xl bg-brand-cyan text-black font-bold text-xs sm:text-sm hover:bg-white active:scale-95 transition-all shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center justify-center gap-2 cursor-pointer min-h-[44px]"
               >
                 <span>
@@ -4134,11 +4181,9 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                   <button
                     key={acc.id}
                     disabled={!isUnlocked}
-                    onClick={() => {
-                      applyTransition((state) =>
-                        equipAccessory(state, acc.id as DuckAccessory)
-                      );
-                    }}
+                    onClick={() =>
+                      handleEquipAccessory(acc.id as DuckAccessory)
+                    }
                     aria-checked={isSelected}
                     role="radio"
                     className={`w-full p-2.5 sm:p-3 rounded-2xl border text-left flex items-center justify-between transition-all min-h-[48px] cursor-pointer ${

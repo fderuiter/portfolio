@@ -34,7 +34,7 @@
 
 ### shape
 
-> **shape**: `"circle"` \| `"star"` \| `"water"` \| `"heart"` \| `"sweat"` \| `"spark"` \| `"bone"` \| `"bubble"` \| `"mud"`
+> **shape**: `"water"` \| `"circle"` \| `"star"` \| `"heart"` \| `"sweat"` \| `"spark"` \| `"bone"` \| `"bubble"` \| `"mud"`
 
 ***
 

@@ -3,8 +3,6 @@
 import React, { useState, useMemo, useCallback, useRef } from "react";
 import { CRFField } from "@/lib/crf/types";
 import {
-  lintFormula,
-  evaluateFormula,
   CLINICAL_FORMULA_PRESETS,
   mapPresetToFormVariables,
   explainCalculationDerivation,
@@ -12,6 +10,7 @@ import {
   FormulaDiagnostic,
   ClinicalFormulaPreset,
 } from "@/lib/crf/ast-evaluator";
+import { useCrfService } from "@/hooks/useCrfService";
 import {
   IconMathFunction,
   IconCheck,
@@ -76,6 +75,7 @@ export const AstRuleEditor: React.FC<AstRuleEditorProps> = ({
   label = "AST Dynamic Formula",
   className = "",
 }) => {
+  const { evaluateFormula, lintFormula } = useCrfService();
   const [showPresets, setShowPresets] = useState(false);
   const [showTester, setShowTester] = useState(false);
   const [showFunctionsGuide, setShowFunctionsGuide] = useState(false);
@@ -86,8 +86,29 @@ export const AstRuleEditor: React.FC<AstRuleEditorProps> = ({
 
   // Lint analysis
   const lintResult = useMemo(() => {
-    return lintFormula(formula, fields, currentFieldId);
-  }, [formula, fields, currentFieldId]);
+    const res = lintFormula({
+      formula,
+      fieldsList: fields,
+      targetFieldId: currentFieldId,
+    });
+    return res.success
+      ? res.data
+      : {
+          isValid: false,
+          diagnostics: [
+            {
+              id: "error",
+              severity: "error" as const,
+              message: res.error.message || "Formula linting failed",
+              code: "UNEXPECTED_TOKEN" as const,
+              start: 0,
+              end: formula.length,
+            },
+          ],
+          tokens: [],
+          referencedVariables: [],
+        };
+  }, [formula, fields, currentFieldId, lintFormula]);
 
   const referencedVars = lintResult.referencedVariables;
 
@@ -112,17 +133,26 @@ export const AstRuleEditor: React.FC<AstRuleEditorProps> = ({
   // Live evaluated preview value
   const previewResult = useMemo(() => {
     if (!formula.trim() || !lintResult.isValid) return null;
-    try {
-      const mergedValues: Record<string, number> = {};
-      referencedVars.forEach((v) => {
-        mergedValues[v.name] = getTestValue(v.name);
-      });
-      const result = evaluateFormula(formula, mergedValues, fields);
-      return Number.isFinite(result) ? result : null;
-    } catch {
-      return null;
-    }
-  }, [formula, fields, lintResult.isValid, referencedVars, getTestValue]);
+    const mergedValues: Record<string, number> = {};
+    referencedVars.forEach((v) => {
+      mergedValues[v.name] = getTestValue(v.name);
+    });
+    const res = evaluateFormula({
+      formula,
+      fieldValues: mergedValues,
+      fieldsList: fields,
+    });
+    return res.success && Number.isFinite(res.data.value)
+      ? res.data.value
+      : null;
+  }, [
+    formula,
+    fields,
+    lintResult.isValid,
+    referencedVars,
+    getTestValue,
+    evaluateFormula,
+  ]);
 
   const currentField = useMemo(() => {
     return fields.find((f) => f.id === currentFieldId);

@@ -23,6 +23,7 @@ import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useResponsiveCanvas } from "@/hooks/useResponsiveCanvas";
 import { useAnnouncer } from "@/hooks/useAnnouncer";
+import { useGarminService } from "@/hooks/useGarminService";
 import { triggerHaptic } from "@/lib/haptics";
 import { BezelClusterDock } from "@/components/arcade/ControlDocks";
 import {
@@ -31,12 +32,9 @@ import {
   createInitialState,
   startGame,
   jettisonOldestVariable,
-  triggerGarbageCollection,
   wipeScreenFog,
   updateGameSimulation,
   renderCanvasFrame,
-  allocateFlashVariable,
-  clearFlashStorage,
   JUMP_FORCE,
   CANVAS_SIZE,
   GameEngineState,
@@ -81,6 +79,8 @@ export const GarminWatchSimulator: React.FC<GarminWatchSimulatorProps> = ({
   const { playNote, playSuccess } = useAudio();
   const { recordEvent } = useTelemetry();
   const { announce } = useAnnouncer();
+  const { allocateMemory, garbageCollect, syncFlashStorage } =
+    useGarminService();
   const [alertMessage, setAlertMessage] = useState<string>("");
 
   const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
@@ -196,20 +196,66 @@ export const GarminWatchSimulator: React.FC<GarminWatchSimulatorProps> = ({
     if (current.gameState !== "playing" || current.isGcActive) return;
     triggerHaptic(20);
     playBeep(450, 0.08);
-    applyTransition((state) => triggerGarbageCollection(state).state);
-  }, [playBeep, applyTransition]);
+    const result = garbageCollect({ state: current });
+    if (result.success) {
+      applyTransition(() => result.data.state);
+    } else if (result.error?.message) {
+      setAlertMessage(result.error.message);
+    }
+  }, [playBeep, applyTransition, garbageCollect]);
 
   // Save Persistent Variable to Flash NVRAM
   const handleSaveFlash = useCallback(() => {
     playBeep(800, 0.03);
-    applyTransition((state) => allocateFlashVariable(state, 8.0).state);
-  }, [playBeep, applyTransition]);
+    const current = stateRef.current;
+    const result = allocateMemory({
+      state: current,
+      type: "float",
+      name: `nvram_${Date.now()}`,
+    });
+    if (result.success) {
+      applyTransition(() => result.data.state);
+    } else {
+      syncFlashStorage({
+        action: "save",
+        variables: [
+          ...current.flashVariables,
+          {
+            id: Date.now(),
+            name: `nvram_${current.flashVariables.length + 1}`,
+            sizeKb: 8.0,
+            allocatedAt: Date.now(),
+          },
+        ],
+      }).then((res) => {
+        if (res.success) {
+          applyTransition((state) => ({
+            ...state,
+            flashVariables: res.data.variables,
+            allocatedFlashKb: res.data.totalAllocatedKb,
+          }));
+        } else if (res.error?.message) {
+          setAlertMessage(res.error.message);
+        }
+      });
+    }
+  }, [playBeep, applyTransition, allocateMemory, syncFlashStorage]);
 
   // Clear NVRAM Flash Storage
   const handleClearFlash = useCallback(() => {
     playBeep(500, 0.04);
-    applyTransition((state) => clearFlashStorage(state));
-  }, [playBeep, applyTransition]);
+    syncFlashStorage({ action: "clear" }).then((res) => {
+      if (res.success) {
+        applyTransition((state) => ({
+          ...state,
+          flashStorage: [],
+          allocatedFlashKb: 0,
+        }));
+      } else if (res.error?.message) {
+        setAlertMessage(res.error.message);
+      }
+    });
+  }, [playBeep, applyTransition, syncFlashStorage]);
 
   // Drain Battery for Power Loss Testing
   const handleDrainBattery = useCallback(() => {

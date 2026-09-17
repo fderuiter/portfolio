@@ -32,7 +32,7 @@
 
 ###### action
 
-`"load"` \| `"clear"` \| `"save"` = `...`
+`"load"` \| `"save"` \| `"clear"` = `...`
 
 ###### variables?
 
