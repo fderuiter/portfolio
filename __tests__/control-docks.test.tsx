@@ -1,7 +1,9 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React from "react";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
@@ -82,6 +84,100 @@ describe("Archetype-Based Control Docks Suite", () => {
       fireEvent.click(weaponBtn);
       expect(onWeaponSelect).toHaveBeenCalledWith(1);
     });
+
+    it("invokes setPointerCapture on pointerdown and releasePointerCapture on pointerup/cancel", () => {
+      const onDirectionPress = vi.fn();
+      const onDirectionRelease = vi.fn();
+
+      render(
+        <DpadActionDock
+          onDirectionPress={onDirectionPress}
+          onDirectionRelease={onDirectionRelease}
+          forceVisible={true}
+        />
+      );
+
+      const leftBtn = screen.getByRole("button", { name: /Move Left/i });
+      const setPointerCapture = vi.fn();
+      const releasePointerCapture = vi.fn();
+      const hasPointerCapture = vi.fn().mockReturnValue(true);
+
+      leftBtn.setPointerCapture = setPointerCapture;
+      leftBtn.releasePointerCapture = releasePointerCapture;
+      leftBtn.hasPointerCapture = hasPointerCapture;
+
+      // Simulate pointerdown
+      fireEvent.pointerDown(leftBtn, { pointerId: 42 });
+      expect(setPointerCapture).toHaveBeenCalledWith(42);
+      expect(onDirectionPress).toHaveBeenCalledWith("left");
+
+      // Simulate pointerup
+      fireEvent.pointerUp(leftBtn, { pointerId: 42 });
+      expect(releasePointerCapture).toHaveBeenCalledWith(42);
+      expect(onDirectionRelease).toHaveBeenCalledWith("left");
+
+      // Simulate pointercancel
+      fireEvent.pointerDown(leftBtn, { pointerId: 99 });
+      fireEvent.pointerCancel(leftBtn, { pointerId: 99 });
+      expect(setPointerCapture).toHaveBeenCalledWith(99);
+      expect(releasePointerCapture).toHaveBeenCalledWith(99);
+    });
+
+    it("releases active pointer capture when DpadActionDock unmounts during active touch", () => {
+      const onDirectionPress = vi.fn();
+      const { unmount } = render(
+        <DpadActionDock
+          onDirectionPress={onDirectionPress}
+          forceVisible={true}
+        />
+      );
+
+      const rightBtn = screen.getByRole("button", { name: /Move Right/i });
+      const releasePointerCapture = vi.fn();
+      const hasPointerCapture = vi.fn().mockReturnValue(true);
+
+      rightBtn.setPointerCapture = vi.fn();
+      rightBtn.releasePointerCapture = releasePointerCapture;
+      rightBtn.hasPointerCapture = hasPointerCapture;
+
+      // Pointer down
+      fireEvent.pointerDown(rightBtn, { pointerId: 101 });
+
+      // Unmount while holding pointer
+      unmount();
+      expect(releasePointerCapture).toHaveBeenCalledWith(101);
+    });
+
+    it("operates multi-touch D-pad and Action button presses independently", () => {
+      const onDirectionPress = vi.fn();
+      const onActionA = vi.fn();
+
+      render(
+        <DpadActionDock
+          onDirectionPress={onDirectionPress}
+          onActionAPress={onActionA}
+          actionALabel="Attack"
+          forceVisible={true}
+        />
+      );
+
+      const downBtn = screen.getByRole("button", { name: /Move Down/i });
+      const attackBtn = screen.getByRole("button", { name: /Attack/i });
+
+      downBtn.setPointerCapture = vi.fn();
+      attackBtn.setPointerCapture = vi.fn();
+
+      // Touch 1 on D-Pad Down (pointerId 1)
+      fireEvent.pointerDown(downBtn, { pointerId: 1 });
+      expect(onDirectionPress).toHaveBeenCalledWith("down");
+
+      // Touch 2 on Attack Button (pointerId 2) while Touch 1 is active
+      fireEvent.pointerDown(attackBtn, { pointerId: 2 });
+      expect(onActionA).toHaveBeenCalledTimes(1);
+
+      expect(downBtn.setPointerCapture).toHaveBeenCalledWith(1);
+      expect(attackBtn.setPointerCapture).toHaveBeenCalledWith(2);
+    });
   });
 
   describe("TwinStickAimDock", () => {
@@ -157,7 +253,12 @@ describe("Archetype-Based Control Docks Suite", () => {
       render(
         <ActionStripDock
           actions={[
-            { id: "feed", label: "Feed Bread", shortcut: "1", badge: "Bread x5" },
+            {
+              id: "feed",
+              label: "Feed Bread",
+              shortcut: "1",
+              badge: "Bread x5",
+            },
             { id: "quack", label: "Quack Horn", shortcut: "2" },
             { id: "sleep", label: "Rest Pond", shortcut: "3" },
           ]}

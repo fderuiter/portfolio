@@ -553,6 +553,7 @@ body {
   }
   .arcade-cabinet[data-fullscreen="true"] .arcade-labyrinth-options {
     flex-shrink: 0;
+    max-height: 40vh;
     max-height: 40dvh;
     overflow-y: auto;
   }
