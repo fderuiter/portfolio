@@ -14,10 +14,6 @@ export class RetroAudioEngine {
     this.engine = engine;
   }
 
-  private getContext(): AudioContext | null {
-    return this.engine.getAudioContext();
-  }
-
   private isSoundAllowed(): boolean {
     return !this.isMuted && this.engine.isSoundAllowed();
   }
@@ -47,30 +43,12 @@ export class RetroAudioEngine {
     volume: number = 0.08
   ): void {
     if (!this.isSoundAllowed()) return;
-    const ctx = this.getContext();
-    if (!ctx) return;
-
-    try {
-      const masterVolume = this.engine.getVolume();
-      const effectiveVolume = Math.max(0.0001, volume * masterVolume);
-
-      const osc = this.engine.trackSource(ctx.createOscillator());
-      const gain = ctx.createGain();
-
-      osc.type = type;
-      osc.frequency.setValueAtTime(freq, ctx.currentTime);
-
-      gain.gain.setValueAtTime(effectiveVolume, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + durationMs / 1000);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start();
-      osc.stop(ctx.currentTime + durationMs / 1000);
-    } catch {
-      // Ignore audio scheduling exceptions
-    }
+    this.engine.playTone({
+      frequency: freq,
+      duration: durationMs / 1000,
+      type,
+      volume,
+    });
   }
 
   /**
@@ -85,27 +63,13 @@ export class RetroAudioEngine {
    */
   public playPortScan(): void {
     if (!this.isSoundAllowed()) return;
-    const ctx = this.getContext();
-    if (!ctx) return;
-
-    try {
-      const masterVolume = this.engine.getVolume();
-      const osc = this.engine.trackSource(ctx.createOscillator());
-      const gain = ctx.createGain();
-
-      osc.type = "sawtooth";
-      osc.frequency.setValueAtTime(400, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.15);
-
-      gain.gain.setValueAtTime(0.06 * masterVolume, ctx.currentTime);
-      gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 0.15);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start();
-      osc.stop(ctx.currentTime + 0.15);
-    } catch {}
+    this.engine.playTone({
+      frequency: 400,
+      endFrequency: 1200,
+      duration: 0.15,
+      type: "sawtooth",
+      volume: 0.06,
+    });
   }
 
   /**
@@ -113,27 +77,13 @@ export class RetroAudioEngine {
    */
   public playExploitBlast(): void {
     if (!this.isSoundAllowed()) return;
-    const ctx = this.getContext();
-    if (!ctx) return;
-
-    try {
-      const masterVolume = this.engine.getVolume();
-      const osc = this.engine.trackSource(ctx.createOscillator());
-      const gain = ctx.createGain();
-
-      osc.type = "sawtooth";
-      osc.frequency.setValueAtTime(280, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(60, ctx.currentTime + 0.25);
-
-      gain.gain.setValueAtTime(0.1 * masterVolume, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start();
-      osc.stop(ctx.currentTime + 0.25);
-    } catch {}
+    this.engine.playTone({
+      frequency: 280,
+      endFrequency: 60,
+      duration: 0.25,
+      type: "sawtooth",
+      volume: 0.1,
+    });
   }
 
   /**

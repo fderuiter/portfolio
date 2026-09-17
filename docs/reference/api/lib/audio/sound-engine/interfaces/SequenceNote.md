@@ -24,6 +24,14 @@ Note duration in seconds
 
 ***
 
+### endFrequency?
+
+> `optional` **endFrequency?**: `number`
+
+Target frequency in Hz at note end for pitch sweeps
+
+***
+
 ### frequency
 
 > **frequency**: `number`
@@ -37,6 +45,14 @@ Frequency in Hz
 > `optional` **pan?**: `number`
 
 Stereo pan position (-1.0 to 1.0)
+
+***
+
+### rampType?
+
+> `optional` **rampType?**: `"exponential"` \| `"linear"`
+
+Ramp curve type for endFrequency
 
 ***
 

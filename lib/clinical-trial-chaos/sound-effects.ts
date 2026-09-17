@@ -23,30 +23,12 @@ export function playSyntheticTone(
   const engine = getSoundEngine();
   if (!engine.isSoundAllowed()) return;
 
-  const ctx = engine.getAudioContext();
-  if (!ctx) return;
-
-  try {
-    const masterVolume = engine.getVolume();
-    const effectiveGain = Math.max(0.0001, gainLevel * masterVolume);
-
-    const osc = engine.trackSource(ctx.createOscillator());
-    const gain = ctx.createGain();
-
-    osc.type = type;
-    osc.frequency.setValueAtTime(frequency, ctx.currentTime);
-
-    gain.gain.setValueAtTime(effectiveGain, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + durationSeconds);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc.start();
-    osc.stop(ctx.currentTime + durationSeconds);
-  } catch {
-    // Ignore audio errors in restricted browser contexts
-  }
+  engine.playTone({
+    frequency,
+    duration: durationSeconds,
+    type,
+    volume: gainLevel,
+  });
 }
 
 /** Sound: Stamp / Validation Success (quick ascending 2-tone) */
@@ -104,10 +86,22 @@ export function playPneumaticChuteSound(): void {
 
 // 8-Bit Chiptune Melody Arpeggio Scale for Procedural BGM
 const BGM_MELODY = [
-  261.63, 329.63, 392.0, 523.25, // C4, E4, G4, C5
-  293.66, 349.23, 440.0, 587.33, // D4, F4, A4, D5
-  329.63, 392.0, 493.88, 659.25, // E4, G4, B4, E5
-  261.63, 392.0, 523.25, 659.25, // C4, G4, C5, E5
+  261.63,
+  329.63,
+  392.0,
+  523.25, // C4, E4, G4, C5
+  293.66,
+  349.23,
+  440.0,
+  587.33, // D4, F4, A4, D5
+  329.63,
+  392.0,
+  493.88,
+  659.25, // E4, G4, B4, E5
+  261.63,
+  392.0,
+  523.25,
+  659.25, // C4, G4, C5, E5
 ];
 
 const BGM_BASS = [130.81, 146.83, 164.81, 130.81]; // C3, D3, E3, C3

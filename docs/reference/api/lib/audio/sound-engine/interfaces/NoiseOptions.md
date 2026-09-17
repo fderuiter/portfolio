@@ -8,6 +8,14 @@
 
 ## Properties
 
+### delay?
+
+> `optional` **delay?**: `number`
+
+Delay in seconds before playing noise (relative to sound start)
+
+***
+
 ### duration
 
 > **duration**: `number`

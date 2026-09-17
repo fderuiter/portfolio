@@ -8,6 +8,7 @@ import React, {
   useCallback,
 } from "react";
 import { useAudio } from "@/components/providers/AudioProvider";
+import { getSoundEngine } from "@/lib/audio/sound-engine";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { clamp } from "@/lib/game-utils";
 import {
@@ -169,8 +170,6 @@ export const LaserLoon: React.FC = () => {
     internalHeight: DEFAULT_CANVAS_HEIGHT,
     maxDpr: 2.0,
   });
-  const audioCtxRef = useRef<AudioContext | null>(null);
-
   const { isFullscreen, toggleFullscreen } = useFullscreen(containerRef);
 
   const selectLaserType = (type: LaserType) => {
@@ -215,24 +214,16 @@ export const LaserLoon: React.FC = () => {
   const playSynthesizedLoonTremolo = useCallback(() => {
     if (!soundEnabled) return;
     try {
-      if (typeof window === "undefined") return;
-      const AudioCtx =
-        window.AudioContext ||
-        (window as unknown as { webkitAudioContext: typeof AudioContext })
-          .webkitAudioContext;
-      if (!AudioCtx) return;
-      if (!audioCtxRef.current) {
-        audioCtxRef.current = new AudioCtx();
-      }
-      const ctx = audioCtxRef.current;
-      if (ctx.state === "suspended") {
-        ctx.resume().catch(() => {});
-      }
+      const engine = getSoundEngine();
+      if (!engine.isSoundAllowed()) return;
+      const ctx = engine.getAudioContext();
+      if (!ctx) return;
 
       const now = ctx.currentTime;
-      const osc = ctx.createOscillator();
+      const masterVol = engine.getVolume();
+      const osc = engine.trackSource(ctx.createOscillator());
       const gain = ctx.createGain();
-      const lfo = ctx.createOscillator();
+      const lfo = engine.trackSource(ctx.createOscillator());
       const lfoGain = ctx.createGain();
 
       // Authentic loon yodel / tremolo FM synthesis
@@ -249,8 +240,8 @@ export const LaserLoon: React.FC = () => {
       lfo.connect(osc.frequency);
 
       gain.gain.setValueAtTime(0.001, now);
-      gain.gain.exponentialRampToValueAtTime(0.35, now + 0.2);
-      gain.gain.exponentialRampToValueAtTime(0.28, now + 1.2);
+      gain.gain.exponentialRampToValueAtTime(0.35 * masterVol, now + 0.2);
+      gain.gain.exponentialRampToValueAtTime(0.28 * masterVol, now + 1.2);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 2.2);
 
       osc.connect(gain);

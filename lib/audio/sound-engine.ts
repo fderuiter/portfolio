@@ -21,8 +21,14 @@ export interface SoundEngineOptions {
 export interface ToneOptions {
   /** Frequency in Hz (e.g. 440 for A4) */
   frequency: number;
+  /** Target frequency in Hz at note end for pitch sweeps/ramps */
+  endFrequency?: number;
+  /** Ramp curve type for endFrequency (default: 'exponential') */
+  rampType?: "exponential" | "linear";
   /** Duration in seconds (e.g. 0.1 for 100ms) */
   duration?: number;
+  /** Delay in seconds before playing this note (relative to sound start) */
+  delay?: number;
   /** Oscillator waveform type */
   type?: OscillatorType;
   /** Tone-specific volume gain multiplier (0.0 to 1.0, default: 0.5) */
@@ -42,6 +48,10 @@ export interface ToneOptions {
 export interface SequenceNote {
   /** Frequency in Hz */
   frequency: number;
+  /** Target frequency in Hz at note end for pitch sweeps */
+  endFrequency?: number;
+  /** Ramp curve type for endFrequency */
+  rampType?: "exponential" | "linear";
   /** Note duration in seconds */
   duration: number;
   /** Delay in seconds before playing this note (relative to sequence start) */
@@ -69,6 +79,8 @@ export interface SequenceHandle {
 export interface NoiseOptions {
   /** Duration in seconds */
   duration: number;
+  /** Delay in seconds before playing noise (relative to sound start) */
+  delay?: number;
   /** Volume gain multiplier (0.0 to 1.0, default: 0.3) */
   volume?: number;
   /** Optional filter type */
@@ -93,9 +105,10 @@ export class SoundEngine {
     this.storage =
       options.storage !== undefined
         ? options.storage
-        : typeof globalThis !== "undefined" && typeof globalThis.localStorage?.getItem === "function"
-        ? globalThis.localStorage
-        : null;
+        : typeof globalThis !== "undefined" &&
+            typeof globalThis.localStorage?.getItem === "function"
+          ? globalThis.localStorage
+          : null;
 
     if (options.audioContext) {
       this.audioCtx = options.audioContext;
@@ -154,14 +167,21 @@ export class SoundEngine {
       return this.audioCtx;
     }
 
-    if (typeof window === "undefined" && typeof globalThis.AudioContext === "undefined") {
+    if (
+      typeof window === "undefined" &&
+      typeof globalThis.AudioContext === "undefined"
+    ) {
       return null;
     }
 
     const AudioContextClass =
       globalThis.AudioContext ||
       (typeof window !== "undefined"
-        ? (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+        ? (
+            window as typeof window & {
+              webkitAudioContext?: typeof AudioContext;
+            }
+          ).webkitAudioContext
         : undefined);
 
     if (!AudioContextClass) return null;
@@ -240,11 +260,18 @@ export class SoundEngine {
   public isBypassActive(): boolean {
     if (typeof window === "undefined") return false;
     try {
-      const forcedColors = window.matchMedia?.("(forced-colors: active)").matches;
-      const msHighContrast = window.matchMedia?.("(-ms-high-contrast: active)").matches;
-      const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      const forcedColors = window.matchMedia?.(
+        "(forced-colors: active)"
+      ).matches;
+      const msHighContrast = window.matchMedia?.(
+        "(-ms-high-contrast: active)"
+      ).matches;
+      const prefersReducedMotion = window.matchMedia?.(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
       const documentClasses = document.documentElement?.className || "";
-      const documentHtmlContrast = document.documentElement?.getAttribute("data-contrast") || "";
+      const documentHtmlContrast =
+        document.documentElement?.getAttribute("data-contrast") || "";
 
       let storageBypass = false;
       if (this.storage) {
@@ -310,7 +337,10 @@ export class SoundEngine {
     if (!this.isSoundAllowed()) return;
 
     let frequency: number;
+    let endFrequency: number | undefined;
+    let rampType: "exponential" | "linear" = "exponential";
     let duration = 0.08;
+    let delay = 0;
     let type: OscillatorType = "sine";
     let volume = 0.5;
     let pan: number | undefined;
@@ -321,7 +351,10 @@ export class SoundEngine {
 
     if (typeof firstArg === "object" && firstArg !== null) {
       frequency = firstArg.frequency;
+      endFrequency = firstArg.endFrequency;
+      rampType = firstArg.rampType ?? rampType;
       duration = firstArg.duration ?? duration;
+      delay = firstArg.delay ?? delay;
       type = firstArg.type ?? type;
       volume = firstArg.volume ?? volume;
       pan = firstArg.pan;
@@ -344,12 +377,26 @@ export class SoundEngine {
       const masterVolume = this.getVolume();
       const effectiveGain = volume * masterVolume;
       const now = ctx.currentTime;
+      const startTime = now + delay;
 
       const osc = this.trackSource(ctx.createOscillator());
       const gainNode = ctx.createGain();
 
       osc.type = type;
-      osc.frequency.setValueAtTime(frequency, now);
+      osc.frequency.setValueAtTime(frequency, startTime);
+      if (typeof endFrequency === "number" && endFrequency > 0) {
+        if (rampType === "linear") {
+          osc.frequency.linearRampToValueAtTime(
+            endFrequency,
+            startTime + duration
+          );
+        } else {
+          osc.frequency.exponentialRampToValueAtTime(
+            Math.max(1, endFrequency),
+            startTime + duration
+          );
+        }
+      }
 
       let totalDuration = duration;
 
@@ -364,25 +411,31 @@ export class SoundEngine {
         const sus = sustain ?? 0.5;
         const rel = release ?? 0.05;
 
-        gainNode.gain.setValueAtTime(0, now);
-        gainNode.gain.linearRampToValueAtTime(effectiveGain, now + att);
-        gainNode.gain.linearRampToValueAtTime(effectiveGain * sus, now + att + dec);
+        gainNode.gain.setValueAtTime(0, startTime);
+        gainNode.gain.linearRampToValueAtTime(effectiveGain, startTime + att);
+        gainNode.gain.linearRampToValueAtTime(
+          effectiveGain * sus,
+          startTime + att + dec
+        );
 
-        const sustainEndTime = now + att + dec + duration;
+        const sustainEndTime = startTime + att + dec + duration;
         gainNode.gain.setValueAtTime(effectiveGain * sus, sustainEndTime);
         gainNode.gain.linearRampToValueAtTime(0, sustainEndTime + rel);
 
         totalDuration = att + dec + duration + rel;
       } else {
-        gainNode.gain.setValueAtTime(effectiveGain, now);
+        gainNode.gain.setValueAtTime(effectiveGain, startTime);
       }
 
       let lastNode: AudioNode = gainNode;
 
-      if (typeof pan === "number" && typeof ctx.createStereoPanner === "function") {
+      if (
+        typeof pan === "number" &&
+        typeof ctx.createStereoPanner === "function"
+      ) {
         try {
           const panner = ctx.createStereoPanner();
-          panner.pan.setValueAtTime(Math.max(-1, Math.min(1, pan)), now);
+          panner.pan.setValueAtTime(Math.max(-1, Math.min(1, pan)), startTime);
           gainNode.connect(panner);
           lastNode = panner;
         } catch {}
@@ -391,18 +444,21 @@ export class SoundEngine {
       lastNode.connect(ctx.destination);
       osc.connect(gainNode);
 
-      osc.start(now);
-      osc.stop(now + totalDuration);
+      osc.start(startTime);
+      osc.stop(startTime + totalDuration);
 
-      setTimeout(() => {
-        try {
-          osc.disconnect();
-          gainNode.disconnect();
-          if (lastNode !== gainNode) {
-            lastNode.disconnect();
-          }
-        } catch {}
-      }, (totalDuration + 0.1) * 1000);
+      setTimeout(
+        () => {
+          try {
+            osc.disconnect();
+            gainNode.disconnect();
+            if (lastNode !== gainNode) {
+              lastNode.disconnect();
+            }
+          } catch {}
+        },
+        (delay + totalDuration + 0.1) * 1000
+      );
     } catch {
       // Ignore audio synthesis exceptions
     }
@@ -411,7 +467,10 @@ export class SoundEngine {
   /**
    * Plays an ordered sequence or arpeggio of notes.
    */
-  public playSequence(notes: SequenceNote[], options: SequenceOptions = {}): SequenceHandle {
+  public playSequence(
+    notes: SequenceNote[],
+    options: SequenceOptions = {}
+  ): SequenceHandle {
     if (!this.isSoundAllowed() || notes.length === 0) {
       return { cancel: () => {} };
     }
@@ -429,12 +488,20 @@ export class SoundEngine {
     notes.forEach((note) => {
       const delay = note.delay ?? 0;
       const defaultType = options.defaultType ?? "sine";
-      const seqVolMultiplier = options.volume !== undefined ? options.volume : 1;
-      const noteBaseVol = note.volume !== undefined ? note.volume : options.volume !== undefined ? 1 : 0.5;
+      const seqVolMultiplier =
+        options.volume !== undefined ? options.volume : 1;
+      const noteBaseVol =
+        note.volume !== undefined
+          ? note.volume
+          : options.volume !== undefined
+            ? 1
+            : 0.5;
 
       const playNoteAction = () => {
         this.playTone({
           frequency: note.frequency,
+          endFrequency: note.endFrequency,
+          rampType: note.rampType,
           duration: note.duration,
           type: note.type ?? defaultType,
           volume: noteBaseVol * seqVolMultiplier,
@@ -467,7 +534,10 @@ export class SoundEngine {
     const ctx = this.getAudioContext();
     if (!ctx) return;
 
-    if (typeof ctx.createBuffer !== "function" || typeof ctx.createBufferSource !== "function") {
+    if (
+      typeof ctx.createBuffer !== "function" ||
+      typeof ctx.createBufferSource !== "function"
+    ) {
       return;
     }
 
@@ -492,8 +562,9 @@ export class SoundEngine {
       const gainNode = ctx.createGain();
       const effectiveGain = (options.volume ?? 0.3) * masterVolume;
       const now = ctx.currentTime;
+      const startTime = now + (options.delay ?? 0);
 
-      gainNode.gain.setValueAtTime(effectiveGain, now);
+      gainNode.gain.setValueAtTime(effectiveGain, startTime);
 
       let lastNode: AudioNode = gainNode;
 
@@ -501,10 +572,10 @@ export class SoundEngine {
         const filter = ctx.createBiquadFilter();
         filter.type = options.filterType;
         if (options.filterFrequency !== undefined) {
-          filter.frequency.setValueAtTime(options.filterFrequency, now);
+          filter.frequency.setValueAtTime(options.filterFrequency, startTime);
         }
         if (options.filterQ !== undefined) {
-          filter.Q.setValueAtTime(options.filterQ, now);
+          filter.Q.setValueAtTime(options.filterQ, startTime);
         }
         source.connect(filter);
         filter.connect(gainNode);
@@ -512,10 +583,16 @@ export class SoundEngine {
         source.connect(gainNode);
       }
 
-      if (typeof options.pan === "number" && typeof ctx.createStereoPanner === "function") {
+      if (
+        typeof options.pan === "number" &&
+        typeof ctx.createStereoPanner === "function"
+      ) {
         try {
           const panner = ctx.createStereoPanner();
-          panner.pan.setValueAtTime(Math.max(-1, Math.min(1, options.pan)), now);
+          panner.pan.setValueAtTime(
+            Math.max(-1, Math.min(1, options.pan)),
+            startTime
+          );
           gainNode.connect(panner);
           lastNode = panner;
         } catch {}
@@ -523,18 +600,21 @@ export class SoundEngine {
 
       lastNode.connect(ctx.destination);
 
-      source.start(now);
-      source.stop(now + options.duration);
+      source.start(startTime);
+      source.stop(startTime + options.duration);
 
-      setTimeout(() => {
-        try {
-          source.disconnect();
-          gainNode.disconnect();
-          if (lastNode !== gainNode) {
-            lastNode.disconnect();
-          }
-        } catch {}
-      }, (options.duration + 0.1) * 1000);
+      setTimeout(
+        () => {
+          try {
+            source.disconnect();
+            gainNode.disconnect();
+            if (lastNode !== gainNode) {
+              lastNode.disconnect();
+            }
+          } catch {}
+        },
+        ((options.delay ?? 0) + options.duration + 0.1) * 1000
+      );
     } catch {
       // Ignore audio synthesis exceptions
     }
