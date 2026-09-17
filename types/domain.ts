@@ -4,13 +4,14 @@ export interface BaseCaseStudy {
   title: string;
   primary_language: string;
   github_url?: string | null;
-  editorial_content: string;       // general summaries
+  editorial_content: string; // general summaries
   architectural_narrative: string; // deep-technical breakdowns
   published: boolean;
   simulated_telemetry: boolean;
-  tags: string;                    // comma-separated list of tags
+  tags: string; // comma-separated list of tags
   commands_json?: string | null;
   playback_json?: string | null;
+  hero_image_url?: string | null;
   created_at: Date;
   updated_at: Date;
 }

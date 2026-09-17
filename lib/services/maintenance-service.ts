@@ -1,5 +1,6 @@
 import * as Sentry from "@sentry/nextjs";
 import { CaseStudyService } from "@/lib/services/case-study-service";
+import { BlogPostService } from "@/lib/services/blog-service";
 import { EmailService } from "@/lib/services/email-service";
 import { TelemetryService } from "@/lib/services/telemetry-service";
 import { sanitizeError } from "@/lib/error-sanitization";
@@ -91,11 +92,15 @@ function createProductionAdapters(batchSize: number): MaintenanceAdapters {
       const telemetry = await TelemetryService.syncBufferedEvents(batchSize);
       const reactions =
         await CaseStudyService.flushBufferedReactionsToDatabase(batchSize);
+      const blogReactions =
+        await BlogPostService.flushBufferedReactionsToDatabase(batchSize);
       return {
         processed: telemetry.processed,
         inserted: telemetry.inserted,
         reactionsProcessed: reactions.processed,
         reactionsInserted: reactions.inserted,
+        blogReactionsProcessed: blogReactions.processed,
+        blogReactionsInserted: blogReactions.inserted,
       };
     },
     async processEmailRetry(now) {

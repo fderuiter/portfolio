@@ -32,6 +32,12 @@
 
 ***
 
+### published?
+
+> `optional` **published?**: `boolean`
+
+***
+
 ### slug?
 
 > `optional` **slug?**: `string`

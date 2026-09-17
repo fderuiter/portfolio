@@ -9,6 +9,7 @@ import React, {
   useSyncExternalStore,
 } from "react";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import { useAnnouncer } from "@/hooks/useAnnouncer";
 import { clamp } from "@/lib/game-utils";
 import { useAudio } from "@/components/providers/AudioProvider";
 import {
@@ -135,6 +136,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({
     getHighScoreServerSnapshot
   );
   const loadedHighScore = parseInt(rawHighScore, 10) || 0;
+  const { announce } = useAnnouncer();
 
   // Persistent Cyberdeck Profile & Meta-Progression
   const [profile, setProfile] = useState<CyberdeckProfile>(() =>
@@ -1860,14 +1862,153 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({
             onMouseLeave={() => {
               cursorGridPosRef.current = null;
             }}
+            role="application"
+            aria-label="Retro Labyrinth Cyberdeck Dungeon Crawl. Use arrow keys or WASD to navigate, and Tab to access accessible controls."
+            tabIndex={0}
             className={`block ${
               isFullscreen
                 ? "max-w-full max-h-full aspect-[240/144] object-contain"
                 : isExpanded
                   ? "w-full max-w-[360px] aspect-[240/144] h-auto"
                   : "w-full max-w-[240px] aspect-[240/144] h-auto"
-            } rounded-lg border border-neutral-900/60 bg-neutral-950 cursor-crosshair`}
+            } rounded-lg border border-neutral-900/60 bg-neutral-950 cursor-crosshair focus:outline-none focus:ring-2 focus:ring-emerald-500/50`}
           />
+
+          {/* Off-screen Accessible DOM Fallback Subtree */}
+          <div
+            className="sr-only"
+            aria-label="Retro Labyrinth Accessible Subtree"
+          >
+            <fieldset>
+              <legend>Retro Labyrinth Dungeon Crawl State and Controls</legend>
+
+              <div role="group" aria-label="Dungeon Telemetry and Status">
+                <output htmlFor="retro-score">Score: {score}</output>
+                <output htmlFor="retro-highscore">
+                  High Score: {effectiveHighScore}
+                </output>
+                <output htmlFor="retro-stage">Stage: {stage}</output>
+                <output htmlFor="retro-status">
+                  Game Status: {gameStatus}
+                </output>
+                <output htmlFor="retro-player-pos">
+                  Player Location: Grid ({playerPosition.x}, {playerPosition.y})
+                </output>
+                <output htmlFor="retro-hp">
+                  Cyberdeck Integrity: {playerHp} / {maxPlayerHp} HP
+                </output>
+                <output htmlFor="retro-weapon">
+                  Active Cyberdeck Weapon: {activeWeaponId}
+                </output>
+                <output htmlFor="retro-bypass">
+                  Bypass Chips: {bypassChips}
+                </output>
+              </div>
+
+              <div
+                role="group"
+                aria-label="Interactive Navigation and Combat Actions"
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleDirectionalMove("up");
+                    announce(
+                      `Moved Up to (${playerPosition.x}, ${Math.max(0, playerPosition.y - 1)})`,
+                      "polite"
+                    );
+                  }}
+                >
+                  Move North / Up
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleDirectionalMove("down");
+                    announce(
+                      `Moved Down to (${playerPosition.x}, ${playerPosition.y + 1})`,
+                      "polite"
+                    );
+                  }}
+                >
+                  Move South / Down
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleDirectionalMove("left");
+                    announce(
+                      `Moved Left to (${Math.max(0, playerPosition.x - 1)}, ${playerPosition.y})`,
+                      "polite"
+                    );
+                  }}
+                >
+                  Move West / Left
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleDirectionalMove("right");
+                    announce(
+                      `Moved Right to (${playerPosition.x + 1}, ${playerPosition.y})`,
+                      "polite"
+                    );
+                  }}
+                >
+                  Move East / Right
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleFireWeapon(activeWeaponId);
+                    announce(
+                      `Dispatched cyber weapon attack: ${activeWeaponId}`,
+                      "polite"
+                    );
+                  }}
+                >
+                  Execute Selected Cyber Attack ({activeWeaponId})
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleUseBypassChip();
+                    announce("Used hardware bypass chip.", "polite");
+                  }}
+                  disabled={bypassChips <= 0}
+                >
+                  Consume Bypass Chip
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleRestart();
+                    announce(
+                      "Restarted Cyberdeck Dungeon Simulation.",
+                      "polite"
+                    );
+                  }}
+                >
+                  Restart Dungeon Simulation
+                </button>
+
+                {gameStatus === "victory" && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleNextRoom();
+                      announce("Navigated to next cyberdeck room.", "polite");
+                    }}
+                  >
+                    Advance to Next Stage
+                  </button>
+                )}
+              </div>
+            </fieldset>
+          </div>
 
           {/* Victory Overlay */}
           {gameStatus === "victory" && (

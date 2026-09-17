@@ -10,7 +10,7 @@
 
 ### applicationCategory
 
-> **applicationCategory**: `"GameApplication"` \| `"DeveloperApplication"` \| `"EducationalApplication"` \| `"MultimediaApplication"`
+> **applicationCategory**: `"GameApplication"` \| `"DeveloperApplication"` \| `"EducationalApplication"` \| `"MultimediaApplication"` \| `"SimulationApplication"`
 
 ***
 

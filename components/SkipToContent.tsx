@@ -45,7 +45,7 @@ export function SkipToContent({
       isDyslexic
         ? "Dyslexia font mode disabled. Active fonts: Atkinson Hyperlegible and Lexend."
         : "Dyslexia font mode enabled. Active font: OpenDyslexic with expanded line-height and tracking.",
-      "assertive"
+      "polite"
     );
   };
 

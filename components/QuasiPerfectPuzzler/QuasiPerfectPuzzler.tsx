@@ -9,6 +9,7 @@ import React, {
 } from "react";
 import { PanInfo } from "framer-motion";
 import { useAudio } from "@/components/providers/AudioProvider";
+import { useAnnouncer } from "@/hooks/useAnnouncer";
 import { puzzleLevels } from "@/lib/quasi-perfect/levels";
 import { tacticDefs } from "@/lib/quasi-perfect/tactics";
 import {
@@ -83,6 +84,7 @@ interface StepHistory {
 
 export const QuasiPerfectPuzzler: React.FC = () => {
   const { playNote, playSuccess } = useAudio();
+  const { announce } = useAnnouncer();
 
   const [activeTab, setActiveTab] = useState<"campaign" | "sandbox">(
     "campaign"
@@ -254,8 +256,12 @@ export const QuasiPerfectPuzzler: React.FC = () => {
           text: `Loaded Chapter ${targetLvl.chapter} [${targetLvl.subtitle}]: ${targetLvl.title}. Mode: ${gameMode.toUpperCase()}.`,
         },
       ]);
+      announce(
+        `Loaded Level ${targetLvl.id}: ${targetLvl.title}. ${targetLvl.description}`,
+        "assertive"
+      );
     },
-    [gameMode]
+    [gameMode, announce]
   );
 
   // Execute a tactic on a given target AST node
@@ -423,6 +429,10 @@ export const QuasiPerfectPuzzler: React.FC = () => {
 
           if (!usedSorry) {
             playSuccess();
+            announce(
+              `Theorem verified! All goals closed for Level ${currentLevel.id}.`,
+              "assertive"
+            );
             addLog(
               `✔ Q.E.D. All goals closed! Theorem verified${
                 gameMode === "hacker" ? ` in ${nextRam.toFixed(1)} GB.` : "!"
@@ -430,6 +440,10 @@ export const QuasiPerfectPuzzler: React.FC = () => {
               "success"
             );
           } else {
+            announce(
+              `Theorem admitted via sorry for Level ${currentLevel.id}.`,
+              "assertive"
+            );
             addLog(
               "▲ Theorem admitted via 'sorry'. Morality Penalty: -100.",
               "warning"
@@ -484,6 +498,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
       playNote,
       playSuccess,
       saveProgress,
+      announce,
     ]
   );
 
@@ -690,7 +705,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
             <button
               type="button"
               onClick={() => handleToggleMode("story")}
-              className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${
+              className={`min-h-[44px] px-3 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:outline-none ${
                 gameMode === "story"
                   ? "bg-brand-cyan text-black shadow-[0_0_10px_rgba(6,182,212,0.4)]"
                   : "text-zinc-400 hover:text-zinc-200"
@@ -701,7 +716,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
             <button
               type="button"
               onClick={() => handleToggleMode("hacker")}
-              className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${
+              className={`min-h-[44px] px-3 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none ${
                 gameMode === "hacker"
                   ? "bg-amber-400 text-black shadow-[0_0_10px_rgba(251,191,36,0.4)] font-extrabold"
                   : "text-zinc-400 hover:text-zinc-200"
@@ -715,7 +730,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveTab("campaign")}
-              className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+              className={`min-h-[44px] px-3 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:outline-none ${
                 activeTab === "campaign"
                   ? "bg-purple-600 text-white shadow-[0_0_10px_rgba(168,85,247,0.4)]"
                   : "text-zinc-400 hover:text-zinc-200"
@@ -726,7 +741,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveTab("sandbox")}
-              className={`flex items-center gap-1 px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+              className={`min-h-[44px] flex items-center justify-center gap-1 px-3 py-2 text-xs font-bold rounded-lg transition-all focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none ${
                 activeTab === "sandbox"
                   ? "bg-emerald-500 text-black shadow-[0_0_10px_rgba(16,185,129,0.4)]"
                   : "text-zinc-400 hover:text-zinc-200"
@@ -774,7 +789,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
                     onClick={() =>
                       setSelectedChapter(chap.id as number | "all")
                     }
-                    className={`px-2.5 py-0.5 rounded text-[11px] font-bold transition-all ${
+                    className={`min-h-[44px] px-3 py-1.5 rounded text-[11px] font-bold transition-all flex items-center justify-center focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:outline-none ${
                       selectedChapter === chap.id
                         ? "bg-zinc-800 text-brand-cyan border border-brand-cyan/40"
                         : "text-zinc-500 hover:text-zinc-300"
@@ -786,11 +801,11 @@ export const QuasiPerfectPuzzler: React.FC = () => {
               </div>
 
               {/* Tools Toggles */}
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 flex-wrap">
                 <button
                   type="button"
                   onClick={() => setShowBriefingModal(true)}
-                  className="flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-lg border border-brand-cyan/40 bg-brand-cyan/10 text-brand-cyan hover:bg-brand-cyan/20 transition-all"
+                  className="min-h-[44px] flex items-center justify-center gap-1 px-3 py-1.5 text-xs font-bold rounded-lg border border-brand-cyan/40 bg-brand-cyan/10 text-brand-cyan hover:bg-brand-cyan/20 transition-all focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:outline-none"
                 >
                   <IconSparkles className="w-3.5 h-3.5" />
                   <span>Theory Briefing</span>
@@ -798,7 +813,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowHints((prev) => !prev)}
-                  className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-lg border transition-all ${
+                  className={`min-h-[44px] flex items-center justify-center gap-1 px-3 py-1.5 text-xs font-bold rounded-lg border transition-all focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none ${
                     showHints
                       ? "bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-[0_0_10px_rgba(245,158,11,0.3)]"
                       : "bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-zinc-200"
@@ -810,7 +825,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowLeanInspector((prev) => !prev)}
-                  className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-lg border transition-all ${
+                  className={`min-h-[44px] flex items-center justify-center gap-1 px-3 py-1.5 text-xs font-bold rounded-lg border transition-all focus-visible:ring-2 focus-visible:ring-purple-400 focus-visible:outline-none ${
                     showLeanInspector
                       ? "bg-purple-500/20 text-purple-300 border-purple-500/50 shadow-[0_0_10px_rgba(168,85,247,0.3)]"
                       : "bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-zinc-200"
@@ -836,7 +851,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
                     key={lvl.id}
                     type="button"
                     onClick={() => loadLevel(actualIdx)}
-                    className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
+                    className={`min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:outline-none ${
                       isCurrent
                         ? "bg-brand-cyan text-black shadow-[0_0_10px_rgba(6,182,212,0.5)] font-extrabold"
                         : lvlProgress?.completed
@@ -860,7 +875,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
           {/* Level Header & Controls */}
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3 bg-zinc-900/40 border border-zinc-850 rounded-xl p-3.5">
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-brand-cyan">
                   Chapter {currentLevel.chapter} · {currentLevel.chapterTitle}
                 </span>
@@ -882,12 +897,12 @@ export const QuasiPerfectPuzzler: React.FC = () => {
               </p>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <button
                 type="button"
                 onClick={handleUndo}
                 disabled={history.length === 0 || levelSolved}
-                className="flex items-center gap-1 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs font-bold text-zinc-300 hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center gap-1 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs font-bold text-zinc-300 hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:outline-none"
               >
                 <IconArrowBackUp className="w-3.5 h-3.5" />
                 <span>Undo</span>
@@ -896,7 +911,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
                 type="button"
                 onClick={handleRedo}
                 disabled={redoHistory.length === 0 || levelSolved}
-                className="flex items-center gap-1 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs font-bold text-zinc-300 hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center gap-1 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs font-bold text-zinc-300 hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:outline-none"
               >
                 <IconArrowForwardUp className="w-3.5 h-3.5" />
                 <span>Redo</span>
@@ -904,7 +919,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
               <button
                 type="button"
                 onClick={handleResetLevel}
-                className="flex items-center gap-1 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs font-bold text-zinc-300 hover:bg-zinc-800 transition-colors"
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center gap-1 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs font-bold text-zinc-300 hover:bg-zinc-800 transition-colors focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:outline-none"
               >
                 <IconRotate className="w-3.5 h-3.5" />
                 <span>Reset</span>
@@ -984,6 +999,98 @@ export const QuasiPerfectPuzzler: React.FC = () => {
               isProofComplete={levelSolved || activeSubgoal.isCompleted}
               isTacticActive={selectedTacticIndex !== null}
             />
+          </div>
+
+          {/* Off-screen Accessible DOM Fallback Subtree */}
+          <div
+            className="sr-only"
+            aria-label="Quasi-Puzzler Accessible Subtree"
+          >
+            <fieldset>
+              <legend>
+                Quasi-Puzzler Lean Proof Assistant State and Controls
+              </legend>
+
+              <div role="group" aria-label="Proof Assistant Status and Context">
+                <output htmlFor="quasi-level">
+                  Level: {currentLevel.title}
+                </output>
+                <output htmlFor="quasi-goal">
+                  Active Goal: {activeSubgoal.label}
+                </output>
+                <output htmlFor="quasi-ram">
+                  RAM Memory: {currentRam.toFixed(1)} GB
+                </output>
+                <output htmlFor="quasi-status">
+                  Proof Status:{" "}
+                  {levelSolved
+                    ? "Solved"
+                    : activeSubgoal.isCompleted
+                      ? "Subgoal Closed"
+                      : "In Progress"}
+                </output>
+                <output htmlFor="quasi-steps">
+                  Steps Applied: {proofSteps.length}
+                </output>
+              </div>
+
+              <div
+                role="group"
+                aria-label="Interactive Tactics and Proof Actions"
+              >
+                {currentLevel.availableTactics.map((tacticItem, idx) => {
+                  const id =
+                    typeof tacticItem === "string" ? tacticItem : tacticItem.id;
+                  const def = tacticDefs[id];
+                  const label = def?.name || id;
+                  return (
+                    <button
+                      key={id + "-" + idx}
+                      type="button"
+                      onClick={() => {
+                        setSelectedTacticIndex(idx);
+                        announce(`Selected tactic: ${label}`, "polite");
+                      }}
+                      aria-pressed={selectedTacticIndex === idx}
+                    >
+                      Apply Tactic: {label}
+                    </button>
+                  );
+                })}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleUndo();
+                    announce("Reverted last tactic step.", "polite");
+                  }}
+                  disabled={history.length === 0}
+                >
+                  Undo Tactic Step
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleRedo();
+                    announce("Restored tactic step.", "polite");
+                  }}
+                  disabled={redoHistory.length === 0}
+                >
+                  Redo Tactic Step
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleResetLevel();
+                    announce("Reset current proof level.", "polite");
+                  }}
+                >
+                  Reset Level
+                </button>
+              </div>
+            </fieldset>
           </div>
 
           {/* Tactic Hand */}

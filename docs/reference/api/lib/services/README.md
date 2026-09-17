@@ -68,9 +68,21 @@ Re-exports [BlogPostData](../fallback-blog-posts/interfaces/BlogPostData.md)
 
 ***
 
+### BlogPostReactionSubmissionInput
+
+Re-exports [BlogPostReactionSubmissionInput](blog-service/interfaces/BlogPostReactionSubmissionInput.md)
+
+***
+
 ### BlogPostService
 
 Re-exports [BlogPostService](blog-service/classes/BlogPostService.md)
+
+***
+
+### BufferedBlogReactionEvent
+
+Re-exports [BufferedBlogReactionEvent](blog-service/interfaces/BufferedBlogReactionEvent.md)
 
 ***
 

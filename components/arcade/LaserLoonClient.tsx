@@ -85,9 +85,11 @@ export const LaserLoonClient: React.FC = () => {
             icon={<IconCrosshair className="w-8 h-8 text-red-400" />}
             instructions="Fly Laser Loon toward the State Capitol, take on rival flags, and blast through red tape. There are ice weapons and boss battles. The flag committee did not request these features."
             controls={[
-              { key: "1-4", action: "Optic Arsenal" },
-              { key: "Space", action: "Loon Tremolo" },
-              { key: "Mouse", action: "Aim Crosshair" },
+              { key: "WASD / Arrows", action: "Glide Loon" },
+              { key: "Click / Touch", action: "Aim & Shoot" },
+              { key: "1 - 4", action: "Optic Arsenal" },
+              { key: "Space / U", action: "Loon Tremolo" },
+              { key: "P", action: "Pause Game" },
             ]}
             importComponent={LaserLoonLoader}
           >

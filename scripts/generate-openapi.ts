@@ -373,6 +373,130 @@ export const openApiSpec = {
         },
       },
     },
+    "/api/blog/reactions": {
+      get: {
+        summary: "Retrieve blog post reaction counts",
+        description:
+          "Fetches aggregate quick reaction counts for a blog post slug.",
+        parameters: [
+          {
+            name: "slug",
+            in: "query",
+            required: false,
+            description:
+              "Blog post slug identifier (interchangeable with blogPostSlug)",
+            schema: { type: "string" },
+          },
+          {
+            name: "blogPostSlug",
+            in: "query",
+            required: false,
+            description:
+              "Blog post slug identifier (interchangeable with slug)",
+            schema: { type: "string" },
+          },
+        ],
+        responses: {
+          200: {
+            description: "Successful retrieval of reaction counts",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/BlogPostReactionGetResponse",
+                },
+              },
+            },
+          },
+          400: {
+            description: "Missing required query parameter",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+              },
+            },
+          },
+          500: {
+            description: "Internal server error",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+              },
+            },
+          },
+        },
+      },
+      post: {
+        summary: "Submit blog post reaction badge",
+        description:
+          "Increments quick reaction badge count for a published blog post slug.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/BlogPostReactionSubmission",
+              },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: "Reaction registered successfully",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ReactionPostResponse",
+                },
+              },
+            },
+          },
+          400: {
+            description: "Validation error on payload",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ValidationError",
+                },
+              },
+            },
+          },
+          404: {
+            description: "Blog post not found or unpublished",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+              },
+            },
+          },
+          429: {
+            description: "Rate limit exceeded",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+              },
+            },
+          },
+          500: {
+            description: "Internal server error",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
     "/api/telemetry": {
       get: {
         summary: "Retrieve compiled telemetry metrics",
@@ -974,6 +1098,230 @@ export const openApiSpec = {
           },
           500: {
             description: "Unable to update draft",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+        },
+      },
+      delete: {
+        summary: "Delete a blog post or draft",
+        description:
+          "Deletes a persisted BlogPost or draft record by ID and evicts associated caches.",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string", minLength: 1, maxLength: 191 },
+          },
+        ],
+        responses: {
+          200: {
+            description: "Blog post or draft deleted successfully",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean" },
+                    data: {
+                      type: "object",
+                      properties: {
+                        id: { type: "string" },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          400: {
+            description: "Invalid draft identifier",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ValidationError" },
+              },
+            },
+          },
+          403: {
+            description: "Administrator access required",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+          404: {
+            description: "Blog draft not found",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+          500: {
+            description: "Unable to delete blog post",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/api/admin/projects/{slug}/image": {
+      post: {
+        summary: "Upload and link project hero image",
+        description:
+          "Stores a validated media asset and updates the target case study hero image URL for authorized administrators.",
+        parameters: [
+          {
+            name: "slug",
+            in: "path",
+            required: true,
+            schema: { type: "string", minLength: 1, maxLength: 100 },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "multipart/form-data": {
+              schema: {
+                type: "object",
+                properties: {
+                  file: {
+                    type: "string",
+                    format: "binary",
+                    description:
+                      "Image file buffer (PNG, JPEG, WebP, GIF, SVG, AVIF; max 5MB)",
+                  },
+                },
+                required: ["file"],
+              },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: "Image asset uploaded and persisted successfully",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean" },
+                    data: {
+                      type: "object",
+                      properties: {
+                        slug: { type: "string" },
+                        hero_image_url: { type: "string" },
+                        key: { type: "string" },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          400: {
+            description: "Validation or payload error",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+          401: {
+            description: "Authentication required",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+          403: {
+            description: "Administrator access required",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+        },
+      },
+      delete: {
+        summary: "Clear project hero image",
+        description:
+          "Clears the hero image URL associated with a project for authorized administrators.",
+        parameters: [
+          {
+            name: "slug",
+            in: "path",
+            required: true,
+            schema: { type: "string", minLength: 1, maxLength: 100 },
+          },
+        ],
+        responses: {
+          200: {
+            description: "Hero image cleared successfully",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean" },
+                    data: {
+                      type: "object",
+                      properties: {
+                        slug: { type: "string" },
+                        hero_image_url: { type: "null" },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          401: {
+            description: "Authentication required",
+          },
+          403: {
+            description: "Administrator access required",
+          },
+        },
+      },
+    },
+    "/api/media/{key}": {
+      get: {
+        summary: "Retrieve media asset by key",
+        description:
+          "Serves stored media asset binary with strict Content-Type and security headers.",
+        parameters: [
+          {
+            name: "key",
+            in: "path",
+            required: true,
+            schema: { type: "string" },
+          },
+        ],
+        responses: {
+          200: {
+            description: "Media asset content stream",
+            content: {
+              "image/png": { schema: { type: "string", format: "binary" } },
+              "image/jpeg": { schema: { type: "string", format: "binary" } },
+              "image/webp": { schema: { type: "string", format: "binary" } },
+              "image/gif": { schema: { type: "string", format: "binary" } },
+              "image/svg+xml": { schema: { type: "string", format: "binary" } },
+              "image/avif": { schema: { type: "string", format: "binary" } },
+            },
+          },
+          404: {
+            description: "Media asset not found",
             content: {
               "application/json": {
                 schema: { $ref: "#/components/schemas/ErrorResponse" },

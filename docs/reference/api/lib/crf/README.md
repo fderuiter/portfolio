@@ -134,6 +134,12 @@ Re-exports [BaselineDiffEntry](study-baseline-diff/interfaces/BaselineDiffEntry.
 
 ***
 
+### BaselinesExportBundle
+
+Re-exports [BaselinesExportBundle](study-baselines/interfaces/BaselinesExportBundle.md)
+
+***
+
 ### BiomedicalConcept
 
 Re-exports [BiomedicalConcept](types/interfaces/BiomedicalConcept.md)
@@ -218,6 +224,12 @@ Re-exports [CDASH_CORE_DOMAIN_VARIABLES](form-health/variables/CDASH_CORE_DOMAIN
 
 ***
 
+### CDASH\_DOMAIN\_CATALOG
+
+Re-exports [CDASH_DOMAIN_CATALOG](study-engine/variables/CDASH_DOMAIN_CATALOG.md)
+
+***
+
 ### CDASH\_STANDARD\_VARIABLES
 
 Re-exports [CDASH_STANDARD_VARIABLES](cdash-domain-templates/variables/CDASH_STANDARD_VARIABLES.md)
@@ -245,6 +257,12 @@ Re-exports [CDISC_NULL_FLAVORS](precision-date/variables/CDISC_NULL_FLAVORS.md)
 ### CdiscNullFlavorCode
 
 Re-exports [CdiscNullFlavorCode](precision-date/type-aliases/CdiscNullFlavorCode.md)
+
+***
+
+### clearStudyBaselines
+
+Re-exports [clearStudyBaselines](study-baselines/functions/clearStudyBaselines.md)
 
 ***
 
@@ -356,6 +374,12 @@ Re-exports [computeFormHealthMetrics](form-health/functions/computeFormHealthMet
 
 ***
 
+### computeStudyChecksum
+
+Re-exports [computeStudyChecksum](study-baselines/functions/computeStudyChecksum.md)
+
+***
+
 ### ConditionExplanation
 
 Re-exports [ConditionExplanation](expression-evaluator/interfaces/ConditionExplanation.md)
@@ -401,6 +425,12 @@ Re-exports [daysInMonth](precision-date/functions/daysInMonth.md)
 ### DEFAULT\_STUDY\_BRANDING
 
 Re-exports [DEFAULT_STUDY_BRANDING](branding-defaults/variables/DEFAULT_STUDY_BRANDING.md)
+
+***
+
+### deleteStudyBaseline
+
+Re-exports [deleteStudyBaseline](study-baselines/functions/deleteStudyBaseline.md)
 
 ***
 
@@ -485,6 +515,12 @@ Re-exports [diffUniversalCrfStudies](universal-schema/functions/diffUniversalCrf
 ### diffUsdmProtocols
 
 Re-exports [diffUsdmProtocols](usdm-adapter/functions/diffUsdmProtocols.md)
+
+***
+
+### DomainMetadata
+
+Re-exports [DomainMetadata](study-engine/interfaces/DomainMetadata.md)
 
 ***
 
@@ -656,6 +692,12 @@ Re-exports [explainRule](expression-evaluator/functions/explainRule.md)
 
 ***
 
+### exportBaselinesBundle
+
+Re-exports [exportBaselinesBundle](study-baselines/functions/exportBaselinesBundle.md)
+
+***
+
 ### ExportDocxOptions
 
 Re-exports [ExportDocxOptions](types/interfaces/ExportDocxOptions.md)
@@ -755,6 +797,18 @@ Re-exports [ExpressionEvaluator](expression-evaluator/classes/ExpressionEvaluato
 ### extractCodelistFromUsdmObject
 
 Re-exports [extractCodelistFromUsdmObject](usdm-adapter/functions/extractCodelistFromUsdmObject.md)
+
+***
+
+### FieldImpactPreview
+
+Re-exports [FieldImpactPreview](study-engine/interfaces/FieldImpactPreview.md)
+
+***
+
+### FieldReferenceLocation
+
+Re-exports [FieldReferenceLocation](study-engine/interfaces/FieldReferenceLocation.md)
 
 ***
 
@@ -926,6 +980,12 @@ Re-exports [getSasFormatName](export-sas/functions/getSasFormatName.md)
 
 ***
 
+### getStudyBaseline
+
+Re-exports [getStudyBaseline](study-baselines/functions/getStudyBaseline.md)
+
+***
+
 ### getStudyBranding
 
 Re-exports [getStudyBranding](branding-defaults/functions/getStudyBranding.md)
@@ -956,9 +1016,21 @@ Re-exports [HighlightToken](formula-linter/interfaces/HighlightToken.md)
 
 ***
 
+### importBaselinesBundle
+
+Re-exports [importBaselinesBundle](study-baselines/functions/importBaselinesBundle.md)
+
+***
+
 ### importStudyFromUsdm
 
 Re-exports [importStudyFromUsdm](usdm-adapter/functions/importStudyFromUsdm.md)
+
+***
+
+### incrementStudyVersion
+
+Re-exports [incrementStudyVersion](study-baselines/functions/incrementStudyVersion.md)
 
 ***
 
@@ -1037,6 +1109,12 @@ Re-exports [lintForm](form-linter/functions/lintForm.md)
 ### lintFormula
 
 Re-exports [lintFormula](formula-linter/functions/lintFormula.md)
+
+***
+
+### listStudyBaselines
+
+Re-exports [listStudyBaselines](study-baselines/functions/listStudyBaselines.md)
 
 ***
 
@@ -1136,9 +1214,33 @@ Re-exports [ProtocolDiffSummary](universal-schema/interfaces/ProtocolDiffSummary
 
 ***
 
+### ProtocolValidationResult
+
+Re-exports [ProtocolValidationResult](study-engine/interfaces/ProtocolValidationResult.md)
+
+***
+
 ### resolveStorage
 
 Re-exports [resolveStorage](study-draft-storage/functions/resolveStorage.md)
+
+***
+
+### restoreBaselineAsDraft
+
+Re-exports [restoreBaselineAsDraft](study-baselines/functions/restoreBaselineAsDraft.md)
+
+***
+
+### RestoreStudyBaselineOptions
+
+Re-exports [RestoreStudyBaselineOptions](study-baselines/interfaces/RestoreStudyBaselineOptions.md)
+
+***
+
+### RestoreStudyBaselineResult
+
+Re-exports [RestoreStudyBaselineResult](study-baselines/type-aliases/RestoreStudyBaselineResult.md)
 
 ***
 
@@ -1157,6 +1259,24 @@ Re-exports [sanitizeRName](export-r/functions/sanitizeRName.md)
 ### sanitizeSasName
 
 Re-exports [sanitizeSasName](export-sas/functions/sanitizeSasName.md)
+
+***
+
+### saveStudyBaseline
+
+Re-exports [saveStudyBaseline](study-baselines/functions/saveStudyBaseline.md)
+
+***
+
+### SaveStudyBaselineOptions
+
+Re-exports [SaveStudyBaselineOptions](study-baselines/interfaces/SaveStudyBaselineOptions.md)
+
+***
+
+### SaveStudyBaselineResult
+
+Re-exports [SaveStudyBaselineResult](study-baselines/type-aliases/SaveStudyBaselineResult.md)
 
 ***
 
@@ -1238,6 +1358,12 @@ Re-exports [searchSlashCommands](smart-blocks-engine/functions/searchSlashComman
 
 ***
 
+### SectionImpactPreview
+
+Re-exports [SectionImpactPreview](study-engine/interfaces/SectionImpactPreview.md)
+
+***
+
 ### serializeStudyToOdmXml
 
 Re-exports [serializeStudyToOdmXml](odm-xml-serializer/variables/serializeStudyToOdmXml.md)
@@ -1289,6 +1415,24 @@ Re-exports [StudioMode](types/type-aliases/StudioMode.md)
 ### StudioTheme
 
 Re-exports [StudioTheme](types/type-aliases/StudioTheme.md)
+
+***
+
+### STUDY\_BASELINES\_CORRUPT\_BACKUP\_KEY
+
+Re-exports [STUDY_BASELINES_CORRUPT_BACKUP_KEY](study-baselines/variables/STUDY_BASELINES_CORRUPT_BACKUP_KEY.md)
+
+***
+
+### STUDY\_BASELINES\_MAX\_COUNT
+
+Re-exports [STUDY_BASELINES_MAX_COUNT](study-baselines/variables/STUDY_BASELINES_MAX_COUNT.md)
+
+***
+
+### STUDY\_BASELINES\_STORAGE\_KEY
+
+Re-exports [STUDY_BASELINES_STORAGE_KEY](study-baselines/variables/STUDY_BASELINES_STORAGE_KEY.md)
 
 ***
 
@@ -1397,6 +1541,12 @@ Re-exports [StudyEpochSchema](universal-schema/variables/StudyEpochSchema.md)
 ### StudyProtocol
 
 Re-exports [StudyProtocol](types/interfaces/StudyProtocol.md)
+
+***
+
+### StudyProtocolEngine
+
+Re-exports [StudyProtocolEngine](study-engine/classes/StudyProtocolEngine.md)
 
 ***
 
@@ -1727,3 +1877,9 @@ Re-exports [validateStudyCompliance](cdisc-conformance-linter/functions/validate
 ### validateUniversalCrf
 
 Re-exports [validateUniversalCrf](universal-schema/functions/validateUniversalCrf.md)
+
+***
+
+### ValidationIssue
+
+Re-exports [ValidationIssue](study-engine/interfaces/ValidationIssue.md)

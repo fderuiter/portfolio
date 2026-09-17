@@ -1008,6 +1008,152 @@ export const GarminWatchSimulator: React.FC<GarminWatchSimulatorProps> = ({
         </span>
       </div>
 
+      {/* Off-screen Accessible DOM Fallback Subtree */}
+      <div className="sr-only" aria-label="Garmin Watch Accessible Subtree">
+        <fieldset>
+          <legend>
+            Garmin Watch Embedded Simulator State and Physical Controls
+          </legend>
+
+          <div role="group" aria-label="Garmin Simulator Telemetry and Status">
+            <output htmlFor="garmin-state">State: {gameState.gameState}</output>
+            <output htmlFor="garmin-score">Score: {gameState.score}</output>
+            <output htmlFor="garmin-highscore">
+              High Score: {effectiveHighScore}
+            </output>
+            <output htmlFor="garmin-device">
+              Device Target: {currentProfile.name}
+            </output>
+            <output htmlFor="garmin-ram">
+              RAM Memory: {gameState.allocatedRamKb.toFixed(1)} /{" "}
+              {currentProfile.ramLimitKb} KB
+            </output>
+            <output htmlFor="garmin-battery">
+              Battery Level: {Math.round(gameState.battery)}%
+            </output>
+            <output htmlFor="garmin-thermal">
+              Thermal Stress: {Math.round((gameState.thermalStress ?? 0) * 100)}
+              %
+            </output>
+            <output htmlFor="garmin-fog">
+              Condensation Fog: {Math.round(gameState.fogLevel * 100)}%
+            </output>
+          </div>
+
+          <div role="group" aria-label="Garmin Watch Physical Controls">
+            <button
+              type="button"
+              onClick={() => {
+                handleStartStop();
+                announce(
+                  `Pressed START/STOP. Status: ${gameState.gameState}`,
+                  "polite"
+                );
+              }}
+            >
+              START / STOP Button
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                handleJettison();
+                announce("Pressed UP / Jettison button.", "polite");
+              }}
+              disabled={gameState.gameState !== "playing"}
+            >
+              UP / Jettison Variable Button
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                handleForceGc();
+                announce("Pressed DOWN / Force GC button.", "polite");
+              }}
+              disabled={
+                gameState.gameState !== "playing" || gameState.isGcActive
+              }
+            >
+              DOWN / Force GC Button
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                handleToggleLight();
+                announce("Pressed LIGHT / Backlight button.", "polite");
+              }}
+            >
+              LIGHT / Backlight Button
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                handleWipeFog();
+                announce("Wiped screen condensation fog.", "polite");
+              }}
+            >
+              Wipe Screen Fog
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                handleSaveFlash();
+                announce("Saved variable to NVRAM flash storage.", "polite");
+              }}
+            >
+              Save NVRAM Flash
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                handleClearFlash();
+                announce("Cleared NVRAM flash storage.", "polite");
+              }}
+            >
+              Clear NVRAM Flash
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                handleSelectDevice("forerunner");
+                announce("Switched profile to Forerunner.", "polite");
+              }}
+              aria-pressed={deviceTarget === "forerunner"}
+            >
+              Profile: Forerunner
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                handleSelectDevice("fenix");
+                announce("Switched profile to Fenix.", "polite");
+              }}
+              aria-pressed={deviceTarget === "fenix"}
+            >
+              Profile: Fenix
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                handleSelectDevice("edge");
+                announce("Switched profile to Edge.", "polite");
+              }}
+              aria-pressed={deviceTarget === "edge"}
+            >
+              Profile: Edge
+            </button>
+          </div>
+        </fieldset>
+      </div>
+
       {/* Off-screen Live Regions for Screen Reader Telemetry & Assertive Alerts */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
         {`Garmin Simulator Telemetry. Status: ${gameState.gameState}. Memory: ${gameState.allocatedRamKb.toFixed(
