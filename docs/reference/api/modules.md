@@ -223,5 +223,6 @@
 - [lib/validation-scanner](lib/validation-scanner/README.md)
 - [lib/webgl/context-manager](lib/webgl/context-manager/README.md)
 - [lib/working-with-duck-engine](lib/working-with-duck-engine/README.md)
+- [lib/zod-to-openapi](lib/zod-to-openapi/README.md)
 - [types/domain](types/domain/README.md)
 - [types/game-manual](types/game-manual/README.md)

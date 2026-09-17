@@ -1,5 +1,41 @@
 import * as fs from "fs";
 import * as path from "path";
+import { zodToOpenApi } from "../lib/zod-to-openapi";
+import {
+  MaintenanceSummarySchema,
+  CaseStudySummarySchema,
+  CaseStudySubmissionSchema,
+  CaseStudyPostResponseSchema,
+  BlogDraftCreateSchema,
+  BlogDraftUpdateSchema,
+  BlogDraftSchema,
+  BlogDraftCollectionSchema,
+  BlogDraftCreateResponseSchema,
+  BlogDraftReadResponseSchema,
+  BlogDraftUpdateResponseSchema,
+  ErrorResponseSchema,
+  TelemetryEventSchema,
+  TelemetryPostResponseSchema,
+  TelemetrySyncResponseSchema,
+  RateLimitParamsSchema,
+  FallbackMemorySchema,
+  SyncParamsSchema,
+  ValidationErrorSchema,
+  FeedbackSubmissionSchema,
+  FeedbackItemSchema,
+  FeedbackGetResponseSchema,
+  FeedbackPostResponseSchema,
+  ReactionSubmissionSchema,
+  ReactionCountsSchema,
+  ReactionGetResponseSchema,
+  ReactionPostResponseSchema,
+  ContactSubmissionSchema,
+  ContactPostResponseSchema,
+  NewsletterSubmissionSchema,
+  NewsletterResponseSchema,
+  ResendWebhookEventSchema,
+  ResendWebhookResponseSchema,
+} from "../lib/schemas";
 
 // Helper to recursively find API route files
 function findRouteFiles(dir: string): string[] {
@@ -29,7 +65,7 @@ export function getExpectedApiRoutes(workspaceRoot: string): string[] {
   });
 }
 
-// Construct OpenAPI 3.0.0 specification using the declarative Zod schemas
+// Construct OpenAPI 3.0.0 specification using canonical Zod schemas
 export const openApiSpec = {
   openapi: "3.0.0",
   info: {
@@ -91,35 +127,7 @@ export const openApiSpec = {
             content: {
               "application/json": {
                 schema: {
-                  type: "object",
-                  properties: {
-                    success: { type: "boolean" },
-                    data: {
-                      type: "object",
-                      properties: {
-                        id: { type: "string" },
-                        slug: { type: "string" },
-                        title: { type: "string" },
-                        primary_language: { type: "string" },
-                        editorial_content: { type: "string" },
-                        architectural_narrative: { type: "string" },
-                        published: { type: "boolean" },
-                        tags: { type: "string" },
-                        created_at: { type: "string", format: "date-time" },
-                      },
-                      required: [
-                        "id",
-                        "slug",
-                        "title",
-                        "primary_language",
-                        "editorial_content",
-                        "architectural_narrative",
-                        "published",
-                        "tags",
-                      ],
-                    },
-                  },
-                  required: ["success", "data"],
+                  $ref: "#/components/schemas/CaseStudyPostResponse",
                 },
               },
             },
@@ -548,26 +556,7 @@ export const openApiSpec = {
             content: {
               "application/json": {
                 schema: {
-                  type: "object",
-                  properties: {
-                    success: { type: "boolean" },
-                    durable: {
-                      type: "boolean",
-                      description:
-                        "Whether the event was accepted into the durable buffer. False means the event was dropped.",
-                    },
-                    event: {
-                      type: "object",
-                      properties: {
-                        id: { type: "string" },
-                        projectSlug: { type: "string" },
-                        eventType: { type: "string" },
-                        createdAt: { type: "string", format: "date-time" },
-                      },
-                      required: ["id", "projectSlug", "eventType", "createdAt"],
-                    },
-                  },
-                  required: ["success", "durable", "event"],
+                  $ref: "#/components/schemas/TelemetryPostResponse",
                 },
               },
             },
@@ -578,26 +567,7 @@ export const openApiSpec = {
             content: {
               "application/json": {
                 schema: {
-                  type: "object",
-                  properties: {
-                    success: { type: "boolean" },
-                    durable: {
-                      type: "boolean",
-                      description:
-                        "Whether the event was accepted into the durable buffer. False means the event was dropped.",
-                    },
-                    event: {
-                      type: "object",
-                      properties: {
-                        id: { type: "string" },
-                        projectSlug: { type: "string" },
-                        eventType: { type: "string" },
-                        createdAt: { type: "string", format: "date-time" },
-                      },
-                      required: ["id", "projectSlug", "eventType", "createdAt"],
-                    },
-                  },
-                  required: ["success", "durable", "event"],
+                  $ref: "#/components/schemas/TelemetryPostResponse",
                 },
               },
             },
@@ -688,23 +658,7 @@ export const openApiSpec = {
             content: {
               "application/json": {
                 schema: {
-                  type: "object",
-                  properties: {
-                    success: { type: "boolean" },
-                    processed: { type: "integer" },
-                    inserted: { type: "integer" },
-                    reactions: {
-                      type: "object",
-                      description:
-                        "Case-study reaction write-buffer drain counters.",
-                      properties: {
-                        processed: { type: "integer" },
-                        inserted: { type: "integer" },
-                      },
-                      required: ["processed", "inserted"],
-                    },
-                  },
-                  required: ["success", "processed"],
+                  $ref: "#/components/schemas/TelemetrySyncResponse",
                 },
               },
             },
@@ -853,6 +807,16 @@ export const openApiSpec = {
         summary: "Ingest Resend deliverability webhook events",
         description:
           "Cryptographically verifies Svix webhook signatures and processes email lifecycle events (bounces, complaints, delivery status) to maintain suppression lists.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ResendWebhookEvent",
+              },
+            },
+          },
+        },
         responses: {
           200: {
             description: "Webhook event processed successfully",
@@ -1380,620 +1344,39 @@ export const openApiSpec = {
   },
   components: {
     schemas: {
-      MaintenanceSummary: {
-        type: "object",
-        properties: {
-          success: { type: "boolean" },
-          partial: { type: "boolean" },
-          startedAt: { type: "string", format: "date-time" },
-          completedAt: { type: "string", format: "date-time" },
-          durationMs: { type: "integer" },
-          deadlineMs: { type: "integer", maximum: 8000 },
-          phases: {
-            type: "object",
-            additionalProperties: {
-              type: "object",
-              properties: {
-                status: {
-                  type: "string",
-                  enum: ["completed", "failed", "timed_out", "skipped"],
-                },
-                durationMs: { type: "integer" },
-                counts: {
-                  type: "object",
-                  additionalProperties: {
-                    type: "integer",
-                    nullable: true,
-                  },
-                },
-                error: { type: "string" },
-              },
-              required: ["status", "durationMs", "counts"],
-            },
-          },
-        },
-        required: [
-          "success",
-          "partial",
-          "startedAt",
-          "completedAt",
-          "durationMs",
-          "deadlineMs",
-          "phases",
-        ],
-      },
-      CaseStudySummary: {
-        type: "object",
-        properties: {
-          id: { type: "string" },
-          slug: { type: "string" },
-          title: { type: "string" },
-          primary_language: { type: "string" },
-          tags: {
-            type: "array",
-            items: { type: "string" },
-          },
-        },
-        required: ["id", "slug", "title", "primary_language", "tags"],
-      },
-      CaseStudySubmission: {
-        type: "object",
-        properties: {
-          title: {
-            type: "string",
-            description: "Title of the post-mortem or case study",
-          },
-          slug: { type: "string", description: "Unique URL slug" },
-          primary_language: {
-            type: "string",
-            description: "Primary programming language or tech stack",
-          },
-          editorial_content: {
-            type: "string",
-            description: "Summary description markdown",
-          },
-          architectural_narrative: {
-            type: "string",
-            description: "Detailed architectural narrative HTML markup",
-          },
-          tags: {
-            oneOf: [
-              { type: "string" },
-              { type: "array", items: { type: "string" } },
-            ],
-            description:
-              "Tags as comma-separated string or array of tag strings",
-          },
-          github_url: {
-            type: "string",
-            description: "Optional GitHub repository URL",
-          },
-        },
-        required: ["title", "slug", "tags"],
-      },
-      BlogDraftCreate: {
-        type: "object",
-        additionalProperties: false,
-        properties: {
-          title: { type: "string", minLength: 3, maxLength: 180 },
-          slug: {
-            type: "string",
-            minLength: 3,
-            maxLength: 120,
-            pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-          },
-          dek: { type: "string", minLength: 10, maxLength: 500 },
-          body: { type: "string", minLength: 1, maxLength: 50000 },
-          pillar: {
-            type: "string",
-            enum: [
-              "clinical-data-engineering",
-              "formal-verification",
-              "accessibility-engineering",
-              "browser-graphics-engineering",
-              "agent-first-dx",
-              "field-notes",
-            ],
-          },
-          tags: {
-            type: "array",
-            minItems: 1,
-            maxItems: 12,
-            items: { type: "string", minLength: 1, maxLength: 50 },
-          },
-          heroImageUrl: {
-            type: "string",
-            format: "uri",
-            maxLength: 2048,
-            nullable: true,
-          },
-        },
-        required: ["title", "slug", "dek", "body", "pillar", "tags"],
-      },
-      BlogDraftUpdate: {
-        type: "object",
-        additionalProperties: false,
-        minProperties: 1,
-        properties: {
-          title: { type: "string", minLength: 3, maxLength: 180 },
-          slug: {
-            type: "string",
-            minLength: 3,
-            maxLength: 120,
-            pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-          },
-          dek: { type: "string", minLength: 10, maxLength: 500 },
-          body: { type: "string", minLength: 1, maxLength: 50000 },
-          pillar: {
-            type: "string",
-            enum: [
-              "clinical-data-engineering",
-              "formal-verification",
-              "accessibility-engineering",
-              "browser-graphics-engineering",
-              "agent-first-dx",
-              "field-notes",
-            ],
-          },
-          tags: {
-            type: "array",
-            minItems: 1,
-            maxItems: 12,
-            items: { type: "string", minLength: 1, maxLength: 50 },
-          },
-          heroImageUrl: {
-            type: "string",
-            format: "uri",
-            maxLength: 2048,
-            nullable: true,
-          },
-        },
-      },
-      BlogDraft: {
-        type: "object",
-        properties: {
-          id: { type: "string" },
-          slug: { type: "string" },
-          title: { type: "string" },
-          dek: { type: "string" },
-          body: { type: "string", description: "Sanitized HTML" },
-          pillar: { type: "string" },
-          tags: {
-            type: "string",
-            description: "Persisted comma-separated tags",
-          },
-          published: { type: "boolean", enum: [false] },
-          reading_time_minutes: { type: "integer", minimum: 1, nullable: true },
-          hero_image_url: { type: "string", format: "uri", nullable: true },
-          created_at: { type: "string", format: "date-time" },
-          updated_at: { type: "string", format: "date-time" },
-        },
-        required: [
-          "id",
-          "slug",
-          "title",
-          "dek",
-          "body",
-          "pillar",
-          "tags",
-          "published",
-          "created_at",
-          "updated_at",
-        ],
-      },
-      BlogDraftCollection: {
-        type: "object",
-        properties: {
-          data: {
-            type: "array",
-            items: { $ref: "#/components/schemas/BlogDraft" },
-          },
-          pagination: {
-            type: "object",
-            properties: {
-              page: { type: "integer", minimum: 1 },
-              pageSize: { type: "integer", minimum: 1, maximum: 100 },
-              total: { type: "integer", minimum: 0 },
-            },
-            required: ["page", "pageSize", "total"],
-          },
-        },
-        required: ["data", "pagination"],
-      },
-      BlogDraftCreateResponse: {
-        type: "object",
-        properties: {
-          success: { type: "boolean", enum: [true] },
-          data: { $ref: "#/components/schemas/BlogDraft" },
-        },
-        required: ["success", "data"],
-      },
-      BlogDraftReadResponse: {
-        type: "object",
-        properties: {
-          data: { $ref: "#/components/schemas/BlogDraft" },
-        },
-        required: ["data"],
-      },
-      BlogDraftUpdateResponse: {
-        type: "object",
-        properties: {
-          success: { type: "boolean", enum: [true] },
-          data: { $ref: "#/components/schemas/BlogDraft" },
-        },
-        required: ["success", "data"],
-      },
-      ErrorResponse: {
-        type: "object",
-        properties: {
-          error: { type: "string" },
-        },
-        required: ["error"],
-      },
-      TelemetryEvent: {
-        type: "object",
-        properties: {
-          projectSlug: {
-            type: "string",
-            description: "Identifier for the project page",
-          },
-          eventType: {
-            type: "string",
-            enum: [
-              "page_view",
-              "project_click",
-              "route_error",
-              "simulator_option_select",
-              "simulator_milestone_reached",
-              "simulator_schedule_click",
-              "simulator_report_copy",
-            ],
-          },
-        },
-        required: ["projectSlug", "eventType"],
-      },
-      RateLimitParams: {
-        type: "object",
-        properties: {
-          windowMs: {
-            type: "integer",
-            default: 60000,
-            description: "Sliding rate window duration in ms",
-          },
-          maxRequests: {
-            type: "integer",
-            default: 100,
-            description: "Maximum requests allowed within the window",
-          },
-        },
-        required: ["windowMs", "maxRequests"],
-      },
-      FallbackMemory: {
-        type: "object",
-        properties: {
-          redisUrl: {
-            type: "string",
-            format: "uri",
-            description: "HA Redis secondary connection URL",
-          },
-          redisToken: {
-            type: "string",
-            description: "Access secret token",
-          },
-          ttlSeconds: {
-            type: "integer",
-            default: 172800,
-            description: "Survival TTL duration in seconds",
-          },
-        },
-        required: ["ttlSeconds"],
-      },
-      SyncParams: {
-        type: "object",
-        properties: {
-          batch: {
-            type: "integer",
-            default: 50,
-            description: "Batch parameter size for loading buffered items",
-          },
-        },
-      },
-      ValidationError: {
-        type: "object",
-        properties: {
-          error: { type: "string" },
-          details: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                path: { type: "string" },
-                message: { type: "string" },
-              },
-              required: ["path", "message"],
-            },
-          },
-        },
-        required: ["error"],
-      },
-      FeedbackSubmission: {
-        type: "object",
-        properties: {
-          caseStudySlug: { type: "string" },
-          takeaways: {
-            type: "array",
-            items: { type: "string" },
-          },
-          comments: { type: "string" },
-        },
-        required: ["caseStudySlug", "takeaways", "comments"],
-      },
-      FeedbackItem: {
-        type: "object",
-        properties: {
-          id: { type: "string", description: "Feedback record ID" },
-          takeaways: {
-            type: "array",
-            items: { type: "string" },
-            description: "Selected key learning takeaways",
-          },
-          comments: {
-            type: "string",
-            description: "Constructive user comments",
-          },
-          createdAt: {
-            type: "string",
-            format: "date-time",
-            description: "Submission timestamp",
-          },
-        },
-        required: ["id", "takeaways", "comments", "createdAt"],
-      },
-      FeedbackGetResponse: {
-        type: "object",
-        properties: {
-          success: { type: "boolean" },
-          caseStudySlug: { type: "string" },
-          hasSubmitted: {
-            type: "boolean",
-            description:
-              "Indicates whether user with same connection hash has submitted feedback",
-          },
-          totalFeedback: { type: "integer" },
-          feedback: {
-            type: "array",
-            items: { $ref: "#/components/schemas/FeedbackItem" },
-          },
-        },
-        required: [
-          "success",
-          "caseStudySlug",
-          "hasSubmitted",
-          "totalFeedback",
-          "feedback",
-        ],
-      },
-      FeedbackPostResponse: {
-        type: "object",
-        properties: {
-          success: { type: "boolean" },
-          message: { type: "string" },
-          feedback: {
-            type: "object",
-            properties: {
-              id: { type: "string" },
-              caseStudySlug: { type: "string" },
-              takeaways: {
-                type: "array",
-                items: { type: "string" },
-              },
-              comments: { type: "string" },
-              createdAt: { type: "string", format: "date-time" },
-            },
-            required: [
-              "id",
-              "caseStudySlug",
-              "takeaways",
-              "comments",
-              "createdAt",
-            ],
-          },
-        },
-        required: ["success", "message", "feedback"],
-      },
-      ReactionSubmission: {
-        type: "object",
-        properties: {
-          caseStudySlug: { type: "string" },
-          reactionType: {
-            type: "string",
-            enum: ["insightful", "mind_blowing", "actionable", "thorough"],
-          },
-        },
-        required: ["caseStudySlug", "reactionType"],
-      },
-      BlogPostReactionSubmission: {
-        type: "object",
-        properties: {
-          blogPostSlug: { type: "string" },
-          reactionType: {
-            type: "string",
-            enum: ["insightful", "mind_blowing", "actionable", "thorough"],
-          },
-        },
-        required: ["blogPostSlug", "reactionType"],
-      },
-      BlogPostReactionGetResponse: {
-        type: "object",
-        properties: {
-          success: { type: "boolean" },
-          blogPostSlug: { type: "string" },
-          counts: { $ref: "#/components/schemas/ReactionCounts" },
-          userReactions: {
-            type: "array",
-            items: { type: "string" },
-            description:
-              "Reaction types submitted by current user connection hash",
-          },
-        },
-        required: ["success", "blogPostSlug", "counts", "userReactions"],
-      },
-      ReactionCounts: {
-        type: "object",
-        properties: {
-          insightful: { type: "integer" },
-          mind_blowing: { type: "integer" },
-          actionable: { type: "integer" },
-          thorough: { type: "integer" },
-        },
-        required: ["insightful", "mind_blowing", "actionable", "thorough"],
-      },
-      ReactionGetResponse: {
-        type: "object",
-        properties: {
-          success: { type: "boolean" },
-          caseStudySlug: { type: "string" },
-          counts: { $ref: "#/components/schemas/ReactionCounts" },
-          userReactions: {
-            type: "array",
-            items: { type: "string" },
-            description:
-              "Reaction types submitted by current user connection hash",
-          },
-        },
-        required: ["success", "caseStudySlug", "counts", "userReactions"],
-      },
-      ReactionPostResponse: {
-        type: "object",
-        properties: {
-          success: { type: "boolean" },
-          reactionType: {
-            type: "string",
-            enum: ["insightful", "mind_blowing", "actionable", "thorough"],
-          },
-          counts: { $ref: "#/components/schemas/ReactionCounts" },
-          userReactions: {
-            type: "array",
-            items: { type: "string" },
-          },
-        },
-        required: ["success", "reactionType", "counts", "userReactions"],
-      },
-      ContactSubmission: {
-        type: "object",
-        properties: {
-          name: {
-            type: "string",
-            minLength: 2,
-            maxLength: 100,
-            description: "Sender full name",
-          },
-          email: {
-            type: "string",
-            format: "email",
-            description: "Sender email address",
-          },
-          intent: {
-            type: "string",
-            enum: [
-              "general",
-              "collaboration",
-              "consulting",
-              "recruiting",
-              "other",
-            ],
-            default: "general",
-            description: "Inquiry intent category",
-          },
-          subject: {
-            type: "string",
-            minLength: 3,
-            maxLength: 150,
-            description: "Inquiry subject line",
-          },
-          message: {
-            type: "string",
-            minLength: 10,
-            maxLength: 5000,
-            description: "Detailed inquiry message text",
-          },
-          _gotcha: {
-            type: "string",
-            description: "Honeypot spam filter field",
-          },
-          _clientTimestamp: {
-            type: "integer",
-            description: "Form client mount timestamp for duration check",
-          },
-        },
-        required: ["name", "email", "intent", "subject", "message"],
-      },
-      ContactPostResponse: {
-        type: "object",
-        properties: {
-          success: { type: "boolean" },
-          message: { type: "string" },
-          messageId: {
-            type: "string",
-            description: "Dispatched email message identifier",
-          },
-          simulated: {
-            type: "boolean",
-            description:
-              "Indicates simulated dispatch during testing or local development",
-          },
-        },
-        required: ["success", "message"],
-      },
-      NewsletterSubmission: {
-        type: "object",
-        properties: {
-          email: {
-            type: "string",
-            format: "email",
-            description: "Subscriber email address",
-          },
-          _gotcha: { type: "string", description: "Honeypot spam trap field" },
-          _clientTimestamp: {
-            type: "integer",
-            description: "Form client mount timestamp for duration check",
-          },
-        },
-        required: ["email"],
-      },
-      NewsletterResponse: {
-        type: "object",
-        properties: {
-          success: { type: "boolean" },
-          message: { type: "string" },
-          subscriberId: {
-            type: "string",
-            description: "Registered subscriber identifier",
-          },
-          simulated: {
-            type: "boolean",
-            description:
-              "Indicates simulated dispatch during testing or local development",
-          },
-        },
-        required: ["success", "message"],
-      },
-      ResendWebhookResponse: {
-        type: "object",
-        properties: {
-          received: { type: "boolean" },
-          processedEvent: {
-            type: "string",
-            description: "The processed event type",
-          },
-          suppressed: {
-            type: "boolean",
-            description:
-              "Indicates whether the email address was recorded to the suppression list",
-          },
-        },
-        required: ["received"],
-      },
+      MaintenanceSummary: zodToOpenApi(MaintenanceSummarySchema),
+      CaseStudySummary: zodToOpenApi(CaseStudySummarySchema),
+      CaseStudySubmission: zodToOpenApi(CaseStudySubmissionSchema),
+      CaseStudyPostResponse: zodToOpenApi(CaseStudyPostResponseSchema),
+      BlogDraftCreate: zodToOpenApi(BlogDraftCreateSchema),
+      BlogDraftUpdate: zodToOpenApi(BlogDraftUpdateSchema),
+      BlogDraft: zodToOpenApi(BlogDraftSchema),
+      BlogDraftCollection: zodToOpenApi(BlogDraftCollectionSchema),
+      BlogDraftCreateResponse: zodToOpenApi(BlogDraftCreateResponseSchema),
+      BlogDraftReadResponse: zodToOpenApi(BlogDraftReadResponseSchema),
+      BlogDraftUpdateResponse: zodToOpenApi(BlogDraftUpdateResponseSchema),
+      ErrorResponse: zodToOpenApi(ErrorResponseSchema),
+      TelemetryEvent: zodToOpenApi(TelemetryEventSchema),
+      TelemetryPostResponse: zodToOpenApi(TelemetryPostResponseSchema),
+      TelemetrySyncResponse: zodToOpenApi(TelemetrySyncResponseSchema),
+      RateLimitParams: zodToOpenApi(RateLimitParamsSchema),
+      FallbackMemory: zodToOpenApi(FallbackMemorySchema),
+      SyncParams: zodToOpenApi(SyncParamsSchema),
+      ValidationError: zodToOpenApi(ValidationErrorSchema),
+      FeedbackSubmission: zodToOpenApi(FeedbackSubmissionSchema),
+      FeedbackItem: zodToOpenApi(FeedbackItemSchema),
+      FeedbackGetResponse: zodToOpenApi(FeedbackGetResponseSchema),
+      FeedbackPostResponse: zodToOpenApi(FeedbackPostResponseSchema),
+      ReactionSubmission: zodToOpenApi(ReactionSubmissionSchema),
+      ReactionCounts: zodToOpenApi(ReactionCountsSchema),
+      ReactionGetResponse: zodToOpenApi(ReactionGetResponseSchema),
+      ReactionPostResponse: zodToOpenApi(ReactionPostResponseSchema),
+      ContactSubmission: zodToOpenApi(ContactSubmissionSchema),
+      ContactPostResponse: zodToOpenApi(ContactPostResponseSchema),
+      NewsletterSubmission: zodToOpenApi(NewsletterSubmissionSchema),
+      NewsletterResponse: zodToOpenApi(NewsletterResponseSchema),
+      ResendWebhookEvent: zodToOpenApi(ResendWebhookEventSchema),
+      ResendWebhookResponse: zodToOpenApi(ResendWebhookResponseSchema),
     },
   },
 };
