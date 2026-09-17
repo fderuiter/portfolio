@@ -85,9 +85,12 @@ export function useGarminService() {
     [syncFlashHandler]
   );
 
-  return {
-    allocateMemory,
-    garbageCollect,
-    syncFlashStorage,
-  };
+  return useMemo(
+    () => ({
+      allocateMemory,
+      garbageCollect,
+      syncFlashStorage,
+    }),
+    [allocateMemory, garbageCollect, syncFlashStorage]
+  );
 }

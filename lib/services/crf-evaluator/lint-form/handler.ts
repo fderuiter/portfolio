@@ -1,5 +1,5 @@
 import { LintFormSpec, LintFormInput, LintFormResult } from "./spec";
-import { lintForm } from "@/lib/crf/form-linter";
+import * as astEvaluator from "@/lib/crf/ast-evaluator";
 import { createSuccess, createFailure } from "@/lib/services/service-result";
 
 export class LintFormHandler implements LintFormSpec {
@@ -20,7 +20,7 @@ export class LintFormHandler implements LintFormSpec {
         ...input.form,
         rules: Array.isArray(input.form.rules) ? input.form.rules : [],
       };
-      const diagnostics = lintForm(normalizedForm);
+      const diagnostics = astEvaluator.lintForm(normalizedForm);
       return createSuccess(diagnostics);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);

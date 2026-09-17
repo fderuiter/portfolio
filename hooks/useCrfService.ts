@@ -85,9 +85,12 @@ export function useCrfService() {
     [lintFormHandler]
   );
 
-  return {
-    evaluateFormula,
-    lintFormula,
-    lintForm,
-  };
+  return useMemo(
+    () => ({
+      evaluateFormula,
+      lintFormula,
+      lintForm,
+    }),
+    [evaluateFormula, lintFormula, lintForm]
+  );
 }

@@ -58,8 +58,11 @@ export function useDuckService() {
     [hazardHandler]
   );
 
-  return {
-    dispatchCommand,
-    interactHazard,
-  };
+  return useMemo(
+    () => ({
+      dispatchCommand,
+      interactHazard,
+    }),
+    [dispatchCommand, interactHazard]
+  );
 }
