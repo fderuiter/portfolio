@@ -362,6 +362,7 @@ describe("DX Invariant Doctor Engine", () => {
         path.join(scriptsDir, "generate-openapi.ts"),
         "// generator"
       );
+
       fs.writeFileSync(
         path.join(tempDir, "openapi.json"),
         JSON.stringify({
@@ -371,6 +372,34 @@ describe("DX Invariant Doctor Engine", () => {
       );
 
       expect(checkOpenApiParity(tempDir, false).status).toBe("pass");
+    });
+
+    it("converts Next.js bracket parameter syntax to OpenAPI template syntax for admin routes", () => {
+      const apiDir = path.join(tempDir, "app", "api", "admin", "blog", "[id]");
+      fs.mkdirSync(apiDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(apiDir, "route.ts"),
+        "export async function GET() { return null; }"
+      );
+
+      const scriptsDir = path.join(tempDir, "scripts");
+      fs.mkdirSync(scriptsDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(scriptsDir, "generate-openapi.ts"),
+        "// generator"
+      );
+
+      fs.writeFileSync(
+        path.join(tempDir, "openapi.json"),
+        JSON.stringify({
+          openapi: "3.0.0",
+          paths: { "/api/admin/blog/{id}": {} },
+        })
+      );
+
+      const result = checkOpenApiParity(tempDir, false);
+      expect(result.status).toBe("pass");
+      expect(result.message).toContain("All app/api routes are documented");
     });
   });
 
