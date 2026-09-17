@@ -1,4 +1,22 @@
 import { vi } from "vitest";
+import { File as NodeFile, Blob as NodeBlob } from "node:buffer";
+
+// Ensure standards-compliant File and Blob implementations with arrayBuffer() in JSDOM / Node
+if (
+  typeof globalThis.File === "undefined" ||
+  typeof globalThis.File.prototype.arrayBuffer !== "function"
+) {
+  Object.defineProperty(globalThis, "File", {
+    value: NodeFile,
+    writable: true,
+    configurable: true,
+  });
+  Object.defineProperty(globalThis, "Blob", {
+    value: NodeBlob,
+    writable: true,
+    configurable: true,
+  });
+}
 
 // Mock localStorage if missing or defective in JSDOM / Node 25+
 class MockStorage implements Storage {

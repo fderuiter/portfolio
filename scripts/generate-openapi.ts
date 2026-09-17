@@ -1209,6 +1209,164 @@ export const openApiSpec = {
         },
       },
     },
+    "/api/admin/projects/{slug}/image": {
+      post: {
+        summary: "Upload and link project hero image",
+        description:
+          "Stores a validated media asset and updates the target case study hero image URL for authorized administrators.",
+        parameters: [
+          {
+            name: "slug",
+            in: "path",
+            required: true,
+            schema: { type: "string", minLength: 1, maxLength: 100 },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "multipart/form-data": {
+              schema: {
+                type: "object",
+                properties: {
+                  file: {
+                    type: "string",
+                    format: "binary",
+                    description:
+                      "Image file buffer (PNG, JPEG, WebP, GIF, SVG, AVIF; max 5MB)",
+                  },
+                },
+                required: ["file"],
+              },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: "Image asset uploaded and persisted successfully",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean" },
+                    data: {
+                      type: "object",
+                      properties: {
+                        slug: { type: "string" },
+                        hero_image_url: { type: "string" },
+                        key: { type: "string" },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          400: {
+            description: "Validation or payload error",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+          401: {
+            description: "Authentication required",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+          403: {
+            description: "Administrator access required",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+        },
+      },
+      delete: {
+        summary: "Clear project hero image",
+        description:
+          "Clears the hero image URL associated with a project for authorized administrators.",
+        parameters: [
+          {
+            name: "slug",
+            in: "path",
+            required: true,
+            schema: { type: "string", minLength: 1, maxLength: 100 },
+          },
+        ],
+        responses: {
+          200: {
+            description: "Hero image cleared successfully",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean" },
+                    data: {
+                      type: "object",
+                      properties: {
+                        slug: { type: "string" },
+                        hero_image_url: { type: "null" },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          401: {
+            description: "Authentication required",
+          },
+          403: {
+            description: "Administrator access required",
+          },
+        },
+      },
+    },
+    "/api/media/{key}": {
+      get: {
+        summary: "Retrieve media asset by key",
+        description:
+          "Serves stored media asset binary with strict Content-Type and security headers.",
+        parameters: [
+          {
+            name: "key",
+            in: "path",
+            required: true,
+            schema: { type: "string" },
+          },
+        ],
+        responses: {
+          200: {
+            description: "Media asset content stream",
+            content: {
+              "image/png": { schema: { type: "string", format: "binary" } },
+              "image/jpeg": { schema: { type: "string", format: "binary" } },
+              "image/webp": { schema: { type: "string", format: "binary" } },
+              "image/gif": { schema: { type: "string", format: "binary" } },
+              "image/svg+xml": { schema: { type: "string", format: "binary" } },
+              "image/avif": { schema: { type: "string", format: "binary" } },
+            },
+          },
+          404: {
+            description: "Media asset not found",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ErrorResponse" },
+              },
+            },
+          },
+        },
+      },
+    },
   },
   components: {
     schemas: {

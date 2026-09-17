@@ -24,6 +24,7 @@ model CaseStudy {
   tags                    String   // Comma-separated string or a related Tag model
   commands_json           String?
   playback_json           String?
+  hero_image_url          String?
   created_at              DateTime @default(now())
   updated_at              DateTime @updatedAt
 }

@@ -292,6 +292,7 @@ export class CaseStudyService {
             r.commands_json ?? fallback?.commands_json ?? undefined,
           playback_json:
             r.playback_json ?? fallback?.playback_json ?? undefined,
+          hero_image_url: r.hero_image_url ?? fallback?.hero_image_url ?? null,
           created_at: new Date(r.created_at),
           updated_at: new Date(r.updated_at),
         };
@@ -404,6 +405,7 @@ export class CaseStudyService {
             r.commands_json ?? fallback?.commands_json ?? undefined,
           playback_json:
             r.playback_json ?? fallback?.playback_json ?? undefined,
+          hero_image_url: r.hero_image_url ?? fallback?.hero_image_url ?? null,
           created_at: new Date(r.created_at),
           updated_at: new Date(r.updated_at),
         };
@@ -572,6 +574,73 @@ export class CaseStudyService {
 
     await CaseStudyService.evictCaseStudyCache(slug);
     return created;
+  }
+
+  /**
+   * Updates the hero image asset URL for a case study and evicts cache.
+   */
+  static async updateCaseStudyImage(
+    slug: string,
+    heroImageUrl: string | null
+  ): Promise<CaseStudyData> {
+    const existing = await prisma.caseStudy.findUnique({
+      where: { slug },
+    });
+
+    let updated;
+    if (existing) {
+      updated = await prisma.caseStudy.update({
+        where: { slug },
+        data: { hero_image_url: heroImageUrl },
+      });
+    } else {
+      const fallback = FALLBACK_CASE_STUDIES.find((f) => f.slug === slug);
+      if (!fallback) {
+        throw new Error(`Case study with slug "${slug}" not found`);
+      }
+      updated = await prisma.caseStudy.create({
+        data: {
+          slug: fallback.slug,
+          title: fallback.title,
+          primary_language: fallback.primary_language,
+          editorial_content: fallback.editorial_content,
+          architectural_narrative: fallback.architectural_narrative,
+          tags: fallback.tags,
+          github_url: fallback.github_url,
+          published: true,
+          simulated_telemetry: fallback.simulated_telemetry,
+          hero_image_url: heroImageUrl,
+        },
+      });
+    }
+
+    await CaseStudyService.evictCaseStudyCache(slug);
+
+    const fallback = FALLBACK_CASE_STUDIES.find((f) => f.slug === slug);
+    return {
+      id: updated.id,
+      slug: updated.slug,
+      title: updated.title,
+      primary_language: updated.primary_language,
+      github_url: updated.github_url ?? fallback?.github_url ?? "",
+      external_platform_url: fallback?.external_platform_url,
+      external_platform_type: fallback?.external_platform_type,
+      interactive_url: fallback?.interactive_url,
+      interactive_label: fallback?.interactive_label,
+      benchmarks: fallback?.benchmarks,
+      published: updated.published,
+      simulated_telemetry: updated.simulated_telemetry,
+      tags: updated.tags,
+      editorial_content: updated.editorial_content,
+      architectural_narrative: updated.architectural_narrative,
+      commands_json:
+        updated.commands_json ?? fallback?.commands_json ?? undefined,
+      playback_json:
+        updated.playback_json ?? fallback?.playback_json ?? undefined,
+      hero_image_url: updated.hero_image_url ?? null,
+      created_at: new Date(updated.created_at),
+      updated_at: new Date(updated.updated_at),
+    };
   }
 
   /**

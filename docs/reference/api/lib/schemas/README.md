@@ -35,6 +35,7 @@
 - [FeedbackSubmissionSchema](variables/FeedbackSubmissionSchema.md)
 - [NewsletterResponseSchema](variables/NewsletterResponseSchema.md)
 - [NewsletterSubscriptionSchema](variables/NewsletterSubscriptionSchema.md)
+- [ProjectSlugParamSchema](variables/ProjectSlugParamSchema.md)
 - [RateLimitParamsSchema](variables/RateLimitParamsSchema.md)
 - [ReactionSubmissionSchema](variables/ReactionSubmissionSchema.md)
 - [RESEND\_EVENT\_TYPES](variables/RESEND_EVENT_TYPES.md)

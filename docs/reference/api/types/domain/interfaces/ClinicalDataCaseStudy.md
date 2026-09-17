@@ -62,6 +62,16 @@
 
 ***
 
+### hero\_image\_url?
+
+> `optional` **hero\_image\_url?**: `string` \| `null`
+
+#### Inherited from
+
+[`BaseCaseStudy`](BaseCaseStudy.md).[`hero_image_url`](BaseCaseStudy.md#hero_image_url)
+
+***
+
 ### id
 
 > **id**: `string`

@@ -3,6 +3,8 @@ import { UserButton } from "@clerk/nextjs";
 import { PageLayout } from "@/components/PageLayout";
 import { getAdminAuthSession } from "@/lib/auth/admin";
 import { AdminAccessDenied } from "@/components/admin/AdminAccessDenied";
+import { ProjectImageUploader } from "@/components/admin/ProjectImageUploader";
+import { CaseStudyService } from "@/lib/services/case-study-service";
 import {
   IconDashboard,
   IconFileText,
@@ -37,6 +39,12 @@ export default async function AdminDashboardPage() {
   }
 
   const { userId, primaryEmail, displayName } = session;
+  const caseStudies = await CaseStudyService.getAllPublishedCaseStudies();
+  const projectOptions = caseStudies.map((cs) => ({
+    slug: cs.slug,
+    title: cs.title,
+    hero_image_url: cs.hero_image_url,
+  }));
 
   return (
     <PageLayout variant="standard">
@@ -70,6 +78,9 @@ export default async function AdminDashboardPage() {
             />
           </div>
         </header>
+
+        {/* Project Image Uploader Console */}
+        <ProjectImageUploader initialProjects={projectOptions} />
 
         {/* Console Hub Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
