@@ -1548,7 +1548,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({
   if (!isMounted) {
     return (
       <div
-        className="relative w-full aspect-[15/9] min-h-[240px] h-[240px] bg-neutral-950/80 border border-neutral-900 rounded-2xl flex flex-col items-center justify-center font-mono select-none overflow-hidden my-6"
+        className="relative w-full aspect-[15/9] min-h-[240px] max-h-[100vh] max-h-[100dvh] h-auto bg-neutral-950/80 border border-neutral-900 rounded-2xl flex flex-col items-center justify-center font-mono select-none overflow-hidden my-6"
         data-testid="retro-labyrinth-skeleton"
       >
         <div className="absolute top-3 left-4 right-4 flex justify-between items-center text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
@@ -1743,8 +1743,8 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({
         data-keyboard-boundary="true"
         className={`arcade-labyrinth-playfield relative w-full ${
           isFullscreen
-            ? "fixed inset-0 z-50 w-full h-[100dvh] max-h-[100dvh] max-w-none rounded-none border-none bg-black flex flex-col items-center justify-between p-1.5 sm:p-4 select-none touch-none overflow-hidden"
-            : "h-auto"
+            ? "fixed inset-0 z-50 w-full h-[100vh] h-[100dvh] max-h-[100vh] max-h-[100dvh] max-w-none rounded-none border-none bg-black flex flex-col items-center justify-between p-1.5 sm:p-4 select-none touch-none overflow-hidden"
+            : "h-auto max-h-[100vh] max-h-[100dvh]"
         } bg-neutral-950/90 border rounded-2xl flex flex-col items-center justify-between p-2.5 overflow-hidden outline-none transition-all duration-300 ${
           isFocused
             ? "border-brand-cyan ring-2 ring-brand-cyan/10 shadow-[0_0_20px_rgba(34,211,238,0.1)] scale-[1.005]"
@@ -1840,10 +1840,10 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({
         <div
           className={`arcade-labyrinth-canvas relative ${
             isFullscreen
-              ? "w-full flex-1 max-h-[var(--layout-viewport-budget,calc(100dvh-var(--header-height,80px)-var(--footer-height,48px)))] max-h-[calc(100dvh-var(--header-height,80px)-var(--footer-height,48px))] aspect-[240/144] min-h-0"
+              ? "w-full flex-1 max-h-[var(--layout-viewport-budget,calc(100vh-var(--header-height,80px)-var(--footer-height,48px)))] max-h-[var(--layout-viewport-budget,calc(100dvh-var(--header-height,80px)-var(--footer-height,48px)))] max-h-[calc(100vh-var(--header-height,80px)-var(--footer-height,48px))] max-h-[calc(100dvh-var(--header-height,80px)-var(--footer-height,48px))] aspect-[240/144] min-h-0"
               : isExpanded
-                ? "w-full max-w-[360px] aspect-[240/144] h-auto"
-                : "w-full max-w-[240px] aspect-[240/144] h-auto"
+                ? "w-full max-w-[360px] aspect-[240/144] h-auto max-h-[100vh] max-h-[100dvh]"
+                : "w-full max-w-[240px] aspect-[240/144] h-auto max-h-[100vh] max-h-[100dvh]"
           } flex items-center justify-center transition-all duration-300 my-auto`}
           style={
             crtCalibration.curvature > 0.05
