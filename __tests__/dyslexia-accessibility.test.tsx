@@ -12,6 +12,7 @@ import {
 import { useFontPreference } from "@/hooks/useFontPreference";
 import { SkipToContent } from "@/components/SkipToContent";
 import { Footer } from "@/components/Footer";
+import { Navbar } from "@/components/Navbar";
 import { FALLBACK_CASE_STUDIES } from "@/lib/case-studies-data";
 import { ROUTE_METADATA_CONFIGS } from "@/lib/seo-metadata";
 import {
@@ -48,6 +49,25 @@ vi.mock("@/components/providers/PersonaProvider", () => ({
   usePersona: () => ({
     persona: "technical",
     setPersona: vi.fn(),
+  }),
+}));
+
+// Mock SearchProvider
+vi.mock("@/components/providers/SearchProvider", () => ({
+  useSearch: () => ({
+    isOpen: false,
+    openSearch: vi.fn(),
+    closeSearch: vi.fn(),
+  }),
+}));
+
+// Mock next/navigation
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/",
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
   }),
 }));
 
@@ -172,8 +192,47 @@ describe("Wave 2: Cognitive Accessibility & Dyslexia Typography (#738, #739, #74
       );
       expect(mockAnnounce).toHaveBeenCalledWith(
         expect.stringContaining("Dyslexia font mode enabled"),
-        "assertive"
+        "polite"
       );
+    });
+  });
+
+  describe("Navbar Dyslexia Mode Toggle Controls ARIA Parity", () => {
+    it("exports valid aria-pressed attributes across desktop, dropdown, and mobile toggles", () => {
+      render(<Navbar />);
+
+      const desktopToggle = screen.getByRole("button", {
+        name: /Enable OpenDyslexic font mode/i,
+      });
+      expect(desktopToggle.getAttribute("aria-pressed")).toBe("false");
+
+      // Preferences dropdown toggle
+      const prefToggles = screen.getAllByRole("button", {
+        name: /Enable OpenDyslexic font mode/i,
+      });
+      expect(prefToggles.length).toBeGreaterThanOrEqual(1);
+      prefToggles.forEach((btn) => {
+        expect(btn.getAttribute("aria-pressed")).toBe("false");
+      });
+
+      // Toggle dyslexia mode via desktop button
+      fireEvent.click(desktopToggle);
+
+      expect(document.documentElement.getAttribute("data-font-mode")).toBe(
+        "opendyslexic"
+      );
+      expect(mockAnnounce).toHaveBeenCalledWith(
+        expect.stringContaining("Dyslexia font mode enabled"),
+        "polite"
+      );
+
+      const activeToggles = screen.getAllByRole("button", {
+        name: /Disable OpenDyslexic font mode/i,
+      });
+      expect(activeToggles.length).toBeGreaterThanOrEqual(1);
+      activeToggles.forEach((btn) => {
+        expect(btn.getAttribute("aria-pressed")).toBe("true");
+      });
     });
   });
 

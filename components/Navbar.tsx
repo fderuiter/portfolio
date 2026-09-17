@@ -155,7 +155,7 @@ export const Navbar: React.FC = () => {
       isDyslexic
         ? "Dyslexia font mode disabled. Using Atkinson Hyperlegible and Lexend."
         : "Dyslexia font mode enabled. Using OpenDyslexic typeface.",
-      "assertive"
+      "polite"
     );
   };
 
@@ -991,6 +991,12 @@ export const Navbar: React.FC = () => {
                       <button
                         type="button"
                         onClick={handleToggleDyslexia}
+                        aria-pressed={isDyslexic}
+                        aria-label={
+                          isDyslexic
+                            ? "Disable OpenDyslexic font mode"
+                            : "Enable OpenDyslexic font mode"
+                        }
                         className={cn(
                           "min-h-8 px-2.5 py-1 rounded-lg border text-[10px] font-mono font-bold transition-all cursor-pointer",
                           isDyslexic
@@ -1326,6 +1332,12 @@ export const Navbar: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleToggleDyslexia}
+                  aria-pressed={isDyslexic}
+                  aria-label={
+                    isDyslexic
+                      ? "Disable OpenDyslexic font mode"
+                      : "Enable OpenDyslexic font mode"
+                  }
                   className={cn(
                     "min-h-11 px-4 py-2 rounded-xl text-xs font-mono font-bold border transition-all cursor-pointer flex items-center justify-center",
                     isDyslexic

@@ -29,7 +29,10 @@ export const VisitMatrixEditorSkeleton: React.FC = () => {
         </div>
         {/* Table body mock */}
         {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="grid grid-cols-4 gap-4 p-4 bg-zinc-900/30 rounded-xl border border-zinc-800/50">
+          <div
+            key={i}
+            className="grid grid-cols-4 gap-4 p-4 bg-zinc-900/30 rounded-xl border border-zinc-800/50"
+          >
             <div className="h-4 bg-zinc-800/80 rounded-md w-2/3" />
             <div className="h-4 bg-zinc-800/60 rounded-md w-3/4" />
             <div className="h-4 bg-zinc-800/50 rounded-md w-1/2" />
@@ -60,7 +63,7 @@ export const RuleGraphStudioSkeleton: React.FC = () => {
       </div>
 
       {/* Visual DAG placeholder */}
-      <div className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-4 shadow-xl h-64 flex flex-col justify-between">
+      <div className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-4 shadow-xl min-h-64 h-auto flex flex-col justify-between">
         <div className="flex justify-between items-center">
           <div className="h-4 bg-zinc-800 rounded-md w-64" />
           <div className="h-3 bg-zinc-800 rounded-md w-32" />
@@ -76,7 +79,7 @@ export const RuleGraphStudioSkeleton: React.FC = () => {
 
       {/* Two column layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-4 h-64">
+        <div className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-4 min-h-64 h-auto">
           <div className="h-4 bg-zinc-800 rounded-md w-40" />
           <div className="space-y-2">
             <div className="h-10 bg-zinc-800/60 rounded-xl" />
@@ -84,7 +87,7 @@ export const RuleGraphStudioSkeleton: React.FC = () => {
             <div className="h-10 bg-zinc-800/60 rounded-xl" />
           </div>
         </div>
-        <div className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-4 h-64">
+        <div className="p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 space-y-4 min-h-64 h-auto">
           <div className="h-4 bg-zinc-800 rounded-md w-40" />
           <div className="space-y-2">
             <div className="h-20 bg-zinc-800/60 rounded-xl" />
@@ -174,13 +177,16 @@ export const WorkflowWizardModalSkeleton: React.FC = () => {
         {/* Stage Navigation Pills */}
         <div className="px-6 py-3 border-b border-zinc-800/60 bg-zinc-950 grid grid-cols-5 gap-2">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="flex items-center gap-2 px-3 py-2 rounded-xl border border-zinc-800/60 bg-zinc-900/40 h-11" />
+            <div
+              key={i}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl border border-zinc-800/60 bg-zinc-900/40 h-11"
+            />
           ))}
         </div>
 
         {/* Inner Content Area */}
         <div className="flex-1 p-6 space-y-6 overflow-y-auto">
-          <div className="p-6 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 space-y-4 h-64">
+          <div className="p-6 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 space-y-4 min-h-64 h-auto">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-zinc-800 shrink-0" />
               <div className="space-y-1.5">
@@ -211,7 +217,10 @@ export const WorkflowWizardModalSkeleton: React.FC = () => {
 
 export const CRFStudioSkeleton: React.FC = () => {
   return (
-    <div className="w-full h-[800px] min-h-[600px] bg-zinc-950 rounded-3xl border border-zinc-800 overflow-hidden flex flex-col p-4 select-none animate-pulse" data-testid="crf-studio-skeleton">
+    <div
+      className="w-full h-[800px] min-h-[600px] bg-zinc-950 rounded-3xl border border-zinc-800 overflow-hidden flex flex-col p-4 select-none animate-pulse"
+      data-testid="crf-studio-skeleton"
+    >
       {/* Studio Header Skeleton */}
       <div className="flex items-center justify-between pb-4 border-b border-zinc-800/80">
         <div className="flex items-center gap-3">
