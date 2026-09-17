@@ -2037,8 +2037,8 @@ export const LaserLoon: React.FC = () => {
           tabIndex={0}
           className={
             isFullscreen
-              ? "max-h-[var(--layout-viewport-budget,calc(100dvh-var(--header-height,80px)-var(--footer-height,48px)))] max-h-[calc(100dvh-var(--header-height,80px)-var(--footer-height,48px))] max-w-full aspect-[768/420] object-contain block cursor-crosshair touch-none my-auto"
-              : "w-full h-auto aspect-[768/420] block cursor-crosshair touch-none"
+              ? "max-h-[var(--layout-viewport-budget,calc(100dvh-var(--header-height,80px)-var(--footer-height,48px)))] max-h-[calc(100dvh-var(--header-height,80px)-var(--footer-height,48px))] max-w-full aspect-[768/420] object-contain block cursor-crosshair touch-none my-auto focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              : "w-full h-auto aspect-[768/420] block cursor-crosshair touch-none focus:outline-none focus:ring-2 focus:ring-red-500/50"
           }
         />
 
@@ -2100,6 +2100,197 @@ export const LaserLoon: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Off-screen Accessible DOM Fallback Subtree */}
+        <div className="sr-only" aria-label="Laser Loon Accessible Subtree">
+          <fieldset>
+            <legend>Laser Loon Game State and Controls</legend>
+
+            <div role="group" aria-label="Laser Loon Telemetry and Status">
+              <output htmlFor="laser-loon-score">Score: {score}</output>
+              <output htmlFor="laser-loon-highscore">
+                High Score: {effectiveHighScore}
+              </output>
+              <output htmlFor="laser-loon-mode">Mode: {mode}</output>
+              <output htmlFor="laser-loon-status">
+                Game Status: {gameState}
+              </output>
+              <output htmlFor="laser-loon-act">
+                Act: {currentActNum} of 4
+              </output>
+              <output htmlFor="laser-loon-combo">Combo: {combo}x</output>
+              <output htmlFor="laser-loon-multiplier">
+                Multiplier: {multiplier}x
+              </output>
+              <output htmlFor="laser-loon-timer">
+                Time Remaining: {timeLeft}s
+              </output>
+              <output htmlFor="laser-loon-ultimate">
+                Ultimate Tremolo: {ultimateMeter}%
+              </output>
+              <output htmlFor="laser-loon-weapon">
+                Selected Optics: {WEAPONS[laserType]?.name || laserType}
+              </output>
+              {bossActive && (
+                <output htmlFor="laser-loon-boss">
+                  Boss {bossName}: {Math.max(0, bossHp)} / {bossMaxHp} HP
+                </output>
+              )}
+            </div>
+
+            <div role="group" aria-label="Laser Loon Interactive Controls">
+              <button
+                type="button"
+                onClick={startGame}
+                disabled={gameState === "playing"}
+              >
+                Start Game
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setMode("campaign")}
+                aria-pressed={mode === "campaign"}
+              >
+                Campaign Mode
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode("arcade")}
+                aria-pressed={mode === "arcade"}
+              >
+                Arcade Mode
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode("sandbox")}
+                aria-pressed={mode === "sandbox"}
+              >
+                Sandbox Mode
+              </button>
+
+              <button
+                type="button"
+                onClick={() => selectLaserType("ruby-laser")}
+                aria-pressed={laserType === "ruby-laser"}
+              >
+                Optics: Ruby Laser
+              </button>
+              <button
+                type="button"
+                onClick={() => selectLaserType("cyan-pulse")}
+                aria-pressed={laserType === "cyan-pulse"}
+              >
+                Optics: Cyan Pulse
+              </button>
+              <button
+                type="button"
+                onClick={() => selectLaserType("aurora-wave")}
+                aria-pressed={laserType === "aurora-wave"}
+              >
+                Optics: Aurora Wave
+              </button>
+              <button
+                type="button"
+                onClick={() => selectLaserType("ice-cannon")}
+                aria-pressed={laserType === "ice-cannon"}
+              >
+                Optics: Ice Cannon
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  isFiringRef.current = true;
+                  fireWeapon();
+                  announce("Laser weapon fired.", "polite");
+                }}
+              >
+                Fire Weapon
+              </button>
+
+              <button
+                type="button"
+                onClick={fireUltimateTremolo}
+                disabled={ultimateMeter < 100 && mode !== "sandbox"}
+              >
+                Trigger Loon Tremolo
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const nextY = Math.max(40, loonPosRef.current.targetY - 25);
+                  loonPosRef.current.targetY = nextY;
+                  announce(
+                    `Moved Loon Up to Y position ${Math.round(nextY)}`,
+                    "polite"
+                  );
+                }}
+              >
+                Move Loon Up
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const nextY = Math.min(340, loonPosRef.current.targetY + 25);
+                  loonPosRef.current.targetY = nextY;
+                  announce(
+                    `Moved Loon Down to Y position ${Math.round(nextY)}`,
+                    "polite"
+                  );
+                }}
+              >
+                Move Loon Down
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const nextX = Math.max(40, loonPosRef.current.targetX - 25);
+                  loonPosRef.current.targetX = nextX;
+                  announce(
+                    `Moved Loon Left to X position ${Math.round(nextX)}`,
+                    "polite"
+                  );
+                }}
+              >
+                Move Loon Left
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const nextX = Math.min(728, loonPosRef.current.targetX + 25);
+                  loonPosRef.current.targetX = nextX;
+                  announce(
+                    `Moved Loon Right to X position ${Math.round(nextX)}`,
+                    "polite"
+                  );
+                }}
+              >
+                Move Loon Right
+              </button>
+
+              {mode === "sandbox" && (
+                <label htmlFor="laser-loon-gravity-input">
+                  Sandbox Gravity Setting
+                  <input
+                    id="laser-loon-gravity-input"
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={gravity}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value);
+                      setGravity(val);
+                      announce(`Sandbox gravity adjusted to ${val}`, "polite");
+                    }}
+                  />
+                </label>
+              )}
+            </div>
+          </fieldset>
+        </div>
 
         {/* Start Overlay Screen */}
         {gameState === "idle" && (

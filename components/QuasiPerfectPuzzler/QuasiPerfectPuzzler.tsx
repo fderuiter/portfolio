@@ -9,6 +9,7 @@ import React, {
 } from "react";
 import { PanInfo } from "framer-motion";
 import { useAudio } from "@/components/providers/AudioProvider";
+import { useAnnouncer } from "@/hooks/useAnnouncer";
 import { puzzleLevels } from "@/lib/quasi-perfect/levels";
 import { tacticDefs } from "@/lib/quasi-perfect/tactics";
 import {
@@ -40,7 +41,6 @@ import { FieldManualButton } from "@/components/FieldManualButton";
 import { FullscreenButton } from "@/components/arcade/FullscreenButton";
 import { DynamicTabletOrientationHint as TabletOrientationHint } from "@/components/arcade/DynamicTabletOrientationHint";
 import { useGameFullscreen as useFullscreen } from "@/components/arcade/CabinetFullscreen";
-import { useAnnouncer } from "@/hooks/useAnnouncer";
 import {
   IconBulb,
   IconCode,
@@ -999,6 +999,98 @@ export const QuasiPerfectPuzzler: React.FC = () => {
               isProofComplete={levelSolved || activeSubgoal.isCompleted}
               isTacticActive={selectedTacticIndex !== null}
             />
+          </div>
+
+          {/* Off-screen Accessible DOM Fallback Subtree */}
+          <div
+            className="sr-only"
+            aria-label="Quasi-Puzzler Accessible Subtree"
+          >
+            <fieldset>
+              <legend>
+                Quasi-Puzzler Lean Proof Assistant State and Controls
+              </legend>
+
+              <div role="group" aria-label="Proof Assistant Status and Context">
+                <output htmlFor="quasi-level">
+                  Level: {currentLevel.title}
+                </output>
+                <output htmlFor="quasi-goal">
+                  Active Goal: {activeSubgoal.label}
+                </output>
+                <output htmlFor="quasi-ram">
+                  RAM Memory: {currentRam.toFixed(1)} GB
+                </output>
+                <output htmlFor="quasi-status">
+                  Proof Status:{" "}
+                  {levelSolved
+                    ? "Solved"
+                    : activeSubgoal.isCompleted
+                      ? "Subgoal Closed"
+                      : "In Progress"}
+                </output>
+                <output htmlFor="quasi-steps">
+                  Steps Applied: {proofSteps.length}
+                </output>
+              </div>
+
+              <div
+                role="group"
+                aria-label="Interactive Tactics and Proof Actions"
+              >
+                {currentLevel.availableTactics.map((tacticItem, idx) => {
+                  const id =
+                    typeof tacticItem === "string" ? tacticItem : tacticItem.id;
+                  const def = tacticDefs[id];
+                  const label = def?.name || id;
+                  return (
+                    <button
+                      key={id + "-" + idx}
+                      type="button"
+                      onClick={() => {
+                        setSelectedTacticIndex(idx);
+                        announce(`Selected tactic: ${label}`, "polite");
+                      }}
+                      aria-pressed={selectedTacticIndex === idx}
+                    >
+                      Apply Tactic: {label}
+                    </button>
+                  );
+                })}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleUndo();
+                    announce("Reverted last tactic step.", "polite");
+                  }}
+                  disabled={history.length === 0}
+                >
+                  Undo Tactic Step
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleRedo();
+                    announce("Restored tactic step.", "polite");
+                  }}
+                  disabled={redoHistory.length === 0}
+                >
+                  Redo Tactic Step
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleResetLevel();
+                    announce("Reset current proof level.", "polite");
+                  }}
+                >
+                  Reset Level
+                </button>
+              </div>
+            </fieldset>
           </div>
 
           {/* Tactic Hand */}
