@@ -24,6 +24,7 @@
 - [BlogDraftIdParamsSchema](variables/BlogDraftIdParamsSchema.md)
 - [BlogDraftPaginationSchema](variables/BlogDraftPaginationSchema.md)
 - [BlogDraftUpdateSchema](variables/BlogDraftUpdateSchema.md)
+- [BlogPostReactionSubmissionSchema](variables/BlogPostReactionSubmissionSchema.md)
 - [CaseStudyListResponseSchema](variables/CaseStudyListResponseSchema.md)
 - [CaseStudySubmissionSchema](variables/CaseStudySubmissionSchema.md)
 - [CaseStudySummarySchema](variables/CaseStudySummarySchema.md)

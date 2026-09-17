@@ -90,6 +90,19 @@ model CaseStudyReaction {
   @@index([connectionHash])
 }
 
+model BlogPostReaction {
+  id             String   @id @default(cuid())
+  blogPostSlug   String
+  reactionType   String
+  connectionHash String
+  createdAt      DateTime @default(now())
+
+  @@unique([blogPostSlug, reactionType, connectionHash])
+  @@index([blogPostSlug])
+  @@index([blogPostSlug, reactionType])
+  @@index([connectionHash])
+}
+
 enum SuppressionReason {
   BOUNCE
   COMPLAINT

@@ -82,6 +82,25 @@ True if the Redis cache keys were successfully deleted; false if Redis
 
 ***
 
+### flushBufferedReactionsToDatabase()
+
+> `static` **flushBufferedReactionsToDatabase**(`batchSize?`): `Promise`\<\{ `inserted`: `number`; `processed`: `number`; \}\>
+
+Flushes buffered blog post reactions from Upstash Redis to Neon Postgres in batches.
+Executed during scheduled maintenance.
+
+#### Parameters
+
+##### batchSize?
+
+`number` = `500`
+
+#### Returns
+
+`Promise`\<\{ `inserted`: `number`; `processed`: `number`; \}\>
+
+***
+
 ### getAllPublishedBlogPosts()
 
 > `static` **getAllPublishedBlogPosts**(): `Promise`\<[`BlogPostData`](../../../fallback-blog-posts/interfaces/BlogPostData.md)[]\>
@@ -179,6 +198,54 @@ collection. This intentionally never consults the public fallback data.
 #### Returns
 
 `Promise`\<\{ `drafts`: `object`[]; `total`: `number`; \}\>
+
+***
+
+### getReactions()
+
+> `static` **getReactions**(`slug`, `connectionHash`): `Promise`\<\{ `blogPostSlug`: `string`; `counts`: \{\[`key`: `string`\]: `number`; \}; `success`: `boolean`; `userReactions`: `string`[]; \}\>
+
+Gets aggregated reactions for a blog post.
+Employs Two-Tier Compute Shield:
+Reads cached base counts (3600s TTL) and merges uncommitted Redis write-buffer increments,
+completely avoiding database queries during active browsing.
+
+#### Parameters
+
+##### slug
+
+`string`
+
+##### connectionHash
+
+`string`
+
+#### Returns
+
+`Promise`\<\{ `blogPostSlug`: `string`; `counts`: \{\[`key`: `string`\]: `number`; \}; `success`: `boolean`; `userReactions`: `string`[]; \}\>
+
+***
+
+### submitReaction()
+
+> `static` **submitReaction**(`input`, `connectionHash`): `Promise`\<\{ `counts?`: `Record`\<`string`, `number`\>; `duplicate?`: `boolean`; `message?`: `string`; `notFound?`: `boolean`; `reactionType?`: `string`; `success`: `boolean`; `userReactions?`: `string`[]; \}\>
+
+Submits a reaction for a published blog post.
+Buffers reaction increments via HINCRBY in Upstash Redis without waking Neon Postgres.
+
+#### Parameters
+
+##### input
+
+[`BlogPostReactionSubmissionInput`](../interfaces/BlogPostReactionSubmissionInput.md)
+
+##### connectionHash
+
+`string`
+
+#### Returns
+
+`Promise`\<\{ `counts?`: `Record`\<`string`, `number`\>; `duplicate?`: `boolean`; `message?`: `string`; `notFound?`: `boolean`; `reactionType?`: `string`; `success`: `boolean`; `userReactions?`: `string`[]; \}\>
 
 ***
 

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-const path = require("path");
 
 const GENERATED_ARTIFACTS = new Set([
   "app/icon.svg",
