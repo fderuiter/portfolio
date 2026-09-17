@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { CopyButton } from "@/components/CopyButton";
+import { CopyButton } from "@/components/ui/CopyButton";
 import {
   IconShieldCheck,
   IconCheck,
@@ -16,7 +16,8 @@ interface InvariantItem {
   id: number;
   code: string;
   name: string;
-  category: "Architecture" | "Testing" | "Accessibility" | "Governance" | "Reliability";
+  category:
+    "Architecture" | "Testing" | "Accessibility" | "Governance" | "Reliability";
   description: string;
   verificationCmd: string;
   status: "Enforced" | "Verified";
@@ -28,8 +29,10 @@ const INVARIANTS: InvariantItem[] = [
     code: "INV-01",
     name: "Dynamic Path Resolution & Storage Mocking",
     category: "Architecture",
-    description: "Workspace paths resolve dynamically via process.cwd(). Browser storage in JSDOM / Node 25+ environments is safely mocked and isolated per test suite.",
-    verificationCmd: "npm run test -- __tests__/defect-remediation-regression.test.ts",
+    description:
+      "Workspace paths resolve dynamically via process.cwd(). Browser storage in JSDOM / Node 25+ environments is safely mocked and isolated per test suite.",
+    verificationCmd:
+      "npm run test -- __tests__/defect-remediation-regression.test.ts",
     status: "Verified",
   },
   {
@@ -37,7 +40,8 @@ const INVARIANTS: InvariantItem[] = [
     code: "INV-02",
     name: "Unified Root Layout & Header Hierarchy",
     category: "Architecture",
-    description: "app/layout.tsx renders the single global Navbar, AudioProvider, and SearchProvider. Child routes never instantiate duplicate navigation bars.",
+    description:
+      "app/layout.tsx renders the single global Navbar, AudioProvider, and SearchProvider. Child routes never instantiate duplicate navigation bars.",
     verificationCmd: "npm run check",
     status: "Enforced",
   },
@@ -46,7 +50,8 @@ const INVARIANTS: InvariantItem[] = [
     code: "INV-03",
     name: "Universal Route Indexing & Discovery",
     category: "Governance",
-    description: "Every first-class route and interactive tool is indexed in CommandPalette.tsx under staticNavs with rich master-detail preview context and metadata.",
+    description:
+      "Every first-class route and interactive tool is indexed in CommandPalette.tsx under staticNavs with rich master-detail preview context and metadata.",
     verificationCmd: "npm run verify",
     status: "Verified",
   },
@@ -55,7 +60,8 @@ const INVARIANTS: InvariantItem[] = [
     code: "INV-04",
     name: "Hydration & External Store Determinism",
     category: "Reliability",
-    description: "Client-only state and browser storage utilize useSyncExternalStore. Non-deterministic timestamps include suppressHydrationWarning attributes.",
+    description:
+      "Client-only state and browser storage utilize useSyncExternalStore. Non-deterministic timestamps include suppressHydrationWarning attributes.",
     verificationCmd: "npm run check",
     status: "Enforced",
   },
@@ -64,7 +70,8 @@ const INVARIANTS: InvariantItem[] = [
     code: "INV-05",
     name: "Multi-Agent Git & Artifact Hygiene",
     category: "Governance",
-    description: "Intermediate agent scratch logs, transient benchmarks, and temporary fixtures are excluded from Git history via strict .gitignore patterns.",
+    description:
+      "Intermediate agent scratch logs, transient benchmarks, and temporary fixtures are excluded from Git history via strict .gitignore patterns.",
     verificationCmd: "npm run quality",
     status: "Verified",
   },
@@ -73,7 +80,8 @@ const INVARIANTS: InvariantItem[] = [
     code: "INV-06",
     name: "Developer Suite (DX) Zero-Warning Gate",
     category: "Testing",
-    description: "Automated verification suite running TypeScript strict compiler, ESLint, TypeDoc compilation, and all 12 architectural health invariants.",
+    description:
+      "Automated verification suite running TypeScript strict compiler, ESLint, TypeDoc compilation, and all 12 architectural health invariants.",
     verificationCmd: "npm run verify",
     status: "Verified",
   },
@@ -82,7 +90,8 @@ const INVARIANTS: InvariantItem[] = [
     code: "INV-07",
     name: "Headless Canvas 2D & Animation Lifecycle",
     category: "Testing",
-    description: "Headless JSDOM context mocks provide quadraticCurveTo, bezierCurveTo, and roundRect methods. Active requestAnimationFrames cancel on unmount.",
+    description:
+      "Headless JSDOM context mocks provide quadraticCurveTo, bezierCurveTo, and roundRect methods. Active requestAnimationFrames cancel on unmount.",
     verificationCmd: "npm run test",
     status: "Verified",
   },
@@ -91,7 +100,8 @@ const INVARIANTS: InvariantItem[] = [
     code: "INV-08",
     name: "JSDoc & TypeDoc Markdown Invariant",
     category: "Governance",
-    description: "Exported symbols maintain markdownlint-compliant docstrings (MD029/MD033 compliant) for seamless TypeDoc-to-markdown automated compilation.",
+    description:
+      "Exported symbols maintain markdownlint-compliant docstrings (MD029/MD033 compliant) for seamless TypeDoc-to-markdown automated compilation.",
     verificationCmd: "npm run lint:docs",
     status: "Verified",
   },
@@ -100,7 +110,8 @@ const INVARIANTS: InvariantItem[] = [
     code: "INV-09",
     name: "OpenAPI Specification Zero-Drift Gate",
     category: "Governance",
-    description: "All API routes enforce declarative Zod validation schemas in lib/schemas.ts with 100% endpoint synchronization in openapi.json.",
+    description:
+      "All API routes enforce declarative Zod validation schemas in lib/schemas.ts with 100% endpoint synchronization in openapi.json.",
     verificationCmd: "npm run check-docs-drift",
     status: "Verified",
   },
@@ -109,7 +120,8 @@ const INVARIANTS: InvariantItem[] = [
     code: "INV-10",
     name: "Continuous Accessibility & WCAG 2.1 AA",
     category: "Accessibility",
-    description: "100% axe-core compliance across all public pages, modals, and drawers with SkipToContent bypass, focus trapping, and screen reader live announcer.",
+    description:
+      "100% axe-core compliance across all public pages, modals, and drawers with SkipToContent bypass, focus trapping, and screen reader live announcer.",
     verificationCmd: "npm run probe:synthetic",
     status: "Verified",
   },
@@ -118,8 +130,10 @@ const INVARIANTS: InvariantItem[] = [
     code: "INV-11",
     name: "Defect Remediation & Root-Cause Protocol",
     category: "Reliability",
-    description: "Bug fixes across core computational engines adhere to the strict Red-Green Remediation Protocol with dedicated test coverage in defect regression suites.",
-    verificationCmd: "npm run test -- __tests__/defect-remediation-regression.test.ts",
+    description:
+      "Bug fixes across core computational engines adhere to the strict Red-Green Remediation Protocol with dedicated test coverage in defect regression suites.",
+    verificationCmd:
+      "npm run test -- __tests__/defect-remediation-regression.test.ts",
     status: "Verified",
   },
   {
@@ -127,13 +141,21 @@ const INVARIANTS: InvariantItem[] = [
     code: "INV-12",
     name: "Property Fuzzing Gates",
     category: "Reliability",
-    description: "Deterministic AST calculation engines pass fast-check property-based fuzz testing gates.",
+    description:
+      "Deterministic AST calculation engines pass fast-check property-based fuzz testing gates.",
     verificationCmd: "npm run test:fuzz",
     status: "Verified",
   },
 ];
 
-const CATEGORIES = ["All", "Architecture", "Testing", "Accessibility", "Governance", "Reliability"] as const;
+const CATEGORIES = [
+  "All",
+  "Architecture",
+  "Testing",
+  "Accessibility",
+  "Governance",
+  "Reliability",
+] as const;
 
 export const InvariantsMatrix: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
@@ -142,7 +164,8 @@ export const InvariantsMatrix: React.FC = () => {
   const { playHover, playSuccess } = useAudio();
 
   const filteredInvariants = INVARIANTS.filter((inv) => {
-    const matchesCategory = selectedCategory === "All" || inv.category === selectedCategory;
+    const matchesCategory =
+      selectedCategory === "All" || inv.category === selectedCategory;
     const matchesQuery =
       inv.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       inv.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -166,7 +189,8 @@ export const InvariantsMatrix: React.FC = () => {
               </span>
             </h3>
             <p className="text-xs text-zinc-400 font-sans mt-0.5">
-              Strict engineering invariants enforced across pre-commit hooks, DX invariant suites, and automated CI pipelines.
+              Strict engineering invariants enforced across pre-commit hooks, DX
+              invariant suites, and automated CI pipelines.
             </p>
           </div>
         </div>
@@ -239,7 +263,9 @@ export const InvariantsMatrix: React.FC = () => {
             <div className="flex items-center justify-between pt-2.5 border-t border-zinc-900 gap-2">
               <div className="flex items-center gap-1.5 font-mono text-[11px] text-zinc-500 truncate min-w-0">
                 <IconTerminal className="w-3 h-3 text-zinc-600 flex-shrink-0" />
-                <code className="truncate text-zinc-400">{inv.verificationCmd}</code>
+                <code className="truncate text-zinc-400">
+                  {inv.verificationCmd}
+                </code>
               </div>
 
               <CopyButton

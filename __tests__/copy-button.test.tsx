@@ -1,7 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import React from "react";
-import { render, screen, fireEvent, act, cleanup } from "@testing-library/react";
-import { CopyButton } from "@/components/CopyButton";
+import {
+  render,
+  screen,
+  fireEvent,
+  act,
+  cleanup,
+} from "@testing-library/react";
+import { CopyButton } from "@/components/ui/CopyButton";
 import { A11yProvider } from "@/components/providers/A11yProvider";
 
 describe("CopyButton Component Primitive", () => {
@@ -31,10 +37,16 @@ describe("CopyButton Component Primitive", () => {
     vi.restoreAllMocks();
 
     if (navigator.clipboard && originalWriteText) {
-      navigator.clipboard.writeText = originalWriteText as (data: string) => Promise<void>;
+      navigator.clipboard.writeText = originalWriteText as (
+        data: string
+      ) => Promise<void>;
     }
     if (originalExecCommand) {
-      document.execCommand = originalExecCommand as (command: string, showUI?: boolean, value?: string) => boolean;
+      document.execCommand = originalExecCommand as (
+        command: string,
+        showUI?: boolean,
+        value?: string
+      ) => boolean;
     }
   });
 
@@ -94,7 +106,9 @@ describe("CopyButton Component Primitive", () => {
     });
 
     expect(textProvider).toHaveBeenCalled();
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith("dynamic-content-123");
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+      "dynamic-content-123"
+    );
   });
 
   it("executes custom onCopy and onCopySuccess callbacks", async () => {
@@ -142,7 +156,9 @@ describe("CopyButton Component Primitive", () => {
   });
 
   it("falls back to document.execCommand when navigator.clipboard fails", async () => {
-    navigator.clipboard.writeText = vi.fn().mockRejectedValue(new Error("Permissions denied"));
+    navigator.clipboard.writeText = vi
+      .fn()
+      .mockRejectedValue(new Error("Permissions denied"));
 
     render(
       <A11yProvider>
@@ -161,7 +177,9 @@ describe("CopyButton Component Primitive", () => {
   });
 
   it("handles errors gracefully and invokes onCopyError when copy fails completely", async () => {
-    navigator.clipboard.writeText = vi.fn().mockRejectedValue(new Error("Clipboard blocked"));
+    navigator.clipboard.writeText = vi
+      .fn()
+      .mockRejectedValue(new Error("Clipboard blocked"));
     document.execCommand = vi.fn().mockImplementation(() => {
       throw new Error("execCommand prohibited");
     });

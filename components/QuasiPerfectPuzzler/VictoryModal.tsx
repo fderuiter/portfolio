@@ -2,7 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { CopyButton } from "@/components/CopyButton";
+import { CopyButton } from "@/components/ui/CopyButton";
 import { LevelScore, PuzzlerLevelDef } from "@/lib/quasi-perfect/types";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { IconCheck, IconCopy, IconSparkles } from "@tabler/icons-react";

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { CopyButton } from "@/components/CopyButton";
+import { CopyButton } from "@/components/ui/CopyButton";
 import { LeanProofStep, PuzzlerLevelDef } from "@/lib/quasi-perfect/types";
 import { tacticDefs } from "@/lib/quasi-perfect/tactics";
 import { generateLeanProofScript } from "@/lib/quasi-perfect/engine";
@@ -94,7 +94,9 @@ export const LeanIdeInspector: React.FC<LeanIdeInspectorProps> = ({
               {level.educationalConcept.summary}
             </p>
             <div className="mt-2 text-[10px] text-zinc-400 flex items-center gap-1">
-              <span className="text-brand-cyan font-semibold">Real-World Application:</span>
+              <span className="text-brand-cyan font-semibold">
+                Real-World Application:
+              </span>
               <span>{level.educationalConcept.realWorldApplication}</span>
             </div>
           </div>
@@ -103,13 +105,16 @@ export const LeanIdeInspector: React.FC<LeanIdeInspectorProps> = ({
           <div className="relative rounded-xl border border-zinc-800 bg-zinc-900/90 p-3.5 overflow-x-auto">
             <div className="flex items-center justify-between text-[10px] text-zinc-500 mb-2 border-b border-zinc-800/80 pb-1.5">
               <span>Main.lean · Real-Time Interactive Synthesizer</span>
-              <span>{isComplete ? "Status: Verified ✔" : "Status: Proving..."}</span>
+              <span>
+                {isComplete ? "Status: Verified ✔" : "Status: Proving..."}
+              </span>
             </div>
             <pre className="text-xs text-zinc-300 font-mono leading-relaxed whitespace-pre">
               {leanCode.split("\n").map((line, idx) => {
                 let colorClass = "text-zinc-300";
                 if (line.startsWith("--")) colorClass = "text-zinc-500 italic";
-                else if (line.startsWith("theorem")) colorClass = "text-purple-400 font-bold";
+                else if (line.startsWith("theorem"))
+                  colorClass = "text-purple-400 font-bold";
                 else if (
                   line.trim().startsWith("rfl") ||
                   line.trim().startsWith("ring") ||
@@ -127,7 +132,10 @@ export const LeanIdeInspector: React.FC<LeanIdeInspectorProps> = ({
                   line.trim().startsWith("constructor")
                 )
                   colorClass = "text-brand-cyan font-semibold";
-                else if (line.trim().startsWith("rw") || line.trim().startsWith("simp"))
+                else if (
+                  line.trim().startsWith("rw") ||
+                  line.trim().startsWith("simp")
+                )
                   colorClass = "text-amber-400 font-semibold";
                 else if (line.trim().startsWith("sorry"))
                   colorClass = "text-rose-400 font-bold";
@@ -160,7 +168,9 @@ export const LeanIdeInspector: React.FC<LeanIdeInspectorProps> = ({
                 }`}
               >
                 <span>{tac.name}</span>
-                <span className="text-[10px] opacity-75">{tac.baseRamCost} GB</span>
+                <span className="text-[10px] opacity-75">
+                  {tac.baseRamCost} GB
+                </span>
               </button>
             ))}
           </div>
@@ -168,7 +178,9 @@ export const LeanIdeInspector: React.FC<LeanIdeInspectorProps> = ({
           {/* Tactic Details Pane */}
           <div className="md:col-span-2 rounded-xl border border-zinc-800 bg-zinc-900/60 p-3.5 space-y-2.5">
             {(() => {
-              const tac = tacticDefs[selectedTactic as keyof typeof tacticDefs] || tacticDefs.rfl;
+              const tac =
+                tacticDefs[selectedTactic as keyof typeof tacticDefs] ||
+                tacticDefs.rfl;
               return (
                 <>
                   <div className="flex items-center justify-between">
@@ -179,65 +191,95 @@ export const LeanIdeInspector: React.FC<LeanIdeInspectorProps> = ({
                       </code>
                     </h4>
                     <span className="text-xs text-zinc-400">
-                      RAM Cost: <strong className="text-zinc-200">{tac.baseRamCost} GB</strong>
+                      RAM Cost:{" "}
+                      <strong className="text-zinc-200">
+                        {tac.baseRamCost} GB
+                      </strong>
                     </span>
                   </div>
 
-                  <p className="text-xs text-zinc-300 leading-relaxed">{tac.description}</p>
+                  <p className="text-xs text-zinc-300 leading-relaxed">
+                    {tac.description}
+                  </p>
 
                   <div className="pt-2 border-t border-zinc-800 text-[11px] text-zinc-400 space-y-1">
                     <div>
-                      <span className="text-zinc-500 font-bold">Failure RAM Penalty:</span>{" "}
+                      <span className="text-zinc-500 font-bold">
+                        Failure RAM Penalty:
+                      </span>{" "}
                       {tac.failureCost} GB
                     </div>
                     {tac.id === "symm" && (
                       <div>
-                        <span className="text-emerald-400 font-bold">Logic Rule:</span> Symmetry of Equality (`Eq.symm : a = b ⟹ b = a`)
+                        <span className="text-emerald-400 font-bold">
+                          Logic Rule:
+                        </span>{" "}
+                        Symmetry of Equality (`Eq.symm : a = b ⟹ b = a`)
                       </div>
                     )}
                     {tac.id === "split" && (
                       <div>
-                        <span className="text-brand-cyan font-bold">Logic Rule:</span> Conjunction Introduction (`And.intro : P → Q → P ∧ Q`)
+                        <span className="text-brand-cyan font-bold">
+                          Logic Rule:
+                        </span>{" "}
+                        Conjunction Introduction (`And.intro : P → Q → P ∧ Q`)
                       </div>
                     )}
                     {tac.id === "left" && (
                       <div>
-                        <span className="text-brand-cyan font-bold">Logic Rule:</span> Disjunction Left Injection (`Or.inl : P → P ∨ Q`)
+                        <span className="text-brand-cyan font-bold">
+                          Logic Rule:
+                        </span>{" "}
+                        Disjunction Left Injection (`Or.inl : P → P ∨ Q`)
                       </div>
                     )}
                     {tac.id === "right" && (
                       <div>
-                        <span className="text-brand-cyan font-bold">Logic Rule:</span> Disjunction Right Injection (`Or.inr : Q → P ∨ Q`)
+                        <span className="text-brand-cyan font-bold">
+                          Logic Rule:
+                        </span>{" "}
+                        Disjunction Right Injection (`Or.inr : Q → P ∨ Q`)
                       </div>
                     )}
                     {tac.id === "intro" && (
                       <div>
-                        <span className="text-purple-400 font-bold">Logic Rule:</span>{" "}
+                        <span className="text-purple-400 font-bold">
+                          Logic Rule:
+                        </span>{" "}
                         Implication Introduction (P → Q ⟹ Γ, h:P ⊢ Q)
                       </div>
                     )}
                     {tac.id === "apply" && (
                       <div>
-                        <span className="text-purple-400 font-bold">Logic Rule:</span> Modus
-                        Ponens / Backward Chaining (Q via h:P → Q)
+                        <span className="text-purple-400 font-bold">
+                          Logic Rule:
+                        </span>{" "}
+                        Modus Ponens / Backward Chaining (Q via h:P → Q)
                       </div>
                     )}
                     {tac.id === "cases" && (
                       <div>
-                        <span className="text-purple-400 font-bold">Logic Rule:</span> Disjunction
-                        Elimination / Pattern Matching (P ∨ Q)
+                        <span className="text-purple-400 font-bold">
+                          Logic Rule:
+                        </span>{" "}
+                        Disjunction Elimination / Pattern Matching (P ∨ Q)
                       </div>
                     )}
                     {tac.id === "ring" && (
                       <div>
-                        <span className="text-purple-400 font-bold">Logic Rule:</span> Commutative
-                        Ring Normalization (Buchberger’s Gröbner Bases)
+                        <span className="text-purple-400 font-bold">
+                          Logic Rule:
+                        </span>{" "}
+                        Commutative Ring Normalization (Buchberger’s Gröbner
+                        Bases)
                       </div>
                     )}
                     {tac.id === "omega" && (
                       <div>
-                        <span className="text-purple-400 font-bold">Logic Rule:</span> Presburger
-                        Linear Integer Arithmetic
+                        <span className="text-purple-400 font-bold">
+                          Logic Rule:
+                        </span>{" "}
+                        Presburger Linear Integer Arithmetic
                       </div>
                     )}
                   </div>

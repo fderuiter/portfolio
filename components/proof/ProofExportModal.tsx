@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { IconDownload, IconX } from "@tabler/icons-react";
-import { CopyButton } from "@/components/CopyButton";
+import { CopyButton } from "@/components/ui/CopyButton";
 import {
   exportProofToLean4,
   exportProofToLatex,
@@ -26,7 +26,9 @@ export const ProofExportModal: React.FC<ProofExportModalProps> = ({
   activeTheoremId,
   edges,
 }) => {
-  const [exportFormat, setExportFormat] = useState<"lean" | "latex" | "markdown" | "mermaid">("lean");
+  const [exportFormat, setExportFormat] = useState<
+    "lean" | "latex" | "markdown" | "mermaid"
+  >("lean");
 
   const getExportText = () => {
     switch (exportFormat) {
@@ -67,19 +69,21 @@ export const ProofExportModal: React.FC<ProofExportModalProps> = ({
               </button>
             </div>
             <div className="flex gap-2">
-              {(["lean", "latex", "markdown", "mermaid"] as const).map((fmt) => (
-                <button
-                  key={fmt}
-                  onClick={() => setExportFormat(fmt)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono uppercase font-bold border transition cursor-pointer active:scale-[0.98] ${
-                    exportFormat === fmt
-                      ? "border-brand-cyan bg-brand-cyan/20 text-brand-cyan"
-                      : "border-slate-800 bg-slate-950 text-slate-400 hover:text-white"
-                  }`}
-                >
-                  {fmt}
-                </button>
-              ))}
+              {(["lean", "latex", "markdown", "mermaid"] as const).map(
+                (fmt) => (
+                  <button
+                    key={fmt}
+                    onClick={() => setExportFormat(fmt)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-mono uppercase font-bold border transition cursor-pointer active:scale-[0.98] ${
+                      exportFormat === fmt
+                        ? "border-brand-cyan bg-brand-cyan/20 text-brand-cyan"
+                        : "border-slate-800 bg-slate-950 text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    {fmt}
+                  </button>
+                )
+              )}
             </div>
             <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 max-h-72 overflow-y-auto">
               <pre className="font-mono text-xs text-slate-300 whitespace-pre-wrap">

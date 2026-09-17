@@ -24,7 +24,7 @@ import {
 import { clamp } from "@/lib/game-utils";
 import { playMemeSound, getMemeSoundDuration } from "@/lib/meme-audio";
 import { useAnnouncer } from "@/components/providers/A11yProvider";
-import { CopyButton } from "@/components/CopyButton";
+import { CopyButton } from "@/components/ui/CopyButton";
 import {
   IconSparkles,
   IconTrophy,

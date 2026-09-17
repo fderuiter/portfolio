@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { CopyButton } from "@/components/CopyButton";
+import { CopyButton } from "@/components/ui/CopyButton";
 import {
   IconCpu,
   IconBolt,

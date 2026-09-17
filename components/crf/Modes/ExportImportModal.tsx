@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { CopyButton } from "@/components/CopyButton";
+import { CopyButton } from "@/components/ui/CopyButton";
 import { StudyProtocol } from "@/lib/crf/types";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import {
@@ -19,9 +19,7 @@ import {
   IconLoader2,
 } from "@tabler/icons-react";
 
-import {
-  exportUniversalCrfJson,
-} from "@/lib/crf/universal-schema";
+import { exportUniversalCrfJson } from "@/lib/crf/universal-schema";
 
 interface ExportImportModalProps {
   study: StudyProtocol;
@@ -30,7 +28,8 @@ interface ExportImportModalProps {
   onOpenBranding?: () => void;
 }
 
-type ExportTab = "universal" | "usdm" | "odm" | "sas" | "r" | "json" | "fhir" | "sdtm_spec";
+type ExportTab =
+  "universal" | "usdm" | "odm" | "sas" | "r" | "json" | "fhir" | "sdtm_spec";
 
 export const ExportImportModal: React.FC<ExportImportModalProps> = ({
   study,
@@ -46,7 +45,10 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
   const [activeContent, setActiveContent] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState<boolean>(true);
 
-  const selectedForm = selectedFormId === "all" ? undefined : study.forms.find((f) => f.id === selectedFormId);
+  const selectedForm =
+    selectedFormId === "all"
+      ? undefined
+      : study.forms.find((f) => f.id === selectedFormId);
 
   useEffect(() => {
     let isMounted = true;
@@ -61,7 +63,8 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
         const { exportStudyToUsdm } = await import("@/lib/crf/usdm-adapter");
         content = exportStudyToUsdm(study);
       } else if (activeTab === "odm") {
-        const { exportStudyToCdiscOdmXml } = await import("@/lib/crf/odm-xml-serializer");
+        const { exportStudyToCdiscOdmXml } =
+          await import("@/lib/crf/odm-xml-serializer");
         content = exportStudyToCdiscOdmXml(study);
       } else if (activeTab === "sas") {
         const { exportStudyToSas } = await import("@/lib/crf/export-sas");
@@ -80,17 +83,23 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
           useLabelledPackage: true,
         });
       } else if (activeTab === "fhir") {
-        const { exportFormToFhirQuestionnaire } = await import("@/lib/crf/fhir-questionnaire");
-        const targetFormForFhir = selectedForm || study.forms[0] || {
-          id: "crf-1",
-          name: "General Form",
-          domain: "DM",
-          description: "",
-          version: "1.0",
-          sections: [],
-          rules: [],
-        };
-        content = JSON.stringify(exportFormToFhirQuestionnaire(targetFormForFhir, study), null, 2);
+        const { exportFormToFhirQuestionnaire } =
+          await import("@/lib/crf/fhir-questionnaire");
+        const targetFormForFhir = selectedForm ||
+          study.forms[0] || {
+            id: "crf-1",
+            name: "General Form",
+            domain: "DM",
+            description: "",
+            version: "1.0",
+            sections: [],
+            rules: [],
+          };
+        content = JSON.stringify(
+          exportFormToFhirQuestionnaire(targetFormForFhir, study),
+          null,
+          2
+        );
       } else {
         content = JSON.stringify(study, null, 2);
       }
@@ -112,7 +121,9 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
     let filename = `study-${study.protocolNumber}.crf.json`;
     let mimeType = "application/json";
     const content = activeContent;
-    const domainSuffix = selectedForm ? `-${selectedForm.domain || selectedForm.id}` : "";
+    const domainSuffix = selectedForm
+      ? `-${selectedForm.domain || selectedForm.id}`
+      : "";
 
     if (activeTab === "universal") {
       filename = `${study.protocolNumber}.crf.json`;
@@ -153,14 +164,17 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
       onImportStudy(imported);
       setImportJsonText("");
     } catch (err: unknown) {
-      setImportError((err as Error).message || "Invalid Protocol or USDM JSON syntax");
+      setImportError(
+        (err as Error).message || "Invalid Protocol or USDM JSON syntax"
+      );
     }
   };
 
   // Compile SDTM variables for specification table, filtered by selectedFormId if applicable
-  const formsForSpec = selectedFormId === "all"
-    ? study.forms
-    : study.forms.filter((f) => f.id === selectedFormId);
+  const formsForSpec =
+    selectedFormId === "all"
+      ? study.forms
+      : study.forms.filter((f) => f.id === selectedFormId);
 
   const specFields = formsForSpec.flatMap((f) =>
     f.sections.flatMap((s) => s.fields.map((field) => ({ field, form: f })))
@@ -180,7 +194,9 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
             </h1>
           </div>
           <p className="text-xs text-zinc-400 font-sans mt-1">
-            Export study protocols and CRFs to CDISC ODM-XML, SAS programs (PROC FORMAT &amp; ATTRIB), R tidyverse tibbles, HL7 FHIR Questionnaires, and JSON Study Bundles.
+            Export study protocols and CRFs to CDISC ODM-XML, SAS programs (PROC
+            FORMAT &amp; ATTRIB), R tidyverse tibbles, HL7 FHIR Questionnaires,
+            and JSON Study Bundles.
           </p>
         </div>
 
@@ -249,7 +265,8 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
             <option value="all">All Study Domains (Full Protocol Suite)</option>
             {study.forms.map((form) => (
               <option key={form.id} value={form.id}>
-                {form.domain ? `[${form.domain}] ` : ""}{form.name}
+                {form.domain ? `[${form.domain}] ` : ""}
+                {form.name}
               </option>
             ))}
           </select>
@@ -380,15 +397,25 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
             </thead>
             <tbody className="divide-y divide-zinc-850">
               {specFields.map(({ field, form }) => (
-                <tr key={`${form.id}_${field.id}`} className="hover:bg-zinc-850/40">
-                  <td className="p-3 font-bold text-brand-cyan">{form.domain}</td>
+                <tr
+                  key={`${form.id}_${field.id}`}
+                  className="hover:bg-zinc-850/40"
+                >
+                  <td className="p-3 font-bold text-brand-cyan">
+                    {form.domain}
+                  </td>
                   <td className="p-3 text-zinc-300 font-sans">{form.name}</td>
-                  <td className="p-3 font-bold text-white">{field.variableName}</td>
+                  <td className="p-3 font-bold text-white">
+                    {field.variableName}
+                  </td>
                   <td className="p-3 text-zinc-300 font-sans">{field.label}</td>
                   <td className="p-3 text-zinc-500">{field.dataType}</td>
-                  <td className="p-3 text-zinc-400">{field.cdashMetadata?.core || (field.required ? "R" : "O")}</td>
+                  <td className="p-3 text-zinc-400">
+                    {field.cdashMetadata?.core || (field.required ? "R" : "O")}
+                  </td>
                   <td className="p-3 text-sky-400">
-                    {field.cdashMetadata?.acrfAnnotation || `${form.domain}.${field.variableName}`}
+                    {field.cdashMetadata?.acrfAnnotation ||
+                      `${form.domain}.${field.variableName}`}
                   </td>
                 </tr>
               ))}
