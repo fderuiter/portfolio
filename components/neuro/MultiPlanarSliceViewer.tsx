@@ -2,8 +2,18 @@
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { clamp } from "@/lib/game-utils";
-import { ControlPoint, SlicePlane, ToolMode, VoxelCoord, VoxelEdit } from "@/lib/neuro/types";
-import { extractSlice, SyntheticVolume, VOLUME_SIZE } from "@/lib/neuro/volume-generator";
+import {
+  ControlPoint,
+  SlicePlane,
+  ToolMode,
+  VoxelCoord,
+  VoxelEdit,
+} from "@/lib/neuro/types";
+import {
+  extractSlice,
+  SyntheticVolume,
+  VOLUME_SIZE,
+} from "@/lib/neuro/volume-generator";
 import { IconLayersSubtract } from "@tabler/icons-react";
 
 interface MultiPlanarSliceViewerProps {
@@ -47,11 +57,7 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
    * Render an individual 2D anatomical slice onto a Canvas 2D context
    */
   const renderSliceToCanvas = useCallback(
-    (
-      canvas: HTMLCanvasElement | null,
-      plane: SlicePlane,
-      sliceIdx: number
-    ) => {
+    (canvas: HTMLCanvasElement | null, plane: SlicePlane, sliceIdx: number) => {
       if (!canvas) return;
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
@@ -135,13 +141,21 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
         dY = min.y;
         dW = max.x - min.x;
         dH = max.y - min.y;
-      } else if (plane === "coronal" && sliceIdx >= min.y && sliceIdx <= max.y) {
+      } else if (
+        plane === "coronal" &&
+        sliceIdx >= min.y &&
+        sliceIdx <= max.y
+      ) {
         inDefectSlice = true;
         dX = min.x;
         dY = height - 1 - max.z;
         dW = max.x - min.x;
         dH = max.z - min.z;
-      } else if (plane === "sagittal" && sliceIdx >= min.x && sliceIdx <= max.x) {
+      } else if (
+        plane === "sagittal" &&
+        sliceIdx >= min.x &&
+        sliceIdx <= max.x
+      ) {
         inDefectSlice = true;
         dX = min.y;
         dY = height - 1 - max.z;
@@ -390,7 +404,10 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
     plane: SlicePlane
   ) => {
     const coord = getVoxelFromTouchEvent(e, plane);
-    if (isMouseDownRef.current && (toolMode === "paint" || toolMode === "erase")) {
+    if (
+      isMouseDownRef.current &&
+      (toolMode === "paint" || toolMode === "erase")
+    ) {
       onCrosshairChange(coord);
       handleToolAction(coord);
     }
@@ -421,18 +438,27 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
     const sliceData = extractSlice(
       volume,
       plane,
-      plane === "axial" ? crosshair.z : plane === "coronal" ? crosshair.y : crosshair.x
+      plane === "axial"
+        ? crosshair.z
+        : plane === "coronal"
+          ? crosshair.y
+          : crosshair.x
     );
     const canvas = e.currentTarget;
     const rect = canvas.getBoundingClientRect();
     const x = Math.floor((e.clientX - rect.left) * (canvas.width / rect.width));
-    const y = Math.floor((e.clientY - rect.top) * (canvas.height / rect.height));
+    const y = Math.floor(
+      (e.clientY - rect.top) * (canvas.height / rect.height)
+    );
     const idx = y * sliceData.width + x;
     if (idx >= 0 && idx < sliceData.pixels.length) {
       setHoverIntensity(sliceData.pixels[idx]);
     }
 
-    if (isMouseDownRef.current && (toolMode === "paint" || toolMode === "erase")) {
+    if (
+      isMouseDownRef.current &&
+      (toolMode === "paint" || toolMode === "erase")
+    ) {
       onCrosshairChange(coord);
       handleToolAction(coord);
     }
@@ -514,17 +540,30 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
           {/* Coronal Pane */}
           <div className="flex flex-col bg-zinc-900/60 rounded-xl border border-zinc-800 p-2 relative">
             <div className="flex items-center justify-between text-xs font-mono mb-1.5 px-1">
-              <span className="text-brand-cyan font-bold">CORONAL (Y={crosshair.y})</span>
+              <span className="text-brand-cyan font-bold">
+                CORONAL (Y={crosshair.y})
+              </span>
               <span className="text-zinc-400">ANT / POST</span>
             </div>
             <div className="flex-1 flex items-center justify-center relative overflow-hidden rounded-lg bg-black">
               {/* Anatomical Compass Badges */}
-              <span className="absolute top-1 left-1/2 -translate-x-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">S</span>
-              <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">I</span>
-              <span className="absolute left-1 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">R</span>
-              <span className="absolute right-1 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">L</span>
+              <span className="absolute top-1 left-1/2 -translate-x-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">
+                S
+              </span>
+              <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">
+                I
+              </span>
+              <span className="absolute left-1 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">
+                R
+              </span>
+              <span className="absolute right-1 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">
+                L
+              </span>
               <canvas
                 ref={coronalCanvasRef}
+                role="img"
+                tabIndex={0}
+                aria-label={`2D Coronal MRI Slice View at Y=${crosshair.y}. Click or drag to inspect or apply edits.`}
                 onMouseDown={(e) => handleCanvasMouseDown(e, "coronal")}
                 onMouseMove={(e) => handleCanvasMouseMove(e, "coronal")}
                 onTouchStart={(e) => handleCanvasTouchStart(e, "coronal")}
@@ -541,7 +580,10 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
               max={VOLUME_SIZE - 1}
               value={crosshair.y}
               onChange={(e) =>
-                onCrosshairChange({ ...crosshair, y: parseInt(e.target.value, 10) })
+                onCrosshairChange({
+                  ...crosshair,
+                  y: parseInt(e.target.value, 10),
+                })
               }
               className="w-full mt-2 accent-brand-cyan h-1 bg-zinc-800 rounded-lg cursor-pointer"
             />
@@ -550,17 +592,30 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
           {/* Axial Pane */}
           <div className="flex flex-col bg-zinc-900/60 rounded-xl border border-zinc-800 p-2 relative">
             <div className="flex items-center justify-between text-xs font-mono mb-1.5 px-1">
-              <span className="text-brand-cyan font-bold">AXIAL (Z={crosshair.z})</span>
+              <span className="text-brand-cyan font-bold">
+                AXIAL (Z={crosshair.z})
+              </span>
               <span className="text-zinc-400">SUP / INF</span>
             </div>
             <div className="flex-1 flex items-center justify-center relative overflow-hidden rounded-lg bg-black">
               {/* Anatomical Compass Badges */}
-              <span className="absolute top-1 left-1/2 -translate-x-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">A</span>
-              <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">P</span>
-              <span className="absolute left-1 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">R</span>
-              <span className="absolute right-1 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">L</span>
+              <span className="absolute top-1 left-1/2 -translate-x-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">
+                A
+              </span>
+              <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">
+                P
+              </span>
+              <span className="absolute left-1 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">
+                R
+              </span>
+              <span className="absolute right-1 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">
+                L
+              </span>
               <canvas
                 ref={axialCanvasRef}
+                role="img"
+                tabIndex={0}
+                aria-label={`2D Axial MRI Slice View at Z=${crosshair.z}. Click or drag to inspect or apply edits.`}
                 onMouseDown={(e) => handleCanvasMouseDown(e, "axial")}
                 onMouseMove={(e) => handleCanvasMouseMove(e, "axial")}
                 onTouchStart={(e) => handleCanvasTouchStart(e, "axial")}
@@ -577,7 +632,10 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
               max={VOLUME_SIZE - 1}
               value={crosshair.z}
               onChange={(e) =>
-                onCrosshairChange({ ...crosshair, z: parseInt(e.target.value, 10) })
+                onCrosshairChange({
+                  ...crosshair,
+                  z: parseInt(e.target.value, 10),
+                })
               }
               className="w-full mt-2 accent-brand-cyan h-1 bg-zinc-800 rounded-lg cursor-pointer"
             />
@@ -586,17 +644,30 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
           {/* Sagittal Pane */}
           <div className="flex flex-col bg-zinc-900/60 rounded-xl border border-zinc-800 p-2 relative">
             <div className="flex items-center justify-between text-xs font-mono mb-1.5 px-1">
-              <span className="text-brand-cyan font-bold">SAGITTAL (X={crosshair.x})</span>
+              <span className="text-brand-cyan font-bold">
+                SAGITTAL (X={crosshair.x})
+              </span>
               <span className="text-zinc-400">LEFT / RIGHT</span>
             </div>
             <div className="flex-1 flex items-center justify-center relative overflow-hidden rounded-lg bg-black">
               {/* Anatomical Compass Badges */}
-              <span className="absolute top-1 left-1/2 -translate-x-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">S</span>
-              <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">I</span>
-              <span className="absolute left-1 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">A</span>
-              <span className="absolute right-1 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">P</span>
+              <span className="absolute top-1 left-1/2 -translate-x-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">
+                S
+              </span>
+              <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">
+                I
+              </span>
+              <span className="absolute left-1 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">
+                A
+              </span>
+              <span className="absolute right-1 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">
+                P
+              </span>
               <canvas
                 ref={sagittalCanvasRef}
+                role="img"
+                tabIndex={0}
+                aria-label={`2D Sagittal MRI Slice View at X=${crosshair.x}. Click or drag to inspect or apply edits.`}
                 onMouseDown={(e) => handleCanvasMouseDown(e, "sagittal")}
                 onMouseMove={(e) => handleCanvasMouseMove(e, "sagittal")}
                 onTouchStart={(e) => handleCanvasTouchStart(e, "sagittal")}
@@ -613,7 +684,10 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
               max={VOLUME_SIZE - 1}
               value={crosshair.x}
               onChange={(e) =>
-                onCrosshairChange({ ...crosshair, x: parseInt(e.target.value, 10) })
+                onCrosshairChange({
+                  ...crosshair,
+                  x: parseInt(e.target.value, 10),
+                })
               }
               className="w-full mt-2 accent-brand-cyan h-1 bg-zinc-800 rounded-lg cursor-pointer"
             />
@@ -644,8 +718,8 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
               {activePlane === "axial"
                 ? `Z = ${crosshair.z}`
                 : activePlane === "coronal"
-                ? `Y = ${crosshair.y}`
-                : `X = ${crosshair.x}`}
+                  ? `Y = ${crosshair.y}`
+                  : `X = ${crosshair.x}`}
             </span>
           </div>
 
@@ -653,6 +727,9 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
             {activePlane === "axial" && (
               <canvas
                 ref={axialCanvasRef}
+                role="img"
+                tabIndex={0}
+                aria-label={`Focused 2D Axial MRI Slice View at Z=${crosshair.z}. Click or drag to inspect or apply edits.`}
                 onMouseDown={(e) => handleCanvasMouseDown(e, "axial")}
                 onMouseMove={(e) => handleCanvasMouseMove(e, "axial")}
                 onTouchStart={(e) => handleCanvasTouchStart(e, "axial")}
@@ -666,6 +743,9 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
             {activePlane === "coronal" && (
               <canvas
                 ref={coronalCanvasRef}
+                role="img"
+                tabIndex={0}
+                aria-label={`Focused 2D Coronal MRI Slice View at Y=${crosshair.y}. Click or drag to inspect or apply edits.`}
                 onMouseDown={(e) => handleCanvasMouseDown(e, "coronal")}
                 onMouseMove={(e) => handleCanvasMouseMove(e, "coronal")}
                 onTouchStart={(e) => handleCanvasTouchStart(e, "coronal")}
@@ -679,6 +759,9 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
             {activePlane === "sagittal" && (
               <canvas
                 ref={sagittalCanvasRef}
+                role="img"
+                tabIndex={0}
+                aria-label={`Focused 2D Sagittal MRI Slice View at X=${crosshair.x}. Click or drag to inspect or apply edits.`}
                 onMouseDown={(e) => handleCanvasMouseDown(e, "sagittal")}
                 onMouseMove={(e) => handleCanvasMouseMove(e, "sagittal")}
                 onTouchStart={(e) => handleCanvasTouchStart(e, "sagittal")}

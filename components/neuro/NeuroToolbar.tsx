@@ -43,7 +43,12 @@ export const NeuroToolbar: React.FC<NeuroToolbarProps> = ({
   onReset,
   onOpenFieldManual,
 }) => {
-  const tools: { id: ToolMode; label: string; key: string; icon: React.ReactNode }[] = [
+  const tools: {
+    id: ToolMode;
+    label: string;
+    key: string;
+    icon: React.ReactNode;
+  }[] = [
     {
       id: "inspect",
       label: "Inspect / Navigate",
@@ -81,15 +86,19 @@ export const NeuroToolbar: React.FC<NeuroToolbarProps> = ({
               key={tool.id}
               onClick={() => onToolModeChange(tool.id)}
               title={`${tool.label} [${tool.key}]`}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-mono transition-all select-none ${
+              className={`flex items-center gap-2 px-3 py-2.5 min-h-[44px] rounded-lg text-xs font-mono transition-all select-none ${
                 isActive
                   ? "bg-zinc-800 text-white font-bold border border-zinc-700 shadow-sm"
                   : "text-zinc-400 hover:text-white hover:bg-zinc-900"
               }`}
             >
               {tool.icon}
-              <span className="hidden sm:inline">{tool.label.split(" ")[0]}</span>
-              <span className="text-[10px] text-zinc-400 hidden lg:inline">[{tool.key}]</span>
+              <span className="hidden sm:inline">
+                {tool.label.split(" ")[0]}
+              </span>
+              <span className="text-[10px] text-zinc-400 hidden lg:inline">
+                [{tool.key}]
+              </span>
             </button>
           );
         })}
@@ -121,25 +130,33 @@ export const NeuroToolbar: React.FC<NeuroToolbarProps> = ({
       <div className="flex items-center gap-1.5 bg-zinc-950 p-1 rounded-xl border border-zinc-800 text-xs font-mono">
         <button
           onClick={onTogglePialContour}
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all ${
+          className={`flex items-center gap-1.5 px-2.5 py-2 min-h-[44px] rounded-lg transition-all ${
             showPialContour
               ? "bg-red-500/15 border border-red-500/30 text-red-400 font-bold"
               : "text-zinc-400 hover:text-white hover:bg-zinc-900"
           }`}
         >
-          {showPialContour ? <IconEye className="w-3.5 h-3.5" /> : <IconEyeOff className="w-3.5 h-3.5" />}
+          {showPialContour ? (
+            <IconEye className="w-3.5 h-3.5" />
+          ) : (
+            <IconEyeOff className="w-3.5 h-3.5" />
+          )}
           <span>Pial (Red)</span>
         </button>
 
         <button
           onClick={onToggleWmContour}
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all ${
+          className={`flex items-center gap-1.5 px-2.5 py-2 min-h-[44px] rounded-lg transition-all ${
             showWmContour
               ? "bg-yellow-500/15 border border-yellow-500/30 text-yellow-400 font-bold"
               : "text-zinc-400 hover:text-white hover:bg-zinc-900"
           }`}
         >
-          {showWmContour ? <IconEye className="w-3.5 h-3.5" /> : <IconEyeOff className="w-3.5 h-3.5" />}
+          {showWmContour ? (
+            <IconEye className="w-3.5 h-3.5" />
+          ) : (
+            <IconEyeOff className="w-3.5 h-3.5" />
+          )}
           <span>WM (Yellow)</span>
         </button>
       </div>
@@ -150,18 +167,22 @@ export const NeuroToolbar: React.FC<NeuroToolbarProps> = ({
           onClick={onRunRecon}
           disabled={isProcessing}
           title="Run FreeSurfer recon-all pipeline [R]"
-          className="flex items-center gap-1.5 px-3.5 py-1.5 bg-brand-cyan hover:bg-brand-cyan/90 text-zinc-950 font-mono font-bold text-xs rounded-xl shadow-lg shadow-brand-cyan/15 transition-all disabled:opacity-50"
+          className="flex items-center gap-1.5 px-3.5 py-2 min-h-[44px] bg-brand-cyan hover:bg-brand-cyan/90 text-zinc-950 font-mono font-bold text-xs rounded-xl shadow-lg shadow-brand-cyan/15 transition-all disabled:opacity-50"
         >
-          <IconPlayerPlay className={`w-4 h-4 ${isProcessing ? "animate-spin" : ""}`} />
+          <IconPlayerPlay
+            className={`w-4 h-4 ${isProcessing ? "animate-spin" : ""}`}
+          />
           <span>{isProcessing ? "RECON RUNNING..." : "RUN RECON-ALL"}</span>
-          <span className="text-[10px] opacity-75 font-mono hidden md:inline">[R]</span>
+          <span className="text-[10px] opacity-75 font-mono hidden md:inline">
+            [R]
+          </span>
         </button>
 
         <button
           onClick={onReset}
           title="Reset current edits & control points"
           aria-label="Reset workspace"
-          className="p-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all"
+          className="p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all"
         >
           <IconRotateClockwise2 className="w-4 h-4" />
         </button>
@@ -170,11 +191,13 @@ export const NeuroToolbar: React.FC<NeuroToolbarProps> = ({
           onClick={onOpenFieldManual}
           title="Open FreeSurfer Field Manual & Defect Guide [M]"
           aria-label="Open Field Manual"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-800 text-brand-cyan hover:bg-zinc-900 text-xs font-mono font-bold transition-all"
+          className="flex items-center gap-1.5 px-3 py-2 min-h-[44px] rounded-xl bg-zinc-950 border border-zinc-800 text-brand-cyan hover:bg-zinc-900 text-xs font-mono font-bold transition-all"
         >
           <IconBook className="w-4 h-4" />
           <span className="hidden sm:inline">FIELD MANUAL</span>
-          <span className="text-[10px] text-zinc-400 font-mono hidden lg:inline">[M]</span>
+          <span className="text-[10px] text-zinc-400 font-mono hidden lg:inline">
+            [M]
+          </span>
         </button>
       </div>
     </div>

@@ -24,6 +24,7 @@ model CaseStudy {
   tags                    String   // Comma-separated string or a related Tag model
   commands_json           String?
   playback_json           String?
+  hero_image_url          String?
   created_at              DateTime @default(now())
   updated_at              DateTime @updatedAt
 }
@@ -113,7 +114,7 @@ model BlogPost {
 
 ### Blog Reaction Schema (`BlogPostReaction`)
 
-Reader engagement reuses the `CaseStudyReaction` shape exactly, keyed by `blogPostSlug` instead of `caseStudySlug`:
+Reader engagement reuses the `CaseStudyReaction` shape exactly, keyed by `blogPostSlug` instead of `caseStudySlug`, supporting the closed reaction enum (`"insightful" | "mind_blowing" | "actionable" | "thorough"`):
 
 ```prisma
 model BlogPostReaction {
@@ -129,7 +130,7 @@ model BlogPostReaction {
 }
 ```
 
-Per ADR 0041, the blog explicitly does not have a discussion-forum-style comment system — reactions (plus the existing rate-limited `/contact` path for anything more substantive) are the full extent of reader response.
+Per ADR 0041, the blog explicitly does not have a discussion-forum-style comment system — reactions (plus the existing rate-limited `/contact` path for anything more substantive) are the full extent of reader response. Free-text feedback (`BlogPostFeedback`) is intentionally omitted to maintain this posture.
 
 ## Prototyping Workflows
 

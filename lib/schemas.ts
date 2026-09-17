@@ -53,6 +53,7 @@ export const BlogDraftUpdateSchema = z
     pillar: z.enum(CONTENT_PILLARS).optional(),
     tags: z.array(z.string().trim().min(1).max(50)).min(1).max(12).optional(),
     heroImageUrl: z.string().trim().url().max(2048).nullable().optional(),
+    published: z.boolean().optional(),
   })
   .strict()
   .refine((data) => Object.keys(data).length > 0, {
@@ -169,6 +170,8 @@ export const CaseStudySubmissionSchema = z
       { message: "Tags are required" }
     ),
     github_url: z.string().trim().optional(),
+    hero_image_url: z.string().trim().url().max(2048).nullable().optional(),
+    heroImageUrl: z.string().trim().url().max(2048).nullable().optional(),
   })
   .superRefine((data, ctx) => {
     const lang = data.primary_language || data.language;
@@ -332,6 +335,20 @@ export const FeedbackSubmissionSchema = z
  */
 export const ReactionSubmissionSchema = z.object({
   caseStudySlug: z.string().min(1, "caseStudySlug must be a non-empty string"),
+  reactionType: z.enum(ALLOWED_REACTIONS, {
+    message:
+      "Allowed reactionType values: 'insightful', 'mind_blowing', 'actionable', 'thorough'",
+  }),
+});
+
+/**
+ * Schema for Blog Post Reaction POST payload validation
+ */
+export const BlogPostReactionSubmissionSchema = z.object({
+  blogPostSlug: z
+    .string()
+    .trim()
+    .min(1, "blogPostSlug must be a non-empty string"),
   reactionType: z.enum(ALLOWED_REACTIONS, {
     message:
       "Allowed reactionType values: 'insightful', 'mind_blowing', 'actionable', 'thorough'",
@@ -507,3 +524,10 @@ export const ResendWebhookResponseSchema = z.object({
 });
 
 export type ResendWebhookResponse = z.infer<typeof ResendWebhookResponseSchema>;
+
+/**
+ * Schema for route parameters targeting a specific project/case study slug.
+ */
+export const ProjectSlugParamSchema = z.object({
+  slug: z.string().trim().min(1, "Project slug is required"),
+});

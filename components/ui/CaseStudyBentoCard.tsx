@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Card, CardTitle, type HeadingTag } from "@/components/BentoGrid";
 import { type ExtendedRichInlineItem } from "@/hooks/usePretextLayout";
@@ -423,6 +424,19 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
             {study.title}
           </CardTitle>
 
+          {/* Project Media Asset Image Banner */}
+          {study.hero_image_url && (
+            <div className="relative w-full h-32 rounded-lg border border-zinc-800 overflow-hidden mb-3 bg-zinc-900 shadow-sm">
+              <Image
+                src={study.hero_image_url}
+                alt={`Validated project media for ${study.title}`}
+                fill
+                className="object-cover"
+                unoptimized
+              />
+            </div>
+          )}
+
           {/* Premium Segmented Mode Switcher */}
           <div className="flex p-0.5 bg-zinc-950/80 border border-zinc-900/80 rounded-lg mb-3 text-xs font-mono relative z-10 w-fit backdrop-blur-sm">
             <button
@@ -543,7 +557,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
               )}
 
               {/* Monospace terminal logs commits feed */}
-              <div className="bg-black/60 border border-zinc-900/60 rounded-xl p-2.5 font-mono text-[9.5px] leading-tight space-y-1 h-[115px] flex flex-col justify-start overflow-hidden">
+              <div className="bg-black/60 border border-zinc-900/60 rounded-xl p-2.5 font-mono text-[9.5px] leading-tight space-y-1 min-h-[115px] h-auto flex flex-col justify-start overflow-hidden">
                 <div className="flex items-center text-zinc-400 border-b border-zinc-900/60 pb-1 mb-1">
                   <IconTerminal className="w-3.5 h-3.5 mr-1 text-zinc-400 shrink-0" />
                   <span className="truncate">

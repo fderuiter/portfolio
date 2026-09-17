@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
+
 const GENERATED_ARTIFACTS = new Set([
   "app/icon.svg",
   "public/favicon.svg",
@@ -26,7 +28,9 @@ module.exports = {
     const authoredFiles = files.filter(
       (file) =>
         !GENERATED_ARTIFACTS.has(
-          file.replaceAll("\\", "/").replace(/^.*?\/(app|public|lib)\//u, "$1/")
+          file
+            .replaceAll("\\", "/")
+            .replace(/^(?:.*\/)?(app|public|lib)\//u, "$1/")
         )
     );
     const codeFiles = authoredFiles.filter((file) => CODE_FILE.test(file));

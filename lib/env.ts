@@ -37,6 +37,7 @@ export const serverEnvSchema = z.object({
   SENTRY_ORG: z.string().optional(),
   SENTRY_PROJECT: z.string().optional(),
   CLERK_SECRET_KEY: z.string().optional(),
+  BLOB_READ_WRITE_TOKEN: z.string().optional(),
   ADMIN_USER_IDS: z.string().optional(),
   ADMIN_EMAILS: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),

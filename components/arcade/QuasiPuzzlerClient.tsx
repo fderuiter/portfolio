@@ -87,9 +87,11 @@ export const QuasiPuzzlerClient: React.FC = () => {
             icon={<IconBrain className="w-8 h-8 text-purple-400" />}
             instructions="Apply tactics to a proof tree and work your way to a complete proof. You can skip a goal with “sorry,” but the score will notice."
             controls={[
-              { key: "Drag", action: "Apply Tactic" },
-              { key: "Click", action: "Select Node" },
-              { key: "sorry", action: "Moral Penalty" },
+              { key: "Click / Drag", action: "Apply Tactic" },
+              { key: "Z / Y", action: "Undo / Redo" },
+              { key: "R", action: "Reset Level" },
+              { key: "H / C / B", action: "Hints / IDE / Brief" },
+              { key: "sorry", action: "Admit Goal" },
             ]}
             importComponent={QuasiPerfectPuzzlerLoader}
           >

@@ -6,4 +6,4 @@
 
 # Type Alias: StudioMode
 
-> **StudioMode** = `"designer"` \| `"matrix"` \| `"rules"` \| `"edc"` \| `"acrf"` \| `"export"`
+> **StudioMode** = `"designer"` \| `"grid"` \| `"matrix"` \| `"rules"` \| `"edc"` \| `"acrf"` \| `"export"`

@@ -29,6 +29,7 @@ import {
   IconSparkles,
   IconCoffee,
   IconFlame,
+  IconShieldCheck,
 } from "@tabler/icons-react";
 import { filterFuzzySearch } from "@/lib/search-utils";
 import { useSearch } from "@/components/providers/SearchProvider";
@@ -786,6 +787,30 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
         ],
       },
       {
+        id: "nav-patrol-shift",
+        title: "Patrol Shift Studio: Midwest Ski Patrol Simulator",
+        subtitle:
+          "Midwest ski-patrol operational judgment simulation and state machine foundation.",
+        category: "navigation",
+        url: "/patrol",
+        icon: <IconShieldCheck className="w-4 h-4 text-brand-cyan" />,
+        badge: "Foundation Scaffold",
+        status: "M1 Scaffold Active",
+        description:
+          "Midwest ski-patrol operational judgment simulation and state machine foundation.",
+        techStack: [
+          "Finite State Machine",
+          "Operational Protocols",
+          "Deep Modules",
+          "React 19",
+        ],
+        highlights: [
+          "Operational trail sweep and dispatch routines",
+          "Deterministic shift phase transitions",
+          "Automated operational debrief reports",
+        ],
+      },
+      {
         id: "nav-stack",
         title: "Under the Hood: Architecture & Stack Overview",
         subtitle:
@@ -1189,7 +1214,7 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
           !isDyslexic
             ? "Dyslexia mode activated. Using OpenDyslexic typeface with increased line spacing and letter tracking."
             : "Dyslexia mode deactivated. Restored Atkinson Hyperlegible and Lexend typography.",
-          "assertive"
+          "polite"
         );
       } else if (actionType === "418") {
         unlockAchievement("rfc-barista");

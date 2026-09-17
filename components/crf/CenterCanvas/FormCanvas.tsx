@@ -11,12 +11,14 @@ import {
   IconArrowDown,
   IconSparkles,
   IconCopy,
+  IconFileSpreadsheet,
 } from "@tabler/icons-react";
 import {
   CRFForm,
   CRFField,
   CodelistDefinition,
   DeviceViewport,
+  StudioMode,
 } from "@/lib/crf/types";
 import { FieldRenderer } from "./FieldRenderer";
 import { ViewportSwitcher } from "./ViewportSwitcher";
@@ -40,6 +42,7 @@ interface FormCanvasProps {
   onOpenPalette: (sectionId?: string) => void;
   onDuplicateForm?: (formId: string) => void;
   onOpenSlashPalette?: (targetSectionId?: string, targetIndex?: number) => void;
+  onSwitchMode?: (mode: StudioMode) => void;
 }
 
 export const FormCanvas: React.FC<FormCanvasProps> = ({
@@ -59,6 +62,7 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
   onOpenPalette,
   onDuplicateForm,
   onOpenSlashPalette,
+  onSwitchMode,
 }) => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [titleInput, setTitleInput] = useState(form.name);
@@ -232,6 +236,19 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
             onChangeViewport={onChangeViewport}
             gridCols={12}
           />
+          {onSwitchMode && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onSwitchMode("grid");
+              }}
+              className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-300 text-xs font-mono transition-all shadow-sm"
+              title="Switch to Active Form Grid Metadata Editor"
+            >
+              <IconFileSpreadsheet className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-cyan" />
+              <span className="hidden sm:inline">Grid View</span>
+            </button>
+          )}
           <button
             onClick={(e) => {
               e.stopPropagation();

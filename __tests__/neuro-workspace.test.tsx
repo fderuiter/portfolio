@@ -2,7 +2,9 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -99,7 +101,9 @@ describe("NeuroRecon Workspace UI Suite", () => {
       root.render(<NeuroReconClient />);
     });
 
-    expect(container.textContent).toContain("Case 01: Dura Over-Inclusion in Temporal Lobe");
+    expect(container.textContent).toContain(
+      "Case 01: Dura Over-Inclusion in Temporal Lobe"
+    );
     expect(container.textContent).toContain("EULER (χ)");
     expect(container.textContent).toContain("DEFECT VOXELS");
     expect(container.textContent).toContain("DICE SCORE");
@@ -117,14 +121,18 @@ describe("NeuroRecon Workspace UI Suite", () => {
 
     // Find Case 02 button
     const buttons = Array.from(container.querySelectorAll("button"));
-    const case2Button = buttons.find((btn) => btn.textContent?.includes("Case 02"));
+    const case2Button = buttons.find((btn) =>
+      btn.textContent?.includes("Case 02")
+    );
     expect(case2Button).toBeDefined();
 
     await act(async () => {
       case2Button?.click();
     });
 
-    expect(container.textContent).toContain("Case 02: White Matter Dropout & B1 Inhomogeneity");
+    expect(container.textContent).toContain(
+      "Case 02: White Matter Dropout & B1 Inhomogeneity"
+    );
     expect(container.textContent).toContain("Intensity Defect");
   });
 
@@ -134,8 +142,8 @@ describe("NeuroRecon Workspace UI Suite", () => {
       root.render(<NeuroReconClient />);
     });
 
-    const manualButton = Array.from(container.querySelectorAll("button")).find((btn) =>
-      btn.textContent?.includes("FIELD MANUAL")
+    const manualButton = Array.from(container.querySelectorAll("button")).find(
+      (btn) => btn.textContent?.includes("FIELD MANUAL")
     );
     expect(manualButton).toBeDefined();
 
@@ -143,12 +151,16 @@ describe("NeuroRecon Workspace UI Suite", () => {
       manualButton?.click();
     });
 
-    expect(container.textContent).toContain("NeuroRecon Field Manual · FreeSurfer 7.x");
-    expect(container.textContent).toContain("Topological Homeomorphism & Euler Characteristic");
+    expect(container.textContent).toContain(
+      "NeuroRecon Field Manual · FreeSurfer 7.x"
+    );
+    expect(container.textContent).toContain(
+      "Topological Homeomorphism & Euler Characteristic"
+    );
 
     // Close button
-    const dismissButton = Array.from(container.querySelectorAll("button")).find((btn) =>
-      btn.textContent?.includes("DISMISS FIELD MANUAL")
+    const dismissButton = Array.from(container.querySelectorAll("button")).find(
+      (btn) => btn.textContent?.includes("DISMISS FIELD MANUAL")
     );
     expect(dismissButton).toBeDefined();
 
@@ -156,7 +168,9 @@ describe("NeuroRecon Workspace UI Suite", () => {
       dismissButton?.click();
     });
 
-    expect(container.textContent).not.toContain("NeuroRecon Field Manual · FreeSurfer 7.x");
+    expect(container.textContent).not.toContain(
+      "NeuroRecon Field Manual · FreeSurfer 7.x"
+    );
   });
 
   it("executes CLI commands in the terminal and renders log outputs", async () => {
@@ -174,7 +188,9 @@ describe("NeuroRecon Workspace UI Suite", () => {
       statsButton?.click();
     });
 
-    expect(container.textContent).toContain("Morphometric Stats (aseg.stats / aparc.stats)");
+    expect(container.textContent).toContain(
+      "Morphometric Stats (aseg.stats / aparc.stats)"
+    );
     expect(container.textContent).toContain("Total Intracranial Volume (eTIV)");
   });
 
@@ -184,8 +200,8 @@ describe("NeuroRecon Workspace UI Suite", () => {
       root.render(<NeuroReconClient />);
     });
 
-    const mniButton = Array.from(container.querySelectorAll("button")).find((btn) =>
-      btn.textContent?.includes("MNI152 (GLB)")
+    const mniButton = Array.from(container.querySelectorAll("button")).find(
+      (btn) => btn.textContent?.includes("MNI152 (GLB)")
     );
     expect(mniButton).toBeDefined();
 
@@ -195,5 +211,56 @@ describe("NeuroRecon Workspace UI Suite", () => {
 
     // In MNI152 mode, sandbox is active with pristine baseline
     expect(container.textContent).toContain("Freeview QA Sandbox");
+  });
+
+  it("renders onboarding banner with first action guide and non-clinical disclaimer, then dismisses it", async () => {
+    await act(async () => {
+      root = createRoot(container);
+      root.render(<NeuroReconClient />);
+    });
+
+    const onboardingBanner = container.querySelector(
+      '[data-testid="neuro-onboarding-banner"]'
+    );
+    expect(onboardingBanner).not.toBeNull();
+    expect(onboardingBanner?.textContent).toContain(
+      "First Action Guide · How to Repair Cortical Surfaces"
+    );
+    expect(onboardingBanner?.textContent).toContain(
+      "Educational Simulation Notice:"
+    );
+    expect(onboardingBanner?.textContent).toContain(
+      "Not for clinical diagnosis or medical decision-making."
+    );
+
+    // Dismiss guide button
+    const dismissBtn = onboardingBanner?.querySelector(
+      'button[aria-label="Dismiss First Action Guide"]'
+    );
+    expect(dismissBtn).toBeDefined();
+
+    await act(async () => {
+      (dismissBtn as HTMLButtonElement)?.click();
+    });
+
+    expect(
+      container.querySelector('[data-testid="neuro-onboarding-banner"]')
+    ).toBeNull();
+  });
+
+  it("renders accessible role and aria-labels on 2D slice canvases", async () => {
+    await act(async () => {
+      root = createRoot(container);
+      root.render(<NeuroReconClient />);
+    });
+
+    const canvases = Array.from(container.querySelectorAll("canvas"));
+    expect(canvases.length).toBeGreaterThanOrEqual(3);
+
+    canvases.forEach((canvas) => {
+      expect(canvas.getAttribute("role")).toBe("img");
+      expect(canvas.getAttribute("tabIndex")).toBe("0");
+      expect(canvas.getAttribute("aria-label")).toBeTruthy();
+    });
   });
 });

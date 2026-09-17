@@ -15,6 +15,7 @@ import {
   IconRefresh,
   IconTrophy,
   IconPlayerPlay,
+  IconPlayerPause,
   IconSnowflake,
   IconSparkles,
   IconBook,
@@ -125,15 +126,39 @@ export const LaserLoon: React.FC = () => {
     useState<PowerUpType | null>(null);
   const [activePowerUpTimeMs, setActivePowerUpTimeMs] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
-  const [screenShakeEnabled, setScreenShakeEnabled] = useState(true);
+  const [screenShakeEnabled, setScreenShakeEnabled] = useState<boolean>(() => {
+    if (typeof window !== "undefined" && window.matchMedia) {
+      return !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    }
+    return true;
+  });
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [gravity, setGravity] = useState<number>(0.15); // for sandbox mode
   const [showMuseum, setShowMuseum] = useState(false);
   const [selectedFlagIndex, setSelectedFlagIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
   const { announce } = useAnnouncer();
+  const isInitialPauseRef = useRef(true);
+
+  const togglePause = useCallback(() => {
+    setIsPaused((prev) => !prev);
+  }, []);
+
+  useEffect(() => {
+    if (isInitialPauseRef.current) {
+      isInitialPauseRef.current = false;
+      return;
+    }
+    announce(isPaused ? "Game paused." : "Game resumed.", "assertive");
+  }, [isPaused, announce]);
+
   const museumTrapRef = useFocusTrap<HTMLDivElement>(showMuseum, {
     onEscape: () => setShowMuseum(false),
+  });
+
+  const pauseTrapRef = useFocusTrap<HTMLDivElement>(isPaused, {
+    onEscape: () => togglePause(),
   });
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -505,6 +530,7 @@ export const LaserLoon: React.FC = () => {
     actKillsRef.current = 0;
     bossSpawnedRef.current = false;
     setBossActive(false);
+    setIsPaused(false);
     setGameState("playing");
     targetsRef.current = [];
     iceBlocksRef.current = [];
@@ -522,6 +548,7 @@ export const LaserLoon: React.FC = () => {
     setCombo(0);
     setMultiplier(1);
     setTimeLeft(fresh.timeLeft);
+    setIsPaused(false);
     ultimateMeterRef.current = 0;
     setUltimateMeter(0);
     activePowerUpRef.current = null;
@@ -546,6 +573,7 @@ export const LaserLoon: React.FC = () => {
   // Reset Game
   const resetGame = useCallback(() => {
     setGameState("idle");
+    setIsPaused(false);
     setScore(0);
     setCombo(0);
     setMultiplier(1);
@@ -598,27 +626,28 @@ export const LaserLoon: React.FC = () => {
 
   // Countdown timer for arcade mode
   useEffect(() => {
-    if (gameState !== "playing" || mode !== "arcade") return;
+    if (gameState !== "playing" || mode !== "arcade" || isPaused) return;
 
     const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          setGameState("gameover");
-          playSuccess();
-          recordEvent("laser_loon_complete", "project_click").catch(() => {});
-          return 0;
-        }
-        return prev - 1;
-      });
+      setTimeLeft((prev) => Math.max(0, prev - 1));
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [gameState, mode, playSuccess, recordEvent]);
+  }, [gameState, mode, isPaused]);
+
+  // Handle countdown expiration outside functional state updater
+  useEffect(() => {
+    if (gameState === "playing" && mode === "arcade" && timeLeft === 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setGameState("gameover");
+      playSuccess();
+      recordEvent("laser_loon_complete", "project_click").catch(() => {});
+    }
+  }, [gameState, mode, timeLeft, playSuccess, recordEvent]);
 
   // Active Power-Up timer
   useEffect(() => {
-    if (!activePowerUpType) return;
+    if (!activePowerUpType || isPaused) return;
     const interval = setInterval(() => {
       if (activePowerUpRef.current) {
         const remaining = activePowerUpRef.current.expiresAt - Date.now();
@@ -632,10 +661,11 @@ export const LaserLoon: React.FC = () => {
       }
     }, 100);
     return () => clearInterval(interval);
-  }, [activePowerUpType]);
+  }, [activePowerUpType, isPaused]);
 
   // Weapon fire trigger
   const fireWeapon = useCallback(() => {
+    if (isPaused) return;
     const now = performance.now();
     const hasHotdish = activePowerUpRef.current?.type === "hotdish";
     const weapon = WEAPONS[laserType] || WEAPONS["ruby-laser"];
@@ -762,6 +792,7 @@ export const LaserLoon: React.FC = () => {
     addScore,
     addUltimateMeter,
     recordEvent,
+    isPaused,
   ]);
 
   // Main Canvas Render & Physics Loop
@@ -786,14 +817,16 @@ export const LaserLoon: React.FC = () => {
     const handleContextRestored = () => {
       isContextLost = false;
       lastFrameTime = performance.now();
-      animFrameIdRef.current = requestAnimationFrame(renderLoop);
+      if (!isPaused) {
+        animFrameIdRef.current = requestAnimationFrame(renderLoop);
+      }
     };
 
     canvas.addEventListener("contextlost", handleContextLost);
     canvas.addEventListener("contextrestored", handleContextRestored);
 
     const renderLoop = (time: number) => {
-      if (isContextLost) return;
+      if (isContextLost || isPaused) return;
       const dt = Math.min(32, time - lastFrameTime) / 16.666;
       lastFrameTime = time;
 
@@ -1367,10 +1400,14 @@ export const LaserLoon: React.FC = () => {
 
       ctx.restore();
 
-      animFrameIdRef.current = requestAnimationFrame(renderLoop);
+      if (!isPaused) {
+        animFrameIdRef.current = requestAnimationFrame(renderLoop);
+      }
     };
 
-    animFrameIdRef.current = requestAnimationFrame(renderLoop);
+    if (!isPaused) {
+      animFrameIdRef.current = requestAnimationFrame(renderLoop);
+    }
 
     return () => {
       canvas.removeEventListener("contextlost", handleContextLost);
@@ -1397,6 +1434,7 @@ export const LaserLoon: React.FC = () => {
     addFloatingText,
     addScore,
     addUltimateMeter,
+    isPaused,
   ]);
 
   // Pointer / Mouse / Touch Controls
@@ -1571,12 +1609,28 @@ export const LaserLoon: React.FC = () => {
       "U",
       "m",
       "M",
+      "p",
+      "P",
       "Enter",
       "Escape",
     ];
 
     if (interceptKeys.includes(e.key)) {
       e.preventDefault();
+    }
+
+    if (e.key.toLowerCase() === "p") {
+      if (gameState === "playing" || isPaused) {
+        togglePause();
+        return;
+      }
+    }
+
+    if (isPaused) {
+      if (e.key === " " || e.key === "Enter" || e.key === "Escape") {
+        togglePause();
+      }
+      return;
     }
 
     if (e.key === " " || e.key === "Enter") {
@@ -1678,7 +1732,7 @@ export const LaserLoon: React.FC = () => {
                 setMode("campaign");
                 resetGame();
               }}
-              className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+              className={`min-h-[44px] px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer flex items-center justify-center focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none ${
                 mode === "campaign"
                   ? "bg-red-500 text-white shadow-[0_0_12px_rgba(239,68,68,0.4)]"
                   : "text-neutral-400 hover:text-white"
@@ -1691,7 +1745,7 @@ export const LaserLoon: React.FC = () => {
                 setMode("arcade");
                 resetGame();
               }}
-              className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+              className={`min-h-[44px] px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer flex items-center justify-center focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none ${
                 mode === "arcade"
                   ? "bg-red-500 text-white shadow-[0_0_12px_rgba(239,68,68,0.4)]"
                   : "text-neutral-400 hover:text-white"
@@ -1704,7 +1758,7 @@ export const LaserLoon: React.FC = () => {
                 setMode("sandbox");
                 setGameState("playing");
               }}
-              className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+              className={`min-h-[44px] px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer flex items-center justify-center focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none ${
                 mode === "sandbox"
                   ? "bg-red-500 text-white shadow-[0_0_12px_rgba(239,68,68,0.4)]"
                   : "text-neutral-400 hover:text-white"
@@ -1719,7 +1773,7 @@ export const LaserLoon: React.FC = () => {
             <button
               onClick={() => selectLaserType("ruby-laser")}
               aria-pressed={laserType === "ruby-laser"}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer flex items-center gap-1 ${
+              className={`min-h-[44px] px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none ${
                 laserType === "ruby-laser"
                   ? "bg-red-500/20 text-red-400 border border-red-500/40 shadow-[0_0_10px_rgba(239,68,68,0.3)]"
                   : "text-neutral-400 hover:text-white border border-transparent"
@@ -1730,7 +1784,7 @@ export const LaserLoon: React.FC = () => {
             <button
               onClick={() => selectLaserType("cyan-pulse")}
               aria-pressed={laserType === "cyan-pulse"}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer ${
+              className={`min-h-[44px] px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${
                 laserType === "cyan-pulse"
                   ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/40"
                   : "text-neutral-400 hover:text-white border border-transparent"
@@ -1741,7 +1795,7 @@ export const LaserLoon: React.FC = () => {
             <button
               onClick={() => selectLaserType("aurora-wave")}
               aria-pressed={laserType === "aurora-wave"}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer ${
+              className={`min-h-[44px] px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none ${
                 laserType === "aurora-wave"
                   ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
                   : "text-neutral-400 hover:text-white border border-transparent"
@@ -1752,7 +1806,7 @@ export const LaserLoon: React.FC = () => {
             <button
               onClick={() => selectLaserType("ice-cannon")}
               aria-pressed={laserType === "ice-cannon"}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer flex items-center gap-1 ${
+              className={`min-h-[44px] px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:outline-none ${
                 laserType === "ice-cannon"
                   ? "bg-sky-500/20 text-sky-400 border border-sky-500/40 shadow-[0_0_10px_rgba(56,189,248,0.3)]"
                   : "text-neutral-400 hover:text-white border border-transparent"
@@ -1767,7 +1821,7 @@ export const LaserLoon: React.FC = () => {
           <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
             <button
               onClick={() => setShowMuseum(true)}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-amber-300 border border-amber-500/30 transition-all cursor-pointer"
+              className="min-h-[44px] inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-amber-300 border border-amber-500/30 transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none"
             >
               <IconBook className="w-3.5 h-3.5" />
               <span>Flag Museum</span>
@@ -1885,6 +1939,24 @@ export const LaserLoon: React.FC = () => {
                 </span>
               </div>
             )}
+
+            {(gameState === "playing" || isPaused) && (
+              <button
+                type="button"
+                onClick={togglePause}
+                aria-label={isPaused ? "Resume Game" : "Pause Game"}
+                className="min-h-[44px] min-w-[44px] px-3 py-1 rounded-full bg-neutral-900/90 border border-neutral-800 hover:border-red-500/50 text-neutral-200 hover:text-red-400 font-mono text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none"
+              >
+                {isPaused ? (
+                  <IconPlayerPlay className="w-3.5 h-3.5 fill-current text-red-400" />
+                ) : (
+                  <IconPlayerPause className="w-3.5 h-3.5 text-red-400" />
+                )}
+                <span className="hidden sm:inline">
+                  {isPaused ? "Resume" : "Pause"} [P]
+                </span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -1965,10 +2037,260 @@ export const LaserLoon: React.FC = () => {
           tabIndex={0}
           className={
             isFullscreen
-              ? "max-h-[var(--layout-viewport-budget,calc(100dvh-var(--header-height,80px)-var(--footer-height,48px)))] max-h-[calc(100dvh-var(--header-height,80px)-var(--footer-height,48px))] max-w-full aspect-[768/420] object-contain block cursor-crosshair touch-none my-auto"
-              : "w-full h-auto aspect-[768/420] block cursor-crosshair touch-none"
+              ? "max-h-[var(--layout-viewport-budget,calc(100dvh-var(--header-height,80px)-var(--footer-height,48px)))] max-h-[calc(100dvh-var(--header-height,80px)-var(--footer-height,48px))] max-w-full aspect-[768/420] object-contain block cursor-crosshair touch-none my-auto focus:outline-none focus:ring-2 focus:ring-red-500/50"
+              : "w-full h-auto aspect-[768/420] block cursor-crosshair touch-none focus:outline-none focus:ring-2 focus:ring-red-500/50"
           }
         />
+
+        {/* Pause Overlay Screen */}
+        {isPaused && (
+          <div className="arcade-shooter-pause absolute inset-0 bg-neutral-950/90 backdrop-blur-md z-40 flex flex-col items-center justify-center text-center p-4 select-none overflow-y-auto">
+            <div
+              ref={pauseTrapRef}
+              className="max-w-md w-full bg-neutral-900/95 border border-red-500/40 rounded-3xl p-6 shadow-2xl flex flex-col items-center my-auto"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center mb-3 text-red-400">
+                <IconPlayerPause className="w-7 h-7" />
+              </div>
+              <h3 className="text-2xl font-bold text-white font-mono tracking-tight mb-1">
+                GAME PAUSED
+              </h3>
+              <p className="text-xs text-neutral-400 mb-6 font-mono">
+                Act {currentActNum} campaign session paused.
+              </p>
+
+              <div className="flex flex-col gap-3 w-full font-mono text-xs font-bold">
+                <button
+                  onClick={togglePause}
+                  className="min-h-[44px] min-w-[44px] w-full px-6 py-3 bg-red-500 hover:bg-red-400 text-white rounded-xl shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-all flex items-center justify-center gap-2 cursor-pointer focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+                >
+                  <IconPlayerPlay className="w-4 h-4 fill-current" />
+                  <span>RESUME GAME [P / SPACE]</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setIsPaused(false);
+                    startGame();
+                  }}
+                  className="min-h-[44px] min-w-[44px] w-full px-6 py-3 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded-xl border border-neutral-700 transition-all flex items-center justify-center gap-2 cursor-pointer focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none"
+                >
+                  <IconRefresh className="w-4 h-4 text-red-400" />
+                  <span>RESTART CAMPAIGN</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setIsPaused(false);
+                    resetGame();
+                  }}
+                  className="min-h-[44px] min-w-[44px] w-full px-6 py-3 bg-neutral-950 hover:bg-neutral-900 text-neutral-400 hover:text-white rounded-xl border border-neutral-800 transition-all flex items-center justify-center gap-2 cursor-pointer focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none"
+                >
+                  <IconX className="w-4 h-4 text-red-500" />
+                  <span>EXIT TO CABINET MENU</span>
+                </button>
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-neutral-800 w-full text-[10px] font-mono text-neutral-500 flex justify-around flex-wrap gap-2">
+                <span>WASD: Move</span>
+                <span>Click: Fire</span>
+                <span>1-4: Optics</span>
+                <span>U: Tremolo</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Off-screen Accessible DOM Fallback Subtree */}
+        <div className="sr-only" aria-label="Laser Loon Accessible Subtree">
+          <fieldset>
+            <legend>Laser Loon Game State and Controls</legend>
+
+            <div role="group" aria-label="Laser Loon Telemetry and Status">
+              <output htmlFor="laser-loon-score">Score: {score}</output>
+              <output htmlFor="laser-loon-highscore">
+                High Score: {effectiveHighScore}
+              </output>
+              <output htmlFor="laser-loon-mode">Mode: {mode}</output>
+              <output htmlFor="laser-loon-status">
+                Game Status: {gameState}
+              </output>
+              <output htmlFor="laser-loon-act">
+                Act: {currentActNum} of 4
+              </output>
+              <output htmlFor="laser-loon-combo">Combo: {combo}x</output>
+              <output htmlFor="laser-loon-multiplier">
+                Multiplier: {multiplier}x
+              </output>
+              <output htmlFor="laser-loon-timer">
+                Time Remaining: {timeLeft}s
+              </output>
+              <output htmlFor="laser-loon-ultimate">
+                Ultimate Tremolo: {ultimateMeter}%
+              </output>
+              <output htmlFor="laser-loon-weapon">
+                Selected Optics: {WEAPONS[laserType]?.name || laserType}
+              </output>
+              {bossActive && (
+                <output htmlFor="laser-loon-boss">
+                  Boss {bossName}: {Math.max(0, bossHp)} / {bossMaxHp} HP
+                </output>
+              )}
+            </div>
+
+            <div role="group" aria-label="Laser Loon Interactive Controls">
+              <button
+                type="button"
+                onClick={startGame}
+                disabled={gameState === "playing"}
+              >
+                Start Game
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setMode("campaign")}
+                aria-pressed={mode === "campaign"}
+              >
+                Campaign Mode
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode("arcade")}
+                aria-pressed={mode === "arcade"}
+              >
+                Arcade Mode
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode("sandbox")}
+                aria-pressed={mode === "sandbox"}
+              >
+                Sandbox Mode
+              </button>
+
+              <button
+                type="button"
+                onClick={() => selectLaserType("ruby-laser")}
+                aria-pressed={laserType === "ruby-laser"}
+              >
+                Optics: Ruby Laser
+              </button>
+              <button
+                type="button"
+                onClick={() => selectLaserType("cyan-pulse")}
+                aria-pressed={laserType === "cyan-pulse"}
+              >
+                Optics: Cyan Pulse
+              </button>
+              <button
+                type="button"
+                onClick={() => selectLaserType("aurora-wave")}
+                aria-pressed={laserType === "aurora-wave"}
+              >
+                Optics: Aurora Wave
+              </button>
+              <button
+                type="button"
+                onClick={() => selectLaserType("ice-cannon")}
+                aria-pressed={laserType === "ice-cannon"}
+              >
+                Optics: Ice Cannon
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  isFiringRef.current = true;
+                  fireWeapon();
+                  announce("Laser weapon fired.", "polite");
+                }}
+              >
+                Fire Weapon
+              </button>
+
+              <button
+                type="button"
+                onClick={fireUltimateTremolo}
+                disabled={ultimateMeter < 100 && mode !== "sandbox"}
+              >
+                Trigger Loon Tremolo
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const nextY = Math.max(40, loonPosRef.current.targetY - 25);
+                  loonPosRef.current.targetY = nextY;
+                  announce(
+                    `Moved Loon Up to Y position ${Math.round(nextY)}`,
+                    "polite"
+                  );
+                }}
+              >
+                Move Loon Up
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const nextY = Math.min(340, loonPosRef.current.targetY + 25);
+                  loonPosRef.current.targetY = nextY;
+                  announce(
+                    `Moved Loon Down to Y position ${Math.round(nextY)}`,
+                    "polite"
+                  );
+                }}
+              >
+                Move Loon Down
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const nextX = Math.max(40, loonPosRef.current.targetX - 25);
+                  loonPosRef.current.targetX = nextX;
+                  announce(
+                    `Moved Loon Left to X position ${Math.round(nextX)}`,
+                    "polite"
+                  );
+                }}
+              >
+                Move Loon Left
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const nextX = Math.min(728, loonPosRef.current.targetX + 25);
+                  loonPosRef.current.targetX = nextX;
+                  announce(
+                    `Moved Loon Right to X position ${Math.round(nextX)}`,
+                    "polite"
+                  );
+                }}
+              >
+                Move Loon Right
+              </button>
+
+              {mode === "sandbox" && (
+                <label htmlFor="laser-loon-gravity-input">
+                  Sandbox Gravity Setting
+                  <input
+                    id="laser-loon-gravity-input"
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={gravity}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value);
+                      setGravity(val);
+                      announce(`Sandbox gravity adjusted to ${val}`, "polite");
+                    }}
+                  />
+                </label>
+              )}
+            </div>
+          </fieldset>
+        </div>
 
         {/* Start Overlay Screen */}
         {gameState === "idle" && (
@@ -2318,18 +2640,18 @@ export const LaserLoon: React.FC = () => {
         <div className="flex items-center gap-4">
           <button
             onClick={() => setSoundEnabled((prev) => !prev)}
-            className="hover:text-neutral-300 transition-colors cursor-pointer flex items-center gap-1"
+            className="min-h-[44px] px-2 py-1 hover:text-neutral-300 transition-colors cursor-pointer flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none rounded-lg"
           >
             {soundEnabled ? (
-              <IconVolume className="w-3 h-3 text-red-400" />
+              <IconVolume className="w-3.5 h-3.5 text-red-400" />
             ) : (
-              <IconVolumeOff className="w-3 h-3" />
+              <IconVolumeOff className="w-3.5 h-3.5" />
             )}
             Audio: {soundEnabled ? "ON" : "MUTED"}
           </button>
           <button
             onClick={() => setScreenShakeEnabled((prev) => !prev)}
-            className="hover:text-neutral-300 transition-colors cursor-pointer"
+            className="min-h-[44px] px-2 py-1 hover:text-neutral-300 transition-colors cursor-pointer flex items-center focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none rounded-lg"
           >
             Screen Shake: {screenShakeEnabled ? "ON" : "OFF"}
           </button>

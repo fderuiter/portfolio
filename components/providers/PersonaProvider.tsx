@@ -1,6 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useState, useMemo, useEffect } from "react";
+import React, { createContext, useContext, useMemo, useCallback } from "react";
+import { usePersistentState } from "@/hooks/usePersistentState";
 
 type PersonaType = "recruiter" | "technical";
 
@@ -12,43 +13,47 @@ interface PersonaContextType {
 const PersonaContext = createContext<PersonaContextType | null>(null);
 
 export function PersonaProvider({ children }: { children: React.ReactNode }) {
-  const [persona, setPersonaState] = useState<PersonaType>("recruiter");
+  const [persona, setPersistentPersona] = usePersistentState<PersonaType>(
+    "global-persona",
+    "recruiter"
+  );
 
-  // Hydrate from localStorage on client mount to persist choice across navigation/refreshes
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("global-persona");
-      if (saved === "technical" || saved === "recruiter") {
-        setTimeout(() => {
-          setPersonaState(saved);
-        }, 0);
+  const setPersona = useCallback(
+    (newPersona: PersonaType) => {
+      let scrollY = 0;
+      if (typeof window !== "undefined") {
+        scrollY = window.scrollY;
       }
-    } catch (e) {
-      console.error("Failed to load global-persona from localStorage", e);
-    }
-  }, []);
-
-  const setPersona = (newPersona: PersonaType) => {
-    setPersonaState(newPersona);
-    try {
-      localStorage.setItem("global-persona", newPersona);
-    } catch (e) {
-      console.error("Failed to save global-persona to localStorage", e);
-    }
-  };
+      setPersistentPersona(newPersona);
+      if (
+        typeof window !== "undefined" &&
+        typeof window.scrollTo === "function"
+      ) {
+        requestAnimationFrame(() => {
+          try {
+            window.scrollTo({ top: scrollY, behavior: "instant" });
+          } catch {
+            // ignore JSDOM unsupported scrollTo
+          }
+        });
+      }
+    },
+    [setPersistentPersona]
+  );
 
   const value = useMemo(
     () => ({
-      persona,
+      persona:
+        persona === "technical" || persona === "recruiter"
+          ? persona
+          : "recruiter",
       setPersona,
     }),
-    [persona]
+    [persona, setPersona]
   );
 
   return (
-    <PersonaContext.Provider value={value}>
-      {children}
-    </PersonaContext.Provider>
+    <PersonaContext.Provider value={value}>{children}</PersonaContext.Provider>
   );
 }
 

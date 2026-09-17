@@ -37,6 +37,24 @@ The existing public cache is evicted only after Prisma confirms creation.
 
 ***
 
+### deleteBlogPost()
+
+> `static` **deleteBlogPost**(`id`): `Promise`\<\{ `body`: `string`; `created_at`: `Date`; `dek`: `string`; `hero_image_url`: `string` \| `null`; `id`: `string`; `pillar`: `string`; `published`: `boolean`; `reading_time_minutes`: `number` \| `null`; `slug`: `string`; `tags`: `string`; `title`: `string`; `updated_at`: `Date`; \} \| `null`\>
+
+Deletes a persisted blog post or draft by ID and evicts associated caches.
+
+#### Parameters
+
+##### id
+
+`string`
+
+#### Returns
+
+`Promise`\<\{ `body`: `string`; `created_at`: `Date`; `dek`: `string`; `hero_image_url`: `string` \| `null`; `id`: `string`; `pillar`: `string`; `published`: `boolean`; `reading_time_minutes`: `number` \| `null`; `slug`: `string`; `tags`: `string`; `title`: `string`; `updated_at`: `Date`; \} \| `null`\>
+
+***
+
 ### evictBlogPostCache()
 
 > `static` **evictBlogPostCache**(`slug`): `Promise`\<`boolean`\>
@@ -64,6 +82,25 @@ True if the Redis cache keys were successfully deleted; false if Redis
 
 ***
 
+### flushBufferedReactionsToDatabase()
+
+> `static` **flushBufferedReactionsToDatabase**(`batchSize?`): `Promise`\<\{ `inserted`: `number`; `processed`: `number`; \}\>
+
+Flushes buffered blog post reactions from Upstash Redis to Neon Postgres in batches.
+Executed during scheduled maintenance.
+
+#### Parameters
+
+##### batchSize?
+
+`number` = `500`
+
+#### Returns
+
+`Promise`\<\{ `inserted`: `number`; `processed`: `number`; \}\>
+
+***
+
 ### getAllPublishedBlogPosts()
 
 > `static` **getAllPublishedBlogPosts**(): `Promise`\<[`BlogPostData`](../../../fallback-blog-posts/interfaces/BlogPostData.md)[]\>
@@ -82,6 +119,24 @@ Guarantees:
 #### Returns
 
 `Promise`\<[`BlogPostData`](../../../fallback-blog-posts/interfaces/BlogPostData.md)[]\>
+
+***
+
+### getBlogPostById()
+
+> `static` **getBlogPostById**(`id`): `Promise`\<\{ `body`: `string`; `created_at`: `Date`; `dek`: `string`; `hero_image_url`: `string` \| `null`; `id`: `string`; `pillar`: `string`; `published`: `boolean`; `reading_time_minutes`: `number` \| `null`; `slug`: `string`; `tags`: `string`; `title`: `string`; `updated_at`: `Date`; \} \| `null`\>
+
+Retrieves a persisted blog post by ID (published or draft) for admin inspection.
+
+#### Parameters
+
+##### id
+
+`string`
+
+#### Returns
+
+`Promise`\<\{ `body`: `string`; `created_at`: `Date`; `dek`: `string`; `hero_image_url`: `string` \| `null`; `id`: `string`; `pillar`: `string`; `published`: `boolean`; `reading_time_minutes`: `number` \| `null`; `slug`: `string`; `tags`: `string`; `title`: `string`; `updated_at`: `Date`; \} \| `null`\>
 
 ***
 
@@ -146,14 +201,60 @@ collection. This intentionally never consults the public fallback data.
 
 ***
 
+### getReactions()
+
+> `static` **getReactions**(`slug`, `connectionHash`): `Promise`\<\{ `blogPostSlug`: `string`; `counts`: \{\[`key`: `string`\]: `number`; \}; `success`: `boolean`; `userReactions`: `string`[]; \}\>
+
+Gets aggregated reactions for a blog post.
+Employs Two-Tier Compute Shield:
+Reads cached base counts (3600s TTL) and merges uncommitted Redis write-buffer increments,
+completely avoiding database queries during active browsing.
+
+#### Parameters
+
+##### slug
+
+`string`
+
+##### connectionHash
+
+`string`
+
+#### Returns
+
+`Promise`\<\{ `blogPostSlug`: `string`; `counts`: \{\[`key`: `string`\]: `number`; \}; `success`: `boolean`; `userReactions`: `string`[]; \}\>
+
+***
+
+### submitReaction()
+
+> `static` **submitReaction**(`input`, `connectionHash`): `Promise`\<\{ `counts?`: `Record`\<`string`, `number`\>; `duplicate?`: `boolean`; `message?`: `string`; `notFound?`: `boolean`; `reactionType?`: `string`; `success`: `boolean`; `userReactions?`: `string`[]; \}\>
+
+Submits a reaction for a published blog post.
+Buffers reaction increments via HINCRBY in Upstash Redis without waking Neon Postgres.
+
+#### Parameters
+
+##### input
+
+[`BlogPostReactionSubmissionInput`](../interfaces/BlogPostReactionSubmissionInput.md)
+
+##### connectionHash
+
+`string`
+
+#### Returns
+
+`Promise`\<\{ `counts?`: `Record`\<`string`, `number`\>; `duplicate?`: `boolean`; `message?`: `string`; `notFound?`: `boolean`; `reactionType?`: `string`; `success`: `boolean`; `userReactions?`: `string`[]; \}\>
+
+***
+
 ### updateDraftBlogPost()
 
 > `static` **updateDraftBlogPost**(`id`, `input`): `Promise`\<\{ `body`: `string`; `created_at`: `Date`; `dek`: `string`; `hero_image_url`: `string` \| `null`; `id`: `string`; `pillar`: `string`; `published`: `boolean`; `reading_time_minutes`: `number` \| `null`; `slug`: `string`; `tags`: `string`; `title`: `string`; `updated_at`: `Date`; \} \| `null`\>
 
-Applies a partial edit to an unpublished draft. The database predicate makes
-the unpublished state part of the write itself, preventing a concurrent
-publication from receiving a draft-only edit. Cache eviction runs only after
-persistence returns the updated record.
+Applies a partial edit to a blog post or draft. Handles publishing state transitions.
+Cache eviction runs only after persistence returns the updated record.
 
 #### Parameters
 

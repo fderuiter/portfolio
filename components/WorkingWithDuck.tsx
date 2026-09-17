@@ -57,6 +57,9 @@ import {
   dragDuckTo,
   releaseDuck,
   activeCodeBurst,
+  applySqueakyToy,
+  applyKongToy,
+  scrubBelly,
   mopIndoorPuddle,
   enterBathtub,
   scrubBathtub,
@@ -3217,8 +3220,8 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
           tabIndex={0}
           className={
             isFullscreen
-              ? "max-h-[var(--layout-viewport-budget,calc(100dvh-var(--header-height,80px)-var(--layout-dock-height,64px)))] max-h-[calc(100dvh-var(--header-height,80px)-var(--footer-height,48px))] max-w-full aspect-[800/500] object-contain block cursor-crosshair touch-none my-auto mx-auto [@media(max-height:500px)]:max-h-[45dvh]"
-              : "w-full h-auto aspect-[800/500] cursor-crosshair block touch-none [@media(max-height:500px)]:w-auto [@media(max-height:500px)]:max-w-full [@media(max-height:500px)]:max-h-[52dvh] [@media(max-height:500px)]:mx-auto"
+              ? "max-h-[var(--layout-viewport-budget,calc(100dvh-var(--header-height,80px)-var(--layout-dock-height,64px)))] max-h-[calc(100dvh-var(--header-height,80px)-var(--footer-height,48px))] max-w-full aspect-[800/500] object-contain block cursor-crosshair touch-none my-auto mx-auto [@media(max-height:500px)]:max-h-[45dvh] focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+              : "w-full h-auto aspect-[800/500] cursor-crosshair block touch-none [@media(max-height:500px)]:w-auto [@media(max-height:500px)]:max-w-full [@media(max-height:500px)]:max-h-[52dvh] [@media(max-height:500px)]:mx-auto focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
           }
         />
 
@@ -4389,6 +4392,194 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
           </div>
         </div>
       )}
+
+      {/* Off-screen Accessible DOM Fallback Subtree */}
+      <div
+        className="sr-only"
+        aria-label="Working with Duck Accessible Subtree"
+      >
+        <fieldset>
+          <legend>Working with Duck Companion State and Controls</legend>
+
+          <div role="group" aria-label="Duck Companion Telemetry and Status">
+            <output htmlFor="duck-score">
+              Total Score: {uiState.totalScore}
+            </output>
+            <output htmlFor="duck-highscore">
+              High Score: {Math.max(uiState.highScore, loadedHighScore)}
+            </output>
+            <output htmlFor="duck-level">
+              Sprint Level: {uiState.currentLevel}
+            </output>
+            <output htmlFor="duck-work">
+              Work Progress: {Math.round(uiState.workProgress)}%
+            </output>
+            <output htmlFor="duck-excitement">
+              Excitement: {Math.round(uiState.excitement)}%
+            </output>
+            <output htmlFor="duck-bladder">
+              Bladder: {Math.round(uiState.bladder)}%
+            </output>
+            <output htmlFor="duck-accessory">
+              Equipped Accessory: {uiState.activeAccessory}
+            </output>
+            <output htmlFor="duck-location">
+              Location: {uiState.inBathtub ? "Bathtub" : "Office Workspace"}
+            </output>
+          </div>
+
+          <div role="group" aria-label="Duck Companion Interactive Actions">
+            <button
+              type="button"
+              onClick={() => {
+                if (uiState.status === "idle") {
+                  applyTransition((state) => ({ ...state, status: "running" }));
+                  announce("Started Duck Companion Simulation.", "polite");
+                }
+              }}
+              disabled={uiState.status === "running"}
+            >
+              Launch Sprint {uiState.currentLevel || 1}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                handleGiveTreat();
+                announce("Gave a delicious treat to the duck.", "polite");
+              }}
+            >
+              Give Treat
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                applyTransition((state) => applySqueakyToy(state, 400, 250));
+                announce("Played with squeaky toy.", "polite");
+              }}
+            >
+              Use Squeaky Toy
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                applyTransition((state) => applyKongToy(state, 400, 250));
+                announce("Gave Kong toy filled with peanut butter.", "polite");
+              }}
+            >
+              Use Kong Toy
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                applyTransition((state) => scrubBelly(state, 400, 250));
+                announce("Gave duck a belly rub.", "polite");
+              }}
+            >
+              Scratch Belly Rub
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                applyTransition((state) => activeCodeBurst(state));
+                announce("Triggered code burst developer session.", "polite");
+              }}
+            >
+              Trigger Code Burst
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                handlePerformTrick("SIT");
+                announce("Commanded duck to Sit.", "polite");
+              }}
+            >
+              Trick: Sit
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                handlePerformTrick("HIGH_FIVE");
+                announce("Commanded duck to High Five.", "polite");
+              }}
+            >
+              Trick: High Five
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                handlePerformTrick("DROP_IT");
+                announce("Commanded duck to Drop It.", "polite");
+              }}
+            >
+              Trick: Drop It
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                handlePerformTrick("SPIN");
+                announce("Commanded duck to Spin.", "polite");
+              }}
+            >
+              Trick: Spin
+            </button>
+
+            {!uiState.inBathtub && (
+              <button
+                type="button"
+                onClick={() => {
+                  applyTransition((state) => enterBathtub(state));
+                  announce("Entered bathtub for duck bath time.", "polite");
+                }}
+              >
+                Enter Bathtub
+              </button>
+            )}
+
+            {uiState.inBathtub && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    applyTransition((state) =>
+                      scrubBathtub(state, Date.now(), 1)
+                    );
+                    announce("Scrubbed duck with soapy bubbles.", "polite");
+                  }}
+                >
+                  Scrub Duck
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    applyTransition((state) => rinseBathtub(state));
+                    announce("Rinsed duck with warm water.", "polite");
+                  }}
+                >
+                  Rinse Duck
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    applyTransition((state) => exitBathtub(state));
+                    announce("Exited bathtub clean and refreshed.", "polite");
+                  }}
+                >
+                  Exit Bathtub
+                </button>
+              </>
+            )}
+          </div>
+        </fieldset>
+      </div>
     </div>
   );
 };

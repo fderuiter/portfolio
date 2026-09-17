@@ -263,7 +263,8 @@ export interface WebApplicationSchemaOptions {
     | "GameApplication"
     | "DeveloperApplication"
     | "EducationalApplication"
-    | "MultimediaApplication";
+    | "MultimediaApplication"
+    | "SimulationApplication";
   operatingSystem?: string;
   genre?: string;
   browserRequirements?: string;

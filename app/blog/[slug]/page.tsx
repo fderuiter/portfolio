@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getAllPublishedBlogPosts, getBlogPostBySlug } from "@/lib/blog";
 import { RichNarrative } from "@/components/RichNarrative";
+import { BlogPostReactions } from "@/components/blog/BlogPostReactions";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
 import { PageLayout } from "@/components/PageLayout";
@@ -139,6 +140,9 @@ export default async function BlogPostPage({ params }: PageProps) {
         <article className="prose prose-invert max-w-none text-neutral-300 leading-relaxed space-y-8 mt-8">
           <RichNarrative html={post.body} />
         </article>
+
+        {/* Reader Reactions Control */}
+        <BlogPostReactions slug={post.slug} />
 
         {/* Sequential Next / Previous Dispatch Navigation */}
         {prevPost && nextPost && (

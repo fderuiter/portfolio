@@ -1,5 +1,6 @@
 import { CaseStudyService } from "@/lib/services/case-study-service";
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import { SandboxTerminal } from "@/components/SandboxTerminal";
 import { IconTerminal } from "@tabler/icons-react";
 import { TracingBeam } from "@/components/ui/TracingBeam";
@@ -217,6 +218,20 @@ export default async function CaseStudyPage({ params }: PageProps) {
           <h1 className="text-4xl md:text-5xl font-black tracking-tight text-neutral-100 mb-4 leading-tight">
             {study.title}
           </h1>
+
+          {/* Project Hero Image Banner */}
+          {study.hero_image_url && (
+            <div className="relative w-full h-64 md:h-80 rounded-xl border border-zinc-800 overflow-hidden mb-6 bg-zinc-900 shadow-lg">
+              <Image
+                src={study.hero_image_url}
+                alt={`Validated hero media for ${study.title}`}
+                fill
+                className="object-cover"
+                unoptimized
+                priority
+              />
+            </div>
+          )}
 
           {/* CRF.xl FluentUI Easter Egg Banner */}
           {slug === "crf-xl" && (

@@ -21,10 +21,20 @@ export const designManifest = {
     "muted": "#94a3b8",
     /** Original CSS Variable: --muted-strong */
     "muted-strong": "#cbd5e1",
+    /** Original CSS Variable: --text-secondary */
+    "text-secondary": "#94a3b8",
     /** Original CSS Variable: --brand-cyan */
     "brand-cyan": "#06b6d4",
     /** Original CSS Variable: --brand-cyan-glow */
     "brand-cyan-glow": "rgba(6, 182, 212, 0.15)",
+    /** Original CSS Variable: --cyan-glow */
+    "cyan-glow": "#38bdf8",
+    /** Original CSS Variable: --emerald-accent */
+    "emerald-accent": "#4ade80",
+    /** Original CSS Variable: --badge-muted-bg */
+    "badge-muted-bg": "#1e293b",
+    /** Original CSS Variable: --badge-muted-text */
+    "badge-muted-text": "#7dd3fc",
     /** Original CSS Variable: --brand-blue */
     "brand-blue": "#3b82f6",
     /** Original CSS Variable: --brand-blue-glow */
