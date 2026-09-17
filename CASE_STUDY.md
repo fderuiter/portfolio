@@ -8,20 +8,25 @@
   - **Sub-millisecond Routing Latency**: Delivered via Bun/Hono edge-native primitives.
   - **End-to-End Type Safety**: Shared schema contracts across `@kiln/api`, `@kiln/sdk`, `@kiln/shared`, and `@kiln/testing`.
   - **100% CI Gatekeeper Coverage**: Pipeline spanning strict linting, automated testing, duplicate code detection (`jscpd`), and dead code pruning (`knip`).
+
 ## Polyglot-TSP: Technical Breakdown & Portfolio Integration
 
 ## 1. Executive Summary & Value Proposition
 
 ### Problem Solved
+
 Cross-paradigm algorithmic benchmarking and verification of combinatorial optimization across **50+ programming languages**, evaluating how disparate memory models, type systems, runtime overheads, and hardware description semantics express brute-force Traveling Salesman Problem (TSP) solutions.
 
 ### Core Technical Highlight
+
 Polyglot test harness and unified verification architecture integrating compiled, interpreted, actor-based, logic, functional, and hardware description languages (**VHDL, Verilog, SPARK, Zig, Rust, APL, COBOL**) against identical matrix structures ($O(N!)$ space/time complexity bounds) with dual-tier testing (native test runners + Python `unittest` orchestrator).
 
 ### Key Metrics & Benchmarks
+
 - **50+ Language Implementations**: Covering imperative, functional, array-oriented, stack-based, logic, actor, and HDL paradigms.
 - **100% Target Parity**: Deterministic output alignment verified across standard matrices (3-city: `60`, 4-city: `80`, 5-city: `97`).
 - **Dual-Tier Test Suite**: Unified execution pipeline (`scripts/run_all.py`) and granular per-language test suites across native runtimes (`cargo test`, `go test`, `ghdl`, `iverilog`, `gnatmake`, `sunit`).
+
 ## Case Study: OxidizeMath — Technical Breakdown & Portfolio Integration
 
 ## 1. Executive Summary & Value Proposition
@@ -31,41 +36,46 @@ Polyglot test harness and unified verification architecture integrating compiled
 **Core Technical Highlight:** An end-to-end verified numerical execution engine (`verified_engine` and `unified_verification`) pairing compile-time procedural macros (`verified_engine_macros`) with runtime AST validation and dynamic double-buffering simulation pipelines.
 
 **Key Metrics & Benchmarks:**
+
 - **Domain Monorepo:** 10+ decoupled, domain-focused crates (`domain_ai`, `domain_physics`, `domain_applied`, `domain_biology`, `math_commons`, `oxidize_core`, `pure_math`, `verified_engine`, `verified_engine_macros`, `math_explorer_gui`).
 - **Target Deployment:** Identical cross-platform single-binary desktop execution and zero-install WebAssembly (WASM via Trunk) deployment using immediate-mode GUI (`egui`).
 - **Verification Guarantee:** 100% deterministic test suites across differential PDE solvers, Lattice Boltzmann fluid simulations, and high-energy physics modules.
+
 ## [Case Study] UALBF: Verified Computational Proof Engine & Search Architecture
 
 ## 1. Executive Summary & Value Proposition
 
-* **Problem Solved:** Investigates the existence of quasiperfect numbers (integers $n$ where the sum of positive divisors $\sigma(n) = 2n + 1$). The system automates large-scale search-space exploration over prime signature lattices while eliminating human arithmetic error through machine-checked formal verification.
-* **Core Technical Highlight:** A verified hybrid architecture pairing a high-throughput Rust branch-and-bound search engine with a Lean 4 formal verification pipeline and Verus-backed formal specs. The engine executes fast cyclotomic polynomial evaluations, bipartite sieve pruning, and obstruction certificate generation via C/FFI, which Lean 4 then formally verifies with zero unproven mathematical axioms.
-* **Key Metrics / Benchmarks:**
-  * Exhaustive search space exploration up to prime exponent bounds $k \ge 11$ and abundancy constraints across hundreds of thousands of lattice nodes.
-  * 100% sound proof verification via Lean 4 kernel with zero unverified axioms (`#print axioms` checked in CI).
-  * Sub-second certificate ingest and proof validation using deterministic JSON proof manifests.
+- **Problem Solved:** Investigates the existence of quasiperfect numbers (integers $n$ where the sum of positive divisors $\sigma(n) = 2n + 1$). The system automates large-scale search-space exploration over prime signature lattices while eliminating human arithmetic error through machine-checked formal verification.
+- **Core Technical Highlight:** A verified hybrid architecture pairing a high-throughput Rust branch-and-bound search engine with a Lean 4 formal verification pipeline and Verus-backed formal specs. The engine executes fast cyclotomic polynomial evaluations, bipartite sieve pruning, and obstruction certificate generation via C/FFI, which Lean 4 then formally verifies with zero unproven mathematical axioms.
+- **Key Metrics / Benchmarks:**
+  - Exhaustive search space exploration up to prime exponent bounds $k \ge 11$ and abundancy constraints across hundreds of thousands of lattice nodes.
+  - 100% sound proof verification via Lean 4 kernel with zero unverified axioms (`#print axioms` checked in CI).
+  - Sub-second certificate ingest and proof validation using deterministic JSON proof manifests.
 
 ---
 
 ## 2. Deep Dive Engineering Focus Areas
 
 ### Architecture & Patterns
+
 - **Modular Clean Architecture**: Clean separation between HTTP transport (`routes.ts`), domain business logic (`service.ts`), and persistence layers (`repository.ts`).
 - **Code-Generation Scaffolding**: Template engines provision tenant-isolated modules dynamically via `scripts/generate.ts`.
 - **Monorepo Type Boundary**: Zero-runtime-cost RPC type sharing across workspace packages (`@kiln/api`, `@kiln/sdk`, `@kiln/shared`, `@kiln/testing`).
 
 ### Trade-Offs & Architectural Decisions
+
 1. **Bun & Hono vs. Express / Node.js**:
-   - *Decision*: Adopted Bun native runtime and Hono router for ultra-lightweight startup profiles and multi-target compilation (Cloudflare Workers, Node.js, Fastly).
-   - *Trade-off*: Relinquished legacy Node.js CJS ecosystem compatibility in favor of ESM-first edge performance.
+   - _Decision_: Adopted Bun native runtime and Hono router for ultra-lightweight startup profiles and multi-target compilation (Cloudflare Workers, Node.js, Fastly).
+   - _Trade-off_: Relinquished legacy Node.js CJS ecosystem compatibility in favor of ESM-first edge performance.
 2. **Drizzle ORM vs. Heavy ORMs (e.g., Prisma)**:
-   - *Decision*: Selected Drizzle ORM for zero abstraction overhead, direct SQL query mapping, and fast startup times in ephemeral serverless invocations.
-   - *Trade-off*: Required writing explicit migration CLI tooling rather than relying on heavy automatic database engine binaries.
+   - _Decision_: Selected Drizzle ORM for zero abstraction overhead, direct SQL query mapping, and fast startup times in ephemeral serverless invocations.
+   - _Trade-off_: Required writing explicit migration CLI tooling rather than relying on heavy automatic database engine binaries.
 3. **Code Generation vs. Dynamic Runtime Metaprogramming**:
-   - *Decision*: Built CLI generators (`generate.ts`, `prune.ts`) to output explicit, type-checked TypeScript source code.
-   - *Trade-off*: Minor file volume increase, but complete elimination of opaque runtime reflection and performance degradation.
+   - _Decision_: Built CLI generators (`generate.ts`, `prune.ts`) to output explicit, type-checked TypeScript source code.
+   - _Trade-off_: Minor file volume increase, but complete elimination of opaque runtime reflection and performance degradation.
 
 ### Edge Cases & Edge Solutions
+
 - **Multi-Tenant Data Isolation**: Contextual tenant repository wrappers and database-level scoped schema constraints prevent cross-tenant data bleed.
 - **Migration Drift Prevention**: Automated preflight health checks and schema synchronization scripts (`sync-schema.ts`, `squash.ts`) prevent schema drift during automated CI/CD deployments.
 - **Edge Auth Guards**: Security middleware handles tenant identity tokens, role propagation, and standardized request headers across edge nodes.
@@ -75,6 +85,7 @@ Polyglot test harness and unified verification architecture integrating compiled
 ## 3. High-Impact Featured Code Snippets
 
 ### `packages/api/utils/factory.ts` — Type-Safe Dynamic Middleware & Route Factory
+
 ```typescript
 import { Hono } from "hono";
 import type { Env } from "../types/env";
@@ -89,6 +100,7 @@ export function createRouter() {
 ```
 
 ### `packages/api/modules/auth/guard.ts` — Multi-Tenant Auth Guard & Context Injector
+
 ```typescript
 import { createMiddleware } from "hono/factory";
 import type { Env } from "../../types/env";
@@ -98,7 +110,10 @@ export const tenantAuthGuard = createMiddleware<Env>(async (c, next) => {
   const authHeader = c.req.header("authorization");
 
   if (!tenantId || !authHeader) {
-    return c.json({ error: "Unauthorized: Missing tenant context or credentials" }, 401);
+    return c.json(
+      { error: "Unauthorized: Missing tenant context or credentials" },
+      401
+    );
   }
 
   // Set scoped tenant context in Hono environment state
@@ -108,12 +123,16 @@ export const tenantAuthGuard = createMiddleware<Env>(async (c, next) => {
 ```
 
 ### `scripts/generate.ts` — Module Scaffolding Engine
+
 ```typescript
 import fs from "fs";
 import path from "path";
 
 export async function generateModule(moduleName: string) {
-  const targetDir = path.resolve(process.cwd(), `packages/api/modules/${moduleName}`);
+  const targetDir = path.resolve(
+    process.cwd(),
+    `packages/api/modules/${moduleName}`
+  );
 
   if (fs.existsSync(targetDir)) {
     throw new Error(`Module ${moduleName} already exists!`);
@@ -156,15 +175,18 @@ graph TD
 
 1. **Database Driver Refactoring**: Adapt persistence layers to seamlessly swap between HTTP serverless drivers (e.g. Neon serverless driver) for edge functions and pooling TCP drivers for containerized services.
 2. **SDK Capability Expansion**: Expand the generated SDK client package to include configurable exponential backoff retries, local cache hydration, and SSE / WebSocket streaming abstractions.
+
 - **Unified Interface / Driver Pattern**: `scripts/run_all.py` acts as a compiler abstraction layer and process driver, mapping file extensions to compile and execute commands, abstracting invocation models across native executables, bytecode interpreters, and JVM/CLR/Wasm targets.
 - **Standardized Algorithmic Invariant**: Every implementation enforces fixed-origin canonical permutations ($0 \to P(1 \dots N-1) \to 0$) reducing permutation operations from $N!$ to $(N-1)!$.
 - **Dual-Tier Quality Gate**: Subprocess-based Python test wrappers (`Testing/test_*.py`) alongside native language test suites (e.g., `Rust/tests/tsp_test.rs`, `Go/tsp_test.go`, `VHDL/tsp_tb.vhdl`).
 
 ### Trade-Offs & Decisions
+
 - **Exhaustive Permutations ($O(N!)$) vs. Dynamic Programming / Heuristics ($O(N^2 2^N)$)**: Prioritized strict brute-force permutation generation across all targets to maintain an identical baseline for syntactic and runtime execution comparisons across obscure and exotic paradigms.
 - **Subprocess CLI Execution vs. Foreign Function Interface (FFI)**: Chose process-level standard stream (`stdout`/`stderr`) assertion over C ABI bindings to accommodate non-standardized runtimes, HDL simulation pipelines (`ghdl`, `iverilog`), and legacy/esoteric environments (INTERCAL, COBOL, Modula-2).
 
 ### Edge Cases & Edge Solutions
+
 - **Index Offsets (0-indexed vs. 1-indexed Runtimes)**: Managed index boundary shifts in 1-indexed environments (Fortran, Julia, APL, Lua, Smalltalk) while standardizing output format representation (`0 -> 1 -> ... -> 0`).
 - **Non-Automated Environments**: Explicitly documented and quarantined headless runner limitations for legacy or interactive frameworks (VBA, incomplete Assembly stubs) in dedicated technical specifications (`Docs/vba_testing.md`, `Docs/assembly_testing.md`).
 - **Memory & Permutation Backtracking**: Standardized in-place array swapping (Heap's / lexicographical backtracking) across systems languages (C, C++, Rust, Zig, Modula-2, Ada) versus immutable list transformations in functional languages (Haskell, OCaml, Clojure, Scheme).
@@ -174,6 +196,7 @@ graph TD
 ## 3. Case Study Content Blueprint
 
 ### Context & Motivation
+
 Exploration of computational ergonomics, runtime tooling, and language design mechanics across 50+ languages. Defining architectural rules for implementing identical combinatorial search algorithms with strict baseline verification across diverse compilation targets.
 
 ### System Design Architecture
@@ -197,12 +220,15 @@ flowchart TD
 ### Key Technical Challenges
 
 #### Challenge 1: Native In-Place Permutation vs. Functional Laziness
+
 Contrast memory-bounded mutable backtracking in Zig/Rust/C against immutable sequence unfolding in Haskell/Scala/Scheme.
 
 #### Challenge 2: Hardware Description Verification
+
 Adapting procedural iteration into synthesizable/testbench-driven simulation blocks in VHDL (`tsp_tb.vhdl`) and Verilog (`tsp_test.v`).
 
 #### Challenge 3: Multi-Toolchain Test Automation
+
 Implementing cross-platform fallback mechanisms for environments lacking native testing frameworks (`Docs/vba_testing.md`, stub runner `fant`, custom test drivers).
 
 ---
@@ -210,6 +236,7 @@ Implementing cross-platform fallback mechanisms for environments lacking native 
 ## 4. Contrasting Code Snippets
 
 ### Rust: Zero-Cost Abstractions & Memory Safety
+
 ```rust
 /// Solves Traveling Salesman Problem using zero-cost iterator abstractions and in-place Heap's backtracking.
 pub fn solve_tsp(matrix: &[Vec<u32>]) -> (u32, Vec<usize>) {
@@ -241,6 +268,7 @@ pub fn solve_tsp(matrix: &[Vec<u32>]) -> (u32, Vec<usize>) {
 ```
 
 ### Haskell: Lazy Stream Recursion & Immutable Sequence Unfolding
+
 ```haskell
 module TSP (solveTSP) where
 
@@ -258,7 +286,8 @@ solveTSP matrix =
 ```
 
 ### Verilog: Discrete Event Hardware Logic & Testbench Clock Evaluation
-```verilog
+
+````verilog
 module tsp_solver #(
     parameter CITIES = 4
 ) (
@@ -315,7 +344,7 @@ graph TD
     C --> D[Domain Crates: physics, ai, biology, applied, pure_math]
     D --> E[Interactive Layer: math_explorer_gui / egui]
     D --> F[CLI & Verification Tools: unified_verification]
-```
+````
 
 ### Double-Buffered Simulation Pipeline
 
@@ -340,6 +369,7 @@ sequenceDiagram
 ## 4. High-Impact Code Snippets
 
 ### 1. Proc-Macro Theory Verification (`verified_engine_macros/src/latex_parser.rs`)
+
 Parsing LaTeX specifications into AST invariant checks at compile-time:
 
 ```rust
@@ -374,6 +404,7 @@ pub fn verify_latex_spec(input: TokenStream) -> TokenStream {
 ```
 
 ### 2. Adaptive Fused PDE Solver (`pure_math/src/pure_math/analysis/pde/fused_stepper.rs`)
+
 Fused Runge-Kutta stepper enforcing numerical stability against non-linear chaos divergence:
 
 ```rust
@@ -415,6 +446,7 @@ where
 ```
 
 ### 3. Asynchronous Double-Buffered Orchestration (`math_explorer_gui/src/async_sim/unified.rs`)
+
 Multi-domain state orchestration decoupling rendering from simulation threads:
 
 ```rust
@@ -461,6 +493,7 @@ impl<T: Clone> DoubleBuffer<T> {
 ---
 
 ## 6. Portfolio Integration Taxonomy
+
 - **Slug**: `polyglot-tsp`
 - **Primary Language**: `Rust`
 - **Stack Badges**: `Rust`, `C++`, `Zig`, `Go`, `Haskell`, `Python`, `Ada`, `VHDL`
@@ -474,13 +507,13 @@ impl<T: Clone> DoubleBuffer<T> {
 
 ### Trade-Offs & Decisions
 
-* **Dual-Engine (Rust + Lean 4) vs. Pure Lean 4 Computation:** Writing the branch-and-bound engine entirely inside Lean 4 would result in slow evaluation cycles; running an unverified search in Rust with deterministic certificate emission allows Lean 4 to act as an independent, lightweight proof-checker without sacrificing raw CPU throughput.
-* **Fixed-Precision Arithmetic vs. Arbitrary Precision:** Used bounded 64-bit/128-bit fixed representations (`Fixed64.lean`) and rational intervals for rapid sieving, with fallbacks to arbitrary-precision cyclotomic evaluation only when bounds require exact verification.
+- **Dual-Engine (Rust + Lean 4) vs. Pure Lean 4 Computation:** Writing the branch-and-bound engine entirely inside Lean 4 would result in slow evaluation cycles; running an unverified search in Rust with deterministic certificate emission allows Lean 4 to act as an independent, lightweight proof-checker without sacrificing raw CPU throughput.
+- **Fixed-Precision Arithmetic vs. Arbitrary Precision:** Used bounded 64-bit/128-bit fixed representations (`Fixed64.lean`) and rational intervals for rapid sieving, with fallbacks to arbitrary-precision cyclotomic evaluation only when bounds require exact verification.
 
 ### Edge Cases & Edge Solutions
 
-* **Axiom Leakage in Automated Verification:** Handled potential axiom leaks (e.g., accidental `sorry` or classical axioms in Lean) by creating automated CI gates (`test_zero_axiom_enforcement.py`) that strictly audit the environment.
-* **FFI Desynchronization:** Built code generators (`export_lean_specs.py`, `test_ffi_automation.py`) to validate struct alignments and memory layouts across the C/Rust/Lean boundary.
+- **Axiom Leakage in Automated Verification:** Handled potential axiom leaks (e.g., accidental `sorry` or classical axioms in Lean) by creating automated CI gates (`test_zero_axiom_enforcement.py`) that strictly audit the environment.
+- **FFI Desynchronization:** Built code generators (`export_lean_specs.py`, `test_ffi_automation.py`) to validate struct alignments and memory layouts across the C/Rust/Lean boundary.
 
 ---
 
@@ -488,8 +521,8 @@ impl<T: Clone> DoubleBuffer<T> {
 
 ### Context & Motivation
 
-* Overview of the quasiperfect number open problem in computational number theory: integers where $\sigma(n) = 2n + 1$.
-* The necessity of computer-assisted proofs that satisfy both performance demands and formal mathematical rigor without trusting complex heuristic code.
+- Overview of the quasiperfect number open problem in computational number theory: integers where $\sigma(n) = 2n + 1$.
+- The necessity of computer-assisted proofs that satisfy both performance demands and formal mathematical rigor without trusting complex heuristic code.
 
 ### System Design
 
@@ -507,6 +540,7 @@ flowchart TD
 ### Key Technical Challenges
 
 #### Challenge 1: Cyclotomic Factor Sieve & Raycasting
+
 Implementing efficient prime factorization trees using cyclotomic graph properties (`CyclotomicGraph.lean`, `cdg.rs`) to prune unreachable branches in `rust-engine/src/dfs_tree.rs`.
 
 ```rust
@@ -557,6 +591,7 @@ impl LatticeSearchEngine {
 ```
 
 #### Challenge 2: Cross-Language FFI Memory Safety
+
 Building deterministic C shims (`c_shims.c`, `ffi.c`) and Lean FFI abstractions (`lean_ffi.rs`) to stream search state without runtime overhead.
 
 ```rust
@@ -606,6 +641,7 @@ pub extern "C" fn ualbf_verify_certificate_manifest(
 ```
 
 #### Challenge 3: Zero-Axiom Soundness
+
 Structuring algebraic lemmas (`EulerProduct.lean`, `Zsigmondy.lean`, `AbundancyBound.lean`) so that proof validation executes cleanly without depending on unverified hypotheses inside `ualbf-project/lean4-proofs/UALBF/Engine/Bipartition.lean`.
 
 ```lean
@@ -647,21 +683,21 @@ theorem bipartition_sieve_soundness
 
 ### Lessons Learned & Future Improvements
 
-* Modular separation between search heuristics and verification kernels drastically minimizes the Trusted Computing Base (TCB).
-* **Future Milestones:** Distributed search coordination across compute clusters and GPU-accelerated polynomial evaluation.
+- Modular separation between search heuristics and verification kernels drastically minimizes the Trusted Computing Base (TCB).
+- **Future Milestones:** Distributed search coordination across compute clusters and GPU-accelerated polynomial evaluation.
 
 ---
 
 ## 4. Metadata & Repository Standards
 
-* **Tech Stack:** Rust, Lean 4, Python, C, LaTeX, Nix
-* **Domain:** Computational Number Theory, Formal Verification, High-Performance Systems
-* **Standardized GitHub Repository Topics:**
-  * `formal-verification`
-  * `lean4`
-  * `rust`
-  * `number-theory`
-  * `computational-mathematics`
+- **Tech Stack:** Rust, Lean 4, Python, C, LaTeX, Nix
+- **Domain:** Computational Number Theory, Formal Verification, High-Performance Systems
+- **Standardized GitHub Repository Topics:**
+  - `formal-verification`
+  - `lean4`
+  - `rust`
+  - `number-theory`
+  - `computational-mathematics`
 
 ---
 
@@ -681,16 +717,19 @@ theorem bipartition_sieve_soundness
 ## 2. Deep Dive Engineering Focus Areas
 
 ### Architecture & Patterns
+
 - **Layered Service-Oriented Architecture (SOA)**: Segregates lower-level SOAP transport primitives (`BaseSonosClient`) from domain-specific UPnP services (`AVTransportClient`, `RenderingControlClient`, `ZoneGroupTopologyClient`) and business domain orchestration services (`RadioService`, `SonosZoneService`, `AlarmService`).
 - **Command / Registry Pattern**: Centralized dispatch via `ACTION_REGISTRY` mapping string commands directly to asynchronous lambdas and service methods, eliminating verbose endpoint routing trees.
 - **Hypermedia-Driven Single Page Architecture (HDA)**: HTMX-powered frontend integration with server-rendered Jinja2 HTML fragments, achieving dynamic UI reactivity without the bundle size and state synchronization overhead of heavy JavaScript frameworks.
 
 ### Trade-Offs & Decisions
+
 1. **Direct UPnP/SOAP Implementation vs. Heavy 3rd-Party SDKs (e.g., SoCo)**: Implemented a bespoke, lightweight asynchronous client over `aiohttp` to ensure strict async event-loop compatibility, predictable error boundaries, and minimal container image size.
 2. **Server-Driven HTMX Swaps vs. Client-Side SPA (React/Vue)**: Traded client-side JavaScript state machines for HTMX polling (`hx-trigger="every 2s"`) and partial DOM updates, drastically lowering memory footprint for low-power edge hosting (e.g., Raspberry Pi).
 3. **SSDP Multicast Discovery with Nmap Fallback**: Leveraged UDP SSDP discovery (`M-SEARCH`) for standard zero-conf resolution, with optional raw socket/nmap port scanning on port 1400 for hardened local networks.
 
 ### Edge Cases & Edge Solutions
+
 - **DIDL-Lite & XML Entity Handling**: Built robust unescaping pipelines for inner DIDL-Lite XML blocks returned inside SOAP body structures, preventing parser failures during radio stream playback and playlist metadata traversal.
 - **UPnP Namespace Resiliency**: Implemented namespace-aware XPath lookups with tag-stripping recursive fallbacks in `BaseSonosClient._find_value_from_xml` to guarantee payload extraction across varied Sonos firmware versions.
 - **Topology Re-binding on Group Join/Leave**: Resolved speaker coordinator reassignment by fetching local node UDNs via HTTP diagnostic endpoints (`/status/zp`) prior to triggering ZoneGroupTopology membership mutations.
@@ -700,6 +739,7 @@ theorem bipartition_sieve_soundness
 ## 3. High-Impact Featured Code Snippets
 
 ### Dynamic SOAP Invocation & Robust XML Extraction
+
 ```python
 async def _invoke_soap_request(
     self, path: str, service_urn: str, action: str, body_content: str = ""
@@ -731,6 +771,7 @@ async def _invoke_soap_request(
 ```
 
 ### Declarative Dynamic Command Routing
+
 ```python
 ACTION_REGISTRY = {
     "setvolume": lambda ip, value: get_rendering_control_client(ip).set_volume(int(value)),
@@ -752,7 +793,7 @@ flowchart TD
     Client[Browser / HTMX Client] -->|HTTP / Form Data| Router[FastAPI Application Gateway]
 
     subgraph Routing & Middleware
-        Router --> ErrorDecorator[@api_error_handler Decorator]
+        Router --> ErrorDecorator["@api_error_handler Decorator"]
         Router --> Registry[Action Registry Dispatcher]
     end
 
@@ -794,36 +835,40 @@ flowchart TD
 
 ## 1. Executive Summary & Value Proposition
 
-* **Problem Solved**: Adaptive clinical trial design and biostatistical simulation (e.g., Continual Reassessment Method, EffTox, Group Sequential Designs, and Win Ratio analysis) require complex numerical modeling, rigorous reproducibility, and accessible interfaces for clinical practitioners. `clintrials` provides a Python-based computational framework alongside an in-browser WebAssembly/Pyodide distribution layer to simulate, validate, and visualize clinical trial protocols.
-* **Core Technical Highlight**: Architectural implementation of an end-to-end client-side execution sandbox using Pyodide WebAssembly workers and Service Workers (`hub/runner.py`, `hub/worker.js`, `hub/sw.js`), allowing biostatistical simulations and dynamic dashboards to run fully client-side with zero backend infrastructure costs while maintaining deterministic numerical parity with native CPython runtimes.
-* **Key Metrics / Benchmarks**:
-  * Comprehensive test suite coverage spanning biostatistical edge cases, schema validations, accessibility standards (axe-core), and API signatures.
-  * Zero-latency cloud compute costs achieved by offloading multi-arm simulations to client-side WebAssembly Web Workers.
-  * Automated regression verification across numerical solvers (`recruitment_solver.py`, `math.py`, `stats.py`) with strict PEP 440 adherence and AST-based UI linting.
+- **Problem Solved**: Adaptive clinical trial design and biostatistical simulation (e.g., Continual Reassessment Method, EffTox, Group Sequential Designs, and Win Ratio analysis) require complex numerical modeling, rigorous reproducibility, and accessible interfaces for clinical practitioners. `clintrials` provides a Python-based computational framework alongside an in-browser WebAssembly/Pyodide distribution layer to simulate, validate, and visualize clinical trial protocols.
+- **Core Technical Highlight**: Architectural implementation of an end-to-end client-side execution sandbox using Pyodide WebAssembly workers and Service Workers (`hub/runner.py`, `hub/worker.js`, `hub/sw.js`), allowing biostatistical simulations and dynamic dashboards to run fully client-side with zero backend infrastructure costs while maintaining deterministic numerical parity with native CPython runtimes.
+- **Key Metrics / Benchmarks**:
+  - Comprehensive test suite coverage spanning biostatistical edge cases, schema validations, accessibility standards (axe-core), and API signatures.
+  - Zero-latency cloud compute costs achieved by offloading multi-arm simulations to client-side WebAssembly Web Workers.
+  - Automated regression verification across numerical solvers (`recruitment_solver.py`, `math.py`, `stats.py`) with strict PEP 440 adherence and AST-based UI linting.
 
 ---
 
 ## 2. Deep Dive Engineering Focus Areas
 
 ### Architecture & Patterns
-* **Modular Domain-Driven Design**: The codebase is partitioned cleanly into core numerical/protocol engines (`clintrials/core/`), specialized trial methodology domains (`dosefinding/`, `phase3/`, `winratio/`), visualization providers (`visualization/dashboard/`), and a client runtime hub (`hub/`).
-* **Provider & Factory Patterns**: Simulation engines implement pluggable interfaces (`clintrials/core/protocol.py`, `clintrials/core/unified.py`, `factory.py`) decoupling simulation definitions, recruitment geometry modeling, and rendering targets (Jupyter notebooks, CLI runners, and Pyodide web dashboards).
-* **State Machine & Solvers**: Trial progression and patient accrual are driven by explicit deterministic state management (`recruitment_state.py`, `recruitment_solver.py`, `cohort.py`).
+
+- **Modular Domain-Driven Design**: The codebase is partitioned cleanly into core numerical/protocol engines (`clintrials/core/`), specialized trial methodology domains (`dosefinding/`, `phase3/`, `winratio/`), visualization providers (`visualization/dashboard/`), and a client runtime hub (`hub/`).
+- **Provider & Factory Patterns**: Simulation engines implement pluggable interfaces (`clintrials/core/protocol.py`, `clintrials/core/unified.py`, `factory.py`) decoupling simulation definitions, recruitment geometry modeling, and rendering targets (Jupyter notebooks, CLI runners, and Pyodide web dashboards).
+- **State Machine & Solvers**: Trial progression and patient accrual are driven by explicit deterministic state management (`recruitment_state.py`, `recruitment_solver.py`, `cohort.py`).
 
 ### Trade-Offs & Decisions
-* **Pyodide/Wasm vs. Cloud Server Infrastructure**: Chose client-side WebAssembly execution over hosted API services (FastAPI/Celery) to eliminate server hosting overhead, maintain data privacy for clinical protocol designers, and enable offline-first simulation via Service Workers.
-* **Custom Schema Enforcement vs. Heavyweight Frameworks**: Implemented targeted schema serialization (`serialize_schemas.py`) and explicit validation layers (`clintrials/validation.py`, `api_manifest.json`) instead of coupling execution code directly to heavyweight web frameworks.
+
+- **Pyodide/Wasm vs. Cloud Server Infrastructure**: Chose client-side WebAssembly execution over hosted API services (FastAPI/Celery) to eliminate server hosting overhead, maintain data privacy for clinical protocol designers, and enable offline-first simulation via Service Workers.
+- **Custom Schema Enforcement vs. Heavyweight Frameworks**: Implemented targeted schema serialization (`serialize_schemas.py`) and explicit validation layers (`clintrials/validation.py`, `api_manifest.json`) instead of coupling execution code directly to heavyweight web frameworks.
 
 ### Edge Cases & Edge Solutions
-* **Numerical Stability in Dose-Escalation**: Handled boundary conditions and posterior probability convergence edge cases within Continual Reassessment Method (CRM) and EffTox algorithms (`crm.py`, `efftox.py`, `watu_must_try_lowest.py`).
-* **Accrual & Time-to-Event (TTE) Geometry**: Implemented custom recruitment geometry solvers to handle non-linear patient accrual rates, dropouts, and non-proportional hazard edge cases across survival simulation sweeps.
-* **Web Worker Concurrency & Memory Constraints**: Managed browser thread offloading using background Web Workers and memory serialization between Pyodide and DOM visualizers.
+
+- **Numerical Stability in Dose-Escalation**: Handled boundary conditions and posterior probability convergence edge cases within Continual Reassessment Method (CRM) and EffTox algorithms (`crm.py`, `efftox.py`, `watu_must_try_lowest.py`).
+- **Accrual & Time-to-Event (TTE) Geometry**: Implemented custom recruitment geometry solvers to handle non-linear patient accrual rates, dropouts, and non-proportional hazard edge cases across survival simulation sweeps.
+- **Web Worker Concurrency & Memory Constraints**: Managed browser thread offloading using background Web Workers and memory serialization between Pyodide and DOM visualizers.
 
 ---
 
 ## 3. High-Impact Featured Code Snippets
 
 ### Patient Accrual Geometry Solver (`clintrials/core/recruitment_solver.py`)
+
 ```python
 from dataclasses import dataclass
 from typing import List, Tuple
@@ -863,6 +908,7 @@ class RecruitmentSolver:
 ```
 
 ### Continual Reassessment Method (CRM) Dose Escalation (`clintrials/dosefinding/crm.py`)
+
 ```python
 import numpy as np
 from typing import List, Dict, Any
@@ -897,6 +943,7 @@ class CRMDoseEscalationEngine:
 ```
 
 ### Pyodide WebAssembly Worker Message Router (`hub/worker.js`)
+
 ```javascript
 import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.mjs";
 
@@ -926,7 +973,11 @@ results = runner.run_simulations()
 json.dumps(results)
       `;
       const resultJson = await pyodide.runPythonAsync(pythonScript);
-      self.postMessage({ type: "SIMULATION_COMPLETE", reqId, data: JSON.parse(resultJson) });
+      self.postMessage({
+        type: "SIMULATION_COMPLETE",
+        reqId,
+        data: JSON.parse(resultJson),
+      });
     } catch (err) {
       self.postMessage({ type: "SIMULATION_ERROR", reqId, error: err.message });
     }
@@ -964,16 +1015,16 @@ flowchart TD
 
 ## 5. Portfolio Integration Metadata
 
-* **Slug**: `clintrials`
-* **Primary Language**: `Python`
-* **Stack Badges**: `Python`, `WebAssembly`, `Pyodide`, `Axe-Core`, `Sphinx`
-* **Standardized GitHub Repository Topics**:
-  * `biostatistics`
-  * `clinical-trials`
-  * `pyodide`
-  * `wasm`
-  * `simulation-engine`
-  * `crm-algorithm`
+- **Slug**: `clintrials`
+- **Primary Language**: `Python`
+- **Stack Badges**: `Python`, `WebAssembly`, `Pyodide`, `Axe-Core`, `Sphinx`
+- **Standardized GitHub Repository Topics**:
+  - `biostatistics`
+  - `clinical-trials`
+  - `pyodide`
+  - `wasm`
+  - `simulation-engine`
+  - `crm-algorithm`
 
 ---
 
@@ -981,34 +1032,38 @@ flowchart TD
 
 ### 1. Executive Summary & Value Proposition
 
-* **Problem Solved**: Surface Guided Radiation Therapy (SGRT) systems require sub-millimeter patient motion tracking and respiratory gating without exposing patients to ionizing radiation or suffering from optical occlusion in clinical treatment rooms. This repository implements a high-throughput, safety-critical FMCW millimeter-wave radar processing pipeline to monitor respiratory motion and trigger LINAC beam-hold interlocks in real time.
-* **Core Technical Highlight**: A hybrid Haskell/C++ architecture combining purely functional DSP pipelines (FMCW range-Doppler transforms, Kalman state estimation) with lock-free C++ ring buffers and Dear ImGui visualizations over an FFI boundary, meeting strict IEC 62304 Class C medical device architectural compliance.
-* **Key Metrics / Benchmarks**: Sub-10ms end-to-end processing and gating latency budget, deterministic interlock propagation under 5ms, 100% traceability to functional safety requirements across 30+ automated property and unit test suites.
+- **Problem Solved**: Surface Guided Radiation Therapy (SGRT) systems require sub-millimeter patient motion tracking and respiratory gating without exposing patients to ionizing radiation or suffering from optical occlusion in clinical treatment rooms. This repository implements a high-throughput, safety-critical FMCW millimeter-wave radar processing pipeline to monitor respiratory motion and trigger LINAC beam-hold interlocks in real time.
+- **Core Technical Highlight**: A hybrid Haskell/C++ architecture combining purely functional DSP pipelines (FMCW range-Doppler transforms, Kalman state estimation) with lock-free C++ ring buffers and Dear ImGui visualizations over an FFI boundary, meeting strict IEC 62304 Class C medical device architectural compliance.
+- **Key Metrics / Benchmarks**: Sub-10ms end-to-end processing and gating latency budget, deterministic interlock propagation under 5ms, 100% traceability to functional safety requirements across 30+ automated property and unit test suites.
 
 ---
 
 ### 2. Deep Dive Engineering Focus Areas
 
 #### Architecture & Patterns
-* **Layered Pipeline Architecture**: Functional Core / Imperative Shell architecture. Pure mathematical modules (`Numeric.Kinematics`, `SignalProcessing.FMCW`, `SignalProcessing.Kalman`) are completely decoupled from IO and side-effects.
-* **Lock-Free Circular Ring Buffer Bridge**: High-throughput raw radar frame ingestion from TI IWR6843ISK mmWave radar hardware across C/C++ FFI via zero-copy shared memory abstractions (`RingBuffer.h`, `FFI.RingBuffer`).
-* **Watchdog & Fail-Safe Interlock Pattern**: Independent watchdog thread verifying signal freshness and safety invariant tokens; any communication dropout or anomaly immediately forces beam-hold assertion (`Safety.Watchdog`, `Safety.Token`).
+
+- **Layered Pipeline Architecture**: Functional Core / Imperative Shell architecture. Pure mathematical modules (`Numeric.Kinematics`, `SignalProcessing.FMCW`, `SignalProcessing.Kalman`) are completely decoupled from IO and side-effects.
+- **Lock-Free Circular Ring Buffer Bridge**: High-throughput raw radar frame ingestion from TI IWR6843ISK mmWave radar hardware across C/C++ FFI via zero-copy shared memory abstractions (`RingBuffer.h`, `FFI.RingBuffer`).
+- **Watchdog & Fail-Safe Interlock Pattern**: Independent watchdog thread verifying signal freshness and safety invariant tokens; any communication dropout or anomaly immediately forces beam-hold assertion (`Safety.Watchdog`, `Safety.Token`).
 
 #### Trade-Offs & Decisions
+
 1. **Haskell for DSP Core vs. Pure C/C++**: Chose Haskell's type system to enforce dimensional safety (`Numeric.Units`), mathematical invariants, and deterministic purity in gating logic, while isolating unavoidable hardware mutation and GPU/OpenGL rendering in lightweight C++ FFI wrappers.
 2. **Lock-Free Ring Buffer vs. Haskell STM / Channels**: Implemented custom C++ lock-free ring buffers for UART frame ingestion to eliminate garbage collector pauses in the critical ingestion path.
 3. **Immediate Mode GUI (Dear ImGui) vs. Heavyweight UI Frameworks**: Selected Dear ImGui via C++ bindings for zero-latency medical HUD rendering without event-loop overhead.
 
 #### Edge Cases & Edge Solutions
-* **Inter-Frame Jitter & Clock Drift**: Addressed via hardware timestamp extraction (`Data.Time.HighRes.hsc`) and kinematic state extrapolation in Kalman filtering during transient packet loss.
-* **FFI Boundary Memory Safety & Foreign Pointer Alignment**: Validated struct padding and memory alignment across Haskell/C++ using `.hsc` bindings and automated FFI struct offset checks (`test/FFI/Hud/HudStateCSpec.hsc`, `test/FFI/RingBuffer/TypesSpec.hs`).
-* **Watchdog Heartbeat Starvation**: Engineered cryptographically validated and monotonically increasing safety tokens to prevent replay attacks and detect deadlocks in the main scheduler thread (`Safety.Crypto`, `Safety.AuditHeartbeatCheck`).
+
+- **Inter-Frame Jitter & Clock Drift**: Addressed via hardware timestamp extraction (`Data.Time.HighRes.hsc`) and kinematic state extrapolation in Kalman filtering during transient packet loss.
+- **FFI Boundary Memory Safety & Foreign Pointer Alignment**: Validated struct padding and memory alignment across Haskell/C++ using `.hsc` bindings and automated FFI struct offset checks (`test/FFI/Hud/HudStateCSpec.hsc`, `test/FFI/RingBuffer/TypesSpec.hs`).
+- **Watchdog Heartbeat Starvation**: Engineered cryptographically validated and monotonically increasing safety tokens to prevent replay attacks and detect deadlocks in the main scheduler thread (`Safety.Crypto`, `Safety.AuditHeartbeatCheck`).
 
 ---
 
 ### 3. Case Study Content Blueprint
 
 #### Context & Motivation
+
 Surface Guided Radiation Therapy (SGRT) requires continuous, sub-millimeter tracking of patient thoracic surface movement to perform respiratory gating during radiation delivery. Optical camera systems often suffer from line-of-sight occlusion by the LINAC gantry, drapes, or clinical personnel. Millimeter-wave FMCW (Frequency-Modulated Continuous-Wave) radar provides non-ionizing, occlusion-resilient sub-millimeter motion tracking. Architectural compliance with IEC 62304 Class C medical software guidelines mandates strict software safety isolation and deterministic fail-safe behavior.
 
 #### System Design Architecture
@@ -1028,6 +1083,7 @@ flowchart LR
 #### Key Technical Challenges & Code Snippets
 
 ##### 1. Ring Buffer Zero-Copy FFI Bridge (`cbits/src/ring_buffer_ffi.cpp` & `src/FFI/RingBuffer/IO.hs`)
+
 ```cpp
 // cbits/src/ring_buffer_ffi.cpp
 #include "RingBuffer.h"
@@ -1069,6 +1125,7 @@ popRadarFrame rbPtr = alloca $ \framePtr -> do
 ```
 
 ##### 2. Pure Kalman Filter Matrix State Transition (`src-math/SignalProcessing/Kalman.hs`)
+
 ```haskell
 -- src-math/SignalProcessing/Kalman.hs
 module SignalProcessing.Kalman
@@ -1103,6 +1160,7 @@ updateState measureH z measureR (KalmanState x' p') =
 ```
 
 ##### 3. Safety Token Verification & Watchdog Interlock Trigger (`src/Safety/Watchdog.hs`)
+
 ```haskell
 -- src/Safety/Watchdog.hs
 module Safety.Watchdog
@@ -1142,22 +1200,24 @@ assertBeamHoldHardwareInterlock = do
 ---
 
 #### 4. Lessons Learned & Future Improvements
-* **GC Management in Hard Real-Time Haskell**: High-frequency real-time DSP logic in Haskell requires minimizing heap allocation in the main loop by reusing ForeignPtr buffers and compiling with `-threaded -rtsopts -with-rtsopts=-A32m`.
-* **Multi-Sensor Array Scaling**: Expanding the single-sensor TI IWR6843ISK pipeline to multi-angle radar arrays to resolve chest wall tilt angles and volumetric body contour displacements.
-* **SIMD / AVX Acceleration**: Offloading 2D FMCW FFT range-Doppler matrix processing to vectorized SIMD C++ routines or OpenCL GPU compute passes.
+
+- **GC Management in Hard Real-Time Haskell**: High-frequency real-time DSP logic in Haskell requires minimizing heap allocation in the main loop by reusing ForeignPtr buffers and compiling with `-threaded -rtsopts -with-rtsopts=-A32m`.
+- **Multi-Sensor Array Scaling**: Expanding the single-sensor TI IWR6843ISK pipeline to multi-angle radar arrays to resolve chest wall tilt angles and volumetric body contour displacements.
+- **SIMD / AVX Acceleration**: Offloading 2D FMCW FFT range-Doppler matrix processing to vectorized SIMD C++ routines or OpenCL GPU compute passes.
 
 ---
 
 #### 5. Portfolio Integration Metadata
-* **Slug**: `lambda-wave`
-* **Primary Language**: `Haskell / C++`
-* **Stack Badges**: `Haskell`, `C++`, `OpenGL`, `DSP`, `IEC-62304`, `Real-Time Systems`
-* **Standardized GitHub Repository Topics**:
-  * `haskell`
-  * `embedded-systems`
-  * `dsp`
-  * `fmcw-radar`
-  * `sgrt`
-  * `medical-device`
-  * `iec-62304`
-  * `real-time`
+
+- **Slug**: `lambda-wave`
+- **Primary Language**: `Haskell / C++`
+- **Stack Badges**: `Haskell`, `C++`, `OpenGL`, `DSP`, `IEC-62304`, `Real-Time Systems`
+- **Standardized GitHub Repository Topics**:
+  - `haskell`
+  - `embedded-systems`
+  - `dsp`
+  - `fmcw-radar`
+  - `sgrt`
+  - `medical-device`
+  - `iec-62304`
+  - `real-time`
