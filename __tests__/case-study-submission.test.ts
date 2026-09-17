@@ -3,6 +3,11 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { POST, GET } from "@/app/api/case-studies/route";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
+import { isCurrentUserAdmin } from "@/lib/auth/admin";
+
+vi.mock("@/lib/auth/admin", () => ({
+  isCurrentUserAdmin: vi.fn(),
+}));
 
 vi.mock("@/lib/db", () => {
   return {
@@ -19,6 +24,59 @@ vi.mock("@/lib/db", () => {
 describe("Case Study Submission API Endpoint (POST /api/case-studies)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(isCurrentUserAdmin).mockResolvedValue(true);
+  });
+
+  describe("Authorization Guards", () => {
+    it("returns HTTP 403 Forbidden when user is unauthenticated", async () => {
+      vi.mocked(isCurrentUserAdmin).mockResolvedValue(false);
+
+      const payload = {
+        title: "Unauthorized Attempt",
+        slug: "unauthorized-attempt",
+        primary_language: "TypeScript",
+        editorial_content: "Attempting submission without admin session.",
+        architectural_narrative: "<p>Should be rejected.</p>",
+        tags: "unauthorized",
+      };
+
+      const req = new NextRequest("http://localhost:3000/api/case-studies", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+
+      const res = await POST(req);
+      expect(res.status).toBe(403);
+
+      const json = await res.json();
+      expect(json.error).toBe("Administrator access required");
+      expect(prisma.caseStudy.create).not.toHaveBeenCalled();
+    });
+
+    it("returns HTTP 403 Forbidden when authenticated user lacks admin privileges", async () => {
+      vi.mocked(isCurrentUserAdmin).mockResolvedValue(false);
+
+      const payload = {
+        title: "Non-Admin Attempt",
+        slug: "non-admin-attempt",
+        primary_language: "Go",
+        editorial_content: "Attempting submission with regular user session.",
+        architectural_narrative: "<p>Should be rejected.</p>",
+        tags: "non-admin",
+      };
+
+      const req = new NextRequest("http://localhost:3000/api/case-studies", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+
+      const res = await POST(req);
+      expect(res.status).toBe(403);
+
+      const json = await res.json();
+      expect(json.error).toBe("Administrator access required");
+      expect(prisma.caseStudy.create).not.toHaveBeenCalled();
+    });
   });
 
   describe("Valid Submissions", () => {
