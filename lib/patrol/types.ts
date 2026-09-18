@@ -32,6 +32,10 @@ export interface VitalsData {
   spo2?: number;
   temperature?: number;
   gcs?: number;
+  avpu?: "A" | "V" | "P" | "U";
+  pms?: "intact" | "compromised" | "absent";
+  pupils?: string;
+  skin?: string;
 }
 
 export type IncidentSeverity = "info" | "warning" | "critical";
@@ -61,6 +65,25 @@ export interface ScenarioAction {
   category?: ActionCategory;
   costMinutes?: number;
   requiredEquipment?: string[];
+  /** IDs of actions that must be executed prior to this action becoming available. */
+  preconditions?: string[];
+  /** Alias for preconditions to ensure backwards compatibility. */
+  prerequisites?: string[];
+  /** Data progressively revealed when this action is completed. */
+  reveals?: {
+    patient?: Partial<PatientState>;
+    environment?: Partial<EnvironmentState>;
+    actors?: PatrolActor[];
+    findings?: string[];
+  };
+  /** Vitals measured or checked when this action is executed. */
+  vitalsCheck?: VitalsData;
+  /** Whether this action establishes or secures scene safety (such as uphill crossed skis). */
+  securesSceneSafety?: boolean;
+  /** Whether this action triggers a scene safety re-assessment. */
+  reassessesSceneSafety?: boolean;
+  /** Whether executing this action without secured scene safety causes condition deterioration. */
+  requiresSceneSafety?: boolean;
 }
 
 export interface DebriefRule {
@@ -78,6 +101,12 @@ export interface PatientState {
   vitals?: VitalsData;
   findings?: string[];
   interventions?: string[];
+  levelOfConsciousness?: string;
+  allergies?: string[];
+  medications?: string[];
+  pastMedicalHistory?: string[];
+  lastIntake?: string;
+  eventsLeading?: string;
 }
 
 export interface EnvironmentState {
@@ -86,6 +115,7 @@ export interface EnvironmentState {
   temperatureFahrenheit?: number;
   visibility?: string;
   hazards?: string[];
+  sceneSafetyNotes?: string;
 }
 
 export interface PatrolActor {
@@ -93,6 +123,7 @@ export interface PatrolActor {
   name: string;
   role: string;
   notes?: string;
+  statement?: string;
 }
 
 export interface PatrolScenario {
@@ -123,6 +154,15 @@ export interface ShiftState {
   actionHistory: ScenarioAction[];
   vitalsHistory: VitalsData[];
   isCompleted: boolean;
+
+  // Milestone M5 progressive information reveal and dynamic clinical state
+  revealedPatient?: Partial<PatientState>;
+  revealedEnvironment?: Partial<EnvironmentState>;
+  revealedActors?: PatrolActor[];
+  sceneSafetySecured?: boolean;
+  sceneSafetyStatus?: "unassessed" | "safe" | "compromised";
+  patientCondition?: "stable" | "deteriorating" | "worsened" | "critical";
+  currentVitals?: VitalsData;
 }
 
 export type ShiftEngineEventType =
@@ -138,6 +178,9 @@ export type ShiftEngineEventType =
   | "FINISH_DEBRIEF"
   | "COMPLETE_SHIFT"
   | "RECORD_ACTION"
+  | "CHECK_VITALS"
+  | "ASSESS_SCENE_SAFETY"
+  | "REASSESS_PATIENT"
   | "PUSH_EVENT"
   | "RESET";
 
@@ -146,6 +189,7 @@ export interface ShiftEngineEvent {
   scenarioId?: string;
   action?: ScenarioAction;
   event?: PatrolEvent;
+  vitals?: VitalsData;
   payload?: Record<string, unknown>;
   timestamp?: number;
 }

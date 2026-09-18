@@ -29,3 +29,9 @@
 ### role
 
 > **role**: `string`
+
+***
+
+### statement?
+
+> `optional` **statement?**: `string`

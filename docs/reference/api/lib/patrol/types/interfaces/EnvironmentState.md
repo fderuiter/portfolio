@@ -14,6 +14,12 @@
 
 ***
 
+### sceneSafetyNotes?
+
+> `optional` **sceneSafetyNotes?**: `string`
+
+***
+
 ### snowConditions?
 
 > `optional` **snowConditions?**: `string`

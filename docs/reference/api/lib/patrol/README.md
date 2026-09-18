@@ -14,6 +14,12 @@ Re-exports [ActionCategory](types/type-aliases/ActionCategory.md)
 
 ***
 
+### ALL\_PATROL\_SCENARIOS
+
+Re-exports [ALL_PATROL_SCENARIOS](presets/variables/ALL_PATROL_SCENARIOS.md)
+
+***
+
 ### BriefingState
 
 Re-exports [BriefingState](types/interfaces/BriefingState.md)
@@ -23,6 +29,12 @@ Re-exports [BriefingState](types/interfaces/BriefingState.md)
 ### CanonicalShiftPhase
 
 Re-exports [CanonicalShiftPhase](types/type-aliases/CanonicalShiftPhase.md)
+
+***
+
+### checkActionPreconditions
+
+Re-exports [checkActionPreconditions](engine/functions/checkActionPreconditions.md)
 
 ***
 
@@ -74,6 +86,24 @@ Re-exports [DebriefRule](types/interfaces/DebriefRule.md)
 
 ***
 
+### deriveRevealedActors
+
+Re-exports [deriveRevealedActors](engine/functions/deriveRevealedActors.md)
+
+***
+
+### deriveRevealedEnvironmentState
+
+Re-exports [deriveRevealedEnvironmentState](engine/functions/deriveRevealedEnvironmentState.md)
+
+***
+
+### deriveRevealedPatientState
+
+Re-exports [deriveRevealedPatientState](engine/functions/deriveRevealedPatientState.md)
+
+***
+
 ### DialogueNode
 
 Re-exports [DialogueNode](dialogue/interfaces/DialogueNode.md)
@@ -98,6 +128,12 @@ Re-exports [generateDebriefReport](debrief/functions/generateDebriefReport.md)
 
 ***
 
+### getAvailableActions
+
+Re-exports [getAvailableActions](engine/functions/getAvailableActions.md)
+
+***
+
 ### getScenarioById
 
 Re-exports [getScenarioById](presets/functions/getScenarioById.md)
@@ -110,9 +146,21 @@ Re-exports [IncidentSeverity](types/type-aliases/IncidentSeverity.md)
 
 ***
 
+### isSceneSafetySecured
+
+Re-exports [isSceneSafetySecured](engine/functions/isSceneSafetySecured.md)
+
+***
+
 ### LegacyShiftPhase
 
 Re-exports [LegacyShiftPhase](types/type-aliases/LegacyShiftPhase.md)
+
+***
+
+### OEC\_SAMPLE\_SCENARIO\_PRESET
+
+Re-exports [OEC_SAMPLE_SCENARIO_PRESET](presets/variables/OEC_SAMPLE_SCENARIO_PRESET.md)
 
 ***
 

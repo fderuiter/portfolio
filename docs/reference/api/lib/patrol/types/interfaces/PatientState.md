@@ -8,9 +8,21 @@
 
 ## Properties
 
+### allergies?
+
+> `optional` **allergies?**: `string`[]
+
+***
+
 ### complaint?
 
 > `optional` **complaint?**: `string`
+
+***
+
+### eventsLeading?
+
+> `optional` **eventsLeading?**: `string`
 
 ***
 
@@ -26,9 +38,33 @@
 
 ***
 
+### lastIntake?
+
+> `optional` **lastIntake?**: `string`
+
+***
+
+### levelOfConsciousness?
+
+> `optional` **levelOfConsciousness?**: `string`
+
+***
+
 ### mechanism?
 
 > `optional` **mechanism?**: `string`
+
+***
+
+### medications?
+
+> `optional` **medications?**: `string`[]
+
+***
+
+### pastMedicalHistory?
+
+> `optional` **pastMedicalHistory?**: `string`[]
 
 ***
 
