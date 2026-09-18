@@ -430,7 +430,7 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     }
   });
 
-  it("sitemap generator in production strictly produces canonical https://www.deruiter.dev URLs without localhost leakage", async () => {
+  it("sitemap generator in production strictly produces canonical https://deruiter.dev URLs without localhost leakage", async () => {
     const originalWin = global.window;
     const originalVercelEnv = process.env.VERCEL_ENV;
     const originalAppUrl = process.env.NEXT_PUBLIC_APP_URL;
@@ -444,7 +444,7 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
       expect(map.length).toBeGreaterThanOrEqual(16);
 
       for (const entry of map) {
-        expect(entry.url).toMatch(/^https:\/\/www\.deruiter\.dev(\/.*)?$/);
+        expect(entry.url).toMatch(/^https:\/\/deruiter\.dev(\/.*)?$/);
         expect(entry.url).not.toContain("localhost");
         expect(entry.url).not.toContain("http://");
       }

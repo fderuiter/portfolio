@@ -224,4 +224,48 @@ test.describe("Headless Synthetic User Probes & Journey Monitoring", () => {
     const liveRegion = page.locator('[aria-live="polite"]').first();
     await expect(liveRegion).toBeAttached();
   });
+
+  // Regression guard for #720. The apex and www hosts previously disagreed: www
+  // served content while canonical tags, the sitemap and robots all advertised a
+  // host that redirected away. This probe only runs when pointed at the real
+  // deployed origin, since a local server has no DNS or edge redirect to assert.
+  test("Probe 8: Canonical host redirect and metadata parity", async ({
+    request,
+    baseURL,
+  }) => {
+    test.skip(
+      !baseURL?.includes("deruiter.dev"),
+      "Canonical host probe requires a deployed deruiter.dev origin"
+    );
+
+    // 1. The non-canonical www host permanently redirects to the apex.
+    const wwwResponse = await request.head("https://www.deruiter.dev/", {
+      maxRedirects: 0,
+    });
+    expect([301, 308]).toContain(wwwResponse.status());
+    expect(wwwResponse.headers()["location"]).toBe("https://deruiter.dev/");
+
+    // 2. The canonical apex serves directly rather than redirecting onward.
+    const apexResponse = await request.get("https://deruiter.dev/", {
+      maxRedirects: 0,
+    });
+    expect(apexResponse.status()).toBe(200);
+
+    // 3. Advertised canonical identity matches the host that actually serves, so
+    //    crawlers are never pointed at a redirecting URL.
+    const html = await apexResponse.text();
+    expect(html).toContain('rel="canonical" href="https://deruiter.dev"');
+    expect(html).not.toContain("https://www.deruiter.dev");
+
+    // 4. Every sitemap entry and the robots pointer resolve to the canonical host.
+    const sitemap = await request.get("https://deruiter.dev/sitemap.xml");
+    expect(sitemap.status()).toBe(200);
+    expect(await sitemap.text()).not.toContain("https://www.deruiter.dev");
+
+    const robots = await request.get("https://deruiter.dev/robots.txt");
+    expect(robots.status()).toBe(200);
+    expect(await robots.text()).toContain(
+      "Sitemap: https://deruiter.dev/sitemap.xml"
+    );
+  });
 });

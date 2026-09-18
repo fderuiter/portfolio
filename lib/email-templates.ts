@@ -5,7 +5,10 @@ import DOMPurify from "isomorphic-dompurify";
  */
 export function escapeHtml(input: string): string {
   if (!input) return "";
-  const sanitized = DOMPurify.sanitize(input, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+  const sanitized = DOMPurify.sanitize(input, {
+    ALLOWED_TAGS: [],
+    ALLOWED_ATTR: [],
+  });
   return String(sanitized)
     .replace(/&(?!(amp|lt|gt|quot|#039);)/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -48,7 +51,9 @@ export interface RenderedEmail {
 /**
  * Renders an admin alert email for a new visitor inquiry.
  */
-export function renderContactAdminEmail(payload: ContactAdminEmailPayload): RenderedEmail {
+export function renderContactAdminEmail(
+  payload: ContactAdminEmailPayload
+): RenderedEmail {
   const safeName = escapeHtml(payload.name);
   const safeEmail = escapeHtml(payload.email);
   const safeIntent = escapeHtml(payload.intent.toUpperCase());
@@ -132,7 +137,7 @@ export function renderContactAdminEmail(payload: ContactAdminEmailPayload): Rend
           <tr>
             <td style="padding: 16px 28px; background-color: #0d0e11; border-top: 1px solid rgba(255, 255, 255, 0.06); text-align: center;">
               <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11px; color: #52525b;">
-                Dispatched by Portfolio Transactional Engine &bull; https://www.deruiter.dev
+                Dispatched by Portfolio Transactional Engine &bull; https://deruiter.dev
               </span>
             </td>
           </tr>
@@ -161,7 +166,9 @@ Reply directly to: ${payload.email}`;
 /**
  * Renders an automated confirmation receipt email for the visitor.
  */
-export function renderContactConfirmationEmail(payload: ContactConfirmationEmailPayload): RenderedEmail {
+export function renderContactConfirmationEmail(
+  payload: ContactConfirmationEmailPayload
+): RenderedEmail {
   const safeName = escapeHtml(payload.name);
   const safeSubject = escapeHtml(payload.subject);
   const safeMessage = escapeHtml(payload.message).replace(/\n/g, "<br />");
@@ -208,7 +215,7 @@ export function renderContactConfirmationEmail(payload: ContactConfirmationEmail
           <tr>
             <td style="padding: 20px 28px; background-color: #0d0e11; border-top: 1px solid rgba(255, 255, 255, 0.06); text-align: center;">
               <p style="margin: 0; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11px; color: #71717a;">
-                Frederick de Ruiter &bull; Software &amp; Systems Architecture &bull; <a href="https://www.deruiter.dev" style="color: #06b6d4; text-decoration: none;">deruiter.dev</a>
+                Frederick de Ruiter &bull; Software &amp; Systems Architecture &bull; <a href="https://deruiter.dev" style="color: #06b6d4; text-decoration: none;">deruiter.dev</a>
               </p>
             </td>
           </tr>
@@ -229,7 +236,7 @@ ${payload.message}
 
 --
 Frederick de Ruiter
-https://www.deruiter.dev`;
+https://deruiter.dev`;
 
   return { html, text, subject: emailSubject };
 }
@@ -237,7 +244,9 @@ https://www.deruiter.dev`;
 /**
  * Renders an admin alert email when feedback is submitted on a case study.
  */
-export function renderFeedbackNotificationEmail(payload: FeedbackNotificationPayload): RenderedEmail {
+export function renderFeedbackNotificationEmail(
+  payload: FeedbackNotificationPayload
+): RenderedEmail {
   const safeSlug = escapeHtml(payload.caseStudySlug);
   const safeComments = escapeHtml(payload.comments).replace(/\n/g, "<br />");
   const safeTakeaways = payload.takeaways.map((t) => escapeHtml(t));
@@ -248,7 +257,8 @@ export function renderFeedbackNotificationEmail(payload: FeedbackNotificationPay
 
   const takeawaysHtml = safeTakeaways
     .map(
-      (t) => `<li style="margin-bottom: 4px; color: #f4f4f6; font-size: 13px;">${t}</li>`
+      (t) =>
+        `<li style="margin-bottom: 4px; color: #f4f4f6; font-size: 13px;">${t}</li>`
     )
     .join("");
 
@@ -331,7 +341,9 @@ export interface NewsletterWelcomePayload {
 /**
  * Renders a confirmation / welcome receipt for a new newsletter subscriber.
  */
-export function renderNewsletterWelcomeEmail(payload: NewsletterWelcomePayload): RenderedEmail {
+export function renderNewsletterWelcomeEmail(
+  payload: NewsletterWelcomePayload
+): RenderedEmail {
   const safeEmail = escapeHtml(payload.email);
   const emailSubject = `Welcome to Frederick de Ruiter's Engineering & Systems Dispatch`;
 
@@ -416,8 +428,7 @@ No spam, zero tracking.
 
 Frederick de Ruiter
 Systems Architecture & Engineering
-https://www.deruiter.dev`;
+https://deruiter.dev`;
 
   return { html, text, subject: emailSubject };
 }
-

@@ -73,7 +73,7 @@ Before any future deletion:
 5. Rebuild the candidate set from live paginated data. Never reuse the
    historical list.
 6. Obtain explicit operator authorization for the resolved IDs.
-7. Verify `https://www.deruiter.dev/` after deletion.
+7. Verify `https://deruiter.dev/` after deletion.
 
 The approved 2026-09-12 cleanup does not authorize deleting future
 deployments, aliases, projects, integrations, or provider resources.

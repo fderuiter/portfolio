@@ -15,7 +15,10 @@ interface BreadcrumbsProps {
   className?: string;
 }
 
-export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items, className = "" }) => {
+export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
+  items,
+  className = "",
+}) => {
   const { playHover } = useAudio();
 
   const isRootCrumb = (crumb: BreadcrumbCrumb) => {
@@ -23,7 +26,10 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items, className = "" 
     const hrefTrim = (crumb.href || "").trim();
     return (
       labelLower === "home" ||
-      (crumb.href !== undefined && (hrefTrim === "/" || hrefTrim === "https://www.deruiter.dev" || hrefTrim === "http://localhost:3000"))
+      (crumb.href !== undefined &&
+        (hrefTrim === "/" ||
+          hrefTrim === "https://deruiter.dev" ||
+          hrefTrim === "http://localhost:3000"))
     );
   };
 
@@ -51,9 +57,15 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items, className = "" 
           const isFirst = idx === 0;
 
           return (
-            <li key={`${crumb.label}-${idx}`} className="inline-flex items-center gap-1.5 sm:gap-2">
+            <li
+              key={`${crumb.label}-${idx}`}
+              className="inline-flex items-center gap-1.5 sm:gap-2"
+            >
               {idx > 0 && (
-                <IconChevronRight className="w-3 h-3 text-zinc-600 flex-shrink-0" aria-hidden="true" />
+                <IconChevronRight
+                  className="w-3 h-3 text-zinc-600 flex-shrink-0"
+                  aria-hidden="true"
+                />
               )}
               {isLast || !crumb.href ? (
                 <span

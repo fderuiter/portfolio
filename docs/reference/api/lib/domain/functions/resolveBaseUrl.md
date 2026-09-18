@@ -8,11 +8,20 @@
 
 > **resolveBaseUrl**(): `string`
 
-Centered dynamic helper to synchronously resolve the base URL of the application.
-Satisfies the following logic:
-1. If running in a browser environment, safely uses window.location.origin to maintain SSR and browser synchronization.
-2. In production (VERCEL_ENV="production" or NODE_ENV="production"), defaults strictly to the canonical domain (https://www.deruiter.dev), or uses NEXT_PUBLIC_APP_URL if explicitly configured with a non-localhost domain.
-3. In non-production environments, uses NEXT_PUBLIC_APP_URL if provided, or falls back to a local address (http://localhost:3000).
+Centralized helper resolving the canonical base URL of the application.
+
+The value is deterministic and never derived from the runtime browser origin, so
+server-rendered markup and client-rendered markup always agree on site identity.
+Resolution order:
+
+- In production (VERCEL_ENV="production" or NODE_ENV="production"), returns
+  NEXT_PUBLIC_APP_URL when it is explicitly configured with a non-localhost domain,
+  otherwise the canonical production domain (https://deruiter.dev).
+- In non-production environments, returns NEXT_PUBLIC_APP_URL if provided, or falls
+  back to a local address (http://localhost:3000).
+
+Callers that genuinely need the host the visitor is currently on — link sharing, for
+example — must use getActiveHostUrl in lib/clipboard.ts instead.
 
 ## Returns
 

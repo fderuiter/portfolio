@@ -129,7 +129,7 @@ export const PROTECTED_NEON_TARGETS = [
     projectId: "portfolio",
     branchName: "main",
     environment: "production" as const,
-    role: "Canonical production PostgreSQL database backing www.deruiter.dev",
+    role: "Canonical production PostgreSQL database backing deruiter.dev",
   },
   {
     projectId: "portfolio",
@@ -212,7 +212,7 @@ export function getNeonCapacityInventory(): NeonCapacityInventory {
             owner: "laser-loons-projects",
             expirationPolicy: "Never (Canonical Production)",
             connectionType: "pooled_runtime",
-            role: "Canonical production database for www.deruiter.dev",
+            role: "Canonical production database for deruiter.dev",
           },
           {
             branchId: "unobserved_locally",

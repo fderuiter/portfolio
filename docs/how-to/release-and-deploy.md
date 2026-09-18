@@ -78,7 +78,7 @@ in order:
    with `--prod --skip-domain`, leaving canonical traffic untouched.
 4. Run the Chromium synthetic journey suite against that staged deployment.
 5. Promote the same deployment without rebuilding and smoke-test
-   `https://www.deruiter.dev`.
+   `https://deruiter.dev`.
 6. Record the promoted deployment ID, commit SHA, previous deployment ID, and
    timestamp as a retained workflow artifact.
 7. Create the annotated `vX.Y.Z` tag and GitHub release only after the evidence

@@ -25,7 +25,7 @@ Neon's free plan provides 0.5 GiB storage and auto-suspends compute after 5 minu
 
 | Project / Resource | Target Name | Branch | Environment | Protection Status | Provider Storage | Role |
 | --- | --- | --- | --- | --- | ---: | --- |
-| `neon-gray-drum` | `portfolio` | `main` | Production | **Protected** | *Unobserved* | Canonical production database backing www.deruiter.dev |
+| `neon-gray-drum` | `portfolio` | `main` | Production | **Protected** | *Unobserved* | Canonical production database backing deruiter.dev |
 | `neon-gray-drum` | `portfolio` | `dev` | Development | **Protected** | *Unobserved* | Long-lived integration branch database for schema rehearsal |
 
 ## Resource Classification & Retention Policy
@@ -95,7 +95,7 @@ No cloud mutations, drops, or deletions are executed by this inventory ticket. Z
 
 1. Obtain explicit operator sign-off with authenticated provider credentials before identifying any candidate target IDs in Neon Console or CLI.
 2. Never delete `main` or `dev` branches under any circumstances.
-3. Post-cleanup verification: Run `npm run check:migrations:drift` and verify HTTP 200 on `https://www.deruiter.dev/`.
+3. Post-cleanup verification: Run `npm run check:migrations:drift` and verify HTTP 200 on `https://deruiter.dev/`.
 
 ## Verification Commands
 

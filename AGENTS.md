@@ -161,8 +161,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ### 18. Canonical Domain, Base URL & Production Routing Invariant
 
 - **Single Source of Truth**: All canonical URLs, `metadataBase`, dynamic sitemaps (`app/sitemap.ts`), robots directives (`app/robots.ts`), OpenGraph preview metadata, and Schema.org JSON-LD structured data generators (`lib/seo.ts`) must resolve via `resolveBaseUrl()` in `lib/domain.ts` and `SITE_BASE_URL` in `lib/seo.ts`.
-- **Production Domain Parity**: The canonical production domain is strictly `https://www.deruiter.dev` (matching Vercel's primary domain routing). Route entrypoints, error layouts (`components/UnifiedErrorLayout.tsx`, `app/error.tsx`), and social generators must never hardcode temporary `.vercel.app`, `fderuiter.dev`, or non-canonical apex domains.
-- **Dynamic Preview & Clipboard Isolation**: Interactive user link-sharing utilities (`lib/clipboard.ts`) must safely resolve `window.location.origin` in active browser runtimes, while headless SSR fallbacks and test harnesses must validate deterministically against `https://www.deruiter.dev`.
+- **Production Domain Parity**: The canonical production domain is strictly `https://deruiter.dev` (the apex, matching Vercel's primary domain routing; `www.deruiter.dev` issues a `308` to it at the edge). Route entrypoints, error layouts (`components/UnifiedErrorLayout.tsx`, `app/error.tsx`), and social generators must never hardcode temporary `.vercel.app`, `fderuiter.dev`, or the non-canonical `www` host.
+- **Dynamic Preview & Clipboard Isolation**: Runtime origin is scoped strictly to link sharing. `getActiveHostUrl()` in `lib/clipboard.ts` may read `window.location.origin` in active browser runtimes; `resolveBaseUrl()` must never do so, so that canonical tags, sitemaps, JSON-LD and OpenGraph metadata are byte-identical whether rendered on the server or in the browser. Headless SSR fallbacks and test harnesses validate deterministically against `https://deruiter.dev`.
 
 ### 19. Studio Container Theming & Scoped Design Tokens
 
