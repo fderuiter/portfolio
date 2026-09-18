@@ -176,6 +176,18 @@ Re-exports [BrandingPalettePreset](branding-defaults/interfaces/BrandingPaletteP
 
 ***
 
+### buildSampleValue
+
+Re-exports [buildSampleValue](form-test-harness/functions/buildSampleValue.md)
+
+***
+
+### buildScopedKey
+
+Re-exports [buildScopedKey](form-test-harness/functions/buildScopedKey.md)
+
+***
+
 ### calculateBazettQTc
 
 Re-exports [calculateBazettQTc](expression-evaluator/functions/calculateBazettQTc.md)
@@ -215,6 +227,12 @@ Re-exports [calculateMostellerBSA](expression-evaluator/functions/calculateMoste
 ### calculateRecistSldChange
 
 Re-exports [calculateRecistSldChange](expression-evaluator/functions/calculateRecistSldChange.md)
+
+***
+
+### CalculationOutcome
+
+Re-exports [CalculationOutcome](form-test-harness/interfaces/CalculationOutcome.md)
 
 ***
 
@@ -455,6 +473,12 @@ Re-exports [daysInMonth](precision-date/functions/daysInMonth.md)
 ### DEFAULT\_STUDY\_BRANDING
 
 Re-exports [DEFAULT_STUDY_BRANDING](branding-defaults/variables/DEFAULT_STUDY_BRANDING.md)
+
+***
+
+### DEFAULT\_TEST\_SCOPE
+
+Re-exports [DEFAULT_TEST_SCOPE](form-test-harness/variables/DEFAULT_TEST_SCOPE.md)
 
 ***
 
@@ -860,6 +884,18 @@ Re-exports [FieldReferenceLocation](study-engine/interfaces/FieldReferenceLocati
 
 ***
 
+### fillSampleValues
+
+Re-exports [fillSampleValues](form-test-harness/functions/fillSampleValues.md)
+
+***
+
+### flattenFormFields
+
+Re-exports [flattenFormFields](form-test-harness/functions/flattenFormFields.md)
+
+***
+
 ### formatPrecisionDate
 
 Re-exports [formatPrecisionDate](precision-date/functions/formatPrecisionDate.md)
@@ -881,6 +917,18 @@ Re-exports [FormConditionalState](conditional-logic/interfaces/FormConditionalSt
 ### FormHealthMetrics
 
 Re-exports [FormHealthMetrics](study-auditor/interfaces/FormHealthMetrics.md)
+
+***
+
+### FormTestReport
+
+Re-exports [FormTestReport](form-test-harness/interfaces/FormTestReport.md)
+
+***
+
+### FormTestScope
+
+Re-exports [FormTestScope](form-test-harness/interfaces/FormTestScope.md)
 
 ***
 
@@ -1037,6 +1085,12 @@ Re-exports [getRuleGroups](expression-evaluator/functions/getRuleGroups.md)
 ### getSasFormatName
 
 Re-exports [getSasFormatName](export-sas/functions/getSasFormatName.md)
+
+***
+
+### getScopedValue
+
+Re-exports [getScopedValue](form-test-harness/functions/getScopedValue.md)
 
 ***
 
@@ -1376,6 +1430,12 @@ Re-exports [previewLibraryInsertion](personal-library/functions/previewLibraryIn
 
 ***
 
+### projectScopedValues
+
+Re-exports [projectScopedValues](form-test-harness/functions/projectScopedValues.md)
+
+***
+
 ### ProtocolDiffSummary
 
 Re-exports [ProtocolDiffSummary](universal-schema/interfaces/ProtocolDiffSummary.md)
@@ -1385,6 +1445,12 @@ Re-exports [ProtocolDiffSummary](universal-schema/interfaces/ProtocolDiffSummary
 ### ProtocolValidationResult
 
 Re-exports [ProtocolValidationResult](study-engine/interfaces/ProtocolValidationResult.md)
+
+***
+
+### resetScopeValues
+
+Re-exports [resetScopeValues](form-test-harness/functions/resetScopeValues.md)
 
 ***
 
@@ -1439,6 +1505,18 @@ Re-exports [RuleAttribution](conditional-logic/interfaces/RuleAttribution.md)
 ### RuleExplanation
 
 Re-exports [RuleExplanation](expression-evaluator/interfaces/RuleExplanation.md)
+
+***
+
+### RuleOutcome
+
+Re-exports [RuleOutcome](form-test-harness/interfaces/RuleOutcome.md)
+
+***
+
+### runFormTest
+
+Re-exports [runFormTest](form-test-harness/functions/runFormTest.md)
 
 ***
 
@@ -1571,6 +1649,12 @@ Re-exports [SectionImpactPreview](study-engine/interfaces/SectionImpactPreview.m
 ### serializeStudyToOdmXml
 
 Re-exports [serializeStudyToOdmXml](odm-xml-serializer/variables/serializeStudyToOdmXml.md)
+
+***
+
+### setScopedValue
+
+Re-exports [setScopedValue](form-test-harness/functions/setScopedValue.md)
 
 ***
 
