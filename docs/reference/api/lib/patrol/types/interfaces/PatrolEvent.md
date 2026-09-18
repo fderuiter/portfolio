@@ -8,21 +8,39 @@
 
 ## Properties
 
-### description
+### action?
 
-> **description**: `string`
+> `optional` **action?**: `string`
 
 ***
 
-### id
+### context?
 
-> **id**: `string`
+> `optional` **context?**: `Record`\<`string`, `unknown`\>
+
+***
+
+### description?
+
+> `optional` **description?**: `string`
+
+***
+
+### id?
+
+> `optional` **id?**: `string`
 
 ***
 
 ### payload?
 
 > `optional` **payload?**: `Record`\<`string`, `unknown`\>
+
+***
+
+### scenarioId?
+
+> `optional` **scenarioId?**: `string`
 
 ***
 
@@ -34,16 +52,16 @@
 
 ### timestamp
 
-> **timestamp**: `string`
+> **timestamp**: `string` \| `number`
 
 ***
 
-### title
+### title?
 
-> **title**: `string`
+> `optional` **title?**: `string`
 
 ***
 
-### type
+### type?
 
-> **type**: `string`
+> `optional` **type?**: `string`

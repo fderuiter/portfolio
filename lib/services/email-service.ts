@@ -49,6 +49,46 @@ export interface SvixVerifyParams {
 }
 
 /**
+ * Contract specification for transactional outbound email services.
+ * Conforms to ADR 0028 Typed Service Contract (Spec & Handler Pattern).
+ */
+export interface EmailServiceSpec {
+  sendRawEmail(options: RawEmailOptions): Promise<EmailDispatchResult>;
+  sendContactInquiry(
+    submission: ContactSubmission
+  ): Promise<ContactDispatchResult>;
+  sendFeedbackNotification(
+    payload: FeedbackNotificationPayload
+  ): Promise<EmailDispatchResult>;
+  subscribeNewsletter(email: string): Promise<EmailDispatchResult>;
+  processRetryQueue(options?: {
+    maxBatchSize?: number;
+    now?: Date;
+  }): Promise<{ processed: number; succeeded: number; failed: number }>;
+  getRetryQueueHealth(now?: Date): Promise<{
+    retryingCount: number;
+    oldestDueAgeSeconds: number;
+    exhaustedDeadLetterCount: number;
+  }>;
+  handleWebhookEvent(event: ResendWebhookEvent): Promise<boolean>;
+  isSuppressed(
+    email: string
+  ): Promise<{ suppressed: boolean; reason?: string }>;
+  recordSuppression(email: string, reason: SuppressionReason): Promise<void>;
+}
+
+/**
+ * Execution handler interface implementing the EmailServiceSpec contract.
+ */
+export interface EmailServiceHandler extends EmailServiceSpec {
+  queueOutboundEmail(
+    options: RawEmailOptions,
+    fromAddress?: string,
+    errorReason?: string
+  ): Promise<string | null>;
+}
+
+/**
  * Singleton holder for the Resend client instance.
  */
 let resendClient: Resend | null = null;

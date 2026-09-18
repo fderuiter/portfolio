@@ -49,7 +49,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ### 5. Multi-Agent Integration & Invariant Synthesis
 
 - When merging concurrent feature branches or autonomous agent PRs, always apply **Additive Synthesis** on merge conflicts: never drop features, combine context providers in topological hierarchy (e.g. `PersonaProvider` -> `TerminologyProvider` -> `SearchProvider`), preserve rich text tokens and tooltips, and provide safe fallback defaults for standalone component testing.
-- Never commit intermediate agent tracking directories (`.agents/`), temporary planning logs, or ad-hoc adversarial scripts to project git history.
+- Never commit intermediate agent tracking logs, temporary planning scratchpads (`.scratch/`, `scratch/`, `tmp/`), or ad-hoc adversarial scripts to project git history. Curated agent skills in `.agents/skills/` are tracked configuration.
 
 ### 6. Developer Suite (DX) & Quality Invariants
 
@@ -83,7 +83,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - **Zero-Drift Invariant Gate**: CI (`.github/workflows/ci.yml`) executes both `npm run check-docs-drift` and `npm run verify`; pre-commit (`.husky/pre-commit`) executes `npm run check-docs-drift` (alongside `typecheck`, `lint:boundaries`, `test:staged`, and `audit:security`). Either gate fails fast (exit code 1) on any uncommitted documentation mutations, untracked generated markdown files, or undocumented API routes.
 - **One-Command Auto-Remediation**: Run `npm run doctor:fix` (`npx tsx scripts/dx.ts doctor --fix`) to automatically regenerate `openapi.json`, recompile TypeDoc markdown in `docs/`, and resolve fixable architectural invariants.
 - **Documentation Staging Protocol**: When introducing or modifying public exports (`lib/`, `hooks/`, `types/`) or API routes, run `npm run compile-docs` (or `npm run doctor:fix`) prior to staging. Run `npm run check-docs-drift` to verify zero drift. Stage generated markdown files in `docs/` (`git add docs/` or `git add .`) alongside code changes so that Husky's pre-commit `check-docs-drift` hook runs against a clean working tree without untracked drift.
-- **Transient Isolation Boundary**: Intermediate agent scratchpads, raw terminal dumps, and temporary logs (`.agents/`, `scratch/`, `tmp/`) must remain strictly isolated from git tracking and markdown linting pipelines (`npm run lint:docs`).
+- **Transient Isolation Boundary**: Intermediate agent scratchpads, raw terminal dumps, and temporary logs (`.scratch/`, `scratch/`, `tmp/`) must remain strictly isolated from git tracking and markdown linting pipelines (`npm run lint:docs`). Curated agent skills in `.agents/skills/` remain tracked configuration.
 - **Dual Spec Exposure**: Co-locate machine-readable `openapi.json` at root for automated tooling/CI with human-readable markdown in `docs/` and `adr/` for GitHub-native developer navigation.
 - **Pre-PR Staging & Gate Invariant**: Prior to publishing a feature branch or opening a pull request, run the complete verification suite (`npm run quality` and `npm test`). Ensure zero lint warnings, zero documentation drift, and that all architectural invariants pass cleanly.
 

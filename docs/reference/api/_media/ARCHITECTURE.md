@@ -495,7 +495,7 @@ To guarantee that technical specifications, API documentation, and internal arch
   - `npm run dx doctor` and `npm run verify` check documentation and API parity alongside 9 core architectural invariants.
   - Running `npm run doctor:fix` automatically synchronizes `openapi.json` and recompiles TypeDoc markdown files.
 - **Strict Hygiene Boundaries:**
-  - Brainstorming notes, intermediate agent traces, and temporary scratchpad directories (`.agents/`, `scratch/`, `tmp/`) are excluded from markdown linting and repository tracking to preserve documentation integrity.
+  - Brainstorming notes, intermediate agent traces, and temporary scratchpad directories (`.scratch/`, `scratch/`, `tmp/`) are excluded from markdown linting and repository tracking to preserve documentation integrity. Curated agent skills in `.agents/skills/` are tracked.
 
 ## Defect Remediation & Root-Cause Quality Architecture
 

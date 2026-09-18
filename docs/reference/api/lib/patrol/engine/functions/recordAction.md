@@ -8,6 +8,8 @@
 
 > **recordAction**(`currentState`, `action`): [`ShiftState`](../../types/interfaces/ShiftState.md)
 
+Legacy record action helper maintained for backward compatibility.
+
 ## Parameters
 
 ### currentState

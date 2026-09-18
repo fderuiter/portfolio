@@ -11,7 +11,9 @@ export function createEvent(
 ): PatrolEvent {
   return {
     id: `event-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-    timestamp: new Date().toISOString(),
+    timestamp: Date.now(),
+    scenarioId: "general",
+    action: type,
     type,
     title,
     description,

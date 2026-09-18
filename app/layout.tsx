@@ -15,7 +15,16 @@ import { AudioProvider } from "@/components/providers/AudioProvider";
 import { SearchProvider } from "@/components/providers/SearchProvider";
 import { TerminologyProvider } from "@/components/providers/TerminologyProvider";
 import { PersonaProvider } from "@/components/providers/PersonaProvider";
-import { RetroChaosOverlay } from "@/components/RetroChaosOverlay";
+import dynamic from "next/dynamic";
+
+const RetroChaosOverlay = dynamic(
+  () =>
+    import("@/components/RetroChaosOverlay").then(
+      (mod) => mod.RetroChaosOverlay
+    ),
+  { ssr: false }
+);
+
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { SearchWrapper } from "@/components/SearchWrapper";
@@ -132,6 +141,12 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: getUnifiedGraphSchema([getPersonNode(), getWebsiteNode()]),
           }}
+        />
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title="Systems Engineering Dispatches"
+          href="/blog/rss.xml"
         />
         <script
           dangerouslySetInnerHTML={{

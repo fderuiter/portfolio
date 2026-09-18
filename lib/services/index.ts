@@ -27,3 +27,6 @@ export * from "./duck/dispatch-command/spec";
 export * from "./duck/dispatch-command/handler";
 export * from "./duck/interact-hazard/spec";
 export * from "./duck/interact-hazard/handler";
+
+// Outbound Email Services
+export type { EmailServiceSpec, EmailServiceHandler } from "./email-service";

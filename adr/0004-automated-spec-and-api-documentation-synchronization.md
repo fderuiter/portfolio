@@ -37,7 +37,7 @@ We establish an automated, zero-drift technical documentation and API specificat
 ### 4. Strict Documentation Hygiene & Scratchpad Isolation
 
 - Formal documentation is strictly partitioned into `docs/`, `adr/`, `ARCHITECTURE.md`, `AGENTS.md`, and `README.md`.
-- Informal scratchpads, intermediate agent traces, and temporary brainstorming artifacts (`.agents/`, `scratch/`, `tmp/`) are explicitly excluded from markdown linting and git tracking.
+- Informal scratchpads, intermediate agent traces, and temporary brainstorming artifacts (`.scratch/`, `scratch/`, `tmp/`) are explicitly excluded from markdown linting and git tracking. Curated agent skills in `.agents/skills/` are tracked configuration.
 
 ## Invariant Compliance
 

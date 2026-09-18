@@ -8,6 +8,8 @@
 
 > **pushEvent**(`currentState`, `event`): [`ShiftState`](../../types/interfaces/ShiftState.md)
 
+Legacy event push helper.
+
 ## Parameters
 
 ### currentState

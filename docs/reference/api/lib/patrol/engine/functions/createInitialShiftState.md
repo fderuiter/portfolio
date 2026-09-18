@@ -6,15 +6,19 @@
 
 # Function: createInitialShiftState()
 
-> **createInitialShiftState**(`scenarioId?`): [`ShiftState`](../../types/interfaces/ShiftState.md)
+> **createInitialShiftState**(`scenarioId?`, `initialPhase?`): [`ShiftState`](../../types/interfaces/ShiftState.md)
 
-Stub Shift FSM Engine for Patrol Shift simulation.
+Creates the initial shift state.
 
 ## Parameters
 
 ### scenarioId?
 
 `string` \| `null`
+
+### initialPhase?
+
+[`ShiftPhase`](../../types/type-aliases/ShiftPhase.md)
 
 ## Returns
 
