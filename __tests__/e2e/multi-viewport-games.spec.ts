@@ -174,4 +174,84 @@ test.describe("Multi-Viewport Arcade Games & Cabinets Suite", () => {
     await expect(playBtn).toBeVisible();
     await playBtn.click();
   });
+
+  test("Patrol Shift (/patrol) renders the shift studio with zero horizontal overflow", async ({
+    page,
+  }) => {
+    await page.goto("/patrol");
+    await page.waitForLoadState("domcontentloaded");
+
+    await expect(
+      page.locator('[data-testid="patrol-shift-container"]')
+    ).toBeVisible({ timeout: 15000 });
+
+    const isOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth
+    );
+    expect(isOverflow).toBe(false);
+  });
+
+  test("Patrol Shift mountain map hub fits the viewport at every breakpoint", async ({
+    page,
+  }) => {
+    await page.goto("/patrol");
+    await page.waitForLoadState("domcontentloaded");
+
+    // Hydration race guard: the click must land after React attaches listeners.
+    await expect(async () => {
+      await page
+        .getByRole("button", { name: /Skip Intro|Resume Shift/i })
+        .click();
+      await expect(
+        page.locator('[data-testid="patrol-mountain-map"]')
+      ).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 15000 });
+
+    const isOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth
+    );
+    expect(isOverflow).toBe(false);
+  });
+
+  test("Patrol Shift OET touch dock meets the 48px minimum target size", async ({
+    page,
+  }) => {
+    await page.goto("/patrol");
+    await page.waitForLoadState("domcontentloaded");
+
+    await expect(async () => {
+      await page
+        .getByRole("button", { name: /Skip Intro|Resume Shift/i })
+        .click();
+      await page
+        .getByRole("button", { name: /Standby on Hill \/ Await Dispatch/i })
+        .click();
+      await page
+        .getByRole("button", { name: /Acknowledge & Respond/i })
+        .click();
+      await page
+        .getByRole("button", { name: /Stabilize & Prepare Toboggan/i })
+        .click();
+      await expect(
+        page.locator('[data-testid="oet-touch-control-dock"]')
+      ).toBeAttached({ timeout: 2000 });
+    }).toPass({ timeout: 25000 });
+
+    const undersized = await page.evaluate(() => {
+      const dock = document.querySelector(
+        '[data-testid="oet-touch-control-dock"]'
+      );
+      if (!dock) return ["dock missing"];
+      return Array.from(dock.querySelectorAll("button"))
+        .map((b) => {
+          const r = b.getBoundingClientRect();
+          return r.width < 48 || r.height < 48
+            ? `${b.getAttribute("aria-label") ?? b.textContent?.trim()}: ${Math.round(r.width)}x${Math.round(r.height)}`
+            : null;
+        })
+        .filter(Boolean);
+    });
+
+    expect(undersized, "OET touch targets below the 48px minimum").toEqual([]);
+  });
 });

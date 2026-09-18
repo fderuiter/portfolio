@@ -1,11 +1,23 @@
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import React from "react";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import { PatrolShiftContainer } from "@/components/patrol/PatrolShiftContainer";
 import { createPatrolShiftEngine, PATROL_SCENARIOS } from "@/lib/patrol";
+import { safeStorage } from "@/lib/safe-storage";
 
 describe("Patrol Shift — M3 Mountain Map Hub & Vertical Slice Integration Loop", () => {
-  afterEach(cleanup);
+  // The intro persists a "seen" flag (M9, #755), so each case must start from a
+  // first-visit state rather than inheriting the previous test's storage.
+  beforeEach(() => {
+    window.localStorage.clear();
+    safeStorage.clearCache?.();
+  });
+
+  afterEach(() => {
+    cleanup();
+    window.localStorage.clear();
+    safeStorage.clearCache?.();
+  });
 
   it("drives the complete happy-path shift loop from INTRO to SHIFT_COMPLETE", () => {
     render(<PatrolShiftContainer />);

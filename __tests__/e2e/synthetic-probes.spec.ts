@@ -156,4 +156,72 @@ test.describe("Headless Synthetic User Probes & Journey Monitoring", () => {
       expect(Array.isArray(cases)).toBe(true);
     }
   });
+
+  test("Probe 6: Patrol Shift Critical Journey — Dispatch to Debrief", async ({
+    page,
+  }) => {
+    const response = await page.goto("/patrol", {
+      waitUntil: "domcontentloaded",
+    });
+    expect(response?.status()).toBeLessThan(400);
+
+    await expect(
+      page.locator('[data-testid="patrol-shift-container"]')
+    ).toBeVisible({ timeout: 15000 });
+
+    // 1. Intro -> mountain map hub. Every interactive trigger is wrapped in a
+    // toPass poll so a click cannot land on static HTML before React 19
+    // attaches its listeners.
+    await expect(async () => {
+      await page
+        .getByRole("button", { name: /Skip Intro|Resume Shift/i })
+        .click();
+      await expect(
+        page.locator('[data-testid="patrol-mountain-map"]')
+      ).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 15000 });
+
+    // 2. Take a dispatch.
+    await expect(async () => {
+      await page
+        .getByRole("button", { name: /Standby on Hill \/ Await Dispatch/i })
+        .click();
+      await expect(
+        page.locator('[data-testid="patrol-dispatch-overlay"]')
+      ).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 15000 });
+
+    // 3. Run the scene (OEC).
+    await expect(async () => {
+      await page
+        .getByRole("button", { name: /Acknowledge & Respond/i })
+        .click();
+      await expect(
+        page.locator('[data-testid="patrol-scene-interaction"]')
+      ).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 15000 });
+
+    // 4. Transport (OET) — the canvas must acquire a 2D context.
+    await expect(async () => {
+      await page
+        .getByRole("button", { name: /Stabilize & Prepare Toboggan/i })
+        .click();
+      await expect(
+        page.locator('[data-testid="patrol-oet-canvas"]')
+      ).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 15000 });
+
+    const hasContext = await page.evaluate(() => {
+      const canvas = document.querySelector(
+        '[data-testid="oet-viewport-canvas"]'
+      ) as HTMLCanvasElement | null;
+      return Boolean(canvas && canvas.getContext("2d"));
+    });
+    expect(hasContext).toBe(true);
+
+    // 5. Radio traffic is text-first, so the journey is completable with audio
+    // unavailable and nothing is conveyed by sound alone.
+    const liveRegion = page.locator('[aria-live="polite"]').first();
+    await expect(liveRegion).toBeAttached();
+  });
 });

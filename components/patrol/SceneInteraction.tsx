@@ -250,7 +250,7 @@ export const SceneInteraction: React.FC<SceneInteractionProps> = ({
                   >
                     <div className="flex items-center justify-between font-bold text-zinc-300">
                       <span>{actor.name}</span>
-                      <span className="text-[10px] text-zinc-500 uppercase">
+                      <span className="text-[10px] text-zinc-400 uppercase">
                         {actor.role}
                       </span>
                     </div>
@@ -275,7 +275,7 @@ export const SceneInteraction: React.FC<SceneInteractionProps> = ({
                 Interactive Scene Actions &amp; Protocol Hotspots
               </h3>
             </div>
-            <span className="text-[11px] font-mono text-zinc-500">
+            <span className="text-[11px] font-mono text-zinc-400">
               Non-linear ordering supported
             </span>
           </div>
@@ -311,7 +311,7 @@ export const SceneInteraction: React.FC<SceneInteractionProps> = ({
                     hasExecuted
                       ? "bg-brand-cyan/10 border-brand-cyan/40 text-white shadow-sm cursor-default"
                       : isLocked
-                        ? "bg-zinc-950/40 border-zinc-800/40 text-zinc-500 cursor-not-allowed opacity-60"
+                        ? "bg-zinc-950/40 border-zinc-800/40 text-zinc-400 cursor-not-allowed opacity-60"
                         : "bg-zinc-950 border-zinc-800 hover:border-zinc-700 text-zinc-200 hover:text-white cursor-pointer hover:shadow-lg hover:shadow-brand-cyan/5"
                   }`}
                 >
@@ -336,7 +336,7 @@ export const SceneInteraction: React.FC<SceneInteractionProps> = ({
                       {hasExecuted ? (
                         <IconCheck className="w-4 h-4 text-brand-cyan" />
                       ) : isLocked ? (
-                        <IconLock className="w-4 h-4 text-zinc-500" />
+                        <IconLock className="w-4 h-4 text-zinc-400" />
                       ) : null}
                     </div>
                   </div>

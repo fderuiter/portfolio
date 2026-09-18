@@ -113,7 +113,7 @@ export const BriefingScreen: React.FC<BriefingScreenProps> = ({
             <div className="text-sm font-mono font-bold text-white truncate">
               18°F (-8°C)
             </div>
-            <div className="text-[10px] font-mono text-zinc-500">
+            <div className="text-[10px] font-mono text-zinc-400">
               Wind chill 4°F
             </div>
           </div>
@@ -131,7 +131,7 @@ export const BriefingScreen: React.FC<BriefingScreenProps> = ({
             <div className="text-sm font-mono font-bold text-white truncate">
               NW 14 mph
             </div>
-            <div className="text-[10px] font-mono text-zinc-500">
+            <div className="text-[10px] font-mono text-zinc-400">
               Gusts to 22 mph
             </div>
           </div>
@@ -149,7 +149,7 @@ export const BriefingScreen: React.FC<BriefingScreenProps> = ({
             <div className="text-sm font-mono font-bold text-white truncate">
               Hardpack / Groomed
             </div>
-            <div className="text-[10px] font-mono text-zinc-500">
+            <div className="text-[10px] font-mono text-zinc-400">
               The Back Bowl icy
             </div>
           </div>
@@ -167,7 +167,7 @@ export const BriefingScreen: React.FC<BriefingScreenProps> = ({
             <div className="text-sm font-mono font-bold text-white truncate">
               44 / 50 Open
             </div>
-            <div className="text-[10px] font-mono text-zinc-500">
+            <div className="text-[10px] font-mono text-zinc-400">
               East Quad &amp; West Quad open
             </div>
           </div>
@@ -209,7 +209,7 @@ export const BriefingScreen: React.FC<BriefingScreenProps> = ({
                   {isChecked ? (
                     <IconSquareCheck className="w-4 h-4 text-brand-cyan" />
                   ) : (
-                    <IconSquare className="w-4 h-4 text-zinc-500" />
+                    <IconSquare className="w-4 h-4 text-zinc-400" />
                   )}
                 </div>
                 <div className="min-w-0 space-y-0.5">

@@ -156,7 +156,7 @@ export const DebriefScreen: React.FC<DebriefScreenProps> = ({
               data-testid="observation-fallback"
               className="p-3.5 rounded-xl border border-zinc-800 bg-zinc-950/60 flex items-start gap-3 text-xs font-mono text-zinc-400"
             >
-              <IconInfoCircle className="w-4 h-4 shrink-0 mt-0.5 text-zinc-500" />
+              <IconInfoCircle className="w-4 h-4 shrink-0 mt-0.5 text-zinc-400" />
               <div className="space-y-1 min-w-0">
                 <p className="font-bold text-zinc-200">
                   Standard Operational Baseline
@@ -181,21 +181,21 @@ export const DebriefScreen: React.FC<DebriefScreenProps> = ({
             <IconGauge className="w-4 h-4 text-brand-cyan shrink-0" />
             Transport Telemetry
           </span>
-          <span className="text-zinc-600" aria-hidden="true">
+          <span className="text-zinc-400" aria-hidden="true">
             &bull;
           </span>
           <span className="text-white font-bold">
             {result.oetSummary.controlledStops} controlled stop
             {result.oetSummary.controlledStops === 1 ? "" : "s"}
           </span>
-          <span className="text-zinc-600" aria-hidden="true">
+          <span className="text-zinc-400" aria-hidden="true">
             &bull;
           </span>
           <span className="inline-flex items-center gap-1.5 text-white font-bold capitalize">
             <IconSnowflake className="w-3.5 h-3.5 text-sky-400 shrink-0" />
             Ride comfort: {result.oetSummary.rideComfort}
           </span>
-          <span className="text-zinc-600" aria-hidden="true">
+          <span className="text-zinc-400" aria-hidden="true">
             &bull;
           </span>
           <span className="text-zinc-400">

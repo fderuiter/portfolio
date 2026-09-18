@@ -270,7 +270,7 @@ export const ShiftSummary: React.FC<ShiftSummaryProps> = ({
               <span>{isLogExpanded ? "Collapse" : "Expand"}</span>
             </button>
 
-            <span className="text-[11px] font-mono text-zinc-500">
+            <span className="text-[11px] font-mono text-zinc-400">
               {filteredEvents.length} of {eventHistory.length} events
             </span>
           </div>
@@ -299,13 +299,13 @@ export const ShiftSummary: React.FC<ShiftSummaryProps> = ({
                       </span>
                     )}
                   </div>
-                  <span className="text-[10px] text-zinc-500 shrink-0">
+                  <span className="text-[10px] text-zinc-400 shrink-0">
                     #{idx + 1}
                   </span>
                 </div>
               ))
             ) : (
-              <p className="text-xs font-mono text-zinc-500 italic p-3">
+              <p className="text-xs font-mono text-zinc-400 italic p-3">
                 No individual event telemetry logged during this session.
               </p>
             )}

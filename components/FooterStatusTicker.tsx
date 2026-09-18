@@ -110,6 +110,7 @@ export const FooterStatusTicker: React.FC = () => {
   return (
     <div
       ref={tickerObserverRef}
+      data-testid="footer-status-ticker"
       className="w-full border-t border-zinc-800/60 bg-zinc-950/60 backdrop-blur-md px-4 py-3 text-xs font-mono"
     >
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">

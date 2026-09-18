@@ -447,7 +447,7 @@ export const OetCanvas: React.FC<OetCanvasProps> = ({
                     mph
                   </span>
                 </div>
-                <div className="text-[9px] sm:text-[10px] font-mono text-zinc-500 truncate">
+                <div className="text-[9px] sm:text-[10px] font-mono text-zinc-400 truncate">
                   {snapshot.currentSpeedMph > 15
                     ? "EXCEEDING SAFE LIMIT"
                     : snapshot.isStopped
@@ -483,7 +483,7 @@ export const OetCanvas: React.FC<OetCanvasProps> = ({
                 <div className="text-base sm:text-lg font-mono font-bold text-emerald-400">
                   {snapshot.judgmentScore}%
                 </div>
-                <div className="text-[9px] sm:text-[10px] font-mono text-zinc-500">
+                <div className="text-[9px] sm:text-[10px] font-mono text-zinc-400">
                   Eff: {snapshot.metrics.routeEfficiency}%
                 </div>
               </div>

@@ -78,7 +78,7 @@ export const DialogueChoice: React.FC<DialogueChoiceProps> = ({
             &ldquo;{moment.prompt}&rdquo;
           </p>
           {moment.context && (
-            <p className="text-[11px] font-sans text-zinc-500 leading-snug">
+            <p className="text-[11px] font-sans text-zinc-400 leading-snug">
               {moment.context}
             </p>
           )}
@@ -107,7 +107,7 @@ export const DialogueChoice: React.FC<DialogueChoiceProps> = ({
                 isSelected
                   ? "bg-brand-cyan/10 border-brand-cyan/50 text-white"
                   : isDisabled
-                    ? "bg-zinc-950/40 border-zinc-800/40 text-zinc-500 cursor-not-allowed opacity-60"
+                    ? "bg-zinc-950/40 border-zinc-800/40 text-zinc-400 cursor-not-allowed opacity-60"
                     : "bg-zinc-900 border-zinc-800 hover:border-zinc-700 text-zinc-200 hover:text-white cursor-pointer"
               }`}
             >

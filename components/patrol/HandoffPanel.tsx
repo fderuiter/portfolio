@@ -129,7 +129,7 @@ export const HandoffPanel: React.FC<HandoffPanelProps> = ({
                   {revealedPatient?.mechanism}
                 </span>
               ) : (
-                <span className="text-zinc-500 italic">
+                <span className="text-zinc-400 italic">
                   Mechanism unconfirmed on scene — patient found down without
                   witness statement.
                 </span>
@@ -153,7 +153,7 @@ export const HandoffPanel: React.FC<HandoffPanelProps> = ({
                   ))}
                 </ul>
               ) : (
-                <span className="text-zinc-500 italic">
+                <span className="text-zinc-400 italic">
                   Detailed secondary physical exam was not completed on scene.
                 </span>
               )}
@@ -251,7 +251,7 @@ export const HandoffPanel: React.FC<HandoffPanelProps> = ({
                   ))}
                 </ul>
               ) : (
-                <span className="text-zinc-500 italic">
+                <span className="text-zinc-400 italic">
                   No splints, bandages, or active interventions applied on hill.
                 </span>
               )}
@@ -295,7 +295,7 @@ export const HandoffPanel: React.FC<HandoffPanelProps> = ({
             ))}
           </div>
         ) : (
-          <p className="text-xs font-sans text-zinc-500 italic">
+          <p className="text-xs font-sans text-zinc-400 italic">
             Standard visual assessment and calm verbal coaching provided during
             transport.
           </p>

@@ -10,6 +10,8 @@ import {
   type PatrolShiftEngine,
 } from "@/lib/patrol";
 import { useAnnouncer } from "@/hooks/useAnnouncer";
+import { FieldManualButton } from "@/components/FieldManualButton";
+import { playPatrolCue, type PatrolSoundName } from "@/lib/game-audio";
 import {
   IconShieldCheck,
   IconClock,
@@ -27,6 +29,27 @@ import { HandoffPanel } from "./HandoffPanel";
 import { DebriefScreen } from "./DebriefScreen";
 import { ShiftSummary } from "./ShiftSummary";
 import { MedicalDisclaimerBanner } from "./MedicalDisclaimerBanner";
+
+/**
+ * Sparse operational cue played when the shift enters a phase. Radio traffic
+ * stays text-first: these are effects layered under the on-screen text, and the
+ * shared SoundEngine is muted by default, so every entry is optional polish.
+ */
+const PHASE_ENTRY_CUES: Record<string, PatrolSoundName> = {
+  BRIEFING: "patrolRoomAmbience",
+  briefing: "patrolRoomAmbience",
+  PATROL_MAP: "chairliftHum",
+  patrol: "chairliftHum",
+  DISPATCH: "radioChirp",
+  RESPONDING: "skiOnSnow",
+  SCENE: "skiOnSnow",
+  incident: "skiOnSnow",
+  TRANSPORT_PREP: "sledMovement",
+  OET: "sledMovement",
+  HANDOFF: "radioStatic",
+  DEBRIEF: "radioStatic",
+  debrief: "radioStatic",
+};
 
 /**
  * Props for the PatrolShiftContainer component.
@@ -68,6 +91,11 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
       announce(
         `Patrol shift phase changed to ${shiftState.phase.replace(/_/g, " ")}`
       );
+      const cue = PHASE_ENTRY_CUES[shiftState.phase];
+      if (cue) {
+        // No-ops unless the shared SoundEngine allows sound (muted by default).
+        playPatrolCue(cue);
+      }
     }
   }, [shiftState.phase, announce]);
 
@@ -156,7 +184,7 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
               <span className="px-2 py-0.5 rounded-full bg-brand-cyan/10 border border-brand-cyan/30 text-brand-cyan text-[10px] font-mono font-bold uppercase tracking-wider">
                 M1 Foundation Scaffold &bull; M3 Map Hub &bull; M4 OET Mini-Game
                 &bull; M5 OEC Interaction &bull; M6 Multi-Scenario &bull; M7
-                Contextual Debrief
+                Contextual Debrief &bull; M8 Ambient Ops &bull; M9 Field Manual
               </span>
             </div>
             <p className="text-xs font-mono text-zinc-400">
@@ -181,6 +209,8 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
               </strong>
             </span>
           </div>
+
+          <FieldManualButton manualId="patrol" />
 
           <button
             type="button"
@@ -388,9 +418,15 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
           <li className="text-brand-cyan flex items-center gap-1.5">
             <IconCheck className="w-3 h-3" /> M6: Multi-Scenario (#752)
           </li>
+          <li className="text-brand-cyan flex items-center gap-1.5">
+            <IconCheck className="w-3 h-3" /> M7: Contextual Debrief (#753)
+          </li>
+          <li className="text-brand-cyan flex items-center gap-1.5">
+            <IconCheck className="w-3 h-3" /> M8: Ambient Operations (#754)
+          </li>
           <li className="text-white font-bold flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-brand-cyan animate-pulse" />
-            M7: Contextual Debrief (#753)
+            M9: Field Manual &amp; Audio (#755)
           </li>
         </ul>
       </div>

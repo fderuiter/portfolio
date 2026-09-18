@@ -672,7 +672,7 @@ export const Navbar: React.FC = () => {
                   "flex items-center justify-center gap-1 px-2 md:px-2.5 py-1.5 rounded-lg font-bold transition-all duration-200 cursor-pointer min-h-8 shrink-0 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-1 focus-visible:ring-offset-zinc-950",
                   persona === "technical"
                     ? "bg-zinc-950 text-amber-400 border border-amber-400/20 shadow-[0_0_8px_rgba(251,191,36,0.15)]"
-                    : "text-zinc-500 hover:text-zinc-300 border border-transparent"
+                    : "text-zinc-400 hover:text-zinc-200 border border-transparent"
                 )}
               >
                 <IconFlame className="w-3.5 h-3.5 shrink-0" />
@@ -689,7 +689,7 @@ export const Navbar: React.FC = () => {
                   "flex items-center justify-center gap-1 px-2 md:px-2.5 py-1.5 rounded-lg font-bold transition-all duration-200 cursor-pointer min-h-8 shrink-0 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-1 focus-visible:ring-offset-zinc-950",
                   persona === "recruiter"
                     ? "bg-zinc-950 text-brand-cyan border border-brand-cyan/20 shadow-[0_0_8px_rgba(6,182,212,0.15)]"
-                    : "text-zinc-500 hover:text-zinc-300 border border-transparent"
+                    : "text-zinc-400 hover:text-zinc-200 border border-transparent"
                 )}
               >
                 <IconBriefcase className="w-3.5 h-3.5 shrink-0" />
@@ -1289,7 +1289,7 @@ export const Navbar: React.FC = () => {
                       "flex-1 flex items-center justify-center gap-1.5 min-h-11 py-2.5 rounded-xl font-bold transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400",
                       persona === "technical"
                         ? "bg-zinc-950 text-amber-400 border border-amber-400/20 shadow-[0_0_12px_rgba(251,191,36,0.15)]"
-                        : "text-zinc-500 hover:text-zinc-300 border border-transparent"
+                        : "text-zinc-400 hover:text-zinc-200 border border-transparent"
                     )}
                     aria-label="Switch to Technical Reading Mode: Deep-dive architecture and engineering details"
                     title="Technical Reading Mode — Deep-dive architecture and engineering details"
@@ -1305,7 +1305,7 @@ export const Navbar: React.FC = () => {
                       "flex-1 flex items-center justify-center gap-1.5 min-h-11 py-2.5 rounded-xl font-bold transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan",
                       persona === "recruiter"
                         ? "bg-zinc-950 text-brand-cyan border border-brand-cyan/20 shadow-[0_0_12px_rgba(6,182,212,0.15)]"
-                        : "text-zinc-500 hover:text-zinc-300 border border-transparent"
+                        : "text-zinc-400 hover:text-zinc-200 border border-transparent"
                     )}
                     aria-label="Switch to Recruiter Reading Mode: Executive summary and business impact"
                     title="Recruiter Reading Mode — Executive summary and business impact"

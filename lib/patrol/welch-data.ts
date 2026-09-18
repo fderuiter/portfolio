@@ -1748,3 +1748,25 @@ export function getWelchPoiById(id: string): WelchPoi | undefined {
   if (!id || typeof id !== "string") return undefined;
   return WELCH_POIS.find((p) => p.id === id);
 }
+
+/** Target commit rate for the descent simulation on desktop viewports (uncapped). */
+export const DESCENT_COMMIT_FPS_DESKTOP = 60;
+
+/** Target commit rate for the descent simulation on mobile viewports. */
+export const DESCENT_COMMIT_FPS_MOBILE = 30;
+
+/**
+ * Minimum interval between React state commits for the trail descent
+ * simulation, in milliseconds.
+ *
+ * On mobile the descent is throttled so a preview run does not drive a 60fps
+ * `setState` loop through the whole map render tree, per the mobile runtime
+ * budgets in AGENTS.md section 16. Desktop returns 0, meaning "commit on every
+ * animation frame".
+ *
+ * @param isMobileViewport - Whether the viewport matches `(max-width: 767px)`.
+ * @returns Milliseconds to wait between commits; 0 for uncapped.
+ */
+export function getDescentCommitIntervalMs(isMobileViewport: boolean): number {
+  return isMobileViewport ? 1000 / DESCENT_COMMIT_FPS_MOBILE : 0;
+}

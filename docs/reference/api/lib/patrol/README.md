@@ -176,6 +176,18 @@ Re-exports [deriveRevealedPatientState](engine/functions/deriveRevealedPatientSt
 
 ***
 
+### DESCENT\_COMMIT\_FPS\_DESKTOP
+
+Re-exports [DESCENT_COMMIT_FPS_DESKTOP](welch-data/variables/DESCENT_COMMIT_FPS_DESKTOP.md)
+
+***
+
+### DESCENT\_COMMIT\_FPS\_MOBILE
+
+Re-exports [DESCENT_COMMIT_FPS_MOBILE](welch-data/variables/DESCENT_COMMIT_FPS_MOBILE.md)
+
+***
+
 ### DialogueMoment
 
 Re-exports [DialogueMoment](types/interfaces/DialogueMoment.md)
@@ -239,6 +251,12 @@ Re-exports [generateDebriefReport](debrief/functions/generateDebriefReport.md)
 ### getAvailableActions
 
 Re-exports [getAvailableActions](engine/functions/getAvailableActions.md)
+
+***
+
+### getDescentCommitIntervalMs
+
+Re-exports [getDescentCommitIntervalMs](welch-data/functions/getDescentCommitIntervalMs.md)
 
 ***
 
