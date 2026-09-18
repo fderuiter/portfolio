@@ -109,15 +109,34 @@ export const OetCanvas: React.FC<OetCanvasProps> = ({
     () => activeEngine.getSnapshot()
   );
 
-  // Record metrics into PatrolEvent history when completed
-  useEffect(() => {
-    if (snapshot.status === "completed" && !hasRecordedEventRef.current) {
+  // Guaranteed arrive-at-base action ensuring metrics event is recorded
+  const handleArriveAtBase = useCallback(() => {
+    if (!hasRecordedEventRef.current) {
       hasRecordedEventRef.current = true;
       const event = activeEngine.createPatrolEventSnapshot(scenario?.id);
       onRecordEvent?.(event);
-      announce(
-        `Toboggan descent completed. Control judgment score: ${snapshot.judgmentScore} percent. Arrived at Base Aid Room.`
-      );
+    }
+    onArriveAtBase();
+  }, [activeEngine, onArriveAtBase, onRecordEvent, scenario?.id]);
+
+  // Record metrics into PatrolEvent history when completed or crashed
+  useEffect(() => {
+    if (
+      (snapshot.status === "completed" || snapshot.status === "crashed") &&
+      !hasRecordedEventRef.current
+    ) {
+      hasRecordedEventRef.current = true;
+      const event = activeEngine.createPatrolEventSnapshot(scenario?.id);
+      onRecordEvent?.(event);
+      if (snapshot.status === "crashed") {
+        announce(
+          `Toboggan transport halted: Terrain collision limit reached. Judgment score: ${snapshot.judgmentScore} percent.`
+        );
+      } else {
+        announce(
+          `Toboggan descent completed. Control judgment score: ${snapshot.judgmentScore} percent. Arrived at Base Aid Room.`
+        );
+      }
     }
   }, [
     snapshot.status,
@@ -134,6 +153,15 @@ export const OetCanvas: React.FC<OetCanvasProps> = ({
     hasRecordedEventRef.current = false;
   }, [activeEngine]);
 
+  // Clean up default engine on unmount
+  useEffect(() => {
+    return () => {
+      if (!customEngine) {
+        defaultEngine.destroy();
+      }
+    };
+  }, [customEngine, defaultEngine]);
+
   // Continuous animation and physics loop
   useEffect(() => {
     let animId: number | null = null;
@@ -147,7 +175,12 @@ export const OetCanvas: React.FC<OetCanvasProps> = ({
       lastTime = timestamp;
 
       const currentStatus = activeEngine.createSnapshot().status;
-      if (!isPaused && !isStepThroughMode && currentStatus !== "completed") {
+      if (
+        !isPaused &&
+        !isStepThroughMode &&
+        currentStatus !== "completed" &&
+        currentStatus !== "crashed"
+      ) {
         // Step fixed 60Hz physics
         const dt = Math.min(0.05, deltaMs / 1000);
         activeEngine.update(dt);
@@ -194,17 +227,13 @@ export const OetCanvas: React.FC<OetCanvasProps> = ({
         activeEngine.setBraking(true);
       } else if (e.code === "Space" || e.code === "KeyB") {
         e.preventDefault();
+        const currentEngaged = activeEngine.getSnapshot().isChainBrakeEngaged;
         activeEngine.toggleChainBrake();
-        announce(
-          `Chain brake ${
-            !snapshot.isChainBrakeEngaged ? "engaged" : "released"
-          }`
-        );
+        announce(`Chain brake ${!currentEngaged ? "engaged" : "released"}`);
       } else if (e.code === "KeyT") {
+        const currentRope = activeEngine.getSnapshot().isTailRopeBraking;
         activeEngine.toggleTailRope();
-        announce(
-          `Tail rope belay ${!snapshot.isTailRopeBraking ? "active" : "slack"}`
-        );
+        announce(`Tail rope belay ${!currentRope ? "active" : "slack"}`);
       } else if (e.code === "KeyP") {
         setIsPaused((prev) => !prev);
       }
@@ -227,26 +256,61 @@ export const OetCanvas: React.FC<OetCanvasProps> = ({
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [
-    activeEngine,
-    snapshot.isChainBrakeEngaged,
-    snapshot.isTailRopeBraking,
-    announce,
-  ]);
+  }, [activeEngine, announce]);
 
-  // Step-through accessibility action dispatcher
+  // Pointer event helpers ensuring touch targets do not stick on drag-out
+  const handlePointerDownSteer =
+    (val: number) => (e: React.PointerEvent<HTMLButtonElement>) => {
+      if (e.cancelable) e.preventDefault();
+      try {
+        e.currentTarget.setPointerCapture(e.pointerId);
+      } catch {
+        // Safe catch for synthetic/mock pointer environments
+      }
+      activeEngine.setSteering(val);
+    };
+
+  const handlePointerUpSteer = (e: React.PointerEvent<HTMLButtonElement>) => {
+    try {
+      if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      }
+    } catch {
+      // Safe catch
+    }
+    activeEngine.setSteering(0);
+  };
+
+  const handlePointerDownBrake = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (e.cancelable) e.preventDefault();
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // Safe catch
+    }
+    activeEngine.setBraking(true);
+  };
+
+  const handlePointerUpBrake = (e: React.PointerEvent<HTMLButtonElement>) => {
+    try {
+      if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      }
+    } catch {
+      // Safe catch
+    }
+    activeEngine.setBraking(false);
+  };
+
+  // Step-through accessibility action dispatcher with dynamic post-action snapshot query
   const handleStepAction = (
     label: string,
     action: () => void,
-    announcement: string
+    announcementGenerator: (snap: OetDescentSnapshot) => string
   ) => {
     action();
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const ctx = canvas.getContext("2d");
-      if (ctx) activeEngine.render(ctx, 1.0);
-    }
-    announce(`${label}: ${announcement}`);
+    const updatedSnap = activeEngine.getSnapshot();
+    announce(`${label}: ${announcementGenerator(updatedSnap)}`);
   };
 
   const progressPercent = Math.min(
@@ -344,10 +408,7 @@ export const OetCanvas: React.FC<OetCanvasProps> = ({
       </div>
 
       {/* 2D Mini-Game Canvas & Absolute HTML HUD Layer (ADR 0026) */}
-      <div
-        className="relative w-full rounded-2xl border border-zinc-800 bg-zinc-950 overflow-hidden shadow-2xl"
-        style={{ aspectRatio: "800 / 500", minHeight: "340px" }}
-      >
+      <div className="relative w-full rounded-2xl border border-zinc-800 bg-zinc-950 overflow-hidden shadow-2xl aspect-[16/10] min-h-[220px]">
         {/* Render Canvas */}
         <canvas
           ref={canvasRef}
@@ -361,28 +422,30 @@ export const OetCanvas: React.FC<OetCanvasProps> = ({
         {/* HTML/CSS Overlay Layer (ADR 0026 #ui-layer) */}
         <div
           id="ui-layer"
-          className="absolute inset-0 pointer-events-none p-4 sm:p-5 flex flex-col justify-between"
+          className="absolute inset-0 pointer-events-none p-3 sm:p-5 flex flex-col justify-between"
         >
           {/* Top HUD Bar */}
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start justify-between gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
             {/* Speed & Control Gauge */}
-            <div className="bg-zinc-950/85 backdrop-blur-md p-3 rounded-xl border border-zinc-800/80 shadow-lg flex items-center gap-3.5 pointer-events-auto">
-              <div className="p-2 rounded-lg bg-zinc-900 border border-zinc-800 text-brand-cyan">
-                <IconGauge className="w-5 h-5" />
+            <div className="bg-zinc-950/85 backdrop-blur-md p-2.5 sm:p-3 rounded-xl border border-zinc-800/80 shadow-lg flex items-center gap-2.5 sm:gap-3.5 pointer-events-auto min-w-0">
+              <div className="p-1.5 sm:p-2 rounded-lg bg-zinc-900 border border-zinc-800 text-brand-cyan shrink-0">
+                <IconGauge className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <div>
-                <div className="text-[10px] font-mono text-zinc-400 uppercase">
+              <div className="min-w-0">
+                <div className="text-[10px] font-mono text-zinc-400 uppercase truncate">
                   Descent Speed
                 </div>
-                <div className="flex items-baseline gap-1.5">
+                <div className="flex items-baseline gap-1">
                   <span
-                    className={`text-xl font-mono font-bold ${speedColorClass}`}
+                    className={`text-lg sm:text-xl font-mono font-bold ${speedColorClass}`}
                   >
                     {snapshot.currentSpeedMph.toFixed(1)}
                   </span>
-                  <span className="text-xs font-mono text-zinc-400">mph</span>
+                  <span className="text-[10px] sm:text-xs font-mono text-zinc-400">
+                    mph
+                  </span>
                 </div>
-                <div className="text-[10px] font-mono text-zinc-500">
+                <div className="text-[9px] sm:text-[10px] font-mono text-zinc-500 truncate">
                   {snapshot.currentSpeedMph > 15
                     ? "EXCEEDING SAFE LIMIT"
                     : snapshot.isStopped
@@ -393,17 +456,17 @@ export const OetCanvas: React.FC<OetCanvasProps> = ({
             </div>
 
             {/* Distance Progress & Gate Rating */}
-            <div className="bg-zinc-950/85 backdrop-blur-md p-3 rounded-xl border border-zinc-800/80 shadow-lg flex items-center gap-4 pointer-events-auto">
-              <div>
-                <div className="text-[10px] font-mono text-zinc-400 uppercase">
+            <div className="bg-zinc-950/85 backdrop-blur-md p-2.5 sm:p-3 rounded-xl border border-zinc-800/80 shadow-lg flex items-center gap-2.5 sm:gap-4 pointer-events-auto min-w-0">
+              <div className="min-w-0">
+                <div className="text-[10px] font-mono text-zinc-400 uppercase truncate">
                   Fall Line Progress
                 </div>
-                <div className="text-sm font-mono font-bold text-white">
+                <div className="text-xs sm:text-sm font-mono font-bold text-white truncate">
                   {Math.round(snapshot.distanceTraveled)}m /{" "}
                   {snapshot.totalDistance}m ({progressPercent}%)
                 </div>
                 {/* Visual Progress Bar */}
-                <div className="w-32 h-1.5 bg-zinc-800 rounded-full mt-1.5 overflow-hidden">
+                <div className="w-20 sm:w-32 h-1.5 bg-zinc-800 rounded-full mt-1.5 overflow-hidden">
                   <div
                     className="h-full bg-brand-cyan transition-all duration-150"
                     style={{ width: `${progressPercent}%` }}
@@ -411,15 +474,15 @@ export const OetCanvas: React.FC<OetCanvasProps> = ({
                 </div>
               </div>
 
-              <div className="border-l border-zinc-800 pl-3">
+              <div className="border-l border-zinc-800 pl-2.5 sm:pl-3 shrink-0">
                 <div className="text-[10px] font-mono text-zinc-400 uppercase">
-                  Judgment Score
+                  Judgment
                 </div>
-                <div className="text-lg font-mono font-bold text-emerald-400">
+                <div className="text-base sm:text-lg font-mono font-bold text-emerald-400">
                   {snapshot.judgmentScore}%
                 </div>
-                <div className="text-[10px] font-mono text-zinc-500">
-                  Efficiency: {snapshot.metrics.routeEfficiency}%
+                <div className="text-[9px] sm:text-[10px] font-mono text-zinc-500">
+                  Eff: {snapshot.metrics.routeEfficiency}%
                 </div>
               </div>
             </div>
@@ -565,10 +628,84 @@ export const OetCanvas: React.FC<OetCanvasProps> = ({
 
               <button
                 type="button"
-                onClick={onArriveAtBase}
+                onClick={handleArriveAtBase}
                 className="min-h-[48px] px-6 py-2.5 rounded-xl bg-brand-cyan hover:bg-brand-cyan/90 text-zinc-950 font-mono text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-2 shadow-lg shadow-brand-cyan/20"
               >
                 <span>Proceed to Base Aid Room Handoff</span>
+                <IconChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Crash / Incident Modal Overlay */}
+        {snapshot.status === "crashed" && (
+          <div
+            className="absolute inset-0 bg-zinc-950/95 backdrop-blur-md p-6 flex flex-col items-center justify-center text-center gap-4 z-20"
+            data-testid="oet-crashed-modal"
+          >
+            <div className="p-3 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400 animate-pulse">
+              <IconAlertTriangle className="w-8 h-8" />
+            </div>
+
+            <div className="space-y-1 max-w-md">
+              <h3 className="text-2xl font-mono font-bold text-white">
+                Critical Transport Incident: Toboggan Halted
+              </h3>
+              <p className="text-xs text-zinc-300 font-sans">
+                Repeated terrain obstacle collisions resulted in sled stoppage
+                on the fall line. Patient transport suspended due to impact
+                shock risk. Immediate triage assessment required.
+              </p>
+            </div>
+
+            {/* Metrics Breakdown */}
+            <div className="grid grid-cols-3 gap-3 p-4 rounded-xl bg-zinc-900 border border-zinc-800 text-left w-full max-w-lg">
+              <div>
+                <div className="text-[10px] font-mono text-zinc-400 uppercase">
+                  Judgment Score
+                </div>
+                <div className="text-lg font-mono font-bold text-red-400">
+                  {snapshot.judgmentScore}%
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] font-mono text-zinc-400 uppercase">
+                  Collisions
+                </div>
+                <div className="text-lg font-mono font-bold text-red-400">
+                  {snapshot.metrics.collisions} / 4
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] font-mono text-zinc-400 uppercase">
+                  Boundary Excursions
+                </div>
+                <div className="text-lg font-mono font-bold text-zinc-200">
+                  {snapshot.metrics.boundaryViolations}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  activeEngine.init();
+                  hasRecordedEventRef.current = false;
+                }}
+                className="min-h-[48px] px-5 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 font-mono text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-2"
+              >
+                <IconRotateClockwise className="w-4 h-4" />
+                <span>Retry Descent Run</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleArriveAtBase}
+                className="min-h-[48px] px-6 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-mono text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-2 shadow-lg shadow-red-600/20"
+              >
+                <span>Proceed to Emergency Triage</span>
                 <IconChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -606,7 +743,12 @@ export const OetCanvas: React.FC<OetCanvasProps> = ({
                       brake: false,
                       chainBrake: false,
                     }),
-                  `Advanced to ${Math.round(snapshot.distanceTraveled + 30)}m at ${snapshot.currentSpeedMph.toFixed(1)} mph.`
+                  (snap) =>
+                    snap.status === "completed"
+                      ? "Arrived at Base Aid Room."
+                      : snap.status === "crashed"
+                        ? "Sled stopped due to collisions."
+                        : `Advanced to ${Math.round(snap.distanceTraveled)}m at ${snap.currentSpeedMph.toFixed(1)} mph.`
                 )
               }
               className="min-h-[48px] p-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-mono font-bold text-white transition-all cursor-pointer inline-flex items-center justify-center gap-1.5"
@@ -626,7 +768,8 @@ export const OetCanvas: React.FC<OetCanvasProps> = ({
                       brake: false,
                       chainBrake: false,
                     }),
-                  "Sideslipped left through guide corridor."
+                  (snap) =>
+                    `Sideslipped left through guide corridor to ${Math.round(snap.distanceTraveled)}m.`
                 )
               }
               className="min-h-[48px] p-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-mono font-bold text-white transition-all cursor-pointer inline-flex items-center justify-center gap-1.5"
@@ -646,7 +789,8 @@ export const OetCanvas: React.FC<OetCanvasProps> = ({
                       brake: false,
                       chainBrake: false,
                     }),
-                  "Sideslipped right through guide corridor."
+                  (snap) =>
+                    `Sideslipped right through guide corridor to ${Math.round(snap.distanceTraveled)}m.`
                 )
               }
               className="min-h-[48px] p-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-mono font-bold text-white transition-all cursor-pointer inline-flex items-center justify-center gap-1.5"
@@ -664,7 +808,8 @@ export const OetCanvas: React.FC<OetCanvasProps> = ({
                     activeEngine.setChainBrake(true);
                     activeEngine.stepSimulation(0.6, { brake: true });
                   },
-                  "Applied snowplow wedge and chain brake."
+                  (snap) =>
+                    `Applied wedge and chain brake. Speed checked to ${snap.currentSpeedMph.toFixed(1)} mph.`
                 )
               }
               className="min-h-[48px] p-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-mono font-bold text-amber-400 transition-all cursor-pointer inline-flex items-center justify-center gap-1.5"
@@ -683,9 +828,10 @@ export const OetCanvas: React.FC<OetCanvasProps> = ({
       >
         <button
           type="button"
-          onPointerDown={() => activeEngine.setSteering(-1)}
-          onPointerUp={() => activeEngine.setSteering(0)}
-          onPointerCancel={() => activeEngine.setSteering(0)}
+          onPointerDown={handlePointerDownSteer(-1)}
+          onPointerUp={handlePointerUpSteer}
+          onPointerCancel={handlePointerUpSteer}
+          onPointerLeave={handlePointerUpSteer}
           className="min-h-[48px] min-w-[48px] p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 active:scale-[0.96] border border-zinc-800 text-white font-mono text-xs font-bold inline-flex items-center justify-center gap-2 select-none touch-none cursor-pointer"
         >
           <IconArrowLeft className="w-5 h-5 text-cyan-400" />
@@ -694,9 +840,10 @@ export const OetCanvas: React.FC<OetCanvasProps> = ({
 
         <button
           type="button"
-          onPointerDown={() => activeEngine.setSteering(1)}
-          onPointerUp={() => activeEngine.setSteering(0)}
-          onPointerCancel={() => activeEngine.setSteering(0)}
+          onPointerDown={handlePointerDownSteer(1)}
+          onPointerUp={handlePointerUpSteer}
+          onPointerCancel={handlePointerUpSteer}
+          onPointerLeave={handlePointerUpSteer}
           className="min-h-[48px] min-w-[48px] p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 active:scale-[0.96] border border-zinc-800 text-white font-mono text-xs font-bold inline-flex items-center justify-center gap-2 select-none touch-none cursor-pointer"
         >
           <IconArrowRight className="w-5 h-5 text-cyan-400" />
@@ -705,9 +852,10 @@ export const OetCanvas: React.FC<OetCanvasProps> = ({
 
         <button
           type="button"
-          onPointerDown={() => activeEngine.setBraking(true)}
-          onPointerUp={() => activeEngine.setBraking(false)}
-          onPointerCancel={() => activeEngine.setBraking(false)}
+          onPointerDown={handlePointerDownBrake}
+          onPointerUp={handlePointerUpBrake}
+          onPointerCancel={handlePointerUpBrake}
+          onPointerLeave={handlePointerUpBrake}
           className="min-h-[48px] min-w-[48px] p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 active:scale-[0.96] border border-zinc-800 text-amber-300 font-mono text-xs font-bold inline-flex items-center justify-center gap-2 select-none touch-none cursor-pointer"
         >
           <IconArrowDown className="w-5 h-5" />
@@ -749,7 +897,7 @@ export const OetCanvas: React.FC<OetCanvasProps> = ({
 
         <button
           type="button"
-          onClick={onArriveAtBase}
+          onClick={handleArriveAtBase}
           className="min-h-[48px] px-6 py-2.5 rounded-xl bg-brand-cyan hover:bg-brand-cyan/90 active:scale-[0.98] text-zinc-950 font-mono text-xs font-bold transition-all cursor-pointer inline-flex items-center justify-center gap-2 shadow-lg shadow-brand-cyan/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
         >
           <span>Arrive at Base Aid Room</span>

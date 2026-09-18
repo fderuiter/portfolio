@@ -246,4 +246,99 @@ describe("Patrol Shift: OetCanvas Component (M4 / #750)", () => {
     unmount();
     expect(cancelAnimSpy).toHaveBeenCalled();
   });
+
+  it("renders crashed incident modal overlay when status transitions to crashed and supports retry", () => {
+    const engine = new OetDescentEngine();
+    const onArriveAtBase = vi.fn();
+
+    render(
+      <OetCanvas
+        scenario={dummyScenario}
+        engine={engine}
+        onArriveAtBase={onArriveAtBase}
+      />
+    );
+
+    // Simulate crash status
+    act(() => {
+      const internal = engine as unknown as {
+        state: { status: string; metrics: { collisions: number } };
+      };
+      internal.state.status = "crashed";
+      internal.state.metrics.collisions = 4;
+      engine.notifySubscribers();
+    });
+
+    // Crash modal should be present
+    expect(screen.getByTestId("oet-crashed-modal")).toBeDefined();
+    expect(
+      screen.getByText(/Critical Transport Incident: Toboggan Halted/i)
+    ).toBeDefined();
+
+    // Click Retry Descent Run
+    const retryBtn = screen.getByRole("button", { name: /Retry Descent Run/i });
+    act(() => {
+      fireEvent.click(retryBtn);
+    });
+
+    expect(engine.createSnapshot().status).toBe("ready");
+    expect(screen.queryByTestId("oet-crashed-modal")).toBeNull();
+  });
+
+  it("ensures metric event is emitted even if user clicks arrive at base aid room before completing descent", () => {
+    const engine = new OetDescentEngine();
+    const onRecordEvent = vi.fn();
+    const onArriveAtBase = vi.fn();
+
+    render(
+      <OetCanvas
+        scenario={dummyScenario}
+        engine={engine}
+        onRecordEvent={onRecordEvent}
+        onArriveAtBase={onArriveAtBase}
+      />
+    );
+
+    // Sled has not finished descent (still ready/descending)
+    expect(engine.createSnapshot().status).toBe("ready");
+
+    const arriveBtn = screen.getByRole("button", {
+      name: /Arrive at Base Aid Room/i,
+    });
+    act(() => {
+      fireEvent.click(arriveBtn);
+    });
+
+    expect(onRecordEvent).toHaveBeenCalledTimes(1);
+    expect(onArriveAtBase).toHaveBeenCalledTimes(1);
+    const emittedEvent = onRecordEvent.mock.calls[0]?.[0] as PatrolEvent;
+    expect(emittedEvent.action).toBe("OET_TRANSPORT_COMPLETED");
+  });
+
+  it("isolates pointer steering and resets steering on pointerup or pointerleave", () => {
+    const engine = new OetDescentEngine();
+    const onArriveAtBase = vi.fn();
+
+    render(
+      <OetCanvas
+        scenario={dummyScenario}
+        engine={engine}
+        onArriveAtBase={onArriveAtBase}
+      />
+    );
+
+    const steerLeftBtn = screen.getByRole("button", { name: /Steer Left/i });
+
+    // Pointer down steers left
+    act(() => {
+      fireEvent.pointerDown(steerLeftBtn, { pointerId: 1 });
+    });
+    expect(engine.createSnapshot().sled.steering).toBe(-1);
+
+    // Pointer leave resets steering to 0
+    act(() => {
+      fireEvent.pointerLeave(steerLeftBtn, { pointerId: 1 });
+    });
+    expect(engine.createSnapshot().sled.steering).toBe(0);
+  });
 });
