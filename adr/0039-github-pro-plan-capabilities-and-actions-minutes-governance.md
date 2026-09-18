@@ -2,12 +2,27 @@
 
 ## Status
 
-Accepted on 2026-09-13. Corrects the plan assumption in ADR 0037's context
-section (written against GitHub Free) and extends ADR 0036's free-tier
-governance pattern to a resource ADR 0036 does not cover: GitHub Actions
-minutes.
+Accepted on 2026-09-13. **Partially corrected on 2026-09-18** — see
+[Correction 2026-09-18](#correction-2026-09-18). The plan premise below is
+wrong: the account is on GitHub **Free**, not Pro. The Actions-minutes
+governance in Decision §2 stands and is now more binding, not less; the
+branch-protection decision in Decision §1 is not achievable on this plan.
+
+Extends ADR 0036's free-tier governance pattern to a resource ADR 0036 does
+not cover: GitHub Actions minutes. Its attempt to correct ADR 0037's context
+section was itself the error — ADR 0037 was right.
 
 ## Context
+
+> [!CAUTION]
+> **Superseded (2026-09-18):** The plan claim in this paragraph and the
+> 3,000-minute figure below are both false. The account is on GitHub
+> **Free**, with a **2,000**-minute private-repository allowance and no
+> branch-protection, ruleset, or environment-protection capability. See
+> [Correction 2026-09-18](#correction-2026-09-18). Everything in this
+> section about _cost behavior_ — cancelled jobs billing full elapsed time,
+> duplicate same-tree runs, matrix breadth as a cost multiplier — remains
+> accurate and is unaffected.
 
 The account owning `fderuiter/portfolio` is on **GitHub Pro**, not GitHub
 Free. This was not established at the time ADR 0037 was written; its context
@@ -170,3 +185,86 @@ Ecosystem` check. The full four-device matrix remains available on demand via
    no-paid-overage invariant, no cloud workflows may be dispatched or retried until
    next month's billing cycle reset. Live empirical measurement of runtime and
    cost remains deferred under #733.
+
+## Correction 2026-09-18
+
+This ADR's central factual premise is wrong. The account owning
+`fderuiter/portfolio` is on **GitHub Free**, not GitHub Pro. ADR 0037's
+original context section — which this ADR set out to correct — was accurate.
+
+### Evidence
+
+| Probe                                                     | Result                                                                               |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `GET /user`                                               | `plan.name = "free"`                                                                 |
+| `GET /repos/fderuiter/portfolio/branches/main/protection` | `403 "Upgrade to GitHub Pro or make this repository public to enable this feature."` |
+| `GET /repos/fderuiter/portfolio/rulesets`                 | same `403`                                                                           |
+| `GET /repos/fderuiter/portfolio/environments`             | 3 environments exist, all with `protection_rules: []`                                |
+
+### What changes
+
+**Decision §1 (branch protection) is not achievable and is withdrawn as an
+actionable decision.** Classic branch protection, repository rulesets, and
+environment protection rules all require Pro on a private repository. The
+client-side guardrails (`.husky/pre-push`, `CODEOWNERS`,
+`scripts/git-guardrail.sh`) are therefore not defense-in-depth layered over
+server-side enforcement, as §1 assumed — **they are the only enforcement
+that exists.** Any document asserting server-side branch protection on
+`main` is describing a control that is not in place. Restoring Actions
+minutes does not change this; only a plan change or making the repository
+public would.
+
+**Decision §2 (Actions-minutes governance) stands, with a tighter budget.**
+The private-repository allowance is **2,000 minutes/month**, not 3,000 — the
+real budget is one third smaller than every downstream document has stated.
+The no-paid-overage invariant is unchanged and was applied as written when
+the allowance was exhausted a second time.
+
+### Second exhaustion, 2026-09-13
+
+The allowance was exhausted again in the same billing cycle this ADR was
+written in, by the same mechanism. September private-repository consumption
+reached **2,433 minutes against a 2,000-minute allowance (122%)**, crossing
+the ceiling on 2026-09-13. Net billable amount was **$0.00** — nothing was
+purchased, confirming this was allowance exhaustion rather than a payment
+failure, a distinction the failing-job annotation does not disambiguate.
+
+`portfolio` accounted for **1,847 of the 2,433 private minutes (76%)**, and
+on 2026-09-13 alone ran **45 CI Pipeline runs for 625 minutes** — 31% of the
+entire monthly allowance in one day. Full analysis in #840.
+
+### The duplicate-run defect was misdiagnosed
+
+Decision §2 identified full-matrix E2E re-execution across a PR check and
+its post-merge `main` push as the duplication to eliminate, and the
+2026-09-14 update fixed exactly that: `heavy-gate` and `device-gate` are
+now `if: github.event_name == 'pull_request'`.
+
+That fix is correct and holds. But it did not eliminate same-tree
+duplication, because `fast-gate` (20m cap) and `security-gate` (15m cap)
+still run on **both** the `pull_request` event and the post-merge `push` to
+`main`. Since merges are squash merges, the `main` run validates a tree the
+PR gate already validated — roughly 35-40 minutes of capped duplicate work
+per merge.
+
+This was compounded by `concurrency.cancel-in-progress` being
+`${{ github.event_name == 'pull_request' }}`, i.e. **false for `main`
+pushes**, so consecutive merges produced consecutive complete non-superseding
+runs rather than superseding one another. The fourteen `main` pushes on
+2026-09-13 each got a full run.
+
+The concurrency asymmetry is corrected in this change. Whether to drop the
+post-merge `fast-gate`/`security-gate` duplicate entirely is a separate
+decision: it is the larger saving, but it removes the only post-merge signal
+on the branch Vercel deploys from, and unlike a PR gate there is no branch
+protection available to compensate.
+
+### Deferred measurement is unchanged
+
+Job `timeout-minutes` caps remain provisional. Every job in every workflow
+declares one — audited 2026-09-18, no unbounded job exists — but the caps
+are loose relative to a 2,000-minute budget: a single hung PR run can reach
+105 minutes (5.3% of the monthly allowance) and a hung `verify-release`
+reaches 90 (4.5%). Ratcheting them down requires one clean measured run and
+remains owned by #733; tightening them by guess would trade cost risk for
+false-failure risk.
