@@ -10,6 +10,7 @@ export * from "./formula-linter";
 export * from "./formula-presets";
 export * from "./form-linter";
 export * from "./ast-evaluator";
+export * from "./conditional-logic";
 export * from "./cdisc-controlled-terminology";
 export * from "./cdash-domain-templates";
 export * from "./cdisc-cdash-library";

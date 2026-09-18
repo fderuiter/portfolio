@@ -64,6 +64,7 @@
 - [lib/crf/cdisc-conformance-linter](lib/crf/cdisc-conformance-linter/README.md)
 - [lib/crf/cdisc-controlled-terminology](lib/crf/cdisc-controlled-terminology/README.md)
 - [lib/crf/cli-engine](lib/crf/cli-engine/README.md)
+- [lib/crf/conditional-logic](lib/crf/conditional-logic/README.md)
 - [lib/crf/cross-visit-rules](lib/crf/cross-visit-rules/README.md)
 - [lib/crf/export-acrf](lib/crf/export-acrf/README.md)
 - [lib/crf/export-docx](lib/crf/export-docx/README.md)
