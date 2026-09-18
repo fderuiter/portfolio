@@ -2,23 +2,35 @@ import {
   INITIAL_PATROL_SCENARIOS,
   OEC_SAMPLE_SCENARIO,
 } from "./scenarios/catalog";
+import { WRIST_INJURY_SCENARIO } from "./scenarios/wrist-injury";
+import { AMBIGUOUS_PATIENT_SCENARIO } from "./scenarios/ambiguous-patient";
+import { BUSY_SCENE_SCENARIO } from "./scenarios/busy-scene";
 import type { PatrolScenario } from "./types";
 
 /**
- * Public catalog re-export for Patrol Shift initial scenario presets.
+ * The three MVP scenario content packages (Issue #752 / epic #744), covering
+ * a straightforward injury, an ambiguous patient, and a busy/crowded scene.
+ * Randomly (or sequentially) selected per shift by the Mountain Map hub.
  */
-export const PATROL_SCENARIOS: PatrolScenario[] = INITIAL_PATROL_SCENARIOS;
+export const PATROL_SCENARIOS: PatrolScenario[] = [
+  WRIST_INJURY_SCENARIO,
+  AMBIGUOUS_PATIENT_SCENARIO,
+  BUSY_SCENE_SCENARIO,
+];
 
 /**
- * Sample clinical OEC scenario for patient assessment and care interaction.
+ * Sample clinical OEC scenario retained for backward compatibility with the
+ * M5 vertical-slice demo; superseded by the three MVP scenarios above.
  * // PLACEHOLDER — needs OEC/NSP content review, see #744
  */
 export const OEC_SAMPLE_SCENARIO_PRESET: PatrolScenario = OEC_SAMPLE_SCENARIO;
 
 /**
- * Comprehensive list of all scenarios registered across milestones.
+ * Comprehensive list of all scenarios registered across milestones, MVP
+ * scenarios first so they are preferred by default scenario selection.
  */
 export const ALL_PATROL_SCENARIOS: PatrolScenario[] = [
+  ...PATROL_SCENARIOS,
   ...INITIAL_PATROL_SCENARIOS,
   OEC_SAMPLE_SCENARIO,
 ];

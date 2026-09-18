@@ -10,6 +10,7 @@ export * from "./MountainMap";
 export * from "./DispatchOverlay";
 export * from "./SceneInteractionPlaceholder";
 export * from "./SceneInteraction";
+export * from "./DialogueChoice";
 export * from "./PatientCard";
 export * from "./MedicalDisclaimerBanner";
 export * from "./OetPlaceholder";

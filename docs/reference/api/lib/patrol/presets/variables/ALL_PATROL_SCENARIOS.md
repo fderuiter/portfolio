@@ -8,4 +8,5 @@
 
 > `const` **ALL\_PATROL\_SCENARIOS**: [`PatrolScenario`](../../types/interfaces/PatrolScenario.md)[]
 
-Comprehensive list of all scenarios registered across milestones.
+Comprehensive list of all scenarios registered across milestones, MVP
+scenarios first so they are preferred by default scenario selection.

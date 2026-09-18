@@ -6,6 +6,8 @@
 
 # Variable: PATROL\_SCENARIOS
 
-> `const` **PATROL\_SCENARIOS**: [`PatrolScenario`](../../types/interfaces/PatrolScenario.md)[] = `INITIAL_PATROL_SCENARIOS`
+> `const` **PATROL\_SCENARIOS**: [`PatrolScenario`](../../types/interfaces/PatrolScenario.md)[]
 
-Public catalog re-export for Patrol Shift initial scenario presets.
+The three MVP scenario content packages (Issue #752 / epic #744), covering
+a straightforward injury, an ambiguous patient, and a busy/crowded scene.
+Randomly (or sequentially) selected per shift by the Mountain Map hub.

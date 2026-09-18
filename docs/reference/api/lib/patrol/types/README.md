@@ -11,6 +11,8 @@
 - [BriefingState](interfaces/BriefingState.md)
 - [DebriefReport](interfaces/DebriefReport.md)
 - [DebriefRule](interfaces/DebriefRule.md)
+- [DialogueMoment](interfaces/DialogueMoment.md)
+- [DialogueOption](interfaces/DialogueOption.md)
 - [EnvironmentState](interfaces/EnvironmentState.md)
 - [OetDescentEngineOptions](interfaces/OetDescentEngineOptions.md)
 - [OetDescentSnapshot](interfaces/OetDescentSnapshot.md)
@@ -36,6 +38,7 @@
 
 - [ActionCategory](type-aliases/ActionCategory.md)
 - [CanonicalShiftPhase](type-aliases/CanonicalShiftPhase.md)
+- [DialogueStyle](type-aliases/DialogueStyle.md)
 - [IncidentSeverity](type-aliases/IncidentSeverity.md)
 - [LegacyShiftPhase](type-aliases/LegacyShiftPhase.md)
 - [OetDescentStatus](type-aliases/OetDescentStatus.md)

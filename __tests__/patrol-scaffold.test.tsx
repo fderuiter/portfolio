@@ -53,16 +53,20 @@ describe("Patrol Shift — M1 Foundation Scaffold & Discovery Verification", () 
     );
   });
 
-  it("contains only operational routines in initial scenarios with no invented patient vitals", () => {
-    expect(PATROL_SCENARIOS.length).toBeGreaterThan(0);
+  it("registers the three M6 MVP scenario content packages with well-formed actions", () => {
+    // Superseded by M6 (#752): PATROL_SCENARIOS now returns the three real
+    // MVP scenarios rather than the non-clinical M1 scaffold routines: see
+    // __tests__/patrol-scenarios.test.ts for the full content-invariant suite.
+    expect(PATROL_SCENARIOS.length).toBe(3);
     for (const scenario of PATROL_SCENARIOS) {
-      expect(scenario.initialVitals).toBeUndefined();
+      expect(scenario.actions.length).toBeGreaterThan(0);
       for (const action of scenario.actions) {
         expect([
           "communication",
           "assessment",
           "decision",
           "transport",
+          "treatment",
         ]).toContain(action.category);
       }
     }

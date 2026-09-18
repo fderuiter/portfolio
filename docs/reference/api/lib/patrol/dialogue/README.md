@@ -6,10 +6,8 @@
 
 # lib/patrol/dialogue
 
-## Interfaces
-
-- [DialogueNode](interfaces/DialogueNode.md)
-
 ## Functions
 
-- [createSampleDialogue](functions/createSampleDialogue.md)
+- [createDialogueChoiceEvent](functions/createDialogueChoiceEvent.md)
+- [findDialogueOption](functions/findDialogueOption.md)
+- [getUnlockedDialogueMoments](functions/getUnlockedDialogueMoments.md)
