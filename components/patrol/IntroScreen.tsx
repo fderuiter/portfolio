@@ -21,7 +21,7 @@ interface IntroScreenProps {
 }
 
 /**
- * Explainer screen introducing Midwest Ski Patrol operational judgment,
+ * Explainer screen introducing Welch Village Ski Patrol operational judgment,
  * Outdoor Emergency Care (OEC), Outdoor Emergency Transportation (OET), and shift roles.
  */
 export const IntroScreen: React.FC<IntroScreenProps> = ({
@@ -44,13 +44,18 @@ export const IntroScreen: React.FC<IntroScreenProps> = ({
           </span>
         </div>
         <h2 className="text-xl sm:text-2xl font-mono font-bold text-white tracking-tight">
-          Midwest Ski Patrol: Shift Studio
+          Welch Village Ski Patrol: Shift Studio
         </h2>
         <p className="text-sm font-sans text-zinc-300 leading-relaxed max-w-3xl">
           Welcome to the Patrol Shift operational judgment simulation. As an
-          active volunteer or pro ski patroller on a Midwest hill, your shift
-          demands swift triage, cold-weather clinical care, and precise toboggan
-          handling across variable snow, ice, and crowded slopes.
+          active volunteer or pro ski patroller at Welch Village, a Twin
+          Cities-area hill, your shift demands swift triage, cold-weather
+          clinical care, and precise toboggan handling across variable snow,
+          ice, and crowded slopes.
+        </p>
+        <p className="text-[10px] font-mono text-zinc-600">
+          Unofficial, fan-made simulation inspired by Welch Village. Not
+          affiliated with or endorsed by Welch Village Ski Area.
         </p>
       </div>
 
@@ -85,8 +90,8 @@ export const IntroScreen: React.FC<IntroScreenProps> = ({
           </div>
           <p className="text-xs font-sans text-zinc-400 leading-relaxed">
             Fall-line descent with Cascade / Akja rescue sleds, chain-brake
-            deployment, and coordinated tail-rope braking across icy Midwestern
-            pitches.
+            deployment, and coordinated tail-rope braking across Welch
+            Village&apos;s icy pitches.
           </p>
         </div>
 

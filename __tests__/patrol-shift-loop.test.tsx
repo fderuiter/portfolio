@@ -12,7 +12,9 @@ describe("Patrol Shift — M3 Mountain Map Hub & Vertical Slice Integration Loop
 
     // 1. INTRO Screen
     expect(screen.getByTestId("patrol-intro-screen")).toBeDefined();
-    expect(screen.getByText(/Midwest Ski Patrol: Shift Studio/i)).toBeDefined();
+    expect(
+      screen.getByText(/Welch Village Ski Patrol: Shift Studio/i)
+    ).toBeDefined();
 
     const beginBriefingBtn = screen.getByRole("button", {
       name: /Begin Shift Briefing/i,

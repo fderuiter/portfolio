@@ -13,20 +13,20 @@ import type { PatrolScenario } from "../types";
  */
 export const BUSY_SCENE_SCENARIO: PatrolScenario = {
   id: "cat-track-collision",
-  title: "Cat Track Collision at a Crowded Merge",
+  title: "Crosstrail Collision at a Crowded Merge",
   subtitle: "Two-skier collision at a blind trail merge with a growing crowd",
   description:
-    "Two skiers collided at a blind merge on a busy cat track. One is down with a leg injury; the other is shaken but on their feet. A crowd of onlookers is gathering and blocking sightlines for uphill traffic.",
+    "Two skiers collided at a blind merge on Crosstrail Right. One is down with a leg injury; the other is shaken but on their feet. A crowd of onlookers is gathering and blocking sightlines for uphill traffic.",
   difficulty: "advanced",
   category: "trauma",
   estimatedMinutes: 25,
-  location: "Lower Cat Track - Mid-Mountain Merge",
+  location: "Crosstrail Right - Mid-Mountain Merge",
   dispatchPrompt:
-    "All patrol, Base Dispatch. Two-skier collision at the Lower Cat Track merge, one down, reported leg injury. Crowd gathering. Respond 10-2, additional patroller en route.",
+    "All patrol, Base Dispatch. Two-skier collision at the Crosstrail Right merge, one down, reported leg injury. Crowd gathering. Respond 10-2, additional patroller en route.",
   environment: {
     // PLACEHOLDER-CONTENT-REVIEW: needs OEC/NSP review, see #744
     weather: "Sunny, 30°F, busy holiday traffic",
-    snowConditions: "Packed powder, high traffic cat track",
+    snowConditions: "Packed powder, high traffic Crosstrail merge",
     temperatureFahrenheit: 30,
     visibility: "Good, but sightlines blocked by the crowd",
     hazards: [

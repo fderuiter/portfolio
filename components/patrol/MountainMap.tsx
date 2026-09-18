@@ -17,11 +17,12 @@ interface MountainMapProps {
 
 /**
  * Responsive, lightweight SVG trail map representing the Mountain Patrol Hub,
- * stylized after Welch Village (Welch, MN) — a real Twin Cities-area hill.
- * Trail names, lift names, and elevation stats are cross-checked against
- * Welch Village's own current published trail map; the artwork itself is an
- * original illustration, not a reproduction of the resort's own trail map
- * graphic.
+ * a comprehensive stylized recreation of Welch Village (Welch, MN) — a real
+ * Twin Cities-area hill. Depicts all three of Welch's real sectors (East
+ * Slopes, West Slopes, and The Back Bowl); every trail name, lift name,
+ * chalet, and elevation stat is cross-checked against Welch Village's own
+ * current published trail map. The artwork itself remains an original
+ * illustration — not a reproduction of the resort's own trail map graphic.
  * Features animated chairlift line, marked trails (green circle, blue square, black diamond),
  * ambient snow particles, strict prefers-reduced-motion CSS, and operational dispatch actions.
  */
@@ -74,7 +75,8 @@ export const MountainMap: React.FC<MountainMapProps> = ({
             Mountain Patrol Hub &amp; Trail Map
           </h2>
           <p className="text-[10px] font-mono text-zinc-500">
-            Base 700 ft &bull; Summit 1,060 ft &bull; Vertical 360 ft
+            Base 700 ft &bull; Summit 1,060 ft &bull; Vertical 360 ft &bull; 50
+            runs across 3 sectors
           </p>
         </div>
 
@@ -96,13 +98,17 @@ export const MountainMap: React.FC<MountainMapProps> = ({
 
       {/* Accessible Trail Map Alternative for Screen Readers */}
       <div className="sr-only">
-        Detailed trail map of Welch Village, a Twin Cities-area ski hill, with
-        active patrol sectors. Features Summit Patrol Shack at the top (1,060
-        feet elevation), the Belle Creek Quad lift line with towers 1 through 6
-        serving The Back Bowl, The Great Gorge (Black Diamond), Harley&apos;s
-        Hollow (Blue Square), Long Way Home (Green Circle), the Skilink base
-        connector, and Base First Aid Room at the bottom (700 feet elevation).
-        This is a stylized, original illustration cross-checked against Welch
+        Detailed trail map of Welch Village, a Twin Cities-area ski hill,
+        organized into three sectors: East Slopes, West Slopes, and The Back
+        Bowl. Features Summit Patrol Shack at the top (1,060 feet elevation);
+        the Belle Creek Quad lift line with towers 1 through 6 serving The Back
+        Bowl, whose runs include The Great Gorge, Black Forest, and Adam&apos;s
+        Abyss (all Black Diamond); Harley&apos;s Hollow (Blue Square) and the
+        Cannon-Valley Quad and Dream Catcher run on the East Slopes; Long Way
+        Home (Green Circle), Cedar Fork, Twister, and the West Quad on the West
+        Slopes; the Skilink base connector; Main Chalet and East Chalet; and
+        Base First Aid Room at the bottom (700 feet elevation). This is a
+        stylized, original illustration cross-checked against Welch
         Village&apos;s own published trail map, not an official resort map.
         Total completed count: {incidentsCompleted}.
       </div>
@@ -118,11 +124,15 @@ export const MountainMap: React.FC<MountainMapProps> = ({
           <title>Welch Village Trail Map</title>
           <desc>
             Stylized, original illustration of Welch Village (Welch, MN) showing
-            Summit Shack, the Belle Creek Quad chairlift (Towers 1 through 6)
-            serving The Back Bowl, The Great Gorge black diamond trail,
-            Harley&apos;s Hollow blue square trail, Long Way Home green circle
-            trail, the Skilink base connector, and Base Lodge First Aid Room.
-            Not an official Welch Village resort map.
+            its three real sectors — East Slopes, West Slopes, and The Back Bowl
+            — Summit Shack, the Belle Creek Quad chairlift (Towers 1 through 6),
+            The Great Gorge, Black Forest, and Adam&apos;s Abyss black diamond
+            trails in The Back Bowl, Harley&apos;s Hollow blue square trail and
+            the Cannon-Valley Quad and Dream Catcher on the East Slopes, Long
+            Way Home green circle trail, Cedar Fork, Twister, and the West Quad
+            on the West Slopes, the Skilink base connector, Main Chalet, East
+            Chalet, and Base Lodge First Aid Room. Not an official Welch Village
+            resort map.
           </desc>
 
           <defs>
@@ -207,9 +217,37 @@ export const MountainMap: React.FC<MountainMapProps> = ({
             opacity="0.2"
           />
 
+          {/* SECTOR LABELS */}
+          <text
+            x="230"
+            y="98"
+            fill="#64748b"
+            fontSize="10"
+            fontWeight="bold"
+            fontFamily="monospace"
+            letterSpacing="1"
+            textAnchor="middle"
+            opacity="0.8"
+          >
+            EAST SLOPES
+          </text>
+          <text
+            x="575"
+            y="98"
+            fill="#64748b"
+            fontSize="10"
+            fontWeight="bold"
+            fontFamily="monospace"
+            letterSpacing="1"
+            textAnchor="middle"
+            opacity="0.8"
+          >
+            WEST SLOPES
+          </text>
+
           {/* TRAILS */}
 
-          {/* Trail 1: Long Way Home (Green Circle) */}
+          {/* Trail 1: Long Way Home (Green Circle) — West Slopes */}
           <path
             d="M 370 85 C 260 120 140 200 130 310 C 120 400 240 450 320 460"
             fill="none"
@@ -227,7 +265,7 @@ export const MountainMap: React.FC<MountainMapProps> = ({
             strokeLinecap="round"
           />
 
-          {/* Trail 2: Harley's Hollow (Blue Square) */}
+          {/* Trail 2: Harley's Hollow (Blue Square) — East Slopes */}
           <path
             d="M 430 85 C 520 150 560 240 540 330 C 520 410 450 440 390 460"
             fill="none"
@@ -245,7 +283,7 @@ export const MountainMap: React.FC<MountainMapProps> = ({
             strokeLinecap="round"
           />
 
-          {/* Trail 3: The Great Gorge (Black Diamond - Fall Line) */}
+          {/* Trail 3: The Great Gorge (Black Diamond - Fall Line) — The Back Bowl */}
           <path
             d="M 395 85 C 380 150 340 220 370 290 C 390 350 370 410 360 460"
             fill="none"
@@ -383,6 +421,63 @@ export const MountainMap: React.FC<MountainMapProps> = ({
             <circle cx="-16" cy="-4" r="2" fill="#ef4444" />
           </g>
 
+          {/* THE BACK BOWL — separate expert-terrain sector, top-left inset */}
+          <g transform="translate(95, 122)">
+            <rect
+              x="-52"
+              y="-30"
+              width="104"
+              height="60"
+              rx="6"
+              fill="#09090b"
+              stroke="#f43f5e"
+              strokeWidth="1.5"
+              opacity="0.95"
+            />
+            <text
+              x="0"
+              y="-16"
+              fill="#fda4af"
+              fontSize="8"
+              fontWeight="bold"
+              fontFamily="monospace"
+              textAnchor="middle"
+            >
+              THE BACK BOWL
+            </text>
+            <text
+              x="0"
+              y="-2"
+              fill="#fecdd3"
+              fontSize="7"
+              fontFamily="monospace"
+              textAnchor="middle"
+            >
+              Black Forest &#9670;
+            </text>
+            <text
+              x="0"
+              y="10"
+              fill="#fecdd3"
+              fontSize="7"
+              fontFamily="monospace"
+              textAnchor="middle"
+            >
+              Adam&apos;s Abyss &#9670;
+            </text>
+            <text
+              x="0"
+              y="22"
+              fill="#94a3b8"
+              fontSize="6"
+              fontFamily="monospace"
+              textAnchor="middle"
+              opacity="0.85"
+            >
+              via Belle Creek Quad
+            </text>
+          </g>
+
           {/* BASE LODGE & FIRST AID ROOM */}
           <g transform="translate(360, 470)">
             <rect
@@ -419,6 +514,34 @@ export const MountainMap: React.FC<MountainMapProps> = ({
             </text>
           </g>
 
+          {/* Main Chalet — real base building, west of Base Aid Room */}
+          <g transform="translate(215, 466)" opacity="0.9">
+            <circle cx="0" cy="0" r="4" fill="#38bdf8" />
+            <text
+              x="9"
+              y="3"
+              fill="#bae6fd"
+              fontSize="8"
+              fontFamily="monospace"
+            >
+              Main Chalet
+            </text>
+          </g>
+
+          {/* East Chalet — real base building, east of Base Aid Room */}
+          <g transform="translate(505, 466)" opacity="0.9">
+            <circle cx="0" cy="0" r="4" fill="#38bdf8" />
+            <text
+              x="9"
+              y="3"
+              fill="#bae6fd"
+              fontSize="8"
+              fontFamily="monospace"
+            >
+              East Chalet
+            </text>
+          </g>
+
           {/* TRAIL MARKER LABELS & BADGES */}
 
           {/* Green Circle Marker */}
@@ -437,7 +560,7 @@ export const MountainMap: React.FC<MountainMapProps> = ({
           </g>
 
           {/* Skilink Marker — base-area connector lift near the lodge */}
-          <g transform="translate(155, 340)" opacity="0.9">
+          <g transform="translate(155, 345)" opacity="0.9">
             <rect x="-5" y="-5" width="10" height="10" rx="2" fill="#facc15" />
             <text
               x="12"
@@ -447,6 +570,34 @@ export const MountainMap: React.FC<MountainMapProps> = ({
               fontFamily="monospace"
             >
               Skilink (Base Connector)
+            </text>
+          </g>
+
+          {/* Dream Catcher Marker — East Slopes blue square */}
+          <g transform="translate(80, 200)" opacity="0.9">
+            <rect x="-5" y="-5" width="10" height="10" rx="2" fill="#0284c7" />
+            <text
+              x="10"
+              y="4"
+              fill="#bae6fd"
+              fontSize="8"
+              fontFamily="monospace"
+            >
+              Dream Catcher ■
+            </text>
+          </g>
+
+          {/* Cannon-Valley Quad Marker — East Slopes lift */}
+          <g transform="translate(75, 405)" opacity="0.9">
+            <rect x="-5" y="-5" width="10" height="10" rx="2" fill="#facc15" />
+            <text
+              x="10"
+              y="4"
+              fill="#fde68a"
+              fontSize="8"
+              fontFamily="monospace"
+            >
+              Cannon-Valley Quad
             </text>
           </g>
 
@@ -462,6 +613,53 @@ export const MountainMap: React.FC<MountainMapProps> = ({
               fontFamily="monospace"
             >
               Harley&apos;s Hollow ■
+            </text>
+          </g>
+
+          {/* Cedar Fork Marker — West Slopes green circle */}
+          <g transform="translate(630, 128)" opacity="0.9">
+            <circle cx="0" cy="0" r="5" fill="#10b981" />
+            <text
+              x="10"
+              y="4"
+              fill="#a7f3d0"
+              fontSize="8"
+              fontFamily="monospace"
+            >
+              Cedar Fork ●
+            </text>
+          </g>
+
+          {/* Twister Marker — West Slopes black diamond */}
+          <g transform="translate(635, 385)" opacity="0.9">
+            <polygon
+              points="0,-6 6,0 0,6 -6,0"
+              fill="#be123c"
+              stroke="#f43f5e"
+              strokeWidth="1"
+            />
+            <text
+              x="11"
+              y="4"
+              fill="#fecdd3"
+              fontSize="8"
+              fontFamily="monospace"
+            >
+              Twister &#9670;
+            </text>
+          </g>
+
+          {/* West Quad Marker — West Slopes lift */}
+          <g transform="translate(715, 445)" opacity="0.9">
+            <rect x="-5" y="-5" width="10" height="10" rx="2" fill="#facc15" />
+            <text
+              x="10"
+              y="4"
+              fill="#fde68a"
+              fontSize="8"
+              fontFamily="monospace"
+            >
+              West Quad
             </text>
           </g>
 
@@ -538,9 +736,11 @@ export const MountainMap: React.FC<MountainMapProps> = ({
       {/* Map Attribution */}
       <p className="text-[10px] font-mono text-zinc-600 -mt-2">
         Stylized, unofficial illustration cross-checked against Welch
-        Village&apos;s own published trail map (trails: Long Way Home,
-        Harley&apos;s Hollow, The Great Gorge &bull; lifts: Belle Creek Quad,
-        Skilink, East Quad, West Quad). Not affiliated with or endorsed by Welch
+        Village&apos;s own published trail map. East Slopes: Harley&apos;s
+        Hollow, Dream Catcher, Cannon-Valley Quad. West Slopes: Long Way Home,
+        Cedar Fork, Twister, West Quad. The Back Bowl (via Belle Creek Quad):
+        The Great Gorge, Black Forest, Adam&apos;s Abyss. Base area: Main
+        Chalet, East Chalet, Skilink. Not affiliated with or endorsed by Welch
         Village Ski Area.
       </p>
 

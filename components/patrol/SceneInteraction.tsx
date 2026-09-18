@@ -157,7 +157,7 @@ export const SceneInteraction: React.FC<SceneInteractionProps> = ({
             </span>
             <span className="text-zinc-400 text-xs font-mono flex items-center gap-1">
               <IconMapPin className="w-3 h-3" />
-              {scenario?.location ?? "Upper Ridge - Tower 6"}
+              {scenario?.location ?? "Dan's Dive - East Slopes"}
             </span>
           </div>
           <h2 className="text-xl sm:text-2xl font-mono font-bold text-white tracking-tight">

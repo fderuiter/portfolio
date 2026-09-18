@@ -14,20 +14,20 @@ import type { PatrolScenario } from "../types";
  */
 export const AMBIGUOUS_PATIENT_SCENARIO: PatrolScenario = {
   id: "ambiguous-glade-fall",
-  title: "Glade Fall — Ambiguous Presentation",
+  title: "Coulee Fall — Ambiguous Presentation",
   subtitle: "Low-speed tumble; patient insists they're fine",
   description:
-    "A skier took a low-speed tumble in the glades and got up on their own before anyone reached them. They say they're fine, but a nearby skier who saw it thought they seemed briefly dazed.",
+    "A skier took a low-speed tumble in the Coulee's wooded terrain and got up on their own before anyone reached them. They say they're fine, but a nearby skier who saw it thought they seemed briefly dazed.",
   difficulty: "intermediate",
   category: "medical",
   estimatedMinutes: 18,
-  location: "North Glades - Mid-Mountain",
+  location: "The Coulee - Mid-Mountain",
   dispatchPrompt:
-    "Patrol 6, Base Dispatch. Report of a skier down in the North Glades, reportedly up and walking. Guest reports may be minor — respond and assess.",
+    "Patrol 6, Base Dispatch. Report of a skier down in the Coulee, reportedly up and walking. Guest reports may be minor — respond and assess.",
   environment: {
     // PLACEHOLDER-CONTENT-REVIEW: needs OEC/NSP review, see #744
     weather: "Overcast, 24°F, flat light",
-    snowConditions: "Packed powder with soft glade texture",
+    snowConditions: "Packed powder with soft texture in the trees",
     temperatureFahrenheit: 24,
     visibility: "Reduced (flat light limits depth perception)",
     hazards: [
@@ -42,7 +42,7 @@ export const AMBIGUOUS_PATIENT_SCENARIO: PatrolScenario = {
     complaint:
       "Patient minimizes symptoms; denies pain, reports feeling 'a little off'",
     mechanism:
-      "Low-speed tumble in the glades; uncertain whether the head contacted the snow",
+      "Low-speed tumble in the Coulee; uncertain whether the head contacted the snow",
     levelOfConsciousness:
       "Alert, but slow to answer some questions (GCS 15 on exam)",
     findings: [
@@ -137,7 +137,7 @@ export const AMBIGUOUS_PATIENT_SCENARIO: PatrolScenario = {
         ],
         patient: {
           mechanism:
-            "Low-speed tumble in the glades; uncertain whether the head contacted the snow",
+            "Low-speed tumble in the Coulee; uncertain whether the head contacted the snow",
         },
       },
     },
