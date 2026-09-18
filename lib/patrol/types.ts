@@ -178,4 +178,6 @@ export interface PatrolShiftEngine {
   getLoadedScenario(): PatrolScenario | null;
   loadScenario(scenario: PatrolScenario): void;
   subscribe(listener: () => void): () => void;
+  /** Returns the list of scenarios registered with this engine instance. */
+  getScenarios?(): PatrolScenario[];
 }

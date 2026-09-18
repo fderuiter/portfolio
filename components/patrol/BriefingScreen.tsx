@@ -196,8 +196,10 @@ export const BriefingScreen: React.FC<BriefingScreenProps> = ({
               <button
                 key={item.id}
                 type="button"
+                role="checkbox"
+                aria-checked={isChecked}
                 onClick={() => toggleItem(item.id)}
-                className={`min-h-[44px] text-left p-3 rounded-xl border transition-all cursor-pointer flex items-start gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan ${
+                className={`min-h-[44px] min-w-[44px] text-left p-3 rounded-xl border transition-all cursor-pointer flex items-start gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan ${
                   isChecked
                     ? "bg-zinc-900/90 border-zinc-700/80 text-zinc-200"
                     : "bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700"

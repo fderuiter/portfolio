@@ -32,16 +32,21 @@ export const DebriefPlaceholder: React.FC<DebriefPlaceholderProps> = ({
   report,
   onReturnToHub,
 }) => {
-  const allRules = [
-    ...(report.passedRules || []),
-    ...(report.failedRules || []),
-    ...(scenario?.debriefRules || []),
-  ];
-
-  // Deduplicate rules by rule id
-  const uniqueRules = Array.from(
-    new Map(allRules.map((rule) => [rule.id, rule])).values()
-  );
+  // Merge rules: scenario defaults first, then strictly override with actual evaluation results
+  const ruleMap = new Map<
+    string,
+    NonNullable<typeof scenario>["debriefRules"][0]
+  >();
+  for (const rule of scenario?.debriefRules || []) {
+    ruleMap.set(rule.id, rule);
+  }
+  for (const rule of report.passedRules || []) {
+    ruleMap.set(rule.id, { ...rule, passed: true });
+  }
+  for (const rule of report.failedRules || []) {
+    ruleMap.set(rule.id, { ...rule, passed: false });
+  }
+  const uniqueRules = Array.from(ruleMap.values());
 
   return (
     <div
@@ -101,8 +106,13 @@ export const DebriefPlaceholder: React.FC<DebriefPlaceholderProps> = ({
         {uniqueRules.length > 0 ? (
           <div className="space-y-2.5">
             {uniqueRules.map((rule) => {
-              const passed =
-                rule.passed ?? report.passedRules.some((p) => p.id === rule.id);
+              const isFailed =
+                report.failedRules.some((f) => f.id === rule.id) ||
+                rule.passed === false;
+              const isPassed =
+                !isFailed &&
+                (rule.passed === true ||
+                  report.passedRules.some((p) => p.id === rule.id));
 
               return (
                 <div
@@ -111,7 +121,7 @@ export const DebriefPlaceholder: React.FC<DebriefPlaceholderProps> = ({
                 >
                   <div className="space-y-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      {passed ? (
+                      {isPassed ? (
                         <IconCircleCheck className="w-4 h-4 text-emerald-400 shrink-0" />
                       ) : (
                         <IconCircleX className="w-4 h-4 text-red-400 shrink-0" />
@@ -129,10 +139,10 @@ export const DebriefPlaceholder: React.FC<DebriefPlaceholderProps> = ({
                   </div>
                   <span
                     className={`text-[11px] font-mono shrink-0 ${
-                      passed ? "text-emerald-400" : "text-zinc-500"
+                      isPassed ? "text-emerald-400" : "text-zinc-500"
                     }`}
                   >
-                    +{rule.score} pts
+                    {isPassed ? `+${rule.score} pts` : "0 pts (flagged)"}
                   </span>
                 </div>
               );

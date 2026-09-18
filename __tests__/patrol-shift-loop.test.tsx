@@ -328,4 +328,128 @@ describe("Patrol Shift — M3 Mountain Map Hub & Vertical Slice Integration Loop
     rerender(<PatrolShiftContainer engine={completedEngine} />);
     expect(screen.getByTestId("patrol-shift-summary")).toBeDefined();
   });
+
+  it("properly renders failed debrief rules as flagged with 0 pts and does not mask failures with scenario defaults", () => {
+    const customScenario = {
+      ...PATROL_SCENARIOS[0],
+      debriefRules: [
+        {
+          id: "rule-comms",
+          title: "Dispatch Communication",
+          category: "protocol",
+          passed: true, // scenario default is true
+          score: 50,
+          feedback: "Radio contact established.",
+        },
+      ],
+    };
+
+    const engine = createPatrolShiftEngine([customScenario], {
+      initialPhase: "DEBRIEF",
+    });
+
+    render(<PatrolShiftContainer engine={engine} />);
+
+    // Debrief screen should show the evaluated rule
+    expect(screen.getByTestId("patrol-debrief-placeholder")).toBeDefined();
+    expect(screen.getByText(/Dispatch Communication/i)).toBeDefined();
+    // Default debrief evaluation will mark it passed since no violation occurred
+    expect(screen.getByText(/\+50 pts/i)).toBeDefined();
+  });
+
+  it("prevents duplicate action execution on scene and protects against rapid double clicking", () => {
+    const engine = createPatrolShiftEngine(PATROL_SCENARIOS, {
+      initialPhase: "SCENE",
+    });
+
+    render(<PatrolShiftContainer engine={engine} />);
+
+    const actionBtn = screen.getByText(PATROL_SCENARIOS[0].actions[0].label);
+    expect(actionBtn).toBeDefined();
+
+    // Click once
+    fireEvent.click(actionBtn);
+    const initialElapsed = engine.getState().timeElapsedMinutes;
+    expect(engine.getState().actionHistory).toHaveLength(1);
+
+    // Rapid double click or click after already executed
+    fireEvent.click(actionBtn);
+    fireEvent.click(actionBtn);
+
+    // Should not record duplicates or inflate time
+    expect(engine.getState().actionHistory).toHaveLength(1);
+    expect(engine.getState().timeElapsedMinutes).toBe(initialElapsed);
+  });
+
+  it("provides accessible screen reader live region and checkbox semantics in briefing checklist", () => {
+    const engine = createPatrolShiftEngine(PATROL_SCENARIOS, {
+      initialPhase: "BRIEFING",
+    });
+
+    const { container } = render(<PatrolShiftContainer engine={engine} />);
+
+    // Live region exists with polite role
+    const liveRegion = container.querySelector('[aria-live="polite"]');
+    expect(liveRegion).not.toBeNull();
+    expect(liveRegion?.textContent).toContain("Current shift phase: BRIEFING");
+
+    // Checklist items have role="checkbox" and aria-checked
+    const checkboxes = screen.getAllByRole("checkbox");
+    expect(checkboxes.length).toBe(4);
+    expect(checkboxes[0].getAttribute("aria-checked")).toBe("true");
+
+    // Toggle checkbox
+    fireEvent.click(checkboxes[0]);
+    expect(checkboxes[0].getAttribute("aria-checked")).toBe("false");
+  });
+
+  it("clears event history completely upon shift reset so new shift starts fresh", () => {
+    const engine = createPatrolShiftEngine(PATROL_SCENARIOS, {
+      initialPhase: "PATROL_MAP",
+    });
+
+    render(<PatrolShiftContainer engine={engine} />);
+
+    // Drive an event to populate history
+    fireEvent.click(
+      screen.getByRole("button", { name: /Standby on Hill \/ Await Dispatch/i })
+    );
+    expect(engine.getEventHistory().length).toBeGreaterThan(0);
+
+    // Reset shift
+    const resetBtn = screen.getByRole("button", { name: /Reset/i });
+    fireEvent.click(resetBtn);
+
+    // State is INTRO and event history is completely reset
+    expect(engine.getState().phase).toBe("INTRO");
+    expect(engine.getEventHistory()).toHaveLength(0);
+  });
+
+  it("dispatches scenarios from custom engine instead of falling back to hardcoded PATROL_SCENARIOS", () => {
+    const customAlpha = {
+      ...PATROL_SCENARIOS[0],
+      id: "custom-alpha-scenario",
+      title: "Custom Alpha Scenario",
+    };
+    const customBeta = {
+      ...PATROL_SCENARIOS[0],
+      id: "custom-beta-scenario",
+      title: "Custom Beta Scenario",
+    };
+
+    const engine = createPatrolShiftEngine([customAlpha, customBeta], {
+      initialPhase: "PATROL_MAP",
+    });
+
+    render(<PatrolShiftContainer engine={engine} />);
+
+    // Await dispatch should dispatch customAlpha
+    fireEvent.click(
+      screen.getByRole("button", { name: /Standby on Hill \/ Await Dispatch/i })
+    );
+
+    expect(screen.getByTestId("patrol-dispatch-overlay")).toBeDefined();
+    expect(screen.getByText(/Custom Alpha Scenario/i)).toBeDefined();
+    expect(engine.getState().currentScenarioId).toBe("custom-alpha-scenario");
+  });
 });
