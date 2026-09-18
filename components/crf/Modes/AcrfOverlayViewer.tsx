@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { CopyButton } from "@/components/CopyButton";
+import { CopyButton } from "@/components/ui/CopyButton";
 import { StudyProtocol } from "@/lib/crf/types";
 import type { SdtmMappingRow } from "@/lib/crf/export-acrf";
 import {
@@ -35,23 +35,33 @@ export const AcrfOverlayViewer: React.FC<AcrfOverlayViewerProps> = ({
     activeFormId || study.forms[0]?.id || ""
   );
 
-  const activeForm = study.forms.find((f) => f.id === selectedFormId) || study.forms[0];
+  const activeForm =
+    study.forms.find((f) => f.id === selectedFormId) || study.forms[0];
   const [sdtmMatrix, setSdtmMatrix] = useState<SdtmMappingRow[]>([]);
   const [acrfHtml, setAcrfHtml] = useState<string>("");
 
   useEffect(() => {
     let isMounted = true;
-    import("@/lib/crf/export-acrf").then(({ generateSdtmMappingMatrix, generateStudyAcrfBookHtml, generateAcrfHtml }) => {
-      if (!isMounted) return;
-      setSdtmMatrix(generateSdtmMappingMatrix(study));
-      const html =
-        viewMode === "study_book"
-          ? generateStudyAcrfBookHtml(study, { mode: "annotated", branding })
-          : activeForm
-          ? generateAcrfHtml(activeForm, study, { mode: "annotated", branding })
-          : "";
-      setAcrfHtml(html);
-    });
+    import("@/lib/crf/export-acrf").then(
+      ({
+        generateSdtmMappingMatrix,
+        generateStudyAcrfBookHtml,
+        generateAcrfHtml,
+      }) => {
+        if (!isMounted) return;
+        setSdtmMatrix(generateSdtmMappingMatrix(study));
+        const html =
+          viewMode === "study_book"
+            ? generateStudyAcrfBookHtml(study, { mode: "annotated", branding })
+            : activeForm
+              ? generateAcrfHtml(activeForm, study, {
+                  mode: "annotated",
+                  branding,
+                })
+              : "";
+        setAcrfHtml(html);
+      }
+    );
     return () => {
       isMounted = false;
     };
@@ -60,13 +70,17 @@ export const AcrfOverlayViewer: React.FC<AcrfOverlayViewerProps> = ({
   const handlePrint = async () => {
     let htmlContent = acrfHtml;
     if (!htmlContent) {
-      const { generateStudyAcrfBookHtml, generateAcrfHtml } = await import("@/lib/crf/export-acrf");
+      const { generateStudyAcrfBookHtml, generateAcrfHtml } =
+        await import("@/lib/crf/export-acrf");
       htmlContent =
         viewMode === "study_book"
           ? generateStudyAcrfBookHtml(study, { mode: "annotated", branding })
           : activeForm
-          ? generateAcrfHtml(activeForm, study, { mode: "annotated", branding })
-          : "";
+            ? generateAcrfHtml(activeForm, study, {
+                mode: "annotated",
+                branding,
+              })
+            : "";
     }
 
     if (!htmlContent) return;
@@ -95,7 +109,8 @@ export const AcrfOverlayViewer: React.FC<AcrfOverlayViewerProps> = ({
             </h1>
           </div>
           <p className="text-xs text-zinc-400 font-sans mt-1">
-            Publication-ready blank case report form with SDTMIG v3.4 / CDASH variable annotation overlays for FDA, EMA, and PMDA filings.
+            Publication-ready blank case report form with SDTMIG v3.4 / CDASH
+            variable annotation overlays for FDA, EMA, and PMDA filings.
           </p>
         </div>
 
@@ -132,7 +147,11 @@ export const AcrfOverlayViewer: React.FC<AcrfOverlayViewerProps> = ({
             className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-brand-cyan text-black hover:bg-white font-mono text-xs font-bold transition-all shadow-sm"
           >
             <IconPrinter className="w-4 h-4" />
-            <span>{viewMode === "study_book" ? "Print aCRF Book" : "Print Form aCRF"}</span>
+            <span>
+              {viewMode === "study_book"
+                ? "Print aCRF Book"
+                : "Print Form aCRF"}
+            </span>
           </button>
         </div>
       </div>
@@ -204,7 +223,8 @@ export const AcrfOverlayViewer: React.FC<AcrfOverlayViewerProps> = ({
                   {study.studyName}
                 </h2>
                 <div className="font-mono text-xs text-zinc-600 mt-1">
-                  Protocol: {study.protocolNumber} | Phase: {study.phase} | Sponsor: {study.sponsor}
+                  Protocol: {study.protocolNumber} | Phase: {study.phase} |
+                  Sponsor: {study.sponsor}
                 </div>
               </div>
               <div className="text-right">
@@ -218,8 +238,12 @@ export const AcrfOverlayViewer: React.FC<AcrfOverlayViewerProps> = ({
             </div>
 
             <div>
-              <h3 className="text-base font-bold text-sky-700 font-mono">{activeForm.name}</h3>
-              <p className="text-xs text-zinc-600 mt-0.5">{activeForm.description}</p>
+              <h3 className="text-base font-bold text-sky-700 font-mono">
+                {activeForm.name}
+              </h3>
+              <p className="text-xs text-zinc-600 mt-0.5">
+                {activeForm.description}
+              </p>
             </div>
 
             {/* Sections & Fields with SDTM Overlays */}
@@ -258,11 +282,15 @@ export const AcrfOverlayViewer: React.FC<AcrfOverlayViewerProps> = ({
 
                         <div className="text-xs font-semibold text-zinc-800 mb-1">
                           {field.label}
-                          {field.required && <span className="text-red-500 ml-0.5">*</span>}
+                          {field.required && (
+                            <span className="text-red-500 ml-0.5">*</span>
+                          )}
                         </div>
 
                         {field.description && (
-                          <p className="text-[10px] text-zinc-500 mb-2">{field.description}</p>
+                          <p className="text-[10px] text-zinc-500 mb-2">
+                            {field.description}
+                          </p>
                         )}
 
                         <div className="h-6 border-b border-dashed border-zinc-300 flex items-end pb-0.5 text-[11px] text-zinc-400 font-mono">
@@ -286,9 +314,12 @@ export const AcrfOverlayViewer: React.FC<AcrfOverlayViewerProps> = ({
             <span className="text-xs font-mono font-bold tracking-widest text-sky-700 uppercase">
               Regulatory Submission Annotated CRF Book (aCRF)
             </span>
-            <h1 className="text-2xl font-black text-zinc-900">{study.studyName}</h1>
+            <h1 className="text-2xl font-black text-zinc-900">
+              {study.studyName}
+            </h1>
             <p className="text-xs font-mono text-zinc-600">
-              Protocol: {study.protocolNumber} | Phase: {study.phase} | Version: {study.version}
+              Protocol: {study.protocolNumber} | Phase: {study.phase} | Version:{" "}
+              {study.version}
             </p>
           </div>
 
@@ -360,19 +391,25 @@ export const AcrfOverlayViewer: React.FC<AcrfOverlayViewerProps> = ({
               <tbody className="divide-y divide-zinc-850">
                 {sdtmMatrix.map((row, idx) => (
                   <tr key={idx} className="hover:bg-zinc-850/30">
-                    <td className="p-2.5 font-bold text-brand-cyan">{row.formDomain}</td>
+                    <td className="p-2.5 font-bold text-brand-cyan">
+                      {row.formDomain}
+                    </td>
                     <td className="p-2.5 text-white">{row.variableName}</td>
-                    <td className="p-2.5 text-zinc-300 font-sans text-xs">{row.label}</td>
+                    <td className="p-2.5 text-zinc-300 font-sans text-xs">
+                      {row.label}
+                    </td>
                     <td className="p-2.5 text-zinc-500">{row.dataType}</td>
-                    <td className="p-2.5 text-sky-400 font-bold">{row.sdtmTarget}</td>
+                    <td className="p-2.5 text-sky-400 font-bold">
+                      {row.sdtmTarget}
+                    </td>
                     <td className="p-2.5">
                       <span
                         className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
                           row.origin === "Derived"
                             ? "bg-purple-500/20 text-purple-300"
                             : row.origin === "Assigned"
-                            ? "bg-teal-500/20 text-teal-300"
-                            : "bg-sky-500/20 text-sky-300"
+                              ? "bg-teal-500/20 text-teal-300"
+                              : "bg-sky-500/20 text-sky-300"
                         }`}
                       >
                         {row.origin}
@@ -389,7 +426,9 @@ export const AcrfOverlayViewer: React.FC<AcrfOverlayViewerProps> = ({
                         {row.core}
                       </span>
                     </td>
-                    <td className="p-2.5 text-zinc-500">{row.nciCode || "—"}</td>
+                    <td className="p-2.5 text-zinc-500">
+                      {row.nciCode || "—"}
+                    </td>
                   </tr>
                 ))}
               </tbody>

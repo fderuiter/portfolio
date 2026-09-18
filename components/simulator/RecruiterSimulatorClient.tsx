@@ -13,7 +13,7 @@ import {
   IconRefresh,
 } from "@tabler/icons-react";
 import { FieldManualButton } from "@/components/FieldManualButton";
-import { CopyButton } from "@/components/CopyButton";
+import { CopyButton } from "@/components/ui/CopyButton";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
 import { PageLayout } from "@/components/PageLayout";
