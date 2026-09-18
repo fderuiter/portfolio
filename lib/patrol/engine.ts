@@ -180,10 +180,24 @@ export function reduceShiftState(
 
     case "FINISH_DEBRIEF": {
       if (state.phase === "DEBRIEF" || state.phase === "debrief") {
+        const nextIncidents = state.incidentsCompleted + 1;
+        const currentReportScore =
+          typeof event.payload?.score === "number"
+            ? event.payload.score
+            : state.score;
+        const compositeScore =
+          state.incidentsCompleted === 0
+            ? currentReportScore
+            : Math.round(
+                (state.score * state.incidentsCompleted + currentReportScore) /
+                  nextIncidents
+              );
+
         return {
           ...state,
           phase: "PATROL_MAP",
-          incidentsCompleted: state.incidentsCompleted + 1,
+          score: compositeScore,
+          incidentsCompleted: nextIncidents,
           currentScenarioId: null,
         };
       }
@@ -203,6 +217,13 @@ export function reduceShiftState(
 
     case "RECORD_ACTION": {
       if (!event.action) return state;
+      // Guard against duplicate action recordings
+      if (
+        event.action.id &&
+        state.actionHistory.some((a) => a.id === event.action?.id)
+      ) {
+        return state;
+      }
       const timeIncrement = event.action.costMinutes ?? 1;
       return {
         ...state,
@@ -261,6 +282,7 @@ class PatrolShiftEngineImpl implements PatrolShiftEngine {
     this.getLoadedScenario = this.getLoadedScenario.bind(this);
     this.loadScenario = this.loadScenario.bind(this);
     this.getEventHistory = this.getEventHistory.bind(this);
+    this.getScenarios = this.getScenarios.bind(this);
   }
 
   getState(): ShiftState {
@@ -269,6 +291,10 @@ class PatrolShiftEngineImpl implements PatrolShiftEngine {
 
   getLoadedScenario(): PatrolScenario | null {
     return this.loadedScenario;
+  }
+
+  getScenarios(): PatrolScenario[] {
+    return Array.from(this.scenarios.values());
   }
 
   loadScenario(scenario: PatrolScenario): void {
@@ -288,6 +314,15 @@ class PatrolShiftEngineImpl implements PatrolShiftEngine {
   }
 
   dispatch(event: ShiftEngineEvent): void {
+    if (event.type === "RESET") {
+      this.eventHistory.length = 0;
+      const firstScenario = Array.from(this.scenarios.values())[0] ?? null;
+      this.loadedScenario = firstScenario;
+      this.state = reduceShiftState(this.state, event);
+      this.notify();
+      return;
+    }
+
     const prevPhase = this.state.phase;
     const nextState = reduceShiftState(this.state, event);
 

@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useMemo, useEffect, useSyncExternalStore } from "react";
+import React, { useMemo, useEffect, useRef, useSyncExternalStore } from "react";
 import {
   PATROL_SCENARIOS,
   createPatrolShiftEngine,
   generateDebriefReport,
   type PatrolShiftEngine,
 } from "@/lib/patrol";
+import { useAnnouncer } from "@/hooks/useAnnouncer";
 import {
   IconShieldCheck,
   IconClock,
@@ -56,21 +57,60 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
     activeEngine.getState
   );
 
+  const { announce } = useAnnouncer();
+  const prevPhaseRef = useRef<string>(shiftState.phase);
+
+  useEffect(() => {
+    if (prevPhaseRef.current !== shiftState.phase) {
+      prevPhaseRef.current = shiftState.phase;
+      announce(
+        `Patrol shift phase changed to ${shiftState.phase.replace(/_/g, " ")}`
+      );
+    }
+  }, [shiftState.phase, announce]);
+
+  const availableScenarios = useMemo(() => {
+    const fromEngine = activeEngine.getScenarios?.();
+    return fromEngine && fromEngine.length > 0 ? fromEngine : PATROL_SCENARIOS;
+  }, [activeEngine]);
+
   useEffect(() => {
     if (initialScenarioId) {
-      const target = PATROL_SCENARIOS.find((s) => s.id === initialScenarioId);
+      const target = availableScenarios.find((s) => s.id === initialScenarioId);
       if (target) {
         activeEngine.loadScenario(target);
       }
     }
-  }, [initialScenarioId, activeEngine]);
+  }, [initialScenarioId, activeEngine, availableScenarios]);
 
-  const loadedScenario = activeEngine.getLoadedScenario();
-  const currentScenario =
-    loadedScenario ??
-    PATROL_SCENARIOS.find((s) => s.id === shiftState.currentScenarioId) ??
-    PATROL_SCENARIOS[shiftState.incidentsCompleted % PATROL_SCENARIOS.length] ??
-    PATROL_SCENARIOS[0];
+  const currentScenario = useMemo(() => {
+    if (shiftState.currentScenarioId) {
+      const match = availableScenarios.find(
+        (s) => s.id === shiftState.currentScenarioId
+      );
+      if (match) return match;
+    }
+    const loaded = activeEngine.getLoadedScenario();
+    if (
+      loaded &&
+      (!shiftState.currentScenarioId ||
+        loaded.id === shiftState.currentScenarioId)
+    ) {
+      return loaded;
+    }
+    return (
+      availableScenarios[
+        shiftState.incidentsCompleted % availableScenarios.length
+      ] ??
+      availableScenarios[0] ??
+      PATROL_SCENARIOS[0]
+    );
+  }, [
+    availableScenarios,
+    activeEngine,
+    shiftState.currentScenarioId,
+    shiftState.incidentsCompleted,
+  ]);
 
   const debriefReport = useMemo(
     () => generateDebriefReport(currentScenario, shiftState),
@@ -135,6 +175,13 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
         </div>
       </div>
 
+      {/* Dynamic Screen Reader Live Region */}
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        Current shift phase: {shiftState.phase.replace(/_/g, " ")}. Time
+        elapsed: {shiftState.timeElapsedMinutes} minutes. Incidents completed:{" "}
+        {shiftState.incidentsCompleted}. Score: {shiftState.score} percent.
+      </div>
+
       {/* Prominent Medical & Clinical Disclaimer */}
       <div
         role="note"
@@ -183,9 +230,9 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
             incidentsCompleted={shiftState.incidentsCompleted}
             onAwaitDispatch={() => {
               const nextScenario =
-                PATROL_SCENARIOS[
-                  shiftState.incidentsCompleted % PATROL_SCENARIOS.length
-                ] ?? PATROL_SCENARIOS[0];
+                availableScenarios[
+                  shiftState.incidentsCompleted % availableScenarios.length
+                ] ?? availableScenarios[0];
               activeEngine.dispatch({
                 type: "RECEIVE_DISPATCH",
                 scenarioId: nextScenario.id,
@@ -249,7 +296,10 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
             scenario={currentScenario}
             report={debriefReport}
             onReturnToHub={() =>
-              activeEngine.dispatch({ type: "FINISH_DEBRIEF" })
+              activeEngine.dispatch({
+                type: "FINISH_DEBRIEF",
+                payload: { score: debriefReport.score },
+              })
             }
           />
         )}

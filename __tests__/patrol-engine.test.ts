@@ -244,4 +244,43 @@ describe("Patrol Shift Headless FSM Engine (Issue #748)", () => {
     );
     expect(unchanged).toBe(step1);
   });
+
+  it("updates score dynamically on FINISH_DEBRIEF and guards against duplicate actions", () => {
+    const engine = createPatrolShiftEngine([dummyScenario], {
+      initialPhase: "DEBRIEF",
+    });
+
+    // Score updates from payload on finish debrief
+    engine.dispatch({ type: "FINISH_DEBRIEF", payload: { score: 85 } });
+    expect(engine.getState().score).toBe(85);
+    expect(engine.getState().incidentsCompleted).toBe(1);
+
+    // Duplicate action defense
+    const withOneAction = reduceShiftState(engine.getState(), {
+      type: "RECORD_ACTION",
+      action: dummyScenario.actions[0],
+    });
+    expect(withOneAction.actionHistory).toHaveLength(1);
+    expect(withOneAction.timeElapsedMinutes).toBe(2);
+
+    // Recording the same action again should be ignored
+    const duplicate = reduceShiftState(withOneAction, {
+      type: "RECORD_ACTION",
+      action: dummyScenario.actions[0],
+    });
+    expect(duplicate.actionHistory).toHaveLength(1);
+    expect(duplicate.timeElapsedMinutes).toBe(2);
+  });
+
+  it("provides getScenarios() and clears event history on RESET", () => {
+    const engine = createPatrolShiftEngine([dummyScenario, dummyScenarioBeta]);
+    expect(engine.getScenarios?.()).toEqual([dummyScenario, dummyScenarioBeta]);
+
+    engine.dispatch({ type: "START_SHIFT" });
+    expect(engine.getEventHistory().length).toBeGreaterThan(0);
+
+    engine.dispatch({ type: "RESET" });
+    expect(engine.getState().phase).toBe("INTRO");
+    expect(engine.getEventHistory()).toHaveLength(0);
+  });
 });

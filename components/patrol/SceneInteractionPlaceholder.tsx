@@ -151,11 +151,16 @@ export const SceneInteractionPlaceholder: React.FC<
               <button
                 key={action.id}
                 type="button"
-                onClick={() => onExecuteAction(action)}
-                className={`min-h-[44px] text-left p-3.5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan ${
+                aria-disabled={hasExecuted}
+                onClick={() => {
+                  if (!hasExecuted) {
+                    onExecuteAction(action);
+                  }
+                }}
+                className={`min-h-[44px] min-w-[44px] text-left p-3.5 rounded-xl border transition-all flex flex-col justify-between gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan ${
                   hasExecuted
-                    ? "bg-brand-cyan/10 border-brand-cyan/40 text-white shadow-sm"
-                    : "bg-zinc-950 border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white"
+                    ? "bg-brand-cyan/10 border-brand-cyan/40 text-white shadow-sm cursor-default"
+                    : "bg-zinc-950 border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white cursor-pointer"
                 }`}
               >
                 <div className="flex items-center justify-between gap-2">

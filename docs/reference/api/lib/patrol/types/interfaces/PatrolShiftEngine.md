@@ -44,6 +44,18 @@
 
 ***
 
+### getScenarios()?
+
+> `optional` **getScenarios**(): [`PatrolScenario`](PatrolScenario.md)[]
+
+Returns the list of scenarios registered with this engine instance.
+
+#### Returns
+
+[`PatrolScenario`](PatrolScenario.md)[]
+
+***
+
 ### getState()
 
 > **getState**(): [`ShiftState`](ShiftState.md)
