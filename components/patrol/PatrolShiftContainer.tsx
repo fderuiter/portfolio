@@ -21,7 +21,7 @@ import { BriefingScreen } from "./BriefingScreen";
 import { MountainMap } from "./MountainMap";
 import { DispatchOverlay } from "./DispatchOverlay";
 import { SceneInteractionPlaceholder } from "./SceneInteractionPlaceholder";
-import { OetPlaceholder } from "./OetPlaceholder";
+import { OetCanvas } from "./OetCanvas";
 import { HandoffScreen } from "./HandoffScreen";
 import { DebriefPlaceholder } from "./DebriefPlaceholder";
 import { ShiftSummary } from "./ShiftSummary";
@@ -138,7 +138,7 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
                 Patrol Shift Studio
               </h1>
               <span className="px-2 py-0.5 rounded-full bg-brand-cyan/10 border border-brand-cyan/30 text-brand-cyan text-[10px] font-mono font-bold uppercase tracking-wider">
-                M1 Foundation Scaffold &bull; M3 Map Hub
+                M1 Foundation Scaffold &bull; M3 Map Hub &bull; M4 OET Mini-Game
               </span>
             </div>
             <p className="text-xs font-mono text-zinc-400">
@@ -272,8 +272,11 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
 
         {(shiftState.phase === "TRANSPORT_PREP" ||
           shiftState.phase === "OET") && (
-          <OetPlaceholder
+          <OetCanvas
             scenario={currentScenario}
+            onRecordEvent={(event) =>
+              activeEngine.dispatch({ type: "PUSH_EVENT", event })
+            }
             onArriveAtBase={() =>
               activeEngine.dispatch({ type: "ARRIVE_AT_BASE" })
             }
@@ -328,11 +331,13 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
           <li className="text-brand-cyan flex items-center gap-1.5">
             <IconCheck className="w-3 h-3" /> M2: Shift State Machine (#748)
           </li>
+          <li className="text-brand-cyan flex items-center gap-1.5">
+            <IconCheck className="w-3 h-3" /> M3: Mountain Map Hub (#749)
+          </li>
           <li className="text-white font-bold flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-brand-cyan animate-pulse" />
-            M3: Mountain Map Hub (#749)
+            M4: OET Mini-Game (#750)
           </li>
-          <li className="text-zinc-500">&bull; M4: OET Mini-Game (#750)</li>
           <li className="text-zinc-500">&bull; M5: OEC Clinical (#751)</li>
           <li className="text-zinc-500">&bull; M6: Multi-Scenario (#752)</li>
           <li className="text-zinc-500">&bull; M7: Debrief Analytics (#753)</li>

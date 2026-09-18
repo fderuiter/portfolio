@@ -8,7 +8,7 @@
 
 > **createOETEngineState**(): [`OETEngineState`](../../types/interfaces/OETEngineState.md)
 
-Stub OET (Outdoor Emergency Transportation) Evaluation Engine.
+Creates legacy initial OET engine state for backward compatibility.
 
 ## Returns
 
