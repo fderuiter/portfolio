@@ -1,12 +1,12 @@
 # Monitor GitHub Actions Minutes
 
-Last verified: 2026-09-14 against GitHub Pro.
+Last verified: 2026-09-18 against GitHub Free (2,000 min/month).
 
 Governing policy: [ADR 0039](../../adr/0039-github-pro-plan-capabilities-and-actions-minutes-governance.md).
 
 ## Why this exists
 
-GitHub Pro's private-repository entitlement is 3,000 Actions minutes/month on
+GitHub Free's private-repository entitlement is 2,000 Actions minutes/month on
 standard runners, with no authorized paid overage — this repository does not
 purchase additional minutes or raise a spending limit. On 2026-09-13 the
 previous single-job `.github/workflows/ci.yml` design (full four-device
@@ -19,10 +19,30 @@ regression before minutes hit zero, mirroring
 [monitor-vercel-headroom.md](./monitor-vercel-headroom.md) for a resource
 GitHub itself does not yet expose a scriptable read on.
 
-No `npm run headroom:*`-style script exists for GitHub Actions minutes today.
-Unlike Vercel's usage API, GitHub's Actions billing usage is not reliably
-readable through a token scoped to this repository alone — checking it is a
-dashboard action, not a script.
+**Correction 2026-09-18:** this page previously stated that Actions billing
+usage was not readable through the API and that checking it was a dashboard
+action. That is wrong. The enhanced billing endpoint reads it directly, given
+a token carrying the `user` scope (`gh auth refresh -h github.com -s user`):
+
+```bash
+gh api "/users/fderuiter/settings/billing/usage?year=2026&month=9"
+```
+
+The legacy `/settings/billing/actions` endpoint now returns `410 Gone` and
+must not be used.
+
+Two properties of the response matter and are easy to get wrong:
+
+- **Only private repositories draw on the allowance.** Public repositories
+  appear in the same response with their minutes fully discounted. Summing
+  every `usageItems` entry overstates consumption several-fold — September
+  2026 totalled 19,955 minutes across all repositories but only 2,433
+  against the allowance. Filter by private repositories before summing.
+- **`netAmount` is not a usage signal.** It stays `0.00` both when usage is
+  comfortably inside the allowance and when the allowance is exhausted with
+  a $0 spending limit, because in the latter case GitHub refuses the jobs
+  rather than billing them. Measure `quantity` against the allowance; do not
+  infer headroom from cost.
 
 ## Check before a heavy iteration day
 
@@ -33,7 +53,7 @@ runs, repeated pushes while chasing a flaky test):
 1. Open **Settings → Billing → Actions minutes** for the account owning
    `fderuiter/portfolio` (organization or personal account billing settings,
    whichever holds this repository).
-2. Note the minutes used and the allowance (3,000/month standard Linux
+2. Note the minutes used and the allowance (2,000/month standard Linux
    runners) and the days remaining until the monthly reset.
 3. If usage is already above ~80% of the allowance for the cycle, prefer
    `heavy-gate`'s single-device PR run over dispatching

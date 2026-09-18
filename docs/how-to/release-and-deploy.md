@@ -133,13 +133,18 @@ immediately after deletion.
 
 ## GitHub Plan and Actions Minutes
 
-This repository is private on **GitHub Pro**, per
-[ADR 0039](../../adr/0039-github-pro-plan-capabilities-and-actions-minutes-governance.md).
-Branch protection, rulesets, and environment protection rules (required
-reviewers on `production-release`) are all available server-side; local
-pre-push guardrails and CI remain as defense-in-depth, not a substitute.
+This repository is private on **GitHub Free**, per
+[ADR 0039](../../adr/0039-github-pro-plan-capabilities-and-actions-minutes-governance.md)
+as corrected 2026-09-18.
 
-Pro's private-repository Actions allowance is 3,000 minutes/month on standard
+Branch protection, rulesets, and environment protection rules (required
+reviewers on `production-release`) are **not available** — all three require
+Pro on a private repository and return `403` today. The local pre-push
+guardrails and CI are therefore the only enforcement that exists, not
+defense-in-depth over a server-side gate. Treat any claim of server-side
+branch protection on `main` as describing a control that is not in place.
+
+Free's private-repository Actions allowance is 2,000 minutes/month on standard
 runners, with **no authorized paid overage**. A CI run that exhausts this
 allowance stays down until the monthly reset. See ADR 0039 for the governing
 policy and the tracked follow-up for reducing per-run cost.

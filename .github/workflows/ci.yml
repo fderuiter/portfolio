@@ -1,6 +1,6 @@
 name: CI Pipeline
 
-# ADR 0039 governs this file: GitHub Pro grants 3,000 Actions minutes/month on
+# ADR 0039 governs this file: GitHub Free grants 2,000 Actions minutes/month on
 # standard runners for this private repo, with no authorized paid overage.
 # The previous single `rigor-pipeline` job ran the full four-device Playwright
 # matrix on every PR push AND again identically on the post-merge `main` push,
@@ -53,9 +53,17 @@ on:
         type: boolean
         default: false
 
+# ADR 0039 (Correction 2026-09-18): `cancel-in-progress` was previously
+# `${{ github.event_name == 'pull_request' }}`, i.e. false for `main` pushes.
+# Consecutive merges therefore produced consecutive complete runs that never
+# superseded one another — the fourteen `main` pushes on 2026-09-13 each got
+# a full run, against a 2,000-minute monthly allowance. Only the newest state
+# of `main` is worth verifying, and GitHub bills a cancelled job's elapsed
+# time rather than its full cap, so superseding is strictly cheaper than
+# letting a stale run finish.
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: true
 
 permissions:
   contents: read

@@ -489,4 +489,46 @@ describe("CI Execution Policy", () => {
       expect(heavyOnPush).toEqual([]);
     });
   });
+
+  /**
+   * ADR 0039 (Correction 2026-09-18): `cancel-in-progress` was
+   * `${{ github.event_name == 'pull_request' }}`, which evaluates false on
+   * `main` pushes. Consecutive merges therefore each got a complete,
+   * non-superseding run -- fourteen of them on 2026-09-13, against what is
+   * actually a 2,000-minute Free-plan allowance rather than the 3,000 the
+   * ADR originally claimed. Superseding is strictly cheaper than letting a
+   * stale run finish, because GitHub bills a cancelled job's elapsed time
+   * rather than its full cap.
+   */
+  describe("redundant runs supersede rather than accumulate", () => {
+    const concurrency = ci.slice(
+      ci.indexOf("\nconcurrency:"),
+      ci.indexOf("\npermissions:")
+    );
+
+    it("cancels superseded runs on every event, including main pushes", () => {
+      expect(concurrency).toContain("cancel-in-progress: true");
+      expect(concurrency).not.toContain("github.event_name == 'pull_request'");
+    });
+
+    it("keys the concurrency group per pull request or per ref", () => {
+      expect(concurrency).toContain(
+        "group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}"
+      );
+    });
+  });
+
+  /**
+   * ADR 0039 requires every job to declare a `timeout-minutes` bound so one
+   * hang cannot consume a large fraction of the monthly allowance. The
+   * specific caps stay provisional pending measurement under #733; that an
+   * unbounded job never reappears is enforceable today.
+   */
+  describe("every job bounds its own cost", () => {
+    it.each(jobNames)("%s declares timeout-minutes", (name) => {
+      const timeout = field(jobBlock(name), "timeout-minutes");
+      expect(timeout).toBeDefined();
+      expect(Number(timeout)).toBeGreaterThan(0);
+    });
+  });
 });
