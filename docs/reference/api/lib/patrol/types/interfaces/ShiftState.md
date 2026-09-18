@@ -26,6 +26,12 @@
 
 ***
 
+### incidentsCompleted
+
+> **incidentsCompleted**: `number`
+
+***
+
 ### isCompleted
 
 > **isCompleted**: `boolean`

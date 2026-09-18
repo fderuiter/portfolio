@@ -8,6 +8,8 @@
 
 > **transitionShiftPhase**(`currentState`, `nextPhase`): [`ShiftState`](../../types/interfaces/ShiftState.md)
 
+Legacy transition helper maintained for backward compatibility.
+
 ## Parameters
 
 ### currentState

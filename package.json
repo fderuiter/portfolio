@@ -14,6 +14,7 @@
     "env:check": "npx tsx scripts/dx.ts env",
     "preflight": "npx tsx scripts/dx.ts preflight",
     "dead-code": "npx tsx scripts/dx.ts dead-code",
+    "dx:issues:sync": "npx tsx scripts/sync-issues.ts",
     "analyze:bundle": "npx tsx scripts/dx.ts analyze",
     "bench": "npx tsx scripts/dx.ts bench",
     "bench:pages": "npx tsx scripts/benchmark-pages.ts",
@@ -157,5 +158,10 @@
   ],
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"
-  }
+  },
+  "browserslist": [
+    "defaults and > 0.5%",
+    "not IE 11",
+    "not dead"
+  ]
 }

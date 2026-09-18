@@ -114,6 +114,9 @@ function printUsage(): void {
     `  ${colors.cyan}crf <cmd> [options]${colors.reset}           Clinical Research Form (CRF) authoring & validation CLI`
   );
   console.log(
+    `  ${colors.cyan}issues:sync [--dry-run]${colors.reset}       Dual-tracker GitHub issue synchronization (ADR 0025)`
+  );
+  console.log(
     `  ${colors.cyan}clean${colors.reset}                         Clean build artifacts and reset developer cache\n`
   );
   console.log(`${colors.bold}Examples:${colors.reset}`);
@@ -1327,8 +1330,18 @@ export async function main(): Promise<void> {
       break;
     case "crf":
       execSync(
-        `npx tsx ${path.resolve(__dirname, "crf.ts")} ${parsed.raw.filter((a) => a !== "crf").join(" ")}`,
+        `npx tsx "${path.resolve(__dirname, "crf.ts")}" ${parsed.raw.filter((a) => a !== "crf").join(" ")}`,
         { stdio: "inherit" }
+      );
+      break;
+    case "issues:sync":
+    case "sync-issues":
+      execSync(
+        `npx tsx "${path.resolve(__dirname, "sync-issues.ts")}" ${parsed.raw.filter((a) => a !== "issues:sync" && a !== "sync-issues").join(" ")}`,
+        {
+          cwd: workspaceRoot,
+          stdio: "inherit",
+        }
       );
       break;
     case "check:migrations":

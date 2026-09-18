@@ -3,10 +3,26 @@
  *
  * Provides core interfaces for scenario modeling, shift FSM states,
  * events, actions, OET engine state, and debrief scoring rules.
+ * Adheres to ADR 0026 and Issue #748.
  */
 
-export type ShiftPhase =
+export type CanonicalShiftPhase =
+  | "INTRO"
+  | "BRIEFING"
+  | "PATROL_MAP"
+  | "DISPATCH"
+  | "RESPONDING"
+  | "SCENE"
+  | "TRANSPORT_PREP"
+  | "OET"
+  | "HANDOFF"
+  | "DEBRIEF"
+  | "SHIFT_COMPLETE";
+
+export type LegacyShiftPhase =
   "briefing" | "patrol" | "incident" | "debrief" | "completed";
+
+export type ShiftPhase = CanonicalShiftPhase | LegacyShiftPhase;
 
 export interface VitalsData {
   heartRate?: number;
@@ -21,11 +37,16 @@ export interface VitalsData {
 export type IncidentSeverity = "info" | "warning" | "critical";
 
 export interface PatrolEvent {
-  id: string;
-  timestamp: string;
-  type: string;
-  title: string;
-  description: string;
+  timestamp: number | string;
+  scenarioId?: string;
+  action?: string;
+  context?: Record<string, unknown>;
+
+  // Legacy / optional metadata fields
+  id?: string;
+  type?: string;
+  title?: string;
+  description?: string;
   severity?: IncidentSeverity;
   payload?: Record<string, unknown>;
 }
@@ -51,14 +72,42 @@ export interface DebriefRule {
   feedback: string;
 }
 
+export interface PatientState {
+  complaint?: string;
+  mechanism?: string;
+  vitals?: VitalsData;
+  findings?: string[];
+  interventions?: string[];
+}
+
+export interface EnvironmentState {
+  weather?: string;
+  snowConditions?: string;
+  temperatureFahrenheit?: number;
+  visibility?: string;
+  hazards?: string[];
+}
+
+export interface PatrolActor {
+  id: string;
+  name: string;
+  role: string;
+  notes?: string;
+}
+
 export interface PatrolScenario {
   id: string;
   title: string;
-  subtitle: string;
-  description: string;
-  difficulty: "beginner" | "intermediate" | "advanced";
-  estimatedMinutes: number;
-  location: string;
+  subtitle?: string;
+  description?: string;
+  difficulty?: "beginner" | "intermediate" | "advanced";
+  category?: string;
+  estimatedMinutes?: number;
+  location?: string;
+  dispatchPrompt?: string;
+  environment?: EnvironmentState;
+  patient?: PatientState;
+  actors?: PatrolActor[];
   initialVitals?: VitalsData;
   actions: ScenarioAction[];
   debriefRules: DebriefRule[];
@@ -69,10 +118,36 @@ export interface ShiftState {
   phase: ShiftPhase;
   timeElapsedMinutes: number;
   score: number;
+  incidentsCompleted: number;
   activeEvents: PatrolEvent[];
   actionHistory: ScenarioAction[];
   vitalsHistory: VitalsData[];
   isCompleted: boolean;
+}
+
+export type ShiftEngineEventType =
+  | "START_SHIFT"
+  | "COMPLETE_BRIEFING"
+  | "RECEIVE_DISPATCH"
+  | "ACCEPT_DISPATCH"
+  | "ARRIVE_ON_SCENE"
+  | "COMPLETE_SCENE"
+  | "BEGIN_TRANSPORT"
+  | "ARRIVE_AT_BASE"
+  | "COMPLETE_HANDOFF"
+  | "FINISH_DEBRIEF"
+  | "COMPLETE_SHIFT"
+  | "RECORD_ACTION"
+  | "PUSH_EVENT"
+  | "RESET";
+
+export interface ShiftEngineEvent {
+  type: ShiftEngineEventType;
+  scenarioId?: string;
+  action?: ScenarioAction;
+  event?: PatrolEvent;
+  payload?: Record<string, unknown>;
+  timestamp?: number;
 }
 
 export interface DebriefReport {
@@ -89,4 +164,18 @@ export interface OETEngineState {
   evaluatedCount: number;
   rulesPassed: number;
   rulesFailed: number;
+}
+
+export interface PatrolShiftEngineOptions {
+  initialPhase?: ShiftPhase;
+  startTime?: number;
+}
+
+export interface PatrolShiftEngine {
+  getState(): ShiftState;
+  dispatch(event: ShiftEngineEvent): void;
+  getEventHistory(): PatrolEvent[];
+  getLoadedScenario(): PatrolScenario | null;
+  loadScenario(scenario: PatrolScenario): void;
+  subscribe(listener: () => void): () => void;
 }

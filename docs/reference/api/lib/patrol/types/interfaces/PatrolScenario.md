@@ -14,27 +14,51 @@
 
 ***
 
+### actors?
+
+> `optional` **actors?**: [`PatrolActor`](PatrolActor.md)[]
+
+***
+
+### category?
+
+> `optional` **category?**: `string`
+
+***
+
 ### debriefRules
 
 > **debriefRules**: [`DebriefRule`](DebriefRule.md)[]
 
 ***
 
-### description
+### description?
 
-> **description**: `string`
-
-***
-
-### difficulty
-
-> **difficulty**: `"beginner"` \| `"intermediate"` \| `"advanced"`
+> `optional` **description?**: `string`
 
 ***
 
-### estimatedMinutes
+### difficulty?
 
-> **estimatedMinutes**: `number`
+> `optional` **difficulty?**: `"beginner"` \| `"intermediate"` \| `"advanced"`
+
+***
+
+### dispatchPrompt?
+
+> `optional` **dispatchPrompt?**: `string`
+
+***
+
+### environment?
+
+> `optional` **environment?**: [`EnvironmentState`](EnvironmentState.md)
+
+***
+
+### estimatedMinutes?
+
+> `optional` **estimatedMinutes?**: `number`
 
 ***
 
@@ -50,15 +74,21 @@
 
 ***
 
-### location
+### location?
 
-> **location**: `string`
+> `optional` **location?**: `string`
 
 ***
 
-### subtitle
+### patient?
 
-> **subtitle**: `string`
+> `optional` **patient?**: [`PatientState`](PatientState.md)
+
+***
+
+### subtitle?
+
+> `optional` **subtitle?**: `string`
 
 ***
 

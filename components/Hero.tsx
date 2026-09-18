@@ -101,23 +101,14 @@ export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
         data-pretext-layer="visual"
         className="w-full select-none pointer-events-none"
       >
-        {!isReady ? (
+        {!isReady || isMobile ? (
           <p className="fluid-heading-hero font-extrabold tracking-tight text-center lg:text-left text-white leading-tight heading-editorial">
             {text}
           </p>
-        ) : isMobile ? (
-          <motion.p
-            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            className="fluid-heading-hero font-extrabold tracking-tight text-center lg:text-left text-white heading-editorial"
-          >
-            {text}
-          </motion.p>
         ) : (
           <motion.div
             variants={containerVariants}
-            initial="hidden"
+            initial={shouldReduceMotion ? false : "hidden"}
             animate="visible"
             className="fluid-heading-hero font-extrabold tracking-tight text-center lg:text-left flex flex-wrap justify-center lg:justify-start heading-editorial"
           >
@@ -209,23 +200,14 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
         data-pretext-layer="visual"
         className="w-full select-none pointer-events-none"
       >
-        {!isReady ? (
+        {!isReady || isMobile ? (
           <p className="text-zinc-300 fluid-body leading-relaxed text-center lg:text-left">
             {text}
           </p>
-        ) : isMobile ? (
-          <motion.p
-            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.35, ease: "easeOut" }}
-            className="text-zinc-300 fluid-body leading-relaxed text-center lg:text-left"
-          >
-            {text}
-          </motion.p>
         ) : (
           <motion.p
             variants={containerVariants}
-            initial="hidden"
+            initial={shouldReduceMotion ? false : "hidden"}
             animate="visible"
             className="text-zinc-300 fluid-body leading-relaxed text-center lg:text-left flex flex-wrap justify-center lg:justify-start"
           >

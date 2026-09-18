@@ -14,6 +14,8 @@
 
 - [ContactDispatchResult](interfaces/ContactDispatchResult.md)
 - [EmailDispatchResult](interfaces/EmailDispatchResult.md)
+- [EmailServiceHandler](interfaces/EmailServiceHandler.md)
+- [EmailServiceSpec](interfaces/EmailServiceSpec.md)
 - [RawEmailOptions](interfaces/RawEmailOptions.md)
 - [SvixVerifyParams](interfaces/SvixVerifyParams.md)
 

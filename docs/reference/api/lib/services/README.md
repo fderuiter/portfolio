@@ -116,6 +116,18 @@ Re-exports [DuckTrickSchema](duck/dispatch-command/spec/variables/DuckTrickSchem
 
 ***
 
+### EmailServiceHandler
+
+Re-exports [EmailServiceHandler](email-service/interfaces/EmailServiceHandler.md)
+
+***
+
+### EmailServiceSpec
+
+Re-exports [EmailServiceSpec](email-service/interfaces/EmailServiceSpec.md)
+
+***
+
 ### EvaluateFormulaData
 
 Re-exports [EvaluateFormulaData](crf-evaluator/evaluate-formula/spec/interfaces/EvaluateFormulaData.md)

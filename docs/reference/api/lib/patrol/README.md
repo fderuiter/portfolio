@@ -14,6 +14,12 @@ Re-exports [ActionCategory](types/type-aliases/ActionCategory.md)
 
 ***
 
+### CanonicalShiftPhase
+
+Re-exports [CanonicalShiftPhase](types/type-aliases/CanonicalShiftPhase.md)
+
+***
+
 ### createEvent
 
 Re-exports [createEvent](events/functions/createEvent.md)
@@ -29,6 +35,12 @@ Re-exports [createInitialShiftState](engine/functions/createInitialShiftState.md
 ### createOETEngineState
 
 Re-exports [createOETEngineState](oet-engine/functions/createOETEngineState.md)
+
+***
+
+### createPatrolShiftEngine
+
+Re-exports [createPatrolShiftEngine](engine/functions/createPatrolShiftEngine.md)
 
 ***
 
@@ -56,6 +68,12 @@ Re-exports [DialogueNode](dialogue/interfaces/DialogueNode.md)
 
 ***
 
+### EnvironmentState
+
+Re-exports [EnvironmentState](types/interfaces/EnvironmentState.md)
+
+***
+
 ### evaluateOETCompliance
 
 Re-exports [evaluateOETCompliance](oet-engine/functions/evaluateOETCompliance.md)
@@ -80,15 +98,33 @@ Re-exports [IncidentSeverity](types/type-aliases/IncidentSeverity.md)
 
 ***
 
+### LegacyShiftPhase
+
+Re-exports [LegacyShiftPhase](types/type-aliases/LegacyShiftPhase.md)
+
+***
+
 ### OETEngineState
 
 Re-exports [OETEngineState](types/interfaces/OETEngineState.md)
 
 ***
 
+### PatientState
+
+Re-exports [PatientState](types/interfaces/PatientState.md)
+
+***
+
 ### PATROL\_SCENARIOS
 
 Re-exports [PATROL_SCENARIOS](presets/variables/PATROL_SCENARIOS.md)
+
+***
+
+### PatrolActor
+
+Re-exports [PatrolActor](types/interfaces/PatrolActor.md)
 
 ***
 
@@ -104,6 +140,18 @@ Re-exports [PatrolScenario](types/interfaces/PatrolScenario.md)
 
 ***
 
+### PatrolShiftEngine
+
+Re-exports [PatrolShiftEngine](types/interfaces/PatrolShiftEngine.md)
+
+***
+
+### PatrolShiftEngineOptions
+
+Re-exports [PatrolShiftEngineOptions](types/interfaces/PatrolShiftEngineOptions.md)
+
+***
+
 ### pushEvent
 
 Re-exports [pushEvent](engine/functions/pushEvent.md)
@@ -116,9 +164,27 @@ Re-exports [recordAction](engine/functions/recordAction.md)
 
 ***
 
+### reduceShiftState
+
+Re-exports [reduceShiftState](engine/functions/reduceShiftState.md)
+
+***
+
 ### ScenarioAction
 
 Re-exports [ScenarioAction](types/interfaces/ScenarioAction.md)
+
+***
+
+### ShiftEngineEvent
+
+Re-exports [ShiftEngineEvent](types/interfaces/ShiftEngineEvent.md)
+
+***
+
+### ShiftEngineEventType
+
+Re-exports [ShiftEngineEventType](types/type-aliases/ShiftEngineEventType.md)
 
 ***
 
