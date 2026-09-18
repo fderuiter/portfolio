@@ -3366,7 +3366,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
           <div className="grid grid-cols-3 p-1 rounded-2xl bg-zinc-900/90 border border-zinc-800 gap-1 text-xs font-bold">
             <button
               onClick={() => setMobileTab("toys")}
-              className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1 min-h-[40px] [@media(max-height:420px)]:min-h-[32px] [@media(max-height:420px)]:py-1 cursor-pointer ${
+              className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1 min-h-[44px] min-w-[44px] cursor-pointer touch-manipulation select-none active:scale-95 ${
                 mobileTab === "toys"
                   ? "bg-brand-cyan text-black shadow-md font-bold"
                   : "text-zinc-400 hover:text-white"
@@ -3380,7 +3380,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
 
             <button
               onClick={() => setMobileTab("tricks")}
-              className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1 min-h-[40px] [@media(max-height:420px)]:min-h-[32px] [@media(max-height:420px)]:py-1 cursor-pointer ${
+              className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1 min-h-[44px] min-w-[44px] cursor-pointer touch-manipulation select-none active:scale-95 ${
                 mobileTab === "tricks"
                   ? "bg-brand-cyan text-black shadow-md font-bold"
                   : "text-zinc-400 hover:text-white"
@@ -3394,7 +3394,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
 
             <button
               onClick={() => setMobileTab("actions")}
-              className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1 min-h-[40px] [@media(max-height:420px)]:min-h-[32px] [@media(max-height:420px)]:py-1 cursor-pointer ${
+              className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1 min-h-[44px] min-w-[44px] cursor-pointer touch-manipulation select-none active:scale-95 ${
                 mobileTab === "actions"
                   ? "bg-brand-cyan text-black shadow-md font-bold"
                   : "text-zinc-400 hover:text-white"
@@ -3417,7 +3417,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                     selectedItem: "tennis-ball",
                   }));
                 }}
-                className={`p-3 rounded-2xl border text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer ${
+                className={`p-3 rounded-2xl border text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer touch-manipulation select-none active:scale-95 ${
                   uiState.selectedItem === "tennis-ball"
                     ? "border-brand-cyan bg-brand-cyan/25 text-brand-cyan shadow-[0_0_12px_rgba(6,182,212,0.3)]"
                     : "border-zinc-800 bg-zinc-900/80 text-zinc-300 active:bg-zinc-800"
@@ -3434,7 +3434,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                     selectedItem: "kong",
                   }));
                 }}
-                className={`p-3 rounded-2xl border text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer ${
+                className={`p-3 rounded-2xl border text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer touch-manipulation select-none active:scale-95 ${
                   uiState.selectedItem === "kong"
                     ? "border-brand-cyan bg-brand-cyan/25 text-brand-cyan shadow-[0_0_12px_rgba(6,182,212,0.3)]"
                     : "border-zinc-800 bg-zinc-900/80 text-zinc-300 active:bg-zinc-800"
@@ -3450,7 +3450,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                     selectedItem: "squeaky-toy",
                   }));
                 }}
-                className={`p-3 rounded-2xl border text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer ${
+                className={`p-3 rounded-2xl border text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer touch-manipulation select-none active:scale-95 ${
                   uiState.selectedItem === "squeaky-toy"
                     ? "border-brand-cyan bg-brand-cyan/25 text-brand-cyan shadow-[0_0_12px_rgba(6,182,212,0.3)]"
                     : "border-zinc-800 bg-zinc-900/80 text-zinc-300 active:bg-zinc-800"
@@ -3462,7 +3462,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
 
               <button
                 onClick={handleGiveTreat}
-                className="p-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 text-amber-300 active:bg-amber-500/20 text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
+                className="p-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 text-amber-300 active:bg-amber-500/20 text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] min-w-[44px] cursor-pointer touch-manipulation select-none active:scale-[0.98]"
               >
                 <span>🍖 Give Treat</span>
               </button>
@@ -3474,28 +3474,28 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
             <div className="grid grid-cols-2 gap-2 animate-fadeIn">
               <button
                 onClick={() => handlePerformTrick("SIT")}
-                className="p-3 rounded-2xl border border-sky-500/40 bg-sky-500/10 text-sky-300 active:bg-sky-500/20 text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
+                className="p-3 rounded-2xl border border-sky-500/40 bg-sky-500/10 text-sky-300 active:bg-sky-500/20 text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] min-w-[44px] cursor-pointer touch-manipulation select-none active:scale-[0.98]"
               >
                 <span>🪑 Sit (Calm)</span>
               </button>
 
               <button
                 onClick={() => handlePerformTrick("HIGH_FIVE")}
-                className="p-3 rounded-2xl border border-pink-500/40 bg-pink-500/10 text-pink-300 active:bg-pink-500/20 text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
+                className="p-3 rounded-2xl border border-pink-500/40 bg-pink-500/10 text-pink-300 active:bg-pink-500/20 text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] min-w-[44px] cursor-pointer touch-manipulation select-none active:scale-[0.98]"
               >
                 <span>🐾 High Five</span>
               </button>
 
               <button
                 onClick={() => handlePerformTrick("DROP_IT")}
-                className="p-3 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 active:bg-emerald-500/20 text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
+                className="p-3 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 active:bg-emerald-500/20 text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] min-w-[44px] cursor-pointer touch-manipulation select-none active:scale-[0.98]"
               >
                 <span>✋ Drop It!</span>
               </button>
 
               <button
                 onClick={() => handlePerformTrick("SPIN")}
-                className="p-3 rounded-2xl border border-purple-500/40 bg-purple-500/10 text-purple-300 active:bg-purple-500/20 text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
+                className="p-3 rounded-2xl border border-purple-500/40 bg-purple-500/10 text-purple-300 active:bg-purple-500/20 text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] min-w-[44px] cursor-pointer touch-manipulation select-none active:scale-[0.98]"
               >
                 <span>🌀 Spin Trick</span>
               </button>
@@ -3511,7 +3511,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                     onClick={() => {
                       applyTransition((state) => activeCodeBurst(state));
                     }}
-                    className="w-full py-3 px-4 rounded-2xl bg-cyan-500 text-black font-bold text-xs hover:bg-cyan-400 active:scale-98 transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
+                    className="w-full py-3 px-4 rounded-2xl bg-cyan-500 text-black font-bold text-xs hover:bg-cyan-400 active:scale-95 transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] flex items-center justify-center gap-2 min-h-[48px] cursor-pointer touch-manipulation select-none"
                   >
                     <IconCode className="w-4 h-4" />
                     <span>Focus Work Sprint</span>
@@ -3522,7 +3522,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                       onClick={() => {
                         applyTransition((state) => enterDogPark(state));
                       }}
-                      className="p-3 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 active:bg-emerald-500/20 text-xs font-bold transition-all flex items-center justify-center gap-1.5 min-h-[48px] cursor-pointer"
+                      className="p-3 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 active:bg-emerald-500/20 text-xs font-bold transition-all flex items-center justify-center gap-1.5 min-h-[48px] cursor-pointer touch-manipulation select-none active:scale-95"
                     >
                       <IconTrees className="w-4 h-4" />
                       <span>Dog Park 🌲</span>
@@ -3532,7 +3532,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                       onClick={() => {
                         applyTransition((state) => enterBathtub(state));
                       }}
-                      className={`p-3 rounded-2xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 min-h-[48px] cursor-pointer ${
+                      className={`p-3 rounded-2xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 min-h-[48px] cursor-pointer touch-manipulation select-none active:scale-95 ${
                         uiState.isMuddy
                           ? "border-sky-400 bg-sky-500/20 text-sky-300 animate-pulse"
                           : "border-zinc-800 bg-zinc-900 text-zinc-400 active:text-white"
@@ -3549,7 +3549,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                     onClick={() => {
                       applyTransition((state) => rinseBathtub(state));
                     }}
-                    className="p-3 rounded-2xl bg-sky-500 text-black font-bold text-xs active:bg-sky-400 transition-all flex items-center justify-center gap-1.5 min-h-[48px] cursor-pointer shadow-[0_0_15px_rgba(56,189,248,0.3)]"
+                    className="p-3 rounded-2xl bg-sky-500 text-black font-bold text-xs active:bg-sky-400 transition-all flex items-center justify-center gap-1.5 min-h-[48px] cursor-pointer touch-manipulation select-none active:scale-95 shadow-[0_0_15px_rgba(56,189,248,0.3)]"
                   >
                     <IconDroplet className="w-4 h-4" />
                     <span>Rinse Spray 🚿</span>
@@ -3559,7 +3559,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                     onClick={() => {
                       applyTransition((state) => exitBathtub(state));
                     }}
-                    className="p-3 rounded-2xl border border-zinc-700 bg-zinc-900 text-zinc-200 text-xs active:bg-zinc-800 transition-colors flex items-center justify-center min-h-[48px] cursor-pointer"
+                    className="p-3 rounded-2xl border border-zinc-700 bg-zinc-900 text-zinc-200 text-xs active:bg-zinc-800 transition-colors flex items-center justify-center min-h-[48px] cursor-pointer touch-manipulation select-none active:scale-95"
                   >
                     <span>Finish Bath →</span>
                   </button>
@@ -3571,7 +3571,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                       onClick={() => {
                         applyTransition((state) => jumpParkHurdle(state));
                       }}
-                      className="p-3 rounded-2xl bg-amber-400 text-black font-bold text-xs active:bg-amber-300 transition-all flex items-center justify-center gap-1.5 min-h-[48px] cursor-pointer shadow-[0_0_12px_rgba(250,204,21,0.3)]"
+                      className="p-3 rounded-2xl bg-amber-400 text-black font-bold text-xs active:bg-amber-300 transition-all flex items-center justify-center gap-1.5 min-h-[48px] cursor-pointer touch-manipulation select-none active:scale-95 shadow-[0_0_12px_rgba(250,204,21,0.3)]"
                     >
                       <span>🦘 Jump Hurdle</span>
                     </button>
@@ -3580,7 +3580,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                       onClick={() => {
                         applyTransition((state) => tapParkWhistle(state));
                       }}
-                      className="p-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 text-amber-300 text-xs font-bold transition-all flex items-center justify-center min-h-[48px] cursor-pointer"
+                      className="p-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 text-amber-300 text-xs font-bold transition-all flex items-center justify-center min-h-[48px] cursor-pointer touch-manipulation select-none active:scale-95"
                     >
                       <span>Whistle 📢</span>
                     </button>
@@ -3591,7 +3591,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                       const isSuccess = uiState.parkState.status === "success";
                       applyTransition((state) => exitDogPark(state, isSuccess));
                     }}
-                    className="w-full py-2.5 rounded-2xl border border-zinc-700 bg-zinc-900 text-zinc-200 text-xs active:bg-zinc-800 transition-colors flex items-center justify-center min-h-[44px] cursor-pointer"
+                    className="w-full py-2.5 rounded-2xl border border-zinc-700 bg-zinc-900 text-zinc-200 text-xs active:bg-zinc-800 transition-colors flex items-center justify-center min-h-[44px] cursor-pointer touch-manipulation select-none active:scale-95"
                   >
                     <span>Return to Office →</span>
                   </button>
@@ -3606,7 +3606,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
 
             <button
               onClick={openWardrobe}
-              className="p-2.5 rounded-xl border border-zinc-800 bg-zinc-900/80 text-amber-400 hover:text-white transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
+              className="p-2.5 rounded-xl border border-zinc-800 bg-zinc-900/80 text-amber-400 hover:text-white transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation select-none active:scale-95"
               title="Wardrobe"
             >
               <IconShirt className="w-4 h-4" />
@@ -3614,7 +3614,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
 
             <button
               onClick={openScrapbook}
-              className="p-2.5 rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
+              className="p-2.5 rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation select-none active:scale-95"
               title="Scrapbook"
             >
               <IconBook className="w-4 h-4" />
@@ -3622,7 +3622,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
 
             <button
               onClick={() => setIsMusicMuted(!isMusicMuted)}
-              className="p-2.5 rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
+              className="p-2.5 rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation select-none active:scale-95"
               title={isMusicMuted ? "Unmute Music" : "Mute Music"}
             >
               {isMusicMuted ? (
@@ -3634,7 +3634,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
 
             <button
               onClick={() => setMuted(!muted)}
-              className="p-2.5 rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
+              className="p-2.5 rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation select-none active:scale-95"
               title={muted ? "Unmute Audio" : "Mute Audio"}
             >
               {muted ? (
@@ -3672,7 +3672,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                   }));
                 }}
                 aria-pressed={uiState.selectedItem === "tennis-ball"}
-                className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                className={`min-h-[44px] min-w-[44px] px-3 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation select-none active:scale-95 ${
                   uiState.selectedItem === "tennis-ball"
                     ? "border-brand-cyan bg-brand-cyan/20 text-brand-cyan shadow-[0_0_12px_rgba(6,182,212,0.3)]"
                     : "border-zinc-800 bg-zinc-900/70 text-zinc-400 hover:text-white"
@@ -3694,7 +3694,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                   }));
                 }}
                 aria-pressed={uiState.selectedItem === "kong"}
-                className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                className={`min-h-[44px] min-w-[44px] px-3 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation select-none active:scale-95 ${
                   uiState.selectedItem === "kong"
                     ? "border-brand-cyan bg-brand-cyan/20 text-brand-cyan shadow-[0_0_12px_rgba(6,182,212,0.3)]"
                     : "border-zinc-800 bg-zinc-900/70 text-zinc-400 hover:text-white"
@@ -3715,7 +3715,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                   }));
                 }}
                 aria-pressed={uiState.selectedItem === "squeaky-toy"}
-                className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                className={`min-h-[44px] min-w-[44px] px-3 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation select-none active:scale-95 ${
                   uiState.selectedItem === "squeaky-toy"
                     ? "border-brand-cyan bg-brand-cyan/20 text-brand-cyan shadow-[0_0_12px_rgba(6,182,212,0.3)]"
                     : "border-zinc-800 bg-zinc-900/70 text-zinc-400 hover:text-white"
@@ -3732,7 +3732,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
               <button
                 onClick={handleGiveTreat}
                 aria-pressed={uiState.selectedItem === "treat"}
-                className="px-3 py-1.5 rounded-xl border border-zinc-800 bg-zinc-900/70 text-amber-300 hover:border-amber-500/40 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                className="min-h-[44px] min-w-[44px] px-3 py-1.5 rounded-xl border border-zinc-800 bg-zinc-900/70 text-amber-300 hover:border-amber-500/40 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation select-none active:scale-95"
                 title="Give treat (trades ball during No Take Only Throw)"
               >
                 <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-zinc-500">
@@ -3746,7 +3746,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
             <div className="flex items-center gap-1.5 flex-wrap">
               <button
                 onClick={() => handlePerformTrick("SIT")}
-                className="px-3 py-1.5 rounded-xl border border-sky-500/40 bg-sky-500/10 text-sky-300 hover:bg-sky-500/20 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                className="min-h-[44px] min-w-[44px] px-3 py-1.5 rounded-xl border border-sky-500/40 bg-sky-500/10 text-sky-300 hover:bg-sky-500/20 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation select-none active:scale-[0.98]"
                 title="Command Sit: Calms Excitement (-20) & boosts Good Boy scale"
               >
                 <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-sky-400">
@@ -3757,7 +3757,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
 
               <button
                 onClick={() => handlePerformTrick("HIGH_FIVE")}
-                className="px-3 py-1.5 rounded-xl border border-pink-500/40 bg-pink-500/10 text-pink-300 hover:bg-pink-500/20 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                className="min-h-[44px] min-w-[44px] px-3 py-1.5 rounded-xl border border-pink-500/40 bg-pink-500/10 text-pink-300 hover:bg-pink-500/20 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation select-none active:scale-[0.98]"
                 title="Command High Five: Morale boost (+45 pts) & tail wag"
               >
                 <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-pink-400">
@@ -3768,7 +3768,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
 
               <button
                 onClick={() => handlePerformTrick("DROP_IT")}
-                className="px-3 py-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                className="min-h-[44px] min-w-[44px] px-3 py-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation select-none active:scale-[0.98]"
                 title="Command Drop It: Immediately drops stolen hazards or ball (+60-75 pts)"
               >
                 <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-emerald-400">
@@ -3779,7 +3779,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
 
               <button
                 onClick={() => handlePerformTrick("SPIN")}
-                className="px-3 py-1.5 rounded-xl border border-purple-500/40 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                className="min-h-[44px] min-w-[44px] px-3 py-1.5 rounded-xl border border-purple-500/40 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation select-none active:scale-[0.98]"
                 title="Command Spin: Playful trick (+50 pts) with 360 rotation"
               >
                 <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-purple-400">
@@ -3799,7 +3799,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                   onClick={() => {
                     applyTransition((state) => activeCodeBurst(state));
                   }}
-                  className="px-4 py-2 rounded-xl bg-cyan-500 text-black font-bold text-xs hover:bg-cyan-400 active:scale-95 transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] flex items-center gap-2 cursor-pointer"
+                  className="min-h-[44px] min-w-[44px] px-4 py-2 rounded-xl bg-cyan-500 text-black font-bold text-xs hover:bg-cyan-400 active:scale-95 transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] flex items-center justify-center gap-2 cursor-pointer touch-manipulation select-none"
                   title="Focus work sprint at desk (Spacebar)"
                 >
                   <IconCode className="w-4 h-4" />
@@ -3811,7 +3811,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                     onClick={() => {
                       applyTransition((state) => rinseBathtub(state));
                     }}
-                    className="px-4 py-2 rounded-xl bg-sky-500 text-black font-bold text-xs hover:bg-sky-400 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-[0_0_15px_rgba(56,189,248,0.3)]"
+                    className="min-h-[44px] min-w-[44px] px-4 py-2 rounded-xl bg-sky-500 text-black font-bold text-xs hover:bg-sky-400 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation select-none shadow-[0_0_15px_rgba(56,189,248,0.3)]"
                   >
                     <IconDroplet className="w-4 h-4" />
                     <span>Shower Rinse Spray 🚿</span>
@@ -3821,7 +3821,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                     onClick={() => {
                       applyTransition((state) => exitBathtub(state));
                     }}
-                    className="px-4 py-2 rounded-xl border border-zinc-700 bg-zinc-900 text-zinc-200 text-xs hover:bg-zinc-800 transition-colors cursor-pointer"
+                    className="min-h-[44px] min-w-[44px] px-4 py-2 rounded-xl border border-zinc-700 bg-zinc-900 text-zinc-200 text-xs hover:bg-zinc-800 transition-colors cursor-pointer touch-manipulation select-none active:scale-95 flex items-center justify-center"
                   >
                     <span>Finish Bath &amp; Return →</span>
                   </button>
@@ -3832,7 +3832,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                     onClick={() => {
                       applyTransition((state) => jumpParkHurdle(state));
                     }}
-                    className="px-4 py-2 rounded-xl bg-amber-400 text-black font-bold text-xs hover:bg-amber-300 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-[0_0_12px_rgba(250,204,21,0.3)]"
+                    className="min-h-[44px] min-w-[44px] px-4 py-2 rounded-xl bg-amber-400 text-black font-bold text-xs hover:bg-amber-300 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation select-none shadow-[0_0_12px_rgba(250,204,21,0.3)]"
                   >
                     <span>🦘 Agility Jump (Space)</span>
                   </button>
@@ -3841,7 +3841,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                     onClick={() => {
                       applyTransition((state) => tapParkWhistle(state));
                     }}
-                    className="px-3.5 py-2 rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-300 text-xs font-bold transition-all cursor-pointer"
+                    className="min-h-[44px] min-w-[44px] px-3.5 py-2 rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-300 text-xs font-bold transition-all cursor-pointer touch-manipulation select-none active:scale-95 flex items-center justify-center"
                   >
                     <span>Whistle 📢</span>
                   </button>
@@ -3851,7 +3851,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                       const isSuccess = uiState.parkState.status === "success";
                       applyTransition((state) => exitDogPark(state, isSuccess));
                     }}
-                    className="px-3.5 py-2 rounded-xl border border-zinc-700 bg-zinc-900 text-zinc-200 text-xs hover:bg-zinc-800 transition-colors cursor-pointer"
+                    className="min-h-[44px] min-w-[44px] px-3.5 py-2 rounded-xl border border-zinc-700 bg-zinc-900 text-zinc-200 text-xs hover:bg-zinc-800 transition-colors cursor-pointer touch-manipulation select-none active:scale-95 flex items-center justify-center"
                   >
                     <span>Return to Office →</span>
                   </button>
@@ -3864,7 +3864,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                     onClick={() => {
                       applyTransition((state) => enterDogPark(state));
                     }}
-                    className="px-3.5 py-2 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                    className="min-h-[44px] min-w-[44px] px-3.5 py-2 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation select-none active:scale-95"
                   >
                     <IconTrees className="w-4 h-4" />
                     <span>Dog Park 🌲</span>
@@ -3874,7 +3874,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                     onClick={() => {
                       applyTransition((state) => enterBathtub(state));
                     }}
-                    className={`px-3.5 py-2 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                    className={`min-h-[44px] min-w-[44px] px-3.5 py-2 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation select-none active:scale-95 ${
                       uiState.isMuddy
                         ? "border-sky-400 bg-sky-500/20 text-sky-300 animate-pulse"
                         : "border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white"
@@ -3893,7 +3893,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
 
               <button
                 onClick={openWardrobe}
-                className="p-2 rounded-xl border border-zinc-800 bg-zinc-900/80 text-amber-400 hover:text-white transition-colors cursor-pointer"
+                className="p-2 rounded-xl border border-zinc-800 bg-zinc-900/80 text-amber-400 hover:text-white transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation select-none active:scale-95"
                 title="Duck Wardrobe & Accessories"
               >
                 <IconShirt className="w-4 h-4" />
@@ -3901,7 +3901,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
 
               <button
                 onClick={openScrapbook}
-                className="p-2 rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                className="p-2 rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation select-none active:scale-95"
                 title="Duck Scrapbook & Facts"
               >
                 <IconBook className="w-4 h-4" />
@@ -3909,7 +3909,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
 
               <button
                 onClick={() => setIsMusicMuted(!isMusicMuted)}
-                className="p-2 rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                className="p-2 rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation select-none active:scale-95"
                 title={isMusicMuted ? "Unmute Lo-Fi Music" : "Mute Lo-Fi Music"}
               >
                 {isMusicMuted ? (
@@ -3921,7 +3921,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
 
               <button
                 onClick={() => setMuted(!muted)}
-                className="p-2 rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                className="p-2 rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation select-none active:scale-95"
                 title={muted ? "Unmute Audio" : "Mute Audio"}
               >
                 {muted ? (
@@ -4011,7 +4011,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
             <div className="mb-4">
               <button
                 onClick={handleAdvanceLevel}
-                className="w-full py-3 px-4 rounded-xl bg-brand-cyan text-black font-bold text-xs sm:text-sm hover:bg-white active:scale-95 transition-all shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center justify-center gap-2 cursor-pointer min-h-[44px]"
+                className="w-full py-3 px-4 rounded-xl bg-brand-cyan text-black font-bold text-xs sm:text-sm hover:bg-white active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center justify-center gap-2 cursor-pointer min-h-[44px] touch-manipulation select-none"
               >
                 <span>
                   {uiState.currentLevel < 5
@@ -4099,7 +4099,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                   return next;
                 });
               }}
-              className="w-full py-3 rounded-xl bg-rose-500 text-white font-mono font-bold text-xs sm:text-sm hover:bg-rose-400 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2 min-h-[44px]"
+              className="w-full py-3 rounded-xl bg-rose-500 text-white font-mono font-bold text-xs sm:text-sm hover:bg-rose-400 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2 min-h-[44px] min-w-[44px] touch-manipulation select-none"
             >
               <IconRotate className="w-4 h-4" />
               <span>Retry Sprint {uiState.currentLevel}</span>
@@ -4120,7 +4120,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
           >
             <button
               onClick={closeWardrobe}
-              className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 rounded-xl border border-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center"
+              className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 rounded-xl border border-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation select-none active:scale-95"
             >
               <IconX className="w-4 h-4" />
             </button>
@@ -4189,7 +4189,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                     }
                     aria-checked={isSelected}
                     role="radio"
-                    className={`w-full p-2.5 sm:p-3 rounded-2xl border text-left flex items-center justify-between transition-all min-h-[48px] cursor-pointer ${
+                    className={`w-full p-2.5 sm:p-3 rounded-2xl border text-left flex items-center justify-between transition-all min-h-[48px] min-w-[44px] cursor-pointer touch-manipulation select-none active:scale-95 ${
                       isSelected
                         ? "border-brand-cyan bg-brand-cyan/15 text-white shadow-md"
                         : isUnlocked
@@ -4238,7 +4238,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
           >
             <button
               onClick={closeScrapbook}
-              className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 rounded-xl border border-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center"
+              className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 rounded-xl border border-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation select-none active:scale-95"
             >
               <IconX className="w-4 h-4" />
             </button>
@@ -4265,7 +4265,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
               <div className="flex items-center rounded-xl bg-zinc-900 border border-zinc-800 p-1">
                 <button
                   onClick={() => setScrapbookViewMode("photo")}
-                  className={`px-2.5 sm:px-3 py-1 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
+                  className={`px-2.5 sm:px-3 py-1 min-h-[44px] min-w-[44px] rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation select-none active:scale-95 ${
                     scrapbookViewMode === "photo"
                       ? "bg-brand-cyan text-black shadow-sm"
                       : "text-zinc-400 hover:text-white"
@@ -4277,7 +4277,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
 
                 <button
                   onClick={() => setScrapbookViewMode("vector")}
-                  className={`px-2.5 sm:px-3 py-1 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
+                  className={`px-2.5 sm:px-3 py-1 min-h-[44px] min-w-[44px] rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation select-none active:scale-95 ${
                     scrapbookViewMode === "vector"
                       ? "bg-brand-cyan text-black shadow-sm"
                       : "text-zinc-400 hover:text-white"
@@ -4358,22 +4358,27 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                 onClick={() =>
                   setActiveScrapbookIndex((i) => Math.max(0, i - 1))
                 }
-                className="px-3 py-1.5 rounded-lg border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer min-h-[38px]"
+                className="px-3 py-1.5 rounded-lg border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation select-none active:scale-95"
               >
                 ← Prev
               </button>
 
-              <div className="flex gap-1.5">
+              <div className="flex gap-1.5 items-center">
                 {DUCK_FACTS.map((f, idx) => (
                   <button
                     key={f.id}
                     onClick={() => setActiveScrapbookIndex(idx)}
-                    className={`w-2.5 h-2.5 rounded-full transition-all cursor-pointer ${
-                      activeScrapbookIndex === idx
-                        ? "bg-brand-cyan scale-125"
-                        : "bg-zinc-800 hover:bg-zinc-600"
-                    }`}
-                  />
+                    className={`relative min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer touch-manipulation select-none active:scale-95`}
+                    aria-label={`Go to card ${idx + 1}`}
+                  >
+                    <span
+                      className={`w-2.5 h-2.5 rounded-full transition-all ${
+                        activeScrapbookIndex === idx
+                          ? "bg-brand-cyan scale-125"
+                          : "bg-zinc-800 hover:bg-zinc-600"
+                      }`}
+                    />
+                  </button>
                 ))}
               </div>
 
@@ -4384,7 +4389,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                     Math.min(DUCK_FACTS.length - 1, i + 1)
                   )
                 }
-                className="px-3 py-1.5 rounded-lg border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer min-h-[38px]"
+                className="px-3 py-1.5 rounded-lg border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation select-none active:scale-95"
               >
                 Next →
               </button>
