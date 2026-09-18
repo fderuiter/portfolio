@@ -293,7 +293,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
             <button
               type="button"
               onClick={() => setShowWizard(true)}
-              className="min-h-12 min-w-12 px-2.5 py-1.5 bg-neutral-900/90 hover:bg-neutral-800 text-amber-400 rounded-xl border border-amber-500/30 transition-all font-mono font-bold text-xs flex items-center justify-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none"
+              className="min-h-[44px] min-w-[44px] px-2.5 py-1.5 bg-neutral-900/90 hover:bg-neutral-800 text-amber-400 rounded-xl border border-amber-500/30 transition-all font-mono font-bold text-xs flex items-center justify-center gap-1 cursor-pointer touch-manipulation select-none active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none"
               title="Pre-Game Setup Wizard"
             >
               <IconAdjustments className="w-3.5 h-3.5" />
@@ -302,7 +302,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
             <button
               type="button"
               onClick={handleExit}
-              className="min-h-12 min-w-12 px-2.5 py-1.5 bg-neutral-900/90 hover:bg-neutral-800 text-zinc-400 hover:text-red-400 rounded-xl border border-neutral-800 transition-all font-mono font-bold text-xs flex items-center justify-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none"
+              className="min-h-[44px] min-w-[44px] px-2.5 py-1.5 bg-neutral-900/90 hover:bg-neutral-800 text-zinc-400 hover:text-red-400 rounded-xl border border-neutral-800 transition-all font-mono font-bold text-xs flex items-center justify-center gap-1 cursor-pointer touch-manipulation select-none active:scale-95 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none"
               title="Reset / Power Off Cabinet"
             >
               <IconPower className="w-3.5 h-3.5 text-red-500" />
@@ -330,7 +330,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
               <button
                 type="button"
                 onClick={() => setShowWizard(true)}
-                className="min-h-12 min-w-12 px-2.5 py-1.5 bg-neutral-900/90 hover:bg-neutral-800 text-amber-400 rounded-xl border border-amber-500/30 transition-all font-mono font-bold text-xs flex items-center justify-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none"
+                className="min-h-[44px] min-w-[44px] px-2.5 py-1.5 bg-neutral-900/90 hover:bg-neutral-800 text-amber-400 rounded-xl border border-amber-500/30 transition-all font-mono font-bold text-xs flex items-center justify-center gap-1 cursor-pointer touch-manipulation select-none active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none"
                 title="Pre-Game Setup Wizard"
               >
                 <IconAdjustments className="w-3.5 h-3.5" />
@@ -340,7 +340,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
               <button
                 type="button"
                 onClick={handleExit}
-                className="min-h-12 min-w-12 px-2.5 py-1.5 bg-neutral-900/90 hover:bg-neutral-800 text-zinc-400 hover:text-red-400 rounded-xl border border-neutral-800 transition-all font-mono font-bold text-xs flex items-center justify-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none"
+                className="min-h-[44px] min-w-[44px] px-2.5 py-1.5 bg-neutral-900/90 hover:bg-neutral-800 text-zinc-400 hover:text-red-400 rounded-xl border border-neutral-800 transition-all font-mono font-bold text-xs flex items-center justify-center gap-1 cursor-pointer touch-manipulation select-none active:scale-95 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none"
                 title="Reset / Power Off Cabinet"
               >
                 <IconPower className="w-3.5 h-3.5 text-red-500" />
@@ -395,7 +395,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
               <button
                 type="button"
                 onClick={() => setShowWizard(true)}
-                className="px-3 py-1 bg-zinc-950 text-amber-400 hover:text-amber-300 rounded-lg border border-amber-500/30 transition-all font-bold uppercase text-[10px] tracking-wider flex items-center gap-1 hover:bg-zinc-900 hover:border-amber-500/50 cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none"
+                className="min-h-[44px] min-w-[44px] px-3 py-1 bg-zinc-950 text-amber-400 hover:text-amber-300 rounded-lg border border-amber-500/30 transition-all font-bold uppercase text-[10px] tracking-wider flex items-center justify-center gap-1 hover:bg-zinc-900 hover:border-amber-500/50 cursor-pointer touch-manipulation select-none active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none"
               >
                 <IconAdjustments className="w-3.5 h-3.5 text-amber-400" />
                 <span>Setup Wizard</span>
@@ -404,7 +404,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
               <button
                 type="button"
                 onClick={handleExit}
-                className="px-3 py-1 bg-zinc-950 text-zinc-400 hover:text-white rounded-lg border border-zinc-800 transition-all font-bold uppercase text-[10px] tracking-wider flex items-center gap-1 hover:bg-zinc-900 hover:border-zinc-700 cursor-pointer focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none"
+                className="min-h-[44px] min-w-[44px] px-3 py-1 bg-zinc-950 text-zinc-400 hover:text-white rounded-lg border border-zinc-800 transition-all font-bold uppercase text-[10px] tracking-wider flex items-center justify-center gap-1 hover:bg-zinc-900 hover:border-zinc-700 cursor-pointer touch-manipulation select-none active:scale-95 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none"
               >
                 <IconPower className="w-3.5 h-3.5 text-red-500" />
                 <span>Reset Cabinet</span>
@@ -550,7 +550,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
                   onMouseEnter={handlePrefetch}
                   onFocus={handlePrefetch}
                   onClick={handleLaunch}
-                  className={`w-full md:w-auto px-8 py-3.5 ${colors.buttonBg} ${colors.buttonHover} text-black font-extrabold rounded-xl border-b-4 ${colors.buttonBorder} hover:border-b-2 active:border-b-0 active:translate-y-1 transition-all duration-70s flex items-center justify-center gap-2 font-mono text-xs sm:text-sm tracking-wider shadow-lg ${colors.buttonShadow} uppercase`}
+                  className={`w-full md:w-auto min-h-[44px] min-w-[44px] px-8 py-3.5 ${colors.buttonBg} ${colors.buttonHover} text-black font-extrabold rounded-xl border-b-4 ${colors.buttonBorder} hover:border-b-2 active:border-b-0 active:translate-y-1 active:scale-95 transition-all duration-70s flex items-center justify-center gap-2 font-mono text-xs sm:text-sm tracking-wider shadow-lg ${colors.buttonShadow} uppercase cursor-pointer touch-manipulation select-none`}
                 >
                   <IconPlayerPlay className="w-4 h-4 fill-black text-black" />
                   <span>Launch Cabinet</span>

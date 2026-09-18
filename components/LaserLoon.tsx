@@ -1732,7 +1732,7 @@ export const LaserLoon: React.FC = () => {
                 setMode("campaign");
                 resetGame();
               }}
-              className={`min-h-[44px] px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer flex items-center justify-center focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none ${
+              className={`min-h-[44px] min-w-[44px] px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer touch-manipulation select-none active:scale-[0.98] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none ${
                 mode === "campaign"
                   ? "bg-red-500 text-white shadow-[0_0_12px_rgba(239,68,68,0.4)]"
                   : "text-neutral-400 hover:text-white"
@@ -1745,7 +1745,7 @@ export const LaserLoon: React.FC = () => {
                 setMode("arcade");
                 resetGame();
               }}
-              className={`min-h-[44px] px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer flex items-center justify-center focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none ${
+              className={`min-h-[44px] min-w-[44px] px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer touch-manipulation select-none active:scale-[0.98] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none ${
                 mode === "arcade"
                   ? "bg-red-500 text-white shadow-[0_0_12px_rgba(239,68,68,0.4)]"
                   : "text-neutral-400 hover:text-white"
@@ -1758,7 +1758,7 @@ export const LaserLoon: React.FC = () => {
                 setMode("sandbox");
                 setGameState("playing");
               }}
-              className={`min-h-[44px] px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer flex items-center justify-center focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none ${
+              className={`min-h-[44px] min-w-[44px] px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer touch-manipulation select-none active:scale-[0.98] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none ${
                 mode === "sandbox"
                   ? "bg-red-500 text-white shadow-[0_0_12px_rgba(239,68,68,0.4)]"
                   : "text-neutral-400 hover:text-white"
@@ -1773,7 +1773,7 @@ export const LaserLoon: React.FC = () => {
             <button
               onClick={() => selectLaserType("ruby-laser")}
               aria-pressed={laserType === "ruby-laser"}
-              className={`min-h-[44px] px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none ${
+              className={`min-h-[44px] min-w-[44px] px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer touch-manipulation select-none active:scale-[0.98] flex items-center justify-center gap-1 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none ${
                 laserType === "ruby-laser"
                   ? "bg-red-500/20 text-red-400 border border-red-500/40 shadow-[0_0_10px_rgba(239,68,68,0.3)]"
                   : "text-neutral-400 hover:text-white border border-transparent"
@@ -1784,7 +1784,7 @@ export const LaserLoon: React.FC = () => {
             <button
               onClick={() => selectLaserType("cyan-pulse")}
               aria-pressed={laserType === "cyan-pulse"}
-              className={`min-h-[44px] px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${
+              className={`min-h-[44px] min-w-[44px] px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer touch-manipulation select-none active:scale-[0.98] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${
                 laserType === "cyan-pulse"
                   ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/40"
                   : "text-neutral-400 hover:text-white border border-transparent"
@@ -1795,7 +1795,7 @@ export const LaserLoon: React.FC = () => {
             <button
               onClick={() => selectLaserType("aurora-wave")}
               aria-pressed={laserType === "aurora-wave"}
-              className={`min-h-[44px] px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none ${
+              className={`min-h-[44px] min-w-[44px] px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer touch-manipulation select-none active:scale-[0.98] flex items-center justify-center focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:outline-none ${
                 laserType === "aurora-wave"
                   ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
                   : "text-neutral-400 hover:text-white border border-transparent"
@@ -1806,7 +1806,7 @@ export const LaserLoon: React.FC = () => {
             <button
               onClick={() => selectLaserType("ice-cannon")}
               aria-pressed={laserType === "ice-cannon"}
-              className={`min-h-[44px] px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:outline-none ${
+              className={`min-h-[44px] min-w-[44px] px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer touch-manipulation select-none active:scale-[0.98] flex items-center justify-center gap-1 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:outline-none ${
                 laserType === "ice-cannon"
                   ? "bg-sky-500/20 text-sky-400 border border-sky-500/40 shadow-[0_0_10px_rgba(56,189,248,0.3)]"
                   : "text-neutral-400 hover:text-white border border-transparent"
@@ -1821,7 +1821,7 @@ export const LaserLoon: React.FC = () => {
           <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
             <button
               onClick={() => setShowMuseum(true)}
-              className="min-h-[44px] inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-amber-300 border border-amber-500/30 transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none"
+              className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-amber-300 border border-amber-500/30 transition-all cursor-pointer touch-manipulation select-none active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none"
             >
               <IconBook className="w-3.5 h-3.5" />
               <span>Flag Museum</span>
@@ -2003,7 +2003,7 @@ export const LaserLoon: React.FC = () => {
               aria-valuemin={0}
               aria-valuemax={100}
               aria-label="Ultimate Tremolo Meter"
-              className={`px-3 py-1.5 rounded-xl font-mono text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-lg ${
+              className={`min-h-[44px] min-w-[44px] px-3 py-1.5 rounded-xl font-mono text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer touch-manipulation select-none active:scale-95 shadow-lg ${
                 ultimateMeter >= 100 || mode === "sandbox"
                   ? "bg-gradient-to-r from-cyan-400 to-sky-500 text-black shadow-[0_0_20px_rgba(34,211,238,0.6)] animate-bounce"
                   : "bg-neutral-900/80 text-neutral-500 border border-neutral-800 cursor-not-allowed opacity-80"
@@ -2314,7 +2314,7 @@ export const LaserLoon: React.FC = () => {
                   startGame();
                   containerRef.current?.focus({ preventScroll: true });
                 }}
-                className="inline-flex items-center gap-2 px-6 py-2.5 bg-red-500 hover:bg-red-400 text-white font-mono font-bold text-sm rounded-xl shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 min-h-[44px] min-w-[44px] px-6 py-2.5 bg-red-500 hover:bg-red-400 text-white font-mono font-bold text-sm rounded-xl shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-all transform hover:scale-105 active:scale-95 cursor-pointer touch-manipulation select-none"
               >
                 <IconPlayerPlay className="w-4 h-4 fill-current" />
                 <span>START CAMPAIGN [SPACE]</span>
@@ -2322,7 +2322,7 @@ export const LaserLoon: React.FC = () => {
 
               <button
                 onClick={() => setShowMuseum(true)}
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-amber-300 border border-amber-500/30 font-mono font-bold text-sm rounded-xl transition-all cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 min-h-[44px] min-w-[44px] px-4 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-amber-300 border border-amber-500/30 font-mono font-bold text-sm rounded-xl transition-all cursor-pointer touch-manipulation select-none active:scale-95"
               >
                 <IconBook className="w-4 h-4" />
                 <span>FLAG MUSEUM</span>
@@ -2366,7 +2366,7 @@ export const LaserLoon: React.FC = () => {
 
                 <button
                   onClick={() => startAct(currentActNum)}
-                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-red-500 hover:bg-red-400 text-white font-mono font-bold text-xs shadow-lg cursor-pointer transition-all transform hover:scale-105 active:scale-95 ml-auto"
+                  className="inline-flex items-center justify-center gap-2 min-h-[44px] min-w-[44px] px-5 py-2 rounded-xl bg-red-500 hover:bg-red-400 text-white font-mono font-bold text-xs shadow-lg cursor-pointer transition-all transform hover:scale-105 active:scale-95 touch-manipulation select-none ml-auto"
                 >
                   <span>ENGAGE STAGE [SPACE]</span>
                   <IconChevronRight className="w-4 h-4" />
@@ -2411,7 +2411,7 @@ export const LaserLoon: React.FC = () => {
                 setCurrentActNum((prev) => prev + 1);
                 setGameState("act-intro");
               }}
-              className="inline-flex items-center gap-2 px-6 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-neutral-950 font-mono font-bold text-sm rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 min-h-[44px] min-w-[44px] px-6 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-neutral-950 font-mono font-bold text-sm rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all transform hover:scale-105 active:scale-95 cursor-pointer touch-manipulation select-none"
             >
               <span>ADVANCE TO ACT {currentActNum + 1} [SPACE]</span>
               <IconChevronRight className="w-4 h-4" />
@@ -2457,14 +2457,14 @@ export const LaserLoon: React.FC = () => {
                 onClick={() => {
                   startGame();
                 }}
-                className="inline-flex items-center gap-2 px-6 py-2.5 bg-red-500 hover:bg-red-400 text-white font-mono font-bold text-sm rounded-xl shadow-lg cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 min-h-[44px] min-w-[44px] px-6 py-2.5 bg-red-500 hover:bg-red-400 text-white font-mono font-bold text-sm rounded-xl shadow-lg cursor-pointer touch-manipulation select-none active:scale-95"
               >
                 <IconRefresh className="w-4 h-4" />
                 PLAY AGAIN [SPACE]
               </button>
               <button
                 onClick={() => setShowMuseum(true)}
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-neutral-900 text-amber-300 border border-amber-500/30 font-mono font-bold text-sm rounded-xl cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 min-h-[44px] min-w-[44px] px-4 py-2.5 bg-neutral-900 text-amber-300 border border-amber-500/30 font-mono font-bold text-sm rounded-xl cursor-pointer touch-manipulation select-none active:scale-95"
               >
                 <IconBook className="w-4 h-4" />
                 FLAG MUSEUM
@@ -2509,7 +2509,7 @@ export const LaserLoon: React.FC = () => {
                 startGame();
                 containerRef.current?.focus({ preventScroll: true });
               }}
-              className="inline-flex items-center gap-2 px-6 py-2.5 bg-red-500 hover:bg-red-400 text-white font-mono font-bold text-sm rounded-xl shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 min-h-[44px] min-w-[44px] px-6 py-2.5 bg-red-500 hover:bg-red-400 text-white font-mono font-bold text-sm rounded-xl shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-all transform hover:scale-105 active:scale-95 cursor-pointer touch-manipulation select-none"
             >
               <IconRefresh className="w-4 h-4" />
               PLAY AGAIN [SPACE]
@@ -2526,7 +2526,7 @@ export const LaserLoon: React.FC = () => {
               </span>
               <button
                 onClick={() => setGravity(0)}
-                className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold cursor-pointer ${
+                className={`min-h-[44px] min-w-[44px] px-2 py-0.5 rounded text-[10px] font-mono font-bold cursor-pointer touch-manipulation select-none active:scale-95 flex items-center justify-center ${
                   gravity === 0
                     ? "bg-red-400 text-black"
                     : "bg-neutral-800 text-neutral-400"
@@ -2536,7 +2536,7 @@ export const LaserLoon: React.FC = () => {
               </button>
               <button
                 onClick={() => setGravity(0.15)}
-                className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold cursor-pointer ${
+                className={`min-h-[44px] min-w-[44px] px-2 py-0.5 rounded text-[10px] font-mono font-bold cursor-pointer touch-manipulation select-none active:scale-95 flex items-center justify-center ${
                   gravity === 0.15
                     ? "bg-red-400 text-black"
                     : "bg-neutral-800 text-neutral-400"
@@ -2557,7 +2557,7 @@ export const LaserLoon: React.FC = () => {
                     aimPosRef.current.y
                   );
                 }}
-                className="px-3 py-1 bg-sky-950 hover:bg-sky-900 text-sky-300 text-[10px] font-mono font-bold rounded-lg border border-sky-800/60 cursor-pointer"
+                className="min-h-[44px] min-w-[44px] px-3 py-1 bg-sky-950 hover:bg-sky-900 text-sky-300 text-[10px] font-mono font-bold rounded-lg border border-sky-800/60 cursor-pointer touch-manipulation select-none active:scale-95 flex items-center justify-center"
               >
                 🧊 Ice Mortar
               </button>
@@ -2570,7 +2570,7 @@ export const LaserLoon: React.FC = () => {
                     );
                   }
                 }}
-                className="px-3 py-1 bg-neutral-800 hover:bg-neutral-700 text-red-400 text-[10px] font-mono font-bold rounded-lg border border-neutral-700 cursor-pointer"
+                className="min-h-[44px] min-w-[44px] px-3 py-1 bg-neutral-800 hover:bg-neutral-700 text-red-400 text-[10px] font-mono font-bold rounded-lg border border-neutral-700 cursor-pointer touch-manipulation select-none active:scale-95 flex items-center justify-center"
               >
                 + Spawn Rival Flag
               </button>
@@ -2583,7 +2583,7 @@ export const LaserLoon: React.FC = () => {
                     );
                   }
                 }}
-                className="px-3 py-1 bg-red-950 hover:bg-red-900 text-red-300 text-[10px] font-mono font-bold rounded-lg border border-red-800/60 cursor-pointer"
+                className="min-h-[44px] min-w-[44px] px-3 py-1 bg-red-950 hover:bg-red-900 text-red-300 text-[10px] font-mono font-bold rounded-lg border border-red-800/60 cursor-pointer touch-manipulation select-none active:scale-95 flex items-center justify-center"
               >
                 ⚠️ Spawn Boss
               </button>
@@ -2640,7 +2640,7 @@ export const LaserLoon: React.FC = () => {
         <div className="flex items-center gap-4">
           <button
             onClick={() => setSoundEnabled((prev) => !prev)}
-            className="min-h-[44px] px-2 py-1 hover:text-neutral-300 transition-colors cursor-pointer flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none rounded-lg"
+            className="min-h-[44px] min-w-[44px] px-2 py-1 hover:text-neutral-300 transition-colors cursor-pointer flex items-center justify-center gap-1 touch-manipulation select-none active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none rounded-lg"
           >
             {soundEnabled ? (
               <IconVolume className="w-3.5 h-3.5 text-red-400" />
@@ -2651,7 +2651,7 @@ export const LaserLoon: React.FC = () => {
           </button>
           <button
             onClick={() => setScreenShakeEnabled((prev) => !prev)}
-            className="min-h-[44px] px-2 py-1 hover:text-neutral-300 transition-colors cursor-pointer flex items-center focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none rounded-lg"
+            className="min-h-[44px] min-w-[44px] px-2 py-1 hover:text-neutral-300 transition-colors cursor-pointer flex items-center justify-center gap-1 touch-manipulation select-none active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none rounded-lg"
           >
             Screen Shake: {screenShakeEnabled ? "ON" : "OFF"}
           </button>
@@ -2667,7 +2667,7 @@ export const LaserLoon: React.FC = () => {
           >
             <button
               onClick={() => setShowMuseum(false)}
-              className="absolute top-5 right-5 p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-white cursor-pointer"
+              className="absolute top-5 right-5 min-h-[44px] min-w-[44px] flex items-center justify-center p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-white cursor-pointer touch-manipulation select-none active:scale-95"
             >
               <IconX className="w-5 h-5" />
             </button>
@@ -2694,7 +2694,7 @@ export const LaserLoon: React.FC = () => {
                   key={entry.id}
                   onClick={() => setSelectedFlagIndex(idx)}
                   aria-pressed={selectedFlagIndex === idx}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold whitespace-nowrap cursor-pointer transition-all ${
+                  className={`min-h-[44px] min-w-[44px] px-3 py-1.5 rounded-xl text-xs font-mono font-bold whitespace-nowrap cursor-pointer transition-all touch-manipulation select-none active:scale-95 flex items-center justify-center ${
                     selectedFlagIndex === idx
                       ? "bg-red-500 text-white shadow-[0_0_12px_rgba(239,68,68,0.4)]"
                       : "bg-neutral-900 text-neutral-400 hover:text-white border border-neutral-800"
