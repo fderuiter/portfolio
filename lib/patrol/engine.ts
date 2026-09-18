@@ -254,6 +254,13 @@ class PatrolShiftEngineImpl implements PatrolShiftEngine {
       firstScenario?.id ?? null,
       options.initialPhase ?? "INTRO"
     );
+
+    this.getState = this.getState.bind(this);
+    this.subscribe = this.subscribe.bind(this);
+    this.dispatch = this.dispatch.bind(this);
+    this.getLoadedScenario = this.getLoadedScenario.bind(this);
+    this.loadScenario = this.loadScenario.bind(this);
+    this.getEventHistory = this.getEventHistory.bind(this);
   }
 
   getState(): ShiftState {
