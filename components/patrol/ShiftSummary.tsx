@@ -39,6 +39,7 @@ const PLAYFUL_STAT_TILES: {
     | "radioTransmissions"
     | "patientsAssisted"
     | "sledTransports"
+    | "trailsChecked"
     | "hazardsMarked";
   label: string;
   icon: React.ComponentType<{ className?: string }>;
@@ -68,6 +69,12 @@ const PLAYFUL_STAT_TILES: {
     label: "Sled Transports",
     icon: IconRoad,
     iconWrapClass: "bg-amber-400/10 border-amber-400/20 text-amber-400",
+  },
+  {
+    key: "trailsChecked",
+    label: "Trails Checked",
+    icon: IconMountain,
+    iconWrapClass: "bg-teal-400/10 border-teal-400/20 text-teal-400",
   },
   {
     key: "hazardsMarked",
@@ -229,7 +236,7 @@ export const ShiftSummary: React.FC<ShiftSummaryProps> = ({
               data-testid="shift-log-filter"
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="min-h-[36px] px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300 text-[11px] font-mono focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan"
+              className="min-h-[44px] px-2.5 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-mono focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan"
             >
               <option value="all">All categories</option>
               {availableCategories.map((category) => (
@@ -245,7 +252,7 @@ export const ShiftSummary: React.FC<ShiftSummaryProps> = ({
               onClick={() => setIsLogExpanded((prev) => !prev)}
               aria-expanded={isLogExpanded}
               aria-controls="shift-log-list"
-              className="min-h-[36px] min-w-[36px] flex items-center justify-center gap-1 px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 active:scale-[0.98] border border-zinc-800 hover:border-zinc-700 text-zinc-400 hover:text-white text-[11px] font-mono transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan"
+              className="min-h-[44px] min-w-[44px] flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 active:scale-[0.98] border border-zinc-800 hover:border-zinc-700 text-zinc-400 hover:text-white text-xs font-mono transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan"
             >
               {isLogExpanded ? (
                 <IconChevronUp className="w-3.5 h-3.5" />

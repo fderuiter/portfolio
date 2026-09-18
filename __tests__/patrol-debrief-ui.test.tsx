@@ -337,6 +337,9 @@ describe("Patrol Shift — M7 Debrief UI Integration (Issue #753)", () => {
         screen.getByTestId("playful-stat-sledTransports").textContent
       ).toContain("1");
       expect(
+        screen.getByTestId("playful-stat-trailsChecked").textContent
+      ).toContain("2");
+      expect(
         screen.getByTestId("playful-stat-communicationRating").textContent
       ).toMatch(/Clear & Confirmed/i);
     });
@@ -421,7 +424,7 @@ describe("Patrol Shift — M7 Debrief UI Integration (Issue #753)", () => {
       ).toBeDefined();
     });
 
-    it("gives shift control buttons a minimum 44px touch target with tactile feedback", () => {
+    it("gives shift control buttons and log controls a minimum 44px touch target with tactile feedback", () => {
       render(
         <ShiftSummary
           shiftState={buildShiftState()}
@@ -430,11 +433,18 @@ describe("Patrol Shift — M7 Debrief UI Integration (Issue #753)", () => {
         />
       );
 
-      for (const testId of ["clock-out-btn", "start-new-shift-btn"]) {
+      for (const testId of [
+        "clock-out-btn",
+        "start-new-shift-btn",
+        "shift-log-toggle",
+      ]) {
         const button = screen.getByTestId(testId);
         expect(button.className).toMatch(/min-h-\[44px\]/);
         expect(button.className).toMatch(/active:scale-\[0\.98\]/);
       }
+
+      const select = screen.getByTestId("shift-log-filter");
+      expect(select.className).toMatch(/min-h-\[44px\]/);
     });
   });
 });

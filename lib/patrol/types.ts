@@ -302,6 +302,7 @@ export interface ShiftPlayfulStats {
   radioTransmissions: number;
   patientsAssisted: number;
   sledTransports: number;
+  trailsChecked: number;
   hazardsMarked: number;
   pmsChecksPerformed: number;
   reassessmentsLogged: number;
@@ -501,6 +502,7 @@ export interface PatrolShiftEngine {
   getState(): ShiftState;
   dispatch(event: ShiftEngineEvent): void;
   getEventHistory(): PatrolEvent[];
+  getIncidentEvents(scenarioId: string | null | undefined): PatrolEvent[];
   getLoadedScenario(): PatrolScenario | null;
   loadScenario(scenario: PatrolScenario): void;
   subscribe(listener: () => void): () => void;

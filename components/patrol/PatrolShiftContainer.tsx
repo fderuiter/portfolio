@@ -5,11 +5,9 @@ import {
   PATROL_SCENARIOS,
   ALL_PATROL_SCENARIOS,
   createPatrolShiftEngine,
-  generateDebriefReport,
+  collectIncidentEvents,
   evaluateIncidentDebrief,
-  extractOetMetrics,
   type PatrolShiftEngine,
-  type PatrolEvent,
 } from "@/lib/patrol";
 import { useAnnouncer } from "@/hooks/useAnnouncer";
 import {
@@ -29,32 +27,6 @@ import { HandoffPanel } from "./HandoffPanel";
 import { DebriefScreen } from "./DebriefScreen";
 import { ShiftSummary } from "./ShiftSummary";
 import { MedicalDisclaimerBanner } from "./MedicalDisclaimerBanner";
-
-/**
- * Merges the engine's complete event history with the FSM's own
- * `activeEvents` accumulator, scoped to a single incident's `scenarioId` and
- * deduplicated (the two lists overlap for several event kinds, e.g.
- * `HAZARD_ALERT`). Returns events in chronological order.
- */
-function collectIncidentEvents(
-  eventHistory: PatrolEvent[],
-  activeEvents: PatrolEvent[],
-  scenarioId: string | null | undefined
-): PatrolEvent[] {
-  if (!scenarioId) return [];
-  const seen = new Set<string>();
-  const merged: PatrolEvent[] = [];
-
-  for (const event of [...eventHistory, ...activeEvents]) {
-    if (event.scenarioId !== scenarioId) continue;
-    const key = `${String(event.timestamp)}|${event.action ?? event.type ?? ""}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    merged.push(event);
-  }
-
-  return merged;
-}
 
 /**
  * Props for the PatrolShiftContainer component.
@@ -146,11 +118,6 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
     shiftState.incidentsCompleted,
   ]);
 
-  const debriefReport = useMemo(
-    () => generateDebriefReport(currentScenario, shiftState),
-    [currentScenario, shiftState]
-  );
-
   const incidentEvents = useMemo(
     () =>
       collectIncidentEvents(
@@ -158,16 +125,11 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
         shiftState.activeEvents,
         currentScenario?.id
       ),
-    [activeEngine, shiftState, currentScenario]
+    [activeEngine, shiftState.activeEvents, currentScenario]
   );
 
   const incidentDebriefResult = useMemo(
-    () =>
-      evaluateIncidentDebrief(
-        currentScenario?.id ?? "",
-        incidentEvents,
-        extractOetMetrics(incidentEvents)
-      ),
+    () => evaluateIncidentDebrief(currentScenario?.id ?? "", incidentEvents),
     [currentScenario, incidentEvents]
   );
 
@@ -235,7 +197,7 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
       <div className="sr-only" aria-live="polite" aria-atomic="true">
         Current shift phase: {shiftState.phase.replace(/_/g, " ")}. Time
         elapsed: {shiftState.timeElapsedMinutes} minutes. Incidents completed:{" "}
-        {shiftState.incidentsCompleted}. Score: {shiftState.score} percent.
+        {shiftState.incidentsCompleted}.
       </div>
 
       {/* Prominent Medical & Clinical Disclaimer */}
@@ -368,7 +330,6 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
             onReturnToHub={() =>
               activeEngine.dispatch({
                 type: "FINISH_DEBRIEF",
-                payload: { score: debriefReport.score },
               })
             }
             onReplayIncident={() =>

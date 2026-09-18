@@ -38,6 +38,12 @@ Re-exports [checkActionPreconditions](engine/functions/checkActionPreconditions.
 
 ***
 
+### collectIncidentEvents
+
+Re-exports [collectIncidentEvents](engine/functions/collectIncidentEvents.md)
+
+***
+
 ### compileShiftSummary
 
 Re-exports [compileShiftSummary](debrief/functions/compileShiftSummary.md)

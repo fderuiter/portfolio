@@ -4,6 +4,7 @@ import {
   evaluateIncidentDebrief,
   compileShiftSummary,
   derivePlayfulStats,
+  createPatrolShiftEngine,
   DEBRIEF_DIMENSION_ORDER,
   type PatrolEvent,
   type OetMetrics,
@@ -304,7 +305,10 @@ describe("Patrol Shift — M7 Contextual Debrief Engine (Issue #753)", () => {
         expect(dimensionScore.score).toBe(5);
         expect(dimensionScore.rating).toBe("developing");
       }
-      expect(result.observations).toEqual([]);
+      expect(result.observations.length).toBeGreaterThan(0);
+      expect(result.observations[0].headline).toBe(
+        "Baseline Protocols Maintained"
+      );
       expect(result.oetSummary).toBeUndefined();
     });
 
@@ -490,6 +494,7 @@ describe("Patrol Shift — M7 Contextual Debrief Engine (Issue #753)", () => {
       expect(stats.radioTransmissions).toBe(1);
       expect(stats.patientsAssisted).toBe(2);
       expect(stats.sledTransports).toBe(1);
+      expect(stats.trailsChecked).toBe(2);
       expect(stats.hazardsMarked).toBe(3);
       expect(stats.pmsChecksPerformed).toBe(2);
       expect(stats.reassessmentsLogged).toBe(1);
@@ -519,6 +524,65 @@ describe("Patrol Shift — M7 Contextual Debrief Engine (Issue #753)", () => {
       ]);
       expect(summary.playfulStats).toEqual(stats);
       expect(summary.chronologicalHighlights.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("7. Incident replay isolation (engine event history)", () => {
+    it("purges prior events for replayed scenario to provide a clean debrief slate", () => {
+      const engine = createPatrolShiftEngine();
+      engine.dispatch({ type: "START_SHIFT" });
+      engine.dispatch({ type: "COMPLETE_BRIEFING" });
+
+      const scenarioId = "wrist-injury";
+      engine.dispatch({ type: "RECEIVE_DISPATCH", scenarioId });
+      engine.dispatch({ type: "ACCEPT_DISPATCH" });
+      engine.dispatch({ type: "ARRIVE_ON_SCENE" });
+
+      // Run 1: log an error action (hazard_alert)
+      engine.dispatch({
+        type: "PUSH_EVENT",
+        event: {
+          id: "hazard-1",
+          timestamp: 100,
+          scenarioId,
+          action: "hazard_alert",
+          title: "Near-Miss",
+          description: "Safety compromised",
+        },
+      });
+
+      // Move to debrief
+      engine.dispatch({ type: "COMPLETE_SCENE" });
+      engine.dispatch({ type: "BEGIN_TRANSPORT" });
+      engine.dispatch({ type: "ARRIVE_AT_BASE" });
+      engine.dispatch({ type: "COMPLETE_HANDOFF" });
+
+      expect(engine.getState().phase).toBe("DEBRIEF");
+      const debrief1 = evaluateIncidentDebrief(
+        scenarioId,
+        engine.getIncidentEvents(scenarioId)
+      );
+      // Run 1 should have negative scene safety impact
+      expect(
+        debrief1.observations.some(
+          (o) => o.relatedEventAction === "hazard_alert"
+        )
+      ).toBe(true);
+
+      // Replay the incident
+      engine.dispatch({ type: "REPLAY_INCIDENT" });
+      expect(engine.getState().phase).toBe("SCENE");
+
+      // Event history for this scenario should be purged of prior run errors
+      const debriefAfterReplay = evaluateIncidentDebrief(
+        scenarioId,
+        engine.getIncidentEvents(scenarioId)
+      );
+      expect(
+        debriefAfterReplay.observations.some(
+          (o) => o.relatedEventAction === "hazard_alert"
+        )
+      ).toBe(false);
     });
   });
 });

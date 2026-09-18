@@ -612,8 +612,9 @@ export function evaluateIncidentDebrief(
   const orderedEvents = (Array.isArray(events) ? [...events] : []).sort(
     (a, b) => toTimestamp(a) - toTimestamp(b)
   );
-  const normalizedOetMetrics = oetMetrics
-    ? normalizeOetMetrics(oetMetrics)
+  const effectiveOetMetrics = oetMetrics ?? extractOetMetrics(orderedEvents);
+  const normalizedOetMetrics = effectiveOetMetrics
+    ? normalizeOetMetrics(effectiveOetMetrics)
     : undefined;
   const ctx: RuleContext = {
     events: orderedEvents,
@@ -636,6 +637,17 @@ export function evaluateIncidentDebrief(
         });
       }
     }
+  }
+
+  if (observations.length === 0) {
+    observations.push({
+      id: `obs-${scenarioId || "incident"}-baseline`,
+      dimension: "operationalJudgment",
+      sentiment: "positive",
+      headline: "Baseline Protocols Maintained",
+      detail:
+        "Standard operational protocols were maintained throughout this incident.",
+    });
   }
 
   const dimensions = buildDimensionScores(deltas);
@@ -751,6 +763,15 @@ export function derivePlayfulStats(events: PatrolEvent[]): ShiftPlayfulStats {
     (e) => actionIdOf(e) === "oet_transport_completed"
   ).length;
 
+  const checkedTrails = new Set<string>();
+  for (const event of safeEvents) {
+    if (event.scenarioId && event.scenarioId !== "hub") {
+      checkedTrails.add(String(event.context?.location ?? event.scenarioId));
+    } else if (event.context?.trail || event.context?.location) {
+      checkedTrails.add(String(event.context.trail ?? event.context.location));
+    }
+  }
+
   const hazardsMarked = safeEvents.filter(
     (e) => isSceneSafetyEstablishedEvent(e) || isCrowdManagementEvent(e)
   ).length;
@@ -773,6 +794,7 @@ export function derivePlayfulStats(events: PatrolEvent[]): ShiftPlayfulStats {
     radioTransmissions,
     patientsAssisted: patientScenarioIds.size,
     sledTransports,
+    trailsChecked: checkedTrails.size,
     hazardsMarked,
     pmsChecksPerformed,
     reassessmentsLogged,

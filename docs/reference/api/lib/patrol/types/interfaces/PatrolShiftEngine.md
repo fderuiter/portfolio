@@ -34,6 +34,22 @@
 
 ***
 
+### getIncidentEvents()
+
+> **getIncidentEvents**(`scenarioId`): [`PatrolEvent`](PatrolEvent.md)[]
+
+#### Parameters
+
+##### scenarioId
+
+`string` \| `null` \| `undefined`
+
+#### Returns
+
+[`PatrolEvent`](PatrolEvent.md)[]
+
+***
+
 ### getLoadedScenario()
 
 > **getLoadedScenario**(): [`PatrolScenario`](PatrolScenario.md) \| `null`

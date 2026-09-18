@@ -65,7 +65,7 @@ export const DebriefDimensionMeter: React.FC<DebriefDimensionMeterProps> = ({
       data-testid={`dimension-meter-${dimension}`}
     >
       <div className="flex items-center justify-between text-xs font-mono gap-2">
-        <span className="text-zinc-300 font-bold truncate">
+        <span className="text-zinc-300 font-bold truncate min-w-0">
           {dimensionScore.label}
         </span>
         <span className={`font-bold shrink-0 ${styles.text}`}>

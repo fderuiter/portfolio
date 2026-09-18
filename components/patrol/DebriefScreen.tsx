@@ -29,31 +29,31 @@ interface DebriefScreenProps {
   onReplayIncident?: () => void;
 }
 
-const SENTIMENT_ICON: Record<
-  IncidentDebriefResult["observations"][number]["sentiment"],
-  React.ComponentType<{ className?: string }>
-> = {
-  positive: IconCheck,
-  caution: IconInfoCircle,
-  constructive: IconAlertTriangle,
-};
+interface SentimentConfig {
+  icon: React.ComponentType<{ className?: string }>;
+  containerClass: string;
+  iconColorClass: string;
+}
 
-const SENTIMENT_STYLES: Record<
+const SENTIMENT_CONFIG: Record<
   IncidentDebriefResult["observations"][number]["sentiment"],
-  string
+  SentimentConfig
 > = {
-  positive: "border-emerald-500/30 bg-emerald-500/5",
-  caution: "border-amber-500/30 bg-amber-500/5",
-  constructive: "border-red-500/30 bg-red-500/5",
-};
-
-const SENTIMENT_ICON_COLOR: Record<
-  IncidentDebriefResult["observations"][number]["sentiment"],
-  string
-> = {
-  positive: "text-emerald-400",
-  caution: "text-amber-400",
-  constructive: "text-red-400",
+  positive: {
+    icon: IconCheck,
+    containerClass: "border-emerald-500/30 bg-emerald-500/5",
+    iconColorClass: "text-emerald-400",
+  },
+  caution: {
+    icon: IconInfoCircle,
+    containerClass: "border-amber-500/30 bg-amber-500/5",
+    iconColorClass: "text-amber-400",
+  },
+  constructive: {
+    icon: IconAlertTriangle,
+    containerClass: "border-red-500/30 bg-red-500/5",
+    iconColorClass: "text-red-400",
+  },
 };
 
 /**
@@ -83,11 +83,11 @@ export const DebriefScreen: React.FC<DebriefScreenProps> = ({
       {/* Debrief Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-zinc-800/80">
         <div className="space-y-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full bg-brand-cyan/20 border border-brand-cyan/40 text-brand-cyan text-[10px] font-mono font-bold uppercase tracking-wider">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="px-2.5 py-0.5 rounded-full bg-brand-cyan/20 border border-brand-cyan/40 text-brand-cyan text-[10px] font-mono font-bold uppercase tracking-wider shrink-0">
               Contextual Incident Debrief
             </span>
-            <span className="text-zinc-400 text-xs font-mono truncate">
+            <span className="text-zinc-400 text-xs font-mono truncate min-w-0">
               {scenario?.title ?? "Routine Incident"}
             </span>
           </div>
@@ -122,22 +122,23 @@ export const DebriefScreen: React.FC<DebriefScreenProps> = ({
       </div>
 
       {/* Qualitative Observations */}
-      {highlightedObservations.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-400">
-            Field Observations
-          </h3>
-          <div className="space-y-2.5" data-testid="debrief-observations">
-            {highlightedObservations.map((observation) => {
-              const Icon = SENTIMENT_ICON[observation.sentiment];
+      <div className="space-y-3">
+        <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-400">
+          Field Observations
+        </h3>
+        <div className="space-y-2.5" data-testid="debrief-observations">
+          {highlightedObservations.length > 0 ? (
+            highlightedObservations.map((observation) => {
+              const config = SENTIMENT_CONFIG[observation.sentiment];
+              const Icon = config.icon;
               return (
                 <div
                   key={observation.id}
                   data-testid={`observation-${observation.id}`}
-                  className={`p-3.5 rounded-xl border flex items-start gap-3 text-xs font-mono ${SENTIMENT_STYLES[observation.sentiment]}`}
+                  className={`p-3.5 rounded-xl border flex items-start gap-3 text-xs font-mono ${config.containerClass}`}
                 >
                   <Icon
-                    className={`w-4 h-4 shrink-0 mt-0.5 ${SENTIMENT_ICON_COLOR[observation.sentiment]}`}
+                    className={`w-4 h-4 shrink-0 mt-0.5 ${config.iconColorClass}`}
                   />
                   <div className="space-y-1 min-w-0">
                     <p className="font-bold text-zinc-100">
@@ -149,10 +150,26 @@ export const DebriefScreen: React.FC<DebriefScreenProps> = ({
                   </div>
                 </div>
               );
-            })}
-          </div>
+            })
+          ) : (
+            <div
+              data-testid="observation-fallback"
+              className="p-3.5 rounded-xl border border-zinc-800 bg-zinc-950/60 flex items-start gap-3 text-xs font-mono text-zinc-400"
+            >
+              <IconInfoCircle className="w-4 h-4 shrink-0 mt-0.5 text-zinc-500" />
+              <div className="space-y-1 min-w-0">
+                <p className="font-bold text-zinc-200">
+                  Standard Operational Baseline
+                </p>
+                <p className="text-[11px] font-sans text-zinc-400 leading-relaxed">
+                  No critical deviations recorded. Standard patrol procedures
+                  were maintained.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       {/* OET Descent Telemetry Pill */}
       {result.oetSummary && (
