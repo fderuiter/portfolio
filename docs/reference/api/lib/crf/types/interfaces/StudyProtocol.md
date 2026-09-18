@@ -116,6 +116,16 @@
 
 ***
 
+### testScenarios?
+
+> `optional` **testScenarios?**: [`TestScenario`](TestScenario.md)[]
+
+Named test scenarios and their last-run evidence (#677). Carried on the
+study document rather than in browser storage so they survive native
+export and reopen alongside everything else the study holds.
+
+***
+
 ### therapeuticArea
 
 > **therapeuticArea**: `string`

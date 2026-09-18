@@ -236,6 +236,12 @@ Re-exports [CalculationOutcome](form-test-harness/interfaces/CalculationOutcome.
 
 ***
 
+### CalculationStatus
+
+Re-exports [CalculationStatus](types/type-aliases/CalculationStatus.md)
+
+***
+
 ### captureLibraryEntry
 
 Re-exports [captureLibraryEntry](personal-library/functions/captureLibraryEntry.md)
@@ -446,6 +452,12 @@ Re-exports [ConditionResult](types/type-aliases/ConditionResult.md)
 
 ***
 
+### createScenario
+
+Re-exports [createScenario](test-scenarios/functions/createScenario.md)
+
+***
+
 ### CRFField
 
 Re-exports [CRFField](types/interfaces/CRFField.md)
@@ -527,6 +539,12 @@ Re-exports [describeBaselineDiffChangeType](study-baseline-diff/functions/descri
 ### describeCondition
 
 Re-exports [describeCondition](expression-evaluator/functions/describeCondition.md)
+
+***
+
+### describeExpectationResult
+
+Re-exports [describeExpectationResult](test-scenarios/functions/describeExpectationResult.md)
 
 ***
 
@@ -746,6 +764,12 @@ Re-exports [ExpandedRField](export-r/interfaces/ExpandedRField.md)
 
 ***
 
+### ExpectationResult
+
+Re-exports [ExpectationResult](test-scenarios/type-aliases/ExpectationResult.md)
+
+***
+
 ### explainCalculationDerivation
 
 Re-exports [explainCalculationDerivation](expression-evaluator/functions/explainCalculationDerivation.md)
@@ -887,6 +911,12 @@ Re-exports [FieldReferenceLocation](study-engine/interfaces/FieldReferenceLocati
 ### fillSampleValues
 
 Re-exports [fillSampleValues](form-test-harness/functions/fillSampleValues.md)
+
+***
+
+### fingerprintForm
+
+Re-exports [fingerprintForm](test-scenarios/functions/fingerprintForm.md)
 
 ***
 
@@ -1088,6 +1118,18 @@ Re-exports [getSasFormatName](export-sas/functions/getSasFormatName.md)
 
 ***
 
+### getScenariosForForm
+
+Re-exports [getScenariosForForm](test-scenarios/functions/getScenariosForForm.md)
+
+***
+
+### getScenarioStanding
+
+Re-exports [getScenarioStanding](test-scenarios/functions/getScenarioStanding.md)
+
+***
+
 ### getScopedValue
 
 Re-exports [getScopedValue](form-test-harness/functions/getScopedValue.md)
@@ -1220,6 +1262,12 @@ Re-exports [isDraftDirty](study-draft-storage/functions/isDraftDirty.md)
 
 ***
 
+### isEvidenceStale
+
+Re-exports [isEvidenceStale](test-scenarios/functions/isEvidenceStale.md)
+
+***
+
 ### isFutureDate
 
 Re-exports [isFutureDate](precision-date/functions/isFutureDate.md)
@@ -1283,6 +1331,12 @@ Re-exports [lintFormula](formula-linter/functions/lintFormula.md)
 ### listLibraryEntries
 
 Re-exports [listLibraryEntries](personal-library/functions/listLibraryEntries.md)
+
+***
+
+### listScenarios
+
+Re-exports [listScenarios](test-scenarios/functions/listScenarios.md)
 
 ***
 
@@ -1430,6 +1484,12 @@ Re-exports [previewLibraryInsertion](personal-library/functions/previewLibraryIn
 
 ***
 
+### projectScenarioInputs
+
+Re-exports [projectScenarioInputs](test-scenarios/functions/projectScenarioInputs.md)
+
+***
+
 ### projectScopedValues
 
 Re-exports [projectScopedValues](form-test-harness/functions/projectScopedValues.md)
@@ -1445,6 +1505,18 @@ Re-exports [ProtocolDiffSummary](universal-schema/interfaces/ProtocolDiffSummary
 ### ProtocolValidationResult
 
 Re-exports [ProtocolValidationResult](study-engine/interfaces/ProtocolValidationResult.md)
+
+***
+
+### removeScenario
+
+Re-exports [removeScenario](test-scenarios/functions/removeScenario.md)
+
+***
+
+### resetScenarioEvidence
+
+Re-exports [resetScenarioEvidence](test-scenarios/functions/resetScenarioEvidence.md)
 
 ***
 
@@ -1520,6 +1592,18 @@ Re-exports [runFormTest](form-test-harness/functions/runFormTest.md)
 
 ***
 
+### runScenario
+
+Re-exports [runScenario](test-scenarios/functions/runScenario.md)
+
+***
+
+### runScenariosForForm
+
+Re-exports [runScenariosForForm](test-scenarios/functions/runScenariosForForm.md)
+
+***
+
 ### sanitizeRName
 
 Re-exports [sanitizeRName](export-r/functions/sanitizeRName.md)
@@ -1589,6 +1673,42 @@ Re-exports [SaveStudySnapshotResult](study-draft-storage/type-aliases/SaveStudyS
 ### scaffoldCdashDomain
 
 Re-exports [scaffoldCdashDomain](cdash-domain-templates/functions/scaffoldCdashDomain.md)
+
+***
+
+### ScenarioExpectation
+
+Re-exports [ScenarioExpectation](types/type-aliases/ScenarioExpectation.md)
+
+***
+
+### ScenarioExpectationResult
+
+Re-exports [ScenarioExpectationResult](types/interfaces/ScenarioExpectationResult.md)
+
+***
+
+### ScenarioExpectationSchema
+
+Re-exports [ScenarioExpectationSchema](universal-schema/variables/ScenarioExpectationSchema.md)
+
+***
+
+### ScenarioRunEvidence
+
+Re-exports [ScenarioRunEvidence](types/interfaces/ScenarioRunEvidence.md)
+
+***
+
+### ScenarioRunEvidenceSchema
+
+Re-exports [ScenarioRunEvidenceSchema](universal-schema/variables/ScenarioRunEvidenceSchema.md)
+
+***
+
+### ScenarioStanding
+
+Re-exports [ScenarioStanding](test-scenarios/type-aliases/ScenarioStanding.md)
 
 ***
 
@@ -1868,6 +1988,18 @@ Re-exports [TABLE_WIDTH_DXA](export-docx/variables/TABLE_WIDTH_DXA.md)
 
 ***
 
+### TestScenario
+
+Re-exports [TestScenario](types/interfaces/TestScenario.md)
+
+***
+
+### TestScenarioSchema
+
+Re-exports [TestScenarioSchema](universal-schema/variables/TestScenarioSchema.md)
+
+***
+
 ### TOC\_COL\_WIDTH\_1
 
 Re-exports [TOC_COL_WIDTH_1](export-docx/variables/TOC_COL_WIDTH_1.md)
@@ -2078,15 +2210,33 @@ Re-exports [UniversalStudyProtocolSchema](universal-schema/variables/UniversalSt
 
 ***
 
+### UniversalTestScenario
+
+Re-exports [UniversalTestScenario](universal-schema/type-aliases/UniversalTestScenario.md)
+
+***
+
 ### updateLibraryEntry
 
 Re-exports [updateLibraryEntry](personal-library/functions/updateLibraryEntry.md)
 
 ***
 
+### updateScenario
+
+Re-exports [updateScenario](test-scenarios/functions/updateScenario.md)
+
+***
+
 ### upsertLibraryEntry
 
 Re-exports [upsertLibraryEntry](personal-library/functions/upsertLibraryEntry.md)
+
+***
+
+### upsertScenario
+
+Re-exports [upsertScenario](test-scenarios/functions/upsertScenario.md)
 
 ***
 

@@ -12,6 +12,7 @@ export * from "./form-linter";
 export * from "./ast-evaluator";
 export * from "./conditional-logic";
 export * from "./form-test-harness";
+export * from "./test-scenarios";
 export * from "./cdisc-controlled-terminology";
 export * from "./cdash-domain-templates";
 export * from "./cdisc-cdash-library";
