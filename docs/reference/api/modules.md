@@ -79,6 +79,7 @@
 - [lib/crf/formula-linter](lib/crf/formula-linter/README.md)
 - [lib/crf/formula-presets](lib/crf/formula-presets/README.md)
 - [lib/crf/odm-xml-serializer](lib/crf/odm-xml-serializer/README.md)
+- [lib/crf/personal-library](lib/crf/personal-library/README.md)
 - [lib/crf/precision-date](lib/crf/precision-date/README.md)
 - [lib/crf/presets](lib/crf/presets/README.md)
 - [lib/crf/presets](lib/crf/presets/README-1.md)

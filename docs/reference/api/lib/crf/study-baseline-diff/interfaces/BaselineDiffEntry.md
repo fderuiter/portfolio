@@ -70,7 +70,7 @@ Stable identity of the changed object (or a synthetic key for scalar metadata).
 
 ### navigationMode?
 
-> `optional` **navigationMode?**: `"designer"` \| `"rules"` \| `"matrix"`
+> `optional` **navigationMode?**: `"rules"` \| `"designer"` \| `"matrix"`
 
 ***
 
