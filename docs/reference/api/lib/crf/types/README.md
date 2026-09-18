@@ -27,6 +27,8 @@
 - [ExportPdfOptions](interfaces/ExportPdfOptions.md)
 - [ExportROptions](interfaces/ExportROptions.md)
 - [ExportSasOptions](interfaces/ExportSasOptions.md)
+- [ScenarioExpectationResult](interfaces/ScenarioExpectationResult.md)
+- [ScenarioRunEvidence](interfaces/ScenarioRunEvidence.md)
 - [StudyArm](interfaces/StudyArm.md)
 - [StudyBaseline](interfaces/StudyBaseline.md)
 - [StudyBaselineActor](interfaces/StudyBaselineActor.md)
@@ -37,13 +39,16 @@
 - [StudyProvenance](interfaces/StudyProvenance.md)
 - [StudyVisit](interfaces/StudyVisit.md)
 - [SubjectFormStatus](interfaces/SubjectFormStatus.md)
+- [TestScenario](interfaces/TestScenario.md)
 
 ## Type Aliases
 
 - [AstOperator](type-aliases/AstOperator.md)
+- [CalculationStatus](type-aliases/CalculationStatus.md)
 - [ClinicalDataType](type-aliases/ClinicalDataType.md)
 - [ComplianceSeverity](type-aliases/ComplianceSeverity.md)
 - [ConditionResult](type-aliases/ConditionResult.md)
 - [DeviceViewport](type-aliases/DeviceViewport.md)
+- [ScenarioExpectation](type-aliases/ScenarioExpectation.md)
 - [StudioMode](type-aliases/StudioMode.md)
 - [StudioTheme](type-aliases/StudioTheme.md)

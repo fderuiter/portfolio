@@ -31,6 +31,7 @@
 - [UniversalStudyCohort](type-aliases/UniversalStudyCohort.md)
 - [UniversalStudyEpoch](type-aliases/UniversalStudyEpoch.md)
 - [UniversalStudyProtocol](type-aliases/UniversalStudyProtocol.md)
+- [UniversalTestScenario](type-aliases/UniversalTestScenario.md)
 
 ## Variables
 
@@ -42,9 +43,12 @@
 - [CodelistDefinitionSchema](variables/CodelistDefinitionSchema.md)
 - [CodelistOptionSchema](variables/CodelistOptionSchema.md)
 - [EditCheckRuleSchema](variables/EditCheckRuleSchema.md)
+- [ScenarioExpectationSchema](variables/ScenarioExpectationSchema.md)
+- [ScenarioRunEvidenceSchema](variables/ScenarioRunEvidenceSchema.md)
 - [StudyArmSchema](variables/StudyArmSchema.md)
 - [StudyCohortSchema](variables/StudyCohortSchema.md)
 - [StudyEpochSchema](variables/StudyEpochSchema.md)
+- [TestScenarioSchema](variables/TestScenarioSchema.md)
 - [UniversalClinicalDataTypeSchema](variables/UniversalClinicalDataTypeSchema.md)
 - [UniversalCrfBrandingSchema](variables/UniversalCrfBrandingSchema.md)
 - [UniversalCrfFieldSchema](variables/UniversalCrfFieldSchema.md)

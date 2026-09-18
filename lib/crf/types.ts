@@ -324,6 +324,67 @@ export interface StudyProtocol {
   cohorts?: StudyCohort[];
   biomedicalConcepts?: BiomedicalConcept[];
   provenance?: StudyProvenance;
+  /**
+   * Named test scenarios and their last-run evidence (#677). Carried on the
+   * study document rather than in browser storage so they survive native
+   * export and reopen alongside everything else the study holds.
+   */
+  testScenarios?: TestScenario[];
+}
+
+/** Calculation outcomes a scenario can assert on. */
+export type CalculationStatus =
+  | "success"
+  | "missing_inputs"
+  | "division_by_zero"
+  | "invalid_unit"
+  | "cyclic_dependency"
+  | "syntax_error";
+
+/**
+ * Declared here rather than in the scenario engine so `types.ts` remains the
+ * single public contract for the study document, with no runtime import and
+ * therefore no cycle between the contract and the engine that operates on it.
+ */
+export interface TestScenario {
+  id: string;
+  name: string;
+  description?: string;
+  formId: string;
+  scope: { subjectId: string; visitId: string };
+  inputs: Record<string, string | number | boolean | null>;
+  expectations: ScenarioExpectation[];
+  lastRun?: ScenarioRunEvidence;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type ScenarioExpectation =
+  | { kind: "field_visible"; fieldId: string; expected: boolean }
+  | { kind: "field_required"; fieldId: string; expected: boolean }
+  | {
+      kind: "calculation";
+      fieldId: string;
+      expectedStatus: CalculationStatus;
+      expectedValue?: number | null;
+    }
+  | { kind: "rule_result"; ruleId: string; expected: ConditionResult };
+
+export interface ScenarioExpectationResult {
+  expectation: ScenarioExpectation;
+  satisfied: boolean;
+  expectedLabel: string;
+  actualLabel: string;
+  subjectId: string;
+  subjectKind: "field" | "rule";
+}
+
+export interface ScenarioRunEvidence {
+  ranAt: string;
+  formFingerprint: string;
+  results: ScenarioExpectationResult[];
+  passed: number;
+  failed: number;
 }
 
 export interface EDCQuery {

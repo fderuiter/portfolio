@@ -97,6 +97,7 @@
 - [lib/crf/study-baselines](lib/crf/study-baselines/README.md)
 - [lib/crf/study-draft-storage](lib/crf/study-draft-storage/README.md)
 - [lib/crf/study-engine](lib/crf/study-engine/README.md)
+- [lib/crf/test-scenarios](lib/crf/test-scenarios/README.md)
 - [lib/crf/types](lib/crf/types/README.md)
 - [lib/crf/universal-schema](lib/crf/universal-schema/README.md)
 - [lib/crf/usdm-adapter](lib/crf/usdm-adapter/README.md)

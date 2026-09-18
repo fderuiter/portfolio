@@ -29,7 +29,9 @@ export const UniversalClinicalDataTypeSchema = z.enum([
   "repeating_table",
   "signature",
 ]);
-export type UniversalClinicalDataType = z.infer<typeof UniversalClinicalDataTypeSchema>;
+export type UniversalClinicalDataType = z.infer<
+  typeof UniversalClinicalDataTypeSchema
+>;
 
 // 2. Codelists & Controlled Terminology
 export const CodelistOptionSchema = z.object({
@@ -59,13 +61,26 @@ export const CdashVariableMetadataSchema = z.object({
   acrfAnnotation: z.string().min(1),
   dataCategory: z.string().optional(),
 });
-export type UniversalCdashMetadata = z.infer<typeof CdashVariableMetadataSchema>;
+export type UniversalCdashMetadata = z.infer<
+  typeof CdashVariableMetadataSchema
+>;
 
 // 4. AST Conditions & Logic Rules
 export const AstConditionSchema = z.object({
   fieldId: z.string().min(1),
   crossVisitId: z.string().optional(),
-  operator: z.enum(["eq", "neq", "gt", "gte", "lt", "lte", "in", "contains", "is_empty", "is_not_empty"]),
+  operator: z.enum([
+    "eq",
+    "neq",
+    "gt",
+    "gte",
+    "lt",
+    "lte",
+    "in",
+    "contains",
+    "is_empty",
+    "is_not_empty",
+  ]),
   value: z.union([z.string(), z.number(), z.boolean(), z.array(z.string())]),
 });
 export type UniversalAstCondition = z.infer<typeof AstConditionSchema>;
@@ -75,7 +90,13 @@ export const EditCheckRuleSchema = z.object({
   name: z.string().min(1),
   description: z.string().default(""),
   triggerFieldIds: z.array(z.string()).min(1),
-  actionType: z.enum(["show_field", "hide_field", "require_field", "raise_query", "set_value"]),
+  actionType: z.enum([
+    "show_field",
+    "hide_field",
+    "require_field",
+    "raise_query",
+    "set_value",
+  ]),
   targetFieldId: z.string().min(1),
   conditions: z.array(AstConditionSchema).min(1),
   logicalOperator: z.enum(["AND", "OR"]).default("AND"),
@@ -119,7 +140,9 @@ export const BiomedicalConceptPropertySchema = z.object({
   code: z.string().optional(),
   datatype: z.string().optional(),
 });
-export type UniversalBiomedicalConceptProperty = z.infer<typeof BiomedicalConceptPropertySchema>;
+export type UniversalBiomedicalConceptProperty = z.infer<
+  typeof BiomedicalConceptPropertySchema
+>;
 
 export const BiomedicalConceptSchema = z.object({
   id: z.string().min(1),
@@ -128,13 +151,20 @@ export const BiomedicalConceptSchema = z.object({
   code: z.string().optional(),
   domain: z.string().optional(),
   synonyms: z.array(z.string()).optional(),
-  properties: z.union([z.array(BiomedicalConceptPropertySchema), z.record(z.string(), z.unknown())]).optional(),
+  properties: z
+    .union([
+      z.array(BiomedicalConceptPropertySchema),
+      z.record(z.string(), z.unknown()),
+    ])
+    .optional(),
   variableName: z.string().optional(),
   dataType: z.string().optional(),
   label: z.string().optional(),
   unit: z.string().optional(),
 });
-export type UniversalBiomedicalConcept = z.infer<typeof BiomedicalConceptSchema>;
+export type UniversalBiomedicalConcept = z.infer<
+  typeof BiomedicalConceptSchema
+>;
 
 // 6. Recursive CRF Field Schema
 export const BaseCRFFieldSchema = z.object({
@@ -175,9 +205,10 @@ export type UniversalCrfField = z.infer<typeof BaseCRFFieldSchema> & {
   repeatingColumns?: UniversalCrfField[];
 };
 
-export const UniversalCrfFieldSchema: z.ZodType<UniversalCrfField> = BaseCRFFieldSchema.extend({
-  repeatingColumns: z.lazy(() => z.array(UniversalCrfFieldSchema).optional()),
-});
+export const UniversalCrfFieldSchema: z.ZodType<UniversalCrfField> =
+  BaseCRFFieldSchema.extend({
+    repeatingColumns: z.lazy(() => z.array(UniversalCrfFieldSchema).optional()),
+  });
 
 // 6. Section & Form Schema
 export const UniversalCrfSectionSchema = z.object({
@@ -210,7 +241,9 @@ export const UniversalCrfVisitSchema = z.object({
   id: z.string().min(1),
   oid: z.string().optional(),
   name: z.string().min(1),
-  visitType: z.enum(["Scheduled", "Unscheduled", "Common"]).default("Scheduled"),
+  visitType: z
+    .enum(["Scheduled", "Unscheduled", "Common"])
+    .default("Scheduled"),
   targetDay: z.number().default(0),
   timepointDays: z.number().optional(),
   windowBefore: z.number().default(0),
@@ -242,6 +275,79 @@ export const UniversalCrfBrandingSchema = z.object({
 });
 export type UniversalCrfBranding = z.infer<typeof UniversalCrfBrandingSchema>;
 
+// 8b. Named Test Scenarios (#677)
+export const ScenarioExpectationSchema = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.literal("field_visible"),
+    fieldId: z.string().min(1),
+    expected: z.boolean(),
+  }),
+  z.object({
+    kind: z.literal("field_required"),
+    fieldId: z.string().min(1),
+    expected: z.boolean(),
+  }),
+  z.object({
+    kind: z.literal("calculation"),
+    fieldId: z.string().min(1),
+    expectedStatus: z.enum([
+      "success",
+      "missing_inputs",
+      "division_by_zero",
+      "invalid_unit",
+      "cyclic_dependency",
+      "syntax_error",
+    ]),
+    expectedValue: z.number().nullable().optional(),
+  }),
+  z.object({
+    kind: z.literal("rule_result"),
+    ruleId: z.string().min(1),
+    expected: z.enum(["true", "false", "missing", "incompatible"]),
+  }),
+]);
+
+export const ScenarioRunEvidenceSchema = z.object({
+  ranAt: z.string(),
+  formFingerprint: z.string(),
+  results: z
+    .array(
+      z.object({
+        expectation: ScenarioExpectationSchema,
+        satisfied: z.boolean(),
+        expectedLabel: z.string(),
+        actualLabel: z.string(),
+        subjectId: z.string(),
+        subjectKind: z.enum(["field", "rule"]),
+      })
+    )
+    .default([]),
+  passed: z.number().default(0),
+  failed: z.number().default(0),
+});
+
+export const TestScenarioSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  description: z.string().optional(),
+  formId: z.string().min(1),
+  scope: z.object({
+    subjectId: z.string().min(1),
+    visitId: z.string().min(1),
+  }),
+  inputs: z
+    .record(
+      z.string(),
+      z.union([z.string(), z.number(), z.boolean(), z.null()])
+    )
+    .default({}),
+  expectations: z.array(ScenarioExpectationSchema).default([]),
+  lastRun: ScenarioRunEvidenceSchema.optional(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export type UniversalTestScenario = z.infer<typeof TestScenarioSchema>;
+
 // 9. Root Universal Study Protocol Schema
 export const UniversalCrfProtocolSchema = z.object({
   $schema: z.string().optional(),
@@ -265,6 +371,7 @@ export const UniversalCrfProtocolSchema = z.object({
   epochs: z.array(StudyEpochSchema).default([]),
   cohorts: z.array(StudyCohortSchema).default([]),
   biomedicalConcepts: z.array(BiomedicalConceptSchema).default([]),
+  testScenarios: z.array(TestScenarioSchema).default([]),
 });
 export type UniversalCrfProtocol = z.infer<typeof UniversalCrfProtocolSchema>;
 export const UniversalStudyProtocolSchema = UniversalCrfProtocolSchema;
@@ -281,7 +388,9 @@ export interface UniversalCrfValidationResult {
 /**
  * Validates any JSON object against the Universal CRF Protocol specification.
  */
-export function validateUniversalCrf(data: unknown): UniversalCrfValidationResult {
+export function validateUniversalCrf(
+  data: unknown
+): UniversalCrfValidationResult {
   const result = UniversalCrfProtocolSchema.safeParse(data);
   if (result.success) {
     return {
@@ -321,9 +430,13 @@ export function parseUniversalCrf(raw: string | object): StudyProtocol {
 /**
  * Serializes a StudyProtocol to Universal CRF JSON string.
  */
-export function exportUniversalCrfJson(study: StudyProtocol, pretty = true): string {
+export function exportUniversalCrfJson(
+  study: StudyProtocol,
+  pretty = true
+): string {
   const payload = {
-    $schema: "https://www.deruiter.dev/schemas/crf/v1/universal-crf.schema.json",
+    $schema:
+      "https://www.deruiter.dev/schemas/crf/v1/universal-crf.schema.json",
     schemaVersion: "1.0.0",
     ...study,
     lastModified: study.lastModified || new Date().toISOString(),
@@ -341,7 +454,9 @@ export function exportUniversalCrfYaml(study: StudyProtocol): string {
       return undefined;
     }
     if (Array.isArray(obj)) {
-      return obj.map((item) => cleanUndefined(item)).filter((item) => item !== undefined);
+      return obj
+        .map((item) => cleanUndefined(item))
+        .filter((item) => item !== undefined);
     }
     if (typeof obj === "object") {
       const cleaned: Record<string, unknown> = {};
@@ -366,8 +481,11 @@ export function exportUniversalCrfYaml(study: StudyProtocol): string {
   };
 
   const payload = cleanUndefined({
-    $schema: (study as unknown as Record<string, unknown>).$schema || "https://www.deruiter.dev/schemas/crf/v1/universal-crf.schema.json",
-    schemaVersion: (study as unknown as Record<string, unknown>).schemaVersion || "1.0.0",
+    $schema:
+      (study as unknown as Record<string, unknown>).$schema ||
+      "https://www.deruiter.dev/schemas/crf/v1/universal-crf.schema.json",
+    schemaVersion:
+      (study as unknown as Record<string, unknown>).schemaVersion || "1.0.0",
     ...study,
     lastModified: study.lastModified || new Date().toISOString(),
   });
@@ -445,8 +563,15 @@ export function exportUniversalCrfYaml(study: StudyProtocol): string {
 /**
  * Generates the CLI subcommand string to add this field via terminal
  */
-export function generateCliCommandForField(domain: string, field: CRFField): string {
-  const parts = [`crf add field ${domain}`, `--var ${field.variableName}`, `--type ${field.dataType}`];
+export function generateCliCommandForField(
+  domain: string,
+  field: CRFField
+): string {
+  const parts = [
+    `crf add field ${domain}`,
+    `--var ${field.variableName}`,
+    `--type ${field.dataType}`,
+  ];
   if (field.label) {
     const safeLabel = field.label.replace(/"/g, '\\"');
     parts.push(`--label "${safeLabel}"`);
@@ -504,7 +629,10 @@ export interface ProtocolDiffSummary {
 /**
  * Performs semantic protocol comparison between two StudyProtocol objects.
  */
-export function diffUniversalCrfStudies(studyA: StudyProtocol, studyB: StudyProtocol): ProtocolDiffSummary {
+export function diffUniversalCrfStudies(
+  studyA: StudyProtocol,
+  studyB: StudyProtocol
+): ProtocolDiffSummary {
   const formMapA = new Map(studyA.forms.map((f) => [f.id, f]));
   const formMapB = new Map(studyB.forms.map((f) => [f.id, f]));
 
@@ -517,8 +645,16 @@ export function diffUniversalCrfStudies(studyA: StudyProtocol, studyB: StudyProt
       addedForms.push(`${formB.domain} (${formB.name})`);
     } else {
       const formA = formMapA.get(id)!;
-      const fieldsA = new Map(formA.sections.flatMap((s) => s.fields).map((fld) => [fld.variableName, fld]));
-      const fieldsB = new Map(formB.sections.flatMap((s) => s.fields).map((fld) => [fld.variableName, fld]));
+      const fieldsA = new Map(
+        formA.sections
+          .flatMap((s) => s.fields)
+          .map((fld) => [fld.variableName, fld])
+      );
+      const fieldsB = new Map(
+        formB.sections
+          .flatMap((s) => s.fields)
+          .map((fld) => [fld.variableName, fld])
+      );
 
       const addedFields: string[] = [];
       const removedFields: string[] = [];
