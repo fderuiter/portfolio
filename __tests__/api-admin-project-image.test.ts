@@ -5,7 +5,10 @@ import { isCurrentUserAdmin } from "@/lib/auth/admin";
 import { auth } from "@clerk/nextjs/server";
 import { POST, DELETE } from "@/app/api/admin/projects/[slug]/image/route";
 import { GET as getMediaAssetRoute } from "@/app/api/media/[key]/route";
-import { MAX_PROJECT_IMAGE_SIZE_BYTES } from "@/lib/services/project-image-service";
+import {
+  ProjectImageService,
+  MAX_PROJECT_IMAGE_SIZE_BYTES,
+} from "@/lib/services/project-image-service";
 import { CaseStudyService } from "@/lib/services/case-study-service";
 
 vi.mock("@/lib/auth/admin", () => ({
@@ -246,6 +249,8 @@ describe("API Admin Project Image Upload Route", () => {
   });
 
   it("successfully validates, persists, and links valid PNG image asset", async () => {
+    const deleteSpy = vi.spyOn(ProjectImageService, "deleteMediaAsset");
+
     const req = createMultipartRequest(
       "http://localhost:3000/api/admin/projects/laser-loon/image",
       {
@@ -268,6 +273,7 @@ describe("API Admin Project Image Upload Route", () => {
     expect(data.data.hero_image_url).toMatch(
       /^\/api\/media\/project-laser-loon-/
     );
+    expect(deleteSpy).toHaveBeenCalledWith("project-laser-loon-old.png");
 
     // Verify GET /api/media/[key] route serves the stored asset correctly
     const key = data.data.key;
@@ -353,7 +359,9 @@ describe("API Admin Project Image Upload Route", () => {
     );
   });
 
-  it("clears project hero image on DELETE request from authorized admin", async () => {
+  it("clears project hero image on DELETE request from authorized admin and deletes prior asset", async () => {
+    const deleteSpy = vi.spyOn(ProjectImageService, "deleteMediaAsset");
+
     const req = new NextRequest(
       "http://localhost:3000/api/admin/projects/laser-loon/image",
       {
@@ -373,5 +381,101 @@ describe("API Admin Project Image Upload Route", () => {
       "laser-loon",
       null
     );
+    expect(deleteSpy).toHaveBeenCalledWith("project-laser-loon-old.png");
+  });
+
+  it("returns 404 on DELETE request when case study slug does not exist", async () => {
+    vi.mocked(CaseStudyService.getCaseStudyBySlug).mockResolvedValue(null);
+
+    const req = new NextRequest(
+      "http://localhost:3000/api/admin/projects/non-existent/image",
+      {
+        method: "DELETE",
+      }
+    );
+
+    const res = await DELETE(req, {
+      params: Promise.resolve({ slug: "non-existent" }),
+    });
+    expect(res.status).toBe(404);
+
+    const data = await res.json();
+    expect(data.error).toMatch(/not found/i);
+    expect(CaseStudyService.updateCaseStudyImage).not.toHaveBeenCalled();
+  });
+
+  it("does not attempt to delete media asset when hero_image_url is an external third-party URL", async () => {
+    const deleteSpy = vi.spyOn(ProjectImageService, "deleteMediaAsset");
+    vi.mocked(CaseStudyService.getCaseStudyBySlug).mockResolvedValue({
+      id: "cs_external",
+      slug: "laser-loon",
+      title: "Laser Loon",
+      primary_language: "TypeScript",
+      github_url: "https://github.com/test/laser-loon",
+      published: true,
+      simulated_telemetry: false,
+      tags: "game, canvas",
+      editorial_content: "Editorial narrative",
+      architectural_narrative: "Architectural breakdown",
+      hero_image_url: "https://images.unsplash.com/photo-123456789",
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
+
+    const req = new NextRequest(
+      "http://localhost:3000/api/admin/projects/laser-loon/image",
+      {
+        method: "DELETE",
+      }
+    );
+
+    const res = await DELETE(req, {
+      params: Promise.resolve({ slug: "laser-loon" }),
+    });
+    expect(res.status).toBe(200);
+    expect(CaseStudyService.updateCaseStudyImage).toHaveBeenCalledWith(
+      "laser-loon",
+      null
+    );
+    expect(deleteSpy).not.toHaveBeenCalled();
+  });
+
+  it("extracts media storage key correctly across various URL patterns", () => {
+    expect(
+      ProjectImageService.extractMediaKeyFromUrl(
+        "/api/media/project-test-123.png"
+      )
+    ).toBe("project-test-123.png");
+    expect(
+      ProjectImageService.extractMediaKeyFromUrl(
+        "https://example.com/api/media/project-test-456.jpg"
+      )
+    ).toBe("project-test-456.jpg");
+    expect(
+      ProjectImageService.extractMediaKeyFromUrl("custom-blob-key.webp")
+    ).toBe("custom-blob-key.webp");
+    expect(
+      ProjectImageService.extractMediaKeyFromUrl(
+        "https://abc12345.public.blob.vercel-storage.com/project-test-789.png"
+      )
+    ).toBe(
+      "https://abc12345.public.blob.vercel-storage.com/project-test-789.png"
+    );
+    expect(
+      ProjectImageService.extractMediaKeyFromUrl(
+        "https://images.unsplash.com/photo-987654"
+      )
+    ).toBeNull();
+    expect(
+      ProjectImageService.extractMediaKeyFromUrl("/images/projects/banner.jpg")
+    ).toBeNull();
+    expect(
+      ProjectImageService.extractMediaKeyFromUrl(
+        "data:image/png;base64,iVBORw0KGgo="
+      )
+    ).toBeNull();
+    expect(ProjectImageService.extractMediaKeyFromUrl(null)).toBeNull();
+    expect(ProjectImageService.extractMediaKeyFromUrl("")).toBeNull();
+    expect(ProjectImageService.extractMediaKeyFromUrl("   ")).toBeNull();
   });
 });

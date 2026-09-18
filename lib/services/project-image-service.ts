@@ -166,7 +166,59 @@ export function getExtensionForMimeType(mimeType: string): string {
   }
 }
 
+/**
+ * Extracts the storage key from a media asset URL or path.
+ */
+export function extractMediaKeyFromUrl(
+  url: string | null | undefined
+): string | null {
+  if (!url || typeof url !== "string" || !url.trim()) return null;
+  const trimmed = url.trim();
+
+  // Local storage relative path: /api/media/<key>
+  if (trimmed.startsWith("/api/media/")) {
+    const key = trimmed.slice("/api/media/".length).trim();
+    return key.length > 0 ? key : null;
+  }
+
+  // Relative paths not under /api/media/ are static public assets, not managed media keys
+  if (trimmed.startsWith("/")) {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.pathname.startsWith("/api/media/")) {
+      const key = parsed.pathname.slice("/api/media/".length).trim();
+      return key.length > 0 ? key : null;
+    }
+    // Vercel Blob cloud storage URL
+    if (parsed.hostname.includes("blob.vercel-storage.com")) {
+      return trimmed;
+    }
+    // External URLs (e.g. Unsplash, GitHub, third-party CDN) are not managed media assets
+    return null;
+  } catch {
+    // Non-URL strings: allow bare keys without path separators or schemes
+    if (
+      !trimmed.includes("/") &&
+      !trimmed.includes("\\") &&
+      !trimmed.includes(":")
+    ) {
+      return trimmed;
+    }
+    return null;
+  }
+}
+
 export class ProjectImageService {
+  /**
+   * Extracts the storage key from a media asset URL or path.
+   */
+  static extractMediaKeyFromUrl(url: string | null | undefined): string | null {
+    return extractMediaKeyFromUrl(url);
+  }
+
   /**
    * Saves a validated media buffer to storage and returns its relative asset URL.
    */
@@ -230,6 +282,7 @@ export class ProjectImageService {
     // 3. Fetch existing case study to preserve prior asset URL on failure
     const existing = await CaseStudyService.getCaseStudyBySlug(slug);
     const priorAssetUrl = existing?.hero_image_url ?? null;
+    const priorKey = extractMediaKeyFromUrl(priorAssetUrl);
 
     // 4. Generate key and save media asset using provider
     const ext = getExtensionForMimeType(mimeType);
@@ -243,9 +296,15 @@ export class ProjectImageService {
     try {
       // 5. Atomic database persistence and cache eviction
       await CaseStudyService.updateCaseStudyImage(slug, assetUrl);
+
+      // 6. Clean up prior media asset if replacing an existing one to prevent storage orphans
+      if (priorKey && priorKey !== key) {
+        await ProjectImageService.deleteMediaAsset(priorKey);
+      }
+
       return { hero_image_url: assetUrl, key };
     } catch (error) {
-      // 6. On failure: Clean up newly created asset and ensure prior asset is preserved
+      // 7. On failure: Clean up newly created asset and ensure prior asset is preserved
       await ProjectImageService.deleteMediaAsset(key);
       if (existing) {
         try {

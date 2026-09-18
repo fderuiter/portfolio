@@ -34,10 +34,6 @@ function duplicateSlugResponse() {
   };
 }
 
-async function isAdministrator(): Promise<boolean> {
-  return isCurrentUserAdmin();
-}
-
 function getDraftId(params: Record<string, string | string[] | undefined>) {
   const parsed = BlogDraftIdParamsSchema.safeParse(params);
   if (!parsed.success) {
@@ -47,7 +43,7 @@ function getDraftId(params: Record<string, string | string[] | undefined>) {
 }
 
 export const GET = createApiHandler(async (_req: NextRequest, { params }) => {
-  if (!(await isAdministrator())) {
+  if (!(await isCurrentUserAdmin())) {
     return NextResponse.json(
       { error: "Administrator access required" },
       { status: 403 }
@@ -79,7 +75,7 @@ export const GET = createApiHandler(async (_req: NextRequest, { params }) => {
 
 export const PATCH = createApiHandler(
   async (_req: NextRequest, { data, params }) => {
-    if (!(await isAdministrator())) {
+    if (!(await isCurrentUserAdmin())) {
       return NextResponse.json(
         { error: "Administrator access required" },
         { status: 403 }
@@ -130,7 +126,7 @@ export const PATCH = createApiHandler(
 
 export const DELETE = createApiHandler(
   async (_req: NextRequest, { params }) => {
-    if (!(await isAdministrator())) {
+    if (!(await isCurrentUserAdmin())) {
       return NextResponse.json(
         { error: "Administrator access required" },
         { status: 403 }

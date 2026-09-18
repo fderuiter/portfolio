@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import Image from "next/image";
 import {
   IconUpload,
@@ -56,6 +56,29 @@ export function ProjectImageUploader({
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const previewUrlRef = useRef<string | null>(null);
+  const progressTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const cleanupPreviewUrl = useCallback(() => {
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = null;
+    }
+  }, []);
+
+  const cleanupProgressTimer = useCallback(() => {
+    if (progressTimerRef.current) {
+      clearInterval(progressTimerRef.current);
+      progressTimerRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      cleanupPreviewUrl();
+      cleanupProgressTimer();
+    };
+  }, [cleanupPreviewUrl, cleanupProgressTimer]);
 
   const activeProject = initialProjects.find((p) => p.slug === selectedSlug);
   const currentAssetUrl =
@@ -64,6 +87,8 @@ export function ProjectImageUploader({
       : activeProject?.hero_image_url || null;
 
   const handleSlugChange = (newSlug: string) => {
+    cleanupPreviewUrl();
+    cleanupProgressTimer();
     setSelectedSlug(newSlug);
     setFile(null);
     setPreviewUrl(null);
@@ -82,23 +107,28 @@ export function ProjectImageUploader({
     return null;
   };
 
-  const handleFileSelect = useCallback((selectedFile: File) => {
-    const error = validateFile(selectedFile);
-    if (error) {
-      setErrorMessage(error);
-      setStatus("error");
-      setFile(null);
-      setPreviewUrl(null);
-      return;
-    }
+  const handleFileSelect = useCallback(
+    (selectedFile: File) => {
+      cleanupPreviewUrl();
+      const error = validateFile(selectedFile);
+      if (error) {
+        setErrorMessage(error);
+        setStatus("error");
+        setFile(null);
+        setPreviewUrl(null);
+        return;
+      }
 
-    setErrorMessage(null);
-    setFile(selectedFile);
-    setStatus("idle");
+      setErrorMessage(null);
+      setFile(selectedFile);
+      setStatus("idle");
 
-    const objectUrl = URL.createObjectURL(selectedFile);
-    setPreviewUrl(objectUrl);
-  }, []);
+      const objectUrl = URL.createObjectURL(selectedFile);
+      previewUrlRef.current = objectUrl;
+      setPreviewUrl(objectUrl);
+    },
+    [cleanupPreviewUrl]
+  );
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -129,6 +159,8 @@ export function ProjectImageUploader({
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
     }
+    cleanupProgressTimer();
+    cleanupPreviewUrl();
     setStatus("cancelled");
     setProgress(0);
     setErrorMessage("Upload cancelled by user.");
@@ -149,10 +181,11 @@ export function ProjectImageUploader({
       formData.append("file", file);
 
       // Simulated smooth progress increments for responsive UX
-      const progressTimer = setInterval(() => {
+      cleanupProgressTimer();
+      progressTimerRef.current = setInterval(() => {
         setProgress((prev) => {
           if (prev >= 85) {
-            clearInterval(progressTimer);
+            cleanupProgressTimer();
             return prev;
           }
           return prev + 15;
@@ -168,7 +201,7 @@ export function ProjectImageUploader({
         }
       );
 
-      clearInterval(progressTimer);
+      cleanupProgressTimer();
 
       if (!response.ok) {
         let errText = "Failed to upload project image.";
@@ -207,6 +240,7 @@ export function ProjectImageUploader({
         );
       }
     } finally {
+      cleanupProgressTimer();
       abortControllerRef.current = null;
     }
   };
@@ -220,6 +254,7 @@ export function ProjectImageUploader({
         }
       );
       if (response.ok) {
+        cleanupPreviewUrl();
         setOverriddenAssets((prev) => ({
           ...prev,
           [selectedSlug]: null,
@@ -399,6 +434,7 @@ export function ProjectImageUploader({
           <button
             type="button"
             onClick={() => {
+              cleanupPreviewUrl();
               setFile(null);
               setPreviewUrl(null);
               setStatus("idle");

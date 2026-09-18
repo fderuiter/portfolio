@@ -22,6 +22,7 @@ import {
   PROMPTOPS_PLAYBACK_OBJ,
 } from "../lib/case-studies-data";
 import { compileTerms } from "../lib/term-compiler";
+import { FALLBACK_BLOG_POSTS } from "../lib/fallback-blog-posts";
 
 neonConfig.webSocketConstructor = ws;
 
@@ -2154,6 +2155,27 @@ async function main() {
     }
   }
 
+  for (const post of FALLBACK_BLOG_POSTS) {
+    const bodyMatches = scanText(post.body);
+    const dekMatches = scanText(post.dek);
+    const combinedMatches = [...bodyMatches, ...dekMatches];
+
+    if (combinedMatches.length > 0) {
+      console.error(
+        `❌ Credentials detected programmatically in blog seeding payload for "${post.title}":`
+      );
+      for (const m of combinedMatches) {
+        console.error(
+          `  - Matched Category: [${m.category}] on relative line ${m.lineNumber}: "${m.matchedText}"`
+        );
+      }
+      console.error(
+        "Seeding halted. Zero records were inserted into the database."
+      );
+      process.exit(1);
+    }
+  }
+
   // 2. Validate fallback files statically to ensure absolute line tracing is perfect
   const seedFile = path.resolve(process.cwd(), "prisma/seed.ts");
   const fallbackFile = path.resolve(process.cwd(), "app/page.tsx");
@@ -2194,6 +2216,7 @@ async function main() {
 
   // WIPE: Enforce idempotence by cleaning database before seeding
   await prisma.caseStudy.deleteMany({});
+  await prisma.blogPost.deleteMany({});
 
   // Insert the validated payloads
   for (const payload of SEED_PAYLOADS) {
@@ -2206,9 +2229,32 @@ async function main() {
     });
   }
 
+  // Insert published blog posts fulfilling ADR 0041 §6 launch bar
+  for (const post of FALLBACK_BLOG_POSTS) {
+    await prisma.blogPost.create({
+      data: {
+        id: post.id,
+        slug: post.slug,
+        title: post.title,
+        dek: post.dek,
+        body: compileTerms(post.body),
+        pillar: post.pillar,
+        tags: post.tags,
+        published: post.published,
+        reading_time_minutes: post.reading_time_minutes,
+        hero_image_url: post.hero_image_url,
+        created_at: post.created_at,
+        updated_at: post.updated_at,
+      },
+    });
+  }
+
   console.log(`Successfully seeded:`);
   for (const payload of SEED_PAYLOADS) {
-    console.log(`- ${payload.title}`);
+    console.log(`- Case study: ${payload.title}`);
+  }
+  for (const post of FALLBACK_BLOG_POSTS) {
+    console.log(`- Blog post: ${post.title}`);
   }
 }
 

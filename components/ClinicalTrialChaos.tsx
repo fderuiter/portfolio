@@ -1954,6 +1954,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                   {conveyorSubjects.map((sub) => (
                     <div
                       key={sub.id}
+                      id={`sub-${sub.id}`}
                       role="group"
                       aria-label={`Subject ${sub.subjectLabel} Controls`}
                     >

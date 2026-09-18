@@ -54,6 +54,7 @@ describe("ProjectImageUploader Component", () => {
     global.URL.createObjectURL = vi.fn(
       () => "blob:http://localhost/test-preview"
     );
+    global.URL.revokeObjectURL = vi.fn();
   });
 
   afterEach(() => {
@@ -216,6 +217,9 @@ describe("ProjectImageUploader Component", () => {
         screen.getByText(/Upload cancelled. Prior asset preserved/i)
       ).toBeDefined();
     });
+    expect(global.URL.revokeObjectURL).toHaveBeenCalledWith(
+      "blob:http://localhost/test-preview"
+    );
   });
 
   it("renders recoverable error state with Retry Upload button on server error", async () => {
@@ -251,6 +255,32 @@ describe("ProjectImageUploader Component", () => {
         screen.getByRole("button", { name: /Retry Upload/i })
       ).toBeDefined();
     });
+  });
+
+  it("revokes object URL on file change, file removal, and component unmount", () => {
+    const { unmount } = render(
+      <ProjectImageUploader
+        initialProjects={mockProjects}
+        defaultSlug="laser-loon"
+      />
+    );
+
+    const fileInput = screen.getByTestId("project-image-input");
+    const file1 = new File(["image 1"], "img1.png", { type: "image/png" });
+    const file2 = new File(["image 2"], "img2.png", { type: "image/png" });
+
+    fireEvent.change(fileInput, { target: { files: [file1] } });
+    expect(global.URL.createObjectURL).toHaveBeenCalledTimes(1);
+
+    // Change file
+    fireEvent.change(fileInput, { target: { files: [file2] } });
+    expect(global.URL.revokeObjectURL).toHaveBeenCalledWith(
+      "blob:http://localhost/test-preview"
+    );
+
+    // Unmount
+    unmount();
+    expect(global.URL.revokeObjectURL).toHaveBeenCalled();
   });
 });
 

@@ -180,7 +180,25 @@ export async function DELETE(
   }
 
   try {
+    const existing = await CaseStudyService.getCaseStudyBySlug(slug);
+    if (!existing) {
+      const res = NextResponse.json(
+        { error: `Case study with slug "${slug}" not found` },
+        { status: 404 }
+      );
+      return applySecurityHeaders(res, req);
+    }
+
+    const priorKey = ProjectImageService.extractMediaKeyFromUrl(
+      existing.hero_image_url
+    );
+
     await CaseStudyService.updateCaseStudyImage(slug, null);
+
+    if (priorKey) {
+      await ProjectImageService.deleteMediaAsset(priorKey);
+    }
+
     const res = NextResponse.json(
       { success: true, data: { slug, hero_image_url: null } },
       { status: 200 }

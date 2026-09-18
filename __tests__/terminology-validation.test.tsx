@@ -6,25 +6,60 @@ import path from "path";
 import React from "react";
 import { render } from "@testing-library/react";
 import { FALLBACK_CASE_STUDIES } from "@/lib/case-studies-data";
+import { FALLBACK_BLOG_POSTS } from "@/lib/fallback-blog-posts";
 import { dictionary } from "@/lib/i18n-dictionary";
 import { RichNarrative } from "@/components/RichNarrative";
-import { checkDictionaryDuplication, runTerminologyVerification } from "@/scripts/verify-terms";
+import {
+  checkDictionaryDuplication,
+  runTerminologyVerification,
+} from "@/scripts/verify-terms";
 
 // Mock framer-motion to prevent transition freezes and warnings in jsdom environment
 vi.mock("framer-motion", async (importOriginal) => {
   const actual = await importOriginal<typeof import("framer-motion")>();
-  const Component = ({ children, className, style, onClick, ...props }: any) => {
-    const { initial: _initial, animate: _animate, exit: _exit, transition: _transition, ...rest } = props;
+  const Component = ({
+    children,
+    className,
+    style,
+    onClick,
+    ...props
+  }: any) => {
+    const {
+      initial: _initial,
+      animate: _animate,
+      exit: _exit,
+      transition: _transition,
+      ...rest
+    } = props;
     return (
       <div className={className} style={style} onClick={onClick} {...rest}>
         {children}
       </div>
     );
   };
-  const Button = ({ children, className, style, onClick, type, ...props }: any) => {
-    const { initial: _initial, animate: _animate, exit: _exit, transition: _transition, ...rest } = props;
+  const Button = ({
+    children,
+    className,
+    style,
+    onClick,
+    type,
+    ...props
+  }: any) => {
+    const {
+      initial: _initial,
+      animate: _animate,
+      exit: _exit,
+      transition: _transition,
+      ...rest
+    } = props;
     return (
-      <button type={type || "button"} className={className} style={style} onClick={onClick} {...rest}>
+      <button
+        type={type || "button"}
+        className={className}
+        style={style}
+        onClick={onClick}
+        {...rest}
+      >
         {children}
       </button>
     );
@@ -83,13 +118,16 @@ function extractStringsFromObject(obj: any): string[] {
  */
 function extractSeedNarratives(fileContent: string): string[] {
   const narratives: string[] = [];
-  
+
   // Isolate the SEED_PAYLOADS block to avoid matching code in comments or functions
-  const payloadsBlockMatch = fileContent.match(/const\s+SEED_PAYLOADS\s*=([\s\S]*?);\s*(?:async\s+)?function/);
+  const payloadsBlockMatch = fileContent.match(
+    /const\s+SEED_PAYLOADS\s*=([\s\S]*?);\s*(?:async\s+)?function/
+  );
   const blockToParse = payloadsBlockMatch ? payloadsBlockMatch[1] : fileContent;
 
   // Match all values assigned to architectural_narrative or editorial_content keys
-  const fieldRegex = /(?:architectural_narrative|editorial_content)\s*:\s*([`"'])([\s\S]*?)\1/g;
+  const fieldRegex =
+    /(?:architectural_narrative|editorial_content)\s*:\s*([`"'])([\s\S]*?)\1/g;
   let match;
   while ((match = fieldRegex.exec(blockToParse)) !== null) {
     narratives.push(match[2]);
@@ -163,17 +201,23 @@ function validateHtmlContent(
 /**
  * Validates consistency of collected terminology keys
  */
-function checkKeyConsistency(collectedTags: TerminologyTag[], errorsList: string[]) {
+function checkKeyConsistency(
+  collectedTags: TerminologyTag[],
+  errorsList: string[]
+) {
   const keyMap = new Map<string, TerminologyTag>();
 
   for (const tag of collectedTags) {
     if (keyMap.has(tag.key)) {
       const existing = keyMap.get(tag.key)!;
-      if (existing.term !== tag.term || existing.definition !== tag.definition) {
+      if (
+        existing.term !== tag.term ||
+        existing.definition !== tag.definition
+      ) {
         errorsList.push(
           `Key Consistency Violation for terminology key "${tag.key}":\n` +
-          `  - Location A [${existing.source}]: term="${existing.term}", definition="${existing.definition}"\n` +
-          `  - Location B [${tag.source}]: term="${tag.term}", definition="${tag.definition}"`
+            `  - Location A [${existing.source}]: term="${existing.term}", definition="${existing.definition}"\n` +
+            `  - Location B [${tag.source}]: term="${tag.term}", definition="${tag.definition}"`
         );
       }
     } else {
@@ -201,6 +245,18 @@ describe("Build-Time Inline Terminology Validation", () => {
         validateHtmlContent(
           study.editorial_content,
           `FALLBACK_CASE_STUDIES[slug=${study.slug}].editorial_content`,
+          collectedTags,
+          errorsList
+        );
+      }
+    });
+
+    // 1b. Parse FALLBACK_BLOG_POSTS
+    FALLBACK_BLOG_POSTS.forEach((post) => {
+      if (post.body) {
+        validateHtmlContent(
+          post.body,
+          `FALLBACK_BLOG_POSTS[slug=${post.slug}].body`,
           collectedTags,
           errorsList
         );
@@ -251,7 +307,7 @@ describe("Build-Time Inline Terminology Validation", () => {
     const collected: TerminologyTag[] = [];
     const errors: string[] = [];
     const validHtml = `<span data-key="sdtm" data-term="Standard Data Tables" data-definition="Study Data Tabulation Model">SDTM</span>`;
-    
+
     validateHtmlContent(validHtml, "test-source", collected, errors);
     expect(errors).toEqual([]);
     expect(collected.length).toBe(1);
@@ -268,7 +324,7 @@ describe("Build-Time Inline Terminology Validation", () => {
   it("should fail validation if any required attributes are missing on a span/abbr", () => {
     const collected: TerminologyTag[] = [];
     const errors: string[] = [];
-    
+
     // Missing data-term
     validateHtmlContent(
       `<span data-key="key1" data-definition="Def 1">Text</span>`,
@@ -297,7 +353,9 @@ describe("Build-Time Inline Terminology Validation", () => {
       errors
     );
     expect(errors.length).toBe(3);
-    expect(errors[2]).toContain("has missing/empty attributes: [data-definition]");
+    expect(errors[2]).toContain(
+      "has missing/empty attributes: [data-definition]"
+    );
   });
 
   it("should fail validation if terminology attributes are placed on non-span/non-abbr tags", () => {
@@ -330,9 +388,11 @@ describe("Build-Time Inline Terminology Validation", () => {
     expect(errors).toEqual([]);
     checkKeyConsistency(collected, errors);
     expect(errors.length).toBe(1);
-    expect(errors[0]).toContain('Key Consistency Violation for terminology key "common-key"');
-    expect(errors[0]).toContain('Term A');
-    expect(errors[0]).toContain('Term B');
+    expect(errors[0]).toContain(
+      'Key Consistency Violation for terminology key "common-key"'
+    );
+    expect(errors[0]).toContain("Term A");
+    expect(errors[0]).toContain("Term B");
   });
 
   it("should execute client-side RichNarrative components without throwing execution errors", () => {

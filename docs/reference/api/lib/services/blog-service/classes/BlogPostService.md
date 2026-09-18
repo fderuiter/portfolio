@@ -226,6 +226,26 @@ completely avoiding database queries during active browsing.
 
 ***
 
+### hydrateBlogReactionCounts()
+
+> `static` **hydrateBlogReactionCounts**(`slug`): `Promise`\<`Record`\<`string`, `number`\>\>
+
+Hydrates the authoritative base reaction counts in Upstash Redis from Postgres.
+Executed during scheduled maintenance or database seeding when Postgres is awake.
+Never invoked on the public visitor read path per ADR 0043 §3.
+
+#### Parameters
+
+##### slug
+
+`string`
+
+#### Returns
+
+`Promise`\<`Record`\<`string`, `number`\>\>
+
+***
+
 ### submitReaction()
 
 > `static` **submitReaction**(`input`, `connectionHash`): `Promise`\<\{ `counts?`: `Record`\<`string`, `number`\>; `duplicate?`: `boolean`; `message?`: `string`; `notFound?`: `boolean`; `reactionType?`: `string`; `success`: `boolean`; `userReactions?`: `string`[]; \}\>

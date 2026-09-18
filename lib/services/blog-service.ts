@@ -58,44 +58,13 @@ async function getBaseBlogReactionCounts(
       return counts;
     }
   } catch {
-    // Tolerated, fall through to database query
+    // Tolerated
   }
 
+  // Zero-Neon-Wake Boundary (ADR 0043 §3): Never query Postgres on the public read path.
+  // When Redis is cold or times out, return zeroed defaults without querying Postgres. Database is hydrated exclusively during seed or scheduled maintenance.
   const counts = getDefaultBlogReactionCounts();
-  try {
-    const reactions = await prisma.blogPostReaction.groupBy({
-      by: ["reactionType"],
-      where: { blogPostSlug: slug },
-      _count: { id: true },
-    });
-    for (const r of reactions) {
-      if (counts[r.reactionType] !== undefined) {
-        counts[r.reactionType] = r._count.id;
-      }
-    }
-    if (isRedisConfigured()) {
-      try {
-        await Promise.race([
-          redis.set(baseKey, counts, { ex: 3600 }),
-          new Promise((_, reject) =>
-            setTimeout(
-              () =>
-                reject(new Error("Redis setBaseBlogReactionCounts timeout")),
-              1500
-            )
-          ),
-        ]);
-      } catch {
-        // Tolerated
-      }
-    }
-  } catch (err) {
-    if (env.VERCEL_ENV === "production") {
-      console.warn(
-        `BlogPostService: Failed to query base reactions for ${slug}:`,
-        err
-      );
-    }
+  if (!isRedisConfigured()) {
     const slugMap = mockBlogReactionsStore.get(slug);
     if (slugMap) {
       for (const [r, count] of slugMap.entries()) {
@@ -1288,6 +1257,10 @@ export class BlogPostService {
         }
       }
 
+      for (const slug of Object.keys(flushedCountsBySlug)) {
+        await BlogPostService.hydrateBlogReactionCounts(slug);
+      }
+
       return {
         processed: events.length,
         inserted: createResult.count,
@@ -1301,5 +1274,52 @@ export class BlogPostService {
       }
       return { processed: 0, inserted: 0 };
     }
+  }
+
+  /**
+   * Hydrates the authoritative base reaction counts in Upstash Redis from Postgres.
+   * Executed during scheduled maintenance or database seeding when Postgres is awake.
+   * Never invoked on the public visitor read path per ADR 0043 §3.
+   */
+  static async hydrateBlogReactionCounts(
+    slug: string
+  ): Promise<Record<string, number>> {
+    const baseKey = getScopedRedisKey(`blog:reactions_counts:${slug}`);
+    const counts = getDefaultBlogReactionCounts();
+
+    try {
+      const reactions = await prisma.blogPostReaction.groupBy({
+        by: ["reactionType"],
+        where: { blogPostSlug: slug },
+        _count: { id: true },
+      });
+      for (const r of reactions) {
+        if (counts[r.reactionType] !== undefined) {
+          counts[r.reactionType] = r._count.id;
+        }
+      }
+
+      if (isRedisConfigured()) {
+        await Promise.race([
+          redis.set(baseKey, counts),
+          new Promise((_, reject) =>
+            setTimeout(
+              () =>
+                reject(new Error("Redis hydrateBlogReactionCounts timeout")),
+              1500
+            )
+          ),
+        ]);
+      }
+    } catch (err) {
+      if (env.VERCEL_ENV === "production") {
+        console.warn(
+          `BlogPostService: Failed to hydrate base reactions for ${slug}:`,
+          err
+        );
+      }
+    }
+
+    return counts;
   }
 }

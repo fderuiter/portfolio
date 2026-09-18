@@ -157,37 +157,52 @@ describe("BlogPostService - Two-Tier Redis Compute Shield & Reaction Buffering",
       expect(prisma.blogPostReaction.findMany).not.toHaveBeenCalled();
     });
 
-    it("fetches base counts from Postgres on Redis cache miss and sets Redis base cache", async () => {
+    it("returns zeroed base counts on Redis cache miss without querying Neon Postgres (Zero-Neon-Wake)", async () => {
       mockRedisGet.mockResolvedValueOnce(null); // Cache miss
-
-      vi.mocked(prisma.blogPostReaction.groupBy).mockResolvedValueOnce([
-        { reactionType: "actionable", _count: { id: 12 } },
-      ] as never);
 
       mockRedisHgetall.mockResolvedValueOnce({});
       mockRedisSmembers.mockResolvedValueOnce([]);
-
-      vi.mocked(prisma.blogPostReaction.findMany).mockResolvedValueOnce([]);
 
       const result = await BlogPostService.getReactions(
         "cdisc-crf-compiler-architecture",
         "conn-123"
       );
 
-      expect(result.counts.actionable).toBe(12);
-      expect(prisma.blogPostReaction.groupBy).toHaveBeenCalledWith({
-        by: ["reactionType"],
-        where: { blogPostSlug: "cdisc-crf-compiler-architecture" },
-        _count: { id: true },
+      expect(result.success).toBe(true);
+      expect(result.counts).toEqual({
+        insightful: 0,
+        mind_blowing: 0,
+        actionable: 0,
+        thorough: 0,
       });
+      expect(prisma.blogPostReaction.groupBy).not.toHaveBeenCalled();
+      expect(prisma.blogPostReaction.findMany).not.toHaveBeenCalled();
+      expect(mockRedisSet).not.toHaveBeenCalled();
+    });
 
-      expect(mockRedisSet).toHaveBeenCalledWith(
-        getScopedRedisKey(
-          "blog:reactions_counts:cdisc-crf-compiler-architecture"
-        ),
-        expect.objectContaining({ actionable: 12 }),
-        { ex: 3600 }
+    it("returns zeroed base counts on Redis timeout without querying Neon Postgres (Zero-Neon-Wake)", async () => {
+      mockRedisGet.mockRejectedValueOnce(
+        new Error("Redis getBaseBlogReactionCounts timeout")
       );
+
+      mockRedisHgetall.mockResolvedValueOnce({});
+      mockRedisSmembers.mockResolvedValueOnce([]);
+
+      const result = await BlogPostService.getReactions(
+        "cdisc-crf-compiler-architecture",
+        "conn-123"
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.counts).toEqual({
+        insightful: 0,
+        mind_blowing: 0,
+        actionable: 0,
+        thorough: 0,
+      });
+      expect(prisma.blogPostReaction.groupBy).not.toHaveBeenCalled();
+      expect(prisma.blogPostReaction.findMany).not.toHaveBeenCalled();
+      expect(mockRedisSet).not.toHaveBeenCalled();
     });
   });
 

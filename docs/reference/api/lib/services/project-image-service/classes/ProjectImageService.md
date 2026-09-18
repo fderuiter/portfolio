@@ -36,6 +36,24 @@ Deletes a media asset from storage by key.
 
 ***
 
+### extractMediaKeyFromUrl()
+
+> `static` **extractMediaKeyFromUrl**(`url`): `string` \| `null`
+
+Extracts the storage key from a media asset URL or path.
+
+#### Parameters
+
+##### url
+
+`string` \| `null` \| `undefined`
+
+#### Returns
+
+`string` \| `null`
+
+***
+
 ### getMediaAsset()
 
 > `static` **getMediaAsset**(`key`): `Promise`\<[`MediaAssetRecord`](../../media-storage/interfaces/MediaAssetRecord.md) \| `null`\>

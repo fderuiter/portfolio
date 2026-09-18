@@ -21,6 +21,7 @@
 
 ## Functions
 
+- [extractMediaKeyFromUrl](functions/extractMediaKeyFromUrl.md)
 - [getExtensionForMimeType](functions/getExtensionForMimeType.md)
 - [sanitizeSvg](functions/sanitizeSvg.md)
 - [validateImageMagicBytes](functions/validateImageMagicBytes.md)
