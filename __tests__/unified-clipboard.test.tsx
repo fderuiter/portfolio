@@ -28,7 +28,7 @@ describe("Unified Clipboard Utility & Hook", () => {
 
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
-    
+
     // Save original properties
     originalWriteText = navigator.clipboard?.writeText;
     originalExecCommand = document.execCommand;
@@ -52,15 +52,21 @@ describe("Unified Clipboard Utility & Hook", () => {
     cleanup();
     vi.useRealTimers();
     vi.restoreAllMocks();
-    
+
     // Restore original properties
     if (navigator.clipboard && originalWriteText) {
-      navigator.clipboard.writeText = originalWriteText as (data: string) => Promise<void>;
+      navigator.clipboard.writeText = originalWriteText as (
+        data: string
+      ) => Promise<void>;
     }
     if (originalExecCommand) {
-      document.execCommand = originalExecCommand as (command: string, showUI?: boolean, value?: string) => boolean;
+      document.execCommand = originalExecCommand as (
+        command: string,
+        showUI?: boolean,
+        value?: string
+      ) => boolean;
     }
-    
+
     // Reset window.location
     Object.defineProperty(window, "location", {
       value: originalLocation,
@@ -96,7 +102,7 @@ describe("Unified Clipboard Utility & Hook", () => {
 
         // 2. Production fallback
         vi.stubEnv("VERCEL_ENV", "production");
-        expect(getActiveHostUrl()).toBe("https://www.deruiter.dev");
+        expect(getActiveHostUrl()).toBe("https://deruiter.dev");
 
         // 3. Configured NEXT_PUBLIC_APP_URL
         vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://custom-domain.dev");
@@ -116,7 +122,9 @@ describe("Unified Clipboard Utility & Hook", () => {
     });
 
     it("falls back to document.execCommand when navigator.clipboard fails", async () => {
-      navigator.clipboard.writeText = vi.fn().mockRejectedValue(new Error("Permission denied"));
+      navigator.clipboard.writeText = vi
+        .fn()
+        .mockRejectedValue(new Error("Permission denied"));
 
       const appendSpy = vi.spyOn(document.body, "appendChild");
       const removeSpy = vi.spyOn(document.body, "removeChild");
@@ -153,7 +161,9 @@ describe("Unified Clipboard Utility & Hook", () => {
     });
 
     it("throws a user-friendly error if both modern and fallback mechanisms fail", async () => {
-      navigator.clipboard.writeText = vi.fn().mockRejectedValue(new Error("Modern clipboard failed"));
+      navigator.clipboard.writeText = vi
+        .fn()
+        .mockRejectedValue(new Error("Modern clipboard failed"));
       document.execCommand = vi.fn().mockReturnValue(false); // Fallback returned false
 
       await expect(copyToClipboard("Failing Copy")).rejects.toThrow(
@@ -198,7 +208,9 @@ describe("Unified Clipboard Utility & Hook", () => {
 
     it("handles errors smoothly and dispatches assertive warning announcements on failure", async () => {
       // Mock copyToClipboard to fail
-      navigator.clipboard.writeText = vi.fn().mockRejectedValue(new Error("API blocked"));
+      navigator.clipboard.writeText = vi
+        .fn()
+        .mockRejectedValue(new Error("API blocked"));
       document.execCommand = vi.fn().mockReturnValue(false);
 
       render(
@@ -216,7 +228,9 @@ describe("Unified Clipboard Utility & Hook", () => {
       });
 
       expect(copiedStatus.textContent).toBe("NOT_COPIED");
-      expect(errorStatus.textContent).toContain("Clipboard copy failed in this environment");
+      expect(errorStatus.textContent).toContain(
+        "Clipboard copy failed in this environment"
+      );
 
       // Verify screen reader assertive region has dynamic announcement
       const assertiveRegion = document.querySelector('[aria-live="assertive"]');

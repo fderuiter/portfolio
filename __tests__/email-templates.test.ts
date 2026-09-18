@@ -27,14 +27,17 @@ describe("Email Templates Engine", () => {
         email: "ada@example.com",
         intent: "collaboration",
         subject: "Deductive Engine Collaboration",
-        message: "Hello Frederick,\n\nI would like to discuss formal verification proof graphs.\n<script>alert(1)</script>",
+        message:
+          "Hello Frederick,\n\nI would like to discuss formal verification proof graphs.\n<script>alert(1)</script>",
         connectionHash: "hash-test-12345",
         submittedAt: new Date("2026-08-19T12:00:00Z"),
       };
 
       const result = renderContactAdminEmail(payload);
 
-      expect(result.subject).toBe("[Inquiry: COLLABORATION] Deductive Engine Collaboration (from Ada Lovelace)");
+      expect(result.subject).toBe(
+        "[Inquiry: COLLABORATION] Deductive Engine Collaboration (from Ada Lovelace)"
+      );
       expect(result.html).toContain("Ada Lovelace");
       expect(result.html).toContain("ada@example.com");
       expect(result.html).toContain("INBOUND INQUIRY // COLLABORATION");
@@ -57,11 +60,15 @@ describe("Email Templates Engine", () => {
 
       const result = renderContactConfirmationEmail(payload);
 
-      expect(result.subject).toBe('Message received: "Quick question on Turing machines"');
+      expect(result.subject).toBe(
+        'Message received: "Quick question on Turing machines"'
+      );
       expect(result.html).toContain("Thanks for reaching out, Alan Turing!");
-      expect(result.html).toContain("Loved the arcade quasi puzzler simulator!");
+      expect(result.html).toContain(
+        "Loved the arcade quasi puzzler simulator!"
+      );
       expect(result.text).toContain("Thanks for reaching out, Alan Turing!");
-      expect(result.text).toContain("https://www.deruiter.dev");
+      expect(result.text).toContain("https://deruiter.dev");
     });
   });
 
@@ -77,11 +84,15 @@ describe("Email Templates Engine", () => {
 
       const result = renderFeedbackNotificationEmail(payload);
 
-      expect(result.subject).toBe('[Case Study Feedback] New commentary on "clinical-chaos"');
+      expect(result.subject).toBe(
+        '[Case Study Feedback] New commentary on "clinical-chaos"'
+      );
       expect(result.html).toContain("clinical-chaos");
       expect(result.html).toContain("GxP Validation Standard");
       expect(result.html).toContain("AST Rule Engine");
-      expect(result.html).toContain("Incredible attention to detail in the CDISC pipeline.");
+      expect(result.html).toContain(
+        "Incredible attention to detail in the CDISC pipeline."
+      );
       expect(result.text).toContain("Target: clinical-chaos");
     });
   });

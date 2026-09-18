@@ -413,7 +413,7 @@ export function BlogAuthoringForm({
                 type="url"
                 value={heroImageUrl}
                 onChange={(e) => setHeroImageUrl(e.target.value)}
-                placeholder="https://www.deruiter.dev/assets/hero.png"
+                placeholder="https://deruiter.dev/assets/hero.png"
                 className="w-full px-3 py-2 rounded bg-[#13151a] border border-white/10 text-zinc-100 font-mono text-sm focus:border-amber-500 focus:outline-none"
               />
             </div>

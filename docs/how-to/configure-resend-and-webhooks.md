@@ -162,7 +162,7 @@ recipient; confirm the event round-trips through the webhook route without a
 
 Before closing the provider configuration gate, an operator must verify the
 Production sending domain and sender, register the canonical
-`https://www.deruiter.dev/api/webhooks/resend` endpoint with the intended event
+`https://deruiter.dev/api/webhooks/resend` endpoint with the intended event
 types, scope the API and webhook secrets to Production, and confirm Preview has
 no transmitting path. These dashboard actions cannot be inferred from source
 code or automated without the protected account credentials.
