@@ -15,15 +15,7 @@ import { AudioProvider } from "@/components/providers/AudioProvider";
 import { SearchProvider } from "@/components/providers/SearchProvider";
 import { TerminologyProvider } from "@/components/providers/TerminologyProvider";
 import { PersonaProvider } from "@/components/providers/PersonaProvider";
-import dynamic from "next/dynamic";
-
-const RetroChaosOverlay = dynamic(
-  () =>
-    import("@/components/RetroChaosOverlay").then(
-      (mod) => mod.RetroChaosOverlay
-    ),
-  { ssr: false }
-);
+import { RetroChaosOverlayWrapper } from "@/components/RetroChaosOverlayWrapper";
 
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -180,7 +172,7 @@ export default function RootLayout({
                     {children}
                   </main>
                   <Footer />
-                  <RetroChaosOverlay />
+                  <RetroChaosOverlayWrapper />
                   <Analytics />
                   <SpeedInsights />
                   <SearchWrapper />
