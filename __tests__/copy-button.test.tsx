@@ -7,10 +7,12 @@ import {
   act,
   cleanup,
 } from "@testing-library/react";
-import { CopyButton } from "@/components/ui/CopyButton";
+import { CopyButton, type CopyButtonProps } from "@/components/ui/CopyButton";
 import { A11yProvider } from "@/components/providers/A11yProvider";
 
 describe("CopyButton Component Primitive", () => {
+  const _typeCheckProps: Partial<CopyButtonProps> = {};
+  void _typeCheckProps;
   let originalWriteText: unknown;
   let originalExecCommand: unknown;
 
