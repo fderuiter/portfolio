@@ -3,6 +3,7 @@
 import React, { useMemo, useEffect, useRef, useSyncExternalStore } from "react";
 import {
   PATROL_SCENARIOS,
+  ALL_PATROL_SCENARIOS,
   createPatrolShiftEngine,
   generateDebriefReport,
   type PatrolShiftEngine,
@@ -12,7 +13,6 @@ import {
   IconShieldCheck,
   IconClock,
   IconRefresh,
-  IconAlertTriangle,
   IconRoute,
   IconCheck,
 } from "@tabler/icons-react";
@@ -20,11 +20,12 @@ import { IntroScreen } from "./IntroScreen";
 import { BriefingScreen } from "./BriefingScreen";
 import { MountainMap } from "./MountainMap";
 import { DispatchOverlay } from "./DispatchOverlay";
-import { SceneInteractionPlaceholder } from "./SceneInteractionPlaceholder";
+import { SceneInteraction } from "./SceneInteraction";
 import { OetCanvas } from "./OetCanvas";
-import { HandoffScreen } from "./HandoffScreen";
+import { HandoffPanel } from "./HandoffPanel";
 import { DebriefPlaceholder } from "./DebriefPlaceholder";
 import { ShiftSummary } from "./ShiftSummary";
+import { MedicalDisclaimerBanner } from "./MedicalDisclaimerBanner";
 
 /**
  * Props for the PatrolShiftContainer component.
@@ -46,7 +47,7 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
   engine: customEngine,
 }) => {
   const defaultEngine = useMemo(
-    () => createPatrolShiftEngine(PATROL_SCENARIOS),
+    () => createPatrolShiftEngine(ALL_PATROL_SCENARIOS),
     []
   );
   const activeEngine = customEngine ?? defaultEngine;
@@ -71,12 +72,16 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
 
   const availableScenarios = useMemo(() => {
     const fromEngine = activeEngine.getScenarios?.();
-    return fromEngine && fromEngine.length > 0 ? fromEngine : PATROL_SCENARIOS;
+    return fromEngine && fromEngine.length > 0
+      ? fromEngine
+      : ALL_PATROL_SCENARIOS;
   }, [activeEngine]);
 
   useEffect(() => {
     if (initialScenarioId) {
-      const target = availableScenarios.find((s) => s.id === initialScenarioId);
+      const target =
+        availableScenarios.find((s) => s.id === initialScenarioId) ??
+        ALL_PATROL_SCENARIOS.find((s) => s.id === initialScenarioId);
       if (target) {
         activeEngine.loadScenario(target);
       }
@@ -139,6 +144,7 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
               </h1>
               <span className="px-2 py-0.5 rounded-full bg-brand-cyan/10 border border-brand-cyan/30 text-brand-cyan text-[10px] font-mono font-bold uppercase tracking-wider">
                 M1 Foundation Scaffold &bull; M3 Map Hub &bull; M4 OET Mini-Game
+                &bull; M5 OEC Interaction
               </span>
             </div>
             <p className="text-xs font-mono text-zinc-400">
@@ -183,25 +189,10 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
       </div>
 
       {/* Prominent Medical & Clinical Disclaimer */}
-      <div
-        role="note"
-        aria-label="Medical & Clinical Disclaimer"
-        className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono space-y-1.5"
-      >
-        <div className="flex items-center gap-2 font-bold uppercase tracking-wider text-amber-400">
-          <IconAlertTriangle className="w-4 h-4 shrink-0" />
-          <span>Simulation Notice &amp; Medical Disclaimer</span>
-        </div>
-        <p className="text-[11px] leading-relaxed text-amber-200/90 font-sans">
-          Patrol Shift is an architectural simulation prototype under active
-          development (Issues #744 / #747 / #749). It models operational
-          dispatch and deterministic state machines for educational purposes. It
-          does <strong>not</strong> provide certified clinical guidance, Outdoor
-          Emergency Care (OEC) treatment protocols, or real-world emergency
-          decision support. Real emergencies require certified emergency
-          responders.
-        </p>
-      </div>
+      {shiftState.phase !== "SCENE" &&
+        shiftState.phase !== "HANDOFF" &&
+        shiftState.phase !== "incident" &&
+        shiftState.phase !== "RESPONDING" && <MedicalDisclaimerBanner />}
 
       {/* Dynamic Phase Router */}
       <div className="w-full">
@@ -257,15 +248,33 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
         {(shiftState.phase === "RESPONDING" ||
           shiftState.phase === "SCENE" ||
           shiftState.phase === "incident") && (
-          <SceneInteractionPlaceholder
+          <SceneInteraction
             scenario={currentScenario}
             actionHistory={shiftState.actionHistory}
+            vitalsHistory={shiftState.vitalsHistory}
+            currentVitals={shiftState.currentVitals}
+            revealedPatient={shiftState.revealedPatient}
+            revealedEnvironment={shiftState.revealedEnvironment}
+            revealedActors={shiftState.revealedActors}
+            sceneSafetyStatus={shiftState.sceneSafetyStatus}
+            patientCondition={shiftState.patientCondition}
             onExecuteAction={(action) =>
               activeEngine.dispatch({ type: "RECORD_ACTION", action })
             }
             onPrepareTransport={() => {
               activeEngine.dispatch({ type: "COMPLETE_SCENE" });
               activeEngine.dispatch({ type: "BEGIN_TRANSPORT" });
+            }}
+            onCheckVitals={() => {
+              activeEngine.dispatch({
+                type: "CHECK_VITALS",
+                vitals:
+                  currentScenario?.patient?.vitals ??
+                  currentScenario?.initialVitals,
+              });
+            }}
+            onAssessSceneSafety={() => {
+              activeEngine.dispatch({ type: "ASSESS_SCENE_SAFETY" });
             }}
           />
         )}
@@ -284,10 +293,14 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
         )}
 
         {shiftState.phase === "HANDOFF" && (
-          <HandoffScreen
+          <HandoffPanel
             scenario={currentScenario}
             actionHistory={shiftState.actionHistory}
+            vitalsHistory={shiftState.vitalsHistory}
+            revealedPatient={shiftState.revealedPatient}
+            revealedEnvironment={shiftState.revealedEnvironment}
             timeElapsedMinutes={shiftState.timeElapsedMinutes}
+            patientCondition={shiftState.patientCondition}
             onCompleteHandoff={() =>
               activeEngine.dispatch({ type: "COMPLETE_HANDOFF" })
             }
@@ -334,11 +347,13 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
           <li className="text-brand-cyan flex items-center gap-1.5">
             <IconCheck className="w-3 h-3" /> M3: Mountain Map Hub (#749)
           </li>
+          <li className="text-brand-cyan flex items-center gap-1.5">
+            <IconCheck className="w-3 h-3" /> M4: OET Mini-Game (#750)
+          </li>
           <li className="text-white font-bold flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-brand-cyan animate-pulse" />
-            M4: OET Mini-Game (#750)
+            M5: OEC Clinical (#751)
           </li>
-          <li className="text-zinc-500">&bull; M5: OEC Clinical (#751)</li>
           <li className="text-zinc-500">&bull; M6: Multi-Scenario (#752)</li>
           <li className="text-zinc-500">&bull; M7: Debrief Analytics (#753)</li>
         </ul>

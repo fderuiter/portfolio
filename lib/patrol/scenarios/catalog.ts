@@ -119,3 +119,263 @@ export const INITIAL_PATROL_SCENARIOS: PatrolScenario[] = [
     ],
   },
 ];
+
+// PLACEHOLDER — needs OEC/NSP content review, see #744
+export const OEC_SAMPLE_SCENARIO: PatrolScenario = {
+  id: "upper-ridge-injury",
+  title: "Upper Ridge Lower Extremity Trauma",
+  subtitle: "Downhill skier collision with fall and lower extremity trauma",
+  description:
+    "Skier down on Upper Ridge near Tower 6. Witnesses report catching an outside edge on firm hardpack with a tumbling fall.",
+  difficulty: "intermediate",
+  estimatedMinutes: 20,
+  location: "Upper Ridge - Tower 6",
+  dispatchPrompt:
+    "Patrol Base Dispatch: 10-50 skier down on Upper Ridge near Tower 6, reported lower extremity injury. Respond with Cascade 100 toboggan.",
+  environment: {
+    weather: "Overcast, 22°F, light wind",
+    snowConditions: "Firm hardpack / groomed packed powder",
+    temperatureFahrenheit: 22,
+    visibility: "Moderate (flat light and glare)",
+    hazards: [
+      "Downhill skier traffic from Chair 4 runout",
+      "Blind terrain roll 25 feet uphill",
+    ],
+    sceneSafetyNotes:
+      "Requires uphill crossed skis or spotter to divert oncoming traffic.",
+  },
+  patient: {
+    complaint: "Severe pain, swelling, and point tenderness in lower left leg",
+    mechanism:
+      "High-speed tumbling fall after catching outside ski edge; ski binding failed to release",
+    levelOfConsciousness: "Alert & Oriented x4 (GCS 15)",
+    findings: [
+      "Deformity and localized swelling at mid-shaft tibia",
+      "Distal PMS intact (strong dorsalis pedis pulse, motor and sensation intact)",
+    ],
+    interventions: [
+      "SAM splint applied to lower extremity",
+      "Insulated with wool blanket and toboggan tarp wrap",
+    ],
+    vitals: {
+      heartRate: 76,
+      respiration: 16,
+      bpSystolic: 124,
+      bpDiastolic: 82,
+      spo2: 98,
+      temperature: 98.4,
+      gcs: 15,
+      avpu: "A",
+      pms: "intact",
+    },
+  },
+  actors: [
+    {
+      id: "actor-witness-alex",
+      name: "Alex",
+      role: "Bystander / Ski Partner",
+      notes: "Skied with patient; witnessed tumbling fall.",
+      statement:
+        "They were carving on hardpack, caught an outside edge, and took a hard tumble. Binding didn't release. No head strike.",
+    },
+    {
+      id: "actor-partner-patroller",
+      name: "Jordan",
+      role: "Responding Patroller",
+      notes: "Arrived on scene with Cascade 100 toboggan and trauma pack.",
+      statement:
+        "Sled anchored uphill with chain brake set. Splint kit and blanket ready.",
+    },
+  ],
+  initialVitals: {
+    heartRate: 76,
+    respiration: 16,
+    bpSystolic: 124,
+    bpDiastolic: 82,
+    spo2: 98,
+    temperature: 98.4,
+    gcs: 15,
+    avpu: "A",
+    pms: "intact",
+  },
+  actions: [
+    {
+      id: "assess-scene-safety",
+      label: "Assess & Secure Scene Safety",
+      description:
+        "Plant crossed skis 25ft uphill to divert oncoming downhill skier traffic and establish a protected perimeter.",
+      category: "assessment",
+      costMinutes: 2,
+      securesSceneSafety: true,
+      reveals: {
+        environment: {
+          hazards: ["Downhill skier traffic diverted by uphill crossed skis"],
+          sceneSafetyNotes: "Scene secured: uphill perimeter established.",
+        },
+      },
+    },
+    {
+      id: "interview-witness",
+      label: "Interview Witness (Alex)",
+      description:
+        "Inquire about speed, fall mechanics, loss of consciousness, and head strike.",
+      category: "assessment",
+      costMinutes: 2,
+      reveals: {
+        actors: [
+          {
+            id: "actor-witness-alex",
+            name: "Alex",
+            role: "Bystander / Ski Partner",
+            notes: "Skied with patient; witnessed tumbling fall.",
+            statement:
+              "They were carving on hardpack, caught an outside edge, and took a hard tumble. Binding didn't release. No head strike.",
+          },
+        ],
+        patient: {
+          mechanism:
+            "High-speed tumbling fall after catching outside ski edge; ski binding failed to release",
+        },
+      },
+    },
+    {
+      id: "primary-assessment",
+      label: "Conduct Primary Assessment (ABCs / LOC)",
+      description:
+        "Assess Airway, Breathing, Circulation, and Level of Consciousness (AVPU / GCS).",
+      category: "assessment",
+      costMinutes: 3,
+      preconditions: ["assess-scene-safety"],
+      reveals: {
+        patient: {
+          complaint:
+            "Severe pain, swelling, and point tenderness in lower left leg",
+          levelOfConsciousness: "Alert & Oriented x4 (GCS 15)",
+          findings: [
+            "Airway patent and clear",
+            "Breathing unlabored at 16 breaths/min",
+            "Radial pulse strong and regular",
+          ],
+        },
+      },
+    },
+    {
+      id: "check-vitals",
+      label: "Measure Baseline Vital Signs",
+      description:
+        "Obtain pulse, respiration rate, blood pressure, SpO2, and skin temperature.",
+      category: "assessment",
+      costMinutes: 3,
+      preconditions: ["primary-assessment"],
+      vitalsCheck: {
+        heartRate: 76,
+        respiration: 16,
+        bpSystolic: 124,
+        bpDiastolic: 82,
+        spo2: 98,
+        temperature: 98.4,
+        gcs: 15,
+        avpu: "A",
+        pms: "intact",
+      },
+      reveals: {
+        patient: {
+          vitals: {
+            heartRate: 76,
+            respiration: 16,
+            bpSystolic: 124,
+            bpDiastolic: 82,
+            spo2: 98,
+            temperature: 98.4,
+            gcs: 15,
+            avpu: "A",
+            pms: "intact",
+          },
+        },
+      },
+    },
+    {
+      id: "secondary-assessment",
+      label: "Focused Secondary Exam & Neurovascular (PMS) Check",
+      description:
+        "Expose injury site, inspect for deformity/swelling, and verify distal Pulse, Motor, and Sensory functions.",
+      category: "assessment",
+      costMinutes: 4,
+      preconditions: ["primary-assessment"],
+      reveals: {
+        patient: {
+          findings: [
+            "Point tenderness and localized swelling at mid-shaft tibia",
+            "Distal pedal pulse present and strong",
+            "Motor and sensory function intact in toes bilaterally",
+          ],
+        },
+      },
+    },
+    {
+      id: "apply-splint",
+      label: "Apply Rigid SAM Splint & Re-verify PMS",
+      description:
+        "Immobilize joint above and below injury; re-check distal pulse, motor, and sensation post-splinting.",
+      category: "treatment",
+      costMinutes: 6,
+      requiredEquipment: ["sam-splint", "elastic-wrap", "cravats"],
+      preconditions: ["secondary-assessment"],
+      requiresSceneSafety: true,
+      reveals: {
+        patient: {
+          interventions: [
+            "SAM splint contoured and secured to lower left extremity",
+            "Distal PMS re-checked and verified intact post-splinting",
+          ],
+        },
+      },
+    },
+    {
+      id: "package-patient",
+      label: "Package in Toboggan with Hypothermia Wrap",
+      description:
+        "Transfer patient onto litter, apply wool blanket insulation, and secure tie-down straps in toboggan.",
+      category: "transport",
+      costMinutes: 5,
+      preconditions: ["apply-splint"],
+      requiresSceneSafety: true,
+      reveals: {
+        patient: {
+          interventions: [
+            "Packaged in Cascade 100 rescue toboggan",
+            "Wool blanket and waterproof tarp hypothermia wrap applied",
+          ],
+        },
+      },
+    },
+  ],
+  debriefRules: [
+    {
+      id: "rule-scene-safety",
+      title: "Scene Safety Protocol",
+      category: "safety",
+      passed: true,
+      score: 30,
+      feedback: "Uphill crossed skis placed before initiating patient contact.",
+    },
+    {
+      id: "rule-pms-evaluation",
+      title: "Neurovascular Assessment",
+      category: "clinical",
+      passed: true,
+      score: 35,
+      feedback:
+        "Distal pulse, motor, and sensory functions assessed before and after splinting.",
+    },
+    {
+      id: "rule-splint-package",
+      title: "Immobilization & Packaging",
+      category: "clinical",
+      passed: true,
+      score: 35,
+      feedback:
+        "Extremity immobilized and patient packaged with hypothermia protection.",
+    },
+  ],
+};
