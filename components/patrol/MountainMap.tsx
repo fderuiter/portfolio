@@ -16,7 +16,11 @@ interface MountainMapProps {
 }
 
 /**
- * Responsive, lightweight SVG trail map representing a Midwestern ski hill hub.
+ * Responsive, lightweight SVG trail map representing the Mountain Patrol Hub,
+ * stylized after Welch Village (Welch, MN) — a real Twin Cities-area hill.
+ * Trail names, lift names, and elevation stats are drawn from Welch Village's
+ * public trail statistics; the artwork itself is an original illustration,
+ * not a reproduction of the resort's own trail map graphic.
  * Features animated chairlift line, marked trails (green circle, blue square, black diamond),
  * ambient snow particles, strict prefers-reduced-motion CSS, and operational dispatch actions.
  */
@@ -62,12 +66,15 @@ export const MountainMap: React.FC<MountainMapProps> = ({
               Mountain Open &bull; Patrol On Hill
             </span>
             <span className="text-zinc-400 text-xs font-mono">
-              Quad Sector 2
+              Welch Village, MN
             </span>
           </div>
           <h2 className="text-lg sm:text-xl font-mono font-bold text-white tracking-tight">
             Mountain Patrol Hub &amp; Trail Map
           </h2>
+          <p className="text-[10px] font-mono text-zinc-500">
+            Base 700 ft &bull; Summit 1,060 ft &bull; Vertical 360 ft
+          </p>
         </div>
 
         {/* Patrol Stats Pills */}
@@ -88,10 +95,14 @@ export const MountainMap: React.FC<MountainMapProps> = ({
 
       {/* Accessible Trail Map Alternative for Screen Readers */}
       <div className="sr-only">
-        Detailed mountain trail map with active patrol sectors. Features Summit
-        Patrol Shack at the top, Chair 1 lift line with Towers 1 through 6,
-        Upper Ridge (Black Diamond), Timberline (Blue Square), Gentle Meadow
-        (Green Circle), and Base First Aid Room at the bottom. Total completed
+        Detailed trail map of Welch Village, a Twin Cities-area ski hill, with
+        active patrol sectors. Features Summit Patrol Shack at the top (1,060
+        feet elevation), the Belle Creek Quad lift line with towers 1 through 6,
+        The Great Gorge (Black Diamond), Harley&apos;s Hollow (Blue Square),
+        Heidi&apos;s Hollow (Green Circle) served by the beginner-only Hall
+        lift, and Base First Aid Room at the bottom (700 feet elevation). This
+        is a stylized, original illustration inspired by Welch Village&apos;s
+        public trail statistics, not an official resort map. Total completed
         count: {incidentsCompleted}.
       </div>
 
@@ -101,14 +112,16 @@ export const MountainMap: React.FC<MountainMapProps> = ({
           viewBox="0 0 800 500"
           className="w-full h-auto max-h-[460px] select-none"
           role="img"
-          aria-label="Midwest Ski Patrol Mountain Trail Map"
+          aria-label="Welch Village Trail Map"
         >
-          <title>Midwest Ski Patrol Mountain Trail Map</title>
+          <title>Welch Village Trail Map</title>
           <desc>
-            Stylized trail map of Midwest ski hill showing Summit Shack,
-            Chairlift Towers 1 through 6, Upper Ridge black diamond trail,
-            Timberline blue square trail, Gentle Meadow green circle trail, and
-            Base Lodge First Aid Room.
+            Stylized, original illustration inspired by Welch Village (Welch,
+            MN) showing Summit Shack, the Belle Creek Quad chairlift with Towers
+            1 through 6, The Great Gorge black diamond trail, Harley&apos;s
+            Hollow blue square trail, Heidi&apos;s Hollow green circle trail
+            served by the beginner-only Hall lift, and Base Lodge First Aid
+            Room. Not an official Welch Village resort map.
           </desc>
 
           <defs>
@@ -195,7 +208,7 @@ export const MountainMap: React.FC<MountainMapProps> = ({
 
           {/* TRAILS */}
 
-          {/* Trail 1: Gentle Meadow (Green Circle) */}
+          {/* Trail 1: Heidi's Hollow (Green Circle) */}
           <path
             d="M 370 85 C 260 120 140 200 130 310 C 120 400 240 450 320 460"
             fill="none"
@@ -213,7 +226,7 @@ export const MountainMap: React.FC<MountainMapProps> = ({
             strokeLinecap="round"
           />
 
-          {/* Trail 2: Timberline Trail (Blue Square) */}
+          {/* Trail 2: Harley's Hollow (Blue Square) */}
           <path
             d="M 430 85 C 520 150 560 240 540 330 C 520 410 450 440 390 460"
             fill="none"
@@ -231,7 +244,7 @@ export const MountainMap: React.FC<MountainMapProps> = ({
             strokeLinecap="round"
           />
 
-          {/* Trail 3: Upper Ridge (Black Diamond - Fall Line) */}
+          {/* Trail 3: The Great Gorge (Black Diamond - Fall Line) */}
           <path
             d="M 395 85 C 380 150 340 220 370 290 C 390 350 370 410 360 460"
             fill="none"
@@ -249,7 +262,7 @@ export const MountainMap: React.FC<MountainMapProps> = ({
             strokeLinecap="round"
           />
 
-          {/* CHAIRLIFT LINE (Chair 1 Quad) */}
+          {/* CHAIRLIFT LINE (Belle Creek Quad) */}
           <line
             x1="460"
             y1="465"
@@ -355,6 +368,17 @@ export const MountainMap: React.FC<MountainMapProps> = ({
             >
               SUMMIT
             </text>
+            <text
+              x="0"
+              y="22"
+              fill="#67e8f9"
+              fontSize="7"
+              fontFamily="monospace"
+              textAnchor="middle"
+              opacity="0.85"
+            >
+              1,060 FT
+            </text>
             <circle cx="-16" cy="-4" r="2" fill="#ef4444" />
           </g>
 
@@ -372,7 +396,7 @@ export const MountainMap: React.FC<MountainMapProps> = ({
             />
             <text
               x="0"
-              y="3"
+              y="0"
               fill="#34d399"
               fontSize="10"
               fontWeight="bold"
@@ -380,6 +404,17 @@ export const MountainMap: React.FC<MountainMapProps> = ({
               textAnchor="middle"
             >
               BASE AID ROOM
+            </text>
+            <text
+              x="0"
+              y="11"
+              fill="#6ee7b7"
+              fontSize="7"
+              fontFamily="monospace"
+              textAnchor="middle"
+              opacity="0.85"
+            >
+              700 FT &bull; WELCH, MN
             </text>
           </g>
 
@@ -396,7 +431,21 @@ export const MountainMap: React.FC<MountainMapProps> = ({
               fontWeight="bold"
               fontFamily="monospace"
             >
-              Gentle Meadow ●
+              Heidi&apos;s Hollow ●
+            </text>
+          </g>
+
+          {/* Hall Lift Marker — beginner-only double chair serving the green terrain */}
+          <g transform="translate(155, 340)" opacity="0.9">
+            <rect x="-5" y="-5" width="10" height="10" rx="2" fill="#facc15" />
+            <text
+              x="12"
+              y="4"
+              fill="#fde68a"
+              fontSize="8"
+              fontFamily="monospace"
+            >
+              Hall Lift (Beginner)
             </text>
           </g>
 
@@ -411,7 +460,7 @@ export const MountainMap: React.FC<MountainMapProps> = ({
               fontWeight="bold"
               fontFamily="monospace"
             >
-              Timberline Trail ■
+              Harley&apos;s Hollow ■
             </text>
           </g>
 
@@ -431,7 +480,7 @@ export const MountainMap: React.FC<MountainMapProps> = ({
               fontWeight="bold"
               fontFamily="monospace"
             >
-              Upper Ridge ◆
+              The Great Gorge ◆
             </text>
           </g>
 
@@ -480,10 +529,19 @@ export const MountainMap: React.FC<MountainMapProps> = ({
         <div className="absolute top-4 left-4 bg-zinc-950/80 backdrop-blur-sm border border-zinc-800 rounded-xl px-3 py-1.5 text-[11px] font-mono text-zinc-300 flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span>
-            Hill Sector: <strong>Upper Mountain &bull; Chair 1</strong>
+            Hill Sector: <strong>East Slopes &bull; Belle Creek Quad</strong>
           </span>
         </div>
       </div>
+
+      {/* Map Attribution */}
+      <p className="text-[10px] font-mono text-zinc-600 -mt-2">
+        Stylized, unofficial illustration inspired by Welch Village&apos;s
+        public trail statistics (trails: Heidi&apos;s Hollow, Harley&apos;s
+        Hollow, The Great Gorge &bull; lifts: Belle Creek Quad, Hall, East
+        Ridge, Skilink). Not affiliated with or endorsed by Welch Village Ski
+        Area.
+      </p>
 
       {/* Action Controls Bar */}
       <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
