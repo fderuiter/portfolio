@@ -78,6 +78,10 @@ interface MountainMapProps {
  * pathing with grooming textures, live cursor altitude calculation, trail inspector with
  * elevation sparkline, skier run simulation, minimap radar, night skiing floodlights,
  * and NSAA Responsibility Code modal. Adheres to ADR 0044 and WCAG 2.1 AA.
+ *
+ * Trail names, lift names, and elevation stats are cross-checked against Welch
+ * Village's own current published trail map, but the artwork is an original
+ * illustration — not a reproduction of, nor an official, resort trail map.
  */
 export const MountainMap: React.FC<MountainMapProps> = ({
   incidentsCompleted,
@@ -667,7 +671,9 @@ export const MountainMap: React.FC<MountainMapProps> = ({
         {activeZone === "main" ? "East and West Slopes" : "The Back Bowl"}. Base
         elevation: 700 feet, Summit elevation: 1,060 feet. Use mouse or touch to
         pan and zoom. Select any trail to view slope profiles, average grade,
-        and initiate skier descent simulations.
+        and initiate skier descent simulations. This is a stylized, original
+        illustration cross-checked against Welch Village&apos;s own published
+        trail map, not an official resort map.
       </div>
 
       {/* ------------------------------------------------------------- */}
@@ -695,7 +701,9 @@ export const MountainMap: React.FC<MountainMapProps> = ({
           <desc>
             Geospatial terrain map of Welch Village Ski Area in Welch,
             Minnesota. Showing authentic trail splines, chairlifts, POIs, and
-            elevation contours.
+            elevation contours. A stylized, original illustration cross-checked
+            against Welch Village&apos;s own published trail map — not an
+            official resort map.
           </desc>
 
           <defs>
