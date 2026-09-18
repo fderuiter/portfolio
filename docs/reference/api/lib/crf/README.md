@@ -380,6 +380,30 @@ Re-exports [computeStudyChecksum](study-baselines/functions/computeStudyChecksum
 
 ***
 
+### CONDITIONAL\_PRECEDENCE\_NOTES
+
+Re-exports [CONDITIONAL_PRECEDENCE_NOTES](conditional-logic/variables/CONDITIONAL_PRECEDENCE_NOTES.md)
+
+***
+
+### ConditionalActionType
+
+Re-exports [ConditionalActionType](conditional-logic/type-aliases/ConditionalActionType.md)
+
+***
+
+### ConditionalConflict
+
+Re-exports [ConditionalConflict](conditional-logic/interfaces/ConditionalConflict.md)
+
+***
+
+### ConditionalFieldValues
+
+Re-exports [ConditionalFieldValues](conditional-logic/type-aliases/ConditionalFieldValues.md)
+
+***
+
 ### ConditionExplanation
 
 Re-exports [ConditionExplanation](expression-evaluator/interfaces/ConditionExplanation.md)
@@ -467,6 +491,12 @@ Re-exports [describeBaselineDiffChangeType](study-baseline-diff/functions/descri
 ### describeCondition
 
 Re-exports [describeCondition](expression-evaluator/functions/describeCondition.md)
+
+***
+
+### describeFieldConditionalState
+
+Re-exports [describeFieldConditionalState](conditional-logic/functions/describeFieldConditionalState.md)
 
 ***
 
@@ -800,6 +830,12 @@ Re-exports [extractCodelistFromUsdmObject](usdm-adapter/functions/extractCodelis
 
 ***
 
+### FieldConditionalState
+
+Re-exports [FieldConditionalState](conditional-logic/interfaces/FieldConditionalState.md)
+
+***
+
 ### FieldImpactPreview
 
 Re-exports [FieldImpactPreview](study-engine/interfaces/FieldImpactPreview.md)
@@ -821,6 +857,12 @@ Re-exports [formatPrecisionDate](precision-date/functions/formatPrecisionDate.md
 ### FormAuditReport
 
 Re-exports [FormAuditReport](study-auditor/interfaces/FormAuditReport.md)
+
+***
+
+### FormConditionalState
+
+Re-exports [FormConditionalState](conditional-logic/interfaces/FormConditionalState.md)
 
 ***
 
@@ -968,6 +1010,12 @@ Re-exports [getPresetByIdSync](presets/loader/functions/getPresetByIdSync.md)
 
 ***
 
+### getRetainedHiddenValues
+
+Re-exports [getRetainedHiddenValues](conditional-logic/functions/getRetainedHiddenValues.md)
+
+***
+
 ### getRuleGroups
 
 Re-exports [getRuleGroups](expression-evaluator/functions/getRuleGroups.md)
@@ -1001,6 +1049,12 @@ Re-exports [getStudyPresets](presets/loader/functions/getStudyPresets.md)
 ### getStudyPresetsSync
 
 Re-exports [getStudyPresetsSync](presets/loader/functions/getStudyPresetsSync.md)
+
+***
+
+### getUnsatisfiedRequiredFields
+
+Re-exports [getUnsatisfiedRequiredFields](conditional-logic/functions/getUnsatisfiedRequiredFields.md)
 
 ***
 
@@ -1220,6 +1274,18 @@ Re-exports [ProtocolValidationResult](study-engine/interfaces/ProtocolValidation
 
 ***
 
+### resolveFormConditionalState
+
+Re-exports [resolveFormConditionalState](conditional-logic/functions/resolveFormConditionalState.md)
+
+***
+
+### resolveFormConditionalStateForForm
+
+Re-exports [resolveFormConditionalStateForForm](conditional-logic/functions/resolveFormConditionalStateForForm.md)
+
+***
+
 ### resolveStorage
 
 Re-exports [resolveStorage](study-draft-storage/functions/resolveStorage.md)
@@ -1241,6 +1307,12 @@ Re-exports [RestoreStudyBaselineOptions](study-baselines/interfaces/RestoreStudy
 ### RestoreStudyBaselineResult
 
 Re-exports [RestoreStudyBaselineResult](study-baselines/type-aliases/RestoreStudyBaselineResult.md)
+
+***
+
+### RuleAttribution
+
+Re-exports [RuleAttribution](conditional-logic/interfaces/RuleAttribution.md)
 
 ***
 

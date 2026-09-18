@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   StudyProtocol,
   CRFField,
@@ -10,6 +10,10 @@ import {
   SubjectFormStatus,
 } from "@/lib/crf/types";
 import { evaluateRule } from "@/lib/crf/ast-evaluator";
+import {
+  resolveFormConditionalState,
+  describeFieldConditionalState,
+} from "@/lib/crf";
 import { useCrfService } from "@/hooks/useCrfService";
 import { generateId } from "@/lib/utils";
 import {
@@ -160,28 +164,51 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
   const formLockKey = `${subjectId}_${activeVisitId}_${activeForm?.id || ""}`;
   const isCurrentFormLocked = lockedForms[formLockKey]?.locked || false;
 
+  // Values for the active subject, keyed by both field id and variable name,
+  // plus cross-visit keys. Shared by formula evaluation, edit checks and the
+  // conditional visibility runtime so all three see identical inputs.
+  const subjectVals = useMemo(() => {
+    const vals: Record<string, string | number | boolean | null | undefined> =
+      {};
+    if (!activeForm) return vals;
+
+    activeForm.sections
+      .flatMap((s) => s.fields)
+      .forEach((f) => {
+        const key = `${subjectId}_${activeVisitId}_${f.id}`;
+        vals[f.id] = formValues[key];
+        vals[f.variableName] = formValues[key];
+      });
+
+    Object.entries(formValues).forEach(([key, val]) => {
+      if (key.startsWith(`${subjectId}_`)) {
+        vals[key.replace(`${subjectId}_`, "")] = val;
+      }
+    });
+
+    return vals;
+  }, [activeForm, formValues, subjectId, activeVisitId]);
+
+  /**
+   * Conditional show/hide/require state (#670). One resolution per render
+   * feeds both the rendered controls and the save-time validator, so the two
+   * can never disagree about whether a field is on screen or mandatory.
+   */
+  const conditionalState = useMemo(() => {
+    if (!activeForm) return null;
+    return resolveFormConditionalState(
+      activeForm.sections.flatMap((s) => s.fields),
+      activeForm.rules || [],
+      subjectVals,
+      activeVisitId
+    );
+  }, [activeForm, subjectVals, activeVisitId]);
+
   // Evaluate dynamic formulas and edit checks when formValues change
   useEffect(() => {
     if (!activeForm) return;
 
     const fields = activeForm.sections.flatMap((s) => s.fields);
-    const subjectVals: Record<
-      string,
-      string | number | boolean | null | undefined
-    > = {};
-    fields.forEach((f) => {
-      const key = `${subjectId}_${activeVisitId}_${f.id}`;
-      subjectVals[f.id] = formValues[key];
-      subjectVals[f.variableName] = formValues[key];
-    });
-
-    // Also inject cross-visit values into subjectVals
-    Object.entries(formValues).forEach(([key, val]) => {
-      if (key.startsWith(`${subjectId}_`)) {
-        const parts = key.replace(`${subjectId}_`, "");
-        subjectVals[parts] = val;
-      }
-    });
 
     // 1. Evaluate Calculated Fields
     fields.forEach((field) => {
@@ -239,7 +266,14 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
         });
       }
     });
-  }, [formValues, activeForm, activeVisitId, subjectId, evaluateFormula]);
+  }, [
+    formValues,
+    activeForm,
+    activeVisitId,
+    subjectId,
+    evaluateFormula,
+    subjectVals,
+  ]);
 
   const handleFieldChange = (
     field: CRFField,
@@ -387,10 +421,20 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
       const hasNullFlavor = isCdiscNullFlavor(val);
       const isEmpty = val === null || val === undefined || val === "";
 
-      // 1. Missing data checks
+      // A field a conditional rule has taken off screen is never validated
+      // (#670). Requiring an invisible answer would make the form
+      // unsubmittable with no way for the investigator to resolve it. The
+      // captured value is left untouched, not cleared.
+      const fieldState = conditionalState?.fields[field.id];
+      if (fieldState && !fieldState.visible) return;
+
+      // 1. Missing data checks. Requiredness comes from the same resolved
+      // state the control rendered from, so a rule-required field is enforced
+      // exactly when it is shown as required.
+      const isRuleRequired = fieldState?.required ?? field.required;
       const isHardStop =
         field.requirementTier === "hard_stop" ||
-        (!field.requirementTier && field.required);
+        (!field.requirementTier && isRuleRequired);
       const isAutoQuery = field.requirementTier === "auto_query";
 
       if (isEmpty && !hasNullFlavor) {
@@ -849,6 +893,18 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
 
                 <div className="grid grid-cols-12 gap-3 sm:gap-4">
                   {section.fields.map((field) => {
+                    // Conditional visibility (#670): a hidden field is not
+                    // rendered at all, so it is absent from the accessibility
+                    // tree and the tab order rather than merely dimmed.
+                    const fieldState = conditionalState?.fields[field.id];
+                    if (fieldState && !fieldState.visible) return null;
+
+                    const isFieldRequired =
+                      fieldState?.required ?? field.required;
+                    const conditionalExplanation = fieldState
+                      ? describeFieldConditionalState(fieldState)
+                      : null;
+
                     const key = `${subjectId}_${activeVisitId}_${field.id}`;
                     const currentVal = formValues[key];
                     const isSdv = sdvMap[key]?.verified || false;
@@ -891,10 +947,24 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
                               className="block text-xs font-semibold text-zinc-200 cursor-pointer"
                             >
                               {field.label}
-                              {field.required && (
-                                <span className="text-red-400 ml-0.5">*</span>
+                              {isFieldRequired && (
+                                <span
+                                  className="text-red-400 ml-0.5"
+                                  title={
+                                    fieldState?.requirednessSource
+                                      ? `Required by rule: ${fieldState.requirednessSource.ruleName}`
+                                      : undefined
+                                  }
+                                >
+                                  *
+                                </span>
                               )}
                             </label>
+                            {conditionalExplanation && (
+                              <span className="sr-only">
+                                {conditionalExplanation}
+                              </span>
+                            )}
                             <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                               <span className="text-[10px] font-mono text-zinc-500">
                                 {field.variableName}
@@ -907,7 +977,7 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
                                     ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
                                     : field.requirementTier === "hard_stop" ||
                                         (!field.requirementTier &&
-                                          field.required)
+                                          isFieldRequired)
                                       ? "bg-red-500/15 text-red-300 border-red-500/30"
                                       : "bg-zinc-900 text-zinc-400 border-zinc-800"
                                 }`}
@@ -915,7 +985,8 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
                                 {field.requirementTier === "auto_query"
                                   ? "? Auto-Query"
                                   : field.requirementTier === "hard_stop" ||
-                                      (!field.requirementTier && field.required)
+                                      (!field.requirementTier &&
+                                        isFieldRequired)
                                     ? "* Hard Stop"
                                     : "Opt"}
                               </span>
