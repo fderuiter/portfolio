@@ -4,6 +4,7 @@ import { CaseStudyService } from "@/lib/services/case-study-service";
 import { createApiHandler } from "@/lib/route-wrapper";
 import { sanitizeError } from "@/lib/error-sanitization";
 import { checkRequestSubmissionRateLimit } from "@/lib/moderation";
+import { isCurrentUserAdmin } from "@/lib/auth/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,13 @@ export const GET = createApiHandler(async () => {
 
 export const POST = createApiHandler(
   async (req: NextRequest, { data }) => {
+    if (!(await isCurrentUserAdmin())) {
+      return NextResponse.json(
+        { error: "Administrator access required" },
+        { status: 403 }
+      );
+    }
+
     try {
       const rateLimitCheck = checkRequestSubmissionRateLimit(req);
       if (rateLimitCheck.isRateLimited) {
@@ -47,12 +55,18 @@ export const POST = createApiHandler(
       const errorObj = err as { code?: string; message?: string };
       if (
         errorObj?.code === "P2002" ||
-        (typeof errorObj?.message === "string" && errorObj.message.includes("Unique constraint failed"))
+        (typeof errorObj?.message === "string" &&
+          errorObj.message.includes("Unique constraint failed"))
       ) {
         return NextResponse.json(
           {
             error: "A case study with this slug already exists",
-            details: [{ path: "slug", message: "A case study with this slug already exists" }],
+            details: [
+              {
+                path: "slug",
+                message: "A case study with this slug already exists",
+              },
+            ],
           },
           { status: 400 }
         );
@@ -71,15 +85,20 @@ export const POST = createApiHandler(
     type: "body",
     customJsonError: "Invalid JSON payload",
     customValidationError: (err) => {
-      const issues = (err as { issues: Array<{ path: Array<string | number>; message: string }> }).issues;
+      const issues = (
+        err as {
+          issues: Array<{ path: Array<string | number>; message: string }>;
+        }
+      ).issues;
       const details = issues.map((issue) => ({
         path: issue.path.join(".") || "payload",
         message: issue.message,
       }));
-      const isToneViolation = issues.some((i) =>
-        i.message.toLowerCase().includes("tone") ||
-        i.message.toLowerCase().includes("constructive") ||
-        i.message.toLowerCase().includes("profanity")
+      const isToneViolation = issues.some(
+        (i) =>
+          i.message.toLowerCase().includes("tone") ||
+          i.message.toLowerCase().includes("constructive") ||
+          i.message.toLowerCase().includes("profanity")
       );
       return {
         error: isToneViolation

@@ -164,7 +164,7 @@ completely avoiding database queries during active browsing.
 
 ### submitCaseStudy()
 
-> `static` **submitCaseStudy**(`input`): `Promise`\<\{ `architectural_narrative`: `string`; `commands_json`: `string` \| `null`; `created_at`: `Date`; `editorial_content`: `string`; `github_url`: `string` \| `null`; `id`: `string`; `playback_json`: `string` \| `null`; `primary_language`: `string`; `published`: `boolean`; `simulated_telemetry`: `boolean`; `slug`: `string`; `tags`: `string`; `title`: `string`; `updated_at`: `Date`; \}\>
+> `static` **submitCaseStudy**(`input`): `Promise`\<\{ `architectural_narrative`: `string`; `commands_json`: `string` \| `null`; `created_at`: `Date`; `editorial_content`: `string`; `github_url`: `string` \| `null`; `hero_image_url`: `string` \| `null`; `id`: `string`; `playback_json`: `string` \| `null`; `primary_language`: `string`; `published`: `boolean`; `simulated_telemetry`: `boolean`; `slug`: `string`; `tags`: `string`; `title`: `string`; `updated_at`: `Date`; \}\>
 
 Sanitizes rich text / HTML content submissions and persists draft case study.
 
@@ -176,7 +176,7 @@ Sanitizes rich text / HTML content submissions and persists draft case study.
 
 #### Returns
 
-`Promise`\<\{ `architectural_narrative`: `string`; `commands_json`: `string` \| `null`; `created_at`: `Date`; `editorial_content`: `string`; `github_url`: `string` \| `null`; `id`: `string`; `playback_json`: `string` \| `null`; `primary_language`: `string`; `published`: `boolean`; `simulated_telemetry`: `boolean`; `slug`: `string`; `tags`: `string`; `title`: `string`; `updated_at`: `Date`; \}\>
+`Promise`\<\{ `architectural_narrative`: `string`; `commands_json`: `string` \| `null`; `created_at`: `Date`; `editorial_content`: `string`; `github_url`: `string` \| `null`; `hero_image_url`: `string` \| `null`; `id`: `string`; `playback_json`: `string` \| `null`; `primary_language`: `string`; `published`: `boolean`; `simulated_telemetry`: `boolean`; `slug`: `string`; `tags`: `string`; `title`: `string`; `updated_at`: `Date`; \}\>
 
 ***
 
@@ -223,3 +223,25 @@ Buffers reaction increments via HINCRBY and enqueues events without waking Neon 
 #### Returns
 
 `Promise`\<\{ `counts`: `Record`\<`string`, `number`\>; `reactionType`: `string`; `success`: `boolean`; `userReactions`: `string`[]; \}\>
+
+***
+
+### updateCaseStudyImage()
+
+> `static` **updateCaseStudyImage**(`slug`, `heroImageUrl`): `Promise`\<[`CaseStudyData`](../../../case-studies-data/interfaces/CaseStudyData.md)\>
+
+Updates the hero image asset URL for a case study and evicts cache.
+
+#### Parameters
+
+##### slug
+
+`string`
+
+##### heroImageUrl
+
+`string` \| `null`
+
+#### Returns
+
+`Promise`\<[`CaseStudyData`](../../../case-studies-data/interfaces/CaseStudyData.md)\>

@@ -52,7 +52,7 @@
 
 ### type
 
-> **type**: `"premise"` \| `"intermediate"` \| `"conclusion"`
+> **type**: `"intermediate"` \| `"premise"` \| `"conclusion"`
 
 ***
 

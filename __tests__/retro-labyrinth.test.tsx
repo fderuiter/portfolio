@@ -32,6 +32,11 @@ describe("RetroLabyrinth Component Architecture & Functional Rules", () => {
     expect(content).toContain('data-keyboard-boundary="true"');
   });
 
+  it("should use dynamic viewport height units (dvh) with vh fallbacks for responsive mobile scaling", () => {
+    expect(content).toContain("max-h-[100dvh]");
+    expect(content).toContain("max-h-[100vh]");
+  });
+
   it("should intercept and prevent default on directional keys inside handleKeyDown", () => {
     expect(content).toContain("handleKeyDown");
     expect(content).toContain("e.preventDefault()");

@@ -56,3 +56,6 @@ app/theme.css
 
 # clerk configuration (can include secrets)
 /.clerk/
+
+# local media storage persistence
+/.media-storage/

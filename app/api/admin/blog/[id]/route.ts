@@ -34,10 +34,6 @@ function duplicateSlugResponse() {
   };
 }
 
-async function isAdministrator(): Promise<boolean> {
-  return isCurrentUserAdmin();
-}
-
 function getDraftId(params: Record<string, string | string[] | undefined>) {
   const parsed = BlogDraftIdParamsSchema.safeParse(params);
   if (!parsed.success) {
@@ -47,7 +43,7 @@ function getDraftId(params: Record<string, string | string[] | undefined>) {
 }
 
 export const GET = createApiHandler(async (_req: NextRequest, { params }) => {
-  if (!(await isAdministrator())) {
+  if (!(await isCurrentUserAdmin())) {
     return NextResponse.json(
       { error: "Administrator access required" },
       { status: 403 }
@@ -79,7 +75,7 @@ export const GET = createApiHandler(async (_req: NextRequest, { params }) => {
 
 export const PATCH = createApiHandler(
   async (_req: NextRequest, { data, params }) => {
-    if (!(await isAdministrator())) {
+    if (!(await isCurrentUserAdmin())) {
       return NextResponse.json(
         { error: "Administrator access required" },
         { status: 403 }
@@ -125,5 +121,38 @@ export const PATCH = createApiHandler(
     type: "body",
     customJsonError: "Invalid JSON payload",
     customValidationError: validationError,
+  }
+);
+
+export const DELETE = createApiHandler(
+  async (_req: NextRequest, { params }) => {
+    if (!(await isCurrentUserAdmin())) {
+      return NextResponse.json(
+        { error: "Administrator access required" },
+        { status: 403 }
+      );
+    }
+
+    const parsed = getDraftId(params);
+    if ("error" in parsed) {
+      return NextResponse.json(parsed.error, { status: 400 });
+    }
+
+    try {
+      const deleted = await BlogPostService.deleteBlogPost(parsed.id);
+      if (!deleted) {
+        return NextResponse.json(
+          { error: "Blog draft not found" },
+          { status: 404 }
+        );
+      }
+      return NextResponse.json({ success: true, data: { id: parsed.id } });
+    } catch (error) {
+      console.error("API admin blog deletion failed:", sanitizeError(error));
+      return NextResponse.json(
+        { error: "Failed to delete blog post" },
+        { status: 500 }
+      );
+    }
   }
 );

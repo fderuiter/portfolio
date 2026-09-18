@@ -18,6 +18,7 @@ export interface CaseStudyData {
   benchmarks?: Record<string, string | number> | null;
   commands_json?: string;
   playback_json?: string;
+  hero_image_url?: string | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -1760,7 +1761,7 @@ flowchart TD
     Client[Browser / HTMX Client] -->|HTTP / Form Data| Router[FastAPI Application Gateway]
 
     subgraph routing["Routing & Middleware"]
-        Router --> ErrorDecorator[@api_error_handler Decorator]
+        Router --> ErrorDecorator["@api_error_handler Decorator"]
         Router --> Registry[Action Registry Dispatcher]
     end
 

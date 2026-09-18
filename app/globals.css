@@ -17,8 +17,13 @@
   --border-active: rgba(245, 158, 11, 0.4);
   --muted: #94a3b8;
   --muted-strong: #cbd5e1;
+  --text-secondary: #94a3b8;
   --brand-cyan: #06b6d4;
   --brand-cyan-glow: rgba(6, 182, 212, 0.15);
+  --cyan-glow: #38bdf8;
+  --emerald-accent: #4ade80;
+  --badge-muted-bg: #1e293b;
+  --badge-muted-text: #7dd3fc;
   --brand-blue: #3b82f6;
   --brand-blue-glow: rgba(59, 130, 246, 0.1);
   --brand-dark: #0d0e11;
@@ -81,8 +86,13 @@
   --color-border-active: var(--border-active);
   --color-muted: var(--muted);
   --color-muted-strong: var(--muted-strong);
+  --color-text-secondary: var(--text-secondary);
   --color-brand-cyan: var(--brand-cyan);
   --color-brand-cyan-glow: var(--brand-cyan-glow);
+  --color-cyan-glow: var(--cyan-glow);
+  --color-emerald-accent: var(--emerald-accent);
+  --color-badge-muted-bg: var(--badge-muted-bg);
+  --color-badge-muted-text: var(--badge-muted-text);
   --color-brand-blue: var(--brand-blue);
   --color-brand-blue-glow: var(--brand-blue-glow);
   --color-brand-dark: var(--brand-dark);
@@ -543,6 +553,7 @@ body {
   }
   .arcade-cabinet[data-fullscreen="true"] .arcade-labyrinth-options {
     flex-shrink: 0;
+    max-height: 40vh;
     max-height: 40dvh;
     overflow-y: auto;
   }

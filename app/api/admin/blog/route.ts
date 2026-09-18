@@ -25,13 +25,9 @@ function validationError(error: unknown) {
   };
 }
 
-async function isAdministrator(): Promise<boolean> {
-  return isCurrentUserAdmin();
-}
-
 export const GET = createApiHandler(
   async (_req: NextRequest, { data }) => {
-    if (!(await isAdministrator())) {
+    if (!(await isCurrentUserAdmin())) {
       return NextResponse.json(
         { error: "Administrator access required" },
         { status: 403 }
@@ -61,7 +57,7 @@ export const GET = createApiHandler(
 
 export const POST = createApiHandler(
   async (_req: NextRequest, { data }) => {
-    if (!(await isAdministrator())) {
+    if (!(await isCurrentUserAdmin())) {
       return NextResponse.json(
         { error: "Administrator access required" },
         { status: 403 }

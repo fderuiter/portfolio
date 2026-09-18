@@ -9,6 +9,7 @@ import React, {
   useSyncExternalStore,
 } from "react";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import { useAnnouncer } from "@/hooks/useAnnouncer";
 import { clamp } from "@/lib/game-utils";
 import { useAudio } from "@/components/providers/AudioProvider";
 import {
@@ -135,6 +136,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({
     getHighScoreServerSnapshot
   );
   const loadedHighScore = parseInt(rawHighScore, 10) || 0;
+  const { announce } = useAnnouncer();
 
   // Persistent Cyberdeck Profile & Meta-Progression
   const [profile, setProfile] = useState<CyberdeckProfile>(() =>
@@ -1546,7 +1548,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({
   if (!isMounted) {
     return (
       <div
-        className="relative w-full aspect-[15/9] min-h-[240px] h-[240px] bg-neutral-950/80 border border-neutral-900 rounded-2xl flex flex-col items-center justify-center font-mono select-none overflow-hidden my-6"
+        className="relative w-full aspect-[15/9] min-h-[240px] max-h-[100vh] max-h-[100dvh] h-auto bg-neutral-950/80 border border-neutral-900 rounded-2xl flex flex-col items-center justify-center font-mono select-none overflow-hidden my-6"
         data-testid="retro-labyrinth-skeleton"
       >
         <div className="absolute top-3 left-4 right-4 flex justify-between items-center text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
@@ -1741,8 +1743,8 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({
         data-keyboard-boundary="true"
         className={`arcade-labyrinth-playfield relative w-full ${
           isFullscreen
-            ? "fixed inset-0 z-50 w-full h-[100dvh] max-h-[100dvh] max-w-none rounded-none border-none bg-black flex flex-col items-center justify-between p-1.5 sm:p-4 select-none touch-none overflow-hidden"
-            : "h-auto"
+            ? "fixed inset-0 z-50 w-full h-[100vh] h-[100dvh] max-h-[100vh] max-h-[100dvh] max-w-none rounded-none border-none bg-black flex flex-col items-center justify-between p-1.5 sm:p-4 select-none touch-none overflow-hidden"
+            : "h-auto max-h-[100vh] max-h-[100dvh]"
         } bg-neutral-950/90 border rounded-2xl flex flex-col items-center justify-between p-2.5 overflow-hidden outline-none transition-all duration-300 ${
           isFocused
             ? "border-brand-cyan ring-2 ring-brand-cyan/10 shadow-[0_0_20px_rgba(34,211,238,0.1)] scale-[1.005]"
@@ -1838,10 +1840,10 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({
         <div
           className={`arcade-labyrinth-canvas relative ${
             isFullscreen
-              ? "w-full flex-1 max-h-[var(--layout-viewport-budget,calc(100dvh-var(--header-height,80px)-var(--footer-height,48px)))] max-h-[calc(100dvh-var(--header-height,80px)-var(--footer-height,48px))] aspect-[240/144] min-h-0"
+              ? "w-full flex-1 max-h-[var(--layout-viewport-budget,calc(100vh-var(--header-height,80px)-var(--footer-height,48px)))] max-h-[var(--layout-viewport-budget,calc(100dvh-var(--header-height,80px)-var(--footer-height,48px)))] max-h-[calc(100vh-var(--header-height,80px)-var(--footer-height,48px))] max-h-[calc(100dvh-var(--header-height,80px)-var(--footer-height,48px))] aspect-[240/144] min-h-0"
               : isExpanded
-                ? "w-full max-w-[360px] aspect-[240/144] h-auto"
-                : "w-full max-w-[240px] aspect-[240/144] h-auto"
+                ? "w-full max-w-[360px] aspect-[240/144] h-auto max-h-[100vh] max-h-[100dvh]"
+                : "w-full max-w-[240px] aspect-[240/144] h-auto max-h-[100vh] max-h-[100dvh]"
           } flex items-center justify-center transition-all duration-300 my-auto`}
           style={
             crtCalibration.curvature > 0.05
@@ -1860,14 +1862,153 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({
             onMouseLeave={() => {
               cursorGridPosRef.current = null;
             }}
+            role="application"
+            aria-label="Retro Labyrinth Cyberdeck Dungeon Crawl. Use arrow keys or WASD to navigate, and Tab to access accessible controls."
+            tabIndex={0}
             className={`block ${
               isFullscreen
                 ? "max-w-full max-h-full aspect-[240/144] object-contain"
                 : isExpanded
                   ? "w-full max-w-[360px] aspect-[240/144] h-auto"
                   : "w-full max-w-[240px] aspect-[240/144] h-auto"
-            } rounded-lg border border-neutral-900/60 bg-neutral-950 cursor-crosshair`}
+            } rounded-lg border border-neutral-900/60 bg-neutral-950 cursor-crosshair focus:outline-none focus:ring-2 focus:ring-emerald-500/50`}
           />
+
+          {/* Off-screen Accessible DOM Fallback Subtree */}
+          <div
+            className="sr-only"
+            aria-label="Retro Labyrinth Accessible Subtree"
+          >
+            <fieldset>
+              <legend>Retro Labyrinth Dungeon Crawl State and Controls</legend>
+
+              <div role="group" aria-label="Dungeon Telemetry and Status">
+                <output htmlFor="retro-score">Score: {score}</output>
+                <output htmlFor="retro-highscore">
+                  High Score: {effectiveHighScore}
+                </output>
+                <output htmlFor="retro-stage">Stage: {stage}</output>
+                <output htmlFor="retro-status">
+                  Game Status: {gameStatus}
+                </output>
+                <output htmlFor="retro-player-pos">
+                  Player Location: Grid ({playerPosition.x}, {playerPosition.y})
+                </output>
+                <output htmlFor="retro-hp">
+                  Cyberdeck Integrity: {playerHp} / {maxPlayerHp} HP
+                </output>
+                <output htmlFor="retro-weapon">
+                  Active Cyberdeck Weapon: {activeWeaponId}
+                </output>
+                <output htmlFor="retro-bypass">
+                  Bypass Chips: {bypassChips}
+                </output>
+              </div>
+
+              <div
+                role="group"
+                aria-label="Interactive Navigation and Combat Actions"
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleDirectionalMove("up");
+                    announce(
+                      `Moved Up to (${playerPosition.x}, ${Math.max(0, playerPosition.y - 1)})`,
+                      "polite"
+                    );
+                  }}
+                >
+                  Move North / Up
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleDirectionalMove("down");
+                    announce(
+                      `Moved Down to (${playerPosition.x}, ${playerPosition.y + 1})`,
+                      "polite"
+                    );
+                  }}
+                >
+                  Move South / Down
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleDirectionalMove("left");
+                    announce(
+                      `Moved Left to (${Math.max(0, playerPosition.x - 1)}, ${playerPosition.y})`,
+                      "polite"
+                    );
+                  }}
+                >
+                  Move West / Left
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleDirectionalMove("right");
+                    announce(
+                      `Moved Right to (${playerPosition.x + 1}, ${playerPosition.y})`,
+                      "polite"
+                    );
+                  }}
+                >
+                  Move East / Right
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleFireWeapon(activeWeaponId);
+                    announce(
+                      `Dispatched cyber weapon attack: ${activeWeaponId}`,
+                      "polite"
+                    );
+                  }}
+                >
+                  Execute Selected Cyber Attack ({activeWeaponId})
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleUseBypassChip();
+                    announce("Used hardware bypass chip.", "polite");
+                  }}
+                  disabled={bypassChips <= 0}
+                >
+                  Consume Bypass Chip
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleRestart();
+                    announce(
+                      "Restarted Cyberdeck Dungeon Simulation.",
+                      "polite"
+                    );
+                  }}
+                >
+                  Restart Dungeon Simulation
+                </button>
+
+                {gameStatus === "victory" && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleNextRoom();
+                      announce("Navigated to next cyberdeck room.", "polite");
+                    }}
+                  >
+                    Advance to Next Stage
+                  </button>
+                )}
+              </div>
+            </fieldset>
+          </div>
 
           {/* Victory Overlay */}
           {gameStatus === "victory" && (

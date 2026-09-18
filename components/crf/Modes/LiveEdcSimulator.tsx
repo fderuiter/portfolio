@@ -9,7 +9,8 @@ import {
   ElectronicSignature,
   SubjectFormStatus,
 } from "@/lib/crf/types";
-import { evaluateFormula, evaluateRule } from "@/lib/crf/ast-evaluator";
+import { evaluateRule } from "@/lib/crf/ast-evaluator";
+import { useCrfService } from "@/hooks/useCrfService";
 import { generateId } from "@/lib/utils";
 import {
   parsePrecisionDate,
@@ -18,6 +19,7 @@ import {
   validatePrecisionDate,
   CDISC_NULL_FLAVORS,
 } from "@/lib/crf/precision-date";
+import { useAnnouncer } from "@/components/providers/A11yProvider";
 import {
   IconShieldCheck,
   IconHistory,
@@ -59,6 +61,8 @@ type EdcSubView = "form_entry" | "subject_matrix" | "audit_trail" | "queries";
 export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
   study,
 }) => {
+  const { evaluateFormula } = useCrfService();
+  const { announce } = useAnnouncer();
   const [subView, setSubView] = useState<EdcSubView>("form_entry");
   const [subjectId, setSubjectId] = useState("001-101");
   const [availableSubjects, setAvailableSubjects] = useState<string[]>([
@@ -182,11 +186,12 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
     // 1. Evaluate Calculated Fields
     fields.forEach((field) => {
       if (field.dataType === "calculated" && field.calculationFormula) {
-        const calculatedVal = evaluateFormula(
-          field.calculationFormula,
-          subjectVals,
-          fields
-        );
+        const evalRes = evaluateFormula({
+          formula: field.calculationFormula,
+          fieldValues: subjectVals,
+          fieldsList: fields,
+        });
+        const calculatedVal = evalRes.success ? evalRes.data.value : null;
         const key = `${subjectId}_${activeVisitId}_${field.id}`;
         if (formValues[key] !== calculatedVal) {
           setFormValues((prev) => ({ ...prev, [key]: calculatedVal }));
@@ -195,7 +200,7 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
     });
 
     // 2. Evaluate Dynamic Edit Check Rules
-    activeForm.rules.forEach((rule) => {
+    (activeForm.rules || []).forEach((rule) => {
       const isTriggered = evaluateRule(
         rule,
         subjectVals,
@@ -234,7 +239,7 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
         });
       }
     });
-  }, [formValues, activeForm, activeVisitId, subjectId]);
+  }, [formValues, activeForm, activeVisitId, subjectId, evaluateFormula]);
 
   const handleFieldChange = (
     field: CRFField,
@@ -456,23 +461,27 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
     }
 
     if (hardStopVars.length > 0) {
+      const errMsg = `Form submission blocked! ${hardStopVars.length} mandatory field(s) failed hard-stop validation.`;
       setSaveStatus({
         type: "error",
-        message: `Form submission blocked! ${hardStopVars.length} mandatory field(s) failed hard-stop validation.`,
+        message: errMsg,
         hardStops: hardStopVars,
       });
+      announce(errMsg, "assertive");
       return;
     }
 
+    const successMsg = `Form saved successfully for Subject ${subjectId} at ${activeVisitId}.${
+      autoQueryVars.length > 0
+        ? ` Registered ${autoQueryVars.length} auto-query ticket(s).`
+        : ""
+    }`;
     setSaveStatus({
       type: "success",
-      message: `Form saved successfully for Subject ${subjectId} at ${activeVisitId}.${
-        autoQueryVars.length > 0
-          ? ` Registered ${autoQueryVars.length} auto-query ticket(s).`
-          : ""
-      }`,
+      message: successMsg,
       autoQueries: autoQueryVars,
     });
+    announce(successMsg, "polite");
   };
 
   const isFormSigned = signatures.some(
@@ -857,6 +866,11 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
                         ? parsePrecisionDate(String(currentVal || ""))
                         : null;
 
+                    const formDomain = activeForm.domain || activeForm.id;
+                    const fieldKey = field.variableName || field.id;
+                    const inputId = `ecrf-input-${formDomain.toLowerCase()}-${fieldKey.toLowerCase()}`;
+                    const errorId = `ecrf-error-${formDomain.toLowerCase()}-${fieldKey.toLowerCase()}`;
+
                     return (
                       <div
                         key={field.id}
@@ -872,7 +886,10 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
                         {/* Field Header */}
                         <div className="flex items-start justify-between gap-2 mb-2">
                           <div>
-                            <label className="block text-xs font-semibold text-zinc-200">
+                            <label
+                              htmlFor={inputId}
+                              className="block text-xs font-semibold text-zinc-200 cursor-pointer"
+                            >
                               {field.label}
                               {field.required && (
                                 <span className="text-red-400 ml-0.5">*</span>
@@ -1011,10 +1028,20 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
                                 <div className="grid grid-cols-3 gap-2">
                                   {/* Day Selector */}
                                   <div>
-                                    <label className="block text-[9px] font-mono text-zinc-500 mb-0.5">
+                                    <label
+                                      htmlFor={`${inputId}-day`}
+                                      className="block text-[9px] font-mono text-zinc-500 mb-0.5"
+                                    >
                                       Day
                                     </label>
                                     <select
+                                      id={`${inputId}-day`}
+                                      aria-invalid={
+                                        fieldError ? "true" : undefined
+                                      }
+                                      aria-describedby={
+                                        fieldError ? errorId : undefined
+                                      }
                                       value={
                                         parsedPrecision?.day !== null &&
                                         parsedPrecision?.day !== undefined
@@ -1068,10 +1095,20 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
 
                                   {/* Month Selector */}
                                   <div>
-                                    <label className="block text-[9px] font-mono text-zinc-500 mb-0.5">
+                                    <label
+                                      htmlFor={`${inputId}-month`}
+                                      className="block text-[9px] font-mono text-zinc-500 mb-0.5"
+                                    >
                                       Month
                                     </label>
                                     <select
+                                      id={`${inputId}-month`}
+                                      aria-invalid={
+                                        fieldError ? "true" : undefined
+                                      }
+                                      aria-describedby={
+                                        fieldError ? errorId : undefined
+                                      }
                                       value={
                                         parsedPrecision?.month !== null &&
                                         parsedPrecision?.month !== undefined
@@ -1142,13 +1179,23 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
 
                                   {/* Year Input */}
                                   <div>
-                                    <label className="block text-[9px] font-mono text-zinc-500 mb-0.5">
+                                    <label
+                                      htmlFor={inputId}
+                                      className="block text-[9px] font-mono text-zinc-500 mb-0.5"
+                                    >
                                       Year
                                     </label>
                                     <input
+                                      id={inputId}
                                       type="number"
                                       min={1900}
                                       max={2100}
+                                      aria-invalid={
+                                        fieldError ? "true" : undefined
+                                      }
+                                      aria-describedby={
+                                        fieldError ? errorId : undefined
+                                      }
                                       value={
                                         parsedPrecision?.year !== null &&
                                         parsedPrecision?.year !== undefined
@@ -1207,7 +1254,12 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
                             {/* Standard Text Input */}
                             {field.dataType === "text" && (
                               <input
+                                id={inputId}
                                 type="text"
+                                aria-invalid={fieldError ? "true" : undefined}
+                                aria-describedby={
+                                  fieldError ? errorId : undefined
+                                }
                                 value={String(currentVal || "")}
                                 onChange={(e) =>
                                   handleFieldChange(field, e.target.value)
@@ -1225,7 +1277,12 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
 
                             {field.dataType === "textarea" && (
                               <textarea
+                                id={inputId}
                                 rows={2}
+                                aria-invalid={fieldError ? "true" : undefined}
+                                aria-describedby={
+                                  fieldError ? errorId : undefined
+                                }
                                 value={String(currentVal || "")}
                                 onChange={(e) =>
                                   handleFieldChange(field, e.target.value)
@@ -1245,7 +1302,12 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
                               field.dataType === "integer") && (
                               <div className="relative">
                                 <input
+                                  id={inputId}
                                   type="number"
+                                  aria-invalid={fieldError ? "true" : undefined}
+                                  aria-describedby={
+                                    fieldError ? errorId : undefined
+                                  }
                                   value={
                                     currentVal !== undefined &&
                                     currentVal !== null
@@ -1279,7 +1341,12 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
                               field.dataType === "partial_date" ||
                               field.dataType === "datetime") && (
                               <input
+                                id={inputId}
                                 type="text"
+                                aria-invalid={fieldError ? "true" : undefined}
+                                aria-describedby={
+                                  fieldError ? errorId : undefined
+                                }
                                 value={String(currentVal || "")}
                                 onChange={(e) =>
                                   handleFieldChange(field, e.target.value)
@@ -1299,7 +1366,16 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
                             )}
 
                             {field.dataType === "radio" && (
-                              <div className="space-y-1.5 pt-0.5">
+                              <div
+                                id={inputId}
+                                role="radiogroup"
+                                aria-labelledby={inputId}
+                                aria-invalid={fieldError ? "true" : undefined}
+                                aria-describedby={
+                                  fieldError ? errorId : undefined
+                                }
+                                className="space-y-1.5 pt-0.5"
+                              >
                                 {(
                                   field.customOptions ||
                                   study.codelists.find(
@@ -1335,6 +1411,11 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
 
                             {field.dataType === "single_select" && (
                               <select
+                                id={inputId}
+                                aria-invalid={fieldError ? "true" : undefined}
+                                aria-describedby={
+                                  fieldError ? errorId : undefined
+                                }
                                 value={String(currentVal || "")}
                                 onChange={(e) =>
                                   handleFieldChange(field, e.target.value)
@@ -1361,7 +1442,15 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
                             )}
 
                             {field.dataType === "multi_select" && (
-                              <div className="space-y-1.5 pt-0.5">
+                              <div
+                                id={inputId}
+                                role="group"
+                                aria-labelledby={inputId}
+                                aria-describedby={
+                                  fieldError ? errorId : undefined
+                                }
+                                className="space-y-1.5 pt-0.5"
+                              >
                                 {(
                                   field.customOptions ||
                                   study.codelists.find(
@@ -1389,6 +1478,12 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
                                       <input
                                         type="checkbox"
                                         checked={isChecked}
+                                        aria-invalid={
+                                          fieldError ? "true" : undefined
+                                        }
+                                        aria-describedby={
+                                          fieldError ? errorId : undefined
+                                        }
                                         onChange={(e) => {
                                           const updated = e.target.checked
                                             ? [...selectedArray, opt.code]
@@ -1415,7 +1510,14 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
                             )}
 
                             {field.dataType === "calculated" && (
-                              <div className="p-2 rounded-lg bg-brand-cyan/10 border border-brand-cyan/30 flex items-center justify-between font-mono min-h-[34px]">
+                              <div
+                                id={inputId}
+                                aria-invalid={fieldError ? "true" : undefined}
+                                aria-describedby={
+                                  fieldError ? errorId : undefined
+                                }
+                                className="p-2 rounded-lg bg-brand-cyan/10 border border-brand-cyan/30 flex items-center justify-between font-mono min-h-[34px]"
+                              >
                                 <span className="text-xs text-brand-cyan font-bold">
                                   {currentVal !== undefined &&
                                   currentVal !== null
@@ -1434,7 +1536,12 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
 
                         {/* Validation Error Feedback */}
                         {fieldError && (
-                          <p className="text-[10px] text-red-400 font-mono mt-1.5 flex items-center gap-1">
+                          <p
+                            id={errorId}
+                            role="alert"
+                            aria-live="polite"
+                            className="text-[10px] text-red-400 font-mono mt-1.5 flex items-center gap-1"
+                          >
                             <IconAlertTriangle className="w-3 h-3 text-red-400 shrink-0" />
                             <span>{fieldError}</span>
                           </p>
@@ -1495,12 +1602,26 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left font-mono text-xs border-collapse">
+            <table
+              className="w-full text-left font-mono text-xs border-collapse"
+              role="grid"
+              aria-label="Subject Status Progression Matrix"
+            >
               <thead>
-                <tr className="border-b border-zinc-800 bg-zinc-950/60 text-zinc-400">
-                  <th className="p-3">Subject ID</th>
+                <tr
+                  className="border-b border-zinc-800 bg-zinc-950/60 text-zinc-400"
+                  role="row"
+                >
+                  <th scope="col" role="columnheader" className="p-3">
+                    Subject ID
+                  </th>
                   {study.visits.map((v) => (
-                    <th key={v.id} className="p-3 text-center">
+                    <th
+                      key={v.id}
+                      scope="col"
+                      role="columnheader"
+                      className="p-3 text-center"
+                    >
                       <div>{v.name}</div>
                       <div className="text-[10px] text-zinc-500">
                         Day {v.targetDay}
@@ -1513,16 +1634,27 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
                 {availableSubjects.map((subj) => (
                   <tr
                     key={subj}
+                    role="row"
                     className="hover:bg-zinc-850/40 transition-colors"
                   >
-                    <td className="p-3 font-bold text-brand-cyan">{subj}</td>
+                    <th
+                      scope="row"
+                      role="rowheader"
+                      className="p-3 font-bold text-brand-cyan text-left font-normal"
+                    >
+                      {subj}
+                    </th>
                     {study.visits.map((v) => {
                       const formsForVisit = study.forms.filter((f) =>
                         v.assignedFormIds.includes(f.id)
                       );
 
                       return (
-                        <td key={v.id} className="p-3 text-center align-top">
+                        <td
+                          key={v.id}
+                          role="gridcell"
+                          className="p-3 text-center align-top"
+                        >
                           <div className="flex flex-wrap justify-center gap-1.5">
                             {formsForVisit.map((form) => {
                               const status = getSubjectFormStatus(

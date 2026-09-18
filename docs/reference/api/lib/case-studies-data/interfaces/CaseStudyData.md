@@ -56,6 +56,12 @@
 
 ***
 
+### hero\_image\_url?
+
+> `optional` **hero\_image\_url?**: `string` \| `null`
+
+***
+
 ### id
 
 > **id**: `string`

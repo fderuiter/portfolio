@@ -443,7 +443,10 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
         </div>
       ) : (
         <div className="mb-2">
-          <label className="block text-xs font-semibold text-zinc-100 leading-snug">
+          <label
+            htmlFor={`ecrf-canvas-${field.id}`}
+            className="block text-xs font-semibold text-zinc-100 leading-snug cursor-pointer"
+          >
             {field.label}
             {field.required && <span className="text-red-400 ml-0.5">*</span>}
           </label>
@@ -459,6 +462,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
       <div className="pointer-events-none opacity-85">
         {field.dataType === "text" && (
           <input
+            id={`ecrf-canvas-${field.id}`}
             type="text"
             readOnly
             placeholder={field.placeholder || "Enter text..."}
@@ -468,6 +472,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
 
         {field.dataType === "textarea" && (
           <textarea
+            id={`ecrf-canvas-${field.id}`}
             readOnly
             rows={2}
             placeholder={field.placeholder || "Enter narrative..."}
@@ -478,6 +483,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
         {(field.dataType === "number" || field.dataType === "integer") && (
           <div className="relative">
             <input
+              id={`ecrf-canvas-${field.id}`}
               type="text"
               readOnly
               placeholder={field.placeholder || "0.0"}

@@ -51,6 +51,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     if (
       config.path === "/crf" ||
+      config.path === "/patrol" ||
       config.path === "/stack" ||
       config.path === "/work/laser-loon"
     ) {

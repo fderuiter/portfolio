@@ -44,7 +44,9 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
       if (v.id !== visitId) return v;
 
       if (selectedArmId !== "all") {
-        const currentArmForms = v.armFormAssignments?.[selectedArmId] || [...v.assignedFormIds];
+        const currentArmForms = v.armFormAssignments?.[selectedArmId] || [
+          ...v.assignedFormIds,
+        ];
         const nextArmForms = currentArmForms.includes(formId)
           ? currentArmForms.filter((id) => id !== formId)
           : [...currentArmForms, formId];
@@ -92,7 +94,9 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
   };
 
   const handleUpdateVisit = (visitId: string, updates: Partial<StudyVisit>) => {
-    onUpdateVisits(study.visits.map((v) => (v.id === visitId ? { ...v, ...updates } : v)));
+    onUpdateVisits(
+      study.visits.map((v) => (v.id === visitId ? { ...v, ...updates } : v))
+    );
   };
 
   const currentCardVisit =
@@ -112,7 +116,8 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
             </h1>
           </div>
           <p className="text-xs text-zinc-400 font-sans mt-1">
-            Map clinical forms to protocol visits and configure allowable window tolerances (± days) across study arms and epochs.
+            Map clinical forms to protocol visits and configure allowable window
+            tolerances (± days) across study arms and epochs.
           </p>
         </div>
 
@@ -159,7 +164,9 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
       {arms.length > 0 && (
         <div className="mb-4 p-3 rounded-xl bg-zinc-900/60 border border-zinc-800 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
           <div className="flex items-center gap-2 text-zinc-300">
-            <span className="font-bold text-brand-cyan">Active Study Arm Scope:</span>
+            <span className="font-bold text-brand-cyan">
+              Active Study Arm Scope:
+            </span>
           </div>
           <div className="flex items-center gap-2 overflow-x-auto">
             <button
@@ -220,12 +227,14 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
                     {currentCardVisit.name}
                   </h2>
                   <div className="text-xs text-brand-cyan font-mono mt-0.5">
-                    Target Day {currentCardVisit.targetDay} (±{currentCardVisit.windowBefore}d window)
-                    {currentCardVisit.epochId && epochMap.has(currentCardVisit.epochId) && (
-                      <span className="ml-2 text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded border border-purple-500/30">
-                        {epochMap.get(currentCardVisit.epochId)}
-                      </span>
-                    )}
+                    Target Day {currentCardVisit.targetDay} (±
+                    {currentCardVisit.windowBefore}d window)
+                    {currentCardVisit.epochId &&
+                      epochMap.has(currentCardVisit.epochId) && (
+                        <span className="ml-2 text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded border border-purple-500/30">
+                          {epochMap.get(currentCardVisit.epochId)}
+                        </span>
+                      )}
                   </div>
                 </div>
 
@@ -233,7 +242,9 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
                   <button
                     onClick={() =>
                       setEditingVisitId(
-                        editingVisitId === currentCardVisit.id ? null : currentCardVisit.id
+                        editingVisitId === currentCardVisit.id
+                          ? null
+                          : currentCardVisit.id
                       )
                     }
                     className="p-1.5 rounded-lg bg-zinc-800 text-zinc-300 hover:text-white"
@@ -256,16 +267,22 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
               {/* Form Checkboxes for this Visit */}
               <div className="space-y-2">
                 <div className="text-[11px] font-mono uppercase text-zinc-400 font-semibold">
-                  Assigned Protocol Forms ({currentCardVisit.assignedFormIds.length}/
-                  {study.forms.length})
+                  Assigned Protocol Forms (
+                  {currentCardVisit.assignedFormIds.length}/{study.forms.length}
+                  )
                 </div>
                 <div className="space-y-1.5">
                   {study.forms.map((form) => {
-                    const isAssigned = getFormAssignment(currentCardVisit, form.id);
+                    const isAssigned = getFormAssignment(
+                      currentCardVisit,
+                      form.id
+                    );
                     return (
                       <div
                         key={form.id}
-                        onClick={() => handleToggleFormAtVisit(currentCardVisit.id, form.id)}
+                        onClick={() =>
+                          handleToggleFormAtVisit(currentCardVisit.id, form.id)
+                        }
                         className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${
                           isAssigned
                             ? "bg-brand-cyan/10 border-brand-cyan/40 text-white"
@@ -306,15 +323,28 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
       ) : (
         /* Interactive Matrix Table with Sticky Form Column */
         <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 overflow-x-auto shadow-xl">
-          <table className="w-full text-left border-collapse min-w-[700px]">
+          <table
+            className="w-full text-left border-collapse min-w-[700px]"
+            role="grid"
+            aria-label="Schedule of Activities Visit Matrix"
+          >
             <thead>
-              <tr className="border-b border-zinc-800 bg-zinc-950/95 sticky top-0 z-20">
-                <th className="p-3.5 sm:p-4 text-xs font-mono font-bold text-zinc-400 w-60 sm:w-64 uppercase tracking-wider sticky left-0 bg-zinc-950 z-30 border-r border-zinc-850">
+              <tr
+                className="border-b border-zinc-800 bg-zinc-950/95 sticky top-0 z-20"
+                role="row"
+              >
+                <th
+                  scope="col"
+                  role="columnheader"
+                  className="p-3.5 sm:p-4 text-xs font-mono font-bold text-zinc-400 w-60 sm:w-64 uppercase tracking-wider sticky left-0 bg-zinc-950 z-30 border-r border-zinc-850"
+                >
                   Forms ({study.forms.length})
                 </th>
                 {study.visits.map((visit) => (
                   <th
                     key={visit.id}
+                    scope="col"
+                    role="columnheader"
                     className="p-3 text-center border-l border-zinc-800/80 min-w-[130px]"
                   >
                     <div className="space-y-1">
@@ -332,7 +362,9 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
                       <div className="flex items-center justify-center gap-1.5 pt-1">
                         <button
                           onClick={() =>
-                            setEditingVisitId(editingVisitId === visit.id ? null : visit.id)
+                            setEditingVisitId(
+                              editingVisitId === visit.id ? null : visit.id
+                            )
                           }
                           className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-800 hover:bg-zinc-750 text-zinc-300"
                         >
@@ -355,8 +387,16 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
             </thead>
             <tbody className="divide-y divide-zinc-800/60 font-mono text-xs">
               {study.forms.map((form) => (
-                <tr key={form.id} className="hover:bg-zinc-850/40 transition-colors">
-                  <td className="p-3 sm:p-3.5 pl-3 sm:pl-4 sticky left-0 bg-zinc-950/95 z-10 border-r border-zinc-850">
+                <tr
+                  key={form.id}
+                  role="row"
+                  className="hover:bg-zinc-850/40 transition-colors"
+                >
+                  <th
+                    scope="row"
+                    role="rowheader"
+                    className="p-3 sm:p-3.5 pl-3 sm:pl-4 sticky left-0 bg-zinc-950/95 z-10 border-r border-zinc-850 font-normal text-left"
+                  >
                     <div className="flex items-center gap-2">
                       <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-zinc-900 border border-zinc-800 text-brand-cyan">
                         {form.domain}
@@ -370,7 +410,7 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
                         </span>
                       )}
                     </div>
-                  </td>
+                  </th>
 
                   {study.visits.map((visit) => {
                     const isAssigned = getFormAssignment(visit, form.id);
@@ -378,8 +418,22 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
                     return (
                       <td
                         key={visit.id}
-                        onClick={() => handleToggleFormAtVisit(visit.id, form.id)}
-                        className="p-3 text-center border-l border-zinc-800/60 cursor-pointer hover:bg-brand-cyan/5 transition-colors"
+                        role="gridcell"
+                        tabIndex={0}
+                        aria-selected={isAssigned}
+                        aria-label={`${form.name} at ${visit.name}: ${
+                          isAssigned ? "Scheduled" : "Not Scheduled"
+                        }`}
+                        onClick={() =>
+                          handleToggleFormAtVisit(visit.id, form.id)
+                        }
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            handleToggleFormAtVisit(visit.id, form.id);
+                          }
+                        }}
+                        className="p-3 text-center border-l border-zinc-800/60 cursor-pointer hover:bg-brand-cyan/5 focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:outline-none transition-colors"
                       >
                         <div className="flex items-center justify-center">
                           <div
@@ -425,38 +479,60 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
 
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
                   <div>
-                    <label className="block text-[10px] font-mono text-zinc-400 mb-1">Visit Name</label>
+                    <label className="block text-[10px] font-mono text-zinc-400 mb-1">
+                      Visit Name
+                    </label>
                     <input
                       type="text"
                       value={v.name}
-                      onChange={(e) => handleUpdateVisit(v.id, { name: e.target.value })}
+                      onChange={(e) =>
+                        handleUpdateVisit(v.id, { name: e.target.value })
+                      }
                       className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-700 rounded-lg text-white font-sans"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-mono text-zinc-400 mb-1">Target Day Offset</label>
+                    <label className="block text-[10px] font-mono text-zinc-400 mb-1">
+                      Target Day Offset
+                    </label>
                     <input
                       type="number"
                       value={v.targetDay}
-                      onChange={(e) => handleUpdateVisit(v.id, { targetDay: parseInt(e.target.value, 10) || 0 })}
+                      onChange={(e) =>
+                        handleUpdateVisit(v.id, {
+                          targetDay: parseInt(e.target.value, 10) || 0,
+                        })
+                      }
                       className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-700 rounded-lg text-white font-mono"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-mono text-zinc-400 mb-1">Window Before (- Days)</label>
+                    <label className="block text-[10px] font-mono text-zinc-400 mb-1">
+                      Window Before (- Days)
+                    </label>
                     <input
                       type="number"
                       value={v.windowBefore}
-                      onChange={(e) => handleUpdateVisit(v.id, { windowBefore: parseInt(e.target.value, 10) || 0 })}
+                      onChange={(e) =>
+                        handleUpdateVisit(v.id, {
+                          windowBefore: parseInt(e.target.value, 10) || 0,
+                        })
+                      }
                       className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-700 rounded-lg text-white font-mono"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-mono text-zinc-400 mb-1">Window After (+ Days)</label>
+                    <label className="block text-[10px] font-mono text-zinc-400 mb-1">
+                      Window After (+ Days)
+                    </label>
                     <input
                       type="number"
                       value={v.windowAfter}
-                      onChange={(e) => handleUpdateVisit(v.id, { windowAfter: parseInt(e.target.value, 10) || 0 })}
+                      onChange={(e) =>
+                        handleUpdateVisit(v.id, {
+                          windowAfter: parseInt(e.target.value, 10) || 0,
+                        })
+                      }
                       className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-700 rounded-lg text-white font-mono"
                     />
                   </div>

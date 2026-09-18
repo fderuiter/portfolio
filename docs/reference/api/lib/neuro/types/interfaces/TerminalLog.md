@@ -28,4 +28,4 @@
 
 ### type
 
-> **type**: `"error"` \| `"success"` \| `"info"` \| `"output"` \| `"command"`
+> **type**: `"error"` \| `"success"` \| `"output"` \| `"info"` \| `"command"`

@@ -102,6 +102,9 @@ function printUsage(): void {
     `  ${colors.cyan}inventory:vercel${colors.reset}              Inspect Vercel storage meters, retention inventory, and candidates`
   );
   console.log(
+    `  ${colors.cyan}inventory:neon${colors.reset}                Inspect Neon capacity, branches, connection hygiene, and candidates`
+  );
+  console.log(
     `  ${colors.cyan}headroom:vercel${colors.reset}               Evaluate Vercel storage and build hour headroom budgets`
   );
   console.log(
@@ -1410,6 +1413,20 @@ export async function main(): Promise<void> {
       const { success } = runRetentionInventoryVerification({
         json,
         candidates,
+      });
+      if (!success) process.exit(1);
+      break;
+    }
+    case "inventory:neon": {
+      const { runNeonCapacityInventoryVerification } =
+        await import("./neon-capacity-inventory");
+      const json = Boolean(parsed.flags.json || parsed.flags.j);
+      const candidates = Boolean(parsed.flags.candidates || parsed.flags.c);
+      const summary = Boolean(parsed.flags.summary || parsed.flags.s);
+      const { success } = runNeonCapacityInventoryVerification({
+        json,
+        candidates,
+        summary,
       });
       if (!success) process.exit(1);
       break;

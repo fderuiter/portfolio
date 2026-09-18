@@ -55,6 +55,8 @@ describe("Prisma migration integrity", () => {
     "20261016000000_enforce_email_contracts",
     "20261017000000_add_telemetry_daily_rollups",
     "20261018000000_add_blog_post",
+    "20261019000000_add_blog_post_reaction",
+    "20261020000000_add_case_study_hero_image",
   ];
 
   it("validates every checked-in migration file", () => {
@@ -132,6 +134,25 @@ describe("Prisma migration integrity", () => {
     expect(migration).toContain('"published" BOOLEAN NOT NULL DEFAULT false');
     expect(migration).toContain(
       'CREATE UNIQUE INDEX "BlogPost_slug_key" ON "BlogPost"("slug")'
+    );
+    expect(migration).not.toMatch(/DROP\s+(TABLE|COLUMN)/i);
+  });
+
+  it("keeps the blog post reaction migration additive, indexed, and non-destructive", () => {
+    const migration = readMigrationSql("20261019000000_add_blog_post_reaction");
+
+    expect(migration).toContain('CREATE TABLE "BlogPostReaction"');
+    expect(migration).toContain('"blogPostSlug" TEXT NOT NULL');
+    expect(migration).toContain('"reactionType" TEXT NOT NULL');
+    expect(migration).toContain('"connectionHash" TEXT NOT NULL');
+    expect(migration).toContain(
+      'CREATE INDEX "BlogPostReaction_blogPostSlug_idx" ON "BlogPostReaction"("blogPostSlug")'
+    );
+    expect(migration).toContain(
+      'CREATE INDEX "BlogPostReaction_blogPostSlug_reactionType_idx" ON "BlogPostReaction"("blogPostSlug", "reactionType")'
+    );
+    expect(migration).toContain(
+      'CREATE INDEX "BlogPostReaction_connectionHash_idx" ON "BlogPostReaction"("connectionHash")'
     );
     expect(migration).not.toMatch(/DROP\s+(TABLE|COLUMN)/i);
   });

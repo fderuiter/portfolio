@@ -6,13 +6,6 @@
 // Shared Service Envelope
 export * from "./service-result";
 
-// Existing Domain Services
-export * from "./case-study-service";
-export * from "./blog-service";
-export * from "./email-service";
-export * from "./privacy-service";
-export * from "./telemetry-service";
-
 // CRF Evaluator Vertical Slices
 export * from "./crf-evaluator/evaluate-formula/spec";
 export * from "./crf-evaluator/evaluate-formula/handler";

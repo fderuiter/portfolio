@@ -53,6 +53,7 @@ export const BlogDraftUpdateSchema = z
     pillar: z.enum(CONTENT_PILLARS).optional(),
     tags: z.array(z.string().trim().min(1).max(50)).min(1).max(12).optional(),
     heroImageUrl: z.string().trim().url().max(2048).nullable().optional(),
+    published: z.boolean().optional(),
   })
   .strict()
   .refine((data) => Object.keys(data).length > 0, {
@@ -169,6 +170,8 @@ export const CaseStudySubmissionSchema = z
       { message: "Tags are required" }
     ),
     github_url: z.string().trim().optional(),
+    hero_image_url: z.string().trim().url().max(2048).nullable().optional(),
+    heroImageUrl: z.string().trim().url().max(2048).nullable().optional(),
   })
   .superRefine((data, ctx) => {
     const lang = data.primary_language || data.language;
@@ -332,6 +335,20 @@ export const FeedbackSubmissionSchema = z
  */
 export const ReactionSubmissionSchema = z.object({
   caseStudySlug: z.string().min(1, "caseStudySlug must be a non-empty string"),
+  reactionType: z.enum(ALLOWED_REACTIONS, {
+    message:
+      "Allowed reactionType values: 'insightful', 'mind_blowing', 'actionable', 'thorough'",
+  }),
+});
+
+/**
+ * Schema for Blog Post Reaction POST payload validation
+ */
+export const BlogPostReactionSubmissionSchema = z.object({
+  blogPostSlug: z
+    .string()
+    .trim()
+    .min(1, "blogPostSlug must be a non-empty string"),
   reactionType: z.enum(ALLOWED_REACTIONS, {
     message:
       "Allowed reactionType values: 'insightful', 'mind_blowing', 'actionable', 'thorough'",
@@ -507,3 +524,190 @@ export const ResendWebhookResponseSchema = z.object({
 });
 
 export type ResendWebhookResponse = z.infer<typeof ResendWebhookResponseSchema>;
+
+/** Alias for NewsletterSubscriptionSchema to match OpenAPI naming convention */
+export const NewsletterSubmissionSchema = NewsletterSubscriptionSchema;
+
+/** Alias for ContactResponseSchema to match OpenAPI naming convention */
+export const ContactPostResponseSchema = ContactResponseSchema;
+
+/** Schema for validation error details */
+export const ValidationErrorItemSchema = z.object({
+  path: z.string(),
+  message: z.string(),
+});
+
+/** Schema for standardized validation error responses */
+export const ValidationErrorSchema = z.object({
+  error: z.string(),
+  details: z.array(ValidationErrorItemSchema).optional(),
+});
+
+/** Schema for individual maintenance phase summary counters */
+export const MaintenancePhaseSummarySchema = z.object({
+  status: z.enum(["completed", "failed", "timed_out", "skipped"]),
+  durationMs: z.number().int(),
+  counts: z.record(z.string(), z.number().int().nullable()),
+  error: z.string().optional(),
+});
+
+/** Schema for maintenance execution pipeline summary */
+export const MaintenanceSummarySchema = z.object({
+  success: z.boolean(),
+  partial: z.boolean(),
+  startedAt: z.string().datetime(),
+  completedAt: z.string().datetime(),
+  durationMs: z.number().int(),
+  deadlineMs: z.number().int().max(8000),
+  phases: z.record(z.string(), MaintenancePhaseSummarySchema),
+});
+
+/** Schema for standardized simple error responses */
+export const ErrorResponseSchema = z.object({
+  error: z.string(),
+});
+
+/** Schema for persisted BlogDraft entity */
+export const BlogDraftSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  title: z.string(),
+  dek: z.string(),
+  body: z.string(),
+  pillar: z.string(),
+  tags: z.string(),
+  published: z.literal(false),
+  reading_time_minutes: z.number().int().min(1).nullable().optional(),
+  hero_image_url: z.string().url().nullable().optional(),
+  created_at: z.string().datetime(),
+  updated_at: z.string().datetime(),
+});
+
+/** Schema for paginated BlogDraft collection */
+export const BlogDraftCollectionSchema = z.object({
+  data: z.array(BlogDraftSchema),
+  pagination: z.object({
+    page: z.number().int().min(1),
+    pageSize: z.number().int().min(1).max(100),
+    total: z.number().int().min(0),
+  }),
+});
+
+/** Schema for BlogDraft create response */
+export const BlogDraftCreateResponseSchema = z.object({
+  success: z.literal(true),
+  data: BlogDraftSchema,
+});
+
+/** Schema for BlogDraft read response */
+export const BlogDraftReadResponseSchema = z.object({
+  data: BlogDraftSchema,
+});
+
+/** Schema for BlogDraft update response */
+export const BlogDraftUpdateResponseSchema = z.object({
+  success: z.literal(true),
+  data: BlogDraftSchema,
+});
+
+/** Schema for individual learning feedback item */
+export const FeedbackItemSchema = z.object({
+  id: z.string(),
+  takeaways: z.array(z.string()),
+  comments: z.string(),
+  createdAt: z.string().datetime(),
+});
+
+/** Schema for Feedback GET response */
+export const FeedbackGetResponseSchema = z.object({
+  success: z.boolean(),
+  caseStudySlug: z.string(),
+  hasSubmitted: z.boolean(),
+  totalFeedback: z.number().int(),
+  feedback: z.array(FeedbackItemSchema),
+});
+
+/** Schema for Feedback POST response */
+export const FeedbackPostResponseSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
+  feedback: z.object({
+    id: z.string(),
+    caseStudySlug: z.string(),
+    takeaways: z.array(z.string()),
+    comments: z.string(),
+    createdAt: z.string().datetime(),
+  }),
+});
+
+/** Schema for Reaction counts breakdown */
+export const ReactionCountsSchema = z.object({
+  insightful: z.number().int(),
+  mind_blowing: z.number().int(),
+  actionable: z.number().int(),
+  thorough: z.number().int(),
+});
+
+/** Schema for Reaction GET response */
+export const ReactionGetResponseSchema = z.object({
+  success: z.boolean(),
+  caseStudySlug: z.string(),
+  counts: ReactionCountsSchema,
+  userReactions: z.array(z.string()),
+});
+
+/** Schema for Reaction POST response */
+export const ReactionPostResponseSchema = z.object({
+  success: z.boolean(),
+  reactionType: z.enum(ALLOWED_REACTIONS),
+  counts: ReactionCountsSchema,
+  userReactions: z.array(z.string()),
+});
+
+/** Schema for CaseStudy POST response */
+export const CaseStudyPostResponseSchema = z.object({
+  success: z.boolean(),
+  data: z.object({
+    id: z.string(),
+    slug: z.string(),
+    title: z.string(),
+    primary_language: z.string(),
+    editorial_content: z.string(),
+    architectural_narrative: z.string(),
+    published: z.boolean(),
+    tags: z.string(),
+    created_at: z.string().datetime().optional(),
+  }),
+});
+
+/** Schema for Telemetry POST response */
+export const TelemetryPostResponseSchema = z.object({
+  success: z.boolean(),
+  durable: z.boolean(),
+  event: z.object({
+    id: z.string(),
+    projectSlug: z.string(),
+    eventType: z.string(),
+    createdAt: z.string().datetime(),
+  }),
+});
+
+/** Schema for Telemetry sync cron response */
+export const TelemetrySyncResponseSchema = z.object({
+  success: z.boolean(),
+  processed: z.number().int(),
+  inserted: z.number().int().optional(),
+  reactions: z
+    .object({
+      processed: z.number().int(),
+      inserted: z.number().int(),
+    })
+    .optional(),
+});
+
+/**
+ * Schema for route parameters targeting a specific project/case study slug.
+ */
+export const ProjectSlugParamSchema = z.object({
+  slug: z.string().trim().min(1, "Project slug is required"),
+});

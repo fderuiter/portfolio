@@ -79,29 +79,118 @@ export const DpadActionDock: React.FC<DpadActionDockProps> = ({
 }) => {
   const isTouch = useIsTouchDevice();
   const audio = useAudio();
+  const activePointersRef = React.useRef<Map<number, HTMLElement>>(new Map());
+
+  useEffect(() => {
+    const activePointers = activePointersRef.current;
+    return () => {
+      activePointers.forEach((target, pointerId) => {
+        if (
+          "releasePointerCapture" in target &&
+          typeof target.releasePointerCapture === "function"
+        ) {
+          try {
+            if (target.hasPointerCapture?.(pointerId)) {
+              target.releasePointerCapture(pointerId);
+            }
+          } catch {
+            // Ignore capture release errors on unmounted targets
+          }
+        }
+      });
+      activePointers.clear();
+    };
+  }, []);
 
   const handleDirPress = (
-    e: React.SyntheticEvent,
+    e: React.PointerEvent<HTMLButtonElement>,
     dir: "up" | "down" | "left" | "right"
   ) => {
     if (e.cancelable) e.preventDefault();
+    const target = e.currentTarget;
+    if (
+      target &&
+      "setPointerCapture" in target &&
+      typeof target.setPointerCapture === "function"
+    ) {
+      try {
+        target.setPointerCapture(e.pointerId);
+        activePointersRef.current.set(e.pointerId, target);
+      } catch {
+        // Safe catch for synthetic/mock pointer events or unattached elements
+      }
+    }
     triggerHaptic(15);
     audio.playHover();
     onDirectionPress?.(dir);
   };
 
   const handleDirRelease = (
-    e: React.SyntheticEvent,
+    e: React.PointerEvent<HTMLButtonElement>,
     dir: "up" | "down" | "left" | "right"
   ) => {
     if (e.cancelable) e.preventDefault();
+    const target = e.currentTarget;
+    if (
+      target &&
+      "releasePointerCapture" in target &&
+      typeof target.releasePointerCapture === "function"
+    ) {
+      try {
+        if (target.hasPointerCapture?.(e.pointerId)) {
+          target.releasePointerCapture(e.pointerId);
+        }
+      } catch {
+        // Safe catch
+      }
+    }
+    activePointersRef.current.delete(e.pointerId);
     onDirectionRelease?.(dir);
   };
 
-  const handleAction = (e: React.SyntheticEvent, callback?: () => void) => {
+  const handleActionDown = (
+    e: React.PointerEvent<HTMLButtonElement>,
+    callback?: () => void
+  ) => {
     if (e.cancelable) e.preventDefault();
+    const target = e.currentTarget;
+    if (
+      target &&
+      "setPointerCapture" in target &&
+      typeof target.setPointerCapture === "function"
+    ) {
+      try {
+        target.setPointerCapture(e.pointerId);
+        activePointersRef.current.set(e.pointerId, target);
+      } catch {
+        // Safe catch
+      }
+    }
     triggerHaptic(20);
     audio.playSubmit();
+    callback?.();
+  };
+
+  const handleActionUp = (
+    e: React.PointerEvent<HTMLButtonElement>,
+    callback?: () => void
+  ) => {
+    if (e.cancelable) e.preventDefault();
+    const target = e.currentTarget;
+    if (
+      target &&
+      "releasePointerCapture" in target &&
+      typeof target.releasePointerCapture === "function"
+    ) {
+      try {
+        if (target.hasPointerCapture?.(e.pointerId)) {
+          target.releasePointerCapture(e.pointerId);
+        }
+      } catch {
+        // Safe catch
+      }
+    }
+    activePointersRef.current.delete(e.pointerId);
     callback?.();
   };
 
@@ -122,6 +211,7 @@ export const DpadActionDock: React.FC<DpadActionDockProps> = ({
           onPointerDown={(e) => handleDirPress(e, "up")}
           onPointerUp={(e) => handleDirRelease(e, "up")}
           onPointerCancel={(e) => handleDirRelease(e, "up")}
+          onLostPointerCapture={(e) => handleDirRelease(e, "up")}
           className="min-w-[48px] min-h-[48px] flex items-center justify-center rounded-xl bg-zinc-800/90 hover:bg-zinc-700 active:bg-cyan-500/30 active:text-cyan-300 border border-zinc-700 text-zinc-200 active:scale-95 transition-transform focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
         >
           <IconArrowUp className="w-6 h-6" />
@@ -134,6 +224,7 @@ export const DpadActionDock: React.FC<DpadActionDockProps> = ({
           onPointerDown={(e) => handleDirPress(e, "left")}
           onPointerUp={(e) => handleDirRelease(e, "left")}
           onPointerCancel={(e) => handleDirRelease(e, "left")}
+          onLostPointerCapture={(e) => handleDirRelease(e, "left")}
           className="min-w-[48px] min-h-[48px] flex items-center justify-center rounded-xl bg-zinc-800/90 hover:bg-zinc-700 active:bg-cyan-500/30 active:text-cyan-300 border border-zinc-700 text-zinc-200 active:scale-95 transition-transform focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
         >
           <IconArrowLeft className="w-6 h-6" />
@@ -147,6 +238,7 @@ export const DpadActionDock: React.FC<DpadActionDockProps> = ({
           onPointerDown={(e) => handleDirPress(e, "right")}
           onPointerUp={(e) => handleDirRelease(e, "right")}
           onPointerCancel={(e) => handleDirRelease(e, "right")}
+          onLostPointerCapture={(e) => handleDirRelease(e, "right")}
           className="min-w-[48px] min-h-[48px] flex items-center justify-center rounded-xl bg-zinc-800/90 hover:bg-zinc-700 active:bg-cyan-500/30 active:text-cyan-300 border border-zinc-700 text-zinc-200 active:scale-95 transition-transform focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
         >
           <IconArrowRight className="w-6 h-6" />
@@ -159,6 +251,7 @@ export const DpadActionDock: React.FC<DpadActionDockProps> = ({
           onPointerDown={(e) => handleDirPress(e, "down")}
           onPointerUp={(e) => handleDirRelease(e, "down")}
           onPointerCancel={(e) => handleDirRelease(e, "down")}
+          onLostPointerCapture={(e) => handleDirRelease(e, "down")}
           className="min-w-[48px] min-h-[48px] flex items-center justify-center rounded-xl bg-zinc-800/90 hover:bg-zinc-700 active:bg-cyan-500/30 active:text-cyan-300 border border-zinc-700 text-zinc-200 active:scale-95 transition-transform focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
         >
           <IconArrowDown className="w-6 h-6" />
@@ -202,9 +295,10 @@ export const DpadActionDock: React.FC<DpadActionDockProps> = ({
           <button
             type="button"
             aria-label={actionBLabel}
-            onPointerDown={(e) => handleAction(e, onActionBPress)}
-            onPointerUp={(e) => handleAction(e, onActionBRelease)}
-            onPointerCancel={(e) => handleAction(e, onActionBRelease)}
+            onPointerDown={(e) => handleActionDown(e, onActionBPress)}
+            onPointerUp={(e) => handleActionUp(e, onActionBRelease)}
+            onPointerCancel={(e) => handleActionUp(e, onActionBRelease)}
+            onLostPointerCapture={(e) => handleActionUp(e, onActionBRelease)}
             className="min-w-[52px] min-h-[52px] w-14 h-14 rounded-2xl bg-rose-500/20 active:bg-rose-500/40 border border-rose-500/40 text-rose-300 active:scale-95 transition-transform shadow-lg flex flex-col items-center justify-center focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:outline-none"
           >
             <IconFlask className="w-5 h-5 mb-0.5" />
@@ -218,9 +312,10 @@ export const DpadActionDock: React.FC<DpadActionDockProps> = ({
           <button
             type="button"
             aria-label={actionALabel}
-            onPointerDown={(e) => handleAction(e, onActionAPress)}
-            onPointerUp={(e) => handleAction(e, onActionARelease)}
-            onPointerCancel={(e) => handleAction(e, onActionARelease)}
+            onPointerDown={(e) => handleActionDown(e, onActionAPress)}
+            onPointerUp={(e) => handleActionUp(e, onActionARelease)}
+            onPointerCancel={(e) => handleActionUp(e, onActionARelease)}
+            onLostPointerCapture={(e) => handleActionUp(e, onActionARelease)}
             className="min-w-[56px] min-h-[56px] w-16 h-16 rounded-2xl bg-cyan-500/20 active:bg-cyan-500/40 border border-cyan-500/40 text-cyan-300 active:scale-95 transition-transform shadow-lg flex flex-col items-center justify-center focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
           >
             <IconSword className="w-6 h-6 mb-0.5" />

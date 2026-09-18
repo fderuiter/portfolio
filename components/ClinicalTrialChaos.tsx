@@ -11,6 +11,7 @@ import React, {
 import Link from "next/link";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import { useAnnouncer } from "@/hooks/useAnnouncer";
 import {
   IconAlertTriangle,
   IconCheck,
@@ -146,6 +147,7 @@ export const ClinicalTrialChaos: React.FC = () => {
   const loadedHighScore = parseInt(rawHighScore, 10) || 0;
   const { playSuccess, muted: globalMuted } = useAudio();
   const { recordEvent } = useTelemetry();
+  const { announce } = useAnnouncer();
 
   // 1. Game configuration & modes
   const [gameMode, setGameMode] = useState<GameMode>("campaign");
@@ -1859,8 +1861,171 @@ export const ClinicalTrialChaos: React.FC = () => {
                 isPointerDownRef.current = false;
               }}
               style={{ touchAction: "none" }}
-              className={`w-full ${isFullscreen ? "h-auto max-h-[300px] aspect-[760/200] object-contain" : "h-auto aspect-[760/200]"} block cursor-pointer touch-none`}
+              role="application"
+              aria-label="Clinical Trial Chaos Simulation Canvas. Use Tab to navigate accessible controls, or space/enter to interact with subjects."
+              tabIndex={0}
+              className={`w-full ${isFullscreen ? "h-auto max-h-[300px] aspect-[760/200] object-contain" : "h-auto aspect-[760/200]"} block cursor-pointer touch-none focus:outline-none focus:ring-2 focus:ring-emerald-500/50`}
             />
+
+            {/* Off-screen Accessible DOM Fallback Subtree */}
+            <div
+              className="sr-only"
+              aria-label="Clinical Trial Chaos Accessible Subtree"
+            >
+              <fieldset>
+                <legend>
+                  Clinical Trial Chaos SDTM Simulator State and Controls
+                </legend>
+
+                <div
+                  role="group"
+                  aria-label="Clinical Trial Telemetry and Status"
+                >
+                  <output htmlFor="clinical-score">
+                    Score: {scoreState.score}
+                  </output>
+                  <output htmlFor="clinical-highscore">
+                    High Score: {effectiveHighScore}
+                  </output>
+                  <output htmlFor="clinical-phase">Phase: {phase} of 3</output>
+                  <output htmlFor="clinical-playstate">
+                    Play State: {playState}
+                  </output>
+                  <output htmlFor="clinical-auditor">
+                    BIMO Auditor Behavior: {auditor.behavior} (Suspicion:{" "}
+                    {Math.round(auditor.suspicion)}%)
+                  </output>
+                  <output htmlFor="clinical-protocol">
+                    Protocol: {activeProtocol?.protocolId || "P-001"} v
+                    {activeProtocol?.version || "1.0"}
+                  </output>
+                  <output htmlFor="clinical-active-subjects">
+                    Active Subjects on Conveyor: {conveyorSubjects.length}
+                  </output>
+                </div>
+
+                <div
+                  role="group"
+                  aria-label="Interactive Clinical Trial Actions"
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (
+                        playState === "idle" ||
+                        playState === "game_over" ||
+                        playState === "phase_cleared"
+                      ) {
+                        setPlayState("playing");
+                        announce(
+                          `Started Clinical Trial Phase ${phase}`,
+                          "polite"
+                        );
+                      }
+                    }}
+                    disabled={playState === "playing"}
+                  >
+                    Start Phase {phase}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setGameMode("campaign");
+                      announce("Switched mode to Campaign", "polite");
+                    }}
+                    aria-pressed={gameMode === "campaign"}
+                  >
+                    Campaign Mode
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setGameMode("endless");
+                      announce("Switched mode to Endless BIMO Audit", "polite");
+                    }}
+                    aria-pressed={gameMode === "endless"}
+                  >
+                    Endless BIMO Audit Mode
+                  </button>
+
+                  {/* Active Conveyor Subject Controls */}
+                  {conveyorSubjects.map((sub) => (
+                    <div
+                      key={sub.id}
+                      id={`sub-${sub.id}`}
+                      role="group"
+                      aria-label={`Subject ${sub.subjectLabel} Controls`}
+                    >
+                      <output htmlFor={`sub-${sub.id}`}>
+                        Subject {sub.subjectLabel} ({sub.studySite}): Time
+                        Remaining {Math.round(sub.timeRemaining)}s
+                      </output>
+                      {sub.observations.map((obs) => (
+                        <button
+                          key={obs.id}
+                          type="button"
+                          onClick={() => {
+                            setValidatingObs({
+                              subjectId: sub.id,
+                              obs,
+                              selectedChoice: undefined,
+                              feedback: undefined,
+                            });
+                            announce(
+                              `Selected observation ${obs.destination} for Subject ${sub.subjectLabel}`,
+                              "polite"
+                            );
+                          }}
+                        >
+                          Inspect Observation: {obs.destination} -{" "}
+                          {obs.rawValue}
+                        </button>
+                      ))}
+                    </div>
+                  ))}
+
+                  {/* PowerUp Activations */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const coffee = powerUps["fda-coffee-break"];
+                      if (coffee && coffee.charge > 0) {
+                        announce(
+                          "Activated FDA Coffee Break powerup",
+                          "polite"
+                        );
+                      }
+                    }}
+                    disabled={
+                      !powerUps["fda-coffee-break"] ||
+                      powerUps["fda-coffee-break"].charge <= 0
+                    }
+                  >
+                    Activate Coffee Break (
+                    {powerUps["fda-coffee-break"]?.charge ?? 0} charges)
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const clean = powerUps["auto-clean"];
+                      if (clean && clean.charge > 0) {
+                        announce("Activated Auto Clean powerup", "polite");
+                      }
+                    }}
+                    disabled={
+                      !powerUps["auto-clean"] ||
+                      powerUps["auto-clean"].charge <= 0
+                    }
+                  >
+                    Activate Auto Clean ({powerUps["auto-clean"]?.charge ?? 0}{" "}
+                    charges)
+                  </button>
+                </div>
+              </fieldset>
+            </div>
 
             {/* Overlays for Idle / Paused / Game Over / Cleared */}
             {playState !== "playing" && (

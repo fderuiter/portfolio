@@ -94,8 +94,12 @@ export function checkRouteIndexing(
 
   for (const pageFile of pageFiles) {
     const relative = path.relative(appDir, pageFile);
-    // Ignore internal routes, group routes, or api
-    if (relative.startsWith("api") || relative.includes("[")) {
+    // Ignore internal routes, group routes, admin, or api
+    if (
+      relative.startsWith("api") ||
+      relative.startsWith("admin") ||
+      relative.includes("[")
+    ) {
       continue;
     }
 
@@ -892,7 +896,10 @@ export function checkOpenApiParity(
   // 1. Discover all app/api routes
   const routeFiles = findFiles(apiDir, /^route\.(ts|js)$/);
   const expectedRoutes = routeFiles.map((file) => {
-    const rel = path.relative(apiDir, path.dirname(file)).replace(/\\/g, "/");
+    const rel = path
+      .relative(apiDir, path.dirname(file))
+      .replace(/\\/g, "/")
+      .replace(/\[([^\]/]+)\]/g, "{$1}");
     return rel === "" ? "/api" : `/api/${rel}`;
   });
 

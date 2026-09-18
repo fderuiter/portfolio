@@ -18,7 +18,7 @@ Preset Command (list / load)
 
 ### action
 
-`"list"` \| `"load"`
+`"load"` \| `"list"`
 
 ### presetId?
 
