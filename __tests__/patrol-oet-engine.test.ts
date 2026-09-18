@@ -310,4 +310,130 @@ describe("Patrol Shift: Headless OET Descent Engine (M4 / #750)", () => {
     expect(engine.createSnapshot().sled.y).toBeGreaterThan(0);
     expect(engine.createSnapshot().sled.steering).toBe(0.5);
   });
+
+  it("allows resuming downhill descent after a controlled check stop when releasing chain brake", () => {
+    const engine = new OetDescentEngine();
+    engine.setChainBrake(false);
+
+    // 1. Accelerate down slope
+    for (let i = 0; i < 90; i++) {
+      engine.update(1 / 60);
+    }
+    expect(engine.createSnapshot().currentSpeedMph).toBeGreaterThan(4);
+
+    // 2. Perform controlled stop
+    engine.performControlledStop();
+    for (let i = 0; i < 90; i++) {
+      engine.update(1 / 60);
+    }
+    expect(engine.createSnapshot().isStopped).toBe(true);
+    expect(engine.createSnapshot().currentSpeedMph).toBe(0);
+
+    // 3. Release chain brake to resume gliding
+    engine.setChainBrake(false);
+    for (let i = 0; i < 60; i++) {
+      engine.update(1 / 60);
+    }
+
+    // Sled should resume accelerating downhill, not remain stuck
+    const resumedSnap = engine.createSnapshot();
+    expect(resumedSnap.isStopped).toBe(false);
+    expect(resumedSnap.currentSpeedMph).toBeGreaterThan(1.0);
+  });
+
+  it("prevents lateral sliding when sled is completely stopped", () => {
+    const engine = new OetDescentEngine();
+    // Engine starts stopped with chain brake engaged
+    expect(engine.createSnapshot().isStopped).toBe(true);
+    expect(engine.createSnapshot().currentSpeedMph).toBe(0);
+    const initialX = engine.createSnapshot().sled.x;
+
+    // Operator turns handles hard left while stopped on snow
+    engine.setSteering(-1);
+    for (let i = 0; i < 60; i++) {
+      engine.update(1 / 60);
+    }
+
+    // Sled must not move sideways without forward momentum
+    expect(engine.createSnapshot().sled.x).toBe(initialX);
+    expect(engine.createSnapshot().sled.vx).toBe(0);
+    expect(engine.createSnapshot().metrics.boundaryViolations).toBe(0);
+  });
+
+  it("dynamically evaluates OET debrief rules as passing or failing based on judgment score threshold (70%)", () => {
+    const scenarioWithOetRule: PatrolScenario = {
+      id: "oet-test-scenario",
+      title: "OET Evaluation Test",
+      actions: [],
+      debriefRules: [
+        {
+          id: "rule-oet-control",
+          title: "Toboggan Descent Control",
+          category: "oet",
+          passed: false, // initial default
+          score: 100,
+          feedback: "Pending descent evaluation.",
+        },
+      ],
+    };
+
+    // 1. Passing run (judgment score 85)
+    const passingEvent = {
+      timestamp: Date.now(),
+      action: "OET_TRANSPORT_COMPLETED",
+      payload: { judgmentScore: 85 },
+    };
+    const passResult = evaluateOETCompliance(
+      scenarioWithOetRule,
+      [],
+      passingEvent
+    );
+    expect(passResult.score).toBe(91); // 85 * 0.6 + 100 * 0.4 = 91
+    expect(passResult.passedCount).toBe(1);
+    expect(passResult.failedCount).toBe(0);
+    expect(passResult.evaluatedRules[0].passed).toBe(true);
+    expect(passResult.evaluatedRules[0].feedback).toContain("passing standard");
+
+    // 2. Failing run (judgment score 40 due to collisions)
+    const failingEvent = {
+      timestamp: Date.now(),
+      action: "OET_TRANSPORT_COMPLETED",
+      payload: { judgmentScore: 40 },
+    };
+    const failResult = evaluateOETCompliance(
+      scenarioWithOetRule,
+      [],
+      failingEvent
+    );
+    expect(failResult.passedCount).toBe(0);
+    expect(failResult.failedCount).toBe(1);
+    expect(failResult.evaluatedRules[0].passed).toBe(false);
+    expect(failResult.evaluatedRules[0].feedback).toContain(
+      "below passing standard"
+    );
+  });
+
+  it("transitions status to crashed and halts simulation upon reaching 4 collisions", () => {
+    const engine = new OetDescentEngine();
+    const engineInternal = engine as unknown as {
+      state: { metrics: { collisions: number }; status: string };
+    };
+
+    // Simulate 3 collisions
+    engineInternal.state.metrics.collisions = 3;
+
+    // Trigger 4th collision
+    const obs = createInitialOetDescentState().obstacles[0];
+    const internalSled = engine as unknown as {
+      state: { sled: { x: number; y: number; speedMph: number } };
+    };
+    internalSled.state.sled.x = obs.x;
+    internalSled.state.sled.y = obs.y - 5;
+    internalSled.state.sled.speedMph = 10;
+
+    engine.update(1 / 60);
+
+    expect(engine.createSnapshot().status).toBe("crashed");
+    expect(engine.createSnapshot().metrics.collisions).toBe(4);
+  });
 });

@@ -30,6 +30,10 @@ Checks scenario debrief rules alongside live descent metrics when available.
 
 `object`
 
+### evaluatedRules
+
+> **evaluatedRules**: [`DebriefRule`](../../types/interfaces/DebriefRule.md)[]
+
 ### failedCount
 
 > **failedCount**: `number`

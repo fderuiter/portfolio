@@ -14,8 +14,9 @@ export function generateDebriefReport(
     shiftState.activeEvents
   );
 
-  const passedRules = scenario.debriefRules.filter((r) => r.passed);
-  const failedRules = scenario.debriefRules.filter((r) => !r.passed);
+  const rules = oetResult.evaluatedRules ?? scenario.debriefRules;
+  const passedRules = rules.filter((r) => r.passed);
+  const failedRules = rules.filter((r) => !r.passed);
 
   return {
     scenarioId: scenario.id,

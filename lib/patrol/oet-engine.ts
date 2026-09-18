@@ -19,6 +19,7 @@ import type {
   OetDescentState,
   OetDescentSnapshot,
   OetDescentEngineOptions,
+  DebriefRule,
 } from "./types";
 
 /**
@@ -362,6 +363,7 @@ export class OetDescentEngine extends ArcadeEngine<
         this.state.sled.speedMph = 0;
         this.state.sled.isStopped = true;
         this.state.status = "stopped";
+        this.isBraking = false; // Release wedge brake latch; chain brake holds the toboggan stationary
 
         if (
           this.highestSpeedSinceLastStop >= 4.0 &&
@@ -377,14 +379,20 @@ export class OetDescentEngine extends ArcadeEngine<
     }
 
     // 5. Lateral Steering & Abrupt Movement Detection
+    // Sled must have forward momentum to generate lateral ski carve/sideslip velocity
     const targetVx =
-      this.state.sled.steering *
-      140 *
-      Math.min(1.2, this.state.sled.speedMph / 8 + 0.3);
+      this.state.sled.speedMph > 0.1
+        ? this.state.sled.steering *
+          140 *
+          Math.min(1.2, this.state.sled.speedMph / 8 + 0.1)
+        : 0;
 
-    this.state.sled.vx +=
-      (targetVx - this.state.sled.vx) *
-      Math.min(1, lateralResponse * clampedDt);
+    this.state.sled.vx =
+      this.state.sled.speedMph > 0.1
+        ? this.state.sled.vx +
+          (targetVx - this.state.sled.vx) *
+            Math.min(1, lateralResponse * clampedDt)
+        : 0;
 
     const steeringDelta = Math.abs(
       this.state.sled.steering - this.prevSteering
@@ -631,6 +639,9 @@ export class OetDescentEngine extends ArcadeEngine<
 
   public setChainBrake(engaged: boolean): void {
     this.state.sled.chainBrakeEngaged = engaged;
+    if (!engaged && this.state.sled.isStopped) {
+      this.isBraking = false;
+    }
     this.notifySubscribers();
   }
 
@@ -1067,6 +1078,7 @@ export function evaluateOETCompliance(
   score: number;
   passedCount: number;
   failedCount: number;
+  evaluatedRules: DebriefRule[];
 } {
   let liveOetScore: number | null = null;
 
@@ -1099,20 +1111,36 @@ export function evaluateOETCompliance(
     }
   }
 
-  if (!scenario.debriefRules || scenario.debriefRules.length === 0) {
+  // Clone debrief rules so evaluation does not mutate shared scenario references
+  const rawRules: DebriefRule[] = scenario.debriefRules
+    ? scenario.debriefRules.map((rule) => ({ ...rule }))
+    : [];
+
+  // Dynamically evaluate OET debrief rules if live descent metrics were captured
+  if (liveOetScore !== null) {
+    const oetPassed = liveOetScore >= 70;
+    for (const rule of rawRules) {
+      if (rule.category === "oet" || rule.id.toLowerCase().includes("oet")) {
+        rule.passed = oetPassed;
+        rule.feedback = oetPassed
+          ? `Controlled descent down fall line maintained passing standard (${liveOetScore}%).`
+          : `Descent control below passing standard (${liveOetScore}%). Excessive speed or collisions.`;
+      }
+    }
+  }
+
+  if (rawRules.length === 0) {
     return {
       score: liveOetScore ?? 100,
       passedCount: 0,
       failedCount: 0,
+      evaluatedRules: [],
     };
   }
 
-  const totalPossible = scenario.debriefRules.reduce(
-    (acc, rule) => acc + rule.score,
-    0
-  );
+  const totalPossible = rawRules.reduce((acc, rule) => acc + rule.score, 0);
 
-  const evaluatedPassed = scenario.debriefRules.filter((rule) => rule.passed);
+  const evaluatedPassed = rawRules.filter((rule) => rule.passed);
   const earnedScore = evaluatedPassed.reduce(
     (acc, rule) => acc + rule.score,
     0
@@ -1130,6 +1158,7 @@ export function evaluateOETCompliance(
   return {
     score: finalScore,
     passedCount: evaluatedPassed.length,
-    failedCount: scenario.debriefRules.length - evaluatedPassed.length,
+    failedCount: rawRules.length - evaluatedPassed.length,
+    evaluatedRules: rawRules,
   };
 }
