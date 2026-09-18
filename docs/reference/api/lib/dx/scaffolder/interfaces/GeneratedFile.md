@@ -10,7 +10,7 @@
 
 ### action
 
-> **action**: `"created"` \| `"updated"` \| `"skipped"`
+> **action**: `"updated"` \| `"created"` \| `"skipped"`
 
 ***
 

@@ -218,6 +218,12 @@ Re-exports [calculateRecistSldChange](expression-evaluator/functions/calculateRe
 
 ***
 
+### captureLibraryEntry
+
+Re-exports [captureLibraryEntry](personal-library/functions/captureLibraryEntry.md)
+
+***
+
 ### CDASH\_CORE\_DOMAIN\_VARIABLES
 
 Re-exports [CDASH_CORE_DOMAIN_VARIABLES](form-health/variables/CDASH_CORE_DOMAIN_VARIABLES.md)
@@ -449,6 +455,12 @@ Re-exports [daysInMonth](precision-date/functions/daysInMonth.md)
 ### DEFAULT\_STUDY\_BRANDING
 
 Re-exports [DEFAULT_STUDY_BRANDING](branding-defaults/variables/DEFAULT_STUDY_BRANDING.md)
+
+***
+
+### deleteLibraryEntry
+
+Re-exports [deleteLibraryEntry](personal-library/functions/deleteLibraryEntry.md)
 
 ***
 
@@ -1088,6 +1100,12 @@ Re-exports [incrementStudyVersion](study-baselines/functions/incrementStudyVersi
 
 ***
 
+### insertLibraryEntryIntoStudy
+
+Re-exports [insertLibraryEntryIntoStudy](personal-library/functions/insertLibraryEntryIntoStudy.md)
+
+***
+
 ### instantiateAtomicField
 
 Re-exports [instantiateAtomicField](smart-blocks-engine/functions/instantiateAtomicField.md)
@@ -1100,9 +1118,27 @@ Re-exports [InstantiateAtomicFieldOptions](smart-blocks-engine/interfaces/Instan
 
 ***
 
+### InstantiatedLibraryEntry
+
+Re-exports [InstantiatedLibraryEntry](personal-library/interfaces/InstantiatedLibraryEntry.md)
+
+***
+
 ### InstantiatedSmartBlock
 
 Re-exports [InstantiatedSmartBlock](smart-blocks-engine/interfaces/InstantiatedSmartBlock.md)
+
+***
+
+### instantiateLibraryEntry
+
+Re-exports [instantiateLibraryEntry](personal-library/functions/instantiateLibraryEntry.md)
+
+***
+
+### InstantiateLibraryEntryOptions
+
+Re-exports [InstantiateLibraryEntryOptions](personal-library/interfaces/InstantiateLibraryEntryOptions.md)
 
 ***
 
@@ -1154,6 +1190,30 @@ Re-exports [KNOWN_MATH_FUNCTIONS](formula-linter/variables/KNOWN_MATH_FUNCTIONS.
 
 ***
 
+### LibraryEntryProvenance
+
+Re-exports [LibraryEntryProvenance](personal-library/interfaces/LibraryEntryProvenance.md)
+
+***
+
+### LibraryInsertionConflict
+
+Re-exports [LibraryInsertionConflict](personal-library/interfaces/LibraryInsertionConflict.md)
+
+***
+
+### LibraryInsertionPreview
+
+Re-exports [LibraryInsertionPreview](personal-library/interfaces/LibraryInsertionPreview.md)
+
+***
+
+### LibrarySourceRef
+
+Re-exports [LibrarySourceRef](personal-library/interfaces/LibrarySourceRef.md)
+
+***
+
 ### lintForm
 
 Re-exports [lintForm](form-linter/functions/lintForm.md)
@@ -1166,6 +1226,12 @@ Re-exports [lintFormula](formula-linter/functions/lintFormula.md)
 
 ***
 
+### listLibraryEntries
+
+Re-exports [listLibraryEntries](personal-library/functions/listLibraryEntries.md)
+
+***
+
 ### listStudyBaselines
 
 Re-exports [listStudyBaselines](study-baselines/functions/listStudyBaselines.md)
@@ -1175,6 +1241,18 @@ Re-exports [listStudyBaselines](study-baselines/functions/listStudyBaselines.md)
 ### listStudySnapshots
 
 Re-exports [listStudySnapshots](study-draft-storage/functions/listStudySnapshots.md)
+
+***
+
+### LoadLibraryResult
+
+Re-exports [LoadLibraryResult](personal-library/type-aliases/LoadLibraryResult.md)
+
+***
+
+### loadPersonalLibrary
+
+Re-exports [loadPersonalLibrary](personal-library/functions/loadPersonalLibrary.md)
 
 ***
 
@@ -1238,6 +1316,36 @@ Re-exports [parseUniversalCrf](universal-schema/functions/parseUniversalCrf.md)
 
 ***
 
+### PERSONAL\_LIBRARY\_CORRUPT\_BACKUP\_KEY
+
+Re-exports [PERSONAL_LIBRARY_CORRUPT_BACKUP_KEY](personal-library/variables/PERSONAL_LIBRARY_CORRUPT_BACKUP_KEY.md)
+
+***
+
+### PERSONAL\_LIBRARY\_ENVELOPE\_VERSION
+
+Re-exports [PERSONAL_LIBRARY_ENVELOPE_VERSION](personal-library/variables/PERSONAL_LIBRARY_ENVELOPE_VERSION.md)
+
+***
+
+### PERSONAL\_LIBRARY\_STORAGE\_KEY
+
+Re-exports [PERSONAL_LIBRARY_STORAGE_KEY](personal-library/variables/PERSONAL_LIBRARY_STORAGE_KEY.md)
+
+***
+
+### PersonalLibraryEntry
+
+Re-exports [PersonalLibraryEntry](personal-library/interfaces/PersonalLibraryEntry.md)
+
+***
+
+### PersonalLibraryEnvelope
+
+Re-exports [PersonalLibraryEnvelope](personal-library/interfaces/PersonalLibraryEnvelope.md)
+
+***
+
 ### PK\_ESCALATION\_PRESET
 
 Re-exports [PK_ESCALATION_PRESET](presets/pk-dose-escalation/variables/PK_ESCALATION_PRESET.md)
@@ -1262,6 +1370,12 @@ Re-exports [PresetCatalogItem](presets/interfaces/PresetCatalogItem.md)
 
 ***
 
+### previewLibraryInsertion
+
+Re-exports [previewLibraryInsertion](personal-library/functions/previewLibraryInsertion.md)
+
+***
+
 ### ProtocolDiffSummary
 
 Re-exports [ProtocolDiffSummary](universal-schema/interfaces/ProtocolDiffSummary.md)
@@ -1283,6 +1397,12 @@ Re-exports [resolveFormConditionalState](conditional-logic/functions/resolveForm
 ### resolveFormConditionalStateForForm
 
 Re-exports [resolveFormConditionalStateForForm](conditional-logic/functions/resolveFormConditionalStateForForm.md)
+
+***
+
+### resolveLibraryStorage
+
+Re-exports [resolveLibraryStorage](personal-library/functions/resolveLibraryStorage.md)
 
 ***
 
@@ -1331,6 +1451,18 @@ Re-exports [sanitizeRName](export-r/functions/sanitizeRName.md)
 ### sanitizeSasName
 
 Re-exports [sanitizeSasName](export-sas/functions/sanitizeSasName.md)
+
+***
+
+### SaveLibraryResult
+
+Re-exports [SaveLibraryResult](personal-library/type-aliases/SaveLibraryResult.md)
+
+***
+
+### savePersonalLibrary
+
+Re-exports [savePersonalLibrary](personal-library/functions/savePersonalLibrary.md)
 
 ***
 
@@ -1859,6 +1991,18 @@ Re-exports [UniversalStudyProtocol](universal-schema/type-aliases/UniversalStudy
 ### UniversalStudyProtocolSchema
 
 Re-exports [UniversalStudyProtocolSchema](universal-schema/variables/UniversalStudyProtocolSchema.md)
+
+***
+
+### updateLibraryEntry
+
+Re-exports [updateLibraryEntry](personal-library/functions/updateLibraryEntry.md)
+
+***
+
+### upsertLibraryEntry
+
+Re-exports [upsertLibraryEntry](personal-library/functions/upsertLibraryEntry.md)
 
 ***
 
