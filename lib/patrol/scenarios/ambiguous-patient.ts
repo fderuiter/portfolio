@@ -21,7 +21,8 @@ export const AMBIGUOUS_PATIENT_SCENARIO: PatrolScenario = {
   difficulty: "intermediate",
   category: "medical",
   estimatedMinutes: 18,
-  location: "The Coulee - Mid-Mountain",
+  location: "The Coulee / Adam's Abyss - The Back Bowl",
+  coordinates: { x: 775, y: 560, zone: "back-bowl" },
   dispatchPrompt:
     "Patrol 6, Base Dispatch. Report of a skier down in the Coulee, reportedly up and walking. Guest reports may be minor — respond and assess.",
   environment: {

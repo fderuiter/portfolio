@@ -22,6 +22,7 @@ export const WRIST_INJURY_SCENARIO: PatrolScenario = {
   category: "trauma",
   estimatedMinutes: 12,
   location: "Magic Carpet Unload Zone - East Base Area",
+  coordinates: { x: 680, y: 1090, zone: "main" },
   dispatchPrompt:
     "Patrol 2, Base Dispatch. Guest down at the Magic Carpet unload, reported wrist injury after a fall. Alert and able to talk. Respond 10-2.",
   environment: {

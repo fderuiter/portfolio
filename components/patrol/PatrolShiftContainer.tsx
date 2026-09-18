@@ -231,6 +231,20 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
           shiftState.phase === "patrol") && (
           <MountainMap
             incidentsCompleted={shiftState.incidentsCompleted}
+            activeAmbientEvent={shiftState.activeAmbientEvent}
+            operationalState={shiftState.operationalState}
+            onTriggerAmbientEvent={() => {
+              activeEngine.dispatch({ type: "TRIGGER_AMBIENT_EVENT" });
+            }}
+            onResolveAmbientOption={(selectedOptionId) => {
+              activeEngine.dispatch({
+                type: "RESOLVE_AMBIENT_EVENT",
+                selectedOptionId,
+              });
+            }}
+            onDismissAmbientEvent={() => {
+              activeEngine.dispatch({ type: "DISMISS_AMBIENT_EVENT" });
+            }}
             onAwaitDispatch={() => {
               const nextScenario =
                 availableScenarios[

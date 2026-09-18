@@ -8,6 +8,8 @@
 
 ## Interfaces
 
+- [AmbientEvent](interfaces/AmbientEvent.md)
+- [AmbientEventOption](interfaces/AmbientEventOption.md)
 - [BriefingState](interfaces/BriefingState.md)
 - [DebriefReport](interfaces/DebriefReport.md)
 - [DebriefRule](interfaces/DebriefRule.md)
@@ -34,6 +36,7 @@
 - [ScenarioAction](interfaces/ScenarioAction.md)
 - [ShiftDebriefSummary](interfaces/ShiftDebriefSummary.md)
 - [ShiftEngineEvent](interfaces/ShiftEngineEvent.md)
+- [ShiftOperationalState](interfaces/ShiftOperationalState.md)
 - [ShiftPlayfulStats](interfaces/ShiftPlayfulStats.md)
 - [ShiftState](interfaces/ShiftState.md)
 - [SnowSprayParticle](interfaces/SnowSprayParticle.md)

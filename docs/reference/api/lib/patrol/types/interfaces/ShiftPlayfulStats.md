@@ -29,6 +29,12 @@ Derived entirely from `PatrolEvent[]` counts (Epic #744: never patient outcomes)
 
 ***
 
+### guestsAssisted?
+
+> `optional` **guestsAssisted?**: `number`
+
+***
+
 ### hazardsMarked
 
 > **hazardsMarked**: `number`

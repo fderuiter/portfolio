@@ -26,6 +26,26 @@
 
 ***
 
+### coordinates?
+
+> `optional` **coordinates?**: `object`
+
+Authentic Welch Village geospatial coordinates for dispatch and beacon anchoring (Issue #835).
+
+#### x
+
+> **x**: `number`
+
+#### y
+
+> **y**: `number`
+
+#### zone?
+
+> `optional` **zone?**: `"main"` \| `"back-bowl"`
+
+***
+
 ### debriefRules
 
 > **debriefRules**: [`DebriefRule`](DebriefRule.md)[]

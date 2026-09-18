@@ -16,7 +16,8 @@ export const INITIAL_PATROL_SCENARIOS: PatrolScenario[] = [
       "Opening patrol sweep across Welch Village's West Slopes, starting at Cedar Fork. Verify trail signage, rope line integrity, and establish radio contact with mountain dispatch.",
     difficulty: "beginner",
     estimatedMinutes: 15,
-    location: "Cedar Fork - West Slopes",
+    location: "Lift Face under Face Lift 2000 Tower 4 - West Slopes",
+    coordinates: { x: 1610, y: 730, zone: "main" },
     actions: [
       {
         id: "radio-check",
@@ -81,6 +82,7 @@ export const INITIAL_PATROL_SCENARIOS: PatrolScenario[] = [
     difficulty: "beginner",
     estimatedMinutes: 10,
     location: "The Summit, Welch Village (1,060 ft)",
+    coordinates: { x: 1000, y: 160, zone: "main" },
     actions: [
       {
         id: "anemometer-reading",
@@ -129,7 +131,8 @@ export const OEC_SAMPLE_SCENARIO: PatrolScenario = {
     "Skier down on Dan's Dive, East Slopes. Witnesses report catching an outside edge on firm hardpack with a tumbling fall.",
   difficulty: "intermediate",
   estimatedMinutes: 20,
-  location: "Dan's Dive - East Slopes",
+  location: "Cannon Ball near Sunrise Triple - East Slopes",
+  coordinates: { x: 405, y: 310, zone: "main" },
   dispatchPrompt:
     "Patrol Base Dispatch: 10-50 skier down on Dan's Dive, East Slopes, reported lower extremity injury. Respond with Cascade 100 toboggan.",
   environment: {

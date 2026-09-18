@@ -182,6 +182,8 @@ export interface PatrolScenario {
   category?: string;
   estimatedMinutes?: number;
   location?: string;
+  /** Authentic Welch Village geospatial coordinates for dispatch and beacon anchoring (Issue #835). */
+  coordinates?: { x: number; y: number; zone?: "main" | "back-bowl" };
   dispatchPrompt?: string;
   environment?: EnvironmentState;
   patient?: PatientState;
@@ -191,6 +193,54 @@ export interface PatrolScenario {
   /** Interpersonal/delegation dialogue beats woven into this scenario (Issue #752). */
   dialogueMoments?: DialogueMoment[];
   debriefRules: DebriefRule[];
+}
+
+/**
+ * A selectable response option within an ambient operational mini-event.
+ */
+export interface AmbientEventOption {
+  id: string;
+  label: string;
+  description?: string;
+  consequenceText: string;
+  category?: ActionCategory;
+  timeIncrementMinutes?: number;
+  closedTrailsDelta?: {
+    add?: string[];
+    remove?: string[];
+  };
+  equipmentLocation?: string;
+  /** Emitted event context or payload appended to activeEvents */
+  emittedEvent?: Partial<PatrolEvent>;
+}
+
+/**
+ * An ambient operational mini-event encountered on the mountain map hub.
+ */
+export interface AmbientEvent {
+  id: string;
+  title: string;
+  location: string;
+  sector: string;
+  coordinates: { x: number; y: number; zone?: "main" | "back-bowl" };
+  prompt: string;
+  context?: string;
+  options: AmbientEventOption[];
+}
+
+/**
+ * Persistent operational state across the patrol shift.
+ */
+export interface ShiftOperationalState {
+  closedTrails: string[];
+  equipmentLocation?: string;
+  activeHazardPins?: Array<{
+    id: string;
+    location: string;
+    x: number;
+    y: number;
+    label: string;
+  }>;
 }
 
 export interface ShiftState {
@@ -212,6 +262,11 @@ export interface ShiftState {
   sceneSafetyStatus?: "unassessed" | "safe" | "compromised";
   patientCondition?: "stable" | "deteriorating" | "worsened" | "critical";
   currentVitals?: VitalsData;
+
+  // Milestone M8 ambient patrol operations and persistent operational state
+  activeAmbientEvent?: AmbientEvent | null;
+  resolvedAmbientEvents?: string[];
+  operationalState?: ShiftOperationalState;
 }
 
 export type ShiftEngineEventType =
@@ -232,7 +287,10 @@ export type ShiftEngineEventType =
   | "ASSESS_SCENE_SAFETY"
   | "REASSESS_PATIENT"
   | "PUSH_EVENT"
-  | "RESET";
+  | "RESET"
+  | "TRIGGER_AMBIENT_EVENT"
+  | "RESOLVE_AMBIENT_EVENT"
+  | "DISMISS_AMBIENT_EVENT";
 
 export interface ShiftEngineEvent {
   type: ShiftEngineEventType;
@@ -242,6 +300,10 @@ export interface ShiftEngineEvent {
   vitals?: VitalsData;
   payload?: Record<string, unknown>;
   timestamp?: number;
+  ambientEventId?: string;
+  selectedOptionId?: string;
+  ambientEvent?: AmbientEvent;
+  seed?: number;
 }
 
 export interface DebriefReport {
@@ -308,6 +370,7 @@ export interface ShiftPlayfulStats {
   reassessmentsLogged: number;
   closedLoopDelegations: number;
   communicationRating: string;
+  guestsAssisted?: number;
 }
 
 /**

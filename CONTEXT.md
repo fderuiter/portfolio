@@ -407,3 +407,18 @@ Formal inference rules used to derive logical steps from valid premises:
 - **Typographic Pacing & Fluency**: The cognitive reading optimization (embodied in Lexend) that systematically scales character width and inter-glyph tracking to prevent visual crowding, line skipping, and perceptual letter merging.
 - **Dynamic Dyslexia Mode**: A client-side persistent accessibility state (`useFontPreference` / `A11yProvider`) that dynamically toggles the active DOM font stack between the default Atkinson/Lexend hybrid and OpenDyslexic across all public UI surfaces and the userland Pretext text measurement engine.
 - **Family-Anchored Accessibility Invariant**: The foundational design commitment ensuring that every interface, navigation element, and technical article in the portfolio is directly legible, usable, and comfortable for Frederick's brother and readers with dyslexia, prioritizing human reading accessibility above conventional design aesthetics.
+
+## Patrol Shift (Ski Patrol Judgment Simulator)
+
+### Mountain Operations & Geospatial Terrain Engine
+
+- **Patrol Shift Simulator**: An interactive Midwest ski patrol judgment and triage simulation (`/patrol`) modeling Welch Village field operations, Outdoor Emergency Care (OEC) clinical triage, Outdoor Emergency Transportation (OET) toboggan descent, and non-clinical mountain management.
+- **Interactive Mountain Viewport**: A responsive pan-and-zoom SVG canvas representing Welch Village's terrain, trails, lifts, and infrastructure across multiple sectors with dual-zone toggling, real-time coordinate transformations, minimap radar tracking, and altitude interpolation.
+- **Dual-Zone Sector View**: The geospatial partitioning of Welch Village into two primary operational camera zones—East & West Slopes (Main Mountain) and The Back Bowl—each with dedicated viewport framing, trail visibility, and elevation context.
+- **Catmull-Rom Spline Pipeline**: The mathematical interpolation technique converting discrete geographic survey points into smooth, continuous cubic Bézier curve paths for trail centerlines, supporting double-pass rendering (casing + core) and grooming textures (solid corduroy vs. dashed moguls).
+- **Slope Profile Sparkline**: An SVG elevation cross-section graph rendered in the trail inspector card, visualizing trail altitude loss from summit to base alongside calculated average gradient percentage.
+- **Parametric Skier Run Simulation**: A physics-driven animation mode descending Catmull-Rom trail splines with tangent angle derivation, carving roll, and dynamic snow spray particle generation.
+- **Aerial Chairlift Physics Loop**: Continuous kinetic evaluation of aerial cable lines and chair carriers with tower pylon crossarms, counter-rotating carrier offsets, and strict `prefers-reduced-motion` fallbacks.
+- **Emergency Dispatch Beacon**: An animated, pulsing radar beacon ring anchored to exact trail or lift tower coordinates on the mountain map during active incident dispatch and response states.
+- **Ambient Operational Mini-Event**: A brief (10–30s) non-clinical mountain event occurring on the map hub between dispatches (guest assistance, boundary control, trail hazard mitigation, lift coordination, dispatch radio checks) reflecting that patrol manages the entire mountain environment.
+- **Your Responsibility Code**: The 10-point National Ski Areas Association (NSAA) skier and snowboarder safety ruleset accessible directly from the mountain hub to reinforce operational mountain safety culture.
