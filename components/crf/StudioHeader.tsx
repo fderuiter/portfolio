@@ -32,6 +32,7 @@ import {
   IconSun,
   IconMoon,
   IconTerminal2,
+  IconFlask2,
   IconGitCompare,
 } from "@tabler/icons-react";
 import { getStudyBranding } from "@/lib/crf/branding-defaults";
@@ -46,9 +47,11 @@ interface StudioHeaderProps {
   isLeftSidebarOpen?: boolean;
   isRightInspectorOpen?: boolean;
   isTerminalOpen?: boolean;
+  isTestDockOpen?: boolean;
   onToggleLeftSidebar?: () => void;
   onToggleRightInspector?: () => void;
   onToggleTerminal?: () => void;
+  onToggleTestDock?: () => void;
   onUndo: () => void;
   onRedo: () => void;
   onChangeMode: (mode: StudioMode) => void;
@@ -74,9 +77,11 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
   isLeftSidebarOpen = true,
   isRightInspectorOpen = true,
   isTerminalOpen = false,
+  isTestDockOpen = false,
   onToggleLeftSidebar,
   onToggleRightInspector,
   onToggleTerminal,
+  onToggleTestDock,
   onUndo,
   onRedo,
   onChangeMode,
@@ -600,6 +605,23 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
 
         {/* Right Side: In-Studio Terminal Toggle & Workspace Sidebar Toggles */}
         <div className="flex items-center gap-1.5 shrink-0">
+          {/* Form Test Dock Toggle (#541) */}
+          {onToggleTestDock && (
+            <button
+              onClick={onToggleTestDock}
+              aria-pressed={isTestDockOpen}
+              className={`p-1.5 rounded-lg border transition-colors inline-flex items-center gap-1.5 text-[11px] font-mono shrink-0 ${
+                isTestDockOpen
+                  ? "bg-brand-cyan/20 text-brand-cyan border-brand-cyan/40"
+                  : "bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border-zinc-800"
+              }`}
+              title="Toggle Form Test Dock (⌘\\)"
+            >
+              <IconFlask2 className="w-3.5 h-3.5" />
+              <span className="hidden md:inline font-bold">Test</span>
+            </button>
+          )}
+
           {/* Terminal / CLI Drawer Toggle */}
           {onToggleTerminal && (
             <button

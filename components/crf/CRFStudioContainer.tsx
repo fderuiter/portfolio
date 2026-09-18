@@ -84,6 +84,8 @@ const SpotlightTourOverlay = dynamic(
 );
 
 import { StudioTerminal } from "./Terminal/StudioTerminal";
+import { FormTestDock } from "./Modes/FormTestDock";
+import { DEFAULT_TEST_SCOPE, type ConditionalFieldValues } from "@/lib/crf";
 import { SlashPaletteModal } from "./SlashPaletteModal";
 import { BaselineManagerModal } from "./BaselineManagerModal";
 import {
@@ -337,6 +339,12 @@ export const CRFStudioContainer: React.FC = () => {
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [isSpotlightTourOpen, setIsSpotlightTourOpen] = useState(false);
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
+  const [isTestDockOpen, setIsTestDockOpen] = useState(false);
+  // Held here rather than inside the dock so edit -> test -> close -> reopen
+  // returns the author to the record they were working on (#541).
+  const [testDockValues, setTestDockValues] = useState<ConditionalFieldValues>(
+    {}
+  );
   const [isSlashPaletteOpen, setIsSlashPaletteOpen] = useState(false);
   const [isBaselinesModalOpen, setIsBaselinesModalOpen] = useState(false);
   const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
@@ -613,6 +621,7 @@ export const CRFStudioContainer: React.FC = () => {
       if (e.key === "Escape") {
         setIsMobileWidgetDrawerOpen(false);
         setIsSlashPaletteOpen(false);
+        setIsTestDockOpen(false);
         if (selectedFieldId) {
           setSelectedFieldId(null);
         }
@@ -671,6 +680,14 @@ export const CRFStudioContainer: React.FC = () => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "j") {
         e.preventDefault();
         setIsTerminalOpen((prev) => !prev);
+        return;
+      }
+
+      // Form Test Dock (⌘\ / Ctrl+\). Chosen because it is unclaimed by the
+      // browser and by the studio's existing bindings.
+      if ((e.metaKey || e.ctrlKey) && e.key === "\\") {
+        e.preventDefault();
+        setIsTestDockOpen((prev) => !prev);
         return;
       }
 
@@ -1325,9 +1342,11 @@ export const CRFStudioContainer: React.FC = () => {
         isLeftSidebarOpen={isLeftSidebarOpen}
         isRightInspectorOpen={isRightInspectorOpen}
         isTerminalOpen={isTerminalOpen}
+        isTestDockOpen={isTestDockOpen}
         onToggleLeftSidebar={() => setIsLeftSidebarOpen((prev) => !prev)}
         onToggleRightInspector={() => setIsRightInspectorOpen((prev) => !prev)}
         onToggleTerminal={() => setIsTerminalOpen((prev) => !prev)}
+        onToggleTestDock={() => setIsTestDockOpen((prev) => !prev)}
         onUndo={handleUndo}
         onRedo={handleRedo}
         onChangeMode={setActiveMode}
@@ -1674,6 +1693,17 @@ export const CRFStudioContainer: React.FC = () => {
           />
         )}
       </div>
+
+      {/* In-Builder Form Test Dock (#541) */}
+      <FormTestDock
+        isOpen={isTestDockOpen}
+        form={activeForm || null}
+        values={testDockValues}
+        scope={DEFAULT_TEST_SCOPE}
+        codelists={study?.codelists}
+        onChangeValues={setTestDockValues}
+        onClose={() => setIsTestDockOpen(false)}
+      />
 
       {/* In-Studio Interactive Terminal Drawer */}
       <StudioTerminal
