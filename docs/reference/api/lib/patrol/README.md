@@ -20,15 +20,57 @@ Re-exports [ALL_PATROL_SCENARIOS](presets/variables/ALL_PATROL_SCENARIOS.md)
 
 ***
 
+### AMBIENT\_EVENTS\_CATALOG
+
+Re-exports [AMBIENT_EVENTS_CATALOG](ambient-events/variables/AMBIENT_EVENTS_CATALOG.md)
+
+***
+
+### AmbientEvent
+
+Re-exports [AmbientEvent](types/interfaces/AmbientEvent.md)
+
+***
+
+### AmbientEventOption
+
+Re-exports [AmbientEventOption](types/interfaces/AmbientEventOption.md)
+
+***
+
+### BASE\_ELEVATION\_FT
+
+Re-exports [BASE_ELEVATION_FT](welch-data/variables/BASE_ELEVATION_FT.md)
+
+***
+
 ### BriefingState
 
 Re-exports [BriefingState](types/interfaces/BriefingState.md)
 
 ***
 
+### calculateAverageGrade
+
+Re-exports [calculateAverageGrade](welch-data/functions/calculateAverageGrade.md)
+
+***
+
+### calculateElevationAt
+
+Re-exports [calculateElevationAt](welch-data/functions/calculateElevationAt.md)
+
+***
+
 ### CanonicalShiftPhase
 
 Re-exports [CanonicalShiftPhase](types/type-aliases/CanonicalShiftPhase.md)
+
+***
+
+### catmullRomToPath
+
+Re-exports [catmullRomToPath](welch-data/functions/catmullRomToPath.md)
 
 ***
 
@@ -212,6 +254,24 @@ Re-exports [getUnlockedDialogueMoments](dialogue/functions/getUnlockedDialogueMo
 
 ***
 
+### getWelchLiftById
+
+Re-exports [getWelchLiftById](welch-data/functions/getWelchLiftById.md)
+
+***
+
+### getWelchPoiById
+
+Re-exports [getWelchPoiById](welch-data/functions/getWelchPoiById.md)
+
+***
+
+### getWelchTrailById
+
+Re-exports [getWelchTrailById](welch-data/functions/getWelchTrailById.md)
+
+***
+
 ### IncidentDebriefResult
 
 Re-exports [IncidentDebriefResult](types/interfaces/IncidentDebriefResult.md)
@@ -221,6 +281,12 @@ Re-exports [IncidentDebriefResult](types/interfaces/IncidentDebriefResult.md)
 ### IncidentSeverity
 
 Re-exports [IncidentSeverity](types/type-aliases/IncidentSeverity.md)
+
+***
+
+### interpolateSkierPosition
+
+Re-exports [interpolateSkierPosition](welch-data/functions/interpolateSkierPosition.md)
 
 ***
 
@@ -380,9 +446,27 @@ Re-exports [reduceShiftState](engine/functions/reduceShiftState.md)
 
 ***
 
+### RESPONSIBILITY\_CODE
+
+Re-exports [RESPONSIBILITY_CODE](welch-data/variables/RESPONSIBILITY_CODE.md)
+
+***
+
+### ResponsibilityRule
+
+Re-exports [ResponsibilityRule](welch-data/interfaces/ResponsibilityRule.md)
+
+***
+
 ### ScenarioAction
 
 Re-exports [ScenarioAction](types/interfaces/ScenarioAction.md)
+
+***
+
+### selectAmbientEvent
+
+Re-exports [selectAmbientEvent](ambient-events/functions/selectAmbientEvent.md)
 
 ***
 
@@ -401,6 +485,12 @@ Re-exports [ShiftEngineEvent](types/interfaces/ShiftEngineEvent.md)
 ### ShiftEngineEventType
 
 Re-exports [ShiftEngineEventType](types/type-aliases/ShiftEngineEventType.md)
+
+***
+
+### ShiftOperationalState
+
+Re-exports [ShiftOperationalState](types/interfaces/ShiftOperationalState.md)
 
 ***
 
@@ -428,12 +518,96 @@ Re-exports [SnowSprayParticle](types/interfaces/SnowSprayParticle.md)
 
 ***
 
+### SUMMIT\_ELEVATION\_FT
+
+Re-exports [SUMMIT_ELEVATION_FT](welch-data/variables/SUMMIT_ELEVATION_FT.md)
+
+***
+
 ### transitionShiftPhase
 
 Re-exports [transitionShiftPhase](engine/functions/transitionShiftPhase.md)
 
 ***
 
+### VERTICAL\_DROP\_FT
+
+Re-exports [VERTICAL_DROP_FT](welch-data/variables/VERTICAL_DROP_FT.md)
+
+***
+
 ### VitalsData
 
 Re-exports [VitalsData](types/interfaces/VitalsData.md)
+
+***
+
+### WELCH\_LIFTS
+
+Re-exports [WELCH_LIFTS](welch-data/variables/WELCH_LIFTS.md)
+
+***
+
+### WELCH\_POIS
+
+Re-exports [WELCH_POIS](welch-data/variables/WELCH_POIS.md)
+
+***
+
+### WELCH\_TRAILS
+
+Re-exports [WELCH_TRAILS](welch-data/variables/WELCH_TRAILS.md)
+
+***
+
+### WelchLift
+
+Re-exports [WelchLift](welch-data/interfaces/WelchLift.md)
+
+***
+
+### WelchLiftType
+
+Re-exports [WelchLiftType](welch-data/type-aliases/WelchLiftType.md)
+
+***
+
+### WelchPoi
+
+Re-exports [WelchPoi](welch-data/interfaces/WelchPoi.md)
+
+***
+
+### WelchPoiCategory
+
+Re-exports [WelchPoiCategory](welch-data/type-aliases/WelchPoiCategory.md)
+
+***
+
+### WelchPoint
+
+Re-exports [WelchPoint](welch-data/interfaces/WelchPoint.md)
+
+***
+
+### WelchSector
+
+Re-exports [WelchSector](welch-data/type-aliases/WelchSector.md)
+
+***
+
+### WelchTrail
+
+Re-exports [WelchTrail](welch-data/interfaces/WelchTrail.md)
+
+***
+
+### WelchTrailDifficulty
+
+Re-exports [WelchTrailDifficulty](welch-data/type-aliases/WelchTrailDifficulty.md)
+
+***
+
+### WelchZone
+
+Re-exports [WelchZone](welch-data/type-aliases/WelchZone.md)

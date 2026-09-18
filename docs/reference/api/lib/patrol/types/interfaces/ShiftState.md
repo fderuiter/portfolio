@@ -14,6 +14,12 @@
 
 ***
 
+### activeAmbientEvent?
+
+> `optional` **activeAmbientEvent?**: [`AmbientEvent`](AmbientEvent.md) \| `null`
+
+***
+
 ### activeEvents
 
 > **activeEvents**: [`PatrolEvent`](PatrolEvent.md)[]
@@ -44,6 +50,12 @@
 
 ***
 
+### operationalState?
+
+> `optional` **operationalState?**: [`ShiftOperationalState`](ShiftOperationalState.md)
+
+***
+
 ### patientCondition?
 
 > `optional` **patientCondition?**: `"critical"` \| `"stable"` \| `"deteriorating"` \| `"worsened"`
@@ -53,6 +65,12 @@
 ### phase
 
 > **phase**: [`ShiftPhase`](../type-aliases/ShiftPhase.md)
+
+***
+
+### resolvedAmbientEvents?
+
+> `optional` **resolvedAmbientEvents?**: `string`[]
 
 ***
 

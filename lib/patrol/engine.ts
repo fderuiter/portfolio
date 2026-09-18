@@ -11,7 +11,9 @@ import type {
   PatientState,
   EnvironmentState,
   PatrolActor,
+  ShiftOperationalState,
 } from "./types";
+import { selectAmbientEvent, AMBIENT_EVENTS_CATALOG } from "./ambient-events";
 
 /**
  * Creates the initial shift state.
@@ -37,6 +39,12 @@ export function createInitialShiftState(
     sceneSafetySecured: false,
     sceneSafetyStatus: "unassessed",
     patientCondition: "stable",
+    activeAmbientEvent: null,
+    resolvedAmbientEvents: [],
+    operationalState: {
+      closedTrails: [],
+      equipmentLocation: "Summit Shack",
+    },
   };
 }
 
@@ -277,6 +285,7 @@ export function reduceShiftState(
         return {
           ...state,
           phase: "PATROL_MAP",
+          activeAmbientEvent: selectAmbientEvent(state, event.seed),
         };
       }
       return state;
@@ -288,6 +297,7 @@ export function reduceShiftState(
           ...state,
           phase: "DISPATCH",
           currentScenarioId: event.scenarioId ?? state.currentScenarioId,
+          activeAmbientEvent: null,
         };
       }
       return state;
@@ -374,12 +384,17 @@ export function reduceShiftState(
                   nextIncidents
               );
 
-        return {
+        const hubState: ShiftState = {
           ...state,
           phase: "PATROL_MAP",
           score: compositeScore,
           incidentsCompleted: nextIncidents,
           currentScenarioId: null,
+        };
+
+        return {
+          ...hubState,
+          activeAmbientEvent: selectAmbientEvent(hubState, event.seed),
         };
       }
       return state;
@@ -414,6 +429,7 @@ export function reduceShiftState(
           ...state,
           phase: "SHIFT_COMPLETE",
           isCompleted: true,
+          activeAmbientEvent: null,
         };
       }
       return state;
@@ -704,6 +720,140 @@ export function reduceShiftState(
       };
     }
 
+    case "TRIGGER_AMBIENT_EVENT": {
+      if (state.phase !== "PATROL_MAP" && state.phase !== "patrol") {
+        return state;
+      }
+      // If an ambient event is already actively awaiting response, do not clobber it
+      // unless an explicit event or event ID is provided.
+      if (
+        state.activeAmbientEvent &&
+        !event.ambientEvent &&
+        !event.ambientEventId
+      ) {
+        return state;
+      }
+      const eventToTrigger =
+        event.ambientEvent ??
+        (event.ambientEventId
+          ? (AMBIENT_EVENTS_CATALOG.find(
+              (e) => e.id === event.ambientEventId
+            ) ?? null)
+          : selectAmbientEvent(state, event.seed));
+
+      if (!eventToTrigger) return state;
+
+      return {
+        ...state,
+        activeAmbientEvent: eventToTrigger,
+      };
+    }
+
+    case "RESOLVE_AMBIENT_EVENT": {
+      if (!state.activeAmbientEvent) {
+        return state;
+      }
+      const currentEvent = state.activeAmbientEvent;
+      const option =
+        currentEvent.options.find((o) => o.id === event.selectedOptionId) ??
+        currentEvent.options[0];
+
+      const timeIncrement = option?.timeIncrementMinutes ?? 1;
+      const nextTime = state.timeElapsedMinutes + timeIncrement;
+
+      // Update closed trails
+      let nextClosedTrails = [...(state.operationalState?.closedTrails ?? [])];
+      if (option?.closedTrailsDelta?.add) {
+        for (const trail of option.closedTrailsDelta.add) {
+          if (!nextClosedTrails.includes(trail)) {
+            nextClosedTrails.push(trail);
+          }
+        }
+      }
+      if (option?.closedTrailsDelta?.remove) {
+        nextClosedTrails = nextClosedTrails.filter(
+          (trail) => !option.closedTrailsDelta?.remove?.includes(trail)
+        );
+      }
+
+      // Update equipment location
+      const nextEquipmentLocation =
+        option?.equipmentLocation ??
+        state.operationalState?.equipmentLocation ??
+        "Summit Shack";
+
+      const nextOperationalState: ShiftOperationalState = {
+        ...(state.operationalState ?? { closedTrails: [] }),
+        closedTrails: nextClosedTrails,
+        equipmentLocation: nextEquipmentLocation,
+      };
+
+      const emittedEvent: PatrolEvent = {
+        timestamp: event.timestamp ?? Date.now(),
+        scenarioId: "ambient-ops",
+        action:
+          option?.emittedEvent?.action ?? `ambient_${currentEvent.id}_resolved`,
+        title: currentEvent.title,
+        description:
+          option?.consequenceText ??
+          "Ambient patrol operations event resolved.",
+        context: {
+          category: option?.category ?? "decision",
+          trail: currentEvent.location,
+          location: currentEvent.location,
+          sector: currentEvent.sector,
+          ...(option?.emittedEvent?.context ?? {}),
+        },
+      };
+
+      const nextResolved = [
+        ...(state.resolvedAmbientEvents ?? []),
+        currentEvent.id,
+      ];
+
+      return {
+        ...state,
+        timeElapsedMinutes: nextTime,
+        activeEvents: [emittedEvent, ...state.activeEvents],
+        operationalState: nextOperationalState,
+        resolvedAmbientEvents: nextResolved,
+        activeAmbientEvent: null,
+      };
+    }
+
+    case "DISMISS_AMBIENT_EVENT": {
+      if (!state.activeAmbientEvent) {
+        return state;
+      }
+      const currentEvent = state.activeAmbientEvent;
+      const dismissEvent: PatrolEvent = {
+        timestamp: event.timestamp ?? Date.now(),
+        scenarioId: "ambient-ops",
+        action: `ambient_${currentEvent.id}_dismissed`,
+        title: currentEvent.title,
+        description: "Patroller maintained hill standby without intervening.",
+        context: {
+          category: "decision",
+          trail: currentEvent.location,
+          location: currentEvent.location,
+          sector: currentEvent.sector,
+          dismissed: true,
+        },
+      };
+
+      const nextResolved = [
+        ...(state.resolvedAmbientEvents ?? []),
+        currentEvent.id,
+      ];
+
+      return {
+        ...state,
+        activeEvents: [dismissEvent, ...state.activeEvents],
+        resolvedAmbientEvents: nextResolved,
+        activeAmbientEvent: null,
+      };
+    }
+
     case "RESET": {
       return createInitialShiftState(null, "INTRO");
     }
@@ -893,6 +1043,14 @@ class PatrolShiftEngineImpl implements PatrolShiftEngine {
 
     if (event.type === "PUSH_EVENT" && event.event) {
       this.recordEvent(event.event);
+    }
+
+    if (
+      (event.type === "RESOLVE_AMBIENT_EVENT" ||
+        event.type === "DISMISS_AMBIENT_EVENT") &&
+      nextState.activeEvents.length > this.state.activeEvents.length
+    ) {
+      this.recordEvent(nextState.activeEvents[0]);
     }
 
     if (nextState !== this.state) {

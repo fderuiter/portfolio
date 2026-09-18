@@ -9,3 +9,5 @@ export * from "./oet-engine";
 export * from "./debrief";
 export * from "./dialogue";
 export * from "./events";
+export * from "./ambient-events";
+export * from "./welch-data";

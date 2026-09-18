@@ -21,6 +21,7 @@ export const BUSY_SCENE_SCENARIO: PatrolScenario = {
   category: "trauma",
   estimatedMinutes: 25,
   location: "Crosstrail Right - Mid-Mountain Merge",
+  coordinates: { x: 1320, y: 580, zone: "main" },
   dispatchPrompt:
     "All patrol, Base Dispatch. Two-skier collision at the Crosstrail Right merge, one down, reported leg injury. Crowd gathering. Respond 10-2, additional patroller en route.",
   environment: {

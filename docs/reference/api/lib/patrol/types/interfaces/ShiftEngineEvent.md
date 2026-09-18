@@ -14,6 +14,18 @@
 
 ***
 
+### ambientEvent?
+
+> `optional` **ambientEvent?**: [`AmbientEvent`](AmbientEvent.md)
+
+***
+
+### ambientEventId?
+
+> `optional` **ambientEventId?**: `string`
+
+***
+
 ### event?
 
 > `optional` **event?**: [`PatrolEvent`](PatrolEvent.md)
@@ -29,6 +41,18 @@
 ### scenarioId?
 
 > `optional` **scenarioId?**: `string`
+
+***
+
+### seed?
+
+> `optional` **seed?**: `number`
+
+***
+
+### selectedOptionId?
+
+> `optional` **selectedOptionId?**: `string`
 
 ***
 

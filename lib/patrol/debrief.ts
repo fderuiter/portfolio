@@ -753,7 +753,10 @@ export function derivePlayfulStats(events: PatrolEvent[]): ShiftPlayfulStats {
     const category = categoryOf(event);
     if (
       (category === "assessment" || category === "treatment") &&
-      event.scenarioId
+      event.scenarioId &&
+      event.scenarioId !== "hub" &&
+      event.scenarioId !== "unknown" &&
+      event.scenarioId !== "ambient-ops"
     ) {
       patientScenarioIds.add(event.scenarioId);
     }
@@ -765,7 +768,12 @@ export function derivePlayfulStats(events: PatrolEvent[]): ShiftPlayfulStats {
 
   const checkedTrails = new Set<string>();
   for (const event of safeEvents) {
-    if (event.scenarioId && event.scenarioId !== "hub") {
+    if (
+      event.scenarioId &&
+      event.scenarioId !== "hub" &&
+      event.scenarioId !== "unknown" &&
+      event.scenarioId !== "ambient-ops"
+    ) {
       checkedTrails.add(String(event.context?.location ?? event.scenarioId));
     } else if (event.context?.trail || event.context?.location) {
       checkedTrails.add(String(event.context.trail ?? event.context.location));
@@ -789,10 +797,17 @@ export function derivePlayfulStats(events: PatrolEvent[]): ShiftPlayfulStats {
     (e) => e.context?.closesLoop === true
   ).length;
 
+  const guestsAssisted = safeEvents.filter(
+    (e) =>
+      e.context?.guestAssisted === true ||
+      /guest-assisted|assist-guest/.test(actionIdOf(e))
+  ).length;
+
   return {
     callsHandled,
     radioTransmissions,
     patientsAssisted: patientScenarioIds.size,
+    guestsAssisted,
     sledTransports,
     trailsChecked: checkedTrails.size,
     hazardsMarked,
@@ -813,9 +828,15 @@ function buildChronologicalHighlights(events: PatrolEvent[]): string[] {
         `Near-miss flagged: ${event.description ?? event.title ?? "scene safety compromised"}.`
       );
     } else if (isSceneSafetyEstablishedEvent(event)) {
-      highlights.push(
-        `Scene safety secured on ${event.scenarioId ?? "an incident"}.`
-      );
+      if (event.scenarioId === "ambient-ops" || event.scenarioId === "hub") {
+        const loc =
+          event.context?.trail ?? event.context?.location ?? "the hill";
+        highlights.push(`Hazard marked and secured on ${loc}.`);
+      } else {
+        highlights.push(
+          `Scene safety secured on ${event.scenarioId ?? "an incident"}.`
+        );
+      }
     } else if (isCrowdManagementEvent(event)) {
       highlights.push(
         `Crowd and bystander traffic managed on ${event.scenarioId ?? "an incident"}.`
@@ -838,6 +859,9 @@ function buildChronologicalHighlights(events: PatrolEvent[]): string[] {
           metrics ? ` with judgment score ${metrics.judgmentScore}%` : ""
         }.`
       );
+    } else if (event.context?.guestAssisted === true) {
+      const loc = event.context?.trail ?? event.context?.location ?? "the hill";
+      highlights.push(`Assisted guests on ${loc}.`);
     }
   }
 
@@ -860,7 +884,13 @@ export function compileShiftSummary(
   const scenarioOrder: string[] = [];
   for (const event of orderedEvents) {
     const id = event.scenarioId;
-    if (id && id !== "hub" && id !== "unknown" && !scenarioOrder.includes(id)) {
+    if (
+      id &&
+      id !== "hub" &&
+      id !== "unknown" &&
+      id !== "ambient-ops" &&
+      !scenarioOrder.includes(id)
+    ) {
       scenarioOrder.push(id);
     }
   }

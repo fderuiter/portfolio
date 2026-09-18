@@ -1,7 +1,50 @@
 "use client";
 
-import React from "react";
-import { IconRadio, IconCheck, IconFlag } from "@tabler/icons-react";
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useMemo,
+} from "react";
+import {
+  IconRadio,
+  IconCheck,
+  IconFlag,
+  IconAntenna,
+  IconX,
+  IconZoomIn,
+  IconZoomOut,
+  IconFocus2,
+  IconMoon,
+  IconSun,
+  IconPlayerPlay,
+  IconPlayerPause,
+  IconPlayerStop,
+  IconRotateClockwise,
+  IconShieldCheck,
+  IconCompass,
+} from "@tabler/icons-react";
+import {
+  WELCH_TRAILS,
+  WELCH_LIFTS,
+  WELCH_POIS,
+  RESPONSIBILITY_CODE,
+  SUMMIT_ELEVATION_FT,
+  BASE_ELEVATION_FT,
+  VERTICAL_DROP_FT,
+  catmullRomToPath,
+  calculateElevationAt,
+  calculateAverageGrade,
+  interpolateSkierPosition,
+  type WelchTrail,
+  type WelchZone,
+  type AmbientEvent,
+  type ShiftOperationalState,
+  type PatrolScenario,
+} from "@/lib/patrol";
+import { AmbientEventToast } from "./AmbientEventToast";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 /**
  * Props for the MountainMap component.
@@ -13,38 +56,408 @@ interface MountainMapProps {
   onAwaitDispatch: () => void;
   /** Callback triggered to initiate final sweep and conclude the shift. */
   onCompleteShift: () => void;
+  /** Optional active ambient mini-event currently requiring patrol attention. */
+  activeAmbientEvent?: AmbientEvent | null;
+  /** Operational modifier state (closed trails, equipment location, active hazard pins). */
+  operationalState?: ShiftOperationalState;
+  /** Callback triggered to request or trigger a routine ambient hill check. */
+  onTriggerAmbientEvent?: () => void;
+  /** Callback triggered when the patroller selects a response option for an ambient event. */
+  onResolveAmbientOption?: (optionId: string) => void;
+  /** Callback triggered when dismissing an ambient event. */
+  onDismissAmbientEvent?: () => void;
+  /** Optional active scenario for live dispatch incident tracking (Issue #835). */
+  activeScenario?: PatrolScenario | null;
+  /** Optional direct incident coordinates override for emergency radar beacon. */
+  incidentCoordinates?: { x: number; y: number; zone?: WelchZone } | null;
 }
 
 /**
- * Responsive, lightweight SVG trail map representing the Mountain Patrol Hub,
- * a comprehensive stylized recreation of Welch Village (Welch, MN) — a real
- * Twin Cities-area hill. Depicts all three of Welch's real sectors (East
- * Slopes, West Slopes, and The Back Bowl); every trail name, lift name,
- * chalet, and elevation stat is cross-checked against Welch Village's own
- * current published trail map. The artwork itself remains an original
- * illustration — not a reproduction of the resort's own trail map graphic.
- * Features animated chairlift line, marked trails (green circle, blue square, black diamond),
- * ambient snow particles, strict prefers-reduced-motion CSS, and operational dispatch actions.
+ * High-fidelity interactive mountain viewport for Welch Village Ski Area (Welch, MN).
+ * Features dual-zone toggle (East & West Slopes ↔ The Back Bowl), Catmull-Rom vector
+ * pathing with grooming textures, live cursor altitude calculation, trail inspector with
+ * elevation sparkline, skier run simulation, minimap radar, night skiing floodlights,
+ * and NSAA Responsibility Code modal. Adheres to ADR 0044 and WCAG 2.1 AA.
  */
 export const MountainMap: React.FC<MountainMapProps> = ({
   incidentsCompleted,
   onAwaitDispatch,
   onCompleteShift,
+  activeAmbientEvent = null,
+  operationalState,
+  onTriggerAmbientEvent,
+  onResolveAmbientOption,
+  onDismissAmbientEvent,
+  activeScenario = null,
+  incidentCoordinates = null,
 }) => {
+  // -------------------------------------------------------------
+  // State: Viewport, Camera & Modes
+  // -------------------------------------------------------------
+  const [userZone, setUserZone] = useState<WelchZone | null>(null);
+
+  // Auto-detect zone when ambient event or incident arrives
+  const autoZone = useMemo<WelchZone>(() => {
+    if (activeAmbientEvent) {
+      if (
+        activeAmbientEvent.sector?.includes("Back Bowl") ||
+        activeAmbientEvent.location?.includes("Belle Creek") ||
+        activeAmbientEvent.coordinates?.zone === "back-bowl"
+      ) {
+        return "back-bowl";
+      }
+      return "main";
+    }
+    if (incidentCoordinates?.zone) {
+      return incidentCoordinates.zone;
+    }
+    if (activeScenario?.coordinates?.zone) {
+      return activeScenario.coordinates.zone;
+    }
+    return "main";
+  }, [activeAmbientEvent, incidentCoordinates, activeScenario]);
+
+  const activeZone = userZone ?? autoZone;
+
+  const [zoom, setZoom] = useState<number>(1.0);
+  const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [prevNavKey, setPrevNavKey] = useState<string | null>(null);
+  const [isPanning, setIsPanning] = useState<boolean>(false);
+  const panStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const svgRef = useRef<SVGSVGElement | null>(null);
+
+  const [isNightMode, setIsNightMode] = useState<boolean>(false);
+  const [isResponsibilityModalOpen, setIsResponsibilityModalOpen] =
+    useState<boolean>(false);
+  const modalRef = useFocusTrap<HTMLDivElement>(isResponsibilityModalOpen, {
+    onEscape: () => setIsResponsibilityModalOpen(false),
+    returnFocus: true,
+  });
+  const [isMinimapExpanded, setIsMinimapExpanded] = useState<boolean>(true);
+
+  // Inspector & Simulation State
+  const [selectedTrail, setSelectedTrail] = useState<WelchTrail | null>(null);
+  const [hoveredTrail, setHoveredTrail] = useState<WelchTrail | null>(null);
+  const [cursorElevation, setCursorElevation] = useState<{
+    x: number;
+    y: number;
+    elevation: number;
+  } | null>(null);
+
+  const [simulation, setSimulation] = useState<{
+    active: boolean;
+    trail: WelchTrail;
+    progress: number;
+    isPaused: boolean;
+  } | null>(null);
+
+  // M8 Ambient Resolution State
+  const [resolvedConsequence, setResolvedConsequence] = useState<{
+    title: string;
+    consequenceText: string;
+    optionLabel: string;
+  } | null>(null);
+
+  // -------------------------------------------------------------
+  // Dimensions & Coordinate Calibration
+  // -------------------------------------------------------------
+  const baseWidth = activeZone === "main" ? 2000 : 1200;
+  const baseHeight = activeZone === "main" ? 1300 : 900;
+
+  // Active Emergency Coordinates
+  const activeIncident = useMemo(() => {
+    if (incidentCoordinates) {
+      return {
+        x: incidentCoordinates.x,
+        y: incidentCoordinates.y,
+        zone: incidentCoordinates.zone ?? "main",
+      };
+    }
+    if (activeScenario?.coordinates) {
+      return {
+        x: activeScenario.coordinates.x,
+        y: activeScenario.coordinates.y,
+        zone: activeScenario.coordinates.zone ?? "main",
+      };
+    }
+    return null;
+  }, [incidentCoordinates, activeScenario]);
+
+  // Adjust camera & clear manual override when incoming incident or ambient event arrives
+  const currentNavKey = activeIncident
+    ? `${activeIncident.x},${activeIncident.y},${activeIncident.zone}`
+    : activeAmbientEvent
+      ? activeAmbientEvent.id
+      : null;
+
+  if (currentNavKey !== prevNavKey) {
+    setPrevNavKey(currentNavKey);
+    setUserZone(null);
+    if (activeIncident) {
+      const targetBaseWidth = activeIncident.zone === "back-bowl" ? 1200 : 2000;
+      const targetBaseHeight = activeIncident.zone === "back-bowl" ? 900 : 1300;
+      const zoomLevel = 1.25;
+      setPan({
+        x: (targetBaseWidth / 2 - activeIncident.x) * zoomLevel,
+        y: (targetBaseHeight / 2 - activeIncident.y) * zoomLevel,
+      });
+      setZoom(zoomLevel);
+    }
+  }
+
+  // Derive scoped trail selection and simulation matching the active zone
+  const activeSelectedTrail =
+    selectedTrail?.zone === activeZone ? selectedTrail : null;
+  const activeSimulation =
+    simulation?.trail.zone === activeZone ? simulation : null;
+
+  // Ambient Event zone derivation
+  const ambientZone: WelchZone =
+    activeAmbientEvent?.coordinates?.zone ??
+    (activeAmbientEvent?.sector?.includes("Back Bowl") ||
+    activeAmbientEvent?.location?.includes("Belle Creek")
+      ? "back-bowl"
+      : "main");
+
+  // Backward-compatibility flags for Milestone M8 ambient tests
+  const isEventOnLongWayHome = Boolean(
+    activeAmbientEvent &&
+    (activeAmbientEvent.location.includes("Long Way Home") ||
+      activeAmbientEvent.prompt.includes("Long Way Home"))
+  );
+  const isEventOnHarleysHollow = Boolean(
+    activeAmbientEvent &&
+    (activeAmbientEvent.location.includes("Harley's Hollow") ||
+      activeAmbientEvent.prompt.includes("Harley's Hollow"))
+  );
+  const isEventOnBelleCreekQuad = Boolean(
+    activeAmbientEvent &&
+    (activeAmbientEvent.location.includes("Belle Creek Quad") ||
+      activeAmbientEvent.prompt.includes("Belle Creek Quad"))
+  );
+  const isEventAtSummit = Boolean(
+    activeAmbientEvent &&
+    (activeAmbientEvent.location.includes("Summit") ||
+      activeAmbientEvent.prompt.includes("Summit"))
+  );
+  const isEventAtBase = Boolean(
+    activeAmbientEvent &&
+    (activeAmbientEvent.location.includes("Base") ||
+      activeAmbientEvent.prompt.includes("Base"))
+  );
+
+  // Filter datasets to active zone
+  const zoneTrails = useMemo(
+    () => WELCH_TRAILS.filter((t) => t.zone === activeZone),
+    [activeZone]
+  );
+  const zoneLifts = useMemo(
+    () => WELCH_LIFTS.filter((l) => l.zone === activeZone),
+    [activeZone]
+  );
+  const zonePois = useMemo(
+    () => WELCH_POIS.filter((p) => p.zone === activeZone),
+    [activeZone]
+  );
+
+  // -------------------------------------------------------------
+  // Skier Simulation Animation Loop
+  // -------------------------------------------------------------
+  const isSimulationActive = Boolean(
+    activeSimulation?.active && !activeSimulation?.isPaused
+  );
+
+  useEffect(() => {
+    if (!isSimulationActive) return;
+
+    let animFrameId: number;
+    let lastTime = performance.now();
+
+    const step = (now: number) => {
+      const dt = (now - lastTime) / 1000;
+      lastTime = now;
+
+      setSimulation((prev) => {
+        if (!prev || !prev.active || prev.isPaused) return prev;
+        // Complete full descent in ~8.0 seconds
+        const nextProgress = prev.progress + dt / 8.0;
+        if (nextProgress >= 1.0) {
+          return { ...prev, progress: 1.0, isPaused: true };
+        }
+        return { ...prev, progress: nextProgress };
+      });
+
+      animFrameId = requestAnimationFrame(step);
+    };
+
+    animFrameId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animFrameId);
+  }, [isSimulationActive]);
+
+  // Current skier position & tangent
+  const currentSkierPosition = useMemo(() => {
+    if (!activeSimulation) return null;
+    return interpolateSkierPosition(
+      activeSimulation.trail.points,
+      activeSimulation.progress
+    );
+  }, [activeSimulation]);
+
+  // -------------------------------------------------------------
+  // Viewport Pan & Zoom Handlers
+  // -------------------------------------------------------------
+  const handlePointerDown = (e: React.PointerEvent<SVGSVGElement>) => {
+    // Only left click or single touch initiates pan
+    if (e.button !== 0 && e.pointerType === "mouse") return;
+    setIsPanning(true);
+    panStartRef.current = { x: e.clientX - pan.x, y: e.clientY - pan.y };
+    (e.target as Element).setPointerCapture?.(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<SVGSVGElement>) => {
+    // 1. Pan update if dragging
+    if (isPanning) {
+      setPan({
+        x: e.clientX - panStartRef.current.x,
+        y: e.clientY - panStartRef.current.y,
+      });
+    }
+
+    // 2. Cursor altitude calculation with inverse viewport transform
+    if (svgRef.current) {
+      const rect = svgRef.current.getBoundingClientRect();
+      const scaleX = baseWidth / rect.width;
+      const scaleY = baseHeight / rect.height;
+      const svgX = (e.clientX - rect.left) * scaleX;
+      const svgY = (e.clientY - rect.top) * scaleY;
+      const cx = baseWidth / 2;
+      const cy = baseHeight / 2;
+      const terrainX = cx + (svgX - cx - pan.x) / zoom;
+      const terrainY = cy + (svgY - cy - pan.y) / zoom;
+      const elevation = calculateElevationAt(terrainX, terrainY, activeZone);
+      setCursorElevation({
+        x: Math.round(terrainX),
+        y: Math.round(terrainY),
+        elevation,
+      });
+    }
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<SVGSVGElement>) => {
+    setIsPanning(false);
+    (e.target as Element).releasePointerCapture?.(e.pointerId);
+  };
+
+  const zoomIn = () =>
+    setZoom((z) => Math.min(Number((z + 0.25).toFixed(2)), 3.8));
+  const zoomOut = () =>
+    setZoom((z) => Math.max(Number((z - 0.25).toFixed(2)), 0.35));
+  const resetCamera = () => {
+    setZoom(1.0);
+    setPan({ x: 0, y: 0 });
+  };
+
+  // Quick Pan Anchors
+  const panToAnchor = (
+    targetZone: WelchZone,
+    targetX: number,
+    targetY: number
+  ) => {
+    if (activeZone !== targetZone) {
+      setUserZone(targetZone);
+      if (selectedTrail?.zone !== targetZone) setSelectedTrail(null);
+      if (simulation?.trail.zone !== targetZone) setSimulation(null);
+    }
+    const targetBaseWidth = targetZone === "main" ? 2000 : 1200;
+    const targetBaseHeight = targetZone === "main" ? 1300 : 900;
+    const zoomLevel = 1.2;
+    setPan({
+      x: (targetBaseWidth / 2 - targetX) * zoomLevel,
+      y: (targetBaseHeight / 2 - targetY) * zoomLevel,
+    });
+    setZoom(zoomLevel);
+  };
+
+  // -------------------------------------------------------------
+  // Ambient Mini-Event Handlers
+  // -------------------------------------------------------------
+  const handleResolveOption = (optionId: string) => {
+    if (activeAmbientEvent) {
+      const opt = activeAmbientEvent.options.find((o) => o.id === optionId);
+      if (opt) {
+        setResolvedConsequence({
+          title: activeAmbientEvent.title,
+          consequenceText: opt.consequenceText,
+          optionLabel: opt.label,
+        });
+      }
+    }
+    onResolveAmbientOption?.(optionId);
+  };
+
+  const handleDismiss = () => {
+    setResolvedConsequence(null);
+    onDismissAmbientEvent?.();
+  };
+
+  // Helper for trail color cores
+  const getDifficultyCoreColor = (diff: WelchTrail["difficulty"]) => {
+    switch (diff) {
+      case "green":
+        return "#10b981"; // Emerald green
+      case "blue":
+        return "#0ea5e9"; // Sky blue
+      case "black":
+        return "#f43f5e"; // Rose black
+      case "double-black":
+        return "#be123c"; // Dark rose
+      case "terrain-park":
+        return "#f59e0b"; // Amber orange
+      default:
+        return "#38bdf8";
+    }
+  };
+
+  // -------------------------------------------------------------
+  // Keyboard Accessibility
+  // -------------------------------------------------------------
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (isResponsibilityModalOpen) {
+          setIsResponsibilityModalOpen(false);
+        } else if (activeSimulation?.active) {
+          setSimulation(null);
+        } else if (activeSelectedTrail) {
+          setSelectedTrail(null);
+        }
+      }
+    },
+    [isResponsibilityModalOpen, activeSimulation, activeSelectedTrail]
+  );
+
   return (
     <div
-      className="flex flex-col gap-5 p-4 sm:p-6 bg-zinc-900/40 rounded-2xl border border-zinc-800/80"
+      className="flex flex-col gap-4 p-4 sm:p-6 bg-zinc-900/50 rounded-2xl border border-zinc-800/90 shadow-2xl relative"
       data-testid="patrol-mountain-map"
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      aria-label="Welch Village Interactive Mountain Map"
     >
       <style>{`
         @keyframes patrolSnowFall {
           0% { transform: translateY(0); opacity: 0.7; }
           50% { opacity: 0.3; }
-          100% { transform: translateY(18px); opacity: 0.7; }
+          100% { transform: translateY(22px); opacity: 0.7; }
         }
         @keyframes patrolChairMove {
-          0% { transform: translateY(0); }
-          100% { transform: translateY(-30px); }
+          0% { transform: translate(0, 0); }
+          100% { transform: translate(var(--chair-move-x, 0px), var(--chair-move-y, -40px)); }
+        }
+        @keyframes patrolRadarPing {
+          0% { transform: scale(0.9); opacity: 0.9; }
+          50% { transform: scale(1.4); opacity: 0.4; }
+          100% { transform: scale(1.9); opacity: 0; }
         }
         .patrol-snow-particle {
           animation: patrolSnowFall 3s ease-in-out infinite alternate;
@@ -52,36 +465,48 @@ export const MountainMap: React.FC<MountainMapProps> = ({
         .patrol-chair-group {
           animation: patrolChairMove 4s linear infinite;
         }
+        .patrol-radar-ping {
+          animation: patrolRadarPing 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
         @media (prefers-reduced-motion: reduce) {
           .patrol-snow-particle,
-          .patrol-chair-group {
+          .patrol-chair-group,
+          .patrol-radar-ping {
             animation: none !important;
           }
         }
       `}</style>
 
-      {/* Mountain Hub Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-zinc-800/80">
+      {/* ------------------------------------------------------------- */}
+      {/* 1. MOUNTAIN HUB HEADER & STATUS BAR */}
+      {/* ------------------------------------------------------------- */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-zinc-800/90">
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-[10px] font-mono font-bold uppercase tracking-wider">
               Mountain Open &bull; Patrol On Hill
             </span>
             <span className="text-zinc-400 text-xs font-mono">
               Welch Village, MN
             </span>
+            {isNightMode && (
+              <span className="px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[10px] font-mono font-bold uppercase tracking-wider">
+                Night Operations &bull; Floodlights On
+              </span>
+            )}
           </div>
-          <h2 className="text-lg sm:text-xl font-mono font-bold text-white tracking-tight">
-            Mountain Patrol Hub &amp; Trail Map
+          <h2 className="text-lg sm:text-xl font-mono font-bold text-white tracking-tight flex items-center gap-2">
+            <span>Mountain Patrol Hub &amp; Trail Map</span>
           </h2>
-          <p className="text-[10px] font-mono text-zinc-500">
-            Base 700 ft &bull; Summit 1,060 ft &bull; Vertical 360 ft &bull; 50
-            runs across 3 sectors
+          <p className="text-[11px] font-mono text-zinc-400">
+            Base {BASE_ELEVATION_FT} FT &bull; Summit{" "}
+            {SUMMIT_ELEVATION_FT.toLocaleString()} FT &bull; Vertical{" "}
+            {VERTICAL_DROP_FT} FT &bull; 50+ runs across 3 sectors
           </p>
         </div>
 
         {/* Patrol Stats Pills */}
-        <div className="flex items-center gap-2.5 text-xs font-mono">
+        <div className="flex items-center gap-2 text-xs font-mono flex-wrap">
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-300">
             <IconCheck className="w-3.5 h-3.5 text-emerald-400" />
             <span>
@@ -89,6 +514,36 @@ export const MountainMap: React.FC<MountainMapProps> = ({
               <strong className="text-white">{incidentsCompleted}</strong>
             </span>
           </div>
+
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-300">
+            <span className="w-2 h-2 rounded-full bg-amber-400 shrink-0" />
+            <span>
+              Sled Staged:{" "}
+              <strong
+                className="text-white font-bold"
+                data-testid="equipment-location-badge"
+              >
+                {operationalState?.equipmentLocation ?? "Summit Shack"}
+              </strong>
+            </span>
+          </div>
+
+          {operationalState?.closedTrails &&
+            operationalState.closedTrails.length > 0 && (
+              <div
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-950/60 border border-red-800/80 text-red-300"
+                data-testid="mountain-closed-trails-pill"
+              >
+                <span className="w-2 h-2 rounded-full bg-red-400 shrink-0" />
+                <span>
+                  Closed:{" "}
+                  <strong className="text-white font-bold">
+                    {operationalState.closedTrails.join(", ")}
+                  </strong>
+                </span>
+              </div>
+            )}
+
           <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-400">
             <IconRadio className="w-3.5 h-3.5 text-brand-cyan" />
             <span>154.570 MHz CH 1</span>
@@ -96,668 +551,1550 @@ export const MountainMap: React.FC<MountainMapProps> = ({
         </div>
       </div>
 
-      {/* Accessible Trail Map Alternative for Screen Readers */}
-      <div className="sr-only">
-        Detailed trail map of Welch Village, a Twin Cities-area ski hill,
-        organized into three sectors: East Slopes, West Slopes, and The Back
-        Bowl. Features Summit Patrol Shack at the top (1,060 feet elevation);
-        the Belle Creek Quad lift line with towers 1 through 6 serving The Back
-        Bowl, whose runs include The Great Gorge, Black Forest, and Adam&apos;s
-        Abyss (all Black Diamond); Harley&apos;s Hollow (Blue Square) and the
-        Cannon-Valley Quad and Dream Catcher run on the East Slopes; Long Way
-        Home (Green Circle), Cedar Fork, Twister, and the West Quad on the West
-        Slopes; the Skilink base connector; Main Chalet and East Chalet; and
-        Base First Aid Room at the bottom (700 feet elevation). This is a
-        stylized, original illustration cross-checked against Welch
-        Village&apos;s own published trail map, not an official resort map.
-        Total completed count: {incidentsCompleted}.
+      {/* ------------------------------------------------------------- */}
+      {/* 2. VIEWPORT TOOLBAR: ZONE TOGGLE, CAMERA, MODES */}
+      {/* ------------------------------------------------------------- */}
+      <div className="flex flex-wrap items-center justify-between gap-2.5">
+        {/* Dual-Zone View Toggle */}
+        <div className="inline-flex rounded-xl bg-zinc-950 p-1 border border-zinc-800">
+          <button
+            type="button"
+            onClick={() => {
+              setUserZone("main");
+              setSelectedTrail(null);
+              setSimulation(null);
+              resetCamera();
+            }}
+            className={`min-h-[44px] min-w-[44px] px-3.5 py-1.5 text-xs font-mono font-bold rounded-lg transition-all cursor-pointer ${
+              activeZone === "main"
+                ? "bg-brand-cyan text-zinc-950 shadow-md font-extrabold"
+                : "text-zinc-400 hover:text-white"
+            }`}
+            aria-pressed={activeZone === "main"}
+          >
+            East &amp; West Slopes
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setUserZone("back-bowl");
+              setSelectedTrail(null);
+              setSimulation(null);
+              resetCamera();
+            }}
+            className={`min-h-[44px] min-w-[44px] px-3.5 py-1.5 text-xs font-mono font-bold rounded-lg transition-all cursor-pointer ${
+              activeZone === "back-bowl"
+                ? "bg-brand-cyan text-zinc-950 shadow-md font-extrabold"
+                : "text-zinc-400 hover:text-white"
+            }`}
+            aria-pressed={activeZone === "back-bowl"}
+          >
+            The Back Bowl
+          </button>
+        </div>
+
+        {/* Viewport Control Buttons */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {/* Night Skiing Toggle */}
+          <button
+            type="button"
+            onClick={() => setIsNightMode((prev) => !prev)}
+            className={`min-h-[44px] min-w-[44px] px-3 py-1.5 rounded-xl border text-xs font-mono font-medium inline-flex items-center gap-1.5 cursor-pointer transition-colors ${
+              isNightMode
+                ? "bg-amber-500/20 border-amber-500/40 text-amber-300"
+                : "bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white"
+            }`}
+            title="Toggle night skiing floodlights"
+            aria-label="Toggle night skiing floodlights"
+          >
+            {isNightMode ? (
+              <IconSun className="w-4 h-4 text-amber-400" />
+            ) : (
+              <IconMoon className="w-4 h-4 text-zinc-400" />
+            )}
+            <span className="hidden sm:inline">
+              {isNightMode ? "Day View" : "Night Skiing"}
+            </span>
+          </button>
+
+          {/* Responsibility Code Modal Button */}
+          <button
+            type="button"
+            onClick={() => setIsResponsibilityModalOpen(true)}
+            data-testid="safety-code-btn"
+            className="min-h-[44px] min-w-[44px] px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white hover:border-zinc-700 inline-flex items-center gap-1.5 cursor-pointer transition-colors"
+            aria-label="View Your Responsibility Code"
+          >
+            <IconShieldCheck className="w-4 h-4 text-emerald-400" />
+            <span className="hidden sm:inline">Safety Code</span>
+          </button>
+
+          {/* Zoom In */}
+          <button
+            type="button"
+            onClick={zoomIn}
+            className="min-h-[44px] min-w-[44px] p-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white cursor-pointer flex items-center justify-center transition-colors"
+            aria-label="Zoom In"
+          >
+            <IconZoomIn className="w-4 h-4" />
+          </button>
+
+          {/* Zoom Out */}
+          <button
+            type="button"
+            onClick={zoomOut}
+            className="min-h-[44px] min-w-[44px] p-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white cursor-pointer flex items-center justify-center transition-colors"
+            aria-label="Zoom Out"
+          >
+            <IconZoomOut className="w-4 h-4" />
+          </button>
+
+          {/* Reset Camera */}
+          <button
+            type="button"
+            onClick={resetCamera}
+            className="min-h-[44px] min-w-[44px] p-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white cursor-pointer flex items-center justify-center transition-colors"
+            aria-label="Fit Mountain"
+          >
+            <IconFocus2 className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
-      {/* SVG Trail Map Canvas */}
-      <div className="relative w-full rounded-2xl border border-zinc-800/80 bg-zinc-950/90 overflow-hidden shadow-inner flex items-center justify-center p-2 sm:p-4">
+      {/* Accessible Screen Reader Context */}
+      <div className="sr-only">
+        Interactive terrain map of Welch Village Ski Area. Current sector view:{" "}
+        {activeZone === "main" ? "East and West Slopes" : "The Back Bowl"}. Base
+        elevation: 700 feet, Summit elevation: 1,060 feet. Use mouse or touch to
+        pan and zoom. Select any trail to view slope profiles, average grade,
+        and initiate skier descent simulations.
+      </div>
+
+      {/* ------------------------------------------------------------- */}
+      {/* 3. INTERACTIVE SVG VIEWPORT CONTAINER */}
+      {/* ------------------------------------------------------------- */}
+      <div
+        className={`relative w-full rounded-2xl border border-zinc-800/90 overflow-hidden shadow-2xl flex items-center justify-center transition-colors duration-500 ${
+          isNightMode ? "bg-[#020617]" : "bg-zinc-950"
+        }`}
+        style={{ minHeight: "440px", maxHeight: "640px" }}
+      >
         <svg
-          viewBox="0 0 800 500"
-          className="w-full h-auto max-h-[460px] select-none"
+          ref={svgRef}
+          viewBox={`0 0 ${baseWidth} ${baseHeight}`}
+          className="w-full h-auto max-h-[640px] select-none touch-none cursor-grab active:cursor-grabbing"
           role="img"
-          aria-label="Welch Village Trail Map"
+          aria-label={`Welch Village Trail Map — ${
+            activeZone === "main" ? "East & West Slopes" : "The Back Bowl"
+          }`}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
         >
           <title>Welch Village Trail Map</title>
           <desc>
-            Stylized, original illustration of Welch Village (Welch, MN) showing
-            its three real sectors — East Slopes, West Slopes, and The Back Bowl
-            — Summit Shack, the Belle Creek Quad chairlift (Towers 1 through 6),
-            The Great Gorge, Black Forest, and Adam&apos;s Abyss black diamond
-            trails in The Back Bowl, Harley&apos;s Hollow blue square trail and
-            the Cannon-Valley Quad and Dream Catcher on the East Slopes, Long
-            Way Home green circle trail, Cedar Fork, Twister, and the West Quad
-            on the West Slopes, the Skilink base connector, Main Chalet, East
-            Chalet, and Base Lodge First Aid Room. Not an official Welch Village
-            resort map.
+            Geospatial terrain map of Welch Village Ski Area in Welch,
+            Minnesota. Showing authentic trail splines, chairlifts, POIs, and
+            elevation contours.
           </desc>
 
           <defs>
-            {/* Mountain Gradient */}
-            <linearGradient id="mountainBg" x1="0%" y1="0%" x2="0%" y2="100%">
+            {/* Mountain Gradient for Day/Night */}
+            <linearGradient
+              id="dayMountainBg"
+              x1="0%"
+              y1="0%"
+              x2="0%"
+              y2="100%"
+            >
               <stop offset="0%" stopColor="#18181b" />
-              <stop offset="40%" stopColor="#1e293b" />
+              <stop offset="35%" stopColor="#1e293b" />
               <stop offset="100%" stopColor="#0f172a" />
             </linearGradient>
 
-            {/* Trail Gradients */}
             <linearGradient
-              id="greenTrailGrad"
+              id="nightMountainBg"
               x1="0%"
               y1="0%"
               x2="0%"
               y2="100%"
             >
-              <stop offset="0%" stopColor="#10b981" stopOpacity="0.8" />
-              <stop offset="100%" stopColor="#059669" stopOpacity="0.5" />
+              <stop offset="0%" stopColor="#020617" />
+              <stop offset="40%" stopColor="#090d16" />
+              <stop offset="100%" stopColor="#020617" />
             </linearGradient>
-            <linearGradient
-              id="blueTrailGrad"
-              x1="0%"
-              y1="0%"
-              x2="0%"
-              y2="100%"
+
+            {/* Glowing filter for Night Skiing floodlit paths */}
+            <filter
+              id="floodlightGlow"
+              x="-20%"
+              y="-20%"
+              width="140%"
+              height="140%"
             >
-              <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.8" />
-              <stop offset="100%" stopColor="#0284c7" stopOpacity="0.5" />
-            </linearGradient>
-            <linearGradient
-              id="blackTrailGrad"
-              x1="0%"
-              y1="0%"
-              x2="0%"
-              y2="100%"
-            >
-              <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.8" />
-              <stop offset="100%" stopColor="#be123c" stopOpacity="0.5" />
-            </linearGradient>
+              <feGaussianBlur stdDeviation="5" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
           </defs>
 
-          {/* Background Mountain Silhouette */}
-          <rect width="800" height="500" rx="16" fill="url(#mountainBg)" />
-
-          {/* Topographic Contour Lines */}
-          <path
-            d="M 50 140 Q 250 80 400 90 T 750 130"
-            fill="none"
-            stroke="#334155"
-            strokeWidth="1"
-            strokeDasharray="4 4"
-            opacity="0.5"
-          />
-          <path
-            d="M 40 240 Q 260 190 410 200 T 760 230"
-            fill="none"
-            stroke="#334155"
-            strokeWidth="1"
-            strokeDasharray="4 4"
-            opacity="0.5"
-          />
-          <path
-            d="M 30 350 Q 280 300 420 310 T 770 340"
-            fill="none"
-            stroke="#334155"
-            strokeWidth="1"
-            strokeDasharray="4 4"
-            opacity="0.5"
-          />
-
-          {/* Mountain Peak / Ridge Geometry */}
-          <polygon
-            points="100,500 400,60 700,500"
-            fill="#1e293b"
-            opacity="0.35"
-          />
-          <polygon
-            points="220,500 420,70 620,500"
-            fill="#334155"
-            opacity="0.2"
-          />
-
-          {/* SECTOR LABELS */}
-          <text
-            x="230"
-            y="98"
-            fill="#64748b"
-            fontSize="10"
-            fontWeight="bold"
-            fontFamily="monospace"
-            letterSpacing="1"
-            textAnchor="middle"
-            opacity="0.8"
+          {/* Root Transform Matrix Group for Pan and Zoom */}
+          <g
+            transform={`translate(${pan.x}, ${pan.y}) scale(${zoom})`}
+            style={{
+              transformOrigin: `${baseWidth / 2}px ${baseHeight / 2}px`,
+              transition: isPanning ? "none" : "transform 0.15s ease-out",
+            }}
           >
-            EAST SLOPES
-          </text>
-          <text
-            x="575"
-            y="98"
-            fill="#64748b"
-            fontSize="10"
-            fontWeight="bold"
-            fontFamily="monospace"
-            letterSpacing="1"
-            textAnchor="middle"
-            opacity="0.8"
-          >
-            WEST SLOPES
-          </text>
+            {/* Background Mountain Silhouette */}
+            <rect
+              width={baseWidth}
+              height={baseHeight}
+              rx="16"
+              fill={
+                isNightMode ? "url(#nightMountainBg)" : "url(#dayMountainBg)"
+              }
+            />
 
-          {/* TRAILS */}
+            {/* Night Sky Stars */}
+            {isNightMode && (
+              <g fill="#ffffff" opacity="0.8">
+                <circle cx="150" cy="80" r="1.5" />
+                <circle cx="340" cy="50" r="1.0" />
+                <circle cx="620" cy="95" r="1.5" />
+                <circle cx="950" cy="65" r="1.2" />
+                <circle cx="1280" cy="110" r="1.5" />
+                <circle cx="1580" cy="70" r="1.0" />
+                <circle cx="1850" cy="120" r="1.8" />
+              </g>
+            )}
 
-          {/* Trail 1: Long Way Home (Green Circle) — West Slopes */}
-          <path
-            d="M 370 85 C 260 120 140 200 130 310 C 120 400 240 450 320 460"
-            fill="none"
-            stroke="url(#greenTrailGrad)"
-            strokeWidth="14"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M 370 85 C 260 120 140 200 130 310 C 120 400 240 450 320 460"
-            fill="none"
-            stroke="#059669"
-            strokeWidth="2"
-            strokeDasharray="6 4"
-            strokeLinecap="round"
-          />
-
-          {/* Trail 2: Harley's Hollow (Blue Square) — East Slopes */}
-          <path
-            d="M 430 85 C 520 150 560 240 540 330 C 520 410 450 440 390 460"
-            fill="none"
-            stroke="url(#blueTrailGrad)"
-            strokeWidth="16"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M 430 85 C 520 150 560 240 540 330 C 520 410 450 440 390 460"
-            fill="none"
-            stroke="#0284c7"
-            strokeWidth="2"
-            strokeDasharray="6 4"
-            strokeLinecap="round"
-          />
-
-          {/* Trail 3: The Great Gorge (Black Diamond - Fall Line) — The Back Bowl */}
-          <path
-            d="M 395 85 C 380 150 340 220 370 290 C 390 350 370 410 360 460"
-            fill="none"
-            stroke="url(#blackTrailGrad)"
-            strokeWidth="18"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M 395 85 C 380 150 340 220 370 290 C 390 350 370 410 360 460"
-            fill="none"
-            stroke="#f43f5e"
-            strokeWidth="2"
-            strokeDasharray="8 4"
-            strokeLinecap="round"
-          />
-
-          {/* CHAIRLIFT LINE (Belle Creek Quad) */}
-          <line
-            x1="460"
-            y1="465"
-            x2="435"
-            y2="75"
-            stroke="#64748b"
-            strokeWidth="2"
-            strokeDasharray="4 2"
-          />
-
-          {/* Chairlift Towers 1 through 6 */}
-          {[
-            { id: 1, x: 457, y: 410 },
-            { id: 2, x: 453, y: 345 },
-            { id: 3, x: 449, y: 280 },
-            { id: 4, x: 445, y: 215 },
-            { id: 5, x: 441, y: 150 },
-            { id: 6, x: 437, y: 95 },
-          ].map((tower) => (
-            <g key={tower.id}>
-              {/* Tower Mast */}
-              <line
-                x1={tower.x}
-                y1={tower.y}
-                x2={tower.x}
-                y2={tower.y + 12}
-                stroke="#94a3b8"
-                strokeWidth="2.5"
-              />
-              {/* Tower Crossarm */}
-              <line
-                x1={tower.x - 6}
-                y1={tower.y}
-                x2={tower.x + 6}
-                y2={tower.y}
-                stroke="#cbd5e1"
-                strokeWidth="2"
-              />
-              {/* Tower Label */}
-              <text
-                x={tower.x + 10}
-                y={tower.y + 4}
-                fill="#94a3b8"
-                fontSize="9"
-                fontFamily="monospace"
+            {/* Topographic Contour Lines */}
+            {activeZone === "main" ? (
+              <g
+                stroke={isNightMode ? "#1e293b" : "#334155"}
+                strokeWidth="1.5"
+                strokeDasharray="6 6"
+                opacity="0.4"
               >
-                T{tower.id}
-              </text>
-            </g>
-          ))}
+                <path d="M 100 240 Q 600 160 1000 180 T 1900 230" fill="none" />
+                <path d="M 80 480 Q 620 380 1020 400 T 1920 470" fill="none" />
+                <path d="M 70 760 Q 640 660 1040 680 T 1930 750" fill="none" />
+                <path
+                  d="M 60 1040 Q 660 940 1060 960 T 1940 1030"
+                  fill="none"
+                />
+              </g>
+            ) : (
+              <g
+                stroke={isNightMode ? "#1e293b" : "#334155"}
+                strokeWidth="1.5"
+                strokeDasharray="6 6"
+                opacity="0.4"
+              >
+                <path d="M 100 200 Q 450 140 600 150 T 1100 190" fill="none" />
+                <path d="M 90 380 Q 460 320 610 330 T 1110 370" fill="none" />
+                <path d="M 80 580 Q 470 520 620 530 T 1120 570" fill="none" />
+                <path d="M 70 760 Q 480 700 630 710 T 1130 750" fill="none" />
+              </g>
+            )}
 
-          {/* Animated Chairs along the cable */}
-          <g className="patrol-chair-group">
-            {[260, 190, 120].map((cy, idx) => (
-              <g key={idx} transform={`translate(446, ${cy})`}>
+            {/* Mountain Ridge Polygon Geometries */}
+            {activeZone === "main" ? (
+              <>
+                <polygon
+                  points="200,1300 1000,160 1800,1300"
+                  fill={isNightMode ? "#090d16" : "#1e293b"}
+                  opacity="0.3"
+                />
+                <polygon
+                  points="450,1300 1000,180 1550,1300"
+                  fill={isNightMode ? "#0f172a" : "#334155"}
+                  opacity="0.2"
+                />
+              </>
+            ) : (
+              <polygon
+                points="100,900 600,130 1100,900"
+                fill={isNightMode ? "#090d16" : "#1e293b"}
+                opacity="0.3"
+              />
+            )}
+
+            {/* Sector Labels on Terrain */}
+            {activeZone === "main" ? (
+              <>
+                <text
+                  x="520"
+                  y="120"
+                  fill="#94a3b8"
+                  fontSize="22"
+                  fontWeight="bold"
+                  fontFamily="monospace"
+                  letterSpacing="4"
+                  textAnchor="middle"
+                  opacity="0.7"
+                >
+                  EAST SLOPES
+                </text>
+                <text
+                  x="1500"
+                  y="120"
+                  fill="#94a3b8"
+                  fontSize="22"
+                  fontWeight="bold"
+                  fontFamily="monospace"
+                  letterSpacing="4"
+                  textAnchor="middle"
+                  opacity="0.7"
+                >
+                  WEST SLOPES
+                </text>
+              </>
+            ) : (
+              <text
+                x="600"
+                y="90"
+                fill="#fda4af"
+                fontSize="22"
+                fontWeight="bold"
+                fontFamily="monospace"
+                letterSpacing="4"
+                textAnchor="middle"
+                opacity="0.8"
+              >
+                THE BACK BOWL &bull; EXPERT AMPHITHEATER
+              </text>
+            )}
+
+            {/* Global Ambient Event Highlights for backward compatibility */}
+            {isEventOnBelleCreekQuad &&
+              !zoneLifts.some((l) => l.id === "belle-creek-quad") && (
                 <line
-                  x1="0"
-                  y1="0"
-                  x2="0"
-                  y2="7"
-                  stroke="#38bdf8"
+                  x1="460"
+                  y1="465"
+                  x2="435"
+                  y2="75"
+                  stroke="#f59e0b"
+                  strokeWidth="10"
+                  strokeLinecap="round"
+                  opacity="0.5"
+                  className="animate-pulse"
+                  data-testid="lift-highlight-belle-creek-quad"
+                />
+              )}
+            {isEventOnLongWayHome &&
+              !zoneTrails.some((t) => t.id === "long-way-home") && (
+                <path
+                  d="M 370 85 C 260 120 140 200 130 310 C 120 400 240 450 320 460"
+                  fill="none"
+                  stroke="#f59e0b"
+                  strokeWidth="24"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  opacity="0.4"
+                  className="animate-pulse"
+                  data-testid="trail-highlight-long-way-home"
+                />
+              )}
+            {isEventOnHarleysHollow &&
+              !zoneTrails.some((t) => t.id === "harleys-hollow") && (
+                <path
+                  d="M 430 85 C 520 150 560 240 540 330 C 520 410 450 440 390 460"
+                  fill="none"
+                  stroke="#f59e0b"
+                  strokeWidth="26"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  opacity="0.4"
+                  className="animate-pulse"
+                  data-testid="trail-highlight-harleys-hollow"
+                />
+              )}
+
+            {/* --------------------------------------------------------- */}
+            {/* TRAILS: CATMULL-ROM DOUBLE-PASS VECTOR RENDERING */}
+            {/* --------------------------------------------------------- */}
+            {zoneTrails.map((trail) => {
+              const pathD = catmullRomToPath(trail.points);
+              const isClosed = Boolean(
+                operationalState?.closedTrails?.includes(trail.name)
+              );
+              const isSelected = activeSelectedTrail?.id === trail.id;
+              const isHovered = hoveredTrail?.id === trail.id;
+
+              // Core color & dashing
+              const coreColor = isClosed
+                ? "#ef4444"
+                : getDifficultyCoreColor(trail.difficulty);
+              const strokeDasharray = isClosed
+                ? "4 4"
+                : trail.groomed
+                  ? undefined
+                  : "8 6";
+
+              return (
+                <g
+                  key={trail.id}
+                  className="cursor-pointer transition-opacity"
+                  onClick={() => setSelectedTrail(trail)}
+                  onPointerEnter={() => setHoveredTrail(trail)}
+                  onPointerLeave={() => setHoveredTrail(null)}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`${trail.name}, ${trail.difficulty} difficulty, ${
+                    trail.groomed ? "Groomed" : "Moguls"
+                  }, ${isClosed ? "Closed" : "Open"}`}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setSelectedTrail(trail);
+                    }
+                  }}
+                >
+                  <title>{`${trail.name} • ${trail.difficulty.toUpperCase()} • ${
+                    trail.groomed ? "Groomed Corduroy" : "Moguls"
+                  } • ${trail.lengthFt.toLocaleString()} FT • ${trail.verticalDropFt} FT Drop`}</title>
+
+                  {/* Active Event Trail Highlights */}
+                  {trail.name === "Long Way Home" && isEventOnLongWayHome && (
+                    <path
+                      d={pathD}
+                      fill="none"
+                      stroke="#f59e0b"
+                      strokeWidth="28"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      opacity="0.4"
+                      className="animate-pulse"
+                      data-testid="trail-highlight-long-way-home"
+                    />
+                  )}
+
+                  {trail.name === "Harley's Hollow" &&
+                    isEventOnHarleysHollow && (
+                      <path
+                        d={pathD}
+                        fill="none"
+                        stroke="#f59e0b"
+                        strokeWidth="28"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        opacity="0.4"
+                        className="animate-pulse"
+                        data-testid="trail-highlight-harleys-hollow"
+                      />
+                    )}
+
+                  {/* Selection / Hover Halo */}
+                  {(isSelected || isHovered) && (
+                    <path
+                      d={pathD}
+                      fill="none"
+                      stroke={isSelected ? "#00f0ff" : "#facc15"}
+                      strokeWidth="14"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      opacity="0.5"
+                    />
+                  )}
+
+                  {/* Pass 1: Casing (6px) */}
+                  <path
+                    d={pathD}
+                    fill="none"
+                    stroke={isNightMode ? "#000000" : "#09090b"}
+                    strokeWidth="6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    opacity={isClosed ? 0.4 : 0.9}
+                  />
+
+                  {/* Pass 2: Difficulty Core (4px) with Grooming Style */}
+                  <path
+                    d={pathD}
+                    fill="none"
+                    stroke={coreColor}
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeDasharray={strokeDasharray}
+                    filter={
+                      isNightMode && trail.groomed
+                        ? "url(#floodlightGlow)"
+                        : undefined
+                    }
+                    opacity={isClosed ? 0.6 : 1.0}
+                  />
+
+                  {/* Closed Trail Badge */}
+                  {isClosed && (
+                    <g
+                      transform={`translate(${trail.points[Math.floor(trail.points.length / 2)].x}, ${
+                        trail.points[Math.floor(trail.points.length / 2)].y
+                      })`}
+                      data-testid={
+                        trail.name === "Long Way Home"
+                          ? "closed-trail-badge-long-way-home"
+                          : trail.name === "Harley's Hollow"
+                            ? "closed-trail-badge-harleys-hollow"
+                            : `closed-trail-badge-${trail.id}`
+                      }
+                    >
+                      <rect
+                        x="-48"
+                        y="-12"
+                        width="96"
+                        height="24"
+                        rx="4"
+                        fill="#7f1d1d"
+                        stroke="#ef4444"
+                        strokeWidth="1.5"
+                      />
+                      <text
+                        x="0"
+                        y="4"
+                        fill="#fecaca"
+                        fontSize="9"
+                        fontWeight="bold"
+                        fontFamily="monospace"
+                        textAnchor="middle"
+                      >
+                        CLOSED
+                      </text>
+                    </g>
+                  )}
+
+                  {/* Trail Name Label at Midpoint */}
+                  <text
+                    x={trail.points[1]?.x ?? trail.points[0].x}
+                    y={(trail.points[1]?.y ?? trail.points[0].y) - 8}
+                    fill={coreColor}
+                    fontSize="10"
+                    fontWeight="bold"
+                    fontFamily="monospace"
+                    textAnchor="middle"
+                    className="select-none pointer-events-none drop-shadow"
+                  >
+                    {trail.name}
+                  </text>
+                </g>
+              );
+            })}
+
+            {/* --------------------------------------------------------- */}
+            {/* CHAIRLIFTS: CABLES, TOWERS, ANIMATED CARRIERS */}
+            {/* --------------------------------------------------------- */}
+            {zoneLifts.map((lift) => {
+              const isBelleCreek = lift.id === "belle-creek-quad";
+              return (
+                <g key={lift.id} className="select-none">
+                  {/* Active Event Highlight for Belle Creek Quad */}
+                  {isBelleCreek && isEventOnBelleCreekQuad && (
+                    <line
+                      x1={lift.bottomTerminal.x}
+                      y1={lift.bottomTerminal.y}
+                      x2={lift.topTerminal.x}
+                      y2={lift.topTerminal.y}
+                      stroke="#f59e0b"
+                      strokeWidth="12"
+                      strokeLinecap="round"
+                      opacity="0.5"
+                      className="animate-pulse"
+                      data-testid="lift-highlight-belle-creek-quad"
+                    />
+                  )}
+
+                  {/* Aerial Cable Line */}
+                  <line
+                    x1={lift.bottomTerminal.x}
+                    y1={lift.bottomTerminal.y}
+                    x2={lift.topTerminal.x}
+                    y2={lift.topTerminal.y}
+                    stroke="#64748b"
+                    strokeWidth="2.5"
+                    strokeDasharray="6 3"
+                  />
+
+                  {/* Towers along lift line */}
+                  {Array.from({ length: lift.towerCount }).map((_, idx) => {
+                    const t = (idx + 1) / (lift.towerCount + 1);
+                    const tx =
+                      lift.bottomTerminal.x +
+                      (lift.topTerminal.x - lift.bottomTerminal.x) * t;
+                    const ty =
+                      lift.bottomTerminal.y +
+                      (lift.topTerminal.y - lift.bottomTerminal.y) * t;
+
+                    return (
+                      <g key={idx}>
+                        <line
+                          x1={tx}
+                          y1={ty}
+                          x2={tx}
+                          y2={ty + 14}
+                          stroke="#94a3b8"
+                          strokeWidth="3"
+                        />
+                        <line
+                          x1={tx - 7}
+                          y1={ty}
+                          x2={tx + 7}
+                          y2={ty}
+                          stroke="#cbd5e1"
+                          strokeWidth="2.5"
+                        />
+                        <text
+                          x={tx + 11}
+                          y={ty + 4}
+                          fill="#94a3b8"
+                          fontSize="9"
+                          fontFamily="monospace"
+                        >
+                          T{idx + 1}
+                        </text>
+                      </g>
+                    );
+                  })}
+
+                  {/* Animated Chairs */}
+                  {(() => {
+                    const cDx = lift.topTerminal.x - lift.bottomTerminal.x;
+                    const cDy = lift.topTerminal.y - lift.bottomTerminal.y;
+                    const cLen = Math.hypot(cDx, cDy) || 1;
+                    const moveStep = 40;
+                    const moveX = Math.round((cDx / cLen) * moveStep);
+                    const moveY = Math.round((cDy / cLen) * moveStep);
+
+                    return (
+                      <g
+                        className="patrol-chair-group"
+                        style={
+                          {
+                            "--chair-move-x": `${moveX}px`,
+                            "--chair-move-y": `${moveY}px`,
+                          } as React.CSSProperties
+                        }
+                      >
+                        {[0.25, 0.5, 0.75].map((pos, cIdx) => {
+                          const cx =
+                            lift.bottomTerminal.x +
+                            (lift.topTerminal.x - lift.bottomTerminal.x) * pos;
+                          const cy =
+                            lift.bottomTerminal.y +
+                            (lift.topTerminal.y - lift.bottomTerminal.y) * pos;
+                          return (
+                            <g key={cIdx} transform={`translate(${cx}, ${cy})`}>
+                              <line
+                                x1="0"
+                                y1="0"
+                                x2="0"
+                                y2="8"
+                                stroke="#38bdf8"
+                                strokeWidth="1.5"
+                              />
+                              <rect
+                                x="-4"
+                                y="8"
+                                width="8"
+                                height="5"
+                                rx="1"
+                                fill="#38bdf8"
+                              />
+                            </g>
+                          );
+                        })}
+                      </g>
+                    );
+                  })()}
+
+                  {/* Terminals */}
+                  <rect
+                    x={lift.bottomTerminal.x - 10}
+                    y={lift.bottomTerminal.y - 10}
+                    width="20"
+                    height="20"
+                    rx="3"
+                    fill="#18181b"
+                    stroke="#facc15"
+                    strokeWidth="1.5"
+                  />
+                  <rect
+                    x={lift.topTerminal.x - 10}
+                    y={lift.topTerminal.y - 10}
+                    width="20"
+                    height="20"
+                    rx="3"
+                    fill="#18181b"
+                    stroke="#facc15"
+                    strokeWidth="1.5"
+                  />
+                  <text
+                    x={lift.bottomTerminal.x}
+                    y={lift.bottomTerminal.y + 24}
+                    fill="#fde68a"
+                    fontSize="9"
+                    fontFamily="monospace"
+                    fontWeight="bold"
+                    textAnchor="middle"
+                  >
+                    {lift.name}
+                  </text>
+                </g>
+              );
+            })}
+
+            {/* --------------------------------------------------------- */}
+            {/* POINTS OF INTEREST (POIs) & CHALETS */}
+            {/* --------------------------------------------------------- */}
+            {zonePois.map((poi) => (
+              <g
+                key={poi.id}
+                transform={`translate(${poi.coordinates.x}, ${poi.coordinates.y})`}
+                className="select-none"
+              >
+                {/* Station highlights for backward compatibility */}
+                {poi.id === "summit-shack" && isEventAtSummit && (
+                  <circle
+                    cx="0"
+                    cy="0"
+                    r="32"
+                    fill="none"
+                    stroke="#f59e0b"
+                    strokeWidth="3"
+                    opacity="0.6"
+                    className="animate-pulse"
+                    data-testid="station-highlight-summit"
+                  />
+                )}
+                {poi.id === "patrol-clinic" && isEventAtBase && (
+                  <circle
+                    cx="0"
+                    cy="0"
+                    r="38"
+                    fill="none"
+                    stroke="#f59e0b"
+                    strokeWidth="3"
+                    opacity="0.6"
+                    className="animate-pulse"
+                    data-testid="station-highlight-base"
+                  />
+                )}
+
+                <rect
+                  x="-36"
+                  y="-14"
+                  width="72"
+                  height="28"
+                  rx="6"
+                  fill="#09090b"
+                  stroke={
+                    poi.category === "medical"
+                      ? "#00f0ff"
+                      : poi.category === "chalet"
+                        ? "#38bdf8"
+                        : "#10b981"
+                  }
                   strokeWidth="1.5"
                 />
-                <rect x="-4" y="7" width="8" height="5" rx="1" fill="#38bdf8" />
+                <text
+                  x="0"
+                  y="0"
+                  fill={poi.category === "medical" ? "#00f0ff" : "#bae6fd"}
+                  fontSize="8.5"
+                  fontWeight="bold"
+                  fontFamily="monospace"
+                  textAnchor="middle"
+                >
+                  {poi.id === "summit-shack"
+                    ? "SUMMIT"
+                    : poi.id === "patrol-clinic"
+                      ? "BASE AID ROOM"
+                      : poi.name.split(" ")[0]}
+                </text>
+                <text
+                  x="0"
+                  y="10"
+                  fill="#94a3b8"
+                  fontSize="7"
+                  fontFamily="monospace"
+                  textAnchor="middle"
+                >
+                  {poi.elevationFt} FT
+                </text>
               </g>
             ))}
-          </g>
 
-          {/* AMBIENT FALLING SNOW PARTICLES */}
-          <g className="patrol-snow-particle" fill="#ffffff" opacity="0.6">
-            <circle cx="200" cy="110" r="1.5" />
-            <circle cx="310" cy="80" r="2" />
-            <circle cx="500" cy="140" r="1.5" />
-            <circle cx="620" cy="210" r="1.5" />
-            <circle cx="280" cy="270" r="2" />
-            <circle cx="160" cy="380" r="1.5" />
-            <circle cx="480" cy="390" r="2" />
-            <circle cx="670" cy="330" r="1.5" />
-            <circle cx="390" cy="210" r="2" />
-            <circle cx="580" cy="90" r="1.5" />
-          </g>
+            {/* --------------------------------------------------------- */}
+            {/* SIMULATED SKIER TOKEN & SNOW SPRAY PARTICLES */}
+            {/* --------------------------------------------------------- */}
+            {activeSimulation?.active && currentSkierPosition && (
+              <g
+                transform={`translate(${currentSkierPosition.x}, ${
+                  currentSkierPosition.y
+                }) rotate(${
+                  (currentSkierPosition.angleRad * 180) / Math.PI + 90
+                })`}
+                data-testid="simulated-skier-token"
+              >
+                {/* Snow spray particles carved backwards from skis */}
+                <g fill="#ffffff" opacity="0.8">
+                  <circle cx="-6" cy="14" r="2.5" />
+                  <circle cx="6" cy="14" r="2.5" />
+                  <circle cx="-10" cy="20" r="1.8" />
+                  <circle cx="10" cy="20" r="1.8" />
+                  <circle cx="-4" cy="26" r="1.2" />
+                  <circle cx="4" cy="26" r="1.2" />
+                </g>
 
-          {/* SUMMIT STATION & PATROL SHACK */}
-          <g transform="translate(390, 50)">
-            <rect
-              x="-24"
-              y="-12"
-              width="48"
-              height="24"
-              rx="4"
-              fill="#09090b"
-              stroke="#00f0ff"
-              strokeWidth="1.5"
-            />
-            <text
-              x="0"
-              y="3"
-              fill="#00f0ff"
-              fontSize="9"
-              fontWeight="bold"
-              fontFamily="monospace"
-              textAnchor="middle"
-            >
-              SUMMIT
-            </text>
-            <text
-              x="0"
-              y="22"
-              fill="#67e8f9"
-              fontSize="7"
-              fontFamily="monospace"
-              textAnchor="middle"
-              opacity="0.85"
-            >
-              1,060 FT
-            </text>
-            <circle cx="-16" cy="-4" r="2" fill="#ef4444" />
-          </g>
+                {/* Left and Right Skis */}
+                <rect
+                  x="-7"
+                  y="-12"
+                  width="3"
+                  height="24"
+                  rx="1.5"
+                  fill="#facc15"
+                  stroke="#ca8a04"
+                  strokeWidth="0.5"
+                />
+                <rect
+                  x="4"
+                  y="-12"
+                  width="3"
+                  height="24"
+                  rx="1.5"
+                  fill="#facc15"
+                  stroke="#ca8a04"
+                  strokeWidth="0.5"
+                />
 
-          {/* THE BACK BOWL — separate expert-terrain sector, top-left inset */}
-          <g transform="translate(95, 122)">
-            <rect
-              x="-52"
-              y="-30"
-              width="104"
-              height="60"
-              rx="6"
-              fill="#09090b"
-              stroke="#f43f5e"
-              strokeWidth="1.5"
-              opacity="0.95"
-            />
-            <text
-              x="0"
-              y="-16"
-              fill="#fda4af"
-              fontSize="8"
-              fontWeight="bold"
-              fontFamily="monospace"
-              textAnchor="middle"
-            >
-              THE BACK BOWL
-            </text>
-            <text
-              x="0"
-              y="-2"
-              fill="#fecdd3"
-              fontSize="7"
-              fontFamily="monospace"
-              textAnchor="middle"
-            >
-              Black Forest &#9670;
-            </text>
-            <text
-              x="0"
-              y="10"
-              fill="#fecdd3"
-              fontSize="7"
-              fontFamily="monospace"
-              textAnchor="middle"
-            >
-              Adam&apos;s Abyss &#9670;
-            </text>
-            <text
-              x="0"
-              y="22"
-              fill="#94a3b8"
-              fontSize="6"
-              fontFamily="monospace"
-              textAnchor="middle"
-              opacity="0.85"
-            >
-              via Belle Creek Quad
-            </text>
-          </g>
+                {/* Skier Body & Red NSP Cross Jacket */}
+                <ellipse cx="0" cy="0" rx="5" ry="6" fill="#dc2626" />
+                {/* Red NSP Cross */}
+                <rect x="-1" y="-3" width="2" height="6" fill="#ffffff" />
+                <rect x="-3" y="-1" width="6" height="2" fill="#ffffff" />
 
-          {/* BASE LODGE & FIRST AID ROOM */}
-          <g transform="translate(360, 470)">
-            <rect
-              x="-40"
-              y="-14"
-              width="80"
-              height="28"
-              rx="6"
-              fill="#09090b"
-              stroke="#10b981"
-              strokeWidth="1.5"
-            />
-            <text
-              x="0"
-              y="0"
-              fill="#34d399"
-              fontSize="10"
-              fontWeight="bold"
-              fontFamily="monospace"
-              textAnchor="middle"
-            >
-              BASE AID ROOM
-            </text>
-            <text
-              x="0"
-              y="11"
-              fill="#6ee7b7"
-              fontSize="7"
-              fontFamily="monospace"
-              textAnchor="middle"
-              opacity="0.85"
-            >
-              700 FT &bull; WELCH, MN
-            </text>
-          </g>
+                {/* Skier Helmet */}
+                <circle
+                  cx="0"
+                  cy="-3"
+                  r="3.5"
+                  fill="#09090b"
+                  stroke="#38bdf8"
+                  strokeWidth="1"
+                />
+              </g>
+            )}
 
-          {/* Main Chalet — real base building, west of Base Aid Room */}
-          <g transform="translate(215, 466)" opacity="0.9">
-            <circle cx="0" cy="0" r="4" fill="#38bdf8" />
-            <text
-              x="9"
-              y="3"
-              fill="#bae6fd"
-              fontSize="8"
-              fontFamily="monospace"
-            >
-              Main Chalet
-            </text>
-          </g>
+            {/* --------------------------------------------------------- */}
+            {/* LIVE EMERGENCY RADAR BEACON (Active Dispatch Incident) */}
+            {/* --------------------------------------------------------- */}
+            {activeIncident && activeIncident.zone === activeZone && (
+              <g
+                transform={`translate(${activeIncident.x}, ${activeIncident.y})`}
+                data-testid="emergency-radar-beacon"
+              >
+                {/* Concentric Pulsing Radar Rings */}
+                <circle
+                  cx="0"
+                  cy="0"
+                  r="36"
+                  fill="none"
+                  stroke="#ef4444"
+                  strokeWidth="2.5"
+                  className="patrol-radar-ping"
+                />
+                <circle
+                  cx="0"
+                  cy="0"
+                  r="24"
+                  fill="none"
+                  stroke="#f97316"
+                  strokeWidth="2"
+                  opacity="0.6"
+                />
+                <circle
+                  cx="0"
+                  cy="0"
+                  r="12"
+                  fill="#ef4444"
+                  stroke="#ffffff"
+                  strokeWidth="2"
+                />
+                <text
+                  x="0"
+                  y="4"
+                  fill="#ffffff"
+                  fontSize="11"
+                  fontWeight="bold"
+                  fontFamily="monospace"
+                  textAnchor="middle"
+                >
+                  !
+                </text>
+                <g transform="translate(0, -22)">
+                  <rect
+                    x="-46"
+                    y="-12"
+                    width="92"
+                    height="18"
+                    rx="4"
+                    fill="#7f1d1d"
+                    stroke="#ef4444"
+                    strokeWidth="1.5"
+                  />
+                  <text
+                    x="0"
+                    y="1"
+                    fill="#fee2e2"
+                    fontSize="8"
+                    fontWeight="bold"
+                    fontFamily="monospace"
+                    textAnchor="middle"
+                  >
+                    DISPATCH INCIDENT
+                  </text>
+                </g>
+              </g>
+            )}
 
-          {/* East Chalet — real base building, east of Base Aid Room */}
-          <g transform="translate(505, 466)" opacity="0.9">
-            <circle cx="0" cy="0" r="4" fill="#38bdf8" />
-            <text
-              x="9"
-              y="3"
-              fill="#bae6fd"
-              fontSize="8"
-              fontFamily="monospace"
-            >
-              East Chalet
-            </text>
-          </g>
+            {/* --------------------------------------------------------- */}
+            {/* M8 AMBIENT OPERATIONAL EVENT PIN */}
+            {/* --------------------------------------------------------- */}
+            {activeAmbientEvent && ambientZone === activeZone && (
+              <g
+                transform={`translate(${activeAmbientEvent.coordinates.x}, ${activeAmbientEvent.coordinates.y})`}
+                data-testid="ambient-event-pin"
+              >
+                <circle
+                  cx="0"
+                  cy="0"
+                  r="20"
+                  fill="#f59e0b"
+                  opacity="0.35"
+                  className="animate-ping"
+                />
+                <circle
+                  cx="0"
+                  cy="0"
+                  r="10"
+                  fill="#f59e0b"
+                  stroke="#ffffff"
+                  strokeWidth="2"
+                />
+                <text
+                  x="0"
+                  y="3.5"
+                  fill="#09090b"
+                  fontSize="10"
+                  fontWeight="bold"
+                  fontFamily="monospace"
+                  textAnchor="middle"
+                >
+                  !
+                </text>
+                <g transform="translate(0, -18)">
+                  <rect
+                    x="-35"
+                    y="-12"
+                    width="70"
+                    height="16"
+                    rx="3"
+                    fill="#09090b"
+                    stroke="#f59e0b"
+                    strokeWidth="1"
+                    opacity="0.95"
+                  />
+                  <text
+                    x="0"
+                    y="0"
+                    fill="#fbbf24"
+                    fontSize="7.5"
+                    fontWeight="bold"
+                    fontFamily="monospace"
+                    textAnchor="middle"
+                  >
+                    OPERATIONS
+                  </text>
+                </g>
+              </g>
+            )}
 
-          {/* TRAIL MARKER LABELS & BADGES */}
-
-          {/* Green Circle Marker */}
-          <g transform="translate(130, 290)">
-            <circle cx="0" cy="0" r="8" fill="#10b981" />
-            <text
-              x="14"
-              y="4"
-              fill="#a7f3d0"
-              fontSize="10"
-              fontWeight="bold"
-              fontFamily="monospace"
-            >
-              Long Way Home ●
-            </text>
-          </g>
-
-          {/* Skilink Marker — base-area connector lift near the lodge */}
-          <g transform="translate(155, 345)" opacity="0.9">
-            <rect x="-5" y="-5" width="10" height="10" rx="2" fill="#facc15" />
-            <text
-              x="12"
-              y="4"
-              fill="#fde68a"
-              fontSize="8"
-              fontFamily="monospace"
-            >
-              Skilink (Base Connector)
-            </text>
-          </g>
-
-          {/* Dream Catcher Marker — East Slopes blue square */}
-          <g transform="translate(80, 200)" opacity="0.9">
-            <rect x="-5" y="-5" width="10" height="10" rx="2" fill="#0284c7" />
-            <text
-              x="10"
-              y="4"
-              fill="#bae6fd"
-              fontSize="8"
-              fontFamily="monospace"
-            >
-              Dream Catcher ■
-            </text>
-          </g>
-
-          {/* Cannon-Valley Quad Marker — East Slopes lift */}
-          <g transform="translate(75, 405)" opacity="0.9">
-            <rect x="-5" y="-5" width="10" height="10" rx="2" fill="#facc15" />
-            <text
-              x="10"
-              y="4"
-              fill="#fde68a"
-              fontSize="8"
-              fontFamily="monospace"
-            >
-              Cannon-Valley Quad
-            </text>
-          </g>
-
-          {/* Blue Square Marker */}
-          <g transform="translate(545, 270)">
-            <rect x="-7" y="-7" width="14" height="14" rx="2" fill="#0284c7" />
-            <text
-              x="14"
-              y="4"
-              fill="#bae6fd"
-              fontSize="10"
-              fontWeight="bold"
-              fontFamily="monospace"
-            >
-              Harley&apos;s Hollow ■
-            </text>
-          </g>
-
-          {/* Cedar Fork Marker — West Slopes green circle */}
-          <g transform="translate(630, 128)" opacity="0.9">
-            <circle cx="0" cy="0" r="5" fill="#10b981" />
-            <text
-              x="10"
-              y="4"
-              fill="#a7f3d0"
-              fontSize="8"
-              fontFamily="monospace"
-            >
-              Cedar Fork ●
-            </text>
-          </g>
-
-          {/* Twister Marker — West Slopes black diamond */}
-          <g transform="translate(635, 385)" opacity="0.9">
-            <polygon
-              points="0,-6 6,0 0,6 -6,0"
-              fill="#be123c"
-              stroke="#f43f5e"
-              strokeWidth="1"
-            />
-            <text
-              x="11"
-              y="4"
-              fill="#fecdd3"
-              fontSize="8"
-              fontFamily="monospace"
-            >
-              Twister &#9670;
-            </text>
-          </g>
-
-          {/* West Quad Marker — West Slopes lift */}
-          <g transform="translate(715, 445)" opacity="0.9">
-            <rect x="-5" y="-5" width="10" height="10" rx="2" fill="#facc15" />
-            <text
-              x="10"
-              y="4"
-              fill="#fde68a"
-              fontSize="8"
-              fontFamily="monospace"
-            >
-              West Quad
-            </text>
-          </g>
-
-          {/* Black Diamond Marker */}
-          <g transform="translate(305, 210)">
-            <polygon
-              points="0,-8 8,0 0,8 -8,0"
-              fill="#be123c"
-              stroke="#f43f5e"
-              strokeWidth="1"
-            />
-            <text
-              x="14"
-              y="4"
-              fill="#fecdd3"
-              fontSize="10"
-              fontWeight="bold"
-              fontFamily="monospace"
-            >
-              The Great Gorge ◆
-            </text>
-          </g>
-
-          {/* Compass / Orientation Rose */}
-          <g transform="translate(730, 60)" opacity="0.8">
-            <circle
-              cx="0"
-              cy="0"
-              r="18"
-              fill="#09090b"
-              stroke="#334155"
-              strokeWidth="1"
-            />
-            <line
-              x1="0"
-              y1="-14"
-              x2="0"
-              y2="14"
-              stroke="#64748b"
-              strokeWidth="1"
-            />
-            <line
-              x1="-14"
-              y1="0"
-              x2="14"
-              y2="0"
-              stroke="#64748b"
-              strokeWidth="1"
-            />
-            <polygon points="0,-13 4,-5 -4,-5" fill="#00f0ff" />
-            <text
-              x="0"
-              y="-16"
-              fill="#00f0ff"
-              fontSize="8"
-              fontWeight="bold"
-              fontFamily="monospace"
-              textAnchor="middle"
-            >
-              N
-            </text>
+            {/* Compass Rose */}
+            <g transform={`translate(${baseWidth - 70}, 80)`} opacity="0.8">
+              <circle
+                cx="0"
+                cy="0"
+                r="22"
+                fill="#09090b"
+                stroke="#334155"
+                strokeWidth="1.5"
+              />
+              <line
+                x1="0"
+                y1="-16"
+                x2="0"
+                y2="16"
+                stroke="#64748b"
+                strokeWidth="1.5"
+              />
+              <line
+                x1="-16"
+                y1="0"
+                x2="16"
+                y2="0"
+                stroke="#64748b"
+                strokeWidth="1.5"
+              />
+              <polygon points="0,-16 5,-6 -5,-6" fill="#00f0ff" />
+              <text
+                x="0"
+                y="-18"
+                fill="#00f0ff"
+                fontSize="10"
+                fontWeight="bold"
+                fontFamily="monospace"
+                textAnchor="middle"
+              >
+                N
+              </text>
+            </g>
           </g>
         </svg>
 
+        {/* ----------------------------------------------------------- */}
+        {/* FLOATING HUD OVERLAYS */}
+        {/* ----------------------------------------------------------- */}
+
         {/* Floating Sector Badge */}
-        <div className="absolute top-4 left-4 bg-zinc-950/80 backdrop-blur-sm border border-zinc-800 rounded-xl px-3 py-1.5 text-[11px] font-mono text-zinc-300 flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span>
-            Hill Sector: <strong>The Back Bowl &bull; Belle Creek Quad</strong>
+        <div
+          data-testid="mountain-sector-badge"
+          className="absolute top-3 left-3 max-w-[calc(100%-24px)] bg-zinc-950/85 backdrop-blur-md border border-zinc-800 rounded-xl px-3 py-1.5 text-xs font-mono text-zinc-300 flex items-center gap-2 shadow-lg truncate"
+        >
+          <span
+            className={`w-2 h-2 rounded-full shrink-0 ${
+              activeAmbientEvent || activeIncident
+                ? "bg-amber-400"
+                : "bg-emerald-400"
+            } animate-pulse`}
+          />
+          <span className="truncate">
+            Hill Sector:{" "}
+            <strong>
+              {activeAmbientEvent
+                ? activeAmbientEvent.sector
+                : activeZone === "back-bowl"
+                  ? "The Back Bowl \u2022 Belle Creek Quad"
+                  : "East & West Slopes \u2022 Main Mountain"}
+            </strong>
           </span>
         </div>
+
+        {/* Floating Trail Hover Tooltip */}
+        {hoveredTrail && (
+          <div
+            data-testid="trail-hover-tooltip"
+            className={`absolute z-20 bg-zinc-950/95 backdrop-blur-md border border-zinc-700/80 rounded-xl px-3.5 py-2 shadow-2xl font-mono text-xs pointer-events-none transition-all duration-150 ${
+              activeSelectedTrail
+                ? "top-14 right-3 max-w-xs"
+                : "bottom-4 left-4 max-w-sm"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <span
+                className="w-2.5 h-2.5 rounded-sm shrink-0"
+                style={{
+                  backgroundColor: getDifficultyCoreColor(
+                    hoveredTrail.difficulty
+                  ),
+                }}
+              />
+              <strong className="text-white text-xs">
+                {hoveredTrail.name}
+              </strong>
+              <span className="text-[10px] text-zinc-400 capitalize">
+                {hoveredTrail.difficulty.replace("-", " ")}
+              </span>
+              {hoveredTrail.groomed ? (
+                <span className="text-[9px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-1.5 py-0.5 rounded font-bold">
+                  Groomed
+                </span>
+              ) : (
+                <span className="text-[9px] text-amber-400 bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 rounded font-bold">
+                  Moguls
+                </span>
+              )}
+            </div>
+            <div className="text-[10px] text-zinc-400 pt-1">
+              {hoveredTrail.lengthFt.toLocaleString()} FT &bull;{" "}
+              {hoveredTrail.verticalDropFt} FT Drop &bull;{" "}
+              <span className="text-brand-cyan font-bold">
+                {calculateAverageGrade(
+                  hoveredTrail.verticalDropFt,
+                  hoveredTrail.lengthFt
+                )}
+                % Grade
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Live Altitude Cursor HUD Badge */}
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 bg-zinc-950/85 backdrop-blur-md border border-zinc-800 rounded-xl px-3 py-1 text-[11px] font-mono text-zinc-300 hidden md:flex items-center gap-2 shadow-lg">
+          <IconCompass className="w-3.5 h-3.5 text-brand-cyan" />
+          <span>
+            Live Terrain:{" "}
+            <strong className="text-white">
+              {cursorElevation
+                ? `${cursorElevation.elevation.toLocaleString()} FT`
+                : activeZone === "main"
+                  ? "1,060 - 700 FT"
+                  : "1,060 - 700 FT"}
+            </strong>
+          </span>
+        </div>
+
+        {/* Simulation Control Overlay (Active Descent) */}
+        {activeSimulation?.active && (
+          <div
+            className="absolute top-14 left-3 bg-zinc-950/95 backdrop-blur-md border border-brand-cyan/50 rounded-2xl p-3 shadow-2xl font-mono text-xs max-w-xs space-y-2 z-30"
+            data-testid="simulation-control-overlay"
+          >
+            <div className="flex items-center justify-between gap-2 border-b border-zinc-800 pb-1.5">
+              <span className="font-bold text-brand-cyan truncate">
+                Sim: {activeSimulation.trail.name}
+              </span>
+              <span className="text-[10px] text-zinc-400">
+                {Math.round(activeSimulation.progress * 100)}%
+              </span>
+            </div>
+            <div className="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
+              <div
+                className="bg-brand-cyan h-full transition-all"
+                style={{ width: `${activeSimulation.progress * 100}%` }}
+              />
+            </div>
+            <div className="flex items-center justify-between gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() =>
+                  setSimulation((prev) =>
+                    prev ? { ...prev, isPaused: !prev.isPaused } : prev
+                  )
+                }
+                className="min-h-[44px] min-w-[44px] px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-white hover:bg-zinc-800 flex items-center justify-center cursor-pointer"
+                aria-label={
+                  activeSimulation.isPaused
+                    ? "Resume simulation"
+                    : "Pause simulation"
+                }
+              >
+                {activeSimulation.isPaused ? (
+                  <IconPlayerPlay className="w-4 h-4 text-emerald-400" />
+                ) : (
+                  <IconPlayerPause className="w-4 h-4 text-amber-400" />
+                )}
+              </button>
+              {activeSimulation.progress >= 1.0 && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSimulation((prev) =>
+                      prev ? { ...prev, progress: 0, isPaused: false } : prev
+                    )
+                  }
+                  className="min-h-[44px] min-w-[44px] px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-white hover:bg-zinc-800 flex items-center justify-center cursor-pointer"
+                  aria-label="Replay run"
+                >
+                  <IconRotateClockwise className="w-4 h-4 text-brand-cyan" />
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setSimulation(null)}
+                className="min-h-[44px] min-w-[44px] px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 text-zinc-400 hover:text-white flex items-center justify-center cursor-pointer"
+                aria-label="Cancel simulation"
+              >
+                <IconPlayerStop className="w-4 h-4 text-red-400" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ----------------------------------------------------------- */}
+        {/* MINIMAP RADAR WIDGET (160x100px) */}
+        {/* ----------------------------------------------------------- */}
+        <div className="absolute bottom-3 right-3 z-20 flex flex-col items-end gap-1">
+          {isMinimapExpanded && (
+            <div
+              className="w-40 h-28 bg-zinc-950/95 border border-zinc-800 rounded-xl overflow-hidden shadow-2xl backdrop-blur-md flex flex-col p-1 relative"
+              data-testid="minimap-radar-widget"
+            >
+              <div className="flex items-center justify-between text-[9px] font-mono text-zinc-400 px-1 border-b border-zinc-800/80 pb-0.5">
+                <span>RADAR OVERVIEW</span>
+                <span className="text-[8px] text-brand-cyan uppercase">
+                  {activeZone}
+                </span>
+              </div>
+              <div className="relative flex-1 w-full flex items-center justify-center overflow-hidden">
+                <svg
+                  viewBox={`0 0 ${baseWidth} ${baseHeight}`}
+                  className="w-full h-full opacity-60"
+                >
+                  {/* Miniature trail outlines */}
+                  {zoneTrails.map((t) => (
+                    <path
+                      key={t.id}
+                      d={catmullRomToPath(t.points)}
+                      fill="none"
+                      stroke={getDifficultyCoreColor(t.difficulty)}
+                      strokeWidth="10"
+                    />
+                  ))}
+                  {/* Dynamic Viewport Bounding Box */}
+                  <rect
+                    x={baseWidth / 2 - (baseWidth / 2 + pan.x) / zoom}
+                    y={baseHeight / 2 - (baseHeight / 2 + pan.y) / zoom}
+                    width={baseWidth / zoom}
+                    height={baseHeight / zoom}
+                    fill="rgba(0, 240, 255, 0.15)"
+                    stroke="#00f0ff"
+                    strokeWidth="16"
+                  />
+                </svg>
+              </div>
+              {/* Quick Jump Anchors */}
+              <div className="grid grid-cols-4 gap-1 pt-1 border-t border-zinc-800/80">
+                <button
+                  type="button"
+                  onClick={() => panToAnchor("main", 1250, 1170)}
+                  className="min-h-[44px] min-w-[44px] text-[8px] font-mono bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded text-center truncate px-0.5 cursor-pointer flex items-center justify-center"
+                  title="Pan to Main Chalet"
+                >
+                  Main
+                </button>
+                <button
+                  type="button"
+                  onClick={() => panToAnchor("main", 420, 1160)}
+                  className="min-h-[44px] min-w-[44px] text-[8px] font-mono bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded text-center truncate px-0.5 cursor-pointer flex items-center justify-center"
+                  title="Pan to East Chalet"
+                >
+                  East
+                </button>
+                <button
+                  type="button"
+                  onClick={() => panToAnchor("main", 1000, 160)}
+                  className="min-h-[44px] min-w-[44px] text-[8px] font-mono bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded text-center truncate px-0.5 cursor-pointer flex items-center justify-center"
+                  title="Pan to Summit Shack"
+                >
+                  Top
+                </button>
+                <button
+                  type="button"
+                  onClick={() => panToAnchor("back-bowl", 600, 460)}
+                  className="min-h-[44px] min-w-[44px] text-[8px] font-mono bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded text-center truncate px-0.5 cursor-pointer flex items-center justify-center"
+                  title="Pan to The Back Bowl"
+                >
+                  Bowl
+                </button>
+              </div>
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() => setIsMinimapExpanded((prev) => !prev)}
+            className="min-h-[44px] min-w-[44px] p-2 bg-zinc-950/80 hover:bg-zinc-900 border border-zinc-800 text-[10px] font-mono text-zinc-400 hover:text-white rounded-lg flex items-center justify-center cursor-pointer shadow-md"
+            aria-expanded={isMinimapExpanded}
+            aria-label="Toggle Minimap Radar"
+          >
+            <IconCompass className="w-3.5 h-3.5 text-brand-cyan" />
+          </button>
+        </div>
+
+        {/* ----------------------------------------------------------- */}
+        {/* TRAIL INSPECTOR CARD / MOBILE BOTTOM SHEET */}
+        {/* ----------------------------------------------------------- */}
+        {activeSelectedTrail && (
+          <div
+            className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 max-w-sm w-[calc(100%-24px)] sm:w-80 bg-zinc-950/95 border border-zinc-700/80 rounded-2xl p-4 shadow-2xl backdrop-blur-md z-30 font-mono space-y-3"
+            data-testid="trail-inspector-card"
+          >
+            {/* Inspector Header */}
+            <div className="flex items-center justify-between gap-2 border-b border-zinc-800 pb-2">
+              <div className="flex items-center gap-2 truncate">
+                <span
+                  className="w-3 h-3 rounded-sm inline-block shrink-0"
+                  style={{
+                    backgroundColor: getDifficultyCoreColor(
+                      activeSelectedTrail.difficulty
+                    ),
+                  }}
+                />
+                <h3 className="font-bold text-white text-sm truncate">
+                  {activeSelectedTrail.name}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedTrail(null)}
+                className="min-h-[44px] min-w-[44px] -mr-2 -mt-2 p-2 text-zinc-400 hover:text-white flex items-center justify-center cursor-pointer"
+                aria-label="Close trail inspector"
+              >
+                <IconX className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Quick Stats Grid */}
+            <div className="grid grid-cols-2 gap-2 text-[11px] text-zinc-300">
+              <div>
+                <span className="text-zinc-500 block text-[9px] uppercase">
+                  Sector
+                </span>
+                <span className="font-bold">{activeSelectedTrail.sector}</span>
+              </div>
+              <div>
+                <span className="text-zinc-500 block text-[9px] uppercase">
+                  Surface
+                </span>
+                <span className="font-bold">
+                  {activeSelectedTrail.groomed
+                    ? "Corduroy Groomed"
+                    : "Moguls / Glade"}
+                </span>
+              </div>
+              <div>
+                <span className="text-zinc-500 block text-[9px] uppercase">
+                  Length
+                </span>
+                <span className="font-bold">
+                  {activeSelectedTrail.lengthFt.toLocaleString()} FT
+                </span>
+              </div>
+              <div>
+                <span className="text-zinc-500 block text-[9px] uppercase">
+                  Drop
+                </span>
+                <span className="font-bold">
+                  {activeSelectedTrail.verticalDropFt} FT
+                </span>
+              </div>
+            </div>
+
+            {/* SVG Elevation Profile Sparkline */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-[10px] text-zinc-400">
+                <span>Elevation Cross-Section</span>
+                <span className="text-brand-cyan font-bold">
+                  {calculateAverageGrade(
+                    activeSelectedTrail.verticalDropFt,
+                    activeSelectedTrail.lengthFt
+                  )}
+                  % Avg Grade
+                </span>
+              </div>
+              <svg
+                viewBox="0 0 240 60"
+                className="w-full h-14 bg-zinc-900/80 rounded-lg p-1 border border-zinc-800"
+                aria-label={`Elevation profile for ${activeSelectedTrail.name}`}
+              >
+                {/* Reference Gridlines */}
+                <line
+                  x1="20"
+                  y1="14"
+                  x2="220"
+                  y2="14"
+                  stroke="#334155"
+                  strokeDasharray="2 2"
+                  strokeWidth="0.75"
+                />
+                <line
+                  x1="20"
+                  y1="50"
+                  x2="220"
+                  y2="50"
+                  stroke="#334155"
+                  strokeDasharray="2 2"
+                  strokeWidth="0.75"
+                />
+
+                {/* Profile Slope Area */}
+                <polygon
+                  points={`${activeSelectedTrail.points
+                    .map((pt, idx) => {
+                      const px =
+                        20 +
+                        (200 * idx) / (activeSelectedTrail.points.length - 1);
+                      const elev = calculateElevationAt(
+                        pt.x,
+                        pt.y,
+                        activeSelectedTrail.zone
+                      );
+                      const clampedElev = Math.min(
+                        Math.max(elev, activeSelectedTrail.baseElevationFt),
+                        activeSelectedTrail.summitElevationFt
+                      );
+                      const py = 50 - (clampedElev - BASE_ELEVATION_FT) * 0.1;
+                      return `${px.toFixed(1)},${py.toFixed(1)}`;
+                    })
+                    .join(" ")} 220,50 20,50`}
+                  fill="rgba(56, 189, 248, 0.15)"
+                />
+                {/* Profile Slope Line */}
+                <path
+                  d={activeSelectedTrail.points
+                    .map((pt, idx) => {
+                      const px =
+                        20 +
+                        (200 * idx) / (activeSelectedTrail.points.length - 1);
+                      const elev = calculateElevationAt(
+                        pt.x,
+                        pt.y,
+                        activeSelectedTrail.zone
+                      );
+                      const clampedElev = Math.min(
+                        Math.max(elev, activeSelectedTrail.baseElevationFt),
+                        activeSelectedTrail.summitElevationFt
+                      );
+                      const py = 50 - (clampedElev - BASE_ELEVATION_FT) * 0.1;
+                      return `${idx === 0 ? "M" : "L"} ${px.toFixed(1)} ${py.toFixed(1)}`;
+                    })
+                    .join(" ")}
+                  fill="none"
+                  stroke="#38bdf8"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                {/* Elevation Labels */}
+                <text
+                  x="22"
+                  y="24"
+                  fill="#94a3b8"
+                  fontSize="8"
+                  fontFamily="monospace"
+                >
+                  {activeSelectedTrail.summitElevationFt}&apos;
+                </text>
+                <text
+                  x="180"
+                  y="46"
+                  fill="#94a3b8"
+                  fontSize="8"
+                  fontFamily="monospace"
+                >
+                  {activeSelectedTrail.baseElevationFt}&apos;
+                </text>
+              </svg>
+            </div>
+
+            <p className="text-xs font-sans text-zinc-300 leading-relaxed">
+              {activeSelectedTrail.description}
+            </p>
+
+            {/* Run Simulation Action Button */}
+            <button
+              type="button"
+              onClick={() =>
+                setSimulation({
+                  active: true,
+                  trail: activeSelectedTrail,
+                  progress: 0,
+                  isPaused: false,
+                })
+              }
+              className="w-full min-h-[44px] px-3 py-2 rounded-xl bg-brand-cyan hover:bg-brand-cyan/90 text-zinc-950 font-mono text-xs font-bold transition-all cursor-pointer inline-flex items-center justify-center gap-2 shadow-lg"
+            >
+              <IconPlayerPlay className="w-4 h-4" />
+              <span>Simulate Run Down Trail</span>
+            </button>
+          </div>
+        )}
+
+        {/* Floating Ambient Operational Event Toast */}
+        {activeAmbientEvent && (
+          <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 max-w-sm sm:max-w-md w-full pointer-events-auto">
+            <AmbientEventToast
+              event={activeAmbientEvent}
+              onResolveOption={handleResolveOption}
+              onDismiss={handleDismiss}
+            />
+          </div>
+        )}
+
+        {/* Resolved Consequence Card */}
+        {resolvedConsequence && !activeAmbientEvent && (
+          <div
+            data-testid="ambient-consequence-card"
+            className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 max-w-sm sm:max-w-md w-full bg-zinc-950/95 border border-emerald-500/50 rounded-2xl p-4 shadow-2xl backdrop-blur-md font-mono space-y-1.5"
+          >
+            <div className="flex items-center justify-between gap-2 border-b border-zinc-800/80 pb-2">
+              <span className="text-[10px] uppercase font-bold text-emerald-400 truncate">
+                Ops Resolved &bull; {resolvedConsequence.optionLabel}
+              </span>
+              <button
+                type="button"
+                onClick={() => setResolvedConsequence(null)}
+                className="min-h-[44px] min-w-[44px] -mr-2 -mt-2 p-2 text-xs text-zinc-400 hover:text-white flex items-center justify-center cursor-pointer"
+                aria-label="Dismiss resolution note"
+              >
+                <IconX className="w-4 h-4" />
+              </button>
+            </div>
+            <p className="text-xs text-zinc-200 font-sans leading-relaxed">
+              {resolvedConsequence.consequenceText}
+            </p>
+          </div>
+        )}
       </div>
 
-      {/* Map Attribution */}
-      <p className="text-[10px] font-mono text-zinc-600 -mt-2">
-        Stylized, unofficial illustration cross-checked against Welch
-        Village&apos;s own published trail map. East Slopes: Harley&apos;s
-        Hollow, Dream Catcher, Cannon-Valley Quad. West Slopes: Long Way Home,
-        Cedar Fork, Twister, West Quad. The Back Bowl (via Belle Creek Quad):
-        The Great Gorge, Black Forest, Adam&apos;s Abyss. Base area: Main
-        Chalet, East Chalet, Skilink. Not affiliated with or endorsed by Welch
-        Village Ski Area.
+      {/* Map Attribution & Sector Information */}
+      <p className="text-[10px] font-mono text-zinc-500 -mt-1">
+        Welch Village (Welch, MN) recreation: East Slopes, West Slopes, and The
+        Back Bowl. 50+ marked trails, 10 lifts, 9 facilities. Unofficial
+        educational simulation. Not affiliated with or endorsed by Welch Village
+        Ski Area.
       </p>
 
-      {/* Action Controls Bar */}
+      {/* ------------------------------------------------------------- */}
+      {/* 4. ACTION CONTROLS BAR */}
+      {/* ------------------------------------------------------------- */}
       <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
         <div className="text-xs font-mono text-zinc-400">
           Radio Frequency:{" "}
-          <strong className="text-brand-cyan">154.570 MHz</strong> • Listening
-          for Base Dispatch...
+          <strong className="text-brand-cyan">154.570 MHz</strong> &bull;
+          Listening for Base Dispatch...
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+          {/* Routine Hill Check on-demand trigger */}
+          <button
+            type="button"
+            onClick={() => {
+              setResolvedConsequence(null);
+              onTriggerAmbientEvent?.();
+            }}
+            disabled={Boolean(activeAmbientEvent)}
+            aria-disabled={Boolean(activeAmbientEvent)}
+            data-testid="routine-hill-check-btn"
+            className={`w-full sm:w-auto min-h-[44px] min-w-[44px] px-4 py-2.5 rounded-xl border font-mono text-xs font-bold transition-all inline-flex items-center justify-center gap-2 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan ${
+              activeAmbientEvent
+                ? "bg-zinc-900/50 border-zinc-800 text-zinc-500 cursor-not-allowed opacity-60"
+                : "bg-zinc-900 hover:bg-zinc-800 active:scale-[0.98] border-zinc-700 hover:border-brand-cyan/50 text-zinc-200 hover:text-white cursor-pointer"
+            }`}
+          >
+            <IconAntenna
+              className={`w-4 h-4 ${
+                activeAmbientEvent ? "text-zinc-500" : "text-brand-cyan"
+              }`}
+            />
+            <span>Routine Hill Check</span>
+          </button>
+
           {incidentsCompleted >= 1 && (
             <button
               type="button"
               onClick={onCompleteShift}
-              className="min-h-[44px] min-w-[44px] px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98] text-zinc-950 font-mono text-xs font-bold transition-all cursor-pointer inline-flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              className="w-full sm:w-auto min-h-[44px] min-w-[44px] px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98] text-zinc-950 font-mono text-xs font-bold transition-all cursor-pointer inline-flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
             >
               <IconFlag className="w-4 h-4" />
               <span>Call Final Sweep / Complete Shift</span>
@@ -767,13 +2104,85 @@ export const MountainMap: React.FC<MountainMapProps> = ({
           <button
             type="button"
             onClick={onAwaitDispatch}
-            className="min-h-[44px] min-w-[44px] px-6 py-2.5 rounded-xl bg-brand-cyan hover:bg-brand-cyan/90 active:scale-[0.98] text-zinc-950 font-mono text-xs font-bold transition-all cursor-pointer inline-flex items-center justify-center gap-2 shadow-lg shadow-brand-cyan/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            className="w-full sm:w-auto min-h-[44px] min-w-[44px] px-6 py-2.5 rounded-xl bg-brand-cyan hover:bg-brand-cyan/90 active:scale-[0.98] text-zinc-950 font-mono text-xs font-bold transition-all cursor-pointer inline-flex items-center justify-center gap-2 shadow-lg shadow-brand-cyan/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
           >
             <IconRadio className="w-4 h-4" />
             <span>Standby on Hill / Await Dispatch</span>
           </button>
         </div>
       </div>
+
+      {/* ------------------------------------------------------------- */}
+      {/* 5. NSAA RESPONSIBILITY CODE ACCESSIBLE MODAL */}
+      {/* ------------------------------------------------------------- */}
+      {isResponsibilityModalOpen && (
+        <div
+          ref={modalRef}
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="responsibility-modal-title"
+        >
+          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+              <div className="flex items-center gap-2">
+                <IconShieldCheck className="w-6 h-6 text-emerald-400" />
+                <h3
+                  id="responsibility-modal-title"
+                  className="font-mono font-bold text-white text-base sm:text-lg"
+                >
+                  Your Responsibility Code
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsResponsibilityModalOpen(false)}
+                className="min-h-[44px] min-w-[44px] p-2 text-zinc-400 hover:text-white rounded-lg flex items-center justify-center cursor-pointer"
+                aria-label="Close Safety Code"
+              >
+                <IconX className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-zinc-400 font-mono">
+              National Ski Areas Association (NSAA) 10-Point Safety Rules.
+              Patrol monitors and promotes these guidelines across all Welch
+              Village terrain.
+            </p>
+
+            <div className="space-y-2.5">
+              {RESPONSIBILITY_CODE.map((item) => (
+                <div
+                  key={item.id}
+                  className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800/80 flex items-start gap-3"
+                >
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 font-mono text-xs font-bold flex items-center justify-center border border-emerald-500/30">
+                    {item.number}
+                  </span>
+                  <div className="space-y-0.5">
+                    <h4 className="text-xs font-mono font-bold text-zinc-200">
+                      {item.title}
+                    </h4>
+                    <p className="text-xs font-sans text-zinc-400 leading-relaxed">
+                      {item.rule}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-2 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setIsResponsibilityModalOpen(false)}
+                className="min-h-[44px] min-w-[44px] px-5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-white font-mono text-xs font-bold cursor-pointer"
+              >
+                Close Safety Code
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

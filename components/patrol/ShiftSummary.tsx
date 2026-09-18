@@ -18,6 +18,7 @@ import {
   IconMessage2,
   IconChevronDown,
   IconChevronUp,
+  IconUserCheck,
 } from "@tabler/icons-react";
 import { DebriefDimensionMeter } from "./DebriefDimensionMeter";
 
@@ -38,6 +39,7 @@ const PLAYFUL_STAT_TILES: {
     | "callsHandled"
     | "radioTransmissions"
     | "patientsAssisted"
+    | "guestsAssisted"
     | "sledTransports"
     | "trailsChecked"
     | "hazardsMarked";
@@ -63,6 +65,12 @@ const PLAYFUL_STAT_TILES: {
     label: "Patients Assisted",
     icon: IconFirstAidKit,
     iconWrapClass: "bg-emerald-400/10 border-emerald-400/20 text-emerald-400",
+  },
+  {
+    key: "guestsAssisted",
+    label: "Guests Assisted",
+    icon: IconUserCheck,
+    iconWrapClass: "bg-teal-400/10 border-teal-400/20 text-teal-400",
   },
   {
     key: "sledTransports",
@@ -173,7 +181,7 @@ export const ShiftSummary: React.FC<ShiftSummaryProps> = ({
                 {label}
               </div>
               <div className="text-xl font-mono font-bold text-white">
-                {summary.playfulStats[key]}
+                {summary.playfulStats[key] ?? 0}
               </div>
             </div>
           </div>
