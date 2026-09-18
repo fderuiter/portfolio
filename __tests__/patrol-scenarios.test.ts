@@ -153,6 +153,11 @@ describe("Patrol Shift — M6 Scenario Content Package Invariants (Issue #752)",
   });
 
   it("flags every clinically-specific detail in the three scenario files for OEC/NSP review (#744 content discipline)", () => {
+    // Reads source text directly (not a module import) because the
+    // PLACEHOLDER-CONTENT-REVIEW marker is a comment, which is stripped
+    // before it ever reaches the compiled PatrolScenario objects imported
+    // through the public lib/patrol entry point above. This does not cross
+    // the lib/patrol/scenarios/ module boundary that depcruise enforces.
     const scenarioFiles = [
       "wrist-injury.ts",
       "ambiguous-patient.ts",

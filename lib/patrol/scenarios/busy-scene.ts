@@ -93,6 +93,8 @@ export const BUSY_SCENE_SCENARIO: PatrolScenario = {
     avpu: "A",
     pms: "intact",
   },
+  // PLACEHOLDER-CONTENT-REVIEW: needs OEC/NSP review, see #744
+  // (vitalsCheck numbers, splint steps, and PMS findings within actions below)
   actions: [
     {
       id: "assess-scene-safety",

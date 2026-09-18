@@ -85,6 +85,8 @@ export const AMBIGUOUS_PATIENT_SCENARIO: PatrolScenario = {
     avpu: "A",
     pms: "intact",
   },
+  // PLACEHOLDER-CONTENT-REVIEW: needs OEC/NSP review, see #744
+  // (vitalsCheck numbers and neuro-check findings within actions below)
   actions: [
     {
       id: "assess-scene-safety",
