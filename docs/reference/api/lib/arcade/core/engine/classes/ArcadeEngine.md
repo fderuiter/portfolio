@@ -14,6 +14,7 @@ Zero framework dependencies. Testable in pure Node.js/Vitest.
 - [`ClinicalTrialChaosEngine`](../../../../clinical-trial-chaos/engine/classes/ClinicalTrialChaosEngine.md)
 - [`GarminWatchEngine`](../../../../garmin-engine/classes/GarminWatchEngine.md)
 - [`LaserLoonEngine`](../../../../laser-loon/engine/classes/LaserLoonEngine.md)
+- [`OetDescentEngine`](../../../../patrol/oet-engine/classes/OetDescentEngine.md)
 - [`RetroLabyrinthEngine`](../../../../retro-labyrinth/engine/classes/RetroLabyrinthEngine.md)
 - [`WorkingWithDuckEngine`](../../../../working-with-duck-engine/classes/WorkingWithDuckEngine.md)
 

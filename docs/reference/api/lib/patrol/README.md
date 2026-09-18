@@ -14,6 +14,12 @@ Re-exports [ActionCategory](types/type-aliases/ActionCategory.md)
 
 ***
 
+### BriefingState
+
+Re-exports [BriefingState](types/interfaces/BriefingState.md)
+
+***
+
 ### CanonicalShiftPhase
 
 Re-exports [CanonicalShiftPhase](types/type-aliases/CanonicalShiftPhase.md)
@@ -23,6 +29,12 @@ Re-exports [CanonicalShiftPhase](types/type-aliases/CanonicalShiftPhase.md)
 ### createEvent
 
 Re-exports [createEvent](events/functions/createEvent.md)
+
+***
+
+### createInitialOetDescentState
+
+Re-exports [createInitialOetDescentState](oet-engine/functions/createInitialOetDescentState.md)
 
 ***
 
@@ -104,9 +116,75 @@ Re-exports [LegacyShiftPhase](types/type-aliases/LegacyShiftPhase.md)
 
 ***
 
+### OetDescentEngine
+
+Re-exports [OetDescentEngine](oet-engine/classes/OetDescentEngine.md)
+
+***
+
+### OetDescentEngineOptions
+
+Re-exports [OetDescentEngineOptions](types/interfaces/OetDescentEngineOptions.md)
+
+***
+
+### OetDescentSnapshot
+
+Re-exports [OetDescentSnapshot](types/interfaces/OetDescentSnapshot.md)
+
+***
+
+### OetDescentState
+
+Re-exports [OetDescentState](types/interfaces/OetDescentState.md)
+
+***
+
+### OetDescentStatus
+
+Re-exports [OetDescentStatus](types/type-aliases/OetDescentStatus.md)
+
+***
+
+### OetEngine
+
+Re-exports [OetEngine](oet-engine/variables/OetEngine.md)
+
+***
+
 ### OETEngineState
 
 Re-exports [OETEngineState](types/interfaces/OETEngineState.md)
+
+***
+
+### OetGate
+
+Re-exports [OetGate](types/interfaces/OetGate.md)
+
+***
+
+### OetMetrics
+
+Re-exports [OetMetrics](types/interfaces/OetMetrics.md)
+
+***
+
+### OetObstacle
+
+Re-exports [OetObstacle](types/interfaces/OetObstacle.md)
+
+***
+
+### OetObstacleType
+
+Re-exports [OetObstacleType](types/type-aliases/OetObstacleType.md)
+
+***
+
+### OetSledState
+
+Re-exports [OetSledState](types/interfaces/OetSledState.md)
 
 ***
 
@@ -197,6 +275,12 @@ Re-exports [ShiftPhase](types/type-aliases/ShiftPhase.md)
 ### ShiftState
 
 Re-exports [ShiftState](types/interfaces/ShiftState.md)
+
+***
+
+### SnowSprayParticle
+
+Re-exports [SnowSprayParticle](types/interfaces/SnowSprayParticle.md)
 
 ***
 

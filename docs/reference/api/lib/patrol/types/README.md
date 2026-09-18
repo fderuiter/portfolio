@@ -8,10 +8,18 @@
 
 ## Interfaces
 
+- [BriefingState](interfaces/BriefingState.md)
 - [DebriefReport](interfaces/DebriefReport.md)
 - [DebriefRule](interfaces/DebriefRule.md)
 - [EnvironmentState](interfaces/EnvironmentState.md)
+- [OetDescentEngineOptions](interfaces/OetDescentEngineOptions.md)
+- [OetDescentSnapshot](interfaces/OetDescentSnapshot.md)
+- [OetDescentState](interfaces/OetDescentState.md)
 - [OETEngineState](interfaces/OETEngineState.md)
+- [OetGate](interfaces/OetGate.md)
+- [OetMetrics](interfaces/OetMetrics.md)
+- [OetObstacle](interfaces/OetObstacle.md)
+- [OetSledState](interfaces/OetSledState.md)
 - [PatientState](interfaces/PatientState.md)
 - [PatrolActor](interfaces/PatrolActor.md)
 - [PatrolEvent](interfaces/PatrolEvent.md)
@@ -21,6 +29,7 @@
 - [ScenarioAction](interfaces/ScenarioAction.md)
 - [ShiftEngineEvent](interfaces/ShiftEngineEvent.md)
 - [ShiftState](interfaces/ShiftState.md)
+- [SnowSprayParticle](interfaces/SnowSprayParticle.md)
 - [VitalsData](interfaces/VitalsData.md)
 
 ## Type Aliases
@@ -29,5 +38,7 @@
 - [CanonicalShiftPhase](type-aliases/CanonicalShiftPhase.md)
 - [IncidentSeverity](type-aliases/IncidentSeverity.md)
 - [LegacyShiftPhase](type-aliases/LegacyShiftPhase.md)
+- [OetDescentStatus](type-aliases/OetDescentStatus.md)
+- [OetObstacleType](type-aliases/OetObstacleType.md)
 - [ShiftEngineEventType](type-aliases/ShiftEngineEventType.md)
 - [ShiftPhase](type-aliases/ShiftPhase.md)

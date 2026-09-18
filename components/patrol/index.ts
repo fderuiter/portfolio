@@ -10,6 +10,7 @@ export * from "./MountainMap";
 export * from "./DispatchOverlay";
 export * from "./SceneInteractionPlaceholder";
 export * from "./OetPlaceholder";
+export * from "./OetCanvas";
 export * from "./HandoffScreen";
 export * from "./DebriefPlaceholder";
 export * from "./ShiftSummary";
