@@ -17,5 +17,6 @@ export * from "./OetPlaceholder";
 export * from "./OetCanvas";
 export * from "./HandoffScreen";
 export * from "./HandoffPanel";
-export * from "./DebriefPlaceholder";
+export * from "./DebriefDimensionMeter";
+export * from "./DebriefScreen";
 export * from "./ShiftSummary";

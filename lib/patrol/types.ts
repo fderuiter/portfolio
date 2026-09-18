@@ -225,6 +225,7 @@ export type ShiftEngineEventType =
   | "ARRIVE_AT_BASE"
   | "COMPLETE_HANDOFF"
   | "FINISH_DEBRIEF"
+  | "REPLAY_INCIDENT"
   | "COMPLETE_SHIFT"
   | "RECORD_ACTION"
   | "CHECK_VITALS"
@@ -257,6 +258,84 @@ export interface OETEngineState {
   evaluatedCount: number;
   rulesPassed: number;
   rulesFailed: number;
+}
+
+/**
+ * One of the five judgment dimensions scored by the M7 contextual debrief engine.
+ */
+export type DebriefDimension =
+  | "sceneManagement"
+  | "patientCare"
+  | "communication"
+  | "transportation"
+  | "operationalJudgment";
+
+/**
+ * Scored evaluation of a single debrief dimension, on a 0-10 scale.
+ */
+export interface DimensionScore {
+  score: number;
+  label: string;
+  rating: "exemplary" | "proficient" | "developing" | "needs-attention";
+  feedback: string;
+}
+
+/**
+ * A single natural-language debrief feedback card tied to a specific dimension
+ * and, where applicable, the `PatrolEvent.action` that triggered it.
+ */
+export interface QualitativeObservation {
+  id: string;
+  dimension: DebriefDimension;
+  sentiment: "positive" | "caution" | "constructive";
+  headline: string;
+  detail: string;
+  relatedEventAction?: string;
+}
+
+/**
+ * Non-clinical, operational activity counters surfaced in the end-of-shift summary.
+ * Derived entirely from `PatrolEvent[]` counts (Epic #744: never patient outcomes).
+ */
+export interface ShiftPlayfulStats {
+  callsHandled: number;
+  radioTransmissions: number;
+  patientsAssisted: number;
+  sledTransports: number;
+  hazardsMarked: number;
+  pmsChecksPerformed: number;
+  reassessmentsLogged: number;
+  closedLoopDelegations: number;
+  communicationRating: string;
+}
+
+/**
+ * Rule-based debrief result for a single incident, produced by
+ * `evaluateIncidentDebrief` from that incident's `PatrolEvent[]` slice alone.
+ */
+export interface IncidentDebriefResult {
+  scenarioId: string;
+  dimensions: Record<DebriefDimension, DimensionScore>;
+  overallRating: string;
+  observations: QualitativeObservation[];
+  oetSummary?: {
+    judgmentScore: number;
+    controlledStops: number;
+    excessiveSpeedSeconds: number;
+    rideComfort: "smooth" | "moderate" | "rough";
+  };
+}
+
+/**
+ * End-of-shift operational record aggregating every incident's debrief result.
+ */
+export interface ShiftDebriefSummary {
+  totalIncidents: number;
+  elapsedShiftMinutes: number;
+  incidentResults: IncidentDebriefResult[];
+  compositeDimensions: Record<DebriefDimension, DimensionScore>;
+  playfulStats: ShiftPlayfulStats;
+  chronologicalHighlights: string[];
 }
 
 /**

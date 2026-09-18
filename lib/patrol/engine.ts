@@ -361,6 +361,29 @@ export function reduceShiftState(
       return state;
     }
 
+    case "REPLAY_INCIDENT": {
+      // Re-runs the same incident from scene arrival: clears incident-local
+      // clinical/scene state, but never touches incidentsCompleted, score, or
+      // the shift clock — replaying is not "undoing" shift time already spent.
+      if (state.phase === "DEBRIEF" || state.phase === "debrief") {
+        return {
+          ...state,
+          phase: "SCENE",
+          actionHistory: [],
+          vitalsHistory: [],
+          activeEvents: [],
+          currentVitals: undefined,
+          revealedPatient: {},
+          revealedEnvironment: {},
+          revealedActors: [],
+          sceneSafetySecured: false,
+          sceneSafetyStatus: "unassessed",
+          patientCondition: "stable",
+        };
+      }
+      return state;
+    }
+
     case "COMPLETE_SHIFT": {
       if (state.phase === "PATROL_MAP" || state.phase === "patrol") {
         return {
