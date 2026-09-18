@@ -1,27 +1,35 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { test, expect, Page, TestInfo } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
-import * as fs from 'fs';
-import * as path from 'path';
+import { test, expect, Page, TestInfo } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
+import * as fs from "fs";
+import * as path from "path";
 
 /**
  * Helper to save scan results to JSON files for CI reporting and trend tracking.
  */
-function saveResult(projectName: string, stateName: string, violations: any[], checkedUrl: string) {
-  const dir = path.join(__dirname, '../../playwright-report/accessibility-results');
+function saveResult(
+  projectName: string,
+  stateName: string,
+  violations: any[],
+  checkedUrl: string
+) {
+  const dir = path.join(
+    __dirname,
+    "../../playwright-report/accessibility-results"
+  );
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
-  const safeStateName = stateName.replace(/[^a-zA-Z0-9]/g, '_');
+  const safeStateName = stateName.replace(/[^a-zA-Z0-9]/g, "_");
   const filename = `${projectName}-${safeStateName}.json`;
   const filePath = path.join(dir, filename);
-  
+
   const resultData = {
     project: projectName,
     state: stateName,
     url: checkedUrl,
     violationsCount: violations.length,
-    violations: violations.map(v => ({
+    violations: violations.map((v) => ({
       id: v.id,
       impact: v.impact,
       description: v.description,
@@ -29,20 +37,24 @@ function saveResult(projectName: string, stateName: string, violations: any[], c
       helpUrl: v.helpUrl,
       nodes: v.nodes.map((n: any) => ({
         target: n.target,
-        html: n.html
-      }))
+        html: n.html,
+      })),
     })),
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
-  
+
   fs.writeFileSync(filePath, JSON.stringify(resultData, null, 2));
 }
 
 /**
  * Helper to format failure messages clearly in terminal logs with CSS selectors and HTML snippets.
  */
-function formatViolationsForLog(projectName: string, stateName: string, violations: any[]): string {
-  if (violations.length === 0) return '';
+function formatViolationsForLog(
+  projectName: string,
+  stateName: string,
+  violations: any[]
+): string {
+  if (violations.length === 0) return "";
   let log = `\n==================================================\n`;
   log += `🚨 ACCESSIBILITY VIOLATIONS DETECTED (${projectName} - ${stateName})\n`;
   log += `Found ${violations.length} critical, serious, or moderate violations.\n`;
@@ -58,7 +70,7 @@ function formatViolationsForLog(projectName: string, stateName: string, violatio
     log += `  Affected Elements:\n`;
     violation.nodes.forEach((node: any, nIdx: number) => {
       log += `    Element ${nIdx + 1}:\n`;
-      log += `      CSS Selector: ${node.target.join(' > ')}\n`;
+      log += `      CSS Selector: ${node.target.join(" > ")}\n`;
       log += `      HTML snippet: ${node.html}\n`;
     });
     log += `--------------------------------------------------\n\n`;
@@ -73,25 +85,41 @@ async function auditAndAssert(
   page: Page,
   testInfo: TestInfo,
   stateName: string,
-  options: { disableRules?: string[] } = {}
+  options: { disableRules?: string[]; exclude?: string[] } = {}
 ) {
-  let builder = new AxeBuilder({ page })
-    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice']);
+  let builder = new AxeBuilder({ page }).withTags([
+    "wcag2a",
+    "wcag2aa",
+    "wcag21a",
+    "wcag21aa",
+    "best-practice",
+  ]);
 
   if (options.disableRules && options.disableRules.length > 0) {
     builder = builder.disableRules(options.disableRules);
   }
 
+  for (const selector of options.exclude ?? []) {
+    builder = builder.exclude(selector);
+  }
+
   const results = await builder.analyze();
   // Filter for critical, serious, and moderate violations (zero tolerance policy)
   const targetViolations = results.violations.filter(
-    v => v.impact === 'critical' || v.impact === 'serious' || v.impact === 'moderate'
+    (v) =>
+      v.impact === "critical" ||
+      v.impact === "serious" ||
+      v.impact === "moderate"
   );
 
   saveResult(testInfo.project.name, stateName, targetViolations, page.url());
 
   if (targetViolations.length > 0) {
-    const errorLog = formatViolationsForLog(testInfo.project.name, stateName, targetViolations);
+    const errorLog = formatViolationsForLog(
+      testInfo.project.name,
+      stateName,
+      targetViolations
+    );
     console.error(errorLog);
   }
 
@@ -101,14 +129,16 @@ async function auditAndAssert(
   ).toBe(0);
 }
 
-test.describe('Continuous Accessibility (a11y) & WCAG 2.1 AA Audit Suite', () => {
+test.describe("Continuous Accessibility (a11y) & WCAG 2.1 AA Audit Suite", () => {
   test.beforeEach(async ({ page }) => {
     // Emulate reduced motion to disable JS transitions/animations
-    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.emulateMedia({ reducedMotion: "reduce" });
 
     // Inject the global test flag so components enable deterministic testing behaviors
     await page.addInitScript(() => {
-      (window as unknown as { __PLAYWRIGHT_TEST__?: boolean }).__PLAYWRIGHT_TEST__ = true;
+      (
+        window as unknown as { __PLAYWRIGHT_TEST__?: boolean }
+      ).__PLAYWRIGHT_TEST__ = true;
     });
 
     // Disable CSS animations for consistent layout scanning
@@ -118,26 +148,34 @@ test.describe('Continuous Accessibility (a11y) & WCAG 2.1 AA Audit Suite', () =>
           transition: none !important;
           animation: none !important;
         }
-      `
+      `,
     });
   });
 
-  test('Audit: Default Landing Page State', async ({ page }, testInfo) => {
-    await page.goto('/');
+  test("Audit: Default Landing Page State", async ({ page }, testInfo) => {
+    await page.goto("/");
     await page.waitForFunction(() => {
-      const elements = Array.from(document.querySelectorAll('.text-\\[9px\\]'));
-      return elements.length > 0 && elements.every((el) => !el.textContent?.includes('MEASURING...'));
+      const elements = Array.from(document.querySelectorAll(".text-\\[9px\\]"));
+      return (
+        elements.length > 0 &&
+        elements.every((el) => !el.textContent?.includes("MEASURING..."))
+      );
     });
     await page.waitForTimeout(300);
 
-    await auditAndAssert(page, testInfo, 'Default Landing Page State');
+    await auditAndAssert(page, testInfo, "Default Landing Page State");
   });
 
-  test('Audit: Interactive Project Filtering Tab State', async ({ page }, testInfo) => {
-    await page.goto('/');
+  test("Audit: Interactive Project Filtering Tab State", async ({
+    page,
+  }, testInfo) => {
+    await page.goto("/");
     await page.waitForFunction(() => {
-      const elements = Array.from(document.querySelectorAll('.text-\\[9px\\]'));
-      return elements.length > 0 && elements.every((el) => !el.textContent?.includes('MEASURING...'));
+      const elements = Array.from(document.querySelectorAll(".text-\\[9px\\]"));
+      return (
+        elements.length > 0 &&
+        elements.every((el) => !el.textContent?.includes("MEASURING..."))
+      );
     });
 
     const filterBtn = page.locator('button:has-text("TypeScript")');
@@ -146,15 +184,24 @@ test.describe('Continuous Accessibility (a11y) & WCAG 2.1 AA Audit Suite', () =>
       await page.waitForTimeout(300);
     }
 
-    await auditAndAssert(page, testInfo, 'Interactive State: TypeScript Filter');
+    await auditAndAssert(
+      page,
+      testInfo,
+      "Interactive State: TypeScript Filter"
+    );
   });
 
-  test('Audit: Active Command Palette Search State', async ({ page }, testInfo) => {
-    await page.goto('/');
-    await page.waitForFunction(() => typeof window.__openSearch === 'function', { timeout: 15000 });
+  test("Audit: Active Command Palette Search State", async ({
+    page,
+  }, testInfo) => {
+    await page.goto("/");
+    await page.waitForFunction(
+      () => typeof window.__openSearch === "function",
+      { timeout: 15000 }
+    );
 
     await page.evaluate(() => {
-      if (typeof window.__openSearch === 'function') {
+      if (typeof window.__openSearch === "function") {
         window.__openSearch();
       }
     });
@@ -162,15 +209,21 @@ test.describe('Continuous Accessibility (a11y) & WCAG 2.1 AA Audit Suite', () =>
     const combobox = page.locator('[role="combobox"]');
     await expect(combobox).toBeVisible();
 
-    await combobox.fill('TypeScript');
+    await combobox.fill("TypeScript");
     await page.waitForTimeout(200);
 
-    await auditAndAssert(page, testInfo, 'Interactive State: Active Command Palette');
+    await auditAndAssert(
+      page,
+      testInfo,
+      "Interactive State: Active Command Palette"
+    );
   });
 
-  test('Audit: Command Palette Focus Restoration', async ({ page }, testInfo) => {
-    await page.goto('/this-is-not-found');
-    await page.waitForLoadState('networkidle');
+  test("Audit: Command Palette Focus Restoration", async ({
+    page,
+  }, testInfo) => {
+    await page.goto("/this-is-not-found");
+    await page.waitForLoadState("networkidle");
 
     const searchBtn = page.locator('button:has-text("Search Site")');
     if (await searchBtn.isVisible()) {
@@ -182,196 +235,458 @@ test.describe('Continuous Accessibility (a11y) & WCAG 2.1 AA Audit Suite', () =>
       await expect(combobox).toBeVisible();
       await expect(combobox).toBeFocused();
 
-      await auditAndAssert(page, testInfo, 'Command Palette Focus State');
+      await auditAndAssert(page, testInfo, "Command Palette Focus State");
 
-      await page.keyboard.press('Escape');
+      await page.keyboard.press("Escape");
       await expect(combobox).not.toBeVisible();
 
-      const isFocused = await searchBtn.evaluate(el => document.activeElement === el);
-      expect(isFocused, "Keyboard focus did not return to the calling button when the modal closed").toBe(true);
+      const isFocused = await searchBtn.evaluate(
+        (el) => document.activeElement === el
+      );
+      expect(
+        isFocused,
+        "Keyboard focus did not return to the calling button when the modal closed"
+      ).toBe(true);
     }
   });
 
-  test('Audit: Mobile Navigation Focus Trap', async ({ page }, testInfo) => {
-    const isMobile = page.viewportSize()?.width && page.viewportSize()!.width < 768;
+  test("Audit: Mobile Navigation Focus Trap", async ({ page }, testInfo) => {
+    const isMobile =
+      page.viewportSize()?.width && page.viewportSize()!.width < 768;
     if (!isMobile) {
-      saveResult(testInfo.project.name, 'Mobile Navigation Focus Trap', [], page.url());
+      saveResult(
+        testInfo.project.name,
+        "Mobile Navigation Focus Trap",
+        [],
+        page.url()
+      );
       return;
     }
 
-    await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
 
     const menuTrigger = page.locator('[aria-label="Open navigation menu"]');
     if (await menuTrigger.isVisible()) {
       await menuTrigger.click();
 
-      const menuContainer = page.locator('#mobile-navigation');
+      const menuContainer = page.locator("#mobile-navigation");
       await expect(menuContainer).toBeVisible();
       await page.waitForTimeout(200);
 
       const isFocusedInitiallyInside = await page.evaluate(() => {
-        return !!document.activeElement?.closest('#mobile-navigation');
+        return !!document.activeElement?.closest("#mobile-navigation");
       });
       expect(isFocusedInitiallyInside).toBe(true);
 
-      await auditAndAssert(page, testInfo, 'Mobile Navigation Open State');
+      await auditAndAssert(page, testInfo, "Mobile Navigation Open State");
 
       // Tab trapping test
       let focusEscaped = false;
       for (let i = 0; i < 15; i++) {
-        await page.keyboard.press('Tab');
+        await page.keyboard.press("Tab");
         const inside = await page.evaluate(() => {
-          return !!document.activeElement?.closest('#mobile-navigation');
+          return !!document.activeElement?.closest("#mobile-navigation");
         });
         if (!inside) {
           focusEscaped = true;
           break;
         }
       }
-      expect(focusEscaped, "Focus escaped the open mobile menu during Tab navigation").toBe(false);
+      expect(
+        focusEscaped,
+        "Focus escaped the open mobile menu during Tab navigation"
+      ).toBe(false);
     }
   });
 
-  test('Audit: CRF Studio & CDISC Form Designer', async ({ page }, testInfo) => {
-    await page.goto('/crf');
-    await page.waitForLoadState('networkidle');
-    await page.waitForSelector('text=CRF Studio', { timeout: 15000 });
+  test("Audit: CRF Studio & CDISC Form Designer", async ({
+    page,
+  }, testInfo) => {
+    await page.goto("/crf");
+    await page.waitForLoadState("networkidle");
+    await page.waitForSelector("text=CRF Studio", { timeout: 15000 });
 
-    await auditAndAssert(page, testInfo, 'CRF Studio Default State');
+    await auditAndAssert(page, testInfo, "CRF Studio Default State");
   });
 
-  test('Audit: Logical Proof Workspace', async ({ page }, testInfo) => {
-    await page.goto('/proof');
-    await page.waitForLoadState('networkidle');
+  /**
+   * The global footer ticker animates continuously and never settles, so a scan
+   * can land mid-transform and report a transient contrast failure on any
+   * route. It is not a Patrol Shift surface and is already covered by the
+   * landing-page audit, so it is scoped out of the Patrol Shift sweep rather
+   * than masked with a retry.
+   */
+  const GLOBAL_ANIMATED_REGIONS = ['[data-testid="footer-status-ticker"]'];
+
+  /**
+   * The field manual fades in under framer-motion, which drives opacity through
+   * inline style rather than a CSS animation, so the injected `animation: none`
+   * reset does not stop it. Scanning mid-fade measures a partially transparent
+   * foreground and reports a false contrast failure, so wait for the dialog and
+   * its ancestors to reach full opacity first. Decorative descendants with a
+   * deliberate opacity (the ambient gradient wash) are intentionally not waited
+   * on, since they never settle at 1.
+   */
+  async function waitForDialogFadeIn(page: Page) {
+    await page.waitForFunction(
+      () => {
+        const dialog = document.querySelector('[role="dialog"]');
+        if (!dialog) return false;
+        let node: Element | null = dialog;
+        while (node) {
+          if (Number(window.getComputedStyle(node).opacity) < 1) return false;
+          node = node.parentElement;
+        }
+        return true;
+      },
+      undefined,
+      { timeout: 10000 }
+    );
+
+    // framer-motion drives the entrance through inline style, so the ancestor
+    // walk above can report 1 while descendants are still interpolating. A
+    // short settle — the same approach the Proof Workspace audit uses — makes
+    // the scan deterministic.
+    await page.waitForTimeout(600);
+  }
+
+  test("Audit: Patrol Shift Intro, Briefing, Map Hub & Field Manual", async ({
+    page,
+  }, testInfo) => {
+    await page.goto("/patrol");
+    await page.waitForLoadState("networkidle");
+    await page.waitForSelector('[data-testid="patrol-shift-container"]', {
+      timeout: 15000,
+    });
+
+    // 1. INTRO
+    await page.waitForSelector('[data-testid="patrol-intro-screen"]', {
+      timeout: 15000,
+    });
+    await auditAndAssert(page, testInfo, "Patrol Shift Intro Screen", {
+      exclude: GLOBAL_ANIMATED_REGIONS,
+    });
+
+    // 2. Field manual — reachable at any point, and must trap focus cleanly.
+    await expect(async () => {
+      await page
+        .getByRole("button", { name: /Open Field Manual for Patrol Shift/i })
+        .click();
+      await expect(page.getByRole("dialog")).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 15000 });
+    await waitForDialogFadeIn(page);
+    await auditAndAssert(page, testInfo, "Patrol Shift Field Manual Modal", {
+      exclude: GLOBAL_ANIMATED_REGIONS,
+    });
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).toBeHidden();
+
+    // 3. BRIEFING
+    await expect(async () => {
+      await page.getByRole("button", { name: /Begin Shift Briefing/i }).click();
+      await expect(
+        page.locator('[data-testid="patrol-briefing-screen"]')
+      ).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 15000 });
+    await auditAndAssert(page, testInfo, "Patrol Shift Briefing Screen", {
+      exclude: GLOBAL_ANIMATED_REGIONS,
+    });
+
+    // 4. MOUNTAIN MAP HUB
+    await expect(async () => {
+      await page
+        .getByRole("button", { name: /Depart Base \/ Open Mountain/i })
+        .click();
+      await expect(
+        page.locator('[data-testid="patrol-mountain-map"]')
+      ).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 15000 });
+    await auditAndAssert(page, testInfo, "Patrol Shift Mountain Map Hub", {
+      exclude: GLOBAL_ANIMATED_REGIONS,
+    });
+  });
+
+  test("Audit: Patrol Shift Dispatch, Scene, Transport & Debrief", async ({
+    page,
+  }, testInfo) => {
+    await page.goto("/patrol");
+    await page.waitForLoadState("networkidle");
+    await page.waitForSelector('[data-testid="patrol-shift-container"]', {
+      timeout: 15000,
+    });
+
+    await expect(async () => {
+      await page
+        .getByRole("button", { name: /Skip Intro|Resume Shift/i })
+        .click();
+      await expect(
+        page.locator('[data-testid="patrol-mountain-map"]')
+      ).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 15000 });
+
+    await expect(async () => {
+      await page
+        .getByRole("button", { name: /Standby on Hill \/ Await Dispatch/i })
+        .click();
+      await expect(
+        page.getByRole("button", { name: /Acknowledge & Respond/i })
+      ).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 15000 });
+    await auditAndAssert(page, testInfo, "Patrol Shift Dispatch Overlay", {
+      exclude: GLOBAL_ANIMATED_REGIONS,
+    });
+
+    // SCENE (OEC)
+    await expect(async () => {
+      await page
+        .getByRole("button", { name: /Acknowledge & Respond/i })
+        .click();
+      await expect(
+        page.locator('[data-testid="patrol-scene-interaction"]')
+      ).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 15000 });
+    await auditAndAssert(page, testInfo, "Patrol Shift Scene Interaction", {
+      exclude: GLOBAL_ANIMATED_REGIONS,
+    });
+  });
+
+  test("Audit: Patrol Shift OET step-through accessibility fallback", async ({
+    page,
+  }, testInfo) => {
+    await page.goto("/patrol");
+    await page.waitForLoadState("networkidle");
+    await page.waitForSelector('[data-testid="patrol-shift-container"]', {
+      timeout: 15000,
+    });
+
+    await expect(async () => {
+      await page
+        .getByRole("button", { name: /Skip Intro|Resume Shift/i })
+        .click();
+      await expect(
+        page.locator('[data-testid="patrol-mountain-map"]')
+      ).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 15000 });
+
+    await expect(async () => {
+      await page
+        .getByRole("button", { name: /Standby on Hill \/ Await Dispatch/i })
+        .click();
+      await page
+        .getByRole("button", { name: /Acknowledge & Respond/i })
+        .click();
+      await expect(
+        page.locator('[data-testid="patrol-scene-interaction"]')
+      ).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 20000 });
+
+    await expect(async () => {
+      await page
+        .getByRole("button", { name: /Stabilize & Prepare Toboggan/i })
+        .click();
+      await expect(
+        page.locator('[data-testid="patrol-oet-canvas"]')
+      ).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 15000 });
+
+    // Step-through must be a real, auditable alternative path to the real-time
+    // descent, not a documented intention (Issue #756).
+    await expect(async () => {
+      await page.getByRole("button", { name: /Step-Through Mode/i }).click();
+      await expect(
+        page.locator('[data-testid="oet-a11y-step-controls"]')
+      ).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 15000 });
+
+    await auditAndAssert(page, testInfo, "Patrol Shift OET Step-Through Mode", {
+      exclude: GLOBAL_ANIMATED_REGIONS,
+    });
+  });
+
+  test("Audit: Logical Proof Workspace", async ({ page }, testInfo) => {
+    await page.goto("/proof");
+    await page.waitForLoadState("networkidle");
     await page.waitForTimeout(400);
 
-    await auditAndAssert(page, testInfo, 'Logical Proof Workspace Default State');
+    await auditAndAssert(
+      page,
+      testInfo,
+      "Logical Proof Workspace Default State"
+    );
   });
 
-  test('Audit: Incident Commander Simulator Route & Step Transitions', async ({ page }, testInfo) => {
-    await page.goto('/simulator');
-    await page.waitForLoadState('networkidle');
-    await page.waitForSelector('text=1. Define Your Target Profile', { timeout: 15000 });
+  test("Audit: Incident Commander Simulator Route & Step Transitions", async ({
+    page,
+  }, testInfo) => {
+    await page.goto("/simulator");
+    await page.waitForLoadState("networkidle");
+    await page.waitForSelector("text=1. Define Your Target Profile", {
+      timeout: 15000,
+    });
 
     // 1. Initial / Default Stage 1 Audit
-    await auditAndAssert(page, testInfo, 'Incident Commander Simulator Default State', { disableRules: ['color-contrast'] });
+    await auditAndAssert(
+      page,
+      testInfo,
+      "Incident Commander Simulator Default State",
+      { disableRules: ["color-contrast"] }
+    );
 
     // 2. Interactive Step Transition: Stage 2 (Live Incident Commander Triage)
-    const stage1Option = page.locator('button:has-text("Raw Systems & Performance Maverick")').or(page.locator('button:has-text("Pixel-Perfect")')).first();
+    const stage1Option = page
+      .locator('button:has-text("Raw Systems & Performance Maverick")')
+      .or(page.locator('button:has-text("Pixel-Perfect")'))
+      .first();
     if (await stage1Option.isVisible()) {
       await stage1Option.click();
-      await page.waitForSelector('text=2. Live Incident Commander: Production Latency Spike', { timeout: 10000 });
-      await auditAndAssert(page, testInfo, 'Incident Commander Simulator Step 2 Triage State', { disableRules: ['color-contrast'] });
+      await page.waitForSelector(
+        "text=2. Live Incident Commander: Production Latency Spike",
+        { timeout: 10000 }
+      );
+      await auditAndAssert(
+        page,
+        testInfo,
+        "Incident Commander Simulator Step 2 Triage State",
+        { disableRules: ["color-contrast"] }
+      );
 
       // 3. Interactive Step Transition: Stage 3 (Systems Review)
-      const stage2Option = page.locator('button:has-text("Engage Distributed Circuit Breaker")').or(page.locator('button:has-text("Scale Neon Read-Replicas")')).first();
+      const stage2Option = page
+        .locator('button:has-text("Engage Distributed Circuit Breaker")')
+        .or(page.locator('button:has-text("Scale Neon Read-Replicas")'))
+        .first();
       if (await stage2Option.isVisible()) {
         await stage2Option.click();
-        await page.waitForSelector('text=3. Code Review Speed Challenge', { timeout: 10000 });
-        await auditAndAssert(page, testInfo, 'Incident Commander Simulator Step 3 Review State', { disableRules: ['color-contrast'] });
+        await page.waitForSelector("text=3. Code Review Speed Challenge", {
+          timeout: 10000,
+        });
+        await auditAndAssert(
+          page,
+          testInfo,
+          "Incident Commander Simulator Step 3 Review State",
+          { disableRules: ["color-contrast"] }
+        );
       }
     }
   });
 
-  test('Audit: Neuroimaging Route - Default State (Component-Aware Loading)', async ({ page }, testInfo) => {
-    await page.goto('/neuro');
-    await page.waitForLoadState('networkidle');
+  test("Audit: Neuroimaging Route - Default State (Component-Aware Loading)", async ({
+    page,
+  }, testInfo) => {
+    await page.goto("/neuro");
+    await page.waitForLoadState("networkidle");
 
     // Component-aware synchronization: Wait for dynamic skeleton placeholder to detach before auditing
     const skeleton = page.locator('[data-testid="brain-3d-skeleton"]');
-    await skeleton.waitFor({ state: 'detached', timeout: 30000 });
+    await skeleton.waitFor({ state: "detached", timeout: 30000 });
 
-    await auditAndAssert(page, testInfo, 'Neuroimaging Studio Default State', { disableRules: ['color-contrast', 'button-name', 'label'] });
+    await auditAndAssert(page, testInfo, "Neuroimaging Studio Default State", {
+      disableRules: ["color-contrast", "button-name", "label"],
+    });
   });
 
-  test('Audit: Neuroimaging Route - Interactive Slice Viewing & Sub-states', async ({ page }, testInfo) => {
-    await page.goto('/neuro');
-    await page.waitForLoadState('networkidle');
+  test("Audit: Neuroimaging Route - Interactive Slice Viewing & Sub-states", async ({
+    page,
+  }, testInfo) => {
+    await page.goto("/neuro");
+    await page.waitForLoadState("networkidle");
 
     // Component-aware synchronization: Wait for dynamic skeleton placeholder to detach
     const skeleton = page.locator('[data-testid="brain-3d-skeleton"]');
-    await skeleton.waitFor({ state: 'detached', timeout: 30000 });
+    await skeleton.waitFor({ state: "detached", timeout: 30000 });
 
     // Interact with Multi-Planar Slice Viewer tools or view modes
-    const toolBtn = page.locator('button:has-text("Voxel Paint Brush")').or(page.locator('button:has-text("Control Point")')).first();
+    const toolBtn = page
+      .locator('button:has-text("Voxel Paint Brush")')
+      .or(page.locator('button:has-text("Control Point")'))
+      .first();
     if (await toolBtn.isVisible()) {
       await toolBtn.click();
       await page.waitForTimeout(300);
     }
 
-    await auditAndAssert(page, testInfo, 'Neuroimaging Studio Interactive Slice Viewing State', { disableRules: ['color-contrast', 'button-name', 'label'] });
+    await auditAndAssert(
+      page,
+      testInfo,
+      "Neuroimaging Studio Interactive Slice Viewing State",
+      { disableRules: ["color-contrast", "button-name", "label"] }
+    );
   });
 
-  test('Audit: Consultation & Schedule Page', async ({ page }, testInfo) => {
-    await page.goto('/schedule');
-    await page.waitForLoadState('networkidle');
+  test("Audit: Consultation & Schedule Page", async ({ page }, testInfo) => {
+    await page.goto("/schedule");
+    await page.waitForLoadState("networkidle");
     await page.waitForTimeout(300);
 
-    await auditAndAssert(page, testInfo, 'Schedule Page Default State');
+    await auditAndAssert(page, testInfo, "Schedule Page Default State");
   });
 
-  test('Audit: Case Study Deep-Dive Reader', async ({ page }, testInfo) => {
-    await page.goto('/case-studies/clinical-data-mapper');
-    await page.waitForLoadState('networkidle');
+  test("Audit: Case Study Deep-Dive Reader", async ({ page }, testInfo) => {
+    await page.goto("/case-studies/clinical-data-mapper");
+    await page.waitForLoadState("networkidle");
     await page.waitForTimeout(300);
 
-    await auditAndAssert(page, testInfo, 'Case Study Reader State');
+    await auditAndAssert(page, testInfo, "Case Study Reader State");
   });
 
-  test('Audit: Arcade Hub & Game Suite', async ({ page }, testInfo) => {
-    await page.goto('/arcade');
-    await page.waitForLoadState('networkidle');
+  test("Audit: Arcade Hub & Game Suite", async ({ page }, testInfo) => {
+    await page.goto("/arcade");
+    await page.waitForLoadState("networkidle");
     await page.waitForTimeout(300);
 
-    await auditAndAssert(page, testInfo, 'Arcade Hub Default State');
+    await auditAndAssert(page, testInfo, "Arcade Hub Default State");
   });
 
-  test('Audit: Arcade Game - Clinical Chaos', async ({ page }, testInfo) => {
-    await page.goto('/arcade/clinical-chaos');
-    await page.waitForLoadState('networkidle');
+  test("Audit: Arcade Game - Clinical Chaos", async ({ page }, testInfo) => {
+    await page.goto("/arcade/clinical-chaos");
+    await page.waitForLoadState("networkidle");
     await page.waitForTimeout(400);
 
-    await auditAndAssert(page, testInfo, 'Arcade Game: Clinical Chaos');
+    await auditAndAssert(page, testInfo, "Arcade Game: Clinical Chaos");
   });
 
-  test('Audit: Arcade Game - Garmin Watch Simulator', async ({ page }, testInfo) => {
-    await page.goto('/arcade/garmin-watch');
-    await page.waitForLoadState('networkidle');
+  test("Audit: Arcade Game - Garmin Watch Simulator", async ({
+    page,
+  }, testInfo) => {
+    await page.goto("/arcade/garmin-watch");
+    await page.waitForLoadState("networkidle");
     await page.waitForTimeout(400);
 
-    await auditAndAssert(page, testInfo, 'Arcade Game: Garmin Watch');
+    await auditAndAssert(page, testInfo, "Arcade Game: Garmin Watch");
   });
 
-  test('Audit: Arcade Game - Laser Loon', async ({ page }, testInfo) => {
-    await page.goto('/arcade/laser-loon');
-    await page.waitForLoadState('networkidle');
+  test("Audit: Arcade Game - Laser Loon", async ({ page }, testInfo) => {
+    await page.goto("/arcade/laser-loon");
+    await page.waitForLoadState("networkidle");
     await page.waitForTimeout(400);
 
-    await auditAndAssert(page, testInfo, 'Arcade Game: Laser Loon');
+    await auditAndAssert(page, testInfo, "Arcade Game: Laser Loon");
   });
 
-  test('Audit: Arcade Game - Quasi-Perfect Puzzler', async ({ page }, testInfo) => {
-    await page.goto('/arcade/quasi-puzzler');
-    await page.waitForLoadState('networkidle');
+  test("Audit: Arcade Game - Quasi-Perfect Puzzler", async ({
+    page,
+  }, testInfo) => {
+    await page.goto("/arcade/quasi-puzzler");
+    await page.waitForLoadState("networkidle");
     await page.waitForTimeout(400);
 
-    await auditAndAssert(page, testInfo, 'Arcade Game: Quasi Puzzler');
+    await auditAndAssert(page, testInfo, "Arcade Game: Quasi Puzzler");
   });
 
-  test('Audit: Arcade Game - Retro Labyrinth', async ({ page }, testInfo) => {
-    await page.goto('/arcade/retro-labyrinth');
-    await page.waitForLoadState('networkidle');
+  test("Audit: Arcade Game - Retro Labyrinth", async ({ page }, testInfo) => {
+    await page.goto("/arcade/retro-labyrinth");
+    await page.waitForLoadState("networkidle");
     await page.waitForTimeout(400);
 
-    await auditAndAssert(page, testInfo, 'Arcade Game: Retro Labyrinth');
+    await auditAndAssert(page, testInfo, "Arcade Game: Retro Labyrinth");
   });
 
-  test('Audit: Arcade Game - Working With Duck', async ({ page }, testInfo) => {
-    await page.goto('/arcade/working-with-duck');
-    await page.waitForLoadState('networkidle');
+  test("Audit: Arcade Game - Working With Duck", async ({ page }, testInfo) => {
+    await page.goto("/arcade/working-with-duck");
+    await page.waitForLoadState("networkidle");
     await page.waitForTimeout(400);
 
-    await auditAndAssert(page, testInfo, 'Arcade Game: Working With Duck');
+    await auditAndAssert(page, testInfo, "Arcade Game: Working With Duck");
   });
 });

@@ -71,7 +71,7 @@ export const AmbientEventToast: React.FC<AmbientEventToastProps> = ({
               <IconRadio className="w-3 h-3 text-amber-400 shrink-0" />
               <span>Ambient Hill Ops</span>
             </span>
-            <span className="text-zinc-500 text-[10px] truncate max-w-[180px]">
+            <span className="text-zinc-400 text-[10px] truncate max-w-[180px]">
               {event.sector}
             </span>
           </div>
@@ -100,8 +100,8 @@ export const AmbientEventToast: React.FC<AmbientEventToastProps> = ({
       <div className="py-3 space-y-1.5 text-xs font-sans">
         <p className="text-zinc-100 leading-relaxed">{event.prompt}</p>
         {event.context && (
-          <p className="text-[11px] font-mono text-zinc-500 flex items-center gap-1.5">
-            <IconAlertCircle className="w-3 h-3 text-zinc-500 shrink-0" />
+          <p className="text-[11px] font-mono text-zinc-400 flex items-center gap-1.5">
+            <IconAlertCircle className="w-3 h-3 text-zinc-400 shrink-0" />
             <span>{event.context}</span>
           </p>
         )}

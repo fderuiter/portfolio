@@ -88,71 +88,85 @@ test.describe("Visual Regression & Drift Detection", () => {
     { name: "Desktop 1440px", width: 1440, height: 900 },
   ];
 
+  // Routes carried through the full multi-viewport overflow matrix. Patrol
+  // Shift joins the landing page here per Issue #756 (M10 launch QA).
+  const overflowRoutes = [
+    { name: "Landing", path: "/", ready: "body" },
+    {
+      name: "Patrol Shift",
+      path: "/patrol",
+      ready: '[data-testid="patrol-shift-container"]',
+    },
+  ];
+
   for (const vp of viewports) {
-    test(`Horizontal Overflow Detector across DOM on ${vp.name}`, async ({
-      page,
-    }) => {
-      await page.setViewportSize({ width: vp.width, height: vp.height });
-      await page.goto("/");
-      await page.waitForLoadState("domcontentloaded");
+    for (const route of overflowRoutes) {
+      test(`Horizontal Overflow Detector across DOM on ${vp.name} (${route.name})`, async ({
+        page,
+      }) => {
+        await page.setViewportSize({ width: vp.width, height: vp.height });
+        await page.goto(route.path);
+        await page.waitForLoadState("domcontentloaded");
+        await page.waitForSelector(route.ready, { timeout: 15000 });
 
-      // Detect any uncontained element overflowing the horizontal viewport boundary
-      const overflowingElements = await page.evaluate(() => {
-        const clientWidth = document.documentElement.clientWidth;
-        const badElements: {
-          tag: string;
-          className: string;
-          right: number;
-          clientWidth: number;
-        }[] = [];
+        // Detect any uncontained element overflowing the horizontal viewport boundary
+        const overflowingElements = await page.evaluate(() => {
+          const clientWidth = document.documentElement.clientWidth;
+          const badElements: {
+            tag: string;
+            className: string;
+            right: number;
+            clientWidth: number;
+          }[] = [];
 
-        document.querySelectorAll("*").forEach((el) => {
-          // Skip elements contained inside an explicitly clipped or scrollable horizontal container
-          let parent = el.parentElement;
-          let isContained = false;
-          while (
-            parent &&
-            parent !== document.body &&
-            parent !== document.documentElement
-          ) {
-            const style = window.getComputedStyle(parent);
-            if (
-              style.overflowX === "hidden" ||
-              style.overflowX === "auto" ||
-              style.overflowX === "scroll" ||
-              style.overflowX === "clip" ||
-              style.overflow === "hidden" ||
-              style.overflow === "clip"
+          document.querySelectorAll("*").forEach((el) => {
+            // Skip elements contained inside an explicitly clipped or scrollable horizontal container
+            let parent = el.parentElement;
+            let isContained = false;
+            while (
+              parent &&
+              parent !== document.body &&
+              parent !== document.documentElement
             ) {
-              isContained = true;
-              break;
+              const style = window.getComputedStyle(parent);
+              if (
+                style.overflowX === "hidden" ||
+                style.overflowX === "auto" ||
+                style.overflowX === "scroll" ||
+                style.overflowX === "clip" ||
+                style.overflow === "hidden" ||
+                style.overflow === "clip"
+              ) {
+                isContained = true;
+                break;
+              }
+              parent = parent.parentElement;
             }
-            parent = parent.parentElement;
-          }
-          if (isContained) return;
+            if (isContained) return;
 
-          const rect = el.getBoundingClientRect();
-          // Allow small 1px subpixel tolerance
-          if (rect.right > clientWidth + 1) {
-            badElements.push({
-              tag: el.tagName.toLowerCase(),
-              className:
-                typeof el.className === "string"
-                  ? el.className.slice(0, 50)
-                  : "",
-              right: Math.round(rect.right),
-              clientWidth,
-            });
-          }
+            const rect = el.getBoundingClientRect();
+            // Allow small 1px subpixel tolerance
+            if (rect.right > clientWidth + 1) {
+              badElements.push({
+                tag: el.tagName.toLowerCase(),
+                className:
+                  typeof el.className === "string"
+                    ? el.className.slice(0, 50)
+                    : "",
+                right: Math.round(rect.right),
+                clientWidth,
+              });
+            }
+          });
+
+          return badElements;
         });
 
-        return badElements;
+        expect(
+          overflowingElements,
+          `Horizontal overflow detected on ${route.name} at viewport ${vp.name} (${vp.width}x${vp.height})`
+        ).toEqual([]);
       });
-
-      expect(
-        overflowingElements,
-        `Horizontal overflow detected on viewport ${vp.name} (${vp.width}x${vp.height})`
-      ).toEqual([]);
-    });
+    }
   }
 });

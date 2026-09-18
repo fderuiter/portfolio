@@ -154,7 +154,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({
                 <IconCheck className="w-3 h-3" /> Assessed
               </span>
             ) : (
-              <span className="text-zinc-500 text-[10px]">Unassessed</span>
+              <span className="text-zinc-400 text-[10px]">Unassessed</span>
             )}
           </div>
           {hasComplaint ? (
@@ -162,7 +162,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({
               {revealedPatient?.complaint}
             </p>
           ) : (
-            <p className="text-xs font-sans text-zinc-500 italic">
+            <p className="text-xs font-sans text-zinc-400 italic">
               Pending primary assessment — interview patient and examine
               airway/circulation.
             </p>
@@ -181,7 +181,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({
                 <IconCheck className="w-3 h-3" /> Revealed
               </span>
             ) : (
-              <span className="text-zinc-500 text-[10px]">Pending MOI</span>
+              <span className="text-zinc-400 text-[10px]">Pending MOI</span>
             )}
           </div>
           {hasMechanism ? (
@@ -189,7 +189,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({
               {revealedPatient?.mechanism}
             </p>
           ) : (
-            <p className="text-xs font-sans text-zinc-500 italic">
+            <p className="text-xs font-sans text-zinc-400 italic">
               Pending witness interview or fall analysis.
             </p>
           )}
@@ -233,7 +233,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({
             <span
               data-testid="vitals-hr"
               className={`text-sm font-bold ${
-                hasVitals ? "text-white" : "text-zinc-600"
+                hasVitals ? "text-white" : "text-zinc-400"
               }`}
             >
               {effectiveVitals?.heartRate
@@ -250,7 +250,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({
             <span
               data-testid="vitals-rr"
               className={`text-sm font-bold ${
-                hasVitals ? "text-white" : "text-zinc-600"
+                hasVitals ? "text-white" : "text-zinc-400"
               }`}
             >
               {effectiveVitals?.respiration
@@ -269,7 +269,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({
               className={`text-sm font-bold ${
                 hasVitals && effectiveVitals?.bpSystolic
                   ? "text-white"
-                  : "text-zinc-600"
+                  : "text-zinc-400"
               }`}
             >
               {effectiveVitals?.bpSystolic
@@ -286,7 +286,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({
               className={`text-sm font-bold ${
                 hasVitals && effectiveVitals?.spo2
                   ? "text-white"
-                  : "text-zinc-600"
+                  : "text-zinc-400"
               }`}
             >
               {effectiveVitals?.spo2 ? `${effectiveVitals.spo2}%` : "--"}
@@ -303,7 +303,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({
               className={`text-sm font-bold ${
                 hasVitals && effectiveVitals?.temperature
                   ? "text-white"
-                  : "text-zinc-600"
+                  : "text-zinc-400"
               }`}
             >
               {effectiveVitals?.temperature
@@ -324,7 +324,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({
                 effectiveVitals?.avpu ||
                 revealedPatient?.levelOfConsciousness
                   ? "text-emerald-400"
-                  : "text-zinc-600"
+                  : "text-zinc-400"
               }`}
             >
               {effectiveVitals?.gcs
@@ -359,7 +359,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({
               ))}
             </ul>
           ) : (
-            <p className="text-xs font-sans text-zinc-500 italic">
+            <p className="text-xs font-sans text-zinc-400 italic">
               Physical exam not yet completed. Perform secondary survey to
               palpate extremity.
             </p>
@@ -384,7 +384,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({
               ))}
             </ul>
           ) : (
-            <p className="text-xs font-sans text-zinc-500 italic">
+            <p className="text-xs font-sans text-zinc-400 italic">
               No splints, insulation, or interventions applied yet.
             </p>
           )}

@@ -42,9 +42,11 @@ import {
   type AmbientEvent,
   type ShiftOperationalState,
   type PatrolScenario,
+  getDescentCommitIntervalMs,
 } from "@/lib/patrol";
 import { AmbientEventToast } from "./AmbientEventToast";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { useIsMobileViewport } from "@/hooks/useIsMobileViewport";
 
 /**
  * Props for the MountainMap component.
@@ -267,6 +269,8 @@ export const MountainMap: React.FC<MountainMapProps> = ({
   // -------------------------------------------------------------
   // Skier Simulation Animation Loop
   // -------------------------------------------------------------
+  const isMobileViewport = useIsMobileViewport();
+
   const isSimulationActive = Boolean(
     activeSimulation?.active && !activeSimulation?.isPaused
   );
@@ -276,10 +280,22 @@ export const MountainMap: React.FC<MountainMapProps> = ({
 
     let animFrameId: number;
     let lastTime = performance.now();
+    let lastCommit = lastTime;
+
+    // AGENTS.md section 16: cap React state commits on mobile so the descent
+    // does not drive a 60fps setState loop through the whole map render tree.
+    // The frame loop still runs; only the commit rate is throttled, so the
+    // animation stays smooth-enough while halving reconciliation work.
+    const minCommitMs = getDescentCommitIntervalMs(isMobileViewport);
 
     const step = (now: number) => {
+      animFrameId = requestAnimationFrame(step);
+
+      if (now - lastCommit < minCommitMs) return;
+
       const dt = (now - lastTime) / 1000;
       lastTime = now;
+      lastCommit = now;
 
       setSimulation((prev) => {
         if (!prev || !prev.active || prev.isPaused) return prev;
@@ -290,13 +306,11 @@ export const MountainMap: React.FC<MountainMapProps> = ({
         }
         return { ...prev, progress: nextProgress };
       });
-
-      animFrameId = requestAnimationFrame(step);
     };
 
     animFrameId = requestAnimationFrame(step);
     return () => cancelAnimationFrame(animFrameId);
-  }, [isSimulationActive]);
+  }, [isSimulationActive, isMobileViewport]);
 
   // Current skier position & tangent
   const currentSkierPosition = useMemo(() => {
@@ -705,7 +719,7 @@ export const MountainMap: React.FC<MountainMapProps> = ({
           ref={svgRef}
           viewBox={`0 0 ${baseWidth} ${baseHeight}`}
           className="w-full h-auto max-h-[640px] select-none touch-none cursor-grab active:cursor-grabbing"
-          role="img"
+          role="group"
           aria-label={`Welch Village Trail Map — ${
             activeZone === "main" ? "East & West Slopes" : "The Back Bowl"
           }`}
@@ -1594,7 +1608,7 @@ export const MountainMap: React.FC<MountainMapProps> = ({
         {/* Floating Sector Badge */}
         <div
           data-testid="mountain-sector-badge"
-          className="absolute top-3 left-3 max-w-[calc(100%-24px)] bg-zinc-950/85 backdrop-blur-md border border-zinc-800 rounded-xl px-3 py-1.5 text-xs font-mono text-zinc-300 flex items-center gap-2 shadow-lg truncate"
+          className="absolute top-3 left-3 max-w-[calc(100%-24px)] bg-zinc-950/95 md:bg-zinc-950/85 md:backdrop-blur-md border border-zinc-800 rounded-xl px-3 py-1.5 text-xs font-mono text-zinc-300 flex items-center gap-2 shadow-lg truncate"
         >
           <span
             className={`w-2 h-2 rounded-full shrink-0 ${
@@ -1619,7 +1633,7 @@ export const MountainMap: React.FC<MountainMapProps> = ({
         {hoveredTrail && (
           <div
             data-testid="trail-hover-tooltip"
-            className={`absolute z-20 bg-zinc-950/95 backdrop-blur-md border border-zinc-700/80 rounded-xl px-3.5 py-2 shadow-2xl font-mono text-xs pointer-events-none transition-all duration-150 ${
+            className={`absolute z-20 bg-zinc-950/95 md:backdrop-blur-md border border-zinc-700/80 rounded-xl px-3.5 py-2 shadow-2xl font-mono text-xs pointer-events-none transition-all duration-150 ${
               activeSelectedTrail
                 ? "top-14 right-3 max-w-xs"
                 : "bottom-4 left-4 max-w-sm"
@@ -1665,7 +1679,7 @@ export const MountainMap: React.FC<MountainMapProps> = ({
         )}
 
         {/* Live Altitude Cursor HUD Badge */}
-        <div className="absolute top-3 left-1/2 -translate-x-1/2 bg-zinc-950/85 backdrop-blur-md border border-zinc-800 rounded-xl px-3 py-1 text-[11px] font-mono text-zinc-300 hidden md:flex items-center gap-2 shadow-lg">
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 bg-zinc-950/85 md:backdrop-blur-md border border-zinc-800 rounded-xl px-3 py-1 text-[11px] font-mono text-zinc-300 hidden md:flex items-center gap-2 shadow-lg">
           <IconCompass className="w-3.5 h-3.5 text-brand-cyan" />
           <span>
             Live Terrain:{" "}
@@ -1682,7 +1696,7 @@ export const MountainMap: React.FC<MountainMapProps> = ({
         {/* Simulation Control Overlay (Active Descent) */}
         {activeSimulation?.active && (
           <div
-            className="absolute top-14 left-3 bg-zinc-950/95 backdrop-blur-md border border-brand-cyan/50 rounded-2xl p-3 shadow-2xl font-mono text-xs max-w-xs space-y-2 z-30"
+            className="absolute top-14 left-3 bg-zinc-950/95 md:backdrop-blur-md border border-brand-cyan/50 rounded-2xl p-3 shadow-2xl font-mono text-xs max-w-xs space-y-2 z-30"
             data-testid="simulation-control-overlay"
           >
             <div className="flex items-center justify-between gap-2 border-b border-zinc-800 pb-1.5">
@@ -1752,7 +1766,7 @@ export const MountainMap: React.FC<MountainMapProps> = ({
         <div className="absolute bottom-3 right-3 z-20 flex flex-col items-end gap-1">
           {isMinimapExpanded && (
             <div
-              className="w-40 h-28 bg-zinc-950/95 border border-zinc-800 rounded-xl overflow-hidden shadow-2xl backdrop-blur-md flex flex-col p-1 relative"
+              className="w-40 h-28 bg-zinc-950/95 border border-zinc-800 rounded-xl overflow-hidden shadow-2xl md:backdrop-blur-md flex flex-col p-1 relative"
               data-testid="minimap-radar-widget"
             >
               <div className="flex items-center justify-between text-[9px] font-mono text-zinc-400 px-1 border-b border-zinc-800/80 pb-0.5">
@@ -1841,7 +1855,7 @@ export const MountainMap: React.FC<MountainMapProps> = ({
         {/* ----------------------------------------------------------- */}
         {activeSelectedTrail && (
           <div
-            className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 max-w-sm w-[calc(100%-24px)] sm:w-80 bg-zinc-950/95 border border-zinc-700/80 rounded-2xl p-4 shadow-2xl backdrop-blur-md z-30 font-mono space-y-3"
+            className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 max-w-sm w-[calc(100%-24px)] sm:w-80 bg-zinc-950/95 border border-zinc-700/80 rounded-2xl p-4 shadow-2xl md:backdrop-blur-md z-30 font-mono space-y-3"
             data-testid="trail-inspector-card"
           >
             {/* Inspector Header */}
@@ -1872,13 +1886,13 @@ export const MountainMap: React.FC<MountainMapProps> = ({
             {/* Quick Stats Grid */}
             <div className="grid grid-cols-2 gap-2 text-[11px] text-zinc-300">
               <div>
-                <span className="text-zinc-500 block text-[9px] uppercase">
+                <span className="text-zinc-400 block text-[9px] uppercase">
                   Sector
                 </span>
                 <span className="font-bold">{activeSelectedTrail.sector}</span>
               </div>
               <div>
-                <span className="text-zinc-500 block text-[9px] uppercase">
+                <span className="text-zinc-400 block text-[9px] uppercase">
                   Surface
                 </span>
                 <span className="font-bold">
@@ -1888,7 +1902,7 @@ export const MountainMap: React.FC<MountainMapProps> = ({
                 </span>
               </div>
               <div>
-                <span className="text-zinc-500 block text-[9px] uppercase">
+                <span className="text-zinc-400 block text-[9px] uppercase">
                   Length
                 </span>
                 <span className="font-bold">
@@ -1896,7 +1910,7 @@ export const MountainMap: React.FC<MountainMapProps> = ({
                 </span>
               </div>
               <div>
-                <span className="text-zinc-500 block text-[9px] uppercase">
+                <span className="text-zinc-400 block text-[9px] uppercase">
                   Drop
                 </span>
                 <span className="font-bold">
@@ -2054,7 +2068,7 @@ export const MountainMap: React.FC<MountainMapProps> = ({
         {resolvedConsequence && !activeAmbientEvent && (
           <div
             data-testid="ambient-consequence-card"
-            className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 max-w-sm sm:max-w-md w-full bg-zinc-950/95 border border-emerald-500/50 rounded-2xl p-4 shadow-2xl backdrop-blur-md font-mono space-y-1.5"
+            className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 max-w-sm sm:max-w-md w-full bg-zinc-950/95 border border-emerald-500/50 rounded-2xl p-4 shadow-2xl md:backdrop-blur-md font-mono space-y-1.5"
           >
             <div className="flex items-center justify-between gap-2 border-b border-zinc-800/80 pb-2">
               <span className="text-[10px] uppercase font-bold text-emerald-400 truncate">
@@ -2077,7 +2091,7 @@ export const MountainMap: React.FC<MountainMapProps> = ({
       </div>
 
       {/* Map Attribution & Sector Information */}
-      <p className="text-[10px] font-mono text-zinc-500 -mt-1">
+      <p className="text-[10px] font-mono text-zinc-400 -mt-1">
         Welch Village (Welch, MN) recreation: East Slopes, West Slopes, and The
         Back Bowl. 50+ marked trails, 10 lifts, 9 facilities. Unofficial
         educational simulation. Not affiliated with or endorsed by Welch Village
@@ -2107,13 +2121,13 @@ export const MountainMap: React.FC<MountainMapProps> = ({
             data-testid="routine-hill-check-btn"
             className={`w-full sm:w-auto min-h-[44px] min-w-[44px] px-4 py-2.5 rounded-xl border font-mono text-xs font-bold transition-all inline-flex items-center justify-center gap-2 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan ${
               activeAmbientEvent
-                ? "bg-zinc-900/50 border-zinc-800 text-zinc-500 cursor-not-allowed opacity-60"
+                ? "bg-zinc-900/50 border-zinc-800 text-zinc-400 cursor-not-allowed opacity-60"
                 : "bg-zinc-900 hover:bg-zinc-800 active:scale-[0.98] border-zinc-700 hover:border-brand-cyan/50 text-zinc-200 hover:text-white cursor-pointer"
             }`}
           >
             <IconAntenna
               className={`w-4 h-4 ${
-                activeAmbientEvent ? "text-zinc-500" : "text-brand-cyan"
+                activeAmbientEvent ? "text-zinc-400" : "text-brand-cyan"
               }`}
             />
             <span>Routine Hill Check</span>
@@ -2147,7 +2161,7 @@ export const MountainMap: React.FC<MountainMapProps> = ({
       {isResponsibilityModalOpen && (
         <div
           ref={modalRef}
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/90 md:bg-black/80 md:backdrop-blur-sm flex items-center justify-center p-4"
           role="dialog"
           aria-modal="true"
           aria-labelledby="responsibility-modal-title"

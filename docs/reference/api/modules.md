@@ -16,6 +16,7 @@
 - [hooks/useFontPreference](hooks/useFontPreference/README.md)
 - [hooks/useFullscreen](hooks/useFullscreen/README.md)
 - [hooks/useGarminService](hooks/useGarminService/README.md)
+- [hooks/useIsMobileViewport](hooks/useIsMobileViewport/README.md)
 - [hooks/useKonamiCode](hooks/useKonamiCode/README.md)
 - [hooks/useMasonryLayout](hooks/useMasonryLayout/README.md)
 - [hooks/useOfflineQueue](hooks/useOfflineQueue/README.md)
