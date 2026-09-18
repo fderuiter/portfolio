@@ -126,6 +126,53 @@ export interface PatrolActor {
   statement?: string;
 }
 
+/**
+ * Communication/delegation style exhibited by a dialogue option.
+ *
+ * These are descriptive, not evaluative: no style is inherently the "correct"
+ * choice. Debrief feedback should describe the resulting clarity and
+ * teamwork trade-offs rather than label a style as wrong.
+ */
+export type DialogueStyle =
+  "directive" | "collaborative" | "deferential" | "candid" | "reassuring";
+
+/**
+ * A single selectable line of dialogue within a `DialogueMoment`.
+ */
+export interface DialogueOption {
+  id: string;
+  /** The line the player-patroller speaks or transmits. */
+  text: string;
+  /** Communication/delegation style this option exemplifies. */
+  style: DialogueStyle;
+  /** How unambiguous the instruction or statement is to the listener. */
+  clarity: "high" | "moderate" | "low";
+  /** Whether the option explicitly requests confirmation/read-back (closed-loop communication). */
+  closesLoop?: boolean;
+  /** The other party's in-fiction reply to this choice. */
+  response: string;
+  /** Neutral, descriptive note surfaced in debrief — describes the style and its effect, not a verdict. */
+  debriefNote: string;
+}
+
+/**
+ * A single interpersonal/delegation dialogue beat: a prompt from another
+ * character (patient, bystander, fellow patroller, or dispatch) paired with
+ * several non-binary response options.
+ */
+export interface DialogueMoment {
+  id: string;
+  /** Who initiates this dialogue beat, e.g. "Casey (Second-Year Patroller)". */
+  speaker: string;
+  /** The line or situation prompting a response. */
+  prompt: string;
+  /** Optional stage-direction / scene-setting context. */
+  context?: string;
+  /** ID of the scenario action that must be completed before this moment becomes available. */
+  afterActionId?: string;
+  options: DialogueOption[];
+}
+
 export interface PatrolScenario {
   id: string;
   title: string;
@@ -141,6 +188,8 @@ export interface PatrolScenario {
   actors?: PatrolActor[];
   initialVitals?: VitalsData;
   actions: ScenarioAction[];
+  /** Interpersonal/delegation dialogue beats woven into this scenario (Issue #752). */
+  dialogueMoments?: DialogueMoment[];
   debriefRules: DebriefRule[];
 }
 

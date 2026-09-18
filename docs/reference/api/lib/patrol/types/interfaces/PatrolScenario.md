@@ -38,6 +38,14 @@
 
 ***
 
+### dialogueMoments?
+
+> `optional` **dialogueMoments?**: [`DialogueMoment`](DialogueMoment.md)[]
+
+Interpersonal/delegation dialogue beats woven into this scenario (Issue #752).
+
+***
+
 ### difficulty?
 
 > `optional` **difficulty?**: `"beginner"` \| `"intermediate"` \| `"advanced"`

@@ -38,6 +38,12 @@ Re-exports [checkActionPreconditions](engine/functions/checkActionPreconditions.
 
 ***
 
+### createDialogueChoiceEvent
+
+Re-exports [createDialogueChoiceEvent](dialogue/functions/createDialogueChoiceEvent.md)
+
+***
+
 ### createEvent
 
 Re-exports [createEvent](events/functions/createEvent.md)
@@ -65,12 +71,6 @@ Re-exports [createOETEngineState](oet-engine/functions/createOETEngineState.md)
 ### createPatrolShiftEngine
 
 Re-exports [createPatrolShiftEngine](engine/functions/createPatrolShiftEngine.md)
-
-***
-
-### createSampleDialogue
-
-Re-exports [createSampleDialogue](dialogue/functions/createSampleDialogue.md)
 
 ***
 
@@ -104,9 +104,21 @@ Re-exports [deriveRevealedPatientState](engine/functions/deriveRevealedPatientSt
 
 ***
 
-### DialogueNode
+### DialogueMoment
 
-Re-exports [DialogueNode](dialogue/interfaces/DialogueNode.md)
+Re-exports [DialogueMoment](types/interfaces/DialogueMoment.md)
+
+***
+
+### DialogueOption
+
+Re-exports [DialogueOption](types/interfaces/DialogueOption.md)
+
+***
+
+### DialogueStyle
+
+Re-exports [DialogueStyle](types/type-aliases/DialogueStyle.md)
 
 ***
 
@@ -119,6 +131,12 @@ Re-exports [EnvironmentState](types/interfaces/EnvironmentState.md)
 ### evaluateOETCompliance
 
 Re-exports [evaluateOETCompliance](oet-engine/functions/evaluateOETCompliance.md)
+
+***
+
+### findDialogueOption
+
+Re-exports [findDialogueOption](dialogue/functions/findDialogueOption.md)
 
 ***
 
@@ -137,6 +155,12 @@ Re-exports [getAvailableActions](engine/functions/getAvailableActions.md)
 ### getScenarioById
 
 Re-exports [getScenarioById](presets/functions/getScenarioById.md)
+
+***
+
+### getUnlockedDialogueMoments
+
+Re-exports [getUnlockedDialogueMoments](dialogue/functions/getUnlockedDialogueMoments.md)
 
 ***
 

@@ -3,7 +3,8 @@
  * Measures real-browser rendering latency, navigation timing, and Web Vitals across portfolio routes.
  */
 
-import { chromium, type Browser, type Page } from "@playwright/test";
+import type { Browser, Page } from "@playwright/test";
+import { launchChromiumWithFallback } from "./browser-launch";
 import { colors, formatHeader, formatSection, renderTable } from "./utils";
 import {
   PUBLIC_ROUTE_REGISTRY,
@@ -262,7 +263,7 @@ export async function runPageBenchmarks(
   const summaries: PageBenchmarkSummary[] = [];
 
   try {
-    browser = await chromium.launch({
+    browser = await launchChromiumWithFallback({
       headless: true,
       args: [
         "--no-sandbox",

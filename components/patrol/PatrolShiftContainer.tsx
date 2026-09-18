@@ -258,6 +258,7 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
             revealedActors={shiftState.revealedActors}
             sceneSafetyStatus={shiftState.sceneSafetyStatus}
             patientCondition={shiftState.patientCondition}
+            activeEvents={shiftState.activeEvents}
             onExecuteAction={(action) =>
               activeEngine.dispatch({ type: "RECORD_ACTION", action })
             }
@@ -275,6 +276,9 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
             }}
             onAssessSceneSafety={() => {
               activeEngine.dispatch({ type: "ASSESS_SCENE_SAFETY" });
+            }}
+            onDialogueChoice={(event) => {
+              activeEngine.dispatch({ type: "PUSH_EVENT", event });
             }}
           />
         )}

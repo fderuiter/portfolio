@@ -1,5 +1,5 @@
 import path from "path";
-import { chromium } from "@playwright/test";
+import { launchChromiumWithFallback } from "../lib/dx/browser-launch";
 import { extractAllMermaidBlocks } from "./mermaid-corpus";
 
 export { extractAllMermaidBlocks, type MermaidBlock } from "./mermaid-corpus";
@@ -20,7 +20,7 @@ export async function validateCorpus(
   workspaceRoot: string = process.cwd()
 ): Promise<{ total: number; results: MermaidRenderResult[] }> {
   const blocks = extractAllMermaidBlocks(workspaceRoot);
-  const browser = await chromium.launch();
+  const browser = await launchChromiumWithFallback();
 
   try {
     const page = await browser.newPage();

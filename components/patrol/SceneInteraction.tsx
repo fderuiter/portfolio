@@ -8,7 +8,9 @@ import type {
   EnvironmentState,
   PatrolActor,
   VitalsData,
+  PatrolEvent,
 } from "@/lib/patrol";
+import { getUnlockedDialogueMoments } from "@/lib/patrol";
 import {
   IconMapPin,
   IconClock,
@@ -19,9 +21,11 @@ import {
   IconShieldCheck,
   IconUser,
   IconSparkles,
+  IconMessageCircle2,
 } from "@tabler/icons-react";
 import { PatientCard } from "./PatientCard";
 import { MedicalDisclaimerBanner } from "./MedicalDisclaimerBanner";
+import { DialogueChoice } from "./DialogueChoice";
 
 /**
  * Props for the SceneInteraction component.
@@ -45,6 +49,8 @@ export interface SceneInteractionProps {
   sceneSafetyStatus?: "unassessed" | "safe" | "compromised";
   /** Dynamic physiological condition of the patient. */
   patientCondition?: "stable" | "deteriorating" | "worsened" | "critical";
+  /** Chronological log of shift events, used to look up already-resolved dialogue choices. */
+  activeEvents?: PatrolEvent[];
   /** Callback triggered when a clinical/operational action is executed on scene. */
   onExecuteAction: (action: ScenarioAction) => void;
   /** Callback triggered to finish scene stabilization and transition to toboggan transport. */
@@ -53,6 +59,8 @@ export interface SceneInteractionProps {
   onCheckVitals?: () => void;
   /** Optional callback when scene safety is assessed or re-assessed. */
   onAssessSceneSafety?: () => void;
+  /** Optional callback when a dialogue moment is resolved, receiving the rich PatrolEvent to log. */
+  onDialogueChoice?: (event: PatrolEvent) => void;
 }
 
 /**
@@ -74,10 +82,12 @@ export const SceneInteraction: React.FC<SceneInteractionProps> = ({
   revealedActors = [],
   sceneSafetyStatus = "unassessed",
   patientCondition = "stable",
+  activeEvents = [],
   onExecuteAction,
   onPrepareTransport,
   onCheckVitals,
   onAssessSceneSafety,
+  onDialogueChoice,
 }) => {
   const executedIds = useMemo(
     () => new Set(actionHistory.map((a) => a.id)),
@@ -85,6 +95,25 @@ export const SceneInteraction: React.FC<SceneInteractionProps> = ({
   );
 
   const actions = useMemo(() => scenario?.actions ?? [], [scenario?.actions]);
+
+  const unlockedDialogueMoments = useMemo(
+    () => getUnlockedDialogueMoments(scenario?.dialogueMoments, actionHistory),
+    [scenario?.dialogueMoments, actionHistory]
+  );
+
+  const resolvedDialogueOptionIds = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const evt of activeEvents) {
+      const momentId = evt.context?.momentId;
+      const optionId = evt.context?.optionId;
+      if (typeof momentId === "string" && typeof optionId === "string") {
+        if (!map.has(momentId)) {
+          map.set(momentId, optionId);
+        }
+      }
+    }
+    return map;
+  }, [activeEvents]);
 
   // Map of action id -> label for friendly precondition messages
   const actionLabelMap = useMemo(() => {
@@ -361,6 +390,30 @@ export const SceneInteraction: React.FC<SceneInteractionProps> = ({
           )}
         </div>
       </div>
+
+      {/* Interpersonal Dialogue & Delegation Moments (Issue #752) */}
+      {unlockedDialogueMoments.length > 0 && (
+        <div
+          data-testid="scene-dialogue-moments"
+          className="flex flex-col gap-3 pt-4 border-t border-zinc-800/80"
+        >
+          <div className="flex items-center gap-2 pb-1">
+            <IconMessageCircle2 className="w-4 h-4 text-brand-cyan" />
+            <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-200">
+              Interpersonal Moments
+            </h3>
+          </div>
+          {unlockedDialogueMoments.map((moment) => (
+            <DialogueChoice
+              key={moment.id}
+              scenarioId={scenario?.id ?? "unknown"}
+              moment={moment}
+              resolvedOptionId={resolvedDialogueOptionIds.get(moment.id)}
+              onChoose={(event) => onDialogueChoice?.(event)}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Navigation CTA to Advance to Transport */}
       <div className="flex items-center justify-end pt-4 border-t border-zinc-800/80">
