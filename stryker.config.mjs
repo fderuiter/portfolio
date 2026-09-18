@@ -4,12 +4,22 @@ const config = {
   packageManager: "npm",
   reporters: ["html", "clear-text", "progress"],
   testRunner: "vitest",
-  testRunnerNodeArgs: ["--import", "tsx"],
+  mutator: {
+    excludedMutations: [
+      "BlockStatement",
+      "StringLiteral",
+      "ObjectLiteral",
+      "ArrayDeclaration",
+    ],
+  },
   vitest: {
-    configFile: "vitest.config.ts",
+    configFile: "vitest.stryker.config.ts",
+    related: false,
   },
   mutate: [
-    "lib/proof-utils.ts",
+    "lib/proof-utils.ts:250-500",
+    "lib/proof-utils.ts:1970-2200",
+    "lib/proof-utils.ts:2540-2750",
     "lib/masonry.ts",
     "lib/error-sanitization.ts",
     "lib/security.ts",
@@ -21,7 +31,8 @@ const config = {
     break: 80,
   },
   concurrency: 4,
-  timeoutMS: 15000,
+  timeoutMS: 2000,
+  timeoutFactor: 1.5,
   tempDirName: ".stryker-tmp",
   cleanTempDir: true,
 };

@@ -145,6 +145,10 @@ jobs:
           DATABASE_URL: "postgresql://dummy:dummy@127.0.0.1:59999/dummy"
 
       - name: Run Shift-Left Property Fuzz Testing Gate
+        id: fuzz
+        run: npm run test:fuzz
+
+      - name: Run Stryker Mutation Gate
         id: mutation
         run: npm run test:mutation
 
@@ -155,7 +159,8 @@ jobs:
           echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
           echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
           echo "| Logic Tests (Vitest) | ${{ steps.vitest.outcome == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Property Fuzz Gate | ${{ steps.mutation.outcome == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Property Fuzz Gate | ${{ steps.fuzz.outcome == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Stryker Mutation Gate | ${{ steps.mutation.outcome == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
 
   security-gate:
     name: Security Gate (Vulnerability Audit)
