@@ -18,9 +18,10 @@ interface MountainMapProps {
 /**
  * Responsive, lightweight SVG trail map representing the Mountain Patrol Hub,
  * stylized after Welch Village (Welch, MN) — a real Twin Cities-area hill.
- * Trail names, lift names, and elevation stats are drawn from Welch Village's
- * public trail statistics; the artwork itself is an original illustration,
- * not a reproduction of the resort's own trail map graphic.
+ * Trail names, lift names, and elevation stats are cross-checked against
+ * Welch Village's own current published trail map; the artwork itself is an
+ * original illustration, not a reproduction of the resort's own trail map
+ * graphic.
  * Features animated chairlift line, marked trails (green circle, blue square, black diamond),
  * ambient snow particles, strict prefers-reduced-motion CSS, and operational dispatch actions.
  */
@@ -97,13 +98,13 @@ export const MountainMap: React.FC<MountainMapProps> = ({
       <div className="sr-only">
         Detailed trail map of Welch Village, a Twin Cities-area ski hill, with
         active patrol sectors. Features Summit Patrol Shack at the top (1,060
-        feet elevation), the Belle Creek Quad lift line with towers 1 through 6,
-        The Great Gorge (Black Diamond), Harley&apos;s Hollow (Blue Square),
-        Heidi&apos;s Hollow (Green Circle) served by the beginner-only Hall
-        lift, and Base First Aid Room at the bottom (700 feet elevation). This
-        is a stylized, original illustration inspired by Welch Village&apos;s
-        public trail statistics, not an official resort map. Total completed
-        count: {incidentsCompleted}.
+        feet elevation), the Belle Creek Quad lift line with towers 1 through 6
+        serving The Back Bowl, The Great Gorge (Black Diamond), Harley&apos;s
+        Hollow (Blue Square), Long Way Home (Green Circle), the Skilink base
+        connector, and Base First Aid Room at the bottom (700 feet elevation).
+        This is a stylized, original illustration cross-checked against Welch
+        Village&apos;s own published trail map, not an official resort map.
+        Total completed count: {incidentsCompleted}.
       </div>
 
       {/* SVG Trail Map Canvas */}
@@ -116,12 +117,12 @@ export const MountainMap: React.FC<MountainMapProps> = ({
         >
           <title>Welch Village Trail Map</title>
           <desc>
-            Stylized, original illustration inspired by Welch Village (Welch,
-            MN) showing Summit Shack, the Belle Creek Quad chairlift with Towers
-            1 through 6, The Great Gorge black diamond trail, Harley&apos;s
-            Hollow blue square trail, Heidi&apos;s Hollow green circle trail
-            served by the beginner-only Hall lift, and Base Lodge First Aid
-            Room. Not an official Welch Village resort map.
+            Stylized, original illustration of Welch Village (Welch, MN) showing
+            Summit Shack, the Belle Creek Quad chairlift (Towers 1 through 6)
+            serving The Back Bowl, The Great Gorge black diamond trail,
+            Harley&apos;s Hollow blue square trail, Long Way Home green circle
+            trail, the Skilink base connector, and Base Lodge First Aid Room.
+            Not an official Welch Village resort map.
           </desc>
 
           <defs>
@@ -208,7 +209,7 @@ export const MountainMap: React.FC<MountainMapProps> = ({
 
           {/* TRAILS */}
 
-          {/* Trail 1: Heidi's Hollow (Green Circle) */}
+          {/* Trail 1: Long Way Home (Green Circle) */}
           <path
             d="M 370 85 C 260 120 140 200 130 310 C 120 400 240 450 320 460"
             fill="none"
@@ -431,11 +432,11 @@ export const MountainMap: React.FC<MountainMapProps> = ({
               fontWeight="bold"
               fontFamily="monospace"
             >
-              Heidi&apos;s Hollow ●
+              Long Way Home ●
             </text>
           </g>
 
-          {/* Hall Lift Marker — beginner-only double chair serving the green terrain */}
+          {/* Skilink Marker — base-area connector lift near the lodge */}
           <g transform="translate(155, 340)" opacity="0.9">
             <rect x="-5" y="-5" width="10" height="10" rx="2" fill="#facc15" />
             <text
@@ -445,7 +446,7 @@ export const MountainMap: React.FC<MountainMapProps> = ({
               fontSize="8"
               fontFamily="monospace"
             >
-              Hall Lift (Beginner)
+              Skilink (Base Connector)
             </text>
           </g>
 
@@ -529,18 +530,18 @@ export const MountainMap: React.FC<MountainMapProps> = ({
         <div className="absolute top-4 left-4 bg-zinc-950/80 backdrop-blur-sm border border-zinc-800 rounded-xl px-3 py-1.5 text-[11px] font-mono text-zinc-300 flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span>
-            Hill Sector: <strong>East Slopes &bull; Belle Creek Quad</strong>
+            Hill Sector: <strong>The Back Bowl &bull; Belle Creek Quad</strong>
           </span>
         </div>
       </div>
 
       {/* Map Attribution */}
       <p className="text-[10px] font-mono text-zinc-600 -mt-2">
-        Stylized, unofficial illustration inspired by Welch Village&apos;s
-        public trail statistics (trails: Heidi&apos;s Hollow, Harley&apos;s
-        Hollow, The Great Gorge &bull; lifts: Belle Creek Quad, Hall, East
-        Ridge, Skilink). Not affiliated with or endorsed by Welch Village Ski
-        Area.
+        Stylized, unofficial illustration cross-checked against Welch
+        Village&apos;s own published trail map (trails: Long Way Home,
+        Harley&apos;s Hollow, The Great Gorge &bull; lifts: Belle Creek Quad,
+        Skilink, East Quad, West Quad). Not affiliated with or endorsed by Welch
+        Village Ski Area.
       </p>
 
       {/* Action Controls Bar */}
