@@ -24,11 +24,27 @@ Decay time in seconds (linear ramp down to sustain level)
 
 ***
 
+### delay?
+
+> `optional` **delay?**: `number`
+
+Delay in seconds before playing this note (relative to sound start)
+
+***
+
 ### duration?
 
 > `optional` **duration?**: `number`
 
 Duration in seconds (e.g. 0.1 for 100ms)
+
+***
+
+### endFrequency?
+
+> `optional` **endFrequency?**: `number`
+
+Target frequency in Hz at note end for pitch sweeps/ramps
 
 ***
 
@@ -45,6 +61,14 @@ Frequency in Hz (e.g. 440 for A4)
 > `optional` **pan?**: `number`
 
 Stereo pan position (-1.0 to 1.0, where -1 is full left, 1 is full right)
+
+***
+
+### rampType?
+
+> `optional` **rampType?**: `"exponential"` \| `"linear"`
+
+Ramp curve type for endFrequency (default: 'exponential')
 
 ***
 

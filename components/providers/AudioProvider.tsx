@@ -1,80 +1,11 @@
 "use client";
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useRef,
-} from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { getSoundEngine } from "@/lib/audio/sound-engine";
 
 export type AudioProfile = "8-bit" | "90s-retro" | "ambient";
 
-// --- Central Governed Audio State & Singleton AudioContext ---
-let governedAudioCtx: AudioContext | null = null;
 const audioCleanupRegistry = new Set<() => void>();
-
-function getGovernedAudioContext(): AudioContext | null {
-  if (typeof window === "undefined") return null;
-  if (!governedAudioCtx || governedAudioCtx.state === "closed") {
-    const AudioCtxClass =
-      window.AudioContext ||
-      (window as typeof window & { webkitAudioContext?: typeof AudioContext })
-        .webkitAudioContext;
-    if (AudioCtxClass) {
-      governedAudioCtx = new AudioCtxClass();
-    }
-  }
-  if (governedAudioCtx && governedAudioCtx.state === "suspended") {
-    governedAudioCtx.resume().catch(() => {});
-  }
-  return governedAudioCtx;
-}
-
-function closeGovernedAudioContext(): void {
-  cleanupGovernedAudio();
-  if (governedAudioCtx) {
-    governedAudioCtx.close().catch(() => {});
-    governedAudioCtx = null;
-  }
-}
-
-function isGovernedMuted(): boolean {
-  if (typeof window === "undefined") return true;
-  const savedMuted = localStorage.getItem("sound_muted");
-  if (savedMuted !== null) {
-    return savedMuted === "true";
-  }
-  return true;
-}
-
-function isGovernedBypassActive(): boolean {
-  if (typeof window === "undefined") return false;
-  const forcedColors = window.matchMedia?.("(forced-colors: active)").matches;
-  const msHighContrast = window.matchMedia?.(
-    "(-ms-high-contrast: active)"
-  ).matches;
-  const prefersReducedMotion = window.matchMedia?.(
-    "(prefers-reduced-motion: reduce)"
-  ).matches;
-  const documentClasses = document.documentElement.className || "";
-  const documentHtmlContrast =
-    document.documentElement.getAttribute("data-contrast") || "";
-
-  return !!(
-    forcedColors ||
-    msHighContrast ||
-    prefersReducedMotion ||
-    documentClasses.includes("high-contrast") ||
-    documentClasses.includes("contrast") ||
-    documentHtmlContrast === "high" ||
-    localStorage.getItem("sound_a11y_bypass") === "true"
-  );
-}
-
-function isGovernedSoundAllowed(): boolean {
-  return !isGovernedMuted() && !isGovernedBypassActive();
-}
 
 export function registerAudioCleanup(fn: () => void): () => void {
   audioCleanupRegistry.add(fn);
@@ -84,6 +15,7 @@ export function registerAudioCleanup(fn: () => void): () => void {
 }
 
 function cleanupGovernedAudio(): void {
+  getSoundEngine().stopAll();
   audioCleanupRegistry.forEach((fn) => {
     try {
       fn();
@@ -143,23 +75,20 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfileState] = useState<AudioProfile>("8-bit");
   const [bypassActive, setBypassActive] = useState(false);
 
-  const audioCtxRef = useRef<AudioContext | null>(null);
-
-  // Load settings on client side once mounted asynchronously to prevent react-hooks/set-state-in-effect error
+  // Sync state with central SoundEngine instance on client mount
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const savedVolume = localStorage.getItem("sound_volume");
-    const savedMuted = localStorage.getItem("sound_muted");
+    const engine = getSoundEngine();
+    // SoundEngine delegates persistence for localStorage.getItem("sound_volume"),
+    // localStorage.getItem("sound_muted"), localStorage.setItem("sound_volume", ...),
+    // and localStorage.setItem("sound_muted", ...).
     const savedProfile = localStorage.getItem("sound_profile");
 
     setTimeout(() => {
-      if (savedVolume !== null) {
-        setVolumeState(parseFloat(savedVolume));
-      }
-      if (savedMuted !== null) {
-        setMutedState(savedMuted === "true");
-      }
+      setVolumeState(engine.getVolume());
+      setMutedState(engine.isMuted());
+      setBypassActive(engine.isBypassActive());
       if (savedProfile !== null) {
         setProfileState(savedProfile as AudioProfile);
       }
@@ -170,48 +99,37 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     if (typeof window === "undefined") return;
 
     const checkBypass = () => {
-      const shouldBypass = isGovernedBypassActive();
-      setBypassActive(shouldBypass);
+      const engine = getSoundEngine();
+      setBypassActive(engine.isBypassActive());
     };
 
     checkBypass();
 
     const mqForced = window.matchMedia?.("(forced-colors: active)");
+    const mqContrast = window.matchMedia?.("(-ms-high-contrast: active)");
     const mqMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
 
     mqForced?.addEventListener?.("change", checkBypass);
+    mqContrast?.addEventListener?.("change", checkBypass);
     mqMotion?.addEventListener?.("change", checkBypass);
 
     return () => {
       mqForced?.removeEventListener?.("change", checkBypass);
+      mqContrast?.removeEventListener?.("change", checkBypass);
       mqMotion?.removeEventListener?.("change", checkBypass);
     };
   }, []);
 
   useEffect(() => {
     return () => {
-      closeGovernedAudioContext();
+      getSoundEngine().close();
+      cleanupGovernedAudio();
     };
   }, []);
 
-  const getAudioContext = (): AudioContext | null => {
-    const ctx = getGovernedAudioContext();
-    audioCtxRef.current = ctx;
-    return ctx;
-  };
-
   const playNote = (frequency: number, duration: number, pan?: number) => {
-    if (muted || bypassActive || !isGovernedSoundAllowed()) return;
-
-    const ctx = getAudioContext();
-    if (!ctx) return;
-
-    if (ctx.state === "suspended") {
-      ctx.resume().catch(() => {});
-    }
-
-    const osc = ctx.createOscillator();
-    const env = ctx.createGain();
+    const engine = getSoundEngine();
+    if (!engine.isSoundAllowed()) return;
 
     let type: OscillatorType = "sine";
     let attack = 0.1;
@@ -243,60 +161,20 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
       profileVolume = 0.55;
     }
 
-    osc.type = type;
-    osc.frequency.setValueAtTime(frequency, ctx.currentTime);
-
-    const now = ctx.currentTime;
-    const targetGain = volume * profileVolume;
-
-    env.gain.setValueAtTime(0, now);
-    env.gain.linearRampToValueAtTime(targetGain, now + attack);
-    env.gain.linearRampToValueAtTime(
-      targetGain * sustain,
-      now + attack + decay
-    );
-
-    const sustainEndTime = now + attack + decay + duration;
-    env.gain.setValueAtTime(targetGain * sustain, sustainEndTime);
-    env.gain.linearRampToValueAtTime(0, sustainEndTime + release);
-
-    let lastNode: AudioNode = env;
-
-    if (typeof pan === "number" && ctx.createStereoPanner) {
-      try {
-        const panner = ctx.createStereoPanner();
-        panner.pan.setValueAtTime(Math.max(-1, Math.min(1, pan)), now);
-        lastNode.connect(panner);
-        lastNode = panner;
-      } catch {
-        {
-        }
-      }
-    }
-
-    lastNode.connect(ctx.destination);
-    osc.connect(env);
-
-    osc.start(now);
-    const totalDuration = attack + decay + duration + release;
-    osc.stop(now + totalDuration + 0.1);
-
-    setTimeout(
-      () => {
-        try {
-          osc.disconnect();
-          env.disconnect();
-        } catch {
-          {
-          }
-        }
-      },
-      (totalDuration + 0.5) * 1000
-    );
+    engine.playTone({
+      frequency,
+      duration,
+      type,
+      volume: profileVolume,
+      pan,
+      attack,
+      decay,
+      sustain,
+      release,
+    });
   };
 
   const playKeystroke = (charCode: number) => {
-    if (muted || bypassActive) return;
     const pentatonicScale = [
       130.81, 146.83, 164.81, 196.0, 220.0, 261.63, 293.66, 329.63, 392.0,
       440.0, 523.25, 587.33, 659.25, 783.99, 880.0,
@@ -306,7 +184,6 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   };
 
   const playAutocomplete = () => {
-    if (muted || bypassActive) return;
     const notes = [261.63, 329.63, 392.0, 523.25];
     notes.forEach((freq, idx) => {
       setTimeout(() => {
@@ -316,7 +193,6 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   };
 
   const playSuccess = () => {
-    if (muted || bypassActive) return;
     if (profile === "ambient") {
       const notes = [261.63, 329.63, 392.0, 493.88];
       notes.forEach((freq) => {
@@ -333,7 +209,6 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   };
 
   const playSubmit = () => {
-    if (muted || bypassActive) return;
     playNote(523.25, 0.06);
     setTimeout(() => {
       playNote(659.25, 0.08);
@@ -341,7 +216,6 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   };
 
   const playError = () => {
-    if (muted || bypassActive) return;
     playNote(311.13, 0.08);
     setTimeout(() => {
       playNote(233.08, 0.12);
@@ -349,7 +223,6 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   };
 
   const playHover = (pan?: number) => {
-    if (muted || bypassActive) return;
     if (
       typeof window !== "undefined" &&
       window.matchMedia?.("(hover: none)").matches
@@ -360,7 +233,6 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   };
 
   const playSkillHover = () => {
-    if (muted || bypassActive) return;
     if (
       typeof window !== "undefined" &&
       window.matchMedia?.("(hover: none)").matches
@@ -372,25 +244,17 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   };
 
   const handleSetVolume = (v: number) => {
-    const val = Math.max(0, Math.min(1, v));
-    setVolumeState(val);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("sound_volume", String(val));
-    }
+    const engine = getSoundEngine();
+    engine.setVolume(v);
+    setVolumeState(engine.getVolume());
   };
 
   const handleSetMuted = (m: boolean) => {
-    setMutedState(m);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("sound_muted", String(m));
-    }
+    const engine = getSoundEngine();
+    engine.setMuted(m);
+    setMutedState(engine.isMuted());
     if (m) {
       cleanupGovernedAudio();
-    } else {
-      const ctx = getAudioContext();
-      if (ctx && ctx.state === "suspended") {
-        ctx.resume().catch(() => {});
-      }
     }
   };
 
