@@ -8,4 +8,4 @@
 
 > `const` **PATROL\_SCENARIOS**: [`PatrolScenario`](../../types/interfaces/PatrolScenario.md)[] = `INITIAL_PATROL_SCENARIOS`
 
-Public catalog re-export for Patrol Shift scenario presets.
+Public catalog re-export for Patrol Shift initial scenario presets.

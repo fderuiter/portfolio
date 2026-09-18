@@ -1,74 +1,130 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useEffect, useRef, useSyncExternalStore } from "react";
 import {
   PATROL_SCENARIOS,
-  createInitialShiftState,
-  transitionShiftPhase,
-  recordAction,
+  ALL_PATROL_SCENARIOS,
+  createPatrolShiftEngine,
   generateDebriefReport,
-  type ShiftState,
-  type PatrolScenario,
-  type ScenarioAction,
+  type PatrolShiftEngine,
 } from "@/lib/patrol";
+import { useAnnouncer } from "@/hooks/useAnnouncer";
 import {
   IconShieldCheck,
   IconClock,
-  IconChecklist,
-  IconChevronRight,
   IconRefresh,
-  IconAlertTriangle,
-  IconMapPin,
-  IconCheck,
   IconRoute,
+  IconCheck,
 } from "@tabler/icons-react";
+import { IntroScreen } from "./IntroScreen";
+import { BriefingScreen } from "./BriefingScreen";
+import { MountainMap } from "./MountainMap";
+import { DispatchOverlay } from "./DispatchOverlay";
+import { SceneInteraction } from "./SceneInteraction";
+import { OetCanvas } from "./OetCanvas";
+import { HandoffPanel } from "./HandoffPanel";
+import { DebriefPlaceholder } from "./DebriefPlaceholder";
+import { ShiftSummary } from "./ShiftSummary";
+import { MedicalDisclaimerBanner } from "./MedicalDisclaimerBanner";
 
+/**
+ * Props for the PatrolShiftContainer component.
+ */
 interface PatrolShiftContainerProps {
+  /** Optional scenario ID to load upon mounting. */
   initialScenarioId?: string;
+  /** Optional custom engine instance for integration testing or dependency injection. */
+  engine?: PatrolShiftEngine;
 }
 
+/**
+ * Top-level container component for the Patrol Shift simulation studio.
+ * Manages headless engine lifecycle, React 19 hydration-safe subscriptions via
+ * `useSyncExternalStore`, and deterministic view routing across all shift phases.
+ */
 export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
   initialScenarioId,
+  engine: customEngine,
 }) => {
-  const [selectedScenario, setSelectedScenario] = useState<PatrolScenario>(
-    () => {
-      const found = PATROL_SCENARIOS.find((s) => s.id === initialScenarioId);
-      return found ?? PATROL_SCENARIOS[0];
+  const defaultEngine = useMemo(
+    () => createPatrolShiftEngine(ALL_PATROL_SCENARIOS),
+    []
+  );
+  const activeEngine = customEngine ?? defaultEngine;
+
+  const shiftState = useSyncExternalStore(
+    activeEngine.subscribe,
+    activeEngine.getState,
+    activeEngine.getState
+  );
+
+  const { announce } = useAnnouncer();
+  const prevPhaseRef = useRef<string>(shiftState.phase);
+
+  useEffect(() => {
+    if (prevPhaseRef.current !== shiftState.phase) {
+      prevPhaseRef.current = shiftState.phase;
+      announce(
+        `Patrol shift phase changed to ${shiftState.phase.replace(/_/g, " ")}`
+      );
     }
-  );
+  }, [shiftState.phase, announce]);
 
-  const [shiftState, setShiftState] = useState<ShiftState>(() =>
-    createInitialShiftState(selectedScenario?.id ?? null)
-  );
+  const availableScenarios = useMemo(() => {
+    const fromEngine = activeEngine.getScenarios?.();
+    return fromEngine && fromEngine.length > 0
+      ? fromEngine
+      : ALL_PATROL_SCENARIOS;
+  }, [activeEngine]);
 
-  const handleSelectScenario = (scenario: PatrolScenario) => {
-    setSelectedScenario(scenario);
-    setShiftState(createInitialShiftState(scenario.id));
-  };
-
-  const handleStartShift = () => {
-    setShiftState((prev) => transitionShiftPhase(prev, "patrol"));
-  };
-
-  const handleExecuteAction = (action: ScenarioAction) => {
-    setShiftState((prev) => {
-      const updated = recordAction(prev, action);
-      if (prev.phase === "patrol" || prev.phase === "briefing") {
-        return transitionShiftPhase(updated, "incident");
+  useEffect(() => {
+    if (initialScenarioId) {
+      const target =
+        availableScenarios.find((s) => s.id === initialScenarioId) ??
+        ALL_PATROL_SCENARIOS.find((s) => s.id === initialScenarioId);
+      if (target) {
+        activeEngine.loadScenario(target);
       }
-      return updated;
-    });
-  };
+    }
+  }, [initialScenarioId, activeEngine, availableScenarios]);
 
-  const handleFinishIncident = () => {
-    setShiftState((prev) => transitionShiftPhase(prev, "debrief"));
-  };
+  const currentScenario = useMemo(() => {
+    if (shiftState.currentScenarioId) {
+      const match = availableScenarios.find(
+        (s) => s.id === shiftState.currentScenarioId
+      );
+      if (match) return match;
+    }
+    const loaded = activeEngine.getLoadedScenario();
+    if (
+      loaded &&
+      (!shiftState.currentScenarioId ||
+        loaded.id === shiftState.currentScenarioId)
+    ) {
+      return loaded;
+    }
+    return (
+      availableScenarios[
+        shiftState.incidentsCompleted % availableScenarios.length
+      ] ??
+      availableScenarios[0] ??
+      PATROL_SCENARIOS[0]
+    );
+  }, [
+    availableScenarios,
+    activeEngine,
+    shiftState.currentScenarioId,
+    shiftState.incidentsCompleted,
+  ]);
 
-  const handleResetShift = () => {
-    setShiftState(createInitialShiftState(selectedScenario.id));
-  };
+  const debriefReport = useMemo(
+    () => generateDebriefReport(currentScenario, shiftState),
+    [currentScenario, shiftState]
+  );
 
-  const debriefReport = generateDebriefReport(selectedScenario, shiftState);
+  const handleReset = () => {
+    activeEngine.dispatch({ type: "RESET" });
+  };
 
   return (
     <div
@@ -78,307 +134,229 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
       {/* Studio Header Bar */}
       <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-zinc-800/80">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-brand-cyan/10 border border-brand-cyan/30 text-brand-cyan">
+          <div className="p-2.5 rounded-xl bg-brand-cyan/10 border border-brand-cyan/30 text-brand-cyan">
             <IconShieldCheck className="w-6 h-6" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-lg font-mono font-bold text-white tracking-tight">
                 Patrol Shift Studio
               </h1>
               <span className="px-2 py-0.5 rounded-full bg-brand-cyan/10 border border-brand-cyan/30 text-brand-cyan text-[10px] font-mono font-bold uppercase tracking-wider">
-                M1 Foundation Scaffold
+                M1 Foundation Scaffold &bull; M3 Map Hub &bull; M4 OET Mini-Game
+                &bull; M5 OEC Interaction
               </span>
             </div>
             <p className="text-xs font-mono text-zinc-400">
-              Midwest Ski Patrol Judgment Simulation — Foundation Milestone
-              (Issue #747)
+              Midwest Ski Patrol Judgment Simulation — Vertical Slice (Issue
+              #749)
             </p>
           </div>
         </div>
 
         {/* Status Pills */}
-        <div className="flex items-center gap-3 text-xs font-mono">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300">
-            <IconClock className="w-3.5 h-3.5 text-brand-cyan" />
-            <span>Shift Time: {shiftState.timeElapsedMinutes} min</span>
+        <div className="flex items-center gap-2.5 text-xs font-mono">
+          <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300">
+            <IconClock className="w-4 h-4 text-brand-cyan" />
+            <span>Shift: {shiftState.timeElapsedMinutes} min</span>
           </div>
+
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400">
+            <span>
+              Phase:{" "}
+              <strong className="text-brand-cyan uppercase">
+                {shiftState.phase}
+              </strong>
+            </span>
+          </div>
+
           <button
             type="button"
-            onClick={handleResetShift}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+            onClick={handleReset}
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 active:scale-[0.98] border border-zinc-800 hover:border-zinc-700 text-zinc-400 hover:text-white transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan"
           >
-            <IconRefresh className="w-3.5 h-3.5" />
+            <IconRefresh className="w-4 h-4" />
             <span>Reset</span>
           </button>
         </div>
       </div>
 
-      {/* Prominent Medical & Clinical Disclaimer */}
-      <div
-        role="note"
-        aria-label="Medical & Clinical Disclaimer"
-        className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono space-y-1.5"
-      >
-        <div className="flex items-center gap-2 font-bold uppercase tracking-wider text-amber-400">
-          <IconAlertTriangle className="w-4 h-4 shrink-0" />
-          <span>Simulation Notice &amp; Medical Disclaimer</span>
-        </div>
-        <p className="text-[11px] leading-relaxed text-amber-200/90 font-sans">
-          Patrol Shift is an architectural simulation prototype under active
-          development (Issues #744 / #747). It models operational dispatch and
-          deterministic state machines for educational purposes. It does{" "}
-          <strong>not</strong> provide certified clinical guidance, Outdoor
-          Emergency Care (OEC) treatment protocols, or real-world emergency
-          decision support. Real emergencies require certified emergency
-          responders.
-        </p>
+      {/* Dynamic Screen Reader Live Region */}
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        Current shift phase: {shiftState.phase.replace(/_/g, " ")}. Time
+        elapsed: {shiftState.timeElapsedMinutes} minutes. Incidents completed:{" "}
+        {shiftState.incidentsCompleted}. Score: {shiftState.score} percent.
       </div>
 
-      {/* Main Grid: Scenario Selector & Workspace */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Scenario Selection Panel (Left) */}
-        <div className="lg:col-span-4 flex flex-col gap-4">
-          <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
-            <IconChecklist className="w-4 h-4 text-brand-cyan" />
-            Operational Routines
-          </h2>
+      {/* Prominent Medical & Clinical Disclaimer */}
+      {shiftState.phase !== "SCENE" &&
+        shiftState.phase !== "HANDOFF" &&
+        shiftState.phase !== "incident" &&
+        shiftState.phase !== "RESPONDING" && <MedicalDisclaimerBanner />}
 
-          <div className="flex flex-col gap-3">
-            {PATROL_SCENARIOS.map((scenario) => {
-              const isSelected = scenario.id === selectedScenario.id;
-              return (
-                <button
-                  key={scenario.id}
-                  type="button"
-                  onClick={() => handleSelectScenario(scenario)}
-                  className={`text-left p-4 rounded-2xl border transition-all cursor-pointer flex flex-col gap-2 ${
-                    isSelected
-                      ? "bg-brand-cyan/10 border-brand-cyan/40 text-white shadow-lg"
-                      : "bg-zinc-900/40 border-zinc-800/80 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-mono font-bold text-zinc-200">
-                      {scenario.title}
-                    </span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border bg-zinc-800/60 border-zinc-700 text-zinc-400">
-                      {scenario.difficulty}
-                    </span>
-                  </div>
-                  <p className="text-xs font-sans text-zinc-400 line-clamp-2">
-                    {scenario.subtitle}
-                  </p>
-                  <div className="flex items-center gap-3 text-[10px] font-mono text-zinc-500 pt-1">
-                    <span>Est: {scenario.estimatedMinutes}m</span>
-                    <span>•</span>
-                    <span className="flex items-center gap-1">
-                      <IconMapPin className="w-3 h-3" />
-                      {scenario.location}
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+      {/* Dynamic Phase Router */}
+      <div className="w-full">
+        {shiftState.phase === "INTRO" && (
+          <IntroScreen
+            onStartShift={() => activeEngine.dispatch({ type: "START_SHIFT" })}
+            onSkipIntro={() => {
+              activeEngine.dispatch({ type: "START_SHIFT" });
+              activeEngine.dispatch({ type: "COMPLETE_BRIEFING" });
+            }}
+          />
+        )}
 
-          {/* Milestone Roadmap Box */}
-          <div className="p-4 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 space-y-2">
-            <div className="flex items-center gap-2 text-xs font-mono font-bold text-zinc-300">
-              <IconRoute className="w-4 h-4 text-brand-cyan" />
-              <span>Milestone Roadmap (Epic #744)</span>
-            </div>
-            <ul className="text-[11px] font-mono text-zinc-400 space-y-1">
-              <li className="text-brand-cyan flex items-center gap-1.5">
-                <IconCheck className="w-3 h-3" /> M1: Route Scaffold &amp;
-                lib/patrol
-              </li>
-              <li className="text-zinc-500">
-                • M2: Headless Shift State Machine (#748)
-              </li>
-              <li className="text-zinc-500">• M3: Mountain Map Hub (#749)</li>
-              <li className="text-zinc-500">• M4: OET Mini-Game (#750)</li>
-              <li className="text-zinc-500">
-                • M5: OEC Interaction &amp; Disclaimer (#751)
-              </li>
-              <li className="text-zinc-500">• M6: Scenario Packages (#752)</li>
-              <li className="text-zinc-500">• M7: Debrief Engine (#753)</li>
-            </ul>
-          </div>
+        {(shiftState.phase === "BRIEFING" ||
+          shiftState.phase === "briefing") && (
+          <BriefingScreen
+            onCompleteBriefing={() =>
+              activeEngine.dispatch({ type: "COMPLETE_BRIEFING" })
+            }
+          />
+        )}
+
+        {(shiftState.phase === "PATROL_MAP" ||
+          shiftState.phase === "patrol") && (
+          <MountainMap
+            incidentsCompleted={shiftState.incidentsCompleted}
+            onAwaitDispatch={() => {
+              const nextScenario =
+                availableScenarios[
+                  shiftState.incidentsCompleted % availableScenarios.length
+                ] ?? availableScenarios[0];
+              activeEngine.dispatch({
+                type: "RECEIVE_DISPATCH",
+                scenarioId: nextScenario.id,
+              });
+            }}
+            onCompleteShift={() =>
+              activeEngine.dispatch({ type: "COMPLETE_SHIFT" })
+            }
+          />
+        )}
+
+        {shiftState.phase === "DISPATCH" && (
+          <DispatchOverlay
+            scenario={currentScenario}
+            onAcknowledge={() => {
+              activeEngine.dispatch({ type: "ACCEPT_DISPATCH" });
+              activeEngine.dispatch({ type: "ARRIVE_ON_SCENE" });
+            }}
+          />
+        )}
+
+        {(shiftState.phase === "RESPONDING" ||
+          shiftState.phase === "SCENE" ||
+          shiftState.phase === "incident") && (
+          <SceneInteraction
+            scenario={currentScenario}
+            actionHistory={shiftState.actionHistory}
+            vitalsHistory={shiftState.vitalsHistory}
+            currentVitals={shiftState.currentVitals}
+            revealedPatient={shiftState.revealedPatient}
+            revealedEnvironment={shiftState.revealedEnvironment}
+            revealedActors={shiftState.revealedActors}
+            sceneSafetyStatus={shiftState.sceneSafetyStatus}
+            patientCondition={shiftState.patientCondition}
+            onExecuteAction={(action) =>
+              activeEngine.dispatch({ type: "RECORD_ACTION", action })
+            }
+            onPrepareTransport={() => {
+              activeEngine.dispatch({ type: "COMPLETE_SCENE" });
+              activeEngine.dispatch({ type: "BEGIN_TRANSPORT" });
+            }}
+            onCheckVitals={() => {
+              activeEngine.dispatch({
+                type: "CHECK_VITALS",
+                vitals:
+                  currentScenario?.patient?.vitals ??
+                  currentScenario?.initialVitals,
+              });
+            }}
+            onAssessSceneSafety={() => {
+              activeEngine.dispatch({ type: "ASSESS_SCENE_SAFETY" });
+            }}
+          />
+        )}
+
+        {(shiftState.phase === "TRANSPORT_PREP" ||
+          shiftState.phase === "OET") && (
+          <OetCanvas
+            scenario={currentScenario}
+            onRecordEvent={(event) =>
+              activeEngine.dispatch({ type: "PUSH_EVENT", event })
+            }
+            onArriveAtBase={() =>
+              activeEngine.dispatch({ type: "ARRIVE_AT_BASE" })
+            }
+          />
+        )}
+
+        {shiftState.phase === "HANDOFF" && (
+          <HandoffPanel
+            scenario={currentScenario}
+            actionHistory={shiftState.actionHistory}
+            vitalsHistory={shiftState.vitalsHistory}
+            revealedPatient={shiftState.revealedPatient}
+            revealedEnvironment={shiftState.revealedEnvironment}
+            timeElapsedMinutes={shiftState.timeElapsedMinutes}
+            patientCondition={shiftState.patientCondition}
+            onCompleteHandoff={() =>
+              activeEngine.dispatch({ type: "COMPLETE_HANDOFF" })
+            }
+          />
+        )}
+
+        {(shiftState.phase === "DEBRIEF" || shiftState.phase === "debrief") && (
+          <DebriefPlaceholder
+            scenario={currentScenario}
+            report={debriefReport}
+            onReturnToHub={() =>
+              activeEngine.dispatch({
+                type: "FINISH_DEBRIEF",
+                payload: { score: debriefReport.score },
+              })
+            }
+          />
+        )}
+
+        {(shiftState.phase === "SHIFT_COMPLETE" ||
+          shiftState.phase === "completed") && (
+          <ShiftSummary
+            shiftState={shiftState}
+            eventHistory={activeEngine.getEventHistory()}
+            onResetShift={handleReset}
+          />
+        )}
+      </div>
+
+      {/* Milestone Roadmap Box */}
+      <div className="p-4 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 space-y-2">
+        <div className="flex items-center gap-2 text-xs font-mono font-bold text-zinc-300">
+          <IconRoute className="w-4 h-4 text-brand-cyan" />
+          <span>Milestone Roadmap (Epic #744)</span>
         </div>
-
-        {/* Incident Interactive Workspace (Right) */}
-        <div className="lg:col-span-8 bg-zinc-900/30 rounded-2xl border border-zinc-800/80 p-5 flex flex-col gap-6">
-          {/* Phase Banner */}
-          <div className="flex items-center justify-between pb-3 border-b border-zinc-800/60 text-xs font-mono">
-            <div className="flex items-center gap-2">
-              <span className="text-zinc-500 uppercase">Current Phase:</span>
-              <span className="px-2.5 py-0.5 rounded-full bg-brand-cyan/20 border border-brand-cyan/40 text-brand-cyan font-bold uppercase">
-                {shiftState.phase}
-              </span>
-            </div>
-            <span className="text-[11px] text-zinc-500 font-mono">
-              FSM Invariant: Deterministic Pure Transitions
-            </span>
-          </div>
-
-          {/* Scenario Overview */}
-          <div className="space-y-2">
-            <h3 className="text-base font-mono font-bold text-white">
-              {selectedScenario.title}
-            </h3>
-            <p className="text-xs font-sans text-zinc-300 leading-relaxed">
-              {selectedScenario.description}
-            </p>
-          </div>
-
-          {/* Action History / Phase Specific View */}
-          {shiftState.phase === "briefing" && (
-            <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 space-y-3">
-              <h4 className="text-xs font-mono font-bold text-brand-cyan uppercase tracking-wider">
-                Operational Briefing
-              </h4>
-              <p className="text-xs font-sans text-zinc-400">
-                Review morning sweep route and weather observations before
-                departing base. Verify communication channels and inspection
-                checklist.
-              </p>
-              <button
-                type="button"
-                onClick={handleStartShift}
-                className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-cyan text-zinc-950 font-mono text-xs font-bold hover:bg-brand-cyan/90 transition-colors cursor-pointer"
-              >
-                <span>Initiate Shift</span>
-                <IconChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          )}
-
-          {(shiftState.phase === "patrol" ||
-            shiftState.phase === "incident") && (
-            <div className="space-y-4">
-              <h4 className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">
-                Available Operational Actions
-              </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {selectedScenario.actions.map((action) => (
-                  <button
-                    key={action.id}
-                    type="button"
-                    onClick={() => handleExecuteAction(action)}
-                    className="text-left p-3 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-brand-cyan/40 hover:bg-zinc-800/80 transition-all cursor-pointer flex flex-col justify-between gap-1"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-mono font-bold text-zinc-200">
-                        {action.label}
-                      </span>
-                      {action.costMinutes && (
-                        <span className="text-[10px] font-mono text-brand-cyan">
-                          +{action.costMinutes}m
-                        </span>
-                      )}
-                    </div>
-                    {action.description && (
-                      <p className="text-[11px] font-sans text-zinc-400">
-                        {action.description}
-                      </p>
-                    )}
-                  </button>
-                ))}
-              </div>
-
-              {shiftState.actionHistory.length > 0 && (
-                <div className="pt-3 border-t border-zinc-800/60 space-y-2">
-                  <span className="text-xs font-mono font-bold text-zinc-400">
-                    Executed Actions ({shiftState.actionHistory.length}):
-                  </span>
-                  <div className="flex flex-wrap gap-2">
-                    {shiftState.actionHistory.map((act, idx) => (
-                      <span
-                        key={`${act.id}-${idx}`}
-                        className="px-2.5 py-1 rounded-lg bg-zinc-800 border border-zinc-700 text-[11px] font-mono text-zinc-300"
-                      >
-                        {act.label}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="pt-2">
-                    <button
-                      type="button"
-                      onClick={handleFinishIncident}
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500 text-zinc-950 font-mono text-xs font-bold hover:bg-emerald-400 transition-colors cursor-pointer"
-                    >
-                      <span>Complete Shift &amp; Review</span>
-                      <IconChevronRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {shiftState.phase === "debrief" && (
-            <div className="p-5 rounded-xl bg-zinc-900/60 border border-zinc-800 space-y-4">
-              <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-                <h4 className="text-sm font-mono font-bold text-white flex items-center gap-2">
-                  <IconShieldCheck className="w-4 h-4 text-brand-cyan" />
-                  Shift Review &amp; Evaluation
-                </h4>
-                <span className="text-sm font-mono font-bold text-brand-cyan">
-                  Completion Score: {debriefReport.score}%
-                </span>
-              </div>
-
-              <p className="text-xs font-sans text-zinc-300">
-                {debriefReport.summary}
-              </p>
-
-              <div className="space-y-2">
-                <span className="text-xs font-mono font-bold text-zinc-400">
-                  Protocol Evaluation Rules:
-                </span>
-                <div className="space-y-2">
-                  {selectedScenario.debriefRules.map((rule) => (
-                    <div
-                      key={rule.id}
-                      className="p-3 rounded-lg bg-zinc-950 border border-zinc-800 flex items-start justify-between gap-3 text-xs font-mono"
-                    >
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`w-2 h-2 rounded-full ${
-                              rule.passed ? "bg-emerald-400" : "bg-red-400"
-                            }`}
-                          />
-                          <span className="font-bold text-zinc-200">
-                            {rule.title}
-                          </span>
-                        </div>
-                        <p className="text-[11px] font-sans text-zinc-400 pl-4">
-                          {rule.feedback}
-                        </p>
-                      </div>
-                      <span className="text-zinc-500 text-[10px]">
-                        +{rule.score} pts
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={handleResetShift}
-                  className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-mono text-xs font-bold transition-colors cursor-pointer"
-                >
-                  Start New Shift Routine
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+        <ul className="text-[11px] font-mono text-zinc-400 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
+          <li className="text-brand-cyan flex items-center gap-1.5">
+            <IconCheck className="w-3 h-3" /> M1: Route Scaffold &amp;
+            lib/patrol
+          </li>
+          <li className="text-brand-cyan flex items-center gap-1.5">
+            <IconCheck className="w-3 h-3" /> M2: Shift State Machine (#748)
+          </li>
+          <li className="text-brand-cyan flex items-center gap-1.5">
+            <IconCheck className="w-3 h-3" /> M3: Mountain Map Hub (#749)
+          </li>
+          <li className="text-brand-cyan flex items-center gap-1.5">
+            <IconCheck className="w-3 h-3" /> M4: OET Mini-Game (#750)
+          </li>
+          <li className="text-white font-bold flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-brand-cyan animate-pulse" />
+            M5: OEC Clinical (#751)
+          </li>
+          <li className="text-zinc-500">&bull; M6: Multi-Scenario (#752)</li>
+          <li className="text-zinc-500">&bull; M7: Debrief Analytics (#753)</li>
+        </ul>
       </div>
     </div>
   );

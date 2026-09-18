@@ -6,7 +6,11 @@
 
 # Function: evaluateOETCompliance()
 
-> **evaluateOETCompliance**(`scenario`, `_actionsTaken`): `object`
+> **evaluateOETCompliance**(`scenario`, `_actionsTaken`, `eventsOrMetrics?`): `object`
+
+Evaluates OET compliance score and debrief rules.
+
+Checks scenario debrief rules alongside live descent metrics when available.
 
 ## Parameters
 
@@ -18,9 +22,17 @@
 
 [`ScenarioAction`](../../types/interfaces/ScenarioAction.md)[]
 
+### eventsOrMetrics?
+
+[`PatrolEvent`](../../types/interfaces/PatrolEvent.md) \| [`PatrolEvent`](../../types/interfaces/PatrolEvent.md)[] \| [`OetMetrics`](../../types/interfaces/OetMetrics.md)
+
 ## Returns
 
 `object`
+
+### evaluatedRules
+
+> **evaluatedRules**: [`DebriefRule`](../../types/interfaces/DebriefRule.md)[]
 
 ### failedCount
 

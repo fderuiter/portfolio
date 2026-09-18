@@ -41,3 +41,9 @@
 ### type
 
 > **type**: [`ShiftEngineEventType`](../type-aliases/ShiftEngineEventType.md)
+
+***
+
+### vitals?
+
+> `optional` **vitals?**: [`VitalsData`](VitalsData.md)

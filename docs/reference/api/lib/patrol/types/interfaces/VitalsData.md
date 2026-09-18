@@ -8,6 +8,12 @@
 
 ## Properties
 
+### avpu?
+
+> `optional` **avpu?**: `"A"` \| `"V"` \| `"P"` \| `"U"`
+
+***
+
 ### bpDiastolic?
 
 > `optional` **bpDiastolic?**: `number`
@@ -32,9 +38,27 @@
 
 ***
 
+### pms?
+
+> `optional` **pms?**: `"intact"` \| `"compromised"` \| `"absent"`
+
+***
+
+### pupils?
+
+> `optional` **pupils?**: `string`
+
+***
+
 ### respiration?
 
 > `optional` **respiration?**: `number`
+
+***
+
+### skin?
+
+> `optional` **skin?**: `string`
 
 ***
 

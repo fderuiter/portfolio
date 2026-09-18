@@ -11,10 +11,10 @@
 Pure, deterministic FSM transition reducer for Patrol Shift.
 
 Implements the lifecycle:
-INTRO → BRIEFING → PATROL_MAP → DISPATCH → RESPONDING → SCENE →
-TRANSPORT_PREP → OET → HANDOFF → DEBRIEF → PATROL_MAP → SHIFT_COMPLETE
+INTRO -> BRIEFING -> PATROL_MAP -> DISPATCH -> RESPONDING -> SCENE ->
+TRANSPORT_PREP -> OET -> HANDOFF -> DEBRIEF -> PATROL_MAP -> SHIFT_COMPLETE
 
-Boundary Defense (AGENTS.md §11):
+Boundary Defense (AGENTS.md Section 11):
 Invalid transitions leave the current state reference unchanged without throwing.
 
 ## Parameters
