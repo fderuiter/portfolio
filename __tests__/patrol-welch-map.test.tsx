@@ -529,4 +529,63 @@ describe("Patrol Shift — MountainMap Interactive Viewport Integration (Issue #
       expect(styleTag?.textContent).toContain("animation: none !important");
     });
   });
+
+  describe("7. Pointer Gesture Lifecycle & Pan Latch Defense", () => {
+    /** Reads the live pan/zoom transform off the SVG root matrix group. */
+    const readTransform = (container: HTMLElement): string =>
+      container
+        .querySelector('svg[role="img"] > g[style]')
+        ?.getAttribute("transform") ?? "";
+
+    const renderMap = () =>
+      render(
+        <MountainMap
+          incidentsCompleted={0}
+          onAwaitDispatch={vi.fn()}
+          onCompleteShift={vi.fn()}
+        />
+      );
+
+    it("pans while the pointer is down and stops panning after pointerup", () => {
+      const { container } = renderMap();
+      const svg = container.querySelector('svg[role="img"]') as SVGSVGElement;
+      const initial = readTransform(container);
+
+      fireEvent.pointerDown(svg, { pointerId: 1, button: 0, clientX: 100, clientY: 100 });
+      fireEvent.pointerMove(svg, { pointerId: 1, clientX: 180, clientY: 160 });
+      const panned = readTransform(container);
+      expect(panned).not.toBe(initial);
+
+      fireEvent.pointerUp(svg, { pointerId: 1, clientX: 180, clientY: 160 });
+      fireEvent.pointerMove(svg, { pointerId: 1, clientX: 400, clientY: 400 });
+      expect(readTransform(container)).toBe(panned);
+    });
+
+    it("releases the pan latch on pointercancel so an OS-interrupted touch does not stick", () => {
+      // Regression: only pointerup cleared isPanning, so a touch cancelled by
+      // the OS (call, notification shade, browser back-gesture) left the map
+      // latched in panning mode and tracking the cursor with no finger down.
+      const { container } = renderMap();
+      const svg = container.querySelector('svg[role="img"]') as SVGSVGElement;
+
+      fireEvent.pointerDown(svg, { pointerId: 7, button: 0, pointerType: "touch", clientX: 100, clientY: 100 });
+      fireEvent.pointerMove(svg, { pointerId: 7, pointerType: "touch", clientX: 150, clientY: 130 });
+      const panned = readTransform(container);
+      expect(panned).not.toBe("");
+
+      fireEvent.pointerCancel(svg, { pointerId: 7, pointerType: "touch" });
+
+      // Any further movement must NOT drag the map.
+      fireEvent.pointerMove(svg, { pointerId: 7, pointerType: "touch", clientX: 600, clientY: 520 });
+      expect(readTransform(container)).toBe(panned);
+    });
+
+    it("does not throw when a pointerup arrives without a prior captured pointerdown", () => {
+      const { container } = renderMap();
+      const svg = container.querySelector('svg[role="img"]') as SVGSVGElement;
+      expect(() =>
+        fireEvent.pointerUp(svg, { pointerId: 99, clientX: 10, clientY: 10 })
+      ).not.toThrow();
+    });
+  });
 });

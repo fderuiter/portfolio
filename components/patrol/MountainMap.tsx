@@ -315,7 +315,10 @@ export const MountainMap: React.FC<MountainMapProps> = ({
     if (e.button !== 0 && e.pointerType === "mouse") return;
     setIsPanning(true);
     panStartRef.current = { x: e.clientX - pan.x, y: e.clientY - pan.y };
-    (e.target as Element).setPointerCapture?.(e.pointerId);
+    // Capture on the <svg> itself, not the child path/text under the cursor —
+    // a child can unmount mid-drag (trail re-render, zone switch) and silently
+    // drop the capture along with the terminating pointerup.
+    e.currentTarget.setPointerCapture?.(e.pointerId);
   };
 
   const handlePointerMove = (e: React.PointerEvent<SVGSVGElement>) => {
@@ -347,9 +350,22 @@ export const MountainMap: React.FC<MountainMapProps> = ({
     }
   };
 
-  const handlePointerUp = (e: React.PointerEvent<SVGSVGElement>) => {
+  const endPan = (e: React.PointerEvent<SVGSVGElement>) => {
     setIsPanning(false);
-    (e.target as Element).releasePointerCapture?.(e.pointerId);
+    if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
+      e.currentTarget.releasePointerCapture?.(e.pointerId);
+    }
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<SVGSVGElement>) => {
+    endPan(e);
+  };
+
+  // A touch interrupted by the OS (incoming call, notification shade, browser
+  // back-gesture) fires pointercancel and never pointerup — without this the
+  // map would stay latched in panning mode and keep tracking the cursor.
+  const handlePointerCancel = (e: React.PointerEvent<SVGSVGElement>) => {
+    endPan(e);
   };
 
   const zoomIn = () =>
@@ -696,6 +712,7 @@ export const MountainMap: React.FC<MountainMapProps> = ({
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerCancel}
         >
           <title>Welch Village Trail Map</title>
           <desc>
@@ -2022,6 +2039,10 @@ export const MountainMap: React.FC<MountainMapProps> = ({
         {activeAmbientEvent && (
           <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 max-w-sm sm:max-w-md w-full pointer-events-auto">
             <AmbientEventToast
+              // Keyed by event id so a TRIGGER_AMBIENT_EVENT that swaps one
+              // active event for another remounts the card with clean
+              // selection state instead of carrying the prior pick over.
+              key={activeAmbientEvent.id}
               event={activeAmbientEvent}
               onResolveOption={handleResolveOption}
               onDismiss={handleDismiss}
