@@ -40,6 +40,7 @@ export { parseMarkdownToRichItems, type ExtendedRichInlineItem };
 
 import {
   isBrowser,
+  isLayoutValidationEnabled,
   validateLayoutHeight,
   textPrepareCache,
   textLayoutCache,
@@ -283,6 +284,12 @@ export function usePretextLayout({
 
   // Layout Height Validation Trigger
   useLayoutEffect(() => {
+    // The getBoundingClientRect read below forces a synchronous layout flush
+    // immediately after this hook has changed the container height, which is
+    // exactly the hydration-time layout thrash #817 tracked. The result only
+    // feeds a development-time drift warning, so production skips the
+    // measurement entirely rather than measuring and discarding it.
+    if (!isLayoutValidationEnabled()) return;
     if (state.isReady && containerRef.current) {
       const actualHeight = containerRef.current.getBoundingClientRect().height;
       validateLayoutHeight(
@@ -626,6 +633,8 @@ export function usePretextRichLayout({
 
   // Layout Height Validation Trigger
   useLayoutEffect(() => {
+    // Development-only drift diagnostic; see the note in usePretextLayout.
+    if (!isLayoutValidationEnabled()) return;
     if (state.isReady && containerRef.current) {
       const actualHeight = containerRef.current.getBoundingClientRect().height;
       validateLayoutHeight(

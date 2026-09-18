@@ -19,6 +19,7 @@
 ## Functions
 
 - [isBrowser](functions/isBrowser.md)
+- [isLayoutValidationEnabled](functions/isLayoutValidationEnabled.md)
 - [isStylesheetLoaded](functions/isStylesheetLoaded.md)
 - [measureTextOffscreen](functions/measureTextOffscreen.md)
 - [resetStylesheetLoadedCache](functions/resetStylesheetLoadedCache.md)
