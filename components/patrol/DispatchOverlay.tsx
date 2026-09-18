@@ -31,7 +31,7 @@ export const DispatchOverlay: React.FC<DispatchOverlayProps> = ({
 }) => {
   const dispatchPrompt =
     scenario?.dispatchPrompt ??
-    "Patrol 4, Base Dispatch. Respond to skier down on Upper Ridge, below Tower 6. Guest reports painful lower extremity injury, unable to bear weight. Respond 10-2 with toboggan.";
+    "Patrol 4, Base Dispatch. Respond to skier down on Dan's Dive, East Slopes. Guest reports painful lower extremity injury, unable to bear weight. Respond 10-2 with toboggan.";
 
   return (
     <div
@@ -97,7 +97,7 @@ export const DispatchOverlay: React.FC<DispatchOverlayProps> = ({
               Location
             </div>
             <div className="text-xs font-mono font-bold text-white truncate">
-              {scenario?.location ?? "Upper Ridge - Tower 6"}
+              {scenario?.location ?? "Dan's Dive - East Slopes"}
             </div>
           </div>
         </div>

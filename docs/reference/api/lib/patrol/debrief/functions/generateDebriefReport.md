@@ -8,7 +8,8 @@
 
 > **generateDebriefReport**(`scenario`, `shiftState`): [`DebriefReport`](../../types/interfaces/DebriefReport.md)
 
-Debrief generation and evaluation helpers.
+Legacy debrief report generator retained for backward compatibility with
+existing container routes and the M1-era `DebriefReport` shape.
 
 ## Parameters
 

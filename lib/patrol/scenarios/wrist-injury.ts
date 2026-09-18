@@ -14,16 +14,16 @@ import type { PatrolScenario } from "../types";
  */
 export const WRIST_INJURY_SCENARIO: PatrolScenario = {
   id: "wrist-injury-lower-park",
-  title: "Lower Park FOOSH Wrist Injury",
+  title: "Magic Carpet FOOSH Wrist Injury",
   subtitle: "Beginner-terrain fall with an isolated wrist injury",
   description:
-    "A guest fell while stepping off the Lower Park carpet lift and put an arm out to catch themselves. Alert, cooperative, and complaining only of wrist pain.",
+    "A guest fell while stepping off the Magic Carpet and put an arm out to catch themselves. Alert, cooperative, and complaining only of wrist pain.",
   difficulty: "beginner",
   category: "trauma",
   estimatedMinutes: 12,
-  location: "Lower Park Beginner Carpet - Unload Zone",
+  location: "Magic Carpet Unload Zone - East Base Area",
   dispatchPrompt:
-    "Patrol 2, Base Dispatch. Guest down at the Lower Park carpet unload, reported wrist injury after a fall. Alert and able to talk. Respond 10-2.",
+    "Patrol 2, Base Dispatch. Guest down at the Magic Carpet unload, reported wrist injury after a fall. Alert and able to talk. Respond 10-2.",
   environment: {
     // PLACEHOLDER-CONTENT-REVIEW: needs OEC/NSP review, see #744
     weather: "Clear, 28°F, calm wind",

@@ -77,12 +77,15 @@ export const OetCanvas: React.FC<OetCanvasProps> = ({
     if (customBriefingState) return customBriefingState;
     const env = scenario?.environment;
     const snowCondition = env?.snowConditions?.toLowerCase() ?? "hardpack";
-    const isGlade =
-      scenario?.location?.toLowerCase().includes("glade") ?? false;
+    // Checks actual hazard content (not a location display string, which is
+    // free-text flavor and shouldn't drive physics) for wooded/narrow terrain.
+    const isTreedTerrain =
+      env?.hazards?.some((hazard) => hazard.toLowerCase().includes("tree")) ??
+      false;
     return {
       snowCondition,
-      narrowTrails: isGlade || false,
-      treeHazards: isGlade || false,
+      narrowTrails: isTreedTerrain || false,
+      treeHazards: isTreedTerrain || false,
       temperatureFahrenheit: env?.temperatureFahrenheit ?? 18,
       visibility: env?.visibility ?? "clear",
     };
@@ -352,8 +355,7 @@ export const OetCanvas: React.FC<OetCanvasProps> = ({
             </span>
           </div>
           <h2 className="text-xl sm:text-2xl font-mono font-bold text-white tracking-tight">
-            Toboggan Descent: {scenario?.location ?? "Upper Mountain Ridge"} to
-            Base
+            Toboggan Descent: {scenario?.location ?? "The Back Bowl"} to Base
           </h2>
           <p className="text-xs font-sans text-zinc-300 max-w-2xl">
             Control descent speed and lateral edge angles down the 24° fall

@@ -9,6 +9,7 @@
 ## Functions
 
 - [checkActionPreconditions](functions/checkActionPreconditions.md)
+- [collectIncidentEvents](functions/collectIncidentEvents.md)
 - [createInitialShiftState](functions/createInitialShiftState.md)
 - [createPatrolShiftEngine](functions/createPatrolShiftEngine.md)
 - [deriveRevealedActors](functions/deriveRevealedActors.md)

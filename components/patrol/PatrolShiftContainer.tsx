@@ -5,7 +5,8 @@ import {
   PATROL_SCENARIOS,
   ALL_PATROL_SCENARIOS,
   createPatrolShiftEngine,
-  generateDebriefReport,
+  collectIncidentEvents,
+  evaluateIncidentDebrief,
   type PatrolShiftEngine,
 } from "@/lib/patrol";
 import { useAnnouncer } from "@/hooks/useAnnouncer";
@@ -23,7 +24,7 @@ import { DispatchOverlay } from "./DispatchOverlay";
 import { SceneInteraction } from "./SceneInteraction";
 import { OetCanvas } from "./OetCanvas";
 import { HandoffPanel } from "./HandoffPanel";
-import { DebriefPlaceholder } from "./DebriefPlaceholder";
+import { DebriefScreen } from "./DebriefScreen";
 import { ShiftSummary } from "./ShiftSummary";
 import { MedicalDisclaimerBanner } from "./MedicalDisclaimerBanner";
 
@@ -117,9 +118,19 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
     shiftState.incidentsCompleted,
   ]);
 
-  const debriefReport = useMemo(
-    () => generateDebriefReport(currentScenario, shiftState),
-    [currentScenario, shiftState]
+  const incidentEvents = useMemo(
+    () =>
+      collectIncidentEvents(
+        activeEngine.getEventHistory(),
+        shiftState.activeEvents,
+        currentScenario?.id
+      ),
+    [activeEngine, shiftState.activeEvents, currentScenario]
+  );
+
+  const incidentDebriefResult = useMemo(
+    () => evaluateIncidentDebrief(currentScenario?.id ?? "", incidentEvents),
+    [currentScenario, incidentEvents]
   );
 
   const handleReset = () => {
@@ -144,12 +155,13 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
               </h1>
               <span className="px-2 py-0.5 rounded-full bg-brand-cyan/10 border border-brand-cyan/30 text-brand-cyan text-[10px] font-mono font-bold uppercase tracking-wider">
                 M1 Foundation Scaffold &bull; M3 Map Hub &bull; M4 OET Mini-Game
-                &bull; M5 OEC Interaction
+                &bull; M5 OEC Interaction &bull; M6 Multi-Scenario &bull; M7
+                Contextual Debrief
               </span>
             </div>
             <p className="text-xs font-mono text-zinc-400">
-              Midwest Ski Patrol Judgment Simulation — Vertical Slice (Issue
-              #749)
+              Welch Village Ski Patrol Judgment Simulation — Vertical Slice
+              (Issue #749)
             </p>
           </div>
         </div>
@@ -185,7 +197,7 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
       <div className="sr-only" aria-live="polite" aria-atomic="true">
         Current shift phase: {shiftState.phase.replace(/_/g, " ")}. Time
         elapsed: {shiftState.timeElapsedMinutes} minutes. Incidents completed:{" "}
-        {shiftState.incidentsCompleted}. Score: {shiftState.score} percent.
+        {shiftState.incidentsCompleted}.
       </div>
 
       {/* Prominent Medical & Clinical Disclaimer */}
@@ -312,14 +324,16 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
         )}
 
         {(shiftState.phase === "DEBRIEF" || shiftState.phase === "debrief") && (
-          <DebriefPlaceholder
+          <DebriefScreen
             scenario={currentScenario}
-            report={debriefReport}
+            result={incidentDebriefResult}
             onReturnToHub={() =>
               activeEngine.dispatch({
                 type: "FINISH_DEBRIEF",
-                payload: { score: debriefReport.score },
               })
+            }
+            onReplayIncident={() =>
+              activeEngine.dispatch({ type: "REPLAY_INCIDENT" })
             }
           />
         )}
@@ -354,12 +368,16 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
           <li className="text-brand-cyan flex items-center gap-1.5">
             <IconCheck className="w-3 h-3" /> M4: OET Mini-Game (#750)
           </li>
+          <li className="text-brand-cyan flex items-center gap-1.5">
+            <IconCheck className="w-3 h-3" /> M5: OEC Clinical (#751)
+          </li>
+          <li className="text-brand-cyan flex items-center gap-1.5">
+            <IconCheck className="w-3 h-3" /> M6: Multi-Scenario (#752)
+          </li>
           <li className="text-white font-bold flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-brand-cyan animate-pulse" />
-            M5: OEC Clinical (#751)
+            M7: Contextual Debrief (#753)
           </li>
-          <li className="text-zinc-500">&bull; M6: Multi-Scenario (#752)</li>
-          <li className="text-zinc-500">&bull; M7: Debrief Analytics (#753)</li>
         </ul>
       </div>
     </div>

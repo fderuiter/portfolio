@@ -38,6 +38,18 @@ Re-exports [checkActionPreconditions](engine/functions/checkActionPreconditions.
 
 ***
 
+### collectIncidentEvents
+
+Re-exports [collectIncidentEvents](engine/functions/collectIncidentEvents.md)
+
+***
+
+### compileShiftSummary
+
+Re-exports [compileShiftSummary](debrief/functions/compileShiftSummary.md)
+
+***
+
 ### createDialogueChoiceEvent
 
 Re-exports [createDialogueChoiceEvent](dialogue/functions/createDialogueChoiceEvent.md)
@@ -74,6 +86,18 @@ Re-exports [createPatrolShiftEngine](engine/functions/createPatrolShiftEngine.md
 
 ***
 
+### DEBRIEF\_DIMENSION\_ORDER
+
+Re-exports [DEBRIEF_DIMENSION_ORDER](debrief/variables/DEBRIEF_DIMENSION_ORDER.md)
+
+***
+
+### DebriefDimension
+
+Re-exports [DebriefDimension](types/type-aliases/DebriefDimension.md)
+
+***
+
 ### DebriefReport
 
 Re-exports [DebriefReport](types/interfaces/DebriefReport.md)
@@ -83,6 +107,12 @@ Re-exports [DebriefReport](types/interfaces/DebriefReport.md)
 ### DebriefRule
 
 Re-exports [DebriefRule](types/interfaces/DebriefRule.md)
+
+***
+
+### derivePlayfulStats
+
+Re-exports [derivePlayfulStats](debrief/functions/derivePlayfulStats.md)
 
 ***
 
@@ -122,15 +152,33 @@ Re-exports [DialogueStyle](types/type-aliases/DialogueStyle.md)
 
 ***
 
+### DimensionScore
+
+Re-exports [DimensionScore](types/interfaces/DimensionScore.md)
+
+***
+
 ### EnvironmentState
 
 Re-exports [EnvironmentState](types/interfaces/EnvironmentState.md)
 
 ***
 
+### evaluateIncidentDebrief
+
+Re-exports [evaluateIncidentDebrief](debrief/functions/evaluateIncidentDebrief.md)
+
+***
+
 ### evaluateOETCompliance
 
 Re-exports [evaluateOETCompliance](oet-engine/functions/evaluateOETCompliance.md)
+
+***
+
+### extractOetMetrics
+
+Re-exports [extractOetMetrics](debrief/functions/extractOetMetrics.md)
 
 ***
 
@@ -161,6 +209,12 @@ Re-exports [getScenarioById](presets/functions/getScenarioById.md)
 ### getUnlockedDialogueMoments
 
 Re-exports [getUnlockedDialogueMoments](dialogue/functions/getUnlockedDialogueMoments.md)
+
+***
+
+### IncidentDebriefResult
+
+Re-exports [IncidentDebriefResult](types/interfaces/IncidentDebriefResult.md)
 
 ***
 
@@ -308,6 +362,12 @@ Re-exports [pushEvent](engine/functions/pushEvent.md)
 
 ***
 
+### QualitativeObservation
+
+Re-exports [QualitativeObservation](types/interfaces/QualitativeObservation.md)
+
+***
+
 ### recordAction
 
 Re-exports [recordAction](engine/functions/recordAction.md)
@@ -326,6 +386,12 @@ Re-exports [ScenarioAction](types/interfaces/ScenarioAction.md)
 
 ***
 
+### ShiftDebriefSummary
+
+Re-exports [ShiftDebriefSummary](types/interfaces/ShiftDebriefSummary.md)
+
+***
+
 ### ShiftEngineEvent
 
 Re-exports [ShiftEngineEvent](types/interfaces/ShiftEngineEvent.md)
@@ -341,6 +407,12 @@ Re-exports [ShiftEngineEventType](types/type-aliases/ShiftEngineEventType.md)
 ### ShiftPhase
 
 Re-exports [ShiftPhase](types/type-aliases/ShiftPhase.md)
+
+***
+
+### ShiftPlayfulStats
+
+Re-exports [ShiftPlayfulStats](types/interfaces/ShiftPlayfulStats.md)
 
 ***
 

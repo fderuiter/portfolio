@@ -12,7 +12,9 @@ describe("Patrol Shift — M3 Mountain Map Hub & Vertical Slice Integration Loop
 
     // 1. INTRO Screen
     expect(screen.getByTestId("patrol-intro-screen")).toBeDefined();
-    expect(screen.getByText(/Midwest Ski Patrol: Shift Studio/i)).toBeDefined();
+    expect(
+      screen.getByText(/Welch Village Ski Patrol: Shift Studio/i)
+    ).toBeDefined();
 
     const beginBriefingBtn = screen.getByRole("button", {
       name: /Begin Shift Briefing/i,
@@ -98,7 +100,7 @@ describe("Patrol Shift — M3 Mountain Map Hub & Vertical Slice Integration Loop
     fireEvent.click(completeHandoffBtn);
 
     // 8. DEBRIEF Review
-    expect(screen.getByTestId("patrol-debrief-placeholder")).toBeDefined();
+    expect(screen.getByTestId("patrol-debrief-screen")).toBeDefined();
     expect(screen.getByText(/Incident Performance Review/i)).toBeDefined();
 
     const returnToHubBtn = screen.getByRole("button", {
@@ -314,12 +316,12 @@ describe("Patrol Shift — M3 Mountain Map Hub & Vertical Slice Integration Loop
     rerender(<PatrolShiftContainer engine={incidentEngine} />);
     expect(screen.getByTestId("patrol-scene-interaction")).toBeDefined();
 
-    // Legacy "debrief" phase routes to DebriefPlaceholder
+    // Legacy "debrief" phase routes to DebriefScreen
     const debriefEngine = createPatrolShiftEngine(PATROL_SCENARIOS, {
       initialPhase: "debrief",
     });
     rerender(<PatrolShiftContainer engine={debriefEngine} />);
-    expect(screen.getByTestId("patrol-debrief-placeholder")).toBeDefined();
+    expect(screen.getByTestId("patrol-debrief-screen")).toBeDefined();
 
     // Legacy "completed" phase routes to ShiftSummary
     const completedEngine = createPatrolShiftEngine(PATROL_SCENARIOS, {
@@ -329,15 +331,27 @@ describe("Patrol Shift — M3 Mountain Map Hub & Vertical Slice Integration Loop
     expect(screen.getByTestId("patrol-shift-summary")).toBeDefined();
   });
 
-  it("properly renders failed debrief rules as flagged with 0 pts and does not mask failures with scenario defaults", () => {
+  it("drives the M7 dimension-based debrief screen from actual event history, not static scenario defaults", () => {
     const customScenario = {
       ...PATROL_SCENARIOS[0],
+      id: "custom-debrief-scenario",
+      actions: [
+        {
+          id: "splint-without-clearing-scene",
+          label: "Splint Without Clearing the Scene",
+          category: "treatment" as const,
+          costMinutes: 5,
+        },
+      ],
+      // Scenario-level debriefRules describe a rosy default; the M7 debrief
+      // engine must ignore them entirely and score only from what actually
+      // happened on scene.
       debriefRules: [
         {
           id: "rule-comms",
           title: "Dispatch Communication",
           category: "protocol",
-          passed: true, // scenario default is true
+          passed: true,
           score: 50,
           feedback: "Radio contact established.",
         },
@@ -345,16 +359,29 @@ describe("Patrol Shift — M3 Mountain Map Hub & Vertical Slice Integration Loop
     };
 
     const engine = createPatrolShiftEngine([customScenario], {
-      initialPhase: "DEBRIEF",
+      initialPhase: "SCENE",
     });
+    engine.dispatch({
+      type: "RECORD_ACTION",
+      action: customScenario.actions[0],
+    });
+    engine.dispatch({ type: "COMPLETE_SCENE" });
+    engine.dispatch({ type: "BEGIN_TRANSPORT" });
+    engine.dispatch({ type: "ARRIVE_AT_BASE" });
+    engine.dispatch({ type: "COMPLETE_HANDOFF" });
 
     render(<PatrolShiftContainer engine={engine} />);
 
-    // Debrief screen should show the evaluated rule
-    expect(screen.getByTestId("patrol-debrief-placeholder")).toBeDefined();
-    expect(screen.getByText(/Dispatch Communication/i)).toBeDefined();
-    // Default debrief evaluation will mark it passed since no violation occurred
-    expect(screen.getByText(/\+50 pts/i)).toBeDefined();
+    expect(screen.getByTestId("patrol-debrief-screen")).toBeDefined();
+    // The old rule-based text/points UI is gone entirely.
+    expect(screen.queryByText(/Dispatch Communication/i)).toBeNull();
+    expect(screen.queryByText(/\+50 pts/i)).toBeNull();
+
+    // Splinting before the scene was ever secured trips a real HAZARD_ALERT;
+    // Scene Management must reflect that near-miss rather than the
+    // scenario's rosy static debriefRules default.
+    const sceneMeter = screen.getByTestId("dimension-meter-sceneManagement");
+    expect(sceneMeter.textContent).toMatch(/Needs Attention/i);
   });
 
   it("prevents duplicate action execution on scene and protects against rapid double clicking", () => {

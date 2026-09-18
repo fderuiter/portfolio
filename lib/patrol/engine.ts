@@ -224,6 +224,30 @@ export function deriveRevealedActors(
 }
 
 /**
+ * Merges, filters, and deduplicates events from an event history and active events list,
+ * scoped to a single scenarioId in chronological order.
+ */
+export function collectIncidentEvents(
+  eventHistory: PatrolEvent[],
+  activeEvents: PatrolEvent[],
+  scenarioId: string | null | undefined
+): PatrolEvent[] {
+  if (!scenarioId) return [];
+  const seen = new Set<string>();
+  const merged: PatrolEvent[] = [];
+
+  for (const event of [...eventHistory, ...activeEvents]) {
+    if (event.scenarioId !== scenarioId) continue;
+    const key = `${String(event.timestamp)}|${event.action ?? event.type ?? ""}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    merged.push(event);
+  }
+
+  return merged;
+}
+
+/**
  * Pure, deterministic FSM transition reducer for Patrol Shift.
  *
  * Implements the lifecycle:
@@ -356,6 +380,29 @@ export function reduceShiftState(
           score: compositeScore,
           incidentsCompleted: nextIncidents,
           currentScenarioId: null,
+        };
+      }
+      return state;
+    }
+
+    case "REPLAY_INCIDENT": {
+      // Re-runs the same incident from scene arrival: clears incident-local
+      // clinical/scene state, but never touches incidentsCompleted, score, or
+      // the shift clock — replaying is not "undoing" shift time already spent.
+      if (state.phase === "DEBRIEF" || state.phase === "debrief") {
+        return {
+          ...state,
+          phase: "SCENE",
+          actionHistory: [],
+          vitalsHistory: [],
+          activeEvents: [],
+          currentVitals: undefined,
+          revealedPatient: {},
+          revealedEnvironment: {},
+          revealedActors: [],
+          sceneSafetySecured: false,
+          sceneSafetyStatus: "unassessed",
+          patientCondition: "stable",
         };
       }
       return state;
@@ -730,6 +777,14 @@ class PatrolShiftEngineImpl implements PatrolShiftEngine {
     return [...this.eventHistory];
   }
 
+  getIncidentEvents(scenarioId: string | null | undefined): PatrolEvent[] {
+    return collectIncidentEvents(
+      this.eventHistory,
+      this.state.activeEvents,
+      scenarioId
+    );
+  }
+
   dispatch(event: ShiftEngineEvent): void {
     if (event.type === "RESET") {
       this.eventHistory.length = 0;
@@ -738,6 +793,17 @@ class PatrolShiftEngineImpl implements PatrolShiftEngine {
       this.state = reduceShiftState(this.state, event);
       this.notify();
       return;
+    }
+
+    if (event.type === "REPLAY_INCIDENT") {
+      const currentScenarioId = this.state.currentScenarioId;
+      if (currentScenarioId) {
+        const filtered = this.eventHistory.filter(
+          (e) => e.scenarioId !== currentScenarioId
+        );
+        this.eventHistory.length = 0;
+        this.eventHistory.push(...filtered);
+      }
     }
 
     const prevPhase = this.state.phase;

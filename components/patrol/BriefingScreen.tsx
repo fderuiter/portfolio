@@ -150,7 +150,7 @@ export const BriefingScreen: React.FC<BriefingScreenProps> = ({
               Hardpack / Groomed
             </div>
             <div className="text-[10px] font-mono text-zinc-500">
-              Upper Ridge icy
+              The Back Bowl icy
             </div>
           </div>
         </div>
@@ -165,10 +165,10 @@ export const BriefingScreen: React.FC<BriefingScreenProps> = ({
               Terrain Status
             </div>
             <div className="text-sm font-mono font-bold text-white truncate">
-              18 / 20 Open
+              44 / 50 Open
             </div>
             <div className="text-[10px] font-mono text-zinc-500">
-              Chair 1 &amp; 2 open
+              East Quad &amp; West Quad open
             </div>
           </div>
         </div>

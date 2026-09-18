@@ -10,13 +10,13 @@ import type { PatrolScenario } from "../types";
 export const INITIAL_PATROL_SCENARIOS: PatrolScenario[] = [
   {
     id: "pine-ridge-sweep",
-    title: "Pine Ridge Morning Sweep",
+    title: "West Slopes Morning Sweep",
     subtitle: "Routine trail marker and boundary inspection",
     description:
-      "Opening patrol sweep across Pine Ridge. Verify trail signage, rope line integrity, and establish radio contact with mountain dispatch.",
+      "Opening patrol sweep across Welch Village's West Slopes, starting at Cedar Fork. Verify trail signage, rope line integrity, and establish radio contact with mountain dispatch.",
     difficulty: "beginner",
     estimatedMinutes: 15,
-    location: "Pine Ridge Glades - Chair 4",
+    location: "Cedar Fork - West Slopes",
     actions: [
       {
         id: "radio-check",
@@ -30,7 +30,7 @@ export const INITIAL_PATROL_SCENARIOS: PatrolScenario[] = [
         id: "boundary-inspection",
         label: "Inspect Boundary Ropes",
         description:
-          "Check closure signage and rope line tension along glade boundary.",
+          "Check closure signage and rope line tension along the West Slopes boundary.",
         category: "assessment",
         costMinutes: 5,
       },
@@ -38,7 +38,7 @@ export const INITIAL_PATROL_SCENARIOS: PatrolScenario[] = [
         id: "hazard-marking",
         label: "Mark Trail Hazard",
         description:
-          "Set up warning bamboo stakes and crossing poles above exposed rock outcrop.",
+          "Set up warning bamboo stakes and crossing poles above an exposed rock outcrop near Twister.",
         category: "decision",
         costMinutes: 5,
         requiredEquipment: ["bamboo-poles", "warning-signs"],
@@ -74,13 +74,13 @@ export const INITIAL_PATROL_SCENARIOS: PatrolScenario[] = [
   },
   {
     id: "summit-weather-monitoring",
-    title: "Summit Ridge Weather Monitor",
+    title: "Summit Weather Watch",
     subtitle: "Observation of summit wind conditions and ridge visibility",
     description:
-      "Mid-morning weather check at Summit Ridge top station. Monitor gust speed, icing on lift infrastructure, and fog encroachment.",
+      "Mid-morning weather check at Welch Village's summit station, top of the Belle Creek Quad. Monitor gust speed, icing on lift infrastructure, and fog encroachment.",
     difficulty: "beginner",
     estimatedMinutes: 10,
-    location: "Summit Ridge Top Station",
+    location: "The Summit, Welch Village (1,060 ft)",
     actions: [
       {
         id: "anemometer-reading",
@@ -123,22 +123,22 @@ export const INITIAL_PATROL_SCENARIOS: PatrolScenario[] = [
 // PLACEHOLDER — needs OEC/NSP content review, see #744
 export const OEC_SAMPLE_SCENARIO: PatrolScenario = {
   id: "upper-ridge-injury",
-  title: "Upper Ridge Lower Extremity Trauma",
+  title: "Dan's Dive Lower Extremity Trauma",
   subtitle: "Downhill skier collision with fall and lower extremity trauma",
   description:
-    "Skier down on Upper Ridge near Tower 6. Witnesses report catching an outside edge on firm hardpack with a tumbling fall.",
+    "Skier down on Dan's Dive, East Slopes. Witnesses report catching an outside edge on firm hardpack with a tumbling fall.",
   difficulty: "intermediate",
   estimatedMinutes: 20,
-  location: "Upper Ridge - Tower 6",
+  location: "Dan's Dive - East Slopes",
   dispatchPrompt:
-    "Patrol Base Dispatch: 10-50 skier down on Upper Ridge near Tower 6, reported lower extremity injury. Respond with Cascade 100 toboggan.",
+    "Patrol Base Dispatch: 10-50 skier down on Dan's Dive, East Slopes, reported lower extremity injury. Respond with Cascade 100 toboggan.",
   environment: {
     weather: "Overcast, 22°F, light wind",
     snowConditions: "Firm hardpack / groomed packed powder",
     temperatureFahrenheit: 22,
     visibility: "Moderate (flat light and glare)",
     hazards: [
-      "Downhill skier traffic from Chair 4 runout",
+      "Downhill skier traffic from the Cannon-Valley Quad runout",
       "Blind terrain roll 25 feet uphill",
     ],
     sceneSafetyNotes:
