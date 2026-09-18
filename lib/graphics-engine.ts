@@ -239,6 +239,21 @@ export function measureTextOffscreen({
 import { getEnv } from "./env";
 
 /**
+ * Reports whether layout-drift validation is active for the current
+ * environment.
+ *
+ * Callers must consult this before measuring the DOM for
+ * `validateLayoutHeight`. The measurement itself is a synchronous
+ * `getBoundingClientRect` read issued from a layout effect that has just
+ * mutated height, which forces the browser to flush layout and blocks the
+ * main thread during hydration. Because the validation is diagnostic only,
+ * production must never pay that cost (#817).
+ */
+export function isLayoutValidationEnabled(): boolean {
+  return getEnv().NODE_ENV !== "production";
+}
+
+/**
  * Expose a layout validation utility that warns in non-production environments
  * when calculated layout height and actual physical DOM measurement differs by more than 2px.
  */
@@ -247,7 +262,7 @@ export function validateLayoutHeight(
   actual: number,
   contextMessage?: string
 ) {
-  if (getEnv().NODE_ENV !== "production") {
+  if (isLayoutValidationEnabled()) {
     if (actual === 0) {
       return;
     }

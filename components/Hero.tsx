@@ -73,20 +73,21 @@ export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
     },
   };
 
-  const wordVariants = shouldReduceMotion
-    ? {
-        hidden: { opacity: 0 },
-        visible: { opacity: 1, transition: { duration: 0.3 } },
-      }
-    : {
-        hidden: { opacity: 0, y: 14, scale: 0.97 },
-        visible: {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          transition: { ...designManifest.motion.springs.hero, mass: 0.35 },
-        },
-      };
+  // Transform-only entrance (#817). The words must never start at opacity 0:
+  // Chromium and WebKit skip fully transparent text when scoring LCP
+  // candidacy, so a fade-in swaps the already-painted static fallback for an
+  // invisible layer and pushes the recorded LCP out to wherever the animation
+  // settles. Translating and scaling from an opaque start keeps every frame a
+  // valid paint candidate, runs on the compositor, and preserves the staggered
+  // spring entrance.
+  const wordVariants = {
+    hidden: { y: 14, scale: 0.97 },
+    visible: {
+      y: 0,
+      scale: 1,
+      transition: { ...designManifest.motion.springs.hero, mass: 0.35 },
+    },
+  };
 
   return (
     <div
@@ -172,20 +173,17 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
     },
   };
 
-  const wordVariants = shouldReduceMotion
-    ? {
-        hidden: { opacity: 0 },
-        visible: { opacity: 1, transition: { duration: 0.3 } },
-      }
-    : {
-        hidden: { opacity: 0, y: 8, scale: 0.98 },
-        visible: {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          transition: { ...designManifest.motion.springs.heroBeam, mass: 0.25 },
-        },
-      };
+  // Transform-only entrance (#817), matching HeroHeadline. The hero intro sits
+  // directly beneath the headline and is a plausible LCP candidate in its own
+  // right at narrow widths, so it must not start transparent either.
+  const wordVariants = {
+    hidden: { y: 8, scale: 0.98 },
+    visible: {
+      y: 0,
+      scale: 1,
+      transition: { ...designManifest.motion.springs.heroBeam, mass: 0.25 },
+    },
+  };
 
   return (
     <div
