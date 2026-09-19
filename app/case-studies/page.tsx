@@ -16,7 +16,10 @@ import { getBreadcrumbSchema } from "@/lib/seo";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "Engineering Case Studies | Frederick de Ruiter",
+  // No site name here: app/layout.tsx templates this as
+  // "%s | Frederick de Ruiter". Including it rendered the name twice.
+  // The openGraph and twitter titles below are not templated, so they keep it.
+  title: "Engineering Case Studies",
   description:
     "Projects by Fred de Ruiter: the problems, the implementation choices, and what happened along the way.",
   alternates: {
