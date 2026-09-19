@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { env, isBuildPhase } from "@/lib/env";
+import { failBuildOnDataSourceError } from "@/lib/build-integrity";
 import { FALLBACK_CASE_STUDIES, CaseStudyData } from "@/lib/case-studies-data";
 import { redis, getScopedRedisKey, isRedisConfigured } from "@/lib/redis";
 import { sanitizeContentHtml } from "@/lib/content-sanitizer";
@@ -304,6 +305,10 @@ export class CaseStudyService {
           err
         );
       }
+      failBuildOnDataSourceError(
+        "CaseStudyService.getAllPublishedCaseStudies",
+        err
+      );
       return [...FALLBACK_CASE_STUDIES];
     }
 
@@ -417,6 +422,7 @@ export class CaseStudyService {
           err
         );
       }
+      failBuildOnDataSourceError("CaseStudyService.getCaseStudyBySlug", err);
     }
 
     const finalResult =
