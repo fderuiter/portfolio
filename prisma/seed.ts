@@ -2126,6 +2126,104 @@ export async function runEvalSuite(
 </ul>
     `.trim(),
   },
+  // The two entries below were recovered from the production database on
+  // 2026-09-19. They were published and live at /case-studies/equipose and
+  // /case-studies/qrcraftly, but existed in no source file -- neither here nor
+  // in lib/case-studies-data.ts. The previous `deleteMany({})` seeding strategy
+  // would have destroyed both, and with six-hour history retention and no
+  // snapshot schedule that would have been permanent. Do not remove them
+  // without first confirming the content exists somewhere else.
+  {
+    slug: "equipose",
+    title:
+      "Equipose: Biostatistics Randomization & Clinical Trial Allocation Engine",
+    primary_language: "TypeScript",
+    github_url: "https://github.com/fderuiter/Equipose",
+    published: true,
+    simulated_telemetry: false,
+    tags: "TypeScript, Angular, Biostatistics, Randomization, Clinical Trials, HIPAA, Cryptography",
+    editorial_content:
+      "An enterprise-grade **TypeScript** and **Angular** randomization platform designed for clinical trial biostatisticians. Synthesizes `double-blind schemas`, dynamic block allocations, and secure random seeds complying with rigid regulatory standards.",
+    architectural_narrative: `<h3>The Challenge</h3>
+<p>Biostatistical randomization is a critical gatekeeper in clinical trials to ensure double-blind integrity. Standard random generators (like JavaScript's <code>Math.random()</code>) are not cryptographically secure and lack reproducibility. If the randomization sequence is guessable or leaks during data entry, it corrupts the trial datasets and invalidates the regulatory submission.</p>
+
+<h3>The Architecture</h3>
+<p>Equipose is a secure biostatistical randomization utility constructed in TypeScript and Angular. It guarantees highly predictable and cryptographically hardened trial allocation schedules, complying with FDA 21 CFR Part 11 and HIPAA frameworks.</p>
+
+<pre><code class="language-typescript">
+// Random block allocation schedule compiler
+export interface AllocationBlock {
+  blockId: string;
+  treatmentList: ("Active" | "Placebo")[];
+  blockSize: number;
+}
+
+export function compileRandomBlock(size: number, activeRatio: number): AllocationBlock {
+  // Uses cryptographically secure random values (CSPRNG)
+  const array = new Uint32Array(size);
+  window.crypto.getRandomValues(array);
+  
+  const treatments = Array(size).fill("Placebo");
+  for (let i = 0; i &lt; size * activeRatio; i++) treatments[i] = "Active";
+  
+  // Scramble treatments array using CSPRNG metrics
+  return {
+    blockId: crypto.randomUUID(),
+    treatmentList: treatments.sort(() =&gt; 0.5 - Math.random()),
+    blockSize: size
+  };
+}
+</code></pre>
+
+<h4>1. Cryptographically Secure Pseudo-Random Number Generation (CSPRNG)</h4>
+<p>Instead of basic math functions, Equipose strictly leverages the browser's native <code>crypto.getRandomValues()</code> API. Seeds are managed using mathematically robust salt algorithms, assuring that the compiled allocation sequence is mathematically impossible to predict, even with complete knowledge of previous assignments.</p>
+
+<h4>2. Dynamic Block Randomization Algorithms</h4>
+<p>To maintain balance in small cohorts, the platform generates dynamically sized block allocations (e.g. block sizes of 4, 6, or 8 subjects). Biostatisticians can customize assignment ratios (e.g., 2:1 active to placebo) and monitor demographic distribution statistics in real time using visual charts, ensuring zero bias across trial sites.</p>
+
+<h4>3. HIPAA Audit Logging & Compliance</h4>
+<p>In accordance with clinical protocol rules, every randomization schedule created in the system triggers immutable audit trails. Decryption of assignment codes is strictly locked behind permission matrices, keeping the study double-blinded until formal protocol unlocking events occur.</p>`,
+  },
+  {
+    slug: "qrcraftly",
+    title: "QRCraftly: Interactive Vector Design & QR Code Layout Engine",
+    primary_language: "TypeScript",
+    github_url: "https://github.com/fderuiter/QRCraftly",
+    published: true,
+    simulated_telemetry: false,
+    tags: "TypeScript, React, Vector Design, Canvas, QR Code, UI Design, Art",
+    editorial_content:
+      "A beautiful, premium design layout compiler built in **TypeScript** that transforms standard QR codes into dynamic, styled vector art canvases. Employs `custom SVG paths`, matrix pixel manipulations, and low-latency rendering controls.",
+    architectural_narrative: `<h3>The Challenge</h3>
+<p>Traditional QR code generators create low-resolution, blocky images that disrupt premium visual branding. Integrating custom logos, gradients, and stylized patterns usually breaks the mathematical integrity of the QR code matrix, rendering it unreadable to scanner lenses.</p>
+
+<h3>The Architecture</h3>
+<p>QRCraftly is an enterprise-grade TypeScript layout compiler that mathematically separates the functional QR code data matrix from its aesthetic rendering layers. It is built around a vector transformation pipeline, dynamic error corrections, and a 60FPS canvas visualizer.</p>
+
+<pre><code class="language-typescript">
+// Stylized node rendering logic in TypeScript
+interface StyledModule {
+  x: number;
+  y: number;
+  type: "data" | "finder" | "alignment" | "timing";
+  shape: "circle" | "rounded" | "square" | "fluid";
+}
+
+export function compileVectorPath(modules: StyledModule[]): string {
+  // Compiles discrete coordinates into a single unified SVG path string
+  return modules.map(m =&gt; \`M \${m.x} \${m.y} a 0.5 0.5 0 1 0 0.001 0\`).join(" ");
+}
+</code></pre>
+
+<h4>1. Reed-Solomon Error Correction Tuning</h4>
+<p>To support high-fidelity artwork overlays (such as placing a brand logo in the center of the QR matrix), QRCraftly sets the QR code's mathematical Reed-Solomon recovery level to Level H (High), guaranteeing that up to 30% of the active data pixels can be blocked or replaced without compromising scanner legibility. It runs dynamic pixel overlap validations to verify the exact reading boundaries.</p>
+
+<h4>2. Single-Path SVG Optimization</h4>
+<p>Standard generators output thousands of individual <code>&lt;rect&gt;</code> HTML tags, bloating the DOM and causing browser sluggishness on dynamic resizes. QRCraftly compiles the entire QR code grid into a single, highly optimized SVG <code>&lt;path&gt;</code> element. This yields incredibly lightweight file structures, allows for elegant gradient fills, and lets browsers render high-DPI outputs instantly.</p>
+
+<h4>3. Mathematical Grid Customizers</h4>
+<p>Systems designers can alternate between round, square, or fluid timing blocks. The engine recalculates proximity coordinates to merge adjacent modules into contiguous, mathematically valid vector shapes, generating beautiful vector canvases at run time.</p>`,
+  },
 ];
 
 async function main() {
@@ -2214,47 +2312,104 @@ async function main() {
   const duration = Date.now() - startTime;
   console.log(`Validation guards completed successfully in ${duration}ms.`);
 
-  // WIPE: Enforce idempotence by cleaning database before seeding
-  await prisma.caseStudy.deleteMany({});
-  await prisma.blogPost.deleteMany({});
+  // Upsert by slug rather than wiping first.
+  //
+  // This previously ran `deleteMany({})` on both tables, commented "enforce
+  // idempotence". It does produce idempotence, but destructively: it makes the
+  // seed authoritative over the entire table, so any row whose slug is absent
+  // from these payloads is deleted. Two published case studies (`equipose` and
+  // `qrcraftly`) existed only in production and would have been destroyed by a
+  // seed run, taking two live indexed URLs with them. History retention on the
+  // Neon free plan is six hours and there is no snapshot schedule, so that is
+  // unrecoverable in practice -- see docs/how-to/restore-the-production-database.md.
+  //
+  // Upserting keyed on the unique `slug` is idempotent in the same way for rows
+  // the seed owns, while leaving anything else untouched.
+  const existingCaseStudySlugs = new Set(
+    (await prisma.caseStudy.findMany({ select: { slug: true } })).map(
+      (r) => r.slug
+    )
+  );
+  const existingBlogSlugs = new Set(
+    (await prisma.blogPost.findMany({ select: { slug: true } })).map(
+      (r) => r.slug
+    )
+  );
 
-  // Insert the validated payloads
   for (const payload of SEED_PAYLOADS) {
-    await prisma.caseStudy.create({
-      data: {
-        ...payload,
-        editorial_content: compileTerms(payload.editorial_content),
-        architectural_narrative: compileTerms(payload.architectural_narrative),
-      },
+    const data = {
+      ...payload,
+      editorial_content: compileTerms(payload.editorial_content),
+      architectural_narrative: compileTerms(payload.architectural_narrative),
+    };
+    await prisma.caseStudy.upsert({
+      where: { slug: payload.slug },
+      create: data,
+      update: data,
     });
   }
 
-  // Insert published blog posts fulfilling ADR 0041 §6 launch bar
+  // Blog posts fulfilling ADR 0041 §6 launch bar.
   for (const post of FALLBACK_BLOG_POSTS) {
-    await prisma.blogPost.create({
-      data: {
-        id: post.id,
-        slug: post.slug,
-        title: post.title,
-        dek: post.dek,
-        body: compileTerms(post.body),
-        pillar: post.pillar,
-        tags: post.tags,
-        published: post.published,
-        reading_time_minutes: post.reading_time_minutes,
-        hero_image_url: post.hero_image_url,
-        created_at: post.created_at,
-        updated_at: post.updated_at,
-      },
+    const data = {
+      slug: post.slug,
+      title: post.title,
+      dek: post.dek,
+      body: compileTerms(post.body),
+      pillar: post.pillar,
+      tags: post.tags,
+      published: post.published,
+      reading_time_minutes: post.reading_time_minutes,
+      hero_image_url: post.hero_image_url,
+      updated_at: post.updated_at,
+    };
+    await prisma.blogPost.upsert({
+      where: { slug: post.slug },
+      // `id` and `created_at` are set only on insert. Rewriting either on update
+      // would break existing BlogPostReaction rows keyed on the slug's identity
+      // and silently reorder the /blog index.
+      create: { ...data, id: post.id, created_at: post.created_at },
+      update: data,
     });
   }
+
+  const seededCaseStudySlugs = new Set(SEED_PAYLOADS.map((p) => p.slug));
+  const seededBlogSlugs = new Set(FALLBACK_BLOG_POSTS.map((p) => p.slug));
+  const preservedCaseStudies = [...existingCaseStudySlugs].filter(
+    (s) => !seededCaseStudySlugs.has(s)
+  );
+  const preservedBlogPosts = [...existingBlogSlugs].filter(
+    (s) => !seededBlogSlugs.has(s)
+  );
 
   console.log(`Successfully seeded:`);
   for (const payload of SEED_PAYLOADS) {
-    console.log(`- Case study: ${payload.title}`);
+    const verb = existingCaseStudySlugs.has(payload.slug)
+      ? "updated"
+      : "created";
+    console.log(`- Case study ${verb}: ${payload.title}`);
   }
   for (const post of FALLBACK_BLOG_POSTS) {
-    console.log(`- Blog post: ${post.title}`);
+    const verb = existingBlogSlugs.has(post.slug) ? "updated" : "created";
+    console.log(`- Blog post ${verb}: ${post.title}`);
+  }
+
+  // Surfaced rather than silently tolerated: a row present in the database but
+  // absent from the seed is either content authored through /admin that belongs
+  // in version control, or a slug this seed renamed and orphaned.
+  if (preservedCaseStudies.length > 0 || preservedBlogPosts.length > 0) {
+    console.log(
+      `\nPreserved ${preservedCaseStudies.length + preservedBlogPosts.length} row(s) present in the database but absent from the seed:`
+    );
+    for (const slug of preservedCaseStudies) {
+      console.log(`- Case study: ${slug}`);
+    }
+    for (const slug of preservedBlogPosts) {
+      console.log(`- Blog post: ${slug}`);
+    }
+    console.log(
+      "These were left untouched. If they should be version-controlled, add them to SEED_PAYLOADS or FALLBACK_BLOG_POSTS."
+    );
   }
 }
 
