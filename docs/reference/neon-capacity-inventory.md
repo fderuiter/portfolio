@@ -30,7 +30,8 @@ Neon's free plan provides 0.5 GiB storage and auto-suspends compute after 5 minu
 
 | Project (id) | Branch | Endpoint | Environment | Protection | Storage | Role |
 | --- | --- | --- | --- | --- | ---: | --- |
-| `neon-gray-drum` (`withered-tooth-11857430`) | `main` (`br-shiny-dust-apixoyf1`) | `ep-young-mouse-ap1zkh0m` | Production | **NOT protected** | 30.8 MiB | Canonical production database backing deruiter.dev |
+| `neon-gray-drum` (`withered-tooth-11857430`) | `main` (`br-snowy-butterfly-apmzw7bd`) | `ep-young-mouse-ap1zkh0m` | Production | **NOT protected** | 30.8 MiB | Canonical production database backing deruiter.dev |
+| `neon-gray-drum` | `pre-rehearsal-main-2026-09-19` (`br-shiny-dust-apixoyf1`) | `ep-sweet-grass-ap3tbi8x` | Ephemeral | Not protected | 30.8 MiB | Former production branch, demoted by the #700 rehearsal; identical data, retained as a rollback copy |
 | `neon-gray-drum` | `rehearsal/v0.3.0-migrations` (`br-royal-sky-apfvczyx`) | `ep-ancient-pine-appqk4cj` | Ephemeral | Not protected | 30.6 MiB | Release rehearsal branch, idle since 2026-09-13 |
 | `neon-blue-plank` (`hidden-frog-92457060`) | `main` (`br-patient-heart-augr38sg`) | — | Abandoned | Not protected | 29.9 MiB | Neon Auth experiment; `neon_auth` schema only, no application tables |
 
@@ -38,6 +39,18 @@ Neon's free plan provides 0.5 GiB storage and auto-suspends compute after 5 minu
 > **Correction (2026-09-19).** The previous revision of this table stated that `main` had Protection Status **Protected** and that a `dev` branch existed and was **Protected**. Neither is true. `main` reports `"protected": false`, and there is no `dev` branch in the project — it was most likely removed under [ADR 0037](../../adr/0037-controlled-integration-and-release-deployments.md), which superseded the persistent dev environment, without this inventory being updated.
 >
 > Protecting the production branch is an unmet acceptance criterion of [#622](https://github.com/fderuiter/portfolio/issues/622), not a control in place. A document asserting governance that does not exist is worse than one recording the gap.
+
+A second correction landed the same day, from executing the restore rehearsal
+rather than from reading provider state:
+
+> [!IMPORTANT]
+> **Production branch id changed (2026-09-19).** The canonical production branch is now `br-snowy-butterfly-apmzw7bd`. It was `br-shiny-dust-apixoyf1` from 2026-05-27 until 2026-09-19.
+>
+> The [#700](https://github.com/fderuiter/portfolio/issues/700) restore rehearsal called Neon's `restore_snapshot` with its default `finalize: true`. That is not an isolated restore — it is a **production cutover**: the restored branch takes the `main` name, the primary/default flags, and the production compute endpoint, while the previous branch is demoted and renamed. Data was verified byte-identical before and after (schema fingerprint `800a41c74b9eb8fb31798631812e007d`, case-study fingerprint `90eb59844b848b1cbe4ef4a8b45603e9`, 4/94/11 rows), and the newest write in the database predated the restore point by 34 days, so nothing was lost.
+>
+> **The compute endpoint is the thing production depends on, not the branch id.** `ep-young-mouse-ap1zkh0m` is named by nine environment variables (`DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `PGHOST`, `PGHOST_UNPOOLED`, `POSTGRES_HOST`, `POSTGRES_PRISMA_URL`, `POSTGRES_URL`, `POSTGRES_URL_NON_POOLING`, `POSTGRES_URL_NO_SSL`) — note this is a *different* set from the eight password-bearing variables listed in [#865](https://github.com/fderuiter/portfolio/issues/865). `set_default_branch` moves the default designation but **does not** move the endpoint, and Neon refuses both to delete the root branch's read-write endpoint and to add a second one to an occupied branch. The branch holding `ep-young-mouse-ap1zkh0m` was therefore renamed to `main` rather than relocating a live endpoint.
+>
+> `pre-rehearsal-main-2026-09-19` (`br-shiny-dust-apixoyf1`) is retained with identical data as a rollback copy and is safe to delete once this release is confirmed. Because history retention is six hours, its longer lineage confers no recovery advantage.
 
 ## Resource Classification & Retention Policy
 
