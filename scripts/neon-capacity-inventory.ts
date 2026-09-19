@@ -151,12 +151,12 @@ export const HISTORICAL_NEON_CANDIDATES: NeonCleanupCandidate[] = [];
 
 export function getNeonCapacityInventory(): NeonCapacityInventory {
   return {
-    timestamp: "2026-09-19T14:40:00.000Z",
+    timestamp: "2026-09-19T16:11:09.000Z",
     scope:
       "Neon Postgres / Vercel Resource 'neon-gray-drum' (observed 2026-09-19)",
     plan: "Neon Free Tier (0.5 GiB Storage & Auto-Suspending Compute)",
     providerInventoryAvailable: true,
-    note: "Observed against the Neon API on 2026-09-19, closing the provider gap in issue #621. This is a recorded snapshot, not a live query: the script has no NEON_API_KEY and will drift until re-observed. Two cleanup candidates are identified in the reference document; zero are approved here.",
+    note: "Observed against the Neon API on 2026-09-19, closing the provider gap in issue #621. This is a recorded snapshot, not a live query: the script has no NEON_API_KEY and will drift until re-observed. Two cleanup candidates are identified in the reference document; zero are approved here. The production branch id changed on 2026-09-19: the #700 restore rehearsal cut production over to a restored branch (br-snowy-butterfly-apmzw7bd), which now carries the name 'main' and the production endpoint ep-young-mouse-ap1zkh0m. The former branch br-shiny-dust-apixoyf1 is retained as pre-rehearsal-main-2026-09-19 with identical data.",
     storageMeter: {
       resource: "Neon Postgres Storage",
       usedBytes: 32284672,
@@ -204,19 +204,35 @@ export function getNeonCapacityInventory(): NeonCapacityInventory {
         totalStorageMiB: 0,
         branches: [
           {
-            branchId: "br-shiny-dust-apixoyf1",
+            branchId: "br-snowy-butterfly-apmzw7bd",
             name: "main",
             projectSlug: "portfolio",
             environmentClassification: "production",
             protectionStatus: "protected",
-            storageBytes: 32284672,
+            storageBytes: 32333824,
             storageMiB: 30.8,
-            createdAtUtc: "2026-05-27T03:10:21Z",
-            updatedAtUtc: "2026-09-19T14:38:23Z",
+            createdAtUtc: "2026-09-19T15:58:52Z",
+            updatedAtUtc: "2026-09-19T16:11:09Z",
             owner: "laser-loons-projects",
             expirationPolicy: "Never (Canonical Production)",
             connectionType: "pooled_runtime",
-            role: "Canonical production database for deruiter.dev",
+            role: "Canonical production database for deruiter.dev; holds endpoint ep-young-mouse-ap1zkh0m",
+          },
+          {
+            branchId: "br-shiny-dust-apixoyf1",
+            name: "pre-rehearsal-main-2026-09-19",
+            projectSlug: "portfolio",
+            environmentClassification: "ephemeral",
+            protectionStatus: "ephemeral",
+            storageBytes: 32284672,
+            storageMiB: 30.8,
+            createdAtUtc: "2026-05-27T03:10:21Z",
+            updatedAtUtc: "2026-09-19T16:10:17Z",
+            owner: "laser-loons-projects",
+            expirationPolicy:
+              "Retained pending operator deletion -- see issue #700 rehearsal record",
+            connectionType: "pooled_runtime",
+            role: "Former production branch, demoted by the #700 restore rehearsal on 2026-09-19; data identical to main, retained as a rollback copy",
           },
           {
             branchId: "br-royal-sky-apfvczyx",
@@ -241,10 +257,10 @@ export function getNeonCapacityInventory(): NeonCapacityInventory {
     candidates: HISTORICAL_NEON_CANDIDATES,
     summary: {
       totalProjects: 1,
-      totalBranches: 2,
+      totalBranches: 3,
       protectedBranchesCount: 1,
       candidateCount: 0,
-      currentTotalStorageMiB: 61.4,
+      currentTotalStorageMiB: 92.2,
       expectedRecoverableStorageMiB: 0,
       expectedRecoverableStorageGiB: 0,
       projectedPostCleanupHeadroomGiB: NEON_FREE_TIER_LIMIT_GIB,
