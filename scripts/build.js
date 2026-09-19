@@ -1,12 +1,38 @@
 /* eslint-disable */
 const { spawnSync } = require("child_process");
+const fs = require("fs");
 
 console.log("--- Starting Post-Build Conditional Migration Build Pipeline ---");
 
+// 0. Load local environment files before deciding anything is missing.
+//
+// npm does not read .env files, so `npm run build` starts with none of them in
+// process.env. Next would load them itself, but this script spawns it with
+// `env: process.env`, and a variable already present in the environment beats
+// any .env file -- so the offline dummy below would win over a perfectly good
+// .env.local and the build would silently produce fallback content.
+//
+// prisma.config.ts already does exactly this for the same reason.
+try {
+  const dotenv = require("dotenv");
+  if (fs.existsSync(".env.local")) {
+    dotenv.config({ path: ".env.local" });
+  } else {
+    dotenv.config();
+  }
+} catch (err) {
+  console.warn(
+    "Could not load local environment files; continuing with the ambient environment.",
+    err && err.message
+  );
+}
+
 // 1. Connection String & Secret Fallback for Offline/Local Compilation
 if (!process.env.DATABASE_URL) {
-  console.log(
-    "No DATABASE_URL found. Setting dummy connection string for offline compilation."
+  console.warn(
+    "No DATABASE_URL found, and no .env.local supplied one. Using a dummy " +
+      "connection string for offline compilation: every database-backed page " +
+      "will be generated from static fallbacks rather than real data."
   );
   const userPass = "dummy:dummy";
   const hostPort = "localhost:5432";
