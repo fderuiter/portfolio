@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { env } from "@/lib/env";
+import { env, isBuildPhase } from "@/lib/env";
 import { FALLBACK_BLOG_POSTS, BlogPostData } from "@/lib/fallback-blog-posts";
 import { redis, getScopedRedisKey, isRedisConfigured } from "@/lib/redis";
 import { CONTENT_PILLARS, type ContentPillar } from "@/lib/blog/types";
@@ -149,7 +149,7 @@ async function submitBlogReactionDirect(
       userReactions: userReactionsList.map((ur) => ur.reactionType),
     };
   } catch (err) {
-    if (env.VERCEL_ENV === "production") {
+    if (env.VERCEL_ENV === "production" && !isBuildPhase()) {
       console.warn(
         "Database blog reaction creation failed, using mock fallback:",
         err
@@ -413,7 +413,7 @@ async function safeRevalidatePath(
       revalidatePath(path, type);
     }
   } catch (err) {
-    if (env.VERCEL_ENV === "production") {
+    if (env.VERCEL_ENV === "production" && !isBuildPhase()) {
       console.warn(
         `BlogPostService.safeRevalidatePath: Path revalidation failed for "${path}":`,
         err
@@ -429,7 +429,7 @@ async function safeRevalidateTag(tag: string): Promise<void> {
       revalidateTag(tag, "max");
     }
   } catch (err) {
-    if (env.VERCEL_ENV === "production") {
+    if (env.VERCEL_ENV === "production" && !isBuildPhase()) {
       console.warn(
         `BlogPostService.safeRevalidateTag: Tag revalidation failed for "${tag}":`,
         err
@@ -669,7 +669,7 @@ export class BlogPostService {
         }
       }
     } catch (err) {
-      if (env.VERCEL_ENV === "production") {
+      if (env.VERCEL_ENV === "production" && !isBuildPhase()) {
         console.warn(
           "BlogPostService.getAllPublishedBlogPosts: Database query failed, using static fallbacks:",
           err
@@ -745,7 +745,7 @@ export class BlogPostService {
         }
       }
     } catch (cacheErr) {
-      if (env.VERCEL_ENV === "production") {
+      if (env.VERCEL_ENV === "production" && !isBuildPhase()) {
         console.warn(
           `BlogPostService.getBlogPostBySlug: Redis cache read failed for "${trimmedSlug}", falling back:`,
           cacheErr
@@ -783,7 +783,7 @@ export class BlogPostService {
         }
       }
     } catch (err) {
-      if (env.VERCEL_ENV === "production") {
+      if (env.VERCEL_ENV === "production" && !isBuildPhase()) {
         console.warn(
           `BlogPostService.getBlogPostBySlug: DB query failed for slug "${trimmedSlug}", falling back:`,
           err
@@ -865,7 +865,7 @@ export class BlogPostService {
         );
         evicted = true;
       } catch (err) {
-        if (env.VERCEL_ENV === "production") {
+        if (env.VERCEL_ENV === "production" && !isBuildPhase()) {
           console.warn(
             `BlogPostService.evictBlogPostCache: Redis eviction failed for "${trimmedSlug}":`,
             err
@@ -933,7 +933,7 @@ export class BlogPostService {
         userReactions,
       };
     } catch (err) {
-      if (env.VERCEL_ENV === "production") {
+      if (env.VERCEL_ENV === "production" && !isBuildPhase()) {
         console.warn(
           "BlogPostService.getReactions: Redis path failed, returning compute-shielded defaults:",
           err
@@ -1113,7 +1113,7 @@ export class BlogPostService {
         userReactions,
       };
     } catch (err) {
-      if (env.VERCEL_ENV === "production") {
+      if (env.VERCEL_ENV === "production" && !isBuildPhase()) {
         console.warn(
           "BlogPostService.submitReaction: Redis buffering failed:",
           err
@@ -1266,7 +1266,7 @@ export class BlogPostService {
         inserted: createResult.count,
       };
     } catch (err) {
-      if (env.VERCEL_ENV === "production") {
+      if (env.VERCEL_ENV === "production" && !isBuildPhase()) {
         console.error(
           "BlogPostService.flushBufferedReactionsToDatabase encountered error:",
           err
@@ -1312,7 +1312,7 @@ export class BlogPostService {
         ]);
       }
     } catch (err) {
-      if (env.VERCEL_ENV === "production") {
+      if (env.VERCEL_ENV === "production" && !isBuildPhase()) {
         console.warn(
           `BlogPostService: Failed to hydrate base reactions for ${slug}:`,
           err
