@@ -124,18 +124,22 @@ export interface NeonCapacityInventory {
 export const NEON_FREE_TIER_LIMIT_BYTES = 536870912; // 0.5 GiB = 512 MiB
 export const NEON_FREE_TIER_LIMIT_GIB = 0.5;
 
+/**
+ * Branches excluded from deletion candidates under any circumstances.
+ *
+ * "Protected" here is this repository's policy, not the provider's flag. The
+ * production branch reports `protected: false` at Neon as of 2026-09-19;
+ * enabling it is an open acceptance criterion of issue #622. A previous
+ * revision of this file also listed a `dev` branch, which does not exist --
+ * ADR 0037 replaced the persistent dev environment and this record was never
+ * updated.
+ */
 export const PROTECTED_NEON_TARGETS = [
   {
     projectId: "portfolio",
     branchName: "main",
     environment: "production" as const,
     role: "Canonical production PostgreSQL database backing deruiter.dev",
-  },
-  {
-    projectId: "portfolio",
-    branchName: "dev",
-    environment: "dev" as const,
-    role: "Long-lived integration branch database for schema rehearsal & staging",
   },
 ];
 
@@ -147,23 +151,23 @@ export const HISTORICAL_NEON_CANDIDATES: NeonCleanupCandidate[] = [];
 
 export function getNeonCapacityInventory(): NeonCapacityInventory {
   return {
-    timestamp: "2026-09-10T19:29:19.000Z",
+    timestamp: "2026-09-19T14:40:00.000Z",
     scope:
-      "Neon Postgres / Vercel Resource 'neon-gray-drum' (Dated 2026-09-10)",
+      "Neon Postgres / Vercel Resource 'neon-gray-drum' (observed 2026-09-19)",
     plan: "Neon Free Tier (0.5 GiB Storage & Auto-Suspending Compute)",
-    providerInventoryAvailable: false,
-    note: "Provider-side capacity measurements, branch IDs, and storage consumption are explicitly unavailable locally in this workspace without authorized NEON_API_KEY credentials (Issue #621). Zero deletion candidates approved.",
+    providerInventoryAvailable: true,
+    note: "Observed against the Neon API on 2026-09-19, closing the provider gap in issue #621. This is a recorded snapshot, not a live query: the script has no NEON_API_KEY and will drift until re-observed. Two cleanup candidates are identified in the reference document; zero are approved here.",
     storageMeter: {
       resource: "Neon Postgres Storage",
-      usedBytes: 0,
+      usedBytes: 32284672,
       limitBytes: NEON_FREE_TIER_LIMIT_BYTES,
-      usedGiB: 0,
+      usedGiB: 0.03,
       limitGiB: NEON_FREE_TIER_LIMIT_GIB,
-      headroomGiB: NEON_FREE_TIER_LIMIT_GIB,
-      headroomPercentage: 100,
+      headroomGiB: 0.47,
+      headroomPercentage: 94,
       unit: "GiB",
-      providerStatus: "unavailable_locally",
-      note: "Local workspace lacks authenticated Neon credentials; live storage meter is unobserved (Issue #621).",
+      providerStatus: "observed",
+      note: "Observed 2026-09-19: neon-gray-drum main branch holds 32,284,672 bytes (30.8 MiB) of the 512 MiB branch limit. Point-in-time recovery is 21,600s (6 hours), which is the effective RPO and bounds issue #700.",
     },
     computePolicy: {
       autoSuspendSeconds: 300,
@@ -200,34 +204,35 @@ export function getNeonCapacityInventory(): NeonCapacityInventory {
         totalStorageMiB: 0,
         branches: [
           {
-            branchId: "unobserved_locally",
+            branchId: "br-shiny-dust-apixoyf1",
             name: "main",
             projectSlug: "portfolio",
             environmentClassification: "production",
             protectionStatus: "protected",
-            storageBytes: 0,
-            storageMiB: 0,
-            createdAtUtc: "unobserved",
-            updatedAtUtc: "unobserved",
+            storageBytes: 32284672,
+            storageMiB: 30.8,
+            createdAtUtc: "2026-05-27T03:10:21Z",
+            updatedAtUtc: "2026-09-19T14:38:23Z",
             owner: "laser-loons-projects",
             expirationPolicy: "Never (Canonical Production)",
             connectionType: "pooled_runtime",
             role: "Canonical production database for deruiter.dev",
           },
           {
-            branchId: "unobserved_locally",
-            name: "dev",
+            branchId: "br-royal-sky-apfvczyx",
+            name: "rehearsal/v0.3.0-migrations",
             projectSlug: "portfolio",
-            environmentClassification: "dev",
-            protectionStatus: "protected",
-            storageBytes: 0,
-            storageMiB: 0,
-            createdAtUtc: "unobserved",
-            updatedAtUtc: "unobserved",
+            environmentClassification: "ephemeral",
+            protectionStatus: "ephemeral",
+            storageBytes: 32071680,
+            storageMiB: 30.6,
+            createdAtUtc: "2026-09-13T01:30:01Z",
+            updatedAtUtc: "2026-09-14T15:58:16Z",
             owner: "laser-loons-projects",
-            expirationPolicy: "Never (Protected Integration)",
+            expirationPolicy:
+              "None configured -- no lifecycle automation exists (issue #622)",
             connectionType: "pooled_runtime",
-            role: "Long-lived integration branch database for schema rehearsal",
+            role: "v0.3.0 migration rehearsal branch; compute idle since 2026-09-13",
           },
         ],
       },
@@ -237,21 +242,21 @@ export function getNeonCapacityInventory(): NeonCapacityInventory {
     summary: {
       totalProjects: 1,
       totalBranches: 2,
-      protectedBranchesCount: 2,
+      protectedBranchesCount: 1,
       candidateCount: 0,
-      currentTotalStorageMiB: 0,
+      currentTotalStorageMiB: 61.4,
       expectedRecoverableStorageMiB: 0,
       expectedRecoverableStorageGiB: 0,
       projectedPostCleanupHeadroomGiB: NEON_FREE_TIER_LIMIT_GIB,
       nonDestructiveInvariantVerified: true,
-      providerDataStatus: "unavailable_locally",
+      providerDataStatus: "observed",
     },
     cleanupRules: [
       "No Cloud Mutation Invariant: Zero write, drop, or delete operations are executed by this script or ticket.",
-      "Protected Resource Rule: Primary production branch ('main') and integration branch ('dev') are strictly excluded from candidates.",
+      "Protected Resource Rule: The primary production branch ('main') is strictly excluded from candidates. Note that Neon branch protection is NOT currently enabled on it -- this is repository policy, not a provider control (issue #622).",
       "Explicit Operator Approval Rule: Deletion of unconnected projects or stale PR branches requires explicit operator sign-off with authorized provider credentials.",
       "Post-Cleanup Verification Rule: Run 'npm run check:migrations:drift' and verify production HTTP 200 health after any future operator cleanup.",
-      "No Invented Evidence Rule: Provider-side storage measurements and branch lifecycles are recorded as unobserved locally until an authorized read-only provider snapshot is captured (Issue #621).",
+      "No Invented Evidence Rule: Figures here are a recorded snapshot observed on 2026-09-19, not a live query. Re-observe before relying on them; a previous revision asserted a protected 'dev' branch that never existed.",
     ],
   };
 }

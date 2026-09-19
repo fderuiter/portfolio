@@ -1,39 +1,50 @@
 # Neon Capacity & Branch Inventory
 
-Last verified: 2026-09-10 (Issue #621 audit)
+Last verified: 2026-09-19 against the Neon API (Issue #621 audit, provider gap closed)
 
 Scope: `fderuiter/portfolio`, Neon Free Tier, Vercel Resource `neon-gray-drum`
 
-Sources: Vercel integration inspection (`neon-gray-drum` attached to `portfolio`), environment configuration names (`vercel env ls`), and repository source (`lib/db.ts`, `prisma/schema.prisma`, `lib/env.ts`)
+Sources: authenticated Neon API (projects, branches, endpoints, databases), Vercel integration inspection, environment configuration names (`vercel env ls`), and repository source (`lib/db.ts`, `prisma/schema.prisma`, `lib/env.ts`)
 
 This is the evidence-backed capacity, connection hygiene, and retention record for Neon Postgres under [ADR 0036](../../adr/0036-free-tier-offloading-and-provider-quota-governance.md).
 
 > [!NOTE]
-> **Provider-Side Inventory Gap (Issue #621)**: No Neon API credential (`NEON_API_KEY`) or authenticated Neon CLI profile is available in this local workspace. Provider-side storage measurements, branch lifecycles, and compute usage are explicitly recorded as unobserved locally rather than estimated or fabricated. No deletion candidates are approved without an authenticated provider snapshot.
+> **Provider-Side Inventory Gap (Issue #621) — closed 2026-09-19.** A Neon API credential is now available and every figure below is observed provider state rather than inference. The previous revision of this document recorded two protections that do not exist; see the correction note under the branch inventory. Deletion candidates are identified but remain unapproved pending operator sign-off.
 
 ## Capacity & Policy Baseline
 
 | Meter | Observed Usage | Governed Limit | Policy Headroom | Status |
 | --- | ---: | ---: | ---: | --- |
-| Storage Capacity | *Unobserved locally* | 0.500 GiB (512 MiB) | 0.500 GiB (100%) | Governed Policy Limit |
+| Storage — `neon-gray-drum` | **30.8 MiB** (32,284,672 B) | 0.500 GiB (512 MiB) | 481 MiB (94%) | Healthy |
+| Storage — `neon-blue-plank` | **29.9 MiB** (31,301,632 B) | 0.500 GiB (512 MiB) | — | Archived, see candidates |
 | Compute Auto-Suspend | **5 minutes** (300s) | 5 minutes | 0s delay | Optimal |
-| Compute Unit Limit | **0.25 CU** | 0.25 CU | 0 CU | Bounded |
+| Compute Unit Limit | **0.25 CU** (min = max) | 0.25 CU | 0 CU | Bounded, no autoscale |
+| Project compute this cycle | **27,473 CPU-seconds** / 108,220s active | — | quota resets 2026-10-01 | Observed |
+| Point-in-time recovery | **6 hours** (21,600s) | — | — | **This is the effective RPO** |
+
+History retention is six hours. Any restore target older than that does not exist, which bounds what [#700](https://github.com/fderuiter/portfolio/issues/700) can rehearse.
 
 Neon's free plan provides 0.5 GiB storage and auto-suspends compute after 5 minutes of inactivity. Direct un-cached public queries wake compute, adding 1–3s cold-start latency and consuming monthly compute hours.
 
 ## Project & Branch Inventory (Policy Baseline)
 
-| Project / Resource | Target Name | Branch | Environment | Protection Status | Provider Storage | Role |
+| Project (id) | Branch | Endpoint | Environment | Protection | Storage | Role |
 | --- | --- | --- | --- | --- | ---: | --- |
-| `neon-gray-drum` | `portfolio` | `main` | Production | **Protected** | *Unobserved* | Canonical production database backing deruiter.dev |
-| `neon-gray-drum` | `portfolio` | `dev` | Development | **Protected** | *Unobserved* | Long-lived integration branch database for schema rehearsal |
+| `neon-gray-drum` (`withered-tooth-11857430`) | `main` (`br-shiny-dust-apixoyf1`) | `ep-young-mouse-ap1zkh0m` | Production | **NOT protected** | 30.8 MiB | Canonical production database backing deruiter.dev |
+| `neon-gray-drum` | `rehearsal/v0.3.0-migrations` (`br-royal-sky-apfvczyx`) | `ep-ancient-pine-appqk4cj` | Ephemeral | Not protected | 30.6 MiB | Release rehearsal branch, idle since 2026-09-13 |
+| `neon-blue-plank` (`hidden-frog-92457060`) | `main` (`br-patient-heart-augr38sg`) | — | Abandoned | Not protected | 29.9 MiB | Neon Auth experiment; `neon_auth` schema only, no application tables |
+
+> [!WARNING]
+> **Correction (2026-09-19).** The previous revision of this table stated that `main` had Protection Status **Protected** and that a `dev` branch existed and was **Protected**. Neither is true. `main` reports `"protected": false`, and there is no `dev` branch in the project — it was most likely removed under [ADR 0037](../../adr/0037-controlled-integration-and-release-deployments.md), which superseded the persistent dev environment, without this inventory being updated.
+>
+> Protecting the production branch is an unmet acceptance criterion of [#622](https://github.com/fderuiter/portfolio/issues/622), not a control in place. A document asserting governance that does not exist is worse than one recording the gap.
 
 ## Resource Classification & Retention Policy
 
 ### Protected Resources (Excluded from Cleanup)
 
-1. **Production Branch (`main`)**: Canonical database powering live visitor endpoints. Retained permanently. Never deleted, reset, or expired.
-2. **Integration Branch (`dev`)**: Long-lived staging database used for pre-release integration tests and migration rehearsals. Retained permanently.
+1. **Production Branch (`main`)**: Canonical database powering live visitor endpoints. Retained permanently; never deleted, reset, or expired. **Branch protection is not currently enabled** and should be, per #622.
+2. ~~**Integration Branch (`dev`)**~~: No such branch exists. ADR 0037 replaced the persistent dev environment with isolated production plus operator-requested previews.
 
 ### Ephemeral Resources (Subject to Retention & Expiry)
 
@@ -87,14 +98,16 @@ To guarantee Neon compute remains suspended in zero-compute sleep states across 
 
 No cloud mutations, drops, or deletions are executed by this inventory ticket. Zero deletion candidates are approved today:
 
-- **Approved Candidates**: 0 targets.
-- **Recoverable Capacity**: 0 MiB (unobserved locally without provider credentials).
-- **Protected Targets**: `main` (production) and `dev` (integration) branches are strictly excluded from candidates.
+- **Approved Candidates**: 0 targets. Identification is not approval.
+- **Identified Candidates**: 2, totalling ~60.5 MiB.
+  1. `rehearsal/v0.3.0-migrations` (`br-royal-sky-apfvczyx`) — 30.6 MiB. Branched from `main` on 2026-09-13 for the v0.3.0 migration rehearsal; compute idle since 2026-09-13T01:33. Nothing expires it, which is the missing lifecycle automation #622 asks for.
+  2. `neon-blue-plank` (`hidden-frog-92457060`) — 29.9 MiB, branch archived. Contains only the `neon_auth` schema (`account`, `session`, `user`, `organization`, `jwks`, …) and no application tables. An abandoned Neon Auth experiment superseded by Clerk. Its `NEON_AUTH_BASE_URL` and `VITE_NEON_AUTH_URL` variables remain live in Vercel Production and Preview, are referenced nowhere in the codebase, and are declared in neither `lib/env.ts` nor `.env.example` — an AGENTS.md section 15 violation independent of the storage.
+- **Protected Targets**: `main` (production) is excluded from candidates regardless of its current unprotected flag.
 
 ### Operating Constraints & Approval Workflow
 
 1. Obtain explicit operator sign-off with authenticated provider credentials before identifying any candidate target IDs in Neon Console or CLI.
-2. Never delete `main` or `dev` branches under any circumstances.
+2. Never delete the `main` branch under any circumstances. (`dev` no longer exists.)
 3. Post-cleanup verification: Run `npm run check:migrations:drift` and verify HTTP 200 on `https://deruiter.dev/`.
 
 ## Verification Commands

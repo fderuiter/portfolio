@@ -21,16 +21,23 @@ describe("Neon Capacity & Branch Inventory", () => {
     "neon-capacity-inventory.md"
   );
 
-  it("captures policy storage meters and records provider usage as unobserved locally under Neon 0.5 GiB free tier limit", () => {
+  it("captures policy storage meters and records observed provider usage under the Neon 0.5 GiB free tier limit", () => {
     expect(inventory.plan).toContain("Neon Free Tier");
     expect(inventory.scope).toContain("Neon Postgres");
-    expect(inventory.providerInventoryAvailable).toBe(false);
+    expect(inventory.providerInventoryAvailable).toBe(true);
 
     const meter = inventory.storageMeter;
     expect(meter.limitBytes).toBe(NEON_FREE_TIER_LIMIT_BYTES);
     expect(meter.limitGiB).toBe(NEON_FREE_TIER_LIMIT_GIB);
-    expect(meter.providerStatus).toBe("unavailable_locally");
-    expect(inventory.summary.providerDataStatus).toBe("unavailable_locally");
+    expect(meter.providerStatus).toBe("observed");
+    expect(inventory.summary.providerDataStatus).toBe("observed");
+
+    // Observed usage must be real and within the limit. Zero was the sentinel
+    // for "unobserved" and must not silently return.
+    expect(meter.usedBytes).toBeGreaterThan(0);
+    expect(meter.usedBytes).toBeLessThan(NEON_FREE_TIER_LIMIT_BYTES);
+    expect(meter.headroomPercentage).toBeGreaterThan(0);
+    expect(meter.headroomPercentage).toBeLessThanOrEqual(100);
   });
 
   it("enforces compute policies (0.25 CU, 5-minute auto-suspend)", () => {
@@ -56,7 +63,7 @@ describe("Neon Capacity & Branch Inventory", () => {
     );
   });
 
-  it("strictly protects production and dev branches from deletion candidates", () => {
+  it("strictly protects the production branch from deletion candidates", () => {
     const candidateProjectBranchPairs = inventory.candidates.map(
       (c) => `${c.projectId}/${c.branchName ?? ""}`
     );
@@ -66,9 +73,14 @@ describe("Neon Capacity & Branch Inventory", () => {
       expect(candidateProjectBranchPairs).not.toContain(protectedPair);
     }
 
-    expect(PROTECTED_NEON_TARGETS).toHaveLength(2);
+    // Only `main` exists. A previous revision asserted a protected `dev`
+    // branch; ADR 0037 replaced the persistent dev environment and no such
+    // branch is present at the provider (verified 2026-09-19).
+    expect(PROTECTED_NEON_TARGETS).toHaveLength(1);
     expect(PROTECTED_NEON_TARGETS[0].branchName).toBe("main");
-    expect(PROTECTED_NEON_TARGETS[1].branchName).toBe("dev");
+    expect(PROTECTED_NEON_TARGETS.map((t) => t.branchName)).not.toContain(
+      "dev"
+    );
   });
 
   it("enforces zero approved candidates until an authorized provider snapshot is captured (Issue #621)", () => {
@@ -130,10 +142,25 @@ describe("Neon Capacity & Branch Inventory", () => {
     expect(fs.existsSync(docPath)).toBe(true);
     const docContent = fs.readFileSync(docPath, "utf-8");
 
-    // All protected branches must be cited in doc
+    // Every protected target must be cited in the document, and nothing the
+    // script does not know about may be presented there as protected.
     expect(docContent).toContain("neon-gray-drum");
-    expect(docContent).toContain("`main`");
-    expect(docContent).toContain("`dev`");
+    for (const target of PROTECTED_NEON_TARGETS) {
+      expect(docContent).toContain(`\`${target.branchName}\``);
+    }
+
+    // Regression guard. This assertion previously read `toContain("\`dev\`")`,
+    // which pinned a branch that does not exist and let a doc rewrite that
+    // contradicted the script pass unnoticed. The document may still discuss
+    // `dev` historically, but must not assert it as a protected branch.
+    expect(docContent).not.toMatch(/\|\s*`dev`\s*\|[^\n]*\*\*Protected\*\*/);
+
+    // Observed figures in the document must match the snapshot the script
+    // reports, so the two cannot drift apart silently again.
+    expect(docContent).toContain(
+      String(inventory.projects[0].branches[0].branchId)
+    );
+    expect(docContent).toContain("6 hours");
 
     // Policy bounds & governance must be represented
     expect(docContent).toContain("0.500 GiB");

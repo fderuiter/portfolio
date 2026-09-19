@@ -138,6 +138,13 @@ describe("build.js script execution", () => {
     expect(process.env.DIRECT_URL).toBe(
       "postgresql://dummy:dummy@localhost:5432/dummy"
     );
+
+    // Guard against credential leakage. scripts/build.js loads .env.local so a
+    // local production build reaches the real database (issue #859), but it must
+    // never do so under test: this assertion would otherwise print a live
+    // connection string into the failure output.
+    expect(process.env.DATABASE_URL).not.toContain("neon.tech");
+    expect(process.env.DATABASE_URL).toContain("dummy");
   });
 
   it("fails immediately if a build step fails", () => {
