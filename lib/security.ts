@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
-import { getEnv } from "./env";
+import { getEnv, isBuildPhase } from "./env";
 
 function timingSafeSecretMatch(provided: string, expected: string): boolean {
   const providedDigest = crypto.createHash("sha256").update(provided).digest();
@@ -18,15 +18,11 @@ export function validateRouteInitialization() {
   const currentEnv = getEnv();
   const isDev =
     currentEnv.NODE_ENV === "development" || currentEnv.NODE_ENV === "test";
-  // Next sets NEXT_PHASE itself while prerendering, and the e2e harness sets
-  // PLAYWRIGHT_TEST, so both cover the cases where this module is imported
-  // without a real secret. CI used to be listed here too, which disabled the
+  // CI used to be treated as a build context here too, which disabled the
   // fail-closed guard for every job on every runner that exports CI=true --
   // the one environment where a regression in it would go unnoticed. CI now
   // supplies CRON_SECRET to the steps that boot a production server instead.
-  const isBuild =
-    currentEnv.NEXT_PHASE === "phase-production-build" ||
-    currentEnv.PLAYWRIGHT_TEST === "true";
+  const isBuild = isBuildPhase();
 
   if (!isDev && !isBuild && !currentEnv.CRON_SECRET) {
     throw new Error(
