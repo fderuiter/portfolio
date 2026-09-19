@@ -1735,7 +1735,7 @@ flowchart TD
     updated_at: new Date("2026-08-18T00:00:00Z"),
   },
   {
-    id: "canonical-14",
+    id: "canonical-22",
     slug: "sonos-network-controller",
     title: "Sonos Network Controller: Keep the Music Local",
     primary_language: "Python",

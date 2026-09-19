@@ -9,6 +9,10 @@ import {
   IconLayersIntersect,
 } from "@tabler/icons-react";
 import { useTerminology } from "@/components/providers/TerminologyProvider";
+import {
+  InlineMarkdown,
+  resolveSnippetTerminology,
+} from "@/components/ui/InlineMarkdown";
 
 interface ProjectTeaserGridProps {
   caseStudies: BaseCaseStudy[];
@@ -100,110 +104,10 @@ const DEFAULT_STYLE = {
 };
 
 /**
- * Synchronously swaps compiled terminology tags for either simplified plain-text definitions
- * or original technical terms, then strips remaining raw HTML tags.
+ * Re-exported so existing importers keep their path. The implementation moved to
+ * `components/ui/InlineMarkdown` when the case-study detail page needed it too.
  */
-export function resolveSnippetTerminology(
-  html: string,
-  simplified: boolean
-): string {
-  if (!html) return "";
-
-  const unescapeAttr = (str: string): string => {
-    return str
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'")
-      .replace(/&apos;/g, "'")
-      .replace(/&lt;/g, "<")
-      .replace(/&gt;/g, ">")
-      .replace(/&amp;/g, "&");
-  };
-
-  const termTagRegex = /<(span|abbr)\b([^>]*)>([\s\S]*?)<\/\1>/gi;
-
-  let resolved = html.replace(
-    termTagRegex,
-    (fullTag, _tagName, attrs, innerContent) => {
-      const isTermTag =
-        /data-term=/i.test(attrs) ||
-        /data-definition=/i.test(attrs) ||
-        /data-key=/i.test(attrs);
-
-      if (!isTermTag) {
-        return fullTag;
-      }
-
-      if (simplified) {
-        const termMatch = /data-term=["']([^"']*)["']/i.exec(attrs);
-        if (termMatch && termMatch[1]) {
-          return unescapeAttr(termMatch[1]);
-        }
-      }
-
-      return unescapeAttr(innerContent);
-    }
-  );
-
-  // Strip any remaining or unclosed HTML tags to prevent broken markup in card text
-  resolved = resolved.replace(/<[^>]*>/g, "");
-
-  return resolved;
-}
-
-interface InlineSnippetPart {
-  kind: "text" | "strong" | "code";
-  content: string;
-}
-
-function createSnippetParts(
-  text: string,
-  maxLength = 240
-): InlineSnippetPart[] {
-  const parts: InlineSnippetPart[] = [];
-  const tokenPattern = /(\*\*[^*]+?\*\*|`[^`]+?`)/g;
-  let match: RegExpExecArray | null;
-  let cursor = 0;
-
-  while ((match = tokenPattern.exec(text)) !== null) {
-    if (match.index > cursor) {
-      parts.push({ kind: "text", content: text.slice(cursor, match.index) });
-    }
-
-    const token = match[0];
-    parts.push({
-      kind: token.startsWith("**") ? "strong" : "code",
-      content: token.startsWith("**") ? token.slice(2, -2) : token.slice(1, -1),
-    });
-    cursor = match.index + token.length;
-  }
-
-  if (cursor < text.length) {
-    parts.push({ kind: "text", content: text.slice(cursor) });
-  }
-
-  let remaining = maxLength;
-  const truncatedParts: InlineSnippetPart[] = [];
-
-  for (const part of parts) {
-    if (remaining >= part.content.length) {
-      truncatedParts.push(part);
-      remaining -= part.content.length;
-      continue;
-    }
-
-    const candidate = part.content.slice(0, remaining);
-    const boundary = candidate.lastIndexOf(" ");
-    const content = boundary > 0 ? candidate.slice(0, boundary) : candidate;
-
-    if (content) {
-      truncatedParts.push({ ...part, content });
-    }
-    truncatedParts.push({ kind: "text", content: "…" });
-    return truncatedParts;
-  }
-
-  return truncatedParts;
-}
+export { resolveSnippetTerminology };
 
 function selectFeaturedProjects(caseStudies: BaseCaseStudy[]): BaseCaseStudy[] {
   const publishedStudies = caseStudies.filter((study) => study.published);
@@ -256,38 +160,6 @@ function getProjectTags(tags: string): string[] {
     .map((tag) => tag.trim())
     .filter(Boolean)
     .slice(0, 3);
-}
-
-// Clean inline text formatter that safely renders Markdown-like emphasis after terminology resolution.
-function CleanMarkdownSnippet({ text }: { text: string }) {
-  const { simplified } = useTerminology();
-  const resolvedText = resolveSnippetTerminology(text, simplified);
-  const parts = createSnippetParts(resolvedText);
-
-  return (
-    <span>
-      {parts.map((part, i) => {
-        if (part.kind === "strong") {
-          return (
-            <strong key={i} className="font-semibold text-zinc-100">
-              {part.content}
-            </strong>
-          );
-        }
-        if (part.kind === "code") {
-          return (
-            <code
-              key={i}
-              className="px-1.5 py-0.5 mx-0.5 text-[11px] font-mono bg-amber-500/10 border border-amber-500/20 text-amber-300 rounded"
-            >
-              {part.content}
-            </code>
-          );
-        }
-        return <span key={i}>{part.content}</span>;
-      })}
-    </span>
-  );
 }
 
 export const ProjectTeaserGrid: React.FC<ProjectTeaserGridProps> = ({
@@ -357,7 +229,10 @@ export const ProjectTeaserGrid: React.FC<ProjectTeaserGridProps> = ({
 
                 {/* Lightweight Description */}
                 <p className="min-w-0 break-words text-xs @sm:text-sm text-zinc-400 leading-relaxed font-sans mb-4 line-clamp-4">
-                  <CleanMarkdownSnippet text={study.editorial_content} />
+                  <InlineMarkdown
+                    text={study.editorial_content}
+                    maxLength={240}
+                  />
                 </p>
 
                 <dl className="mb-4 grid gap-2 border-l border-amber-500/30 pl-3 text-xs leading-relaxed">
