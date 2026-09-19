@@ -13,7 +13,15 @@ console.log("--- Starting Post-Build Conditional Migration Build Pipeline ---");
 // .env.local and the build would silently produce fallback content.
 //
 // prisma.config.ts already does exactly this for the same reason.
+// Never under test. A test that deletes DATABASE_URL to exercise the offline
+// fallback would otherwise have it repopulated from the developer's real
+// .env.local, and any assertion on the value would print a live production
+// credential into the failure output. lib/env.ts special-cases VITEST for the
+// same reason.
 try {
+  if (process.env.VITEST) {
+    throw new Error("skipped under test");
+  }
   const dotenv = require("dotenv");
   if (fs.existsSync(".env.local")) {
     dotenv.config({ path: ".env.local" });
@@ -21,10 +29,12 @@ try {
     dotenv.config();
   }
 } catch (err) {
-  console.warn(
-    "Could not load local environment files; continuing with the ambient environment.",
-    err && err.message
-  );
+  if (!process.env.VITEST) {
+    console.warn(
+      "Could not load local environment files; continuing with the ambient environment.",
+      err && err.message
+    );
+  }
 }
 
 // 1. Connection String & Secret Fallback for Offline/Local Compilation
