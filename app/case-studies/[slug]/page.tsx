@@ -5,6 +5,7 @@ import { SandboxTerminal } from "@/components/SandboxTerminal";
 import { IconTerminal } from "@tabler/icons-react";
 import { TracingBeam } from "@/components/ui/TracingBeam";
 import { RichNarrative } from "@/components/RichNarrative";
+import { InlineMarkdown } from "@/components/ui/InlineMarkdown";
 import { Tooltip } from "@/components/ui/Tooltip";
 import {
   getGitHubStats,
@@ -270,9 +271,15 @@ export default async function CaseStudyPage({ params }: PageProps) {
 
           {/* Long-form Article Narrative */}
           <article className="prose prose-invert max-w-none text-neutral-300 leading-relaxed space-y-8">
-            {/* Editorial Content Highlight block */}
+            {/* Editorial Content Highlight block.
+                `editorial_content` is Markdown, not HTML -- rendering it through
+                RichNarrative printed the asterisks and backticks literally on
+                every case study. */}
             <div className="text-lg text-muted-strong font-medium border-l-2 border-brand-cyan/60 pl-6 py-2 italic bg-zinc-900/10 rounded-r-xl">
-              <RichNarrative html={study.editorial_content} />
+              <InlineMarkdown
+                text={study.editorial_content}
+                codeClassName="px-1.5 py-0.5 mx-0.5 text-sm font-mono not-italic bg-amber-500/10 border border-amber-500/20 text-amber-300 rounded"
+              />
             </div>
 
             {/* Tags list row */}
