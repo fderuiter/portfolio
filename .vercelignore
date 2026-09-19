@@ -1,0 +1,33 @@
+# Vercel builds from source on its own runners, so local build output, installed
+# dependencies and agent scratch space must never be uploaded. Without this file
+# a deploy uploads ~200,000 files instead of the ~3,200 tracked in git, which
+# exhausts the free tier's 5,000-request daily upload allowance and locks
+# deployments out for 24 hours.
+
+# Local build output. Vercel warns explicitly not to upload this.
+.next
+out
+build
+
+# Installed dependencies. Reinstalled on the runner from the lockfile.
+node_modules
+
+# Agent worktrees are full second checkouts of this repository, each with its
+# own node_modules and .next. See issue #849 for the matching ESLint problem.
+.claude
+
+# Test and coverage output.
+coverage
+test-results
+playwright-report
+.nyc_output
+
+# Local environment and logs. Secrets must never leave the machine.
+.env.local
+.env*.local
+*.log
+npm-debug.log*
+
+# Version control metadata.
+.git
+.github
