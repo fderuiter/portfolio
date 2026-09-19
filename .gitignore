@@ -63,3 +63,4 @@ app/theme.css
 
 # local media storage persistence
 /.media-storage/
+.env*.local
