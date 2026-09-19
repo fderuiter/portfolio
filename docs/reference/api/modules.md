@@ -46,6 +46,7 @@
 - [lib/blog](lib/blog/README.md)
 - [lib/blog/presets](lib/blog/presets/README.md)
 - [lib/blog/types](lib/blog/types/README.md)
+- [lib/build-integrity](lib/build-integrity/README.md)
 - [lib/case-studies-data](lib/case-studies-data/README.md)
 - [lib/client-sentry](lib/client-sentry/README.md)
 - [lib/clinical-trial-chaos](lib/clinical-trial-chaos/README.md)

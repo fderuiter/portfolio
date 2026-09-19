@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { env, isBuildPhase } from "@/lib/env";
+import { failBuildOnDataSourceError } from "@/lib/build-integrity";
 import { FALLBACK_BLOG_POSTS, BlogPostData } from "@/lib/fallback-blog-posts";
 import { redis, getScopedRedisKey, isRedisConfigured } from "@/lib/redis";
 import { CONTENT_PILLARS, type ContentPillar } from "@/lib/blog/types";
@@ -675,6 +676,10 @@ export class BlogPostService {
           err
         );
       }
+      failBuildOnDataSourceError(
+        "BlogPostService.getAllPublishedBlogPosts",
+        err
+      );
       return FALLBACK_BLOG_POSTS.filter(
         (p) => p.published && isValidBlogPost(p)
       )
@@ -789,6 +794,7 @@ export class BlogPostService {
           err
         );
       }
+      failBuildOnDataSourceError("BlogPostService.getBlogPostBySlug", err);
       const fallback = FALLBACK_BLOG_POSTS.find(
         (p) =>
           p.slug === trimmedSlug && p.published === true && isValidBlogPost(p)

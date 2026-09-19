@@ -49,6 +49,7 @@ export const serverEnvSchema = z.object({
   PLAYWRIGHT_TEST: z.string().optional(),
   CI: z.string().optional(),
   SKIP_DB_HEALTH_CHECK: z.string().optional(),
+  ALLOW_FALLBACK_PRODUCTION_BUILD: z.string().optional(),
   ALLOW_DESTRUCTIVE_MIGRATIONS: z.string().optional(),
   NEXT_PHASE: z.string().optional(),
   NEXT_RUNTIME: z.string().optional(),
