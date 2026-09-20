@@ -30,12 +30,33 @@ export function resolveTracesSampleRate(
   return isProduction ? MAX_PRODUCTION_TRACES_SAMPLE_RATE : 0;
 }
 
+/**
+ * Reports whether captured events belong in Sentry at all.
+ *
+ * Span sampling alone does not bound the error budget: `beforeSend` runs for
+ * every captured exception regardless of `tracesSampleRate`, so a developer
+ * running `next dev` against the production DSN spends the 5k monthly error
+ * allowance on hot-reload aborts and local timeouts. Only a production
+ * deployment produces errors anyone can act on, so only production reports.
+ *
+ * @param isProduction - Override for the deployment check, for tests.
+ * @returns True when the event should be transmitted.
+ */
+export function isReportableEnvironment(
+  isProduction: boolean = isProductionEnvironment()
+): boolean {
+  return isProduction;
+}
+
 /** Error names and message fragments that carry no diagnostic value. */
 const BENIGN_ERROR_NAMES = new Set(["AbortError", "GameEngineException"]);
 
 const BENIGN_MESSAGE_FRAGMENTS = [
   "ResizeObserver loop limit exceeded",
   "ResizeObserver loop completed with undelivered notifications",
+  // Raised by the streaming renderer when a visitor navigates away before the
+  // response finishes. The abort is the visitor's, not a fault in the route.
+  "The destination stream closed early",
 ];
 
 /** Extension schemes that report faults belonging to the visitor's browser. */

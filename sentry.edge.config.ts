@@ -1,6 +1,7 @@
 import * as Sentry from "@sentry/nextjs";
 import {
   isBenignClientNoise,
+  isReportableEnvironment,
   resolveTracesSampleRate,
 } from "@/lib/sentry-policy";
 
@@ -11,6 +12,9 @@ Sentry.init({
   debug: false,
   sendDefaultPii: false,
   beforeSend(event, hint) {
+    if (!isReportableEnvironment()) {
+      return null;
+    }
     if (isBenignClientNoise(hint?.originalException)) {
       return null;
     }

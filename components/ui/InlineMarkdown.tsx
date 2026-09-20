@@ -68,7 +68,7 @@ export function resolveSnippetTerminology(
   return resolved;
 }
 
-export interface InlineSnippetPart {
+interface InlineSnippetPart {
   kind: "text" | "strong" | "code";
   content: string;
 }
@@ -81,7 +81,7 @@ export interface InlineSnippetPart {
  * private copy did, would silently clip a case study's description to a card
  * length on a full-width page.
  */
-export function createSnippetParts(
+function createSnippetParts(
   text: string,
   maxLength = Number.POSITIVE_INFINITY
 ): InlineSnippetPart[] {
@@ -131,7 +131,7 @@ export function createSnippetParts(
   return truncatedParts;
 }
 
-export interface InlineMarkdownProps {
+interface InlineMarkdownProps {
   text: string;
   /** Character budget before an ellipsis. Omit to render the whole field. */
   maxLength?: number;
