@@ -8,7 +8,10 @@ import { PageLayout } from "@/components/PageLayout";
 import { CRFStudioSkeleton } from "@/components/crf/Skeletons";
 
 const CRFStudioContainer = dynamic(
-  () => import("@/components/crf/CRFStudioContainer").then((mod) => mod.CRFStudioContainer),
+  () =>
+    import("@/components/crf/CRFStudioContainer").then(
+      (mod) => mod.CRFStudioContainer
+    ),
   {
     ssr: false,
     loading: () => <CRFStudioSkeleton />,
@@ -17,7 +20,15 @@ const CRFStudioContainer = dynamic(
 
 export default function CRFStudioPage() {
   return (
-    <PageLayout variant="studio" className="bg-zinc-950 text-white selection:bg-brand-cyan/30 selection:text-brand-cyan">
+    <PageLayout
+      variant="studio"
+      className="bg-zinc-950 text-white selection:bg-brand-cyan/30 selection:text-brand-cyan"
+    >
+      {/* The studio's visible headings belong to whichever mode panel is open,
+          so the stable page-level heading is visually hidden rather than
+          duplicating a title the layout does not have room for. */}
+      <h1 className="sr-only">CRF Studio</h1>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4 w-full">
         <Breadcrumbs
           items={[

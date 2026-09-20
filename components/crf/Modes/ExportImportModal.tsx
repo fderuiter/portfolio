@@ -189,9 +189,9 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
             <span className="p-1.5 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-400">
               <IconCode className="w-5 h-5" />
             </span>
-            <h1 className="text-lg font-bold text-white font-mono">
+            <h2 className="text-lg font-bold text-white font-mono">
               CDISC Standards &amp; Interoperability Exporter
-            </h1>
+            </h2>
           </div>
           <p className="text-xs text-zinc-400 font-sans mt-1">
             Export study protocols and CRFs to CDISC ODM-XML, SAS programs (PROC

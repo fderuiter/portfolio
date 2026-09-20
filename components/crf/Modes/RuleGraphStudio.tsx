@@ -120,9 +120,9 @@ export const RuleGraphStudio: React.FC<RuleGraphStudioProps> = ({ study }) => {
             <span className="p-1.5 rounded-lg bg-brand-cyan/10 border border-brand-cyan/30 text-brand-cyan">
               <IconHierarchy className="w-5 h-5" />
             </span>
-            <h1 className="text-lg font-bold text-white font-mono">
+            <h2 className="text-lg font-bold text-white font-mono">
               Logic Dependency DAG &amp; AST Rule Studio
-            </h1>
+            </h2>
           </div>
           <p className="text-xs text-zinc-400 font-sans mt-1">
             Visual directed acyclic graph for cross-field edit checks, execution

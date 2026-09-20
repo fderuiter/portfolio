@@ -117,7 +117,7 @@ export const AssetDistributionHub: React.FC = () => {
   return (
     <div className="w-full my-12 p-6 sm:p-8 bg-zinc-950/90 border border-zinc-800 rounded-3xl shadow-2xl relative overflow-hidden">
       {/* Background Glow */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-red-500/5 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-96 h-96 bg-red-500/5 rounded-full blur-[100px] pointer-events-none hidden sm:block" />
 
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 border-b border-zinc-800/80 pb-6 relative z-10">

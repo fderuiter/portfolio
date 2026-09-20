@@ -104,9 +104,9 @@ export const AcrfOverlayViewer: React.FC<AcrfOverlayViewerProps> = ({
             <span className="p-1.5 rounded-lg bg-sky-500/10 border border-sky-500/30 text-sky-400">
               <IconFileCode className="w-5 h-5" />
             </span>
-            <h1 className="text-lg font-bold text-white font-mono">
+            <h2 className="text-lg font-bold text-white font-mono">
               Visual Annotated CRF (aCRF) Submission Studio
-            </h1>
+            </h2>
           </div>
           <p className="text-xs text-zinc-400 font-sans mt-1">
             Publication-ready blank case report form with SDTMIG v3.4 / CDASH
@@ -314,9 +314,9 @@ export const AcrfOverlayViewer: React.FC<AcrfOverlayViewerProps> = ({
             <span className="text-xs font-mono font-bold tracking-widest text-sky-700 uppercase">
               Regulatory Submission Annotated CRF Book (aCRF)
             </span>
-            <h1 className="text-2xl font-black text-zinc-900">
+            <h2 className="text-2xl font-black text-zinc-900">
               {study.studyName}
-            </h1>
+            </h2>
             <p className="text-xs font-mono text-zinc-600">
               Protocol: {study.protocolNumber} | Phase: {study.phase} | Version:{" "}
               {study.version}

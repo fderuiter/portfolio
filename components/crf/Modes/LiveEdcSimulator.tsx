@@ -600,9 +600,9 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
             <span className="p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 shrink-0">
               <IconShieldCheck className="w-5 h-5" />
             </span>
-            <h1 className="text-base sm:text-lg font-bold text-white font-mono truncate">
+            <h2 className="text-base sm:text-lg font-bold text-white font-mono truncate">
               Live 21 CFR Part 11 EDC Simulation Mode
-            </h1>
+            </h2>
           </div>
           <p className="text-xs text-zinc-400 font-sans mt-1">
             Test live subject patient entry, CRA source data verification (SDV),

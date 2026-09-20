@@ -176,7 +176,7 @@ export function UnifiedErrorLayout({
       <div className="min-h-screen py-32 px-6 flex flex-col items-center justify-center bg-brand-dark text-foreground relative overflow-hidden select-none">
         {/* Background Blurs */}
         <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-brand-cyan/5 blur-[120px] pointer-events-none transition-all duration-700 [transform:translate(-50%,-50%)_translate(var(--blur-shift-x,0px),var(--blur-shift-y,0px))]"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-brand-cyan/5 blur-[120px] pointer-events-none transition-all duration-700 [transform:translate(-50%,-50%)_translate(var(--blur-shift-x,0px),var(--blur-shift-y,0px))] hidden sm:block"
           style={
             showRetroLabyrinth
               ? ({

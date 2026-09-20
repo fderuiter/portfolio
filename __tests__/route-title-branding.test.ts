@@ -79,3 +79,49 @@ describe("route titles are branded exactly once", () => {
     ).toMatch(/template:\s*["'`]%s \| Frederick de Ruiter["'`]/);
   });
 });
+
+/**
+ * `/work/laser-loon` declares its metadata inline rather than through
+ * `ROUTE_METADATA_CONFIGS`, so the config-driven bounds never reached it. It
+ * rendered at 91 characters, the longest title on the site.
+ */
+describe("routes with inline metadata observe the same SERP bound", () => {
+  const TEMPLATE_COST = " | Frederick de Ruiter".length;
+
+  const inlineRoutes = [
+    { path: "app/work/laser-loon/page.tsx", label: "/work/laser-loon" },
+  ];
+
+  inlineRoutes.forEach(({ path: relativePath, label }) => {
+    it(`keeps ${label} within the 60-character SERP limit`, () => {
+      const source = readFileSync(join(process.cwd(), relativePath), "utf8");
+      const titles = [...source.matchAll(/title:\s*"([^"]+)"/gu)].map(
+        (match) => match[1]
+      );
+
+      expect(titles.length).toBeGreaterThan(0);
+
+      for (const title of titles) {
+        const rendered = title.length + TEMPLATE_COST;
+        expect(
+          rendered,
+          `${label} renders ${rendered} chars: "${title}"`
+        ).toBeLessThanOrEqual(60);
+      }
+    });
+  });
+
+  it("brands inline titles exactly once, like the templated routes", () => {
+    const source = readFileSync(
+      join(process.cwd(), "app/work/laser-loon/page.tsx"),
+      "utf8"
+    );
+    const titles = [...source.matchAll(/title:\s*"([^"]+)"/gu)].map(
+      (match) => match[1]
+    );
+
+    for (const title of titles) {
+      expect(SITE_NAME_SUFFIX.test(title), `"${title}"`).toBe(false);
+    }
+  });
+});

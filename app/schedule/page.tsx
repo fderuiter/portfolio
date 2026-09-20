@@ -49,8 +49,8 @@ export default function SchedulePage() {
       className="bg-zinc-950 text-foreground relative overflow-hidden"
     >
       {/* Ambient Atmospheric Glows */}
-      <div className="absolute top-24 left-1/2 -translate-x-1/2 w-[650px] h-[320px] bg-brand-cyan/5 blur-[140px] pointer-events-none -z-10 rounded-full" />
-      <div className="absolute top-96 right-1/4 w-[450px] h-[280px] bg-brand-blue/5 blur-[120px] pointer-events-none -z-10 rounded-full" />
+      <div className="absolute top-24 left-1/2 -translate-x-1/2 w-[650px] h-[320px] bg-brand-cyan/5 blur-[140px] pointer-events-none -z-10 rounded-full hidden sm:block" />
+      <div className="absolute top-96 right-1/4 w-[450px] h-[280px] bg-brand-blue/5 blur-[120px] pointer-events-none -z-10 rounded-full hidden sm:block" />
 
       <div className="max-w-5xl mx-auto flex flex-col items-center relative z-10 w-full">
         {/* Navigation Breadcrumb */}
@@ -105,8 +105,8 @@ export default function SchedulePage() {
 
         {/* Interactive Booking Action Card */}
         <div className="w-full p-8 md:p-12 rounded-3xl bg-zinc-900/30 border border-zinc-800/80 hover:border-brand-cyan/40 transition-all shadow-2xl relative overflow-hidden flex flex-col items-center text-center">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-brand-cyan/5 rounded-full blur-[100px] pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-80 h-80 bg-brand-blue/5 rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute top-0 right-0 w-80 h-80 bg-brand-cyan/5 rounded-full blur-[100px] pointer-events-none hidden sm:block" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-brand-blue/5 rounded-full blur-[100px] pointer-events-none hidden sm:block" />
 
           <div className="w-16 h-16 rounded-2xl bg-brand-cyan/10 border border-brand-cyan/30 flex items-center justify-center mb-6 text-brand-cyan shadow-[0_0_25px_rgba(6,182,212,0.2)]">
             <IconCalendar className="w-8 h-8" />
