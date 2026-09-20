@@ -1,4 +1,8 @@
-import { isBenignClientNoise, resolveTracesSampleRate } from "./sentry-policy";
+import {
+  isBenignClientNoise,
+  isReportableEnvironment,
+  resolveTracesSampleRate,
+} from "./sentry-policy";
 /**
  * Utility for lazy Sentry loading and conditional initialization on client side.
  */
@@ -46,6 +50,9 @@ export async function initClientSentry(): Promise<boolean | null> {
       debug: false,
       sendDefaultPii: false,
       beforeSend(event, hint) {
+        if (!isReportableEnvironment()) {
+          return null;
+        }
         if (isBenignClientNoise(hint?.originalException)) {
           return null;
         }

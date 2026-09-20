@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   MAX_PRODUCTION_TRACES_SAMPLE_RATE,
   isBenignClientNoise,
+  isReportableEnvironment,
   resolveTracesSampleRate,
 } from "@/lib/sentry-policy";
 
@@ -23,6 +24,24 @@ describe("Sentry quota and noise policy", () => {
     it("never returns full sampling", () => {
       expect(resolveTracesSampleRate(true)).not.toBe(1);
       expect(resolveTracesSampleRate(false)).not.toBe(1);
+    });
+  });
+
+  describe("environment reporting gate", () => {
+    it("reports only from a production deployment", () => {
+      expect(isReportableEnvironment(true)).toBe(true);
+      expect(isReportableEnvironment(false)).toBe(false);
+    });
+
+    it("drops the local development errors that spend the error budget", () => {
+      // A developer running next dev against the production DSN previously
+      // billed hot-reload aborts and local Redis timeouts to the 5k allowance.
+      const timeout = new Error("Redis buffer enqueue timed out after 2000ms");
+      const beforeSend = (error: unknown) =>
+        !isReportableEnvironment(false) || isBenignClientNoise(error)
+          ? null
+          : error;
+      expect(beforeSend(timeout)).toBeNull();
     });
   });
 
@@ -61,6 +80,12 @@ describe("Sentry quota and noise policy", () => {
       expect(isBenignClientNoise(gameError)).toBe(true);
     });
 
+    it("drops streaming responses aborted by the visitor", () => {
+      expect(
+        isBenignClientNoise(new Error("The destination stream closed early."))
+      ).toBe(true);
+    });
+
     it("keeps real application errors", () => {
       expect(
         isBenignClientNoise(new TypeError("cannot read x of undefined"))
@@ -70,6 +95,13 @@ describe("Sentry quota and noise policy", () => {
       );
       expect(isBenignClientNoise(undefined)).toBe(false);
       expect(isBenignClientNoise(null)).toBe(false);
+      // A buffer timeout drops a telemetry event outright, so production must
+      // still see it once the environment gate allows the event through.
+      expect(
+        isBenignClientNoise(
+          new Error("Redis buffer enqueue timed out after 2000ms")
+        )
+      ).toBe(false);
     });
   });
 });

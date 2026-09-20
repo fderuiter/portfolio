@@ -13,4 +13,5 @@
 ## Functions
 
 - [isBenignClientNoise](functions/isBenignClientNoise.md)
+- [isReportableEnvironment](functions/isReportableEnvironment.md)
 - [resolveTracesSampleRate](functions/resolveTracesSampleRate.md)
