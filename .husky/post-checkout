@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Post-Checkout Hook: Branch Naming Advisory
+# Warns (never blocks) when a checked-out branch does not follow the convention.
+# Renaming is free at creation; by push time the work is already finished.
+
+set -eu
+
+# git passes: <prev_head> <new_head> <branch_flag>. 1 means a branch checkout
+# rather than a file checkout, which is the only case worth commenting on.
+if [ "${3:-0}" != "1" ]; then
+  exit 0
+fi
+
+npx tsx scripts/validate-branch.ts --warn || true
+
+exit 0

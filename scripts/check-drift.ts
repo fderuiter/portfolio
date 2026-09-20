@@ -52,6 +52,67 @@ function defaultDependencies(workspaceRoot: string): DriftCheckDependencies {
   };
 }
 
+/** The kinds of drift this check reports, each with a different remedy. */
+export type DriftCategory =
+  | "generated-docs"
+  | "authored-docs"
+  | "openapi"
+  | "onboarding"
+  | "topology"
+  | "markdown-links";
+
+const REMEDIES: Record<DriftCategory, { title: string; steps: string[] }> = {
+  "generated-docs": {
+    title:
+      "Stale generated references (TypeDoc is behind lib/, hooks/ or types/)",
+    steps: ["npm run compile-docs", "git add docs/"],
+  },
+  openapi: {
+    title: "API contract drift (a route is missing from openapi.json)",
+    steps: ["npm run doctor:fix", "git add openapi.json docs/"],
+  },
+  onboarding: {
+    title: "Onboarding documentation drift",
+    steps: ["npm run doctor:fix", "git add docs/"],
+  },
+  topology: {
+    title: "Architectural topology drift",
+    steps: ["npm run doctor:fix", "git add docs/"],
+  },
+  "authored-docs": {
+    title: "Authored documentation you changed deliberately",
+    steps: ["git add docs/"],
+  },
+  "markdown-links": {
+    title: "Broken markdown links",
+    steps: [
+      "# Fix the reported link targets by hand",
+      "npm run check-docs-drift",
+    ],
+  },
+};
+
+/**
+ * Renders a copy-pasteable remedy for each category that actually failed.
+ *
+ * Prose costs a second full pre-commit cycle: an author reads "regenerate only
+ * stale references", guesses the command, and pays typecheck and the staged
+ * suite again. Generated drift is deterministic and safe to name exactly;
+ * authored drift is not regenerated here because a human edited it on purpose
+ * and silently restaging it would discard that intent.
+ */
+export function formatDriftRemedy(categories: DriftCategory[]): string {
+  const unique = Array.from(new Set(categories));
+  if (unique.length === 0) return "";
+
+  const sections = unique.map((category) => {
+    const { title, steps } = REMEDIES[category];
+    return `  ${title}:\n${steps.map((step) => `    ${step}`).join("\n")}`;
+  });
+
+  return `👉 Resolve the drift, then commit again:\n\n${sections.join("\n\n")}\n`;
+}
+
 /** Runs the non-mutating documentation and specification drift checks. */
 export function checkDrift(
   workspaceRoot = path.resolve(__dirname, ".."),
@@ -60,6 +121,7 @@ export function checkDrift(
   console.log("Checking for documentation and specification drift...");
   let docsDrift = false;
   let driftSummary = "";
+  const categories: DriftCategory[] = [];
 
   console.log(
     "Comparing documentation against an isolated TypeDoc compilation..."
@@ -72,6 +134,13 @@ export function checkDrift(
   if (documentationResult.status === "fail") {
     docsDrift = true;
     driftSummary += `${documentationResult.details.map((detail) => `• ${detail}`).join("\n")}\n`;
+    for (const detail of documentationResult.details) {
+      categories.push(
+        detail.startsWith("Stale generated reference")
+          ? "generated-docs"
+          : "authored-docs"
+      );
+    }
   }
 
   console.log(
@@ -80,6 +149,7 @@ export function checkDrift(
   const { missingRoutes, hasDrift: openApiDrift } = dependencies.checkOpenApi();
   if (missingRoutes.length > 0) {
     docsDrift = true;
+    categories.push("openapi");
     driftSummary +=
       `• Undocumented API routes detected (${missingRoutes.length}):\n` +
       missingRoutes.map((route) => `  - ${route}`).join("\n") +
@@ -87,6 +157,7 @@ export function checkDrift(
   }
   if (openApiDrift) {
     docsDrift = true;
+    categories.push("openapi");
     driftSummary +=
       "• openapi.json is out of sync with scripts/generate-openapi.ts\n";
   }
@@ -95,6 +166,7 @@ export function checkDrift(
   const onboardingResult = dependencies.checkOnboarding();
   if (onboardingResult.status === "fail") {
     docsDrift = true;
+    categories.push("onboarding");
     driftSummary +=
       "• Onboarding documentation drift detected:\n" +
       (onboardingResult.details || [])
@@ -107,6 +179,7 @@ export function checkDrift(
   const topologyResult = dependencies.checkTopology();
   if (topologyResult.status === "fail") {
     docsDrift = true;
+    categories.push("topology");
     driftSummary +=
       "• Architectural directory topology drift detected:\n" +
       (topologyResult.details || [])
@@ -119,6 +192,7 @@ export function checkDrift(
   const markdownLinkResult = dependencies.checkMarkdownLinks();
   if (markdownLinkResult.status === "fail") {
     docsDrift = true;
+    categories.push("markdown-links");
     driftSummary +=
       "• Broken documentation markdown links detected:\n" +
       markdownLinkResult.details.map((detail) => `  - ${detail}`).join("\n") +
@@ -130,9 +204,7 @@ export function checkDrift(
       "\n❌ [DRIFT DETECTED] Technical specifications or documentation are out of sync with the codebase!"
     );
     console.error(driftSummary);
-    console.error(
-      "👉 Remedy the reported category: stage authored documentation, regenerate only stale references, and add missing API contracts before retrying.\n"
-    );
+    console.error(formatDriftRemedy(categories));
     return 1;
   }
 

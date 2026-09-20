@@ -5,6 +5,7 @@ import path from "node:path";
 import { checkDocumentationDrift } from "../scripts/documentation-drift";
 import {
   checkDrift,
+  formatDriftRemedy,
   type DriftCheckDependencies,
 } from "../scripts/check-drift";
 
@@ -264,5 +265,62 @@ describe("documentation drift checking", () => {
       )
     );
     error.mockRestore();
+  });
+});
+
+/**
+ * The remedy used to read "regenerate only stale references", naming no
+ * command. Every public-export change then cost two full pre-commit cycles:
+ * one to discover the drift, one after guessing the fix.
+ */
+describe("Drift remedy guidance", () => {
+  it("names the exact command for stale generated references", () => {
+    const remedy = formatDriftRemedy(["generated-docs"]);
+    expect(remedy).toContain("npm run compile-docs");
+    expect(remedy).toContain("git add docs/");
+  });
+
+  it("names the contract regeneration command for OpenAPI drift", () => {
+    const remedy = formatDriftRemedy(["openapi"]);
+    expect(remedy).toContain("npm run doctor:fix");
+    expect(remedy).toContain("openapi.json");
+  });
+
+  it("never offers to regenerate authored documentation", () => {
+    // A human edited these deliberately; restaging them silently would discard
+    // that intent, so the remedy only tells them to stage it.
+    const remedy = formatDriftRemedy(["authored-docs"]);
+    expect(remedy).toContain("git add docs/");
+    expect(remedy).not.toContain("compile-docs");
+    expect(remedy).not.toContain("doctor:fix");
+  });
+
+  it("reports only the categories that actually failed", () => {
+    const remedy = formatDriftRemedy(["generated-docs"]);
+    expect(remedy).not.toContain("Broken markdown links");
+    expect(remedy).not.toContain("openapi.json");
+  });
+
+  it("de-duplicates repeated categories", () => {
+    const remedy = formatDriftRemedy(["openapi", "openapi", "openapi"]);
+    expect(remedy.match(/npm run doctor:fix/gu)).toHaveLength(1);
+  });
+
+  it("returns nothing when there is no drift", () => {
+    expect(formatDriftRemedy([])).toBe("");
+  });
+
+  it("stays copy-pasteable rather than prose", () => {
+    const remedy = formatDriftRemedy([
+      "generated-docs",
+      "openapi",
+      "authored-docs",
+    ]);
+    expect(remedy).not.toContain("Remedy the reported category");
+    // Every non-empty line is either a heading or an indented command.
+    const commandLines = remedy
+      .split("\n")
+      .filter((line) => line.startsWith("    ") && line.trim().length > 0);
+    expect(commandLines.length).toBeGreaterThanOrEqual(4);
   });
 });
