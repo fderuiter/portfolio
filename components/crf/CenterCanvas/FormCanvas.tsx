@@ -351,9 +351,9 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                     <span className="px-2 py-0.5 rounded text-xs font-mono font-bold bg-brand-cyan/15 text-brand-cyan border border-brand-cyan/30">
                       {form.domain || "CRF"}
                     </span>
-                    <h1 className="text-base sm:text-xl font-extrabold text-white font-mono truncate">
+                    <h2 className="text-base sm:text-xl font-extrabold text-white font-mono truncate">
                       {form.name}
-                    </h1>
+                    </h2>
                     {form.isLogForm && (
                       <span className="text-[10px] font-mono text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/20">
                         Log Form

@@ -111,9 +111,9 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
             <span className="p-1.5 rounded-lg bg-brand-cyan/10 border border-brand-cyan/30 text-brand-cyan shrink-0">
               <IconCalendar className="w-5 h-5" />
             </span>
-            <h1 className="text-base sm:text-lg font-bold text-white font-mono truncate">
+            <h2 className="text-base sm:text-lg font-bold text-white font-mono truncate">
               Protocol Visit Schedule Matrix (Schedule of Assessments)
-            </h1>
+            </h2>
           </div>
           <p className="text-xs text-zinc-400 font-sans mt-1">
             Map clinical forms to protocol visits and configure allowable window

@@ -294,14 +294,12 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
       // characters, so a config passing at 60 rendered at 82.
       const renderedTitle = `${config.title} | Frederick de Ruiter`;
 
-      // 60 is the SERP display limit and the target. 13 of 31 routes exceed it
-      // today -- a pre-existing gap this test could not see while it measured
-      // the wrong string. This ceiling stops it worsening; bringing the
-      // outliers under 60 is tracked separately.
+      // 60 is the SERP display limit: past it, search results truncate with an
+      // ellipsis. The template costs 22 characters, so a config has 38.
       expect(
         renderedTitle.length,
         `Route "${key}" renders ${renderedTitle.length} chars: "${renderedTitle}"`
-      ).toBeLessThanOrEqual(78);
+      ).toBeLessThanOrEqual(60);
       expect(
         renderedTitle.length,
         `Route "${key}" renders only ${renderedTitle.length} chars: "${renderedTitle}"`

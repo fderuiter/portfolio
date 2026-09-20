@@ -50,7 +50,7 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     isAccessibleForFree: true,
   },
   patrol: {
-    title: "Patrol Shift Studio: Midwest Ski Patrol Simulator",
+    title: "Ski Patrol Shift Studio",
     description:
       "An interactive Midwest ski-patrol judgment simulation foundation powered by deterministic FSM transitions and operational dispatch routines.",
     path: "/patrol",
@@ -100,7 +100,7 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     isAccessibleForFree: true,
   },
   quasiPuzzler: {
-    title: "Quasi-Perfect Puzzler: Formal Verification",
+    title: "Formal Verification Puzzler",
     description:
       "Apply deductive proof tactics to a tree in this Lean-inspired puzzle game. Complete the proof before your simulated memory runs out.",
     path: "/arcade/quasi-puzzler",
@@ -197,7 +197,7 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     isAccessibleForFree: true,
   },
   simulator: {
-    title: "Incident & Engineering Decision Simulator",
+    title: "Incident Decision Simulator",
     description:
       "Work through a few engineering decisions, from interface priorities to an outage. Explore what your choices emphasize and compare the results.",
     path: "/simulator",
@@ -322,7 +322,7 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     isAccessibleForFree: true,
   },
   oxidizeMath: {
-    title: "OxidizeMath: Scientific Computing in Rust",
+    title: "OxidizeMath: Rust Scientific Computing",
     description:
       "Explore scientific computing in Rust with numerical solvers, compile-time checks, and interactive simulations. Read the OxidizeMath writeup.",
     path: "/case-studies/oxidizemath",
@@ -355,7 +355,7 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     isAccessibleForFree: true,
   },
   sonosNetworkController: {
-    title: "Sonos Network Controller: Keep the Music Local",
+    title: "Sonos Network Controller",
     description:
       "Control Sonos speakers on your own network with a Python API and a small web interface. Read about the protocols and implementation choices.",
     path: "/case-studies/sonos-network-controller",
@@ -371,7 +371,7 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     isAccessibleForFree: true,
   },
   clintrials: {
-    title: "clintrials: Try Trial Designs in Your Browser",
+    title: "clintrials: Trial Designs in Browser",
     description:
       "Compare adaptive clinical trial designs in a browser workspace. See how Pyodide workers run statistical models without a separate Python setup.",
     path: "/case-studies/clintrials",
@@ -387,7 +387,7 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     isAccessibleForFree: true,
   },
   equiposeRandomization: {
-    title: "Equipose: Reproducible Clinical Trial Randomization",
+    title: "Equipose: Trial Randomization",
     description:
       "Explore reproducible clinical trial randomization in the browser, with generated Python, R, SAS, and Stata code for inspecting the allocation.",
     path: "/case-studies/equipose-randomization",
@@ -405,7 +405,7 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     isAccessibleForFree: true,
   },
   lambdaWave: {
-    title: "Lambda-Wave: Tracking Respiratory Motion With Radar",
+    title: "Lambda-Wave: Respiratory Motion Radar",
     description:
       "Explore a respiratory motion tracking project using FMCW radar, Haskell signal processing, and C++ sample transport. Read the design notes.",
     path: "/case-studies/lambda-wave",
@@ -422,7 +422,7 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     isAccessibleForFree: true,
   },
   duckDeploy: {
-    title: "DuckDeploy: From Configuration Forms to Deployment Files",
+    title: "DuckDeploy: Config to Deployed Forms",
     description:
       "Turn JSON Schema into configuration forms, then compile the values into deployment manifests. See how DuckDeploy uses TypeScript and workers.",
     path: "/case-studies/duckdeploy",
@@ -439,7 +439,7 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     isAccessibleForFree: true,
   },
   cardiacRiskModeling: {
-    title: "Cardiac Risk Modeling: Predictions You Can Inspect",
+    title: "Inspectable Cardiac Risk Models",
     description:
       "Read a cardiac risk modeling project using Python, XGBoost, and SHAP. Explore data leakage, cross-validation, calibration, and model explanations.",
     path: "/case-studies/cardiac-risk-modeling",
@@ -473,7 +473,7 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     isAccessibleForFree: true,
   },
   crfXl: {
-    title: "CRF.xl: From Spreadsheet to Clinical Forms",
+    title: "CRF.xl: Spreadsheet to Clinical Forms",
     description:
       "Turn Excel protocol grids into clinical form definitions and ODM-XML exports. Read how CRF.xl handles rules, dependencies, and background work.",
     path: "/case-studies/crf-xl",
@@ -490,7 +490,7 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     isAccessibleForFree: true,
   },
   promptOps: {
-    title: "PromptOps: Test Prompts Like Other Code",
+    title: "PromptOps: Test Prompts Like Code",
     description:
       "Version prompts, validate response shapes, and run regression evaluations in CI. Read how PromptOps makes changes easier to inspect and compare.",
     path: "/case-studies/promptops",
@@ -507,7 +507,7 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     isAccessibleForFree: true,
   },
   designingForMyBrother: {
-    title: "Designing for My Brother: Cognitive Typography",
+    title: "Designing for My Brother: Typography",
     description:
       "A personal case study on cognitive typography: replacing generic fonts with Lexend, Atkinson Hyperlegible, and OpenDyslexic with zero-CLS Pretext reflow.",
     path: "/case-studies/designing-for-my-brother",

@@ -379,8 +379,8 @@ export default function RecruiterSimulatorClient() {
       className="bg-zinc-950 text-foreground relative overflow-hidden flex flex-col items-center justify-start"
     >
       {/* Dynamic Background Atmospheric Lighting */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-brand-cyan/5 blur-[160px] pointer-events-none rounded-full" />
-      <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-brand-blue/5 blur-[140px] pointer-events-none rounded-full" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-brand-cyan/5 blur-[160px] pointer-events-none rounded-full hidden sm:block" />
+      <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-brand-blue/5 blur-[140px] pointer-events-none rounded-full hidden sm:block" />
 
       <div className="w-full max-w-2xl mx-auto relative z-10 flex flex-col items-center">
         {/* Navigation Breadcrumb */}
