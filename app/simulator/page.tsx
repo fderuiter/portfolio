@@ -17,11 +17,24 @@ const DynamicRecruiterSimulator = dynamic(
 const emptySubscribe = () => () => {};
 
 export default function IncidentSimulatorPage() {
-  const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
+  const isMounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
 
-  if (!isMounted) {
-    return <RecruiterSimulatorSkeleton />;
-  }
-
-  return <DynamicRecruiterSimulator />;
+  return (
+    <>
+      {/* See app/neuro/page.tsx: studio routes render no visible page title,
+          leaving assistive technology without a top-level heading. Declared
+          outside the mount branch so it is present in the server-rendered
+          skeleton too, not only after hydration. */}
+      <h1 className="sr-only">Incident and Engineering Decision Simulator</h1>
+      {isMounted ? (
+        <DynamicRecruiterSimulator />
+      ) : (
+        <RecruiterSimulatorSkeleton />
+      )}
+    </>
+  );
 }

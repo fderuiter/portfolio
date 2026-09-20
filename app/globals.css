@@ -382,6 +382,37 @@ body {
   }
 }
 
+/* Narrative code blocks must scroll rather than be silently truncated.
+ *
+ * `@tailwindcss/typography` is not installed, so the `prose prose-invert`
+ * classes on the case-study, blog and admin-preview articles are class names
+ * with no rules behind them. Sanitized narrative HTML therefore renders with
+ * user-agent defaults, and `pre` defaults to `white-space: pre` with
+ * `overflow: visible`.
+ *
+ * `body { overflow-x: hidden }` above then clips anything wider than the
+ * viewport. The combination is silent: a code line wider than the container is
+ * cut off with no scrollbar and no indication that text is missing. At 320px a
+ * 739px-wide block showed roughly its first third and the rest was
+ * unreachable.
+ *
+ * Scoped to `.prose` so terminal, game and diagram components keep their own
+ * `pre` styling.
+ */
+.prose pre {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+/* A scrollable region must be reachable by keyboard (WCAG 2.1 AA, AGENTS.md
+ * §10). `RichNarrative` adds `tabindex="0"` to overflowing blocks; this keeps
+ * the focus ring legible against the code surface. */
+.prose pre:focus-visible {
+  outline: 2px solid var(--color-brand-cyan, #22d3ee);
+  outline-offset: 2px;
+}
+
 /* Portfolio editorial rhythm: readable prose, quiet labels, stable anchors. */
 .portfolio-home :is(#case-studies, #about, #contact) {
   scroll-margin-top: calc(var(--navbar-height) + 2rem);

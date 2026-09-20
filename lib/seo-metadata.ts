@@ -67,7 +67,7 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     isAccessibleForFree: true,
   },
   arcade: {
-    title: "Arcade & Browser Games | Fred de Ruiter",
+    title: "Arcade & Browser Games",
     description:
       "Try browser games by Fred de Ruiter: a laser loon, a demanding puppy, logic puzzles, and a smartwatch with very little memory to spare.",
     path: "/arcade",
@@ -134,7 +134,7 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     isAccessibleForFree: true,
   },
   clinicalChaos: {
-    title: "Clinical Trial Chaos | Fred de Ruiter",
+    title: "Clinical Trial Chaos",
     description:
       "Sort clinical data, fix entries, and sign submissions against the clock. Play a clinical research arcade game with an impatient auditor.",
     path: "/arcade/clinical-chaos",
@@ -150,7 +150,7 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     isAccessibleForFree: true,
   },
   retroLabyrinth: {
-    title: "Retro Labyrinth | Fred de Ruiter",
+    title: "Retro Labyrinth",
     description:
       "Explore an abandoned codebase as a shifting dungeon. Fight bugs, navigate moving walls, and face a wireframe boss in this browser game.",
     path: "/arcade/retro-labyrinth",
@@ -166,7 +166,7 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     isAccessibleForFree: true,
   },
   workingWithDuck: {
-    title: "Working With Duck | Fred de Ruiter",
+    title: "Working With Duck",
     description:
       "You have a deadline. Duck the puppy has a ball. Keep the project and the puppy happy with toys, treats, and park breaks in this browser game.",
     path: "/arcade/working-with-duck",
@@ -181,7 +181,7 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     isAccessibleForFree: true,
   },
   proof: {
-    title: "Logical Proof Workspace | Fred de Ruiter",
+    title: "Logical Proof Workspace",
     description:
       "Build a proof one step at a time. Connect premises, try inference rules, and inspect where an argument goes wrong in this logic workspace.",
     path: "/proof",
@@ -212,7 +212,7 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     isAccessibleForFree: true,
   },
   schedule: {
-    title: "Book a Chat With Fred | Fred de Ruiter",
+    title: "Book a Chat With Fred",
     description:
       "Find a time to talk about a project, ask a question, or introduce yourself. Book a 30-minute Google Meet chat with Fred de Ruiter.",
     path: "/schedule",
@@ -227,7 +227,7 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     isAccessibleForFree: true,
   },
   contact: {
-    title: "Contact Fred | Frederick de Ruiter",
+    title: "Contact Fred",
     description:
       "Have a project, a role, or a question in mind? Send Fred de Ruiter a note about what you’re working on, or find a time to talk it through.",
     path: "/contact",
@@ -243,7 +243,7 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     isAccessibleForFree: true,
   },
   neuro: {
-    title: "NeuroRecon Studio | Fred de Ruiter",
+    title: "NeuroRecon Studio",
     description:
       "Explore brain surfaces and MRI slices, place control points, and work through simulated reconstruction problems in NeuroRecon Studio.",
     path: "/neuro",
@@ -259,7 +259,7 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     isAccessibleForFree: true,
   },
   stack: {
-    title: "Under the Hood | Frederick de Ruiter",
+    title: "Under the Hood",
     description:
       "See how this site works: text layout, browser audio, the application stack, and the checks I use while building it. Demos and source included.",
     path: "/stack",
@@ -275,7 +275,7 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     isAccessibleForFree: true,
   },
   memeVault: {
-    title: "Meme Vault & Soundboard | Fred de Ruiter",
+    title: "Meme Vault & Soundboard",
     description:
       "Make some noise with a browser soundboard, discover hidden trophies, and enjoy a few jokes about code, clinical data, and the working day.",
     path: "/arcade/meme-vault",
@@ -291,7 +291,7 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     isAccessibleForFree: true,
   },
   offline: {
-    title: "You’re Offline | Frederick de Ruiter",
+    title: "You’re Offline",
     description:
       "This page is not available offline. Check your connection, retry the page, or explore tools and pages already saved in your browser.",
     path: "/offline",
@@ -306,7 +306,7 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     isAccessibleForFree: true,
   },
   caseStudies: {
-    title: "Project Writeups | Frederick de Ruiter",
+    title: "Project Writeups",
     description:
       "Read about the problems, implementation choices, and lessons behind Fred de Ruiter’s clinical data tools, web apps, and side projects.",
     path: "/case-studies",
@@ -535,7 +535,20 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
 export function buildRouteMetadata(config: RouteMetaConfig): Metadata {
   const url = `${SITE_BASE_URL}${config.path}`;
   const ogImageUrl = `${SITE_BASE_URL}${config.path.startsWith("/") ? config.path : "/" + config.path}/opengraph-image`;
-  const fullTitle = config.title.includes("Frederick de Ruiter")
+  // `config.title` must NOT carry the site name. `title` below is templated by
+  // app/layout.tsx (`"%s | Frederick de Ruiter"`), so a config that already
+  // ends with it renders the name twice in the browser tab and in search
+  // results -- "Under the Hood | Frederick de Ruiter | Frederick de Ruiter".
+  // Ten routes shipped that way.
+  //
+  // OpenGraph and Twitter titles are not templated, so they are branded here
+  // instead. The short form is matched as well as the long one: the previous
+  // guard tested only "Frederick de Ruiter", so the many configs written
+  // "... | Fred de Ruiter" were double-branded in social cards too.
+  const alreadyBranded = /\|\s*(?:Fred|Frederick) de Ruiter\s*$/.test(
+    config.title
+  );
+  const fullTitle = alreadyBranded
     ? config.title
     : `${config.title} | Frederick de Ruiter`;
 

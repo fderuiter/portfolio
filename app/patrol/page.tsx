@@ -25,6 +25,9 @@ export default function PatrolShiftPage() {
       className="bg-zinc-950 text-white selection:bg-brand-cyan/30 selection:text-brand-cyan"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4 w-full">
+        {/* See app/neuro/page.tsx: studio routes render no visible page title,
+            leaving assistive technology without a top-level heading. */}
+        <h1 className="sr-only">Patrol Shift Studio</h1>
         <Breadcrumbs
           items={[
             { label: "Systems", href: "/#about" },

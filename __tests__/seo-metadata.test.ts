@@ -254,9 +254,15 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
 
   it("contact route layout exports dedicated page metadata with title, description, and social images", async () => {
     const { metadata } = await import("@/app/contact/layout");
-    expect(metadata.title).toBe("Contact Fred | Frederick de Ruiter");
+    // No site name: app/layout.tsx templates it on as "%s | Frederick de
+    // Ruiter". This previously asserted the branded string, which is what let
+    // ten routes ship with the name rendered twice in the browser tab.
+    expect(metadata.title).toBe("Contact Fred");
     expect(metadata.description).toContain("Send Fred de Ruiter a note");
-    expect(metadata.openGraph?.title).toContain("Contact Fred");
+    // OpenGraph is not templated, so it is branded by buildRouteMetadata.
+    expect(metadata.openGraph?.title).toBe(
+      "Contact Fred | Frederick de Ruiter"
+    );
     expect(metadata.openGraph?.description).toBe(metadata.description);
 
     const ogImages = metadata.openGraph?.images as Array<{
@@ -282,12 +288,30 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     for (const key of routeKeys) {
       const config = ROUTE_METADATA_CONFIGS[key];
 
-      // Title must be front-loaded, concise, and bounded between 25 and 60 characters
+      // Bounds apply to the title a search engine actually renders, which is
+      // the config plus the layout template ("%s | Frederick de Ruiter").
+      // Measuring `config.title` alone understated every title by 22
+      // characters, so a config passing at 60 rendered at 82.
+      const renderedTitle = `${config.title} | Frederick de Ruiter`;
+
+      // 60 is the SERP display limit and the target. 13 of 31 routes exceed it
+      // today -- a pre-existing gap this test could not see while it measured
+      // the wrong string. This ceiling stops it worsening; bringing the
+      // outliers under 60 is tracked separately.
       expect(
-        config.title.length,
-        `Route config "${key}" title is ${config.title.length} chars (must be <= 60): "${config.title}"`
-      ).toBeLessThanOrEqual(60);
-      expect(config.title.length).toBeGreaterThanOrEqual(25);
+        renderedTitle.length,
+        `Route "${key}" renders ${renderedTitle.length} chars: "${renderedTitle}"`
+      ).toBeLessThanOrEqual(78);
+      expect(
+        renderedTitle.length,
+        `Route "${key}" renders only ${renderedTitle.length} chars: "${renderedTitle}"`
+      ).toBeGreaterThanOrEqual(25);
+
+      // The config itself must not carry the site name, or it renders twice.
+      expect(
+        /\|\s*(?:Fred|Frederick) de Ruiter\s*$/.test(config.title),
+        `Route "${key}" title already ends with the site name, which the layout template then appends again: "${config.title}"`
+      ).toBe(false);
 
       // Description must be between 120 and 160 characters for optimal SERP snippets
       expect(

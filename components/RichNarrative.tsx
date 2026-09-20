@@ -95,7 +95,7 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
 
   // Enforce a strict security allowlist to prevent Stored XSS injections while maintaining beautiful layout aesthetics.
   const cleanHtml = useMemo(() => {
-    return DOMPurify.sanitize(html, {
+    const sanitized = DOMPurify.sanitize(html, {
       ALLOWED_TAGS: [
         "h2",
         "h3",
@@ -129,6 +129,21 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
         "aria-checked",
       ],
     });
+
+    // `.prose pre` scrolls horizontally (see app/globals.css) so long code lines
+    // are reachable instead of being silently clipped by `body { overflow-x:
+    // hidden }`. A scrollable region that cannot be focused cannot be scrolled
+    // by keyboard, so mark each block as a focusable labelled region --
+    // WCAG 2.1 AA, AGENTS.md §10.
+    //
+    // Applied to the sanitized output rather than the input: DOMPurify has
+    // already run, and these are static attributes already present in
+    // ALLOWED_ATTR, so this cannot reintroduce anything the allowlist rejected.
+    // Blocks that already carry a tabindex are left alone.
+    return sanitized.replace(
+      /<pre(?![^>]*\btabindex=)([^>]*)>/gi,
+      '<pre$1 tabindex="0" role="region" aria-label="Code sample">'
+    );
   }, [html]);
 
   // Synchronously swap terms according to the active simplified preference for pre-hydration rendering
