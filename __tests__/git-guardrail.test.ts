@@ -127,6 +127,122 @@ describe("Git Safety Guardrail Interceptor (scripts/git-guardrail.sh)", () => {
     });
   });
 
+  describe("Surgical single-file restores are not the bulk discard", () => {
+    // The bulk form discards every local change. Restoring one named file is the
+    // opposite operation, and blocking it trains the reflex to set the bypass.
+    const surgicalCommands = [
+      "git checkout -- .gitignore",
+      "git checkout -- .husky/pre-commit",
+      "git checkout -- .env.example",
+      "git restore .husky/pre-push",
+      "git restore -- .gitignore",
+      "git restore --staged .gitignore",
+    ];
+
+    surgicalCommands.forEach((cmd) => {
+      it(`allows surgical restore: '${cmd}'`, () => {
+        const result = runGuardrail(cmd);
+        expect(result.exitCode).toBe(0);
+      });
+    });
+
+    it("still blocks the bulk discard forms it is meant to catch", () => {
+      for (const cmd of ["git checkout -- .", "git restore --staged ."]) {
+        expect(runGuardrail(cmd).exitCode).toBe(2);
+      }
+    });
+  });
+
+  describe("Command text versus command effect", () => {
+    // A guard that cannot be inspected or tested without the bypass is a guard
+    // operators learn to bypass reflexively.
+    const inspectionCommands = [
+      'grep -n "git reset --hard" scripts/git-guardrail.sh',
+      "echo 'git push --force is blocked here'",
+      'rg --files-with-matches "git clean -fd"',
+      "cat scripts/git-guardrail.sh",
+    ];
+
+    inspectionCommands.forEach((cmd) => {
+      it(`allows inspection that only mentions a pattern: '${cmd}'`, () => {
+        const result = runGuardrail(cmd);
+        expect(result.exitCode).toBe(0);
+      });
+    });
+
+    it("allows backticked examples in messages and documentation", () => {
+      // Commit messages and markdown quote commands constantly; this guard
+      // rejected its own commit message before backticks were treated as
+      // quoting.
+      const result = runGuardrail(
+        'echo "see `git reset --hard` in the release notes"'
+      );
+      expect(result.exitCode).toBe(0);
+    });
+
+    it("still blocks a dangerous command chained after another program", () => {
+      // Leading-token matching alone would miss this; segments are resolved
+      // individually so `cd` cannot be used to smuggle the operation through.
+      expect(runGuardrail("cd /tmp && git reset --hard").exitCode).toBe(2);
+      expect(runGuardrail("npm run build; git push --force").exitCode).toBe(2);
+    });
+  });
+
+  describe("Consequential deploy operations", () => {
+    const blockedDeploys: Array<[string, string]> = [
+      ["npx vercel deploy --prebuilt", "fallback content"],
+      ["vercel deploy --prod --prebuilt", "fallback content"],
+      ["npx vercel deploy --prod", "release.yml governance"],
+      ["vercel env rm DATABASE_URL production", "hard to undo"],
+      ["vercel domains rm deruiter.dev", "detaches production traffic"],
+      ["npx prisma migrate deploy", "disposable branch"],
+    ];
+
+    blockedDeploys.forEach(([cmd, reasonFragment]) => {
+      it(`blocks '${cmd}' and explains why`, () => {
+        const result = runGuardrail(cmd, { CI: "" });
+        expect(result.exitCode).toBe(2);
+        expect(result.stderr).toContain(
+          "Consequential deploy operation intercepted"
+        );
+        expect(result.stderr).toContain(reasonFragment);
+      });
+    });
+
+    it("names the remote build as the alternative to --prebuilt", () => {
+      const result = runGuardrail("npx vercel deploy --prebuilt", { CI: "" });
+      expect(result.stderr).toContain("npx vercel deploy --prod");
+    });
+
+    it("leaves the release.yml --prebuilt path untouched under CI", () => {
+      // ADR 0038 builds once and promotes the same artifact, with migration and
+      // verification steps around it, so --prebuilt is correct there.
+      const result = runGuardrail("npx vercel deploy --prebuilt", {
+        CI: "true",
+      });
+      expect(result.exitCode).toBe(0);
+    });
+
+    it("allows ordinary vercel and prisma subcommands", () => {
+      for (const cmd of [
+        "vercel env pull",
+        "vercel ls",
+        "npx prisma generate",
+        "npx prisma migrate dev",
+      ]) {
+        expect(runGuardrail(cmd, { CI: "" }).exitCode).toBe(0);
+      }
+    });
+
+    it("honours the single documented override for deploys too", () => {
+      const result = runGuardrail("npx vercel deploy --prebuilt", {
+        CI: "",
+        ALLOW_DANGEROUS_GIT: "1",
+      });
+      expect(result.exitCode).toBe(0);
+    });
+  });
+
   describe("Intentional Override Bypass (ALLOW_DANGEROUS_GIT=1)", () => {
     it("permits git push --force when ALLOW_DANGEROUS_GIT=1 is set", () => {
       const result = runGuardrail("git push --force", {

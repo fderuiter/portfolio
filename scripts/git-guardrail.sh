@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
-# Git Safety Guardrail Interceptor
-# Intercepts and blocks destructive git operations across AI agent runners and CLI sessions.
+# Git & Deploy Safety Guardrail Interceptor
+# Intercepts destructive git and deploy operations across AI agent runners and CLI sessions.
 # Bypass with: ALLOW_DANGEROUS_GIT=1 <command>
+#
+# Matching is per-segment and anchored to each segment's leading program. Grepping
+# for a pattern, echoing one as an example, or asserting on one in a test is not the
+# operation itself, and a guard that cannot be inspected or tested is one operators
+# learn to bypass reflexively.
 
 set -euo pipefail
 
@@ -38,26 +43,103 @@ if [ -z "$COMMAND" ]; then
   exit 0
 fi
 
-# 3. Define dangerous regex patterns
-DANGEROUS_PATTERNS=(
-  "git[[:space:]]+push.*[[:space:]](--force|-f)([[:space:]]|$)"
-  "git[[:space:]]+push.*[[:space:]]([a-zA-Z0-9_-]+[[:space:]]+)?main([[:space:]]|$)"
-  "git[[:space:]]+push.*:main([[:space:]]|$)"
-  "git[[:space:]]+reset[[:space:]]+--hard"
-  "git[[:space:]]+clean[[:space:]]+.*-f"
-  "git[[:space:]]+branch[[:space:]]+.*-D"
-  "git[[:space:]]+checkout[[:space:]]+(\.[[:space:]]*$|--[[:space:]]+\.)"
-  "git[[:space:]]+restore[[:space:]]+(\.[[:space:]]*$|--staged[[:space:]]+\.)"
+# 3. Dangerous patterns, grouped by the program they apply to.
+#
+# The bulk-discard forms below are anchored to end-of-segment. Unanchored, the
+# `-- .` alternative also matched every precise single-file restore of a dotfile,
+# which is the careful operation rather than the dangerous one.
+GIT_PATTERNS=(
+  "^git[[:space:]]+push.*[[:space:]](--force|-f)([[:space:]]|$)"
+  "^git[[:space:]]+push.*[[:space:]]([a-zA-Z0-9_-]+[[:space:]]+)?main([[:space:]]|$)"
+  "^git[[:space:]]+push.*:main([[:space:]]|$)"
+  "^git[[:space:]]+reset[[:space:]]+--hard"
+  "^git[[:space:]]+clean[[:space:]]+.*-f"
+  "^git[[:space:]]+branch[[:space:]]+.*-D"
+  "^git[[:space:]]+checkout[[:space:]]+(\.[[:space:]]*$|--[[:space:]]+\.[[:space:]]*$)"
+  "^git[[:space:]]+restore[[:space:]]+(\.[[:space:]]*$|--staged[[:space:]]+\.[[:space:]]*$)"
 )
 
-# 4. Check command against dangerous patterns
-for pattern in "${DANGEROUS_PATTERNS[@]}"; do
-  if echo "$COMMAND" | grep -qE "$pattern"; then
-    echo "BLOCKED: Destructive git operation intercepted: '$COMMAND'" >&2
-    echo "Reason: Command matches safety guardrail pattern '$pattern'." >&2
-    echo "To bypass intentionally, set ALLOW_DANGEROUS_GIT=1 before executing." >&2
-    exit 2
+# Deploy guards are skipped under CI so release.yml's build-once-promote-same-artifact
+# path (ADR 0038), which uses --prebuilt deliberately and with verification around it,
+# runs unimpeded.
+DEPLOY_PATTERNS=()
+DEPLOY_REASONS=()
+if [ "${CI:-}" != "true" ]; then
+  DEPLOY_PATTERNS+=("^vercel[[:space:]]+.*deploy.*[[:space:]]--prebuilt([[:space:]]|$)")
+  DEPLOY_REASONS+=("--prebuilt ships a locally built artifact without rebuilding. A build whose data source was unreachable still exits 0 and bakes fallback content into every page, so this flag is how a silent build failure becomes a silent production incident. Run a remote build instead: npx vercel deploy --prod")
+
+  DEPLOY_PATTERNS+=("^vercel[[:space:]]+.*deploy.*[[:space:]]--prod([[:space:]]|$)")
+  DEPLOY_REASONS+=("Deploying straight to production from a developer machine bypasses the release.yml governance entirely (migrations, verification, rollback). Sometimes necessary, but it should be deliberate.")
+
+  DEPLOY_PATTERNS+=("^vercel[[:space:]]+env[[:space:]]+rm([[:space:]]|$)")
+  DEPLOY_REASONS+=("Removing a Vercel environment variable is hard to undo and can break production at the next cold start.")
+
+  DEPLOY_PATTERNS+=("^vercel[[:space:]]+domains[[:space:]]+rm([[:space:]]|$)")
+  DEPLOY_REASONS+=("Removing a domain detaches production traffic and its certificate.")
+
+  DEPLOY_PATTERNS+=("^prisma[[:space:]]+migrate[[:space:]]+deploy([[:space:]]|$)")
+  DEPLOY_REASONS+=("Nothing here distinguishes the production database from a disposable branch at the moment of running it. Confirm the resolved host first.")
+fi
+
+# 4. Resolve each segment's leading program, then match only patterns that apply to it.
+block() {
+  echo "BLOCKED: $1" >&2
+  echo "Segment: '$2'" >&2
+  echo "Reason: $3" >&2
+  echo "To bypass intentionally, set ALLOW_DANGEROUS_GIT=1 before executing." >&2
+  exit 2
+}
+
+# Quoted spans are data, not commands. A message, an example in a script, or a
+# test fixture may legitimately contain a separator followed by a real program
+# name; matching that text would block the inspection rather than the operation.
+# Backticks count as quoting: commit messages and markdown use them constantly,
+# and this guard blocked its own commit message before they were stripped.
+MATCH_TARGET=$(printf '%s' "$COMMAND" | sed -E "s/\`[^\`]*\`//g; s/'[^']*'//g; s/\"[^\"]*\"//g")
+
+SEGMENTS=$(printf '%s\n' "$MATCH_TARGET" | awk '{gsub(/\|\||&&|;|\|/, "\n"); print}')
+
+while IFS= read -r segment; do
+  [ -z "${segment//[[:space:]]/}" ] && continue
+
+  # Trim, drop leading environment assignments and package-runner prefixes so the
+  # leading program is the one that actually executes.
+  read -r -a tokens <<< "$segment" || true
+  idx=0
+  program=""
+  while [ "$idx" -lt "${#tokens[@]}" ]; do
+    token="${tokens[$idx]}"
+    case "$token" in
+      [A-Za-z_]*=*) idx=$((idx + 1)); continue ;;
+      npx|bunx|pnpm|yarn|command|sudo) idx=$((idx + 1)); continue ;;
+    esac
+    program="${token##*/}"
+    break
+  done
+  [ -z "$program" ] && continue
+
+  # Re-form the segment from its leading program so the anchored patterns apply.
+  normalized="${tokens[*]:$idx}"
+
+  if [ "$program" = "git" ]; then
+    for pattern in "${GIT_PATTERNS[@]}"; do
+      if echo "$normalized" | grep -qE "$pattern"; then
+        block "Destructive git operation intercepted: '$COMMAND'" "$normalized" \
+          "Command matches safety guardrail pattern '$pattern'."
+      fi
+    done
   fi
-done
+
+  if [ "$program" = "vercel" ] || [ "$program" = "prisma" ]; then
+    i=0
+    while [ "$i" -lt "${#DEPLOY_PATTERNS[@]}" ]; do
+      if echo "$normalized" | grep -qE "${DEPLOY_PATTERNS[$i]}"; then
+        block "Consequential deploy operation intercepted: '$COMMAND'" "$normalized" \
+          "${DEPLOY_REASONS[$i]}"
+      fi
+      i=$((i + 1))
+    done
+  fi
+done <<< "$SEGMENTS"
 
 exit 0
