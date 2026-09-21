@@ -514,7 +514,13 @@ body {
   .arcade-cabinet[data-fullscreen="true"] .arcade-shooter-controls {
     margin: 0;
     max-height: 100%;
-    overflow-y: auto;
+    overflow-y: visible;
+  }
+  .arcade-cabinet[data-fullscreen="true"]
+    .arcade-shooter-controls
+    button[aria-label="Primary Fire"] {
+    width: 56px;
+    height: 56px;
   }
   .arcade-cabinet[data-fullscreen="true"] .arcade-shooter-footer {
     grid-column: 1 / -1;

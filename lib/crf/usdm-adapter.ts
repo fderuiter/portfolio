@@ -19,7 +19,10 @@ import {
   AstCondition,
   ConditionGroup,
 } from "./types";
-import { validateUniversalCrf } from "./universal-schema";
+import {
+  getUniversalCrfSchemaUrl,
+  validateUniversalCrf,
+} from "./universal-schema";
 import { STANDARD_CODELISTS } from "./cdisc-controlled-terminology";
 
 export interface UsdmBiomedicalConceptProperty {
@@ -876,8 +879,7 @@ export function importStudyFromUsdm(
   const rules: EditCheckRule[] = Array.from(ruleMap.values());
 
   const protocol: StudyProtocol = {
-    $schema:
-      "https://www.deruiter.dev/schemas/crf/v1/universal-crf.schema.json",
+    $schema: getUniversalCrfSchemaUrl(),
     schemaVersion: "1.0.0",
     id: studyObj.id || "imported_usdm_study",
     protocolNumber: studyObj.protocolNumber || studyObj.name || "USDM-STUDY",

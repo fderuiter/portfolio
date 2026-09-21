@@ -92,6 +92,7 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     "coverage/**",
+    ".stryker-tmp/**",
     "public/*.js",
     // Agent worktrees are full second checkouts of this repository living inside
     // it. Without this, ESLint lints every file twice -- and the copies sit at

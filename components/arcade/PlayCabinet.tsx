@@ -293,7 +293,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
             <button
               type="button"
               onClick={() => setShowWizard(true)}
-              className="min-h-[44px] min-w-[44px] px-2.5 py-1.5 bg-neutral-900/90 hover:bg-neutral-800 text-amber-400 rounded-xl border border-amber-500/30 transition-all font-mono font-bold text-xs flex items-center justify-center gap-1 cursor-pointer touch-manipulation select-none active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none"
+              className="min-h-12 min-w-12 px-2.5 py-1.5 bg-neutral-900/90 hover:bg-neutral-800 text-amber-400 rounded-xl border border-amber-500/30 transition-all font-mono font-bold text-xs flex items-center justify-center gap-1 cursor-pointer touch-manipulation select-none active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none"
               title="Pre-Game Setup Wizard"
             >
               <IconAdjustments className="w-3.5 h-3.5" />
@@ -302,7 +302,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
             <button
               type="button"
               onClick={handleExit}
-              className="min-h-[44px] min-w-[44px] px-2.5 py-1.5 bg-neutral-900/90 hover:bg-neutral-800 text-zinc-400 hover:text-red-400 rounded-xl border border-neutral-800 transition-all font-mono font-bold text-xs flex items-center justify-center gap-1 cursor-pointer touch-manipulation select-none active:scale-95 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none"
+              className="min-h-12 min-w-12 px-2.5 py-1.5 bg-neutral-900/90 hover:bg-neutral-800 text-zinc-400 hover:text-red-400 rounded-xl border border-neutral-800 transition-all font-mono font-bold text-xs flex items-center justify-center gap-1 cursor-pointer touch-manipulation select-none active:scale-95 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none"
               title="Reset / Power Off Cabinet"
             >
               <IconPower className="w-3.5 h-3.5 text-red-500" />
@@ -330,7 +330,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
               <button
                 type="button"
                 onClick={() => setShowWizard(true)}
-                className="min-h-[44px] min-w-[44px] px-2.5 py-1.5 bg-neutral-900/90 hover:bg-neutral-800 text-amber-400 rounded-xl border border-amber-500/30 transition-all font-mono font-bold text-xs flex items-center justify-center gap-1 cursor-pointer touch-manipulation select-none active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none"
+                className="min-h-12 min-w-12 px-2.5 py-1.5 bg-neutral-900/90 hover:bg-neutral-800 text-amber-400 rounded-xl border border-amber-500/30 transition-all font-mono font-bold text-xs flex items-center justify-center gap-1 cursor-pointer touch-manipulation select-none active:scale-95 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none"
                 title="Pre-Game Setup Wizard"
               >
                 <IconAdjustments className="w-3.5 h-3.5" />
@@ -340,7 +340,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
               <button
                 type="button"
                 onClick={handleExit}
-                className="min-h-[44px] min-w-[44px] px-2.5 py-1.5 bg-neutral-900/90 hover:bg-neutral-800 text-zinc-400 hover:text-red-400 rounded-xl border border-neutral-800 transition-all font-mono font-bold text-xs flex items-center justify-center gap-1 cursor-pointer touch-manipulation select-none active:scale-95 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none"
+                className="min-h-12 min-w-12 px-2.5 py-1.5 bg-neutral-900/90 hover:bg-neutral-800 text-zinc-400 hover:text-red-400 rounded-xl border border-neutral-800 transition-all font-mono font-bold text-xs flex items-center justify-center gap-1 cursor-pointer touch-manipulation select-none active:scale-95 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none"
                 title="Reset / Power Off Cabinet"
               >
                 <IconPower className="w-3.5 h-3.5 text-red-500" />

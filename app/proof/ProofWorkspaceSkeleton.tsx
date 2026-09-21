@@ -182,10 +182,10 @@ export function ProofWorkspaceSkeleton() {
                 <div className="border-b-2 border-brand-cyan bg-slate-900 flex items-center justify-center text-slate-400 font-bold">
                   Ledger
                 </div>
-                <div className="border-transparent flex items-center justify-center text-slate-500">
+                <div className="border-transparent flex items-center justify-center text-slate-400">
                   Systems
                 </div>
-                <div className="border-transparent flex items-center justify-center text-slate-500">
+                <div className="border-transparent flex items-center justify-center text-slate-400">
                   Fallacy
                 </div>
               </div>

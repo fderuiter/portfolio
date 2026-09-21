@@ -12,9 +12,9 @@
 ![Prisma](https://img.shields.io/badge/Prisma-v7-2D3748?logo=prisma&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?logo=tailwindcss&logoColor=white)
 
-> **Repository Topics:** `document-classification` · `machine-learning-offline` · `clinical-trials` · `sqlcipher` · `hipaa-compliant` · `desktop-application`
-
-A bleeding-edge interactive portfolio designed to unify disparate Python, Rust, and TypeScript repositories into a single, cohesive experience.
+An interactive engineering portfolio built with Next.js, React, and TypeScript.
+It combines long-form case studies with browser-based studios for formal logic,
+clinical data design, scientific visualization, and systems simulations.
 
 ---
 
@@ -52,20 +52,15 @@ Operational workflows for production releases—including Automated Canary Analy
 
 ## Project Roadmap
 
-Work is tracked as eight epic maps on the [Portfolio Hub: Release Readiness](https://github.com/users/fderuiter/projects/18) board. Each epic owns a slice of the product and links its own child issues; live progress is the sub-issue completion shown on the epic itself, so this table records scope rather than a percentage that would drift.
+Current work and release blockers are tracked on the
+[Portfolio Hub: Release Readiness](https://github.com/users/fderuiter/projects/18)
+board. The board and linked issues are the source of truth; completed epics are
+kept in GitHub history instead of copied into a static status table here.
 
-| Epic                                                                          | Scope                                                                     | Priority |
-| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------- | -------- |
-| [#632](https://github.com/fderuiter/portfolio/issues/632) Release delivery    | Neon, Vercel, Resend, Clerk, migrations, previews, and the delivery gate  | P0       |
-| [#643](https://github.com/fderuiter/portfolio/issues/643) Dependency exposure | Evidence-backed remediation of every open dependency advisory             | P0       |
-| [#633](https://github.com/fderuiter/portfolio/issues/633) Verification trust  | Local, agent, browser, and release verification that can be believed      | P1       |
-| [#634](https://github.com/fderuiter/portfolio/issues/634) Experience & a11y   | The public visitor journey and WCAG 2.1 AA polish                         | P2       |
-| [#536](https://github.com/fderuiter/portfolio/issues/536) CRF Designer        | Next-generation clinical case report form designer architecture           | P3       |
-| [#549](https://github.com/fderuiter/portfolio/issues/549) Arcade engine       | Headless arcade lifecycle, viewport matrix, and HTML HUD overlay standard | P3       |
-| [#330](https://github.com/fderuiter/portfolio/issues/330) Portfolio assistant | A grounded, cost-bounded, observable assistant                            | P3       |
-| [#327](https://github.com/fderuiter/portfolio/issues/327) Asset management    | Authenticated upload and lifecycle management for portfolio media         | P3       |
-
-Architectural decisions are recorded in [`adr/`](https://github.com/fderuiter/portfolio/tree/dev/adr); the invariants these epics are held to are listed in [`AGENTS.md`](https://github.com/fderuiter/portfolio/blob/dev/AGENTS.md).
+Architectural decisions are recorded in
+[`adr/`](https://github.com/fderuiter/portfolio/tree/main/adr), and repository
+invariants are listed in
+[`AGENTS.md`](https://github.com/fderuiter/portfolio/blob/main/AGENTS.md).
 
 ## Prerequisites
 
@@ -179,24 +174,26 @@ npm run quality
 
 ### CI Quality Gate Mapping
 
-| Local Quality Command                | Continuous Integration Job / Step                              | Verification Scope & Purpose                                                                                                                                                       |
-| ------------------------------------ | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm run doctor`                     | `rigor-pipeline` / Diagnostic Check                            | Diagnostic audit of 23 architectural and testing invariants (routes, layout, WCAG a11y, hydration)                                                                                 |
-| `npm run doctor:fix`                 | Local Auto-remediation                                         | Auto-remediates fixable architectural invariants and updates OpenAPI & TypeDoc contracts                                                                                           |
-| `npm run env:check`                  | `rigor-pipeline` / Environment Guard                           | Validates `.env.local` schema definitions against `lib/env.ts` and `.env.example`                                                                                                  |
-| `npm run check`                      | `rigor-pipeline` / `Type Check & Lint`                         | Static TypeScript type checking (`tsc --noEmit`) and ESLint code hygiene                                                                                                           |
-| `npm run lint:docs`                  | `rigor-pipeline` / `Lint Documentation`                        | Markdown formatting and structure linting via `markdownlint-cli`                                                                                                                   |
-| `npm run check-docs-drift`           | `rigor-pipeline` / `Check Documentation Drift`                 | Verifies lockstep synchronization for TypeDoc API docs, OpenAPI schemas, and onboarding guides                                                                                     |
-| `npm run release:gate`               | `rigor-pipeline` / `Execute Pipeline Release Gate`             | Pre-deployment release gate validating security audits and migration integrity                                                                                                     |
-| `npm run check:migrations:drift`     | `rigor-pipeline` / `Check Schema Drift`                        | Verifies Prisma database schema against active migrations and checks for drift                                                                                                     |
-| `npm test` / `npm run test:ci`       | `rigor-pipeline` / `Run Logic Tests (Vitest)`                  | Comprehensive unit, logic, and state engine test execution with coverage tracking                                                                                                  |
-| `npm run test:mutation`              | `rigor-pipeline` / `Run Shift-Left Property Fuzz Testing Gate` | Fast-check property-based fuzz testing and generative invariant verification                                                                                                       |
-| `npx playwright test`                | `rigor-pipeline` / `Run Visual & Drift Detection`              | Sub-pixel visual regression testing and Playwright-Axe WCAG accessibility scans                                                                                                    |
-| `npm run analyze:bundle -- --strict` | `rigor-pipeline` / `Verify Bundle Performance Budgets`         | Enforces JavaScript chunk size limits and initial shared bundle gzip budgets                                                                                                       |
-| `npm run bench:pages -- --assert`    | `rigor-pipeline` / `Run Real-Browser Sub-Route Web Vitals`     | Fresh, clean, owned production-server Core Web Vitals assertion (LCP <= 2500ms, TTFB <= 800ms, CLS <= 0.1); writes ignored `.benchmark-results/benchmark-results.v1.json` evidence |
-| `npm run audit:security`             | `security-gate` / `Execute Security Audit Gate`                | Dependency security vulnerability auditing and policy compliance                                                                                                                   |
-| `npm run probe:synthetic`            | `synthetic-probes.yml` / `Headless Synthetic Probe Matrix`     | Playwright synthetic user probes verifying critical user journeys and API telemetry                                                                                                |
-| `npm run quality`                    | CI Pipeline Composite Pre-Flight Gate                          | Runs `check`, `lint:docs`, `check-docs-drift`, `bench:pages -- --assert`, and `verify` in sequence                                                                                 |
+| Local Quality Command                | Continuous Integration Job / Step                                | Verification Scope & Purpose                                                                          |
+| ------------------------------------ | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `npm run doctor`                     | `heavy-gate` / Verify ADR Invariants & Doctor Health Diagnostics | Diagnostic audit of architectural and testing invariants (routes, layout, WCAG a11y, hydration)       |
+| `npm run doctor:fix`                 | Local Auto-remediation                                           | Auto-remediates fixable architectural invariants and updates OpenAPI & TypeDoc contracts              |
+| `npm run env:check`                  | Local environment preflight                                      | Validates `.env.local` schema definitions against `lib/env.ts` and `.env.example`                     |
+| `npm run check`                      | `fast-gate` / Type Check & Lint                                  | Static TypeScript checking, ESLint, and dependency-boundary enforcement                               |
+| `npm run lint:docs`                  | `fast-gate` / Lint Documentation                                 | Markdown formatting and structure linting via `markdownlint-cli`                                      |
+| `npm run check-docs-drift`           | `fast-gate` / Check Documentation Drift                          | Verifies lockstep synchronization for TypeDoc API docs, OpenAPI schemas, and onboarding guides        |
+| `npm run release:gate`               | `fast-gate` / Execute Pipeline Release Gate                      | Pre-deployment release gate validating security audits and migration integrity                        |
+| `npm run check:migrations:drift`     | `fast-gate` / Check Schema Drift                                 | Verifies Prisma database schema against active migrations and checks for drift                        |
+| `npm test` / `npm run test:ci`       | `fast-gate` / Run Logic Tests (Vitest)                           | Comprehensive unit, logic, and state-engine tests with optional coverage                              |
+| `npm run test:fuzz`                  | `fast-gate` / Run Shift-Left Property Fuzz Testing Gate          | Fast-check property-based testing and generative invariant verification                               |
+| `npm run test:mutation`              | `fast-gate` / Run Stryker Mutation Gate                          | Mutation testing of critical deterministic and security modules                                       |
+| `npx playwright test`                | `heavy-gate` and `device-gate` browser suites                    | Visual regression, interaction, responsive-device, and Playwright-Axe accessibility checks            |
+| `npm run analyze:bundle -- --strict` | `heavy-gate` / Verify Bundle Performance Budgets                 | Enforces JavaScript chunk-size limits and initial shared-bundle gzip budgets                          |
+| `npm run bench:pages -- --assert`    | `heavy-gate` / Run Real-Browser Sub-Route Web Vitals             | Production-server Core Web Vitals assertions (LCP <= 2500ms, TTFB <= 800ms, CLS <= 0.1)               |
+| `npm run audit:security`             | `security-gate` / `Execute Security Audit Gate`                  | Dependency security vulnerability auditing and policy compliance                                      |
+| `npm run audit:secrets`              | `security-gate` / Scan Reachable Git History for Secrets         | Redacted scan of all reachable Git history for high-confidence credential patterns                    |
+| `npm run probe:synthetic`            | `synthetic-probes.yml` / `Headless Synthetic Probe Matrix`       | Playwright synthetic user probes verifying critical user journeys and API telemetry                   |
+| `npm run quality`                    | CI Pipeline Composite Pre-Flight Gate                            | Runs static checks, docs gates, secret-history audit, page benchmarks, and architectural verification |
 
 ## Asset Generation & Design System Commands
 

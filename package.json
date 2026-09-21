@@ -2,6 +2,15 @@
   "name": "fderuiter-portfolio",
   "version": "0.3.0",
   "private": true,
+  "description": "Interactive systems-engineering portfolio and browser-based technical studios.",
+  "homepage": "https://deruiter.dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fderuiter/portfolio.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fderuiter/portfolio/issues"
+  },
   "scripts": {
     "dx": "npx tsx scripts/dx.ts",
     "crf": "npx tsx scripts/crf.ts",
@@ -19,7 +28,7 @@
     "bench": "npx tsx scripts/dx.ts bench",
     "bench:pages": "npx tsx scripts/benchmark-pages.ts",
     "scaffold": "npx tsx scripts/dx.ts scaffold",
-    "quality": "npm run check && npm run lint:docs && npm run check-docs-drift && npm run bench:pages -- --assert && npm run verify",
+    "quality": "npm run check && npm run lint:docs && npm run check-docs-drift && npm run audit:secrets && npm run bench:pages -- --assert && npm run verify",
     "predev": "npx tsx scripts/generate-theme.ts",
     "dev": "concurrently -n \"turbo,tsc\" -c \"cyan,magenta\" \"next dev --turbo\" \"tsc --noEmit --watch\"",
     "build:icons": "npx tsx scripts/generate-brand-icons.ts",
@@ -57,6 +66,7 @@
     "test:fuzz": "VITE_CONFIG_NATIVE_IGNORE_WARNING=1 vitest run __tests__/property-fuzz.test.ts",
     "test:mutation": "npx tsx scripts/run-mutation-tests.ts",
     "audit:security": "npx tsx scripts/security-audit.ts",
+    "audit:secrets": "npx tsx scripts/audit-secret-history.ts",
     "probe:synthetic": "playwright test __tests__/e2e/synthetic-probes.spec.ts",
     "canary:eval": "npx tsx scripts/canary-analyzer.ts"
   },
@@ -79,6 +89,7 @@
     "shell-quote": "^1.8.1",
     "browserslist": "^4.28.8",
     "mysql2": "^3.24.3",
+    "qs": "6.16.0",
     "jsdom": "26.1.0"
   },
   "dependencies": {
@@ -118,6 +129,8 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.60.0",
+    "@stryker-mutator/core": "^10.0.0",
+    "@stryker-mutator/vitest-runner": "^10.0.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",

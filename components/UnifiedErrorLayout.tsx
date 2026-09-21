@@ -389,9 +389,9 @@ export function UnifiedErrorLayout({
                       className="group block p-4 bg-neutral-950/60 hover:bg-neutral-900/60 border border-neutral-900 hover:border-brand-cyan/40 rounded-2xl transition-all duration-300 backdrop-blur-sm"
                     >
                       <div className="flex justify-between items-start gap-2 mb-1">
-                        <h4 className="text-sm font-bold text-neutral-200 group-hover:text-brand-cyan transition-colors duration-250">
+                        <h2 className="text-sm font-bold text-neutral-200 group-hover:text-brand-cyan transition-colors duration-250">
                           {study.title}
-                        </h4>
+                        </h2>
                         <span className="shrink-0 px-2 py-0.5 text-[9px] font-mono font-bold bg-neutral-900 border border-neutral-800 text-brand-blue rounded">
                           {study.primary_language}
                         </span>

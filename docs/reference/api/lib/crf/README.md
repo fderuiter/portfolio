@@ -1160,6 +1160,12 @@ Re-exports [getStudyPresetsSync](presets/loader/functions/getStudyPresetsSync.md
 
 ***
 
+### getUniversalCrfSchemaUrl
+
+Re-exports [getUniversalCrfSchemaUrl](universal-schema/functions/getUniversalCrfSchemaUrl.md)
+
+***
+
 ### getUnsatisfiedRequiredFields
 
 Re-exports [getUnsatisfiedRequiredFields](conditional-logic/functions/getUnsatisfiedRequiredFields.md)

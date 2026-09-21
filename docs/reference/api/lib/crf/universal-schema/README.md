@@ -65,5 +65,6 @@
 - [exportUniversalCrfYaml](functions/exportUniversalCrfYaml.md)
 - [generateCliCommandForField](functions/generateCliCommandForField.md)
 - [generateCliCommandForForm](functions/generateCliCommandForForm.md)
+- [getUniversalCrfSchemaUrl](functions/getUniversalCrfSchemaUrl.md)
 - [parseUniversalCrf](functions/parseUniversalCrf.md)
 - [validateUniversalCrf](functions/validateUniversalCrf.md)

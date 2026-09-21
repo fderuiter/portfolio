@@ -15,9 +15,12 @@ on:
         required: false
         default: ""
 
+permissions:
+  contents: read
+
 env:
   # Canonical production domain, per ADR/AGENTS.md §18.
-  DEFAULT_PROBE_TARGET: "https://www.deruiter.dev"
+  DEFAULT_PROBE_TARGET: "https://deruiter.dev"
 
 jobs:
   synthetic-probe-run:

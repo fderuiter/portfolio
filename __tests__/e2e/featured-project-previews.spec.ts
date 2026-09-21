@@ -15,8 +15,8 @@ for (const viewport of viewports) {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
     await expect(
-      page.getByText("Featured for connected clinical-data impact:", {
-        exact: false,
+      page.getByRole("heading", {
+        name: "Things I’ve built. Reasons I built them.",
       })
     ).toBeVisible();
 

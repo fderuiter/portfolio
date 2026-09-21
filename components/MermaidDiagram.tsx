@@ -160,6 +160,7 @@ export function MermaidDiagram({ source }: MermaidDiagramProps) {
         aria-label="Architecture diagram"
         className="overflow-x-auto rounded-xl border border-zinc-800 bg-[#13151a] p-3 sm:p-5"
         role="img"
+        tabIndex={0}
       >
         <span className="sr-only" id={descriptionId}>
           Mermaid source alternative: {source}

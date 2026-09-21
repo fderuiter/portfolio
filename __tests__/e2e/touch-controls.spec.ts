@@ -233,8 +233,14 @@ test.describe("Mobile & Tablet Touch Interactions Suite", () => {
     await expect(canvas).toBeVisible({ timeout: 15000 });
 
     // Check touch controls bar if on mobile/tablet
-    const fireBtn = page.getByRole("button", { name: /fire/i });
-    const iceBtn = page.getByRole("button", { name: /ice cannon/i });
+    const fireBtn = page.getByRole("button", {
+      name: "Primary Fire",
+      exact: true,
+    });
+    const iceBtn = page.getByRole("button", {
+      name: "4: Mortar",
+      exact: true,
+    });
 
     if (await iceBtn.isVisible()) {
       await iceBtn.click();

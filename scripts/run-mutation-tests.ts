@@ -4,15 +4,19 @@
  * Directly executes Stryker mutation testing using stryker.config.mjs.
  */
 
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 import path from "path";
 
 const workspaceRoot = path.resolve(__dirname, "..");
+const strykerCli = path.resolve(
+  workspaceRoot,
+  "node_modules/@stryker-mutator/core/bin/stryker.js"
+);
 
 export function runMutationGate(): void {
   console.log("\n🧬 Executing Stryker Mutation Testing Gate...");
   try {
-    execSync("npx stryker run", {
+    execFileSync(process.execPath, [strykerCli, "run"], {
       cwd: workspaceRoot,
       stdio: "inherit",
       env: {

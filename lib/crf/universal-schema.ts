@@ -5,7 +5,14 @@
  */
 
 import { z } from "zod";
+import { resolveBaseUrl } from "@/lib/domain";
 import type { StudyProtocol, CRFForm, CRFField } from "./types";
+
+const UNIVERSAL_CRF_SCHEMA_PATH = "/schemas/crf/v1/universal-crf.schema.json";
+
+export function getUniversalCrfSchemaUrl(): string {
+  return `${resolveBaseUrl()}${UNIVERSAL_CRF_SCHEMA_PATH}`;
+}
 
 // 1. Clinical Data Types
 export const UniversalClinicalDataTypeSchema = z.enum([
@@ -435,8 +442,7 @@ export function exportUniversalCrfJson(
   pretty = true
 ): string {
   const payload = {
-    $schema:
-      "https://www.deruiter.dev/schemas/crf/v1/universal-crf.schema.json",
+    $schema: getUniversalCrfSchemaUrl(),
     schemaVersion: "1.0.0",
     ...study,
     lastModified: study.lastModified || new Date().toISOString(),
@@ -483,7 +489,7 @@ export function exportUniversalCrfYaml(study: StudyProtocol): string {
   const payload = cleanUndefined({
     $schema:
       (study as unknown as Record<string, unknown>).$schema ||
-      "https://www.deruiter.dev/schemas/crf/v1/universal-crf.schema.json",
+      getUniversalCrfSchemaUrl(),
     schemaVersion:
       (study as unknown as Record<string, unknown>).schemaVersion || "1.0.0",
     ...study,

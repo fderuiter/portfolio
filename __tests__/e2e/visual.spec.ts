@@ -61,23 +61,19 @@ test.describe("Visual Regression & Drift Detection", () => {
     // Give a brief moment for layout/scroll coordinates to settle completely
     await page.waitForTimeout(500);
 
-    // Wait for at least one card to be present and hydrated
-    await page.waitForSelector("[data-card-slug]");
+    // Wait for the current project dossiers to be present and hydrated.
+    await page.waitForSelector('[data-testid="featured-project-card"]');
 
-    // Select all cards inside the grid
-    const cards = await page.locator("[data-card-slug]").all();
+    const cards = await page.getByTestId("featured-project-card").all();
     for (const card of cards) {
-      const slug = await card.getAttribute("data-card-slug");
-      const expected = await card.getAttribute("data-expected-height");
-      const actual = await card.getAttribute("data-actual-height");
-
-      const mismatch = await card.getAttribute("data-hydration-mismatch");
-      if (mismatch === "true") {
-        expect(
-          actual,
-          `Drift detected! Card '${slug}' mathematically expected ${expected}px but naturally measured ${actual}px. Update padding constants.`
-        ).toBe(expected);
-      }
+      const title = await card.getByRole("heading").textContent();
+      const overflows = await card.evaluate(
+        (element) => element.scrollWidth > element.clientWidth + 1
+      );
+      expect(
+        overflows,
+        `Project dossier '${title}' overflows its container`
+      ).toBe(false);
     }
   });
 

@@ -10,7 +10,7 @@ for why.
 | --- | --- | --- |
 | [**Tutorials**](tutorials/) | "How do I get set up?" (learning-oriented) | [Local development & onboarding](tutorials/01-local-development-and-onboarding.md) |
 | [**How-To Guides**](how-to/) | "How do I do X?" (goal-oriented) | [Add an API route & Zod contract](how-to/add-api-route-and-zod-contract.md) · [Configure Resend & webhooks](how-to/configure-resend-and-webhooks.md) · [Configure Clerk, Sentry, Upstash, Vercel Cron/Analytics & GitHub fetching](how-to/configure-integrations.md) · [Monitor Vercel headroom](how-to/monitor-vercel-headroom.md) · [Monitor GitHub Actions minutes](how-to/monitor-github-actions-minutes.md) · [Release and deploy](how-to/release-and-deploy.md) · [Restore the production database](how-to/restore-the-production-database.md) |
-| [**Reference**](reference/api/) | "What's the exact contract?" (information-oriented, machine-compiled) | [TypeDoc API reference](reference/api/README.md) · [Integration catalog](reference/integrations-catalog.md) · [Vercel retention inventory](reference/vercel-retention-inventory.md) · [`openapi.json`](../openapi.json) at the repository root |
+| [**Reference**](reference/README.md) | "What's the exact contract or operational baseline?" (information-oriented) | [Reference index](reference/README.md) · [TypeDoc API reference](reference/api/README.md) · [`openapi.json`](../openapi.json) |
 | [**Explanation**](explanation/) | "Why is it built this way?" (understanding-oriented) | [Explanation index](explanation/README.md) · [ADRs](../adr/) at the repository root |
 
 ## Keeping reference docs in sync
@@ -43,5 +43,9 @@ root, which governs how autonomous coding agents operate in this repo):
   `AGENTS.md`.
 - [`docs/CASE_STUDY.md`](CASE_STUDY.md) — the Sortify air-gapped document
   classification case study deep dive.
-- `ARCHITECTURE.md`, `DEPLOYMENT.md`, `CONTRIBUTING.md`, and
-  `DATABASE_MIGRATIONS.md` at the repository root.
+- [`CASE_STUDY.md`](../CASE_STUDY.md) — the cross-project engineering-note
+  compendium used by the Mermaid corpus checks.
+- [`PRODUCT_EXCELLENCE_EVALUATION.md`](../PRODUCT_EXCELLENCE_EVALUATION.md) — a
+  point-in-time opportunity catalog, not the live release-status source.
+- `ARCHITECTURE.md`, `DEPLOYMENT.md`, `CONTRIBUTING.md`,
+  `CMS_GUIDELINES.md`, and `DATABASE_MIGRATIONS.md` at the repository root.

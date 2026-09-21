@@ -1,10 +1,16 @@
 import { execSync } from "child_process";
 import path from "path";
-import { scanFile } from "../lib/validation-scanner";
+import { scanFile, type ScanMatch } from "../lib/validation-scanner";
+
+export function formatRedactedMatch(match: ScanMatch): string {
+  return `  - Line ${match.lineNumber}: Category [${match.category}] (value redacted)`;
+}
 
 function getStagedFiles(): string[] {
   try {
-    const output = execSync("git diff --cached --name-only --diff-filter=d", { encoding: "utf-8" });
+    const output = execSync("git diff --cached --name-only --diff-filter=d", {
+      encoding: "utf-8",
+    });
     return output
       .split("\n")
       .map((f) => f.trim())
@@ -18,11 +24,38 @@ function getStagedFiles(): string[] {
 export function shouldScanFile(filePath: string): boolean {
   // Exclude node_modules, package locks, binary files, configurations that are meant to hold env configs, etc.
   const ignoredExtensions = [
-    ".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".woff", ".woff2", ".ttf", ".eot",
-    ".db", ".zip", ".tar", ".gz", ".pdf", ".mp4", ".mov"
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".svg",
+    ".ico",
+    ".woff",
+    ".woff2",
+    ".ttf",
+    ".eot",
+    ".db",
+    ".zip",
+    ".tar",
+    ".gz",
+    ".pdf",
+    ".mp4",
+    ".mov",
   ];
-  const ignoredFiles = ["package-lock.json", "bun.lock", "yarn.lock", "pnpm-lock.yaml"];
-  const ignoredDirectories = ["node_modules/", ".git/", ".next/", "dist/", "build/", "__tests__/"];
+  const ignoredFiles = [
+    "package-lock.json",
+    "bun.lock",
+    "yarn.lock",
+    "pnpm-lock.yaml",
+  ];
+  const ignoredDirectories = [
+    "node_modules/",
+    ".git/",
+    ".next/",
+    "dist/",
+    "build/",
+    "__tests__/",
+  ];
 
   const baseName = path.basename(filePath);
   const ext = path.extname(filePath).toLowerCase();
@@ -47,12 +80,19 @@ function main() {
   const stagedFiles = getStagedFiles();
 
   // Block the inclusion of alternative lockfiles
-  const alternativeLockfiles = ["bun.lock", "bun.lockb", "yarn.lock", "pnpm-lock.yaml"];
+  const alternativeLockfiles = [
+    "bun.lock",
+    "bun.lockb",
+    "yarn.lock",
+    "pnpm-lock.yaml",
+  ];
   for (const file of stagedFiles) {
     const baseName = path.basename(file);
     if (alternativeLockfiles.includes(baseName)) {
       console.error(`\n❌ [BLOCKER] Alternative lockfile detected: ${file}`);
-      console.error("This repository has standardized on npm exclusively. Alternative lockfiles are strictly prohibited.\n");
+      console.error(
+        "This repository has standardized on npm exclusively. Alternative lockfiles are strictly prohibited.\n"
+      );
       process.exit(1);
     }
   }
@@ -69,13 +109,11 @@ function main() {
 
     if (matches.length > 0) {
       hasViolation = true;
-      console.error(`\n❌ [SECURITY ALERT] Sensitive information or credential pattern detected in staged file: ${file}`);
+      console.error(
+        `\n❌ [SECURITY ALERT] Sensitive information or credential pattern detected in staged file: ${file}`
+      );
       for (const match of matches) {
-        console.error(
-          `  - Line ${match.lineNumber}: Category [${match.category}]`
-        );
-        console.error(`    Matched Text: "${match.matchedText}"`);
-        console.error(`    Line Content: "${match.lineContent}"`);
+        console.error(formatRedactedMatch(match));
       }
     }
   }
@@ -84,10 +122,14 @@ function main() {
   console.log(`Pre-Commit validation completed in ${duration}ms.`);
 
   if (hasViolation) {
-    console.error("\n❌ Commit blocked. Please sanitize all highlighted credentials before committing.\n");
+    console.error(
+      "\n❌ Commit blocked. Please sanitize all highlighted credentials before committing.\n"
+    );
     process.exit(1);
   } else {
-    console.log("✅ Pre-Commit validation passed. No credential patterns detected.");
+    console.log(
+      "✅ Pre-Commit validation passed. No credential patterns detected."
+    );
     process.exit(0);
   }
 }

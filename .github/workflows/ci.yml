@@ -177,6 +177,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
@@ -189,6 +191,9 @@ jobs:
 
       - name: Execute Security Audit Gate
         run: npm run audit:security
+
+      - name: Scan Reachable Git History for Secrets
+        run: npm run audit:secrets
 
   # Part of the PR merge gate for build/visual/performance concerns. Runs only
   # chromium against the full e2e suite — most specs in __tests__/e2e/ are not
