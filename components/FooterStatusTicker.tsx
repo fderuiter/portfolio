@@ -7,7 +7,7 @@ import React, {
   useSyncExternalStore,
 } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   STATUS_TICKER_ITEMS,
   unlockAchievement,
@@ -52,6 +52,7 @@ interface TreatParticle {
 }
 
 export const FooterStatusTicker: React.FC = () => {
+  const shouldReduceMotion = useReducedMotion();
   const [tickerIndex, setTickerIndex] = useState(0);
   const [duckBubble, setDuckBubble] = useState<string | null>(null);
   const [duckBarks, setDuckBarks] = useState(0);
@@ -127,10 +128,10 @@ export const FooterStatusTicker: React.FC = () => {
             <AnimatePresence mode="wait">
               <motion.span
                 key={tickerIndex}
-                initial={{ y: 12, opacity: 0 }}
+                initial={shouldReduceMotion ? false : { y: 12, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                exit={{ y: -12, opacity: 0 }}
-                transition={{ duration: 0.25 }}
+                exit={shouldReduceMotion ? undefined : { y: -12, opacity: 0 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.25 }}
                 className="text-zinc-300 truncate block"
               >
                 {STATUS_TICKER_ITEMS[tickerIndex]}

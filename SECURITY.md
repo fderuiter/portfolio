@@ -1,5 +1,25 @@
 # Security Policy
 
+## Supported Versions
+
+Security fixes are applied to the current `main` branch and the production
+release deployed from it. Historical tags and branches are not maintained as
+separate supported release lines.
+
+## Reporting a Vulnerability
+
+Do not open a public issue for a suspected vulnerability or include secrets,
+personal data, exploit details, or production identifiers in a public report.
+Use GitHub's private **Report a vulnerability** flow on the repository Security
+tab. If that flow is unavailable, email `fpderuiter@gmail.com` with a concise
+description and reproduction. Please allow a reasonable remediation window
+before public disclosure.
+
+Reports should include the affected route or component, impact, reproduction
+steps, and whether a credential or user record may have been exposed. Never
+include a live credential; identify its provider and scope, then revoke or
+rotate it.
+
 ## Layout Engine & Core Framework (`@chenglou/pretext`)
 
 This project relies on the `@chenglou/pretext` library as its core text layout engine to achieve high performance. Since this library processes user-facing and dynamically injected text, it is important to understand its security posture.
@@ -18,9 +38,13 @@ Developers can run local security audits using the following CLI command:
 
 ```bash
 npm run audit:security
+npm run audit:secrets
 ```
 
-This command executes `npx tsx scripts/security-audit.ts`, which parses `npm audit --json` output and enforces repository security policies.
+The first command parses `npm audit --json` and enforces dependency-vulnerability
+policy. The second performs a redacted scan of every reachable Git commit for
+high-confidence credential patterns. Neither command prints matched secret
+values.
 
 ### Severity Thresholds
 
@@ -34,7 +58,7 @@ The security audit CLI evaluates vulnerability severity levels and enforces the 
 Automated security checks are enforced across continuous integration and release workflows:
 
 - **Pre-Commit Hook Gate:** Local commits perform dependency security vulnerability checks via `npm run audit:security` in `.husky/pre-commit` before remote push.
-- **Pull Request & Branch CI Gate:** In `.github/workflows/ci.yml`, the `security-gate` job executes `npm run audit:security` on every push to `main` and on every pull request targeting `dev` or `main`. Pull requests with unhandled or expired vulnerabilities cannot pass CI.
+- **Pull Request & Branch CI Gate:** In `.github/workflows/ci.yml`, the `security-gate` job executes both audits against full Git history on every push to `main` and pull request targeting `main`. Unhandled vulnerabilities or unallowlisted secret-shaped values fail the gate.
 - **Release Gate Pipeline:** Pre-deployment release operations execute `npm run release:gate` (`scripts/release-gate.ts`), which runs the vulnerability security audit step (`runSecurityAudit`) prior to database migration deployments and production builds. Any unhandled high or critical vulnerabilities halt the release pipeline immediately.
 
 ## Vulnerability Override Governance Rules

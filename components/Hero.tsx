@@ -636,7 +636,9 @@ const InteractiveEngineeringConsole: React.FC = () => {
                     />
                   </div>
                   <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[10px] text-zinc-400 pt-0.5">
-                    <span>Illustrative frame reference: 16.6ms</span>
+                    <span className="min-w-0 max-w-full break-all">
+                      Illustrative frame reference: 16.6ms
+                    </span>
                     <span className="text-emerald-400">
                       Simulated allocation (heap)
                     </span>
@@ -748,9 +750,13 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
         <div className="lg:col-span-7 min-w-0 flex flex-col items-center lg:items-start text-center lg:text-left">
           {/* Micro Brand Identifier */}
           <motion.div
-            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : -8 }}
+            initial={shouldReduceMotion ? false : { opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            transition={
+              shouldReduceMotion
+                ? { duration: 0 }
+                : { duration: 0.5, ease: "easeOut" }
+            }
             className="inline-flex items-center gap-2 px-3 py-1 mb-5 sm:mb-6 text-[10px] sm:text-xs font-mono font-semibold tracking-[0.15em] uppercase text-amber-300 bg-amber-500/10 border border-amber-500/25 rounded-full"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
@@ -765,11 +771,11 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
 
           {/* CTA Action Group */}
           <motion.div
-            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 16 }}
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={
               shouldReduceMotion
-                ? { delay: 0.1, duration: 0.4 }
+                ? { duration: 0 }
                 : {
                     delay: 0.5,
                     duration: 0.6,
@@ -834,11 +840,11 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
 
         {/* Right Column: Interactive Live Engineering Console */}
         <motion.div
-          initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={
             shouldReduceMotion
-              ? { delay: 0.1, duration: 0.4 }
+              ? { duration: 0 }
               : {
                   delay: 0.4,
                   duration: 0.7,

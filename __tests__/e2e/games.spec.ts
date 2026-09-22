@@ -49,24 +49,23 @@ test.describe("Arcade Games & Simulators Suite", () => {
       if (await launchBtn.isVisible()) {
         await launchBtn.click({ force: true });
       }
-      const skipBtn = page.getByRole("button", { name: /Skip Setup/i });
-      await expect(skipBtn).toBeVisible({ timeout: 2000 });
+      await expect(page.locator("canvas").first()).toBeVisible({
+        timeout: 2000,
+      });
     }).toPass({ timeout: 20000 });
-
-    // 2. Dismiss Setup Wizard
-    const skipBtn = page.getByRole("button", { name: /Skip Setup/i });
-    if (await skipBtn.isVisible()) {
-      await skipBtn.click({ force: true });
-      await skipBtn
-        .waitFor({ state: "hidden", timeout: 10000 })
-        .catch(() => {});
-    }
 
     const laserCanvas = page.locator("canvas").first();
     await expect(laserCanvas).toBeVisible({ timeout: 15000 });
 
+    await page
+      .getByText("Game modes, weapons & audio", { exact: true })
+      .click();
+
     // 3. Switch weapons to Emerald Beam (Aurora)
-    const auroraBtn = page.getByRole("button", { name: /Aurora/i }).first();
+    const auroraBtn = page.getByRole("button", {
+      name: "Aurora (3)",
+      exact: true,
+    });
     await expect(async () => {
       await auroraBtn.click({ force: true });
       await expect(auroraBtn).toHaveAttribute("aria-pressed", "true", {
@@ -95,18 +94,10 @@ test.describe("Arcade Games & Simulators Suite", () => {
       if (await launchBtn.isVisible()) {
         await launchBtn.click({ force: true });
       }
-      const skipBtn = page.getByRole("button", { name: /Skip Setup/i });
-      await expect(skipBtn).toBeVisible({ timeout: 2000 });
+      await expect(page.locator("canvas").first()).toBeVisible({
+        timeout: 2000,
+      });
     }).toPass({ timeout: 20000 });
-
-    // 2. Dismiss Setup Wizard
-    const skipBtn = page.getByRole("button", { name: /Skip Setup/i });
-    if (await skipBtn.isVisible()) {
-      await skipBtn.click({ force: true });
-      await skipBtn
-        .waitFor({ state: "hidden", timeout: 10000 })
-        .catch(() => {});
-    }
 
     const garminCanvas = page.locator("canvas").first();
     await expect(garminCanvas).toBeVisible({ timeout: 15000 });
@@ -138,18 +129,10 @@ test.describe("Arcade Games & Simulators Suite", () => {
       if (await launchBtn.isVisible()) {
         await launchBtn.click({ force: true });
       }
-      const skipBtn = page.getByRole("button", { name: /Skip Setup/i });
-      await expect(skipBtn).toBeVisible({ timeout: 2000 });
+      await expect(
+        page.locator("h3", { hasText: "The Identity Crisis" })
+      ).toBeVisible({ timeout: 2000 });
     }).toPass({ timeout: 20000 });
-
-    // 2. Dismiss Setup Wizard
-    const skipBtn = page.getByRole("button", { name: /Skip Setup/i });
-    if (await skipBtn.isVisible()) {
-      await skipBtn.click({ force: true });
-      await skipBtn
-        .waitFor({ state: "hidden", timeout: 10000 })
-        .catch(() => {});
-    }
 
     // 3. Verify Level 1 and solve via rfl tactic card click + target node
     await expect(
@@ -187,9 +170,8 @@ test.describe("Arcade Games & Simulators Suite", () => {
       await expect(labyrinthCanvas).toBeVisible({ timeout: 3000 });
     }).toPass({ timeout: 20000 });
 
-    // Verify error boundary and retro labyrinth content
-    await expect(page.getByText("Graveyard Roguelike")).toBeVisible({
-      timeout: 15000,
-    });
+    await expect(
+      page.getByRole("heading", { name: "This page wandered off." })
+    ).toBeVisible();
   });
 });

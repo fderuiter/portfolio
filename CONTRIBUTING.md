@@ -198,3 +198,11 @@ npm test
 ```
 
 Thank you for contributing to Portfolio Hub!
+
+---
+
+## Licensing of Contributions
+
+The application source is licensed under the [Apache License 2.0](LICENSE). By submitting a pull request you agree that your contribution is licensed under those same terms (inbound = outbound), as described in Apache-2.0 section 5. No separate CLA is required.
+
+Two carve-outs apply and are described in full in [`NOTICE`](NOTICE): the Laser Loon artwork in `public/files/` stays under CC BY 4.0, and editorial content, biography, resume data, photography, and the `Frederick de Ruiter` / `deruiter.dev` marks are all rights reserved. Pull requests that add third-party code must keep its original license intact and record it in `NOTICE`; Apache-2.0-incompatible licenses (GPL, AGPL, SSPL, and non-commercial or source-available licenses) cannot be merged.

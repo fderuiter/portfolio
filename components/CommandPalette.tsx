@@ -10,6 +10,7 @@ import React, {
   useTransition,
   useCallback,
 } from "react";
+import { createPortal } from "react-dom";
 import { hexToRgba } from "@/lib/utils";
 import { designManifest } from "@/lib/design-manifest";
 import { motion, AnimatePresence } from "framer-motion";
@@ -82,10 +83,39 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
   const { announce } = useAnnouncer();
 
   const router = useRouter();
+  const backdropRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const searchId = useId();
 
   const lastAudioTimeRef = useRef<number>(0);
+
+  useEffect(() => {
+    const backdrop = backdropRef.current;
+    if (!backdrop) return;
+
+    const siblings = Array.from(document.body.children).filter(
+      (element): element is HTMLElement =>
+        element instanceof HTMLElement && element !== backdrop
+    );
+    const previous = siblings.map((element) => ({
+      element,
+      inert: element.inert,
+      ariaHidden: element.getAttribute("aria-hidden"),
+    }));
+
+    for (const element of siblings) {
+      element.inert = true;
+      element.setAttribute("aria-hidden", "true");
+    }
+
+    return () => {
+      for (const { element, inert, ariaHidden } of previous) {
+        element.inert = inert;
+        if (ariaHidden === null) element.removeAttribute("aria-hidden");
+        else element.setAttribute("aria-hidden", ariaHidden);
+      }
+    };
+  }, []);
 
   const throttledPlayHover = useCallback(() => {
     const now = performance.now();
@@ -1270,11 +1300,9 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
 
   return (
     <motion.div
+      ref={backdropRef}
       key="command-palette-backdrop"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.15 }}
+      initial={false}
       onClick={handleBackdropClick}
       className="fixed inset-0 z-50 flex items-start justify-center pt-[max(1.5rem,env(safe-area-inset-top)+1rem)] sm:pt-[12vh] px-3 sm:px-4 pb-[max(1.5rem,env(safe-area-inset-bottom)+1rem)] bg-zinc-950/85 backdrop-blur-md transition-all duration-300 overflow-y-auto"
     >
@@ -1282,9 +1310,9 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
         role="dialog"
         aria-modal="true"
         aria-label="Command Palette"
-        initial={{ opacity: 0, scale: 0.97, y: -8 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.97, y: -8 }}
+        initial={false}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.97, y: -8 }}
         transition={{ duration: 0.18, ease: "easeOut" }}
         ref={trapRef}
         style={
@@ -1292,7 +1320,7 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
             "--cmd-glow": `0 0 50px ${hexToRgba(designManifest.colors["brand-cyan"], 0.06)}`,
           } as React.CSSProperties
         }
-        className="w-full max-w-3xl bg-zinc-900/95 border border-zinc-800/90 backdrop-blur-2xl shadow-[var(--cmd-glow)] rounded-3xl overflow-hidden flex flex-col relative my-auto sm:my-0 max-h-[85vh]"
+        className="w-full max-w-3xl bg-[#13151a] border border-zinc-800/90 shadow-[var(--cmd-glow)] rounded-3xl overflow-hidden flex flex-col relative my-auto sm:my-0 max-h-[85vh]"
       >
         {/* Circular glow visual elements inside modal */}
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-cyan/5 rounded-full blur-3xl pointer-events-none" />
@@ -1447,8 +1475,8 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
             {activeItem ? (
               <motion.div
                 key={activeItem.id}
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={false}
+                animate={{ y: 0 }}
                 transition={{ duration: 0.12, ease: "easeOut" }}
                 className="flex flex-col h-full justify-between gap-3"
               >
@@ -1703,7 +1731,7 @@ export const CommandPalette: React.FC = () => {
 
   if (!isMounted) return null;
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <CommandPaletteModal
@@ -1712,6 +1740,7 @@ export const CommandPalette: React.FC = () => {
           studies={studies}
         />
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };

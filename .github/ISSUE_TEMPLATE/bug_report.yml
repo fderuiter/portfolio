@@ -1,0 +1,54 @@
+name: Bug report
+description: Report a reproducible defect in the portfolio or developer tooling.
+title: "bug: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        Thanks for helping improve the project. Do not include credentials,
+        personal data, or undisclosed security details here; use the private
+        vulnerability-reporting link instead.
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Describe the observed behavior and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: Provide the smallest reliable sequence of steps.
+      placeholder: |
+        1. Open …
+        2. Select …
+        3. Observe …
+    validations:
+      required: true
+  - type: input
+    id: route
+    attributes:
+      label: Route or component
+      placeholder: /proof or components/CommandPalette.tsx
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser, operating system, viewport, Node version, or commit SHA.
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Additional evidence
+      description: Add sanitized logs, screenshots, or links. Remove secrets first.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues for this defect.
+          required: true
+        - label: I removed credentials and personal data from this report.
+          required: true

@@ -55,7 +55,20 @@ describe("narrative code blocks are reachable, not clipped", () => {
       // keyboard (WCAG 2.1 AA, AGENTS.md §10).
       expect(pre!.getAttribute("tabindex")).toBe("0");
       expect(pre!.getAttribute("role")).toBe("region");
-      expect(pre!.getAttribute("aria-label")).toBe("Code sample");
+      expect(pre!.getAttribute("aria-label")).toBe("Code sample 1");
+    });
+  });
+
+  it("gives multiple code blocks unique landmark names", async () => {
+    const { container } = render(
+      <RichNarrative html="<pre><code>one</code></pre><pre><code>two</code></pre>" />
+    );
+
+    await waitFor(() => {
+      const labels = Array.from(container.querySelectorAll("pre")).map((pre) =>
+        pre.getAttribute("aria-label")
+      );
+      expect(labels).toEqual(["Code sample 1", "Code sample 2"]);
     });
   });
 

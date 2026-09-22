@@ -1,4 +1,10 @@
-# Case Study: Hono-Kiln — Technical Breakdown & Portfolio Integration
+# Portfolio Case Study Engineering Notes
+
+This compendium preserves the detailed engineering notes behind multiple case
+studies presented by the portfolio. It is source material for documentation and
+Mermaid validation, not a description of this repository's own runtime stack.
+
+## Hono-Kiln — Technical Breakdown & Portfolio Integration
 
 ## 1. Executive Summary & Value Proposition
 

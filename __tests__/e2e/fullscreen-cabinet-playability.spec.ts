@@ -10,7 +10,10 @@ test.describe("Arcade Cabinet Fullscreen & In-Game Playability Suite", () => {
       name: "Laser Loon: Bug Hunter",
       route: "/arcade/laser-loon",
       interactiveAction: async (page: Page) => {
-        const auroraBtn = page.getByRole("button", { name: /Aurora/i }).first();
+        const auroraBtn = page.getByRole("button", {
+          name: "3: Aurora",
+          exact: true,
+        });
         if (await auroraBtn.isVisible()) {
           await auroraBtn.click();
         }

@@ -154,6 +154,18 @@ describe("DX Invariant Doctor Engine", () => {
       const result = checkSecretLeaks(tempDir);
       expect(result.status).toBe("fail");
     });
+
+    it("defers the history audit detector file to its fixture-aware scanner", () => {
+      const scriptsDir = path.join(tempDir, "scripts");
+      fs.mkdirSync(scriptsDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(scriptsDir, "audit-secret-history.ts"),
+        'const fixture = "' + "ghp_" + '123456789012345678901234567890123456";'
+      );
+
+      const result = checkSecretLeaks(tempDir);
+      expect(result.status).toBe("pass");
+    });
   });
 
   describe("checkMigrationGuard", () => {

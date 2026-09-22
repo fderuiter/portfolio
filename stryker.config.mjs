@@ -16,6 +16,19 @@ const config = {
     configFile: "vitest.stryker.config.ts",
     related: false,
   },
+  htmlReporter: {
+    fileName: ".stryker-tmp/mutation-report.html",
+  },
+  ignorePatterns: [
+    "/.benchmark-results/**",
+    "/.claude/**",
+    "/.next/**",
+    "/.stryker-tmp/**",
+    "/.vercel/**",
+    "/coverage/**",
+    "/playwright-report/**",
+    "/test-results/**",
+  ],
   mutate: [
     "lib/proof-utils.ts:250-500",
     "lib/proof-utils.ts:1970-2200",
@@ -23,7 +36,6 @@ const config = {
     "lib/masonry.ts",
     "lib/error-sanitization.ts",
     "lib/security.ts",
-    "!lib/**/*.d.ts",
   ],
   thresholds: {
     high: 85,

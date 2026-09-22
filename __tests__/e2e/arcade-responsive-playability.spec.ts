@@ -73,8 +73,16 @@ for (const view of views) {
           .getByRole("button", { name: "3: Aurora", exact: true })
           .click();
       }
-      await page.keyboard.press("Escape");
-      await expect(cabinet).toHaveAttribute("data-fullscreen", "false");
+      // An in-game dialog owns the first Escape; a subsequent Escape exits
+      // pseudo-fullscreen after that topmost focus trap closes.
+      await expect(async () => {
+        if ((await cabinet.getAttribute("data-fullscreen")) === "true") {
+          await page.keyboard.press("Escape");
+        }
+        await expect(cabinet).toHaveAttribute("data-fullscreen", "false", {
+          timeout: 2000,
+        });
+      }).toPass({ timeout: 15000 });
       await expect(
         page.getByRole("button", { name: /Enter Fullscreen/i }).first()
       ).toBeVisible();

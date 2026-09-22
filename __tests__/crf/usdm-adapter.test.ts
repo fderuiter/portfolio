@@ -1,17 +1,16 @@
 import { describe, it, expect } from "vitest";
 import {
+  StudyProtocol,
+  StudyProtocolEngine,
+  ONCOLOGY_RECIST_PRESET,
   exportStudyToUsdm,
   exportStudyToUsdmObject,
   importStudyFromUsdm,
   diffUsdmProtocols,
-} from "../../lib/crf/usdm-adapter";
-import {
   validateUniversalCrf,
   diffUniversalCrfStudies,
-} from "../../lib/crf/universal-schema";
-import { StudyProtocolEngine } from "../../lib/crf/study-engine";
-import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets";
-import { StudyProtocol } from "../../lib/crf/types";
+  getUniversalCrfSchemaUrl,
+} from "@/lib/crf";
 
 describe("Graph-Extended Schema & USDM Bidirectional Adapter", () => {
   it("validates protocol containing explicit arms, epochs, cohorts, and biomedical concepts without error", () => {
@@ -97,6 +96,9 @@ describe("Graph-Extended Schema & USDM Bidirectional Adapter", () => {
     expect(design.encounters.length).toBe(6);
     expect(design.activities.length).toBe(6);
     expect(design.biomedicalConcepts.length).toBeGreaterThanOrEqual(3);
+
+    const imported = importStudyFromUsdm(usdmJson);
+    expect(imported.$schema).toBe(getUniversalCrfSchemaUrl());
   });
 
   it("performs lossless roundtrip conversion between StudyProtocol and USDM JSON", () => {

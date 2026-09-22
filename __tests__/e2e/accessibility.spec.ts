@@ -505,8 +505,10 @@ test.describe("Continuous Accessibility (a11y) & WCAG 2.1 AA Audit Suite", () =>
   });
 
   test("Audit: Logical Proof Workspace", async ({ page }, testInfo) => {
-    await page.goto("/proof");
-    await page.waitForLoadState("networkidle");
+    await page.goto("/proof", { waitUntil: "domcontentloaded" });
+    await expect(
+      page.getByRole("button", { name: /Share/i }).first()
+    ).toBeVisible({ timeout: 15000 });
     await page.waitForTimeout(400);
 
     await auditAndAssert(

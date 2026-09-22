@@ -1,5 +1,8 @@
 import { describe, it, expect } from "vitest";
 import {
+  CRFField,
+  CRFForm,
+  StudyProtocol,
   validateUniversalCrf,
   parseUniversalCrf,
   exportUniversalCrfJson,
@@ -7,9 +10,9 @@ import {
   generateCliCommandForField,
   generateCliCommandForForm,
   diffUniversalCrfStudies,
-} from "@/lib/crf/universal-schema";
-import { getOncologyPresetSync } from "@/lib/crf/presets";
-import { CRFField, CRFForm, StudyProtocol } from "@/lib/crf/types";
+  getUniversalCrfSchemaUrl,
+  getOncologyPresetSync,
+} from "@/lib/crf";
 
 describe("Universal CRF Specification & Schema Engine", () => {
   const sampleStudy = getOncologyPresetSync();
@@ -42,6 +45,7 @@ describe("Universal CRF Specification & Schema Engine", () => {
 
   it("parses valid JSON string into typed StudyProtocol", () => {
     const jsonString = exportUniversalCrfJson(sampleStudy);
+    expect(JSON.parse(jsonString).$schema).toBe(getUniversalCrfSchemaUrl());
     const parsed = parseUniversalCrf(jsonString);
 
     expect(parsed.protocolNumber).toBe(sampleStudy.protocolNumber);

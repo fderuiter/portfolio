@@ -140,9 +140,11 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
     // already run, and these are static attributes already present in
     // ALLOWED_ATTR, so this cannot reintroduce anything the allowlist rejected.
     // Blocks that already carry a tabindex are left alone.
+    let codeSampleIndex = 0;
     return sanitized.replace(
       /<pre(?![^>]*\btabindex=)([^>]*)>/gi,
-      '<pre$1 tabindex="0" role="region" aria-label="Code sample">'
+      (_match, attributes: string) =>
+        `<pre${attributes} tabindex="0" role="region" aria-label="Code sample ${++codeSampleIndex}">`
     );
   }, [html]);
 
