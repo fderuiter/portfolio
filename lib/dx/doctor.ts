@@ -426,13 +426,20 @@ export function checkSecretLeaks(root: string): DiagnosticCheckResult {
 
   for (const file of candidateFiles) {
     const baseName = path.basename(file);
+    const relativeFile = path.relative(root, file).split(path.sep).join("/");
     if (ignoredFiles.includes(baseName) || baseName.startsWith(".env")) {
+      continue;
+    }
+    // This file necessarily contains detector regexes and exact inert fixtures.
+    // The history-aware audit scans it with fixture-level allowlisting, while
+    // the simpler Doctor scanner would otherwise flag the detector definitions.
+    if (relativeFile === "scripts/audit-secret-history.ts") {
       continue;
     }
     const matches = scanFile(file);
     for (const match of matches) {
       leaks.push({
-        file: path.relative(root, file),
+        file: relativeFile,
         line: match.lineNumber,
         category: match.category,
       });
