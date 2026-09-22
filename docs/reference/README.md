@@ -15,6 +15,9 @@ lookup rather than sequential reading.
 
 - [Public repository readiness](public-repository-readiness.md) — current
   GitHub Actions, visibility, and secret-exposure constraints.
+- [2026-09-22 release readiness audit](../explanation/audits/2026-09-22-release-public-vercel-readiness.md)
+  — point-in-time source, GitHub, Vercel, production, and local verification
+  evidence.
 - [Release security evidence for 0.3.0](release-security-evidence-0.3.0.md) —
   dependency and release-security evidence for the candidate version.
 - [Neon capacity inventory](neon-capacity-inventory.md) — point-in-time database

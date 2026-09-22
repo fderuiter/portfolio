@@ -5,6 +5,16 @@
 Accepted on 2026-09-13. Supersedes ADR 0037 only where that decision allowed
 Vercel to deploy every merge to `main` automatically.
 
+**Control correction, 2026-09-22:** the build-once, stage, verify, and promote
+decision remains active. The reviewer-protected GitHub Environment described
+below is not active: required reviewers and environment protection rules are
+unavailable while this repository is private on GitHub Free, and the live
+environment has no protection rules. Today the job is guarded by manual
+dispatch, environment-scoped secrets, workflow validation, concurrency, and
+client-side policy—not by a server-enforced reviewer. Public conversion or a
+qualifying plan change is required before the reviewer portion of this ADR can
+be implemented.
+
 ## Context
 
 ADR 0001 requires production migrations to run outside application builds,

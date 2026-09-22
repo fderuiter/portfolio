@@ -10,7 +10,7 @@ Accepted — architectural policy governing parent epic #632 and child integrati
 
 The portfolio platform is deployed on Vercel Hobby alongside generous external free tiers:
 
-- **Vercel Hobby**: 10 GB functions storage, 100 build hours/month, strictly **one** scheduled cron job per day (`0 0 * * *`), 10-second serverless execution timeout. Currently observed at **9.6 / 10 GB (96%)** Functions Storage and **86 / 100 hours (86%)** build time (audited in #691, #698).
+- **Vercel Hobby**: 10 GB functions storage, 100 build hours/month, strictly **one** scheduled cron job per day (`0 0 * * *`), 10-second serverless execution timeout. At the decision date, the account was observed at **9.6 / 10 GB (96%)** Functions Storage and **86 / 100 hours (86%)** build time (audited in #691, #698). These values are historical context, not live meters; the dated retention inventory is the operational evidence record.
 - **Neon Postgres**: 0.5 GiB storage, compute auto-suspends after 5 minutes of inactivity. Direct un-cached public queries wake compute, adding 1–3s cold-start latency and consuming monthly compute hours.
 - **Upstash Redis**: 10,000 commands/day, 256 MB storage, 100 requests/sec. Uncached rate-limit queries on every static request would quickly burn the daily command budget.
 - **Resend**: 100 emails/day, 3,000/month, 1 sending domain. Spam bots hitting contact forms can rapidly exhaust daily quotas, while outbound retries require a reliable scheduler.

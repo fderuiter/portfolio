@@ -11,7 +11,14 @@
 - [ ] `npm run quality`
 - [ ] `npm test`
 - [ ] Generated documentation is synchronized when public contracts changed
-- [ ] One operator-requested Vercel preview checked when deployment risk warrants it
+- [ ] Runtime-impact declaration: I checked the actual diff (e.g.
+      `git diff main... -- app components public app/globals.css`), not just
+      my intent, for changes to rendered paths (`app/**`, `components/**`,
+      `public/**`, `app/globals.css`) or visual snapshots
+      (`__tests__/**/*-snapshots/**`). If that diff is non-empty, an
+      operator-requested Vercel preview was checked and is linked below; if
+      it is empty, state that explicitly instead of "no runtime code paths
+      change"
 - [ ] No production or shared-provider credentials were added to the repository
 - [ ] `npm run audit:secrets` passes when history or public visibility is in scope
 

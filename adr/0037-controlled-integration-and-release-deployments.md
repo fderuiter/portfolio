@@ -4,9 +4,11 @@
 
 Accepted on 2026-09-12. Its automatic production-deployment decision is
 superseded by ADR 0038; its single-branch integration decision remains active.
-Its context section's claim that private-repo branch protection is
-unavailable assumed GitHub Free; ADR 0039 corrects this against the
-account's actual GitHub Pro plan and makes branch protection enforceable.
+Its context section's claim that private-repository branch protection is
+unavailable on GitHub Free remains accurate. ADR 0039 initially contradicted
+that claim, then corrected itself on 2026-09-18 after the live account and
+protection APIs confirmed GitHub Free and `403` responses. Branch protection
+is not enforceable while this repository remains private on that plan.
 
 ## Context
 

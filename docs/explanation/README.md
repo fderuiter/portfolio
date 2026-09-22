@@ -23,6 +23,9 @@ reviewing a specific subsystem or workflow — what was discovered, not a
 live specification. Treat the codebase and its tests as ground truth over
 an audit if the two disagree.
 
+Current release evidence: [2026-09-22 release, public repository, and Vercel
+readiness audit](audits/2026-09-22-release-public-vercel-readiness.md).
+
 ## Planning
 
 [`planning/`](planning/) contains forward-looking design notes and
