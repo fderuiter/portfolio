@@ -6,6 +6,13 @@ release controls that connect them
 Method: live read-only GitHub and Vercel inspection, checked-in configuration,
 and primary-source platform documentation
 
+> [!NOTE]
+> This is historical evidence from 2026-09-12, not the current runbook. The
+> `dev` reconciliation, main-only topology, and governed build-once release
+> design subsequently landed in ADRs 0037 and 0038. Current provider and
+> release status is recorded in the
+> [2026-09-22 readiness audit](2026-09-22-release-public-vercel-readiness.md).
+
 ## Executive conclusion
 
 The repository should converge on **one protected trunk, `main`**, with

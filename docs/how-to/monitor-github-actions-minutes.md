@@ -1,6 +1,7 @@
 # Monitor GitHub Actions Minutes
 
-Last verified: 2026-09-18 against GitHub Free (2,000 min/month).
+Last verified: 2026-09-22 against GitHub Free (2,000 min/month), repository
+settings, and current workflow-run results.
 
 Governing policy: [ADR 0039](../../adr/0039-github-pro-plan-capabilities-and-actions-minutes-governance.md).
 
@@ -13,9 +14,10 @@ previous single-job `.github/workflows/ci.yml` design (full four-device
 Playwright matrix on every PR push, repeated identically on the post-merge
 `main` push) exhausted the month's allowance during one active day of
 iteration, and every CI job on the next three PRs failed in 2-4 seconds with
-`0` billable milliseconds. #733 restructured the workflow to fit inside the
-allowance comfortably; this page is the manual habit that catches the next
-regression before minutes hit zero, mirroring
+`0` billable milliseconds. #733 restructured the workflow to reduce that
+cost, but the revised runtime has not yet been measured in GitHub because the
+allowance remains exhausted. This page is the manual habit that catches the
+next regression before minutes hit zero, mirroring
 [monitor-vercel-headroom.md](./monitor-vercel-headroom.md) for a resource
 GitHub itself does not yet expose a scriptable read on.
 
@@ -84,8 +86,8 @@ runs, repeated pushes while chasing a flaky test):
   full suite a second time on identical code.
 - `merge-gate` is a required-checks summary job: it `needs:` every job above
   and fails deliberately unless each one that is supposed to run for the
-  triggering event actually reported success. See "Required branch
-  protection checks (#732)" below.
+  triggering event actually reported success. See "Required check contract
+  when branch protection becomes available (#732)" below.
 - `cross-device-matrix` (the full four-device matrix against the full suite)
   is `workflow_dispatch`-only, for a release or a device-sensitive change
   that specifically warrants it.
@@ -106,18 +108,23 @@ split from #733/#775 (one four-device matrix run per merge, not per push and
 per PR) is unchanged, just relocated to before the merge instead of after.
 
 `main`-push confirmation stays deliberately bounded to `fast-gate` and
-`security-gate` — a safety net for a direct push that bypasses PR review
-(relevant only until #732's branch protection is confirmed active), not a
-repeat of the build/Playwright work the merged PR already did. The full
+`security-gate` — a safety net for a direct push that bypasses PR review.
+That risk remains real while the repository is private on GitHub Free because
+the live branch-protection API returns `403`; server-side protection is not
+active. The bounded push jobs are not a repeat of the build/Playwright work
+the merged PR already did. The full
 four-device matrix remains a one-click `workflow_dispatch` job
 (`cross-device-matrix`); nothing here changes when or how often that runs
 automatically (it doesn't).
 
-### Required branch protection checks (#732)
+### Required check contract when branch protection becomes available (#732)
 
 `.github/workflows/ci.yml` now exposes one job whose sole purpose is to be
 the required status check: **`Merge Gate (Required Checks Summary)`** (the
-`merge-gate` job's `name:`). Require exactly that check under Settings →
+`merge-gate` job's `name:`). The repository cannot require it today: the live
+branch-protection and ruleset APIs return `403` for this private GitHub Free
+repository. After public conversion or a qualifying plan change, require
+exactly that check under Settings →
 Branches → branch protection rule for `main` → "Require status checks to
 pass before merging".
 
@@ -192,7 +199,7 @@ A manual or unrecognized trigger can therefore never produce a "skipped" conclus
 ### Implementation evidence, server settings, and deferred cost measurements
 
 Because GitHub Actions minutes for the account are currently exhausted, this
-guidance clearly separates what is locally verified from unverified server settings
+guidance separates what is locally verified from unavailable server controls
 and future measured costs:
 
 - **Local implementation evidence**: Workflow YAML topology, step dependencies
@@ -202,11 +209,11 @@ and future measured costs:
   These tests extract the exact bash script from `.github/workflows/ci.yml` and
   execute it across simulated event and status permutations (`pull_request`,
   `push`, `workflow_dispatch`, `success`, `failure`, `cancelled`, `skipped`).
-- **Unverified server-side protection**: While branch protection rules on `main`
-  (requiring `Merge Gate (Required Checks Summary)`) and environment protection
-  rules on `production-release` (requiring reviewers) represent declared repository
-  policy, their activation on GitHub's servers remains an unverified administrative
-  setting until confirmed by the repository owner under Settings → Branches.
+- **Server-side protection is unavailable**: Live API probes on 2026-09-22
+  returned `403` for branch protection and rulesets. The
+  `production-release` environment exists without protection rules because
+  required reviewers are also unavailable for this private GitHub Free
+  repository. Client-side guardrails remain the only enforcement.
 - **Future measured Actions costs**: The `timeout-minutes` values on `fast-gate` (20),
   `security-gate` (15), `heavy-gate` (40), `device-gate` (25), and `merge-gate` (5)
   remain provisional estimates. Real runtime and billable minutes consumption
@@ -217,7 +224,9 @@ and future measured costs:
   additional minutes will be purchased, and no cloud workflows may be dispatched
   or retried until next month's billing cycle reset (without assuming or inventing
   an exact calendar reset day). All live validation and timeout tuning remain
-  deferred under #733.
+  deferred under #733. On 2026-09-22, current-main, PR #886, and the scheduled
+  synthetic-probe run still failed with zero executed steps, confirming the
+  outage had not cleared.
 
 ## Refresh this page
 

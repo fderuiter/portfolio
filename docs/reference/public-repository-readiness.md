@@ -89,9 +89,9 @@ substitute for that pre-publication review.
 The visibility switch itself is an operator action after this gate is signed
 off. It is not part of the repository-polish change set.
 
-## Repository Evidence Recorded 2026-09-21
+## Repository Evidence Recorded Through 2026-09-22
 
-- `npm run audit:secrets` scanned all 547 commits reachable from the local refs
+- `npm run audit:secrets` scanned all 551 commits reachable from the local refs
   for credential-bearing database URLs, GitHub and AWS credentials, private-key
   headers, and common provider-token formats. It passed with zero unallowlisted
   matches. The command reports only file, line, commit, and category metadata;
@@ -110,6 +110,37 @@ off. It is not part of the repository-polish change set.
 - A complete review or deliberate retention decision for older workflow logs is
   still required before conversion; the absence of artifacts and the #862
   evidence do not prove every historical log is safe.
+
+The complete point-in-time repository, GitHub, Vercel, production, and local
+quality evidence is recorded in the
+[2026-09-22 readiness audit](../explanation/audits/2026-09-22-release-public-vercel-readiness.md).
+
+## Vercel and Production Evidence Recorded 2026-09-22
+
+- The local Vercel project link matches `portfolio`, Node 24, and the expected
+  team, but the global CLI (`41.6.1`) has an invalid token and the connected
+  Vercel app returned `403` for the team. Current private deployment, alias,
+  environment, quota, and runtime-log state is therefore unknown.
+- Release workflows dynamically request `vercel@59.16.0`; the npm registry's
+  current stable version was `59.25.0`, and no Vercel CLI is locked in
+  `package-lock.json`.
+- The last authenticated Vercel capacity snapshot, from 2026-09-12, recorded
+  Functions Storage at 96.8% and Build Time at 87%. It is not a current
+  reading, but release must remain blocked until fresh headroom is known.
+- Public routing works: the apex returns `200`, and `www` returns `308` to the
+  apex. The deployed canonical, OpenGraph, robots, sitemap, and structured-data
+  output nevertheless still uses `www`.
+- Representative production pages return private/no-store cache misses. The
+  exact audited `main` build returns prerendered `s-maxage=3600` cache hits.
+  Production is behind the intended cache and canonical behavior.
+- Production HTML reports Sentry release `dc133b59`, which resolves to a commit
+  64 commits behind audited `main` (`7fb7e666`). This is application evidence,
+  not an API-confirmed Vercel deployment SHA, because private control-plane
+  access was unavailable.
+- The ignored `.vercel/.env.production.local` file contains production secret
+  material in plaintext on the workstation. It is untracked and does not
+  become public with the repository, but it remains sensitive local state and
+  is not a valid source for CLI authentication.
 
 ## Completed Since Last Verification
 
@@ -170,6 +201,8 @@ Those decisions have related but distinct gates.
    forks, external-contributor approval, token permissions, and secret access.
    After conversion, enable public secret scanning and restore protection for
    `main` because GitHub disables push rulesets during the visibility change.
+6. Pin workflow actions and the Vercel CLI to immutable, reviewed dependency
+   identities before accepting untrusted public-fork contributions.
 
 Application source licensing (item 3 in prior verifications) is complete; see
 "Completed Since Last Verification" above.
@@ -186,11 +219,17 @@ operator work tracked by:
 - [#848](https://github.com/fderuiter/portfolio/issues/848), production cron
   secret configuration and a verified scheduled run;
 - [#851](https://github.com/fderuiter/portfolio/issues/851), the production
-  credential-path remediation; and
+  credential-path remediation;
 - [#720](https://github.com/fderuiter/portfolio/issues/720), final production
-  verification.
+  canonical and routing verification;
+- [#853](https://github.com/fderuiter/portfolio/issues/853), the production
+  chunk-cycle warning and regression gate;
+- [#817](https://github.com/fderuiter/portfolio/issues/817), production
+  performance measurement and remaining global CSS work; and
+- [#871](https://github.com/fderuiter/portfolio/issues/871), the operator-owned
+  decision on database-backed versus fallback blog content.
 
-The historical Actions-log and public-surface review blocks publication, but
-does not independently block a private production deployment. Conversely,
+The historical Actions-log and public-surface reviews block publication, but
+do not independently block a private production deployment. Conversely,
 completion of the local repository audit does not close the operator-owned
 production checks above.

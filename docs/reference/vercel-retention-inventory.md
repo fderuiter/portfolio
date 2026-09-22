@@ -10,6 +10,13 @@ This is the post-cleanup capacity and retention record for
 [Issue #691](https://github.com/fderuiter/portfolio/issues/691) and closed
 [Issue #692](https://github.com/fderuiter/portfolio/issues/692).
 
+> [!WARNING]
+> This page is a dated snapshot, not current Vercel state. A 2026-09-22
+> refresh was blocked because the workstation CLI token was invalid and the
+> connected Vercel app lacked access to the linked team. Do not make a release,
+> cleanup, or capacity decision from these figures until authenticated provider
+> access is restored and every meter, deployment, and alias is re-read.
+
 ## Capacity Snapshot
 
 | Meter | Used | Limit | Remaining | Status |
@@ -24,7 +31,7 @@ billing window. Deleted successful deployments also enter Vercel's recovery
 period, and protected-deployment reevaluation can take time. A same-day meter
 drop is therefore not an appropriate cleanup success criterion.
 
-## Live Deployment Inventory
+## Deployment Inventory Captured 2026-09-12
 
 The final paginated audit returned 268 records for `portfolio`:
 
@@ -48,18 +55,37 @@ accepted removal of 57 superseded, unaliased deployments:
 - 36 stale preview deployments;
 - 21 superseded production deployments outside the protected set.
 
-The canonical domain returned HTTP 200 after both phases. The current
-production deployment remains protected:
+The canonical domain returned HTTP 200 after both phases. The production
+deployment identified at capture time remained protected:
 
 | Deployment ID | Environment | Branch | Purpose |
 | --- | --- | --- | --- |
-| `dpl_3VVso5GPXhpejKjb5wGRFszJABfa` | Production | `main` | Canonical production target |
+| `dpl_3VVso5GPXhpejKjb5wGRFszJABfa` | Production | `main` | Canonical target at the 2026-09-12 capture |
 
 The post-cleanup audit found **zero additional conservative deletion
 candidates**. The original review candidates remain in
 `HISTORICAL_REVIEW_CANDIDATES_2026_09_12` in
 `scripts/vercel-retention-inventory.ts` as an audit record; they are not a live
 deletion queue.
+
+## Verification Gap Recorded 2026-09-22
+
+The public site was reachable, but the private Vercel control plane was not:
+
+- global Vercel CLI `41.6.1` rejected its stored token as invalid;
+- the connected Vercel app returned `403` for the linked team;
+- the production HTML reported Sentry release `dc133b59`, 64 commits behind
+  audited `main` (`7fb7e666`);
+- apex routing worked (`www` returned `308` to the apex), while canonical,
+  OpenGraph, robots, and sitemap output still used `www`;
+- production page responses were private/no-store cache misses, while the
+  exact audited `main` build returned prerendered cache hits with
+  `s-maxage=3600`.
+
+These observations prove deployment drift but do not reveal the current
+deployment ID, alias target, storage meter, build-time meter, environment
+inventory, or runtime-error state. See the
+[2026-09-22 readiness audit](../explanation/audits/2026-09-22-release-public-vercel-readiness.md).
 
 ## Retention Rules
 
@@ -99,5 +125,9 @@ npm run inventory:vercel -- --json
 npm run headroom:vercel
 ```
 
-The scripts contain a verified snapshot, not a live Vercel credential. Refresh
-the snapshot from the dashboard and API before making capacity decisions.
+The scripts contain the verified 2026-09-12 snapshot, not a live Vercel
+credential. `scripts/vercel-headroom.ts` currently defaults its evaluation
+clock to that same fixed date, so its `stale` field does not age naturally.
+Refresh the snapshot from the dashboard and API before making capacity
+decisions, and compare the capture timestamp manually until that defect is
+fixed.

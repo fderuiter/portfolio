@@ -14,7 +14,7 @@ Captured on 2026-09-13 for release blocker
   vulnerabilities and 0 at every severity
 
 The evidence commit changes only audit policy, tests, and this report; it does
-not change the audited lockfile. The protected release workflow records the
+not change the audited lockfile. The build-once release workflow records the
 final release commit SHA and deployment ID so publication cannot reuse this
 report against a different source tree.
 

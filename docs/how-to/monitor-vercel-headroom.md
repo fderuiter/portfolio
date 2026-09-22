@@ -1,6 +1,7 @@
 # Monitor Vercel Storage and Build Headroom
 
-Last verified: 2026-09-12 23:31 UTC against Vercel Hobby.
+Documentation last reconciled: 2026-09-22. Meter data last verified:
+2026-09-12 23:31 UTC against Vercel Hobby.
 
 Governing policy: [ADR 0036](../../adr/0036-free-tier-offloading-and-provider-quota-governance.md),
 [Issue #691](https://github.com/fderuiter/portfolio/issues/691), closed
@@ -18,11 +19,14 @@ npm run inventory:vercel
 ```
 
 `--strict` exits unsuccessfully while any meter is critical. These commands
-evaluate the checked-in verified snapshot; they do not query Vercel live.
+evaluate the checked-in 2026-09-12 snapshot; they do not query Vercel live.
+The strict command currently fails because the captured Functions Storage
+meter was critical. That failure is not proof of today's value, and a pass
+after editing the snapshot would not be provider evidence.
 
-## Thresholds and Current Snapshot
+## Thresholds and Captured Snapshot
 
-| Meter | Limit | Warning | Critical | Verified usage |
+| Meter | Limit | Warning | Critical | 2026-09-12 usage |
 | --- | ---: | ---: | ---: | ---: |
 | Functions Storage | 10.00 GB | 8.00 GB | 9.50 GB | **9.68 GB** |
 | Deployment Storage | 10.00 GB | 8.00 GB | 9.50 GB | **6.20 GB** |
@@ -38,6 +42,13 @@ evaluate the checked-in verified snapshot; they do not query Vercel live.
 `HeadroomAlertManager` fingerprints alerts by resource and severity, applies a
 cooldown, and emits a recovery notification when a resource returns to a
 healthy band.
+
+> [!CAUTION]
+> `scripts/vercel-headroom.ts` currently defaults its evaluation clock to a
+> fixed 2026-09-12 timestamp. Its `stale` classification therefore does not
+> age naturally when the command is run later. Until the implementation is
+> corrected, compare the capture timestamp above with the real current date
+> and treat an over-age snapshot as stale manually.
 
 ## Critical Functions Storage Response
 
@@ -73,7 +84,16 @@ When the meter is critical:
 
 ## Refresh the Audited Snapshot
 
-After reading the live dashboard and deployment API, update together:
+First establish read-only provider access. On 2026-09-22 the workstation's
+global Vercel CLI (`41.6.1`) rejected its stored token, and the connected
+Vercel app returned `403` for the linked team. Do not use
+`.vercel/.env.production.local` as a token source; it contains sensitive
+production configuration and no usable `VERCEL_TOKEN`.
+
+After reauthorization, read the live dashboard and deployment API without
+printing environment values. Confirm meter values, the canonical alias target,
+the current/previous known-good deployments, recent errors, and retention
+exceptions. Then update together:
 
 - `scripts/vercel-headroom.ts`;
 - `scripts/vercel-retention-inventory.ts`;
@@ -87,6 +107,11 @@ Then run:
 npm test -- __tests__/vercel-headroom.test.ts __tests__/vercel-retention-inventory.test.ts
 npm run lint:docs
 ```
+
+Do not deploy while the last-known Functions Storage reading is critical and
+the live meter is unavailable. The
+[2026-09-22 readiness audit](../explanation/audits/2026-09-22-release-public-vercel-readiness.md)
+records the authorization gap and public production evidence.
 
 ## Provider Ledger
 
