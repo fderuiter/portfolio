@@ -1,6 +1,6 @@
 # Public Repository Readiness: GitHub Actions and Secret Exposure
 
-Last verified: 2026-09-21 against current GitHub documentation
+Last verified: 2026-09-22 against current GitHub documentation
 
 Scope: the operational consequences of changing `fderuiter/portfolio` from
 private to public on GitHub Free. This note does not assert that the repository
@@ -99,14 +99,52 @@ off. It is not part of the repository-polish change set.
 - Git history contains no tracked `.env.local`, `.env.development.local`, key,
   or certificate file. The tracked `.env.example` contains local/example
   fixtures only.
-- GitHub reported 2,817 historical workflow runs and zero retained Actions
-  artifacts. The pull-request, head-commit, and post-merge runs associated with
-  #862 had no executed steps because the Actions allowance was already
-  exhausted, corroborating #865's assessment that the live database credential
-  did not reach GitHub Actions logs through that regression.
+- GitHub reported 2,820 historical workflow runs (as last verified on
+  2026-09-22; this count grows with every push and is not a stable
+  invariant — treat it as a snapshot, not a target to re-derive) and zero
+  retained Actions artifacts. The pull-request, head-commit, and post-merge
+  runs associated with #862 had no executed steps because the Actions
+  allowance was already exhausted, corroborating #865's assessment that the
+  live database credential did not reach GitHub Actions logs through that
+  regression.
 - A complete review or deliberate retention decision for older workflow logs is
   still required before conversion; the absence of artifacts and the #862
-  evidence do not prove all 2,817 historical logs are safe.
+  evidence do not prove every historical log is safe.
+
+## Completed Since Last Verification
+
+- **Application source licensing.** [PR #886](https://github.com/fderuiter/portfolio/pull/886)
+  (merged to `main` as `7fb7e666`) added the Apache License 2.0 grant
+  (`LICENSE`) and the three-layer `NOTICE` scope statement (application
+  source under Apache-2.0, `public/files/` artwork unchanged under CC BY 4.0,
+  editorial/identity content all rights reserved), as decided in
+  [ADR 0045](../../adr/0045-source-code-licensing-and-three-layer-reuse-boundary.md).
+  The licensing surface is enforced by
+  `__tests__/public-repository-readiness.test.ts`, which pins the license and
+  notice text against truncation or unauthorized mutation rather than
+  substring-matching a label. License selection is no longer a publication
+  blocker.
+
+## Process Correction: PR #886 Runtime-Impact Declaration
+
+PR #886's Verification checklist checked the Vercel-preview item as "not
+requested; no runtime code paths change." That statement was inaccurate: the
+merged diff (`7fb7e666`) included runtime-rendered changes — `app/globals.css`,
+`app/proof/ProofWorkspaceSkeleton.tsx`, `components/CommandPalette.tsx`,
+`components/FooterStatusTicker.tsx`, `components/Hero.tsx`,
+`components/MermaidDiagram.tsx`, `components/RichNarrative.tsx`,
+`components/UnifiedErrorLayout.tsx`, and `components/arcade/PlayCabinet.tsx`
+— and updated a Playwright visual snapshot
+(`__tests__/e2e/visual.spec.ts-snapshots/home-chromium-darwin.png`). No
+Vercel preview was captured for this diff before merge.
+
+This is recorded here rather than corrected in the PR itself: the PR is
+merged and its description is part of the historical record, not something
+to rewrite after the fact. The pull request template's runtime-impact
+checkbox has been tightened (see `.github/pull_request_template.md`) to
+require checking the actual diff for runtime-rendered paths rather than
+relying on the author's stated intent, so the same mismatch is harder to
+reproduce.
 
 ## Current Go/No-Go Status
 
@@ -121,19 +159,20 @@ Those decisions have related but distinct gates.
 2. Resolve the mutation-quality gate. The first functioning local Stryker run
    measured 46.73% against the configured 80% break threshold; the threshold
    has not been weakened.
-3. Choose and add an intentional repository license. The asset-specific
-   `public/files/LICENSE.txt` does not license the application source code.
-4. Review or retire all 2,817 historical Actions runs before their logs become
-   public. The absence of retained artifacts is not evidence that every log is
-   safe.
-5. Finish the public-surface audit of open and closed issues, pull requests,
+3. Review or retire all historical Actions runs (2,820 as last verified on
+   2026-09-22, and growing) before their logs become public. The absence of
+   retained artifacts is not evidence that every log is safe.
+4. Finish the public-surface audit of open and closed issues, pull requests,
    discussions, and wikis. Discussions and the wiki are currently disabled;
    that fact does not replace review of existing issue and pull-request text,
    comments, attachments, or linked content.
-6. Complete the workflow and repository-setting review for untrusted public
+5. Complete the workflow and repository-setting review for untrusted public
    forks, external-contributor approval, token permissions, and secret access.
    After conversion, enable public secret scanning and restore protection for
    `main` because GitHub disables push rulesets during the visibility change.
+
+Application source licensing (item 3 in prior verifications) is complete; see
+"Completed Since Last Verification" above.
 
 ### Production Release
 
@@ -151,7 +190,7 @@ operator work tracked by:
 - [#720](https://github.com/fderuiter/portfolio/issues/720), final production
   verification.
 
-License selection and the historical public-surface review block publication,
-but do not independently block a private production deployment. Conversely,
+The historical Actions-log and public-surface review blocks publication, but
+does not independently block a private production deployment. Conversely,
 completion of the local repository audit does not close the operator-owned
 production checks above.

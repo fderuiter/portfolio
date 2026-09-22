@@ -4,10 +4,12 @@
 
 Accepted on 2026-09-21.
 
-Completes the public-repository readiness work landed in `ff707f76`, which
-shipped a code of conduct, issue templates, a security policy, and public
-repository metadata but left the source itself unlicensed. Scopes, but does
-not modify, the pre-existing CC BY 4.0 grant on `public/files/`.
+Completes the public-repository readiness work landed via
+[PR #886](https://github.com/fderuiter/portfolio/pull/886), merged to `main`
+as `7fb7e666`, which shipped a code of conduct, issue templates, a security
+policy, public repository metadata, and this licensing decision together.
+Scopes, but does not modify, the pre-existing CC BY 4.0 grant on
+`public/files/`.
 
 ## Context
 
@@ -65,7 +67,7 @@ Apache-2.0 over MIT for two clauses that are doing real work here:
   and proof-engine modules are the plausible commercial-adoption surface;
   MIT leaves the patent question entirely unaddressed.
 
-Section 4(b)'s NOTICE propagation is a secondary benefit: attribution
+Section 4(d)'s NOTICE propagation is a secondary benefit: attribution
 survives redistribution without a per-file header campaign across a tree
 this size.
 
