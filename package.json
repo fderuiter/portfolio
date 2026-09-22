@@ -11,6 +11,7 @@
   "bugs": {
     "url": "https://github.com/fderuiter/portfolio/issues"
   },
+  "license": "Apache-2.0",
   "scripts": {
     "dx": "npx tsx scripts/dx.ts",
     "crf": "npx tsx scripts/crf.ts",

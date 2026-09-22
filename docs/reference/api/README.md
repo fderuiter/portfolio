@@ -224,3 +224,15 @@ production rollout order, and the one-time production baseline procedure.
 ## Contributing Guidelines
 
 For full details on developer onboarding, architectural invariants, conventional commits, and interactive CLI feature scaffolding (`npm run scaffold`), please refer to the [**`CONTRIBUTING.md`**](_media/CONTRIBUTING.md) guide.
+
+## License
+
+The application source is licensed under the [Apache License 2.0](_media/LICENSE). The repository ships three kinds of material under three different terms, and [`NOTICE`](_media/NOTICE) is the authoritative scope statement:
+
+- **Application source** — Apache-2.0. `app/`, `components/`, `hooks/`, `lib/`, `types/`, `prisma/`, `scripts/`, `__tests__/`, root configuration, and the generated `docs/` and `openapi.json`.
+- **Laser Loon brand artwork** (`public/files/`) — [CC BY 4.0](_media/LICENSE.txt), unchanged.
+- **Editorial content, biography, resume data, photography, and the `Frederick de Ruiter` / `deruiter.dev` marks** — all rights reserved.
+
+Apache-2.0 was chosen over MIT for its express patent grant and its section 6 trademark reservation: this repository is a personal-brand deployment, so the permission to reuse the engineering must not read as permission to reuse the identity. Fork the engineering freely; replace the writing and the branding before you deploy.
+
+Contributions are accepted under the same Apache-2.0 terms as the project (inbound = outbound), per [`CONTRIBUTING.md`](_media/CONTRIBUTING.md).
