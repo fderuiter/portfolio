@@ -11,7 +11,7 @@ import {
   materializeRichInlineLineRange,
   type RichInlineLineRange,
 } from "@chenglou/pretext/rich-inline";
-import { scanFile } from "../validation-scanner";
+import { scanFile } from "../security-scan";
 import { evaluateFormula, lintFormula } from "../crf/ast-evaluator";
 import {
   parseFormula,

@@ -1,23 +1,26 @@
 import { describe, it, expect } from "vitest";
-import { scanText, scanFile } from "../lib/validation-scanner";
+import { scanText, scanFile } from "../lib/security-scan";
 import { shouldScanFile } from "../scripts/validate-commit";
 
 describe("Static Regex Guards - scanText", () => {
   it("detects database connection string pattern with credentials", () => {
-    const text = "We connected using postgresql://admin:superSecretPass123@db.example.com:5432/production";
+    const text = [
+      "We connected using postgresql",
+      "://admin:superSecretPass123@db.example.net:5432/production",
+    ].join("");
     const matches = scanText(text);
     expect(matches).toHaveLength(1);
-    expect(matches[0].category).toBe("Database Connection String (with credentials)");
-    expect(matches[0].lineNumber).toBe(1);
-    expect(matches[0].matchedText).toContain("postgresql://admin:superSecretPass123@db.example.com:5432/production");
+    expect(matches[0].detectorId).toBe("database-url-credentialed");
+    expect(matches[0].line).toBe(1);
   });
 
   it("detects database connection string pattern without credentials", () => {
-    const text = "Connecting to postgresql://localhost:5432/my_local_db";
+    const text =
+      "Connecting to postgresql://db.fixture.internal:5432/my_local_db";
     const matches = scanText(text);
     expect(matches).toHaveLength(1);
-    expect(matches[0].category).toBe("Database Connection Pattern");
-    expect(matches[0].lineNumber).toBe(1);
+    expect(matches[0].detectorId).toBe("database-url-bare");
+    expect(matches[0].line).toBe(1);
   });
 
   it("detects generic secret and password patterns with high entropy", () => {
@@ -29,24 +32,26 @@ describe("Static Regex Guards - scanText", () => {
     `;
     const matches = scanText(text);
     expect(matches).toHaveLength(1);
-    expect(matches[0].category).toBe("Generic API Key/Secret/Password");
-    expect(matches[0].lineNumber).toBe(3);
+    expect(matches[0].detectorId).toBe("generic-assigned-secret");
+    expect(matches[0].line).toBe(3);
   });
 
   it("detects AWS Access Keys", () => {
-    const text = "Set environment variable AWS_ACCESS_KEY_ID = AKIAIOSFODNN7EXAMPLE";
+    const key = ["AKIA", "ABCDEFGHIJKLMNOP"].join("");
+    const text = `Set environment variable AWS_ACCESS_KEY_ID = ${key}`;
     const matches = scanText(text);
     expect(matches).toHaveLength(1);
-    expect(matches[0].category).toBe("AWS Access Key");
-    expect(matches[0].lineNumber).toBe(1);
+    expect(matches[0].detectorId).toBe("aws-access-key");
+    expect(matches[0].line).toBe(1);
   });
 
   it("detects GitHub Access Tokens", () => {
-    const text = "Check out using token: ghp_123456789012345678901234567890123456";
+    const token = ["ghp_", "ABCDEFGHIJKLMNOPQRSTUVWXYZ01234"].join("");
+    const text = `Check out using token: ${token}`;
     const matches = scanText(text);
     expect(matches).toHaveLength(1);
-    expect(matches[0].category).toBe("GitHub Access Token");
-    expect(matches[0].lineNumber).toBe(1);
+    expect(matches[0].detectorId).toBe("github-token");
+    expect(matches[0].line).toBe(1);
   });
 
   it("detects Private Keys", () => {
@@ -55,10 +60,10 @@ describe("Static Regex Guards - scanText", () => {
 MIIEowIBAAKCAQEA0G...
 -----END RSA PRIVATE KEY-----
     `;
-    const matches = scanText(text);
+    const matches = scanText(text, "some/other/file.ts");
     expect(matches).toHaveLength(1);
-    expect(matches[0].category).toBe("Private Key (PEM)");
-    expect(matches[0].lineNumber).toBe(2);
+    expect(matches[0].detectorId).toBe("private-key-pem");
+    expect(matches[0].line).toBe(2);
   });
 
   it("does not trigger on safe text and code", () => {
@@ -76,8 +81,15 @@ MIIEowIBAAKCAQEA0G...
     const text = "const api_key = `superSecretToken12345`;";
     const matches = scanText(text);
     expect(matches).toHaveLength(1);
-    expect(matches[0].category).toBe("Generic API Key/Secret/Password");
-    expect(matches[0].lineNumber).toBe(1);
+    expect(matches[0].detectorId).toBe("generic-assigned-secret");
+    expect(matches[0].line).toBe(1);
+  });
+
+  it("allows the AWS-published example key (well-known, not a real credential)", () => {
+    const text =
+      "Set environment variable AWS_ACCESS_KEY_ID = AKIAIOSFODNN7EXAMPLE";
+    const matches = scanText(text);
+    expect(matches).toHaveLength(0);
   });
 
   it("handles scanFile on non-existent or empty files gracefully", () => {
@@ -102,6 +114,11 @@ MIIEowIBAAKCAQEA0G...
       expect(shouldScanFile("foo/node_modules/bar.js")).toBe(false);
       expect(shouldScanFile(".next/server/page.js")).toBe(false);
       expect(shouldScanFile("__tests__/validation.test.ts")).toBe(false);
+    });
+
+    it("returns false for dotenv files", () => {
+      expect(shouldScanFile(".env.example")).toBe(false);
+      expect(shouldScanFile(".env.local")).toBe(false);
     });
 
     it("returns true for regular source files", () => {

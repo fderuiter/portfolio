@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { FALLBACK_CASE_STUDIES } from "@/lib/case-studies-data";
-import { scanText } from "@/lib/validation-scanner";
+import { scanText } from "@/lib/security-scan";
 import { CANONICAL_ROUTES } from "@/lib/dx/page-bench";
 import { ROUTE_METADATA_CONFIGS } from "@/lib/seo-metadata";
 

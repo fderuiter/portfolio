@@ -1,10 +1,6 @@
 import { execSync } from "child_process";
 import path from "path";
-import { scanFile, type ScanMatch } from "../lib/validation-scanner";
-
-export function formatRedactedMatch(match: ScanMatch): string {
-  return `  - Line ${match.lineNumber}: Category [${match.category}] (value redacted)`;
-}
+import { formatFinding, scanFile } from "../lib/security-scan";
 
 function getStagedFiles(): string[] {
   try {
@@ -60,7 +56,11 @@ export function shouldScanFile(filePath: string): boolean {
   const baseName = path.basename(filePath);
   const ext = path.extname(filePath).toLowerCase();
 
-  if (ignoredExtensions.includes(ext) || ignoredFiles.includes(baseName)) {
+  if (
+    ignoredExtensions.includes(ext) ||
+    ignoredFiles.includes(baseName) ||
+    baseName.startsWith(".env")
+  ) {
     return false;
   }
 
@@ -105,15 +105,15 @@ function main() {
     }
 
     const absolutePath = path.resolve(process.cwd(), file);
-    const matches = scanFile(absolutePath);
+    const findings = scanFile(absolutePath, file);
 
-    if (matches.length > 0) {
+    if (findings.length > 0) {
       hasViolation = true;
       console.error(
         `\n❌ [SECURITY ALERT] Sensitive information or credential pattern detected in staged file: ${file}`
       );
-      for (const match of matches) {
-        console.error(formatRedactedMatch(match));
+      for (const finding of findings) {
+        console.error(formatFinding(finding));
       }
     }
   }

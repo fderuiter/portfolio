@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { FALLBACK_CASE_STUDIES } from "@/lib/case-studies-data";
-import { scanText } from "@/lib/validation-scanner";
+import { scanText } from "@/lib/security-scan";
 import fs from "fs";
 import path from "path";
 

@@ -155,12 +155,22 @@ describe("DX Invariant Doctor Engine", () => {
       expect(result.status).toBe("fail");
     });
 
-    it("defers the history audit detector file to its fixture-aware scanner", () => {
+    it("flags secret patterns in scripts/audit-secret-history.ts too (no more file-path special-casing)", () => {
       const scriptsDir = path.join(tempDir, "scripts");
       fs.mkdirSync(scriptsDir, { recursive: true });
       fs.writeFileSync(
         path.join(scriptsDir, "audit-secret-history.ts"),
-        'const fixture = "' + "ghp_" + '123456789012345678901234567890123456";'
+        'const fixture = "' + "ghp_" + 'ABCDEFGHIJKLMNOPQRSTUVWXYZ01234";'
+      );
+
+      const result = checkSecretLeaks(tempDir);
+      expect(result.status).toBe("fail");
+    });
+
+    it("still ignores known-safe placeholder values from .env.example / env-guard.ts", () => {
+      fs.writeFileSync(
+        path.join(tempDir, ".env.example"),
+        'UPSTASH_REDIS_REST_TOKEN="example_dev_token"'
       );
 
       const result = checkSecretLeaks(tempDir);

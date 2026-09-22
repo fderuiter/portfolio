@@ -3,10 +3,13 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { CaseStudyService } from "@/lib/services/case-study-service";
 import { FALLBACK_CASE_STUDIES } from "@/lib/case-studies-data";
 import { prisma } from "@/lib/db";
-import { generateMetadata, generateStaticParams } from "@/app/case-studies/[slug]/page";
+import {
+  generateMetadata,
+  generateStaticParams,
+} from "@/app/case-studies/[slug]/page";
 import { ROUTE_METADATA_CONFIGS } from "@/lib/seo-metadata";
 import { CANONICAL_ROUTES } from "@/lib/dx/page-bench";
-import { scanText } from "@/lib/validation-scanner";
+import { scanText } from "@/lib/security-scan";
 
 vi.mock("@/lib/db", () => ({
   prisma: {
@@ -97,12 +100,16 @@ describe("New Production Engineering Case Studies Unit Test Suite", () => {
     );
 
     it("asserts domain-specific tag signatures for each new study", () => {
-      const duckDeploy = FALLBACK_CASE_STUDIES.find((s) => s.slug === "duckdeploy");
+      const duckDeploy = FALLBACK_CASE_STUDIES.find(
+        (s) => s.slug === "duckdeploy"
+      );
       expect(duckDeploy?.tags).toContain("TypeScript");
       expect(duckDeploy?.tags).toContain("JSON Schema");
       expect(duckDeploy?.tags).toContain("Web Workers");
 
-      const cardiac = FALLBACK_CASE_STUDIES.find((s) => s.slug === "cardiac-risk-modeling");
+      const cardiac = FALLBACK_CASE_STUDIES.find(
+        (s) => s.slug === "cardiac-risk-modeling"
+      );
       expect(cardiac?.tags).toContain("Python");
       expect(cardiac?.tags).toContain("LightGBM");
       expect(cardiac?.tags).toContain("Adversarial Validation");
@@ -117,7 +124,9 @@ describe("New Production Engineering Case Studies Unit Test Suite", () => {
       expect(crfXl?.tags).toContain("CDISC");
       expect(crfXl?.tags).toContain("ODM-XML");
 
-      const promptOps = FALLBACK_CASE_STUDIES.find((s) => s.slug === "promptops");
+      const promptOps = FALLBACK_CASE_STUDIES.find(
+        (s) => s.slug === "promptops"
+      );
       expect(promptOps?.tags).toContain("TypeScript");
       expect(promptOps?.tags).toContain("LLM");
       expect(promptOps?.tags).toContain("Semantic Versioning");
@@ -200,14 +209,22 @@ describe("New Production Engineering Case Studies Unit Test Suite", () => {
 
     it("registers all 5 new case studies in CANONICAL_ROUTES for page benchmarks", () => {
       for (const slug of NEW_CASE_STUDY_SLUGS) {
-        const route = CANONICAL_ROUTES.find((r) => r.path === `/case-studies/${slug}`);
+        const route = CANONICAL_ROUTES.find(
+          (r) => r.path === `/case-studies/${slug}`
+        );
         expect(route).toBeDefined();
         expect(route?.category).toBe("case-study");
       }
     });
 
     it("registers SEO metadata configurations in ROUTE_METADATA_CONFIGS", () => {
-      const configKeys = ["duckDeploy", "cardiacRiskModeling", "fourGlory", "crfXl", "promptOps"] as const;
+      const configKeys = [
+        "duckDeploy",
+        "cardiacRiskModeling",
+        "fourGlory",
+        "crfXl",
+        "promptOps",
+      ] as const;
       for (const key of configKeys) {
         const config = ROUTE_METADATA_CONFIGS[key];
         expect(config).toBeDefined();
