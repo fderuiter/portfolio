@@ -108,6 +108,8 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     };
 
     HTMLCanvasElement.prototype.getContext = vi.fn(() => mockCtx as any);
+    // Starting a shift scrolls the board into view; JSDOM has no layout to scroll.
+    window.scrollTo = vi.fn() as unknown as typeof window.scrollTo;
     HTMLCanvasElement.prototype.getBoundingClientRect = vi.fn(() => ({
       left: 0,
       top: 0,
