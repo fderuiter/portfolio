@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import type {
   CRFField,
   StudyReviewActor,
@@ -44,6 +44,7 @@ export function ReviewThreadsTab({
   isTargetDeleted,
   getStatus,
 }: ReviewThreadsTabProps) {
+  const idPrefix = useId();
   const [comment, setComment] = useState("");
   const [replyingToThreadId, setReplyingToThreadId] = useState<string | null>(
     null
@@ -68,6 +69,9 @@ export function ReviewThreadsTab({
           label: selectedField.label,
         }
       : null;
+  const authorNameId = `review-author-name-${idPrefix}`;
+  const authorRoleId = `review-author-role-${idPrefix}`;
+  const commentId = `review-comment-${idPrefix}`;
 
   const submitComment = () => {
     if (!commentTarget || !actor.name || !comment.trim()) return;
@@ -89,11 +93,11 @@ export function ReviewThreadsTab({
         <div className="mt-3 grid grid-cols-1 gap-2">
           <label
             className="text-[10px] text-zinc-400"
-            htmlFor="review-author-name"
+            htmlFor={authorNameId}
           >
             Reviewer name
             <input
-              id="review-author-name"
+              id={authorNameId}
               value={author.name}
               onChange={(event) =>
                 onAuthorChange({ ...author, name: event.target.value })
@@ -105,11 +109,11 @@ export function ReviewThreadsTab({
           </label>
           <label
             className="text-[10px] text-zinc-400"
-            htmlFor="review-author-role"
+            htmlFor={authorRoleId}
           >
             Reviewer role
             <select
-              id="review-author-role"
+              id={authorRoleId}
               value={author.role}
               onChange={(event) =>
                 onAuthorChange({
@@ -141,11 +145,11 @@ export function ReviewThreadsTab({
           <p className="mt-1 text-[11px] text-zinc-400">
             {commentTarget.variableName} · {commentTarget.label}
           </p>
-          <label className="sr-only" htmlFor="review-comment">
+          <label className="sr-only" htmlFor={commentId}>
             Review comment
           </label>
           <textarea
-            id="review-comment"
+            id={commentId}
             value={comment}
             onChange={(event) => setComment(event.target.value)}
             rows={3}

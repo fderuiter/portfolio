@@ -79,6 +79,43 @@ describe("field review thread controls", () => {
     expect(onSetStatus).toHaveBeenLastCalledWith(thread.id, "open", author);
   });
 
+  it("uses unique accessible control IDs when inspector instances coexist", () => {
+    const { form } = StudyProtocolEngine.addForm(
+      StudyProtocolEngine.createInitialStudy(),
+      "VS"
+    );
+    const field = form.sections[0]?.fields[0];
+    expect(field).toBeDefined();
+    if (!field) throw new Error("The starter study needs a field");
+    const props = {
+      threads: [],
+      selectedField: field,
+      author: { name: "Reviewer", role: "Data Manager" as const },
+      onAuthorChange: vi.fn(),
+      onAddComment: vi.fn(),
+      onSetStatus: vi.fn(),
+      isTargetDeleted: StudyProtocolEngine.isReviewTargetDeleted,
+      getStatus: StudyProtocolEngine.getReviewThreadStatus,
+    };
+
+    render(
+      <>
+        <ReviewThreadsTab {...props} />
+        <ReviewThreadsTab {...props} />
+      </>
+    );
+
+    const nameInputs = screen.getAllByLabelText("Reviewer name");
+    const roleInputs = screen.getAllByLabelText("Reviewer role");
+    const comments = screen.getAllByLabelText("Review comment");
+    expect(nameInputs).toHaveLength(2);
+    expect(roleInputs).toHaveLength(2);
+    expect(comments).toHaveLength(2);
+    expect(new Set(nameInputs.map((input) => input.id)).size).toBe(2);
+    expect(new Set(roleInputs.map((input) => input.id)).size).toBe(2);
+    expect(new Set(comments.map((input) => input.id)).size).toBe(2);
+  });
+
   it("lets a reviewer reply to a deleted field thread without selecting a field", () => {
     const { study, form } = StudyProtocolEngine.addForm(
       StudyProtocolEngine.createInitialStudy(),
