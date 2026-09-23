@@ -16,6 +16,15 @@ import {
 import { sanitizeString, sanitizeError } from "@/lib/error-sanitization";
 import { validateSyncRequest } from "@/lib/security";
 import { NextRequest } from "next/server";
+import {
+  DEMOGRAPHICS_SCENARIO,
+  advanceDesk,
+  createDeskState,
+  evaluateHand,
+  roundRatio,
+  type DeskAction,
+  type RoundingMode,
+} from "@/lib/trial-and-error";
 
 // Arbitrary generator for Propositional Logic ASTs
 const varNames = ["P", "Q", "R", "S", "A", "B", "C"];
@@ -295,6 +304,118 @@ describe("Shift-Left Fuzz & Property-Based Verification", () => {
           originalEnv;
         process.env.CRON_SECRET = originalSecret;
       }
+    });
+  });
+  describe("Trial & Error Scoring, Rounding & Replay Invariants", () => {
+    const modeArbitrary = fc.constantFrom<RoundingMode>(
+      "HALF_EVEN",
+      "HALF_AWAY_FROM_ZERO",
+      "TRUNCATE"
+    );
+
+    it("rounds every ratio to within one unit of the last displayed place", () => {
+      fc.assert(
+        fc.property(
+          fc.integer({ min: -1_000_000, max: 1_000_000 }),
+          fc.integer({ min: 1, max: 10_000 }),
+          fc.integer({ min: 0, max: 4 }),
+          modeArbitrary,
+          (numerator, denominator, precision, mode) => {
+            const rounded = roundRatio(numerator, denominator, precision, mode);
+            expect(rounded).not.toBeNull();
+            const error = Math.abs(Number(rounded) - numerator / denominator);
+            expect(error).toBeLessThanOrEqual(10 ** -precision + 1e-9);
+            if (mode === "TRUNCATE") {
+              expect(Math.abs(Number(rounded))).toBeLessThanOrEqual(
+                Math.abs(numerator / denominator) + 1e-9
+              );
+            }
+          }
+        )
+      );
+    });
+
+    it("never scores a hand below zero, and zeroes any hand carrying a ×0 rule", () => {
+      const ruleArbitrary = fc.record({
+        ruleId: fc.constantFrom("R1", "R2", "R3"),
+        passed: fc.boolean(),
+        chipsDelta: fc.integer({ min: -200, max: 200 }),
+        multDelta: fc.integer({ min: -20, max: 20 }),
+        multMultiplier: fc.option(fc.constantFrom(0, 0.5, 1, 1.5, 2), {
+          nil: undefined,
+        }),
+        evidence: fc.constant("fuzz"),
+      });
+      fc.assert(
+        fc.property(
+          fc.array(
+            fc.record({
+              id: fc.constant("card"),
+              chips: fc.nat(300),
+              mult: fc.nat(20),
+            }),
+            {
+              minLength: 1,
+              maxLength: 5,
+            }
+          ),
+          fc.array(ruleArbitrary, { maxLength: 8 }),
+          (cards, ruleResults) => {
+            const input = {
+              handType: "HIGH_TABLE" as const,
+              cards,
+              ruleResults,
+            };
+            const result = evaluateHand(input);
+            expect(Number.isInteger(result.score)).toBe(true);
+            expect(result.score).toBeGreaterThanOrEqual(0);
+            expect(evaluateHand(input)).toEqual(result);
+            if (ruleResults.some((r) => r.multMultiplier === 0)) {
+              expect(result.score).toBe(0);
+              expect(result.zeroRule.triggered).toBe(true);
+            }
+          }
+        )
+      );
+    });
+
+    it("replays any QC Desk move sequence to an identical state with conserved CPU", () => {
+      const actionArbitrary: fc.Arbitrary<DeskAction> = fc.oneof(
+        fc.record({
+          type: fc.constant("INSPECT_CELL" as const),
+          row: fc.integer({ min: -1, max: 5 }),
+          col: fc.integer({ min: -1, max: 3 }),
+        }),
+        fc.record({
+          type: fc.constant("CORRECT_FINDING" as const),
+          findingId: fc.constantFrom(
+            "SAP-DM-01@r2c2",
+            "SAP-DM-02@r2c1",
+            "SAP-DM-03@r1c2",
+            "SAP-DM-02@r2c0",
+            "missing"
+          ),
+        }),
+        fc.constant<DeskAction>({ type: "PLAY_HAND" }),
+        fc.constant<DeskAction>({ type: "DISCARD" })
+      );
+      fc.assert(
+        fc.property(fc.array(actionArbitrary, { maxLength: 40 }), (actions) => {
+          const replay = () =>
+            actions.reduce(
+              (state, action) =>
+                advanceDesk(DEMOGRAPHICS_SCENARIO, state, action),
+              createDeskState(DEMOGRAPHICS_SCENARIO)
+            );
+          const first = replay();
+          expect(replay()).toEqual(first);
+          expect(first.cpu.available).toBeGreaterThanOrEqual(0);
+          expect(first.cpu.available + first.cpu.spent).toBe(
+            DEMOGRAPHICS_SCENARIO.startingCpu
+          );
+          expect(first.cpu.spent).toBe(first.handsPlayed * 2 + first.discards);
+        })
+      );
     });
   });
 });

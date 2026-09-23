@@ -385,7 +385,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
 
         {/* Discrete Retro Controller Menu (visible when not in full-screen) */}
         {!isFullscreen && (
-          <div className="mt-3 flex items-center justify-between w-full border border-zinc-800 bg-zinc-900/60 rounded-2xl px-4 py-2 font-mono text-xs text-zinc-500 flex-wrap gap-2 shrink-0">
+          <div className="mt-3 flex items-center justify-between w-full border border-zinc-800 bg-zinc-900/60 rounded-2xl px-4 py-2 font-mono text-xs text-zinc-400 flex-wrap gap-2 shrink-0">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span className="uppercase tracking-wider">Cabinet Engaged</span>

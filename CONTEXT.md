@@ -422,3 +422,23 @@ Formal inference rules used to derive logical steps from valid premises:
 - **Emergency Dispatch Beacon**: An animated, pulsing radar beacon ring anchored to exact trail or lift tower coordinates on the mountain map during active incident dispatch and response states.
 - **Ambient Operational Mini-Event**: A brief (10–30s) non-clinical mountain event occurring on the map hub between dispatches (guest assistance, boundary control, trail hazard mitigation, lift coordination, dispatch radio checks) reflecting that patrol manages the entire mountain environment.
 - **Your Responsibility Code**: The 10-point National Ski Areas Association (NSAA) skier and snowboarder safety ruleset accessible directly from the mountain hub to reinforce operational mountain safety culture.
+
+## Trial & Error: Biostat Ops (Clinical-Output Deckbuilder)
+
+Fictional teaching material; nothing in the game is clinical or regulatory advice. See [ADR 0046](adr/0046-trial-and-error-biostat-ops-architecture.md).
+
+- **SAP (Statistical Analysis Plan)**: The scenario's authoritative rulebook. It declares the population suit, any population aliases, decimal precision and rounding mode, and the rules a staged output is validated against. No precision or rounding convention is assumed outside it.
+- **TLF (Tables, Listings & Figures)**: The outputs of a clinical study report. In the game they are the cards that form scoring hands.
+- **Table Shell**: The planned specification of an output (`TableShellSpec`): number, title, card type, target population, Chips and +Mult weight, and required rulebook.
+- **Population Snapshot**: An immutable, versioned record of which subjects belong to which analysis population. Every denominator is derived from it, never from the table under review.
+- **Analysis Population (Suit)**: `SCREENED`, `ITT`, `SAFETY`, `PER_PROTOCOL` or `FAS`. FAS and ITT are distinct unless a scenario's SAP declares an alias.
+- **QC Discrepancy (Finding)**: A validator result that ties one cell to one SAP rule, with category (denominator, value, precision, rounding), severity, observed and expected values, evidence, and consequence.
+- **QC Desk**: The review surface where a staged output is inspected cell by cell, findings are revealed and corrected, and the hand is approved and played or rejected and discarded.
+- **Chips**: A hand's base weight: the hand's base Chips plus output, rule and relic Chips.
+- **+Mult / ×Mult**: Additive and multiplicative multipliers. A hand scores `Chips × (Σ +Mult) × (Π ×Mult)`.
+- **Zero-Score Rule**: Any rule result carrying ×0 (an uncorrected fatal denominator error, or closed-session unblinding) sets final Mult to 0.
+- **Redline**: A revealed, uncorrected non-fatal finding that subtracts its rule's penalty from +Mult.
+- **Blind**: A milestone delivery quota (Small, Big or Boss) the round score must reach.
+- **Hand**: A scored combination of outputs, from High Table (15 Chips / +1 Mult) to MedDRA Five of a Kind (200 / +18).
+- **CPU**: The action budget. Approve & Play costs 2 CPU; Reject & Discard costs 1 CPU.
+- **Draw Pile**: The ordered drafts a scenario stages. It is fixed per scenario; seeded randomness is reserved for the crisis deck and the shop.

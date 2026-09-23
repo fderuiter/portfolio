@@ -58,12 +58,20 @@ export default defineConfig({
         "lib/garmin-types.ts",
         "lib/working-with-duck-types.ts",
         "lib/telemetry/index.ts",
+        "lib/trial-and-error/index.ts",
       ],
       thresholds: {
         lines: 80,
         functions: 80,
         branches: 70,
         statements: 80,
+        // Trial & Error validation and scoring carry a stricter gate (#890, #909).
+        "lib/trial-and-error/**": {
+          statements: 95,
+          branches: 95,
+          functions: 95,
+          lines: 95,
+        },
       },
     },
   },

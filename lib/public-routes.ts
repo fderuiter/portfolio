@@ -175,6 +175,11 @@ export const PUBLIC_ROUTE_REGISTRY = [
     category: "arcade",
   },
   {
+    path: "/arcade/trial-and-error",
+    name: "Game: Trial & Error",
+    category: "arcade",
+  },
+  {
     path: "/arcade/retro-labyrinth",
     name: "Game: Retro Labyrinth",
     category: "arcade",

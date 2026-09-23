@@ -683,6 +683,25 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
         ],
       },
       {
+        id: "nav-trial-and-error",
+        title: "Trial & Error: Biostat Ops",
+        subtitle:
+          "Review clinical tables against the SAP and play Chips × Mult hands to beat regulatory Blinds.",
+        category: "navigation",
+        url: "/arcade/trial-and-error",
+        icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />,
+        badge: "Deckbuilder",
+        status: "QC Desk Slice",
+        description:
+          "A deterministic, SAP-driven QC Desk: inspect Table 14.1.1, correct redlines, and score a hand.",
+        techStack: ["Zod", "Pure Reducers", "Exact Rounding"],
+        highlights: [
+          "Half-even vs half-away tie detection",
+          "FAS ≠ ITT denominator checks",
+          "Zero-score rule for fatal errors",
+        ],
+      },
+      {
         id: "nav-garmin-watch",
         title: "Monkey C Mayhem: Garmin Schvitz App",
         subtitle:

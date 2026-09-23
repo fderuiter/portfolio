@@ -659,6 +659,90 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
     },
   },
 
+  "trial-and-error": {
+    id: "trial-and-error",
+    title: "Trial & Error: Biostat Ops",
+    subtitle: "SAP-Driven QC Desk & Roguelike Deckbuilder",
+    genre: "Roguelike Deckbuilder",
+    badge: "Chips × Mult",
+    route: "/arcade/trial-and-error",
+    accentColor: "from-amber-500/20 via-amber-500/5 to-transparent",
+    badgeBg: "bg-amber-500/10 text-amber-300 border-amber-500/30",
+    objective:
+      "Review the staged Demographics table (Table 14.1.1) against its Statistical Analysis Plan, correct the discrepancies you find, and play hands worth Chips × Mult until your round score reaches the Small Blind quota of 300.",
+    quickSummary:
+      "Move through the grid with the arrow keys, press Enter or Space to inspect a cell, press C to correct a revealed finding, then P to approve and play (2 CPU) or D to reject and discard the draft (1 CPU).",
+    controls: [
+      {
+        action: "Move the review cursor",
+        description:
+          "Arrow keys move between cells; Home and End jump to the ends of a row. Tab leaves the grid for the action buttons.",
+        key: "Arrow Keys",
+      },
+      {
+        action: "Inspect cell",
+        description:
+          "Re-derives the cell from the population snapshot and reveals any SAP findings with their rule, evidence and consequence.",
+        key: "Enter / Space",
+      },
+      {
+        action: "Flag & correct",
+        description:
+          "Corrects the revealed open finding on the active cell and earns its rule's +Mult bonus.",
+        key: "C",
+      },
+      {
+        action: "Approve & Play Hand",
+        description:
+          "Scores the staged table as it truly is, including findings you did not inspect. Costs 2 CPU.",
+        key: "P",
+      },
+      {
+        action: "Reject & Discard",
+        description:
+          "Sends the draft back and stages the next one from the fixed draw pile. Costs 1 CPU.",
+        key: "D",
+      },
+    ],
+    rules: [
+      {
+        title: "Scoring pipeline",
+        detail:
+          "Hand Score = (base hand Chips + output Chips + relic Chips) × (base hand Mult + card and rule +Mult + relic +Mult) × every ×Mult. A High Table is 15 Chips / +1 Mult; the Demographics table adds 30 Chips / +1 Mult, and 12 verified subject records add 12 Chips.",
+        badge: "Chips × Mult",
+      },
+      {
+        title: "Zero-score rule",
+        detail:
+          "A percentage divided by the wrong population's N (FAS instead of ITT) is a fatal denominator error. While it stands, the hand's final Mult is 0 — whether or not you found it.",
+        badge: "Fatal",
+      },
+      {
+        title: "Precision and rounding",
+        detail:
+          "The SAP reports 1 decimal place and rounds ties half-to-even. Correcting a precision slip earns +2 Mult; correcting a rounding slip earns +1. Each open redline you have revealed costs 1 Mult.",
+        badge: "SAP-DM-001",
+      },
+    ],
+    proTips: [
+      "The Expected Value only counts findings you have revealed. Unreviewed cells can hide a zero.",
+      "Draft A is the messiest draft but also the most valuable once every finding is corrected.",
+      "FAS and ITT are different populations here; the Total column is where a denominator slip hides.",
+    ],
+    lore: {
+      title: "Why statisticians double-program tables",
+      story:
+        "Before a clinical study report goes anywhere, a second programmer independently re-derives every number in every table, listing and figure against the Statistical Analysis Plan. Most discrepancies are small — a decimal place, a tie rounded the other way — but a wrong denominator changes every percentage in a column. This game is fictional teaching material, not clinical or regulatory advice.",
+      realWorldTech: [
+        "Statistical Analysis Plans",
+        "Tables, Listings & Figures",
+        "Independent QC",
+        "Banker's Rounding",
+        "Analysis Populations",
+      ],
+    },
+  },
+
   "retro-labyrinth": {
     id: "retro-labyrinth",
     title: "Retro Labyrinth: Graveyard Roguelike",
