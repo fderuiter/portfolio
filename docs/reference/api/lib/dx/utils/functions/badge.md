@@ -16,7 +16,7 @@
 
 ### type
 
-`"info"` \| `"warn"` \| `"fail"` \| `"pass"` \| `"fixed"`
+`"info"` \| `"fixed"` \| `"warn"` \| `"fail"` \| `"pass"`
 
 ## Returns
 

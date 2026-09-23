@@ -5,6 +5,9 @@
 Accepted on 2026-09-23 with T&E-01 ([#909](https://github.com/fderuiter/portfolio/issues/909)),
 under the governing map [#890](https://github.com/fderuiter/portfolio/issues/890).
 Later Trial & Error tickets amend this record rather than contradict it.
+Amended on 2026-09-23 for card-table presentation
+([#942](https://github.com/fderuiter/portfolio/issues/942)); see
+[the amendment](#amendment-2026-09-23-card-table-presentation).
 
 ## Context
 
@@ -118,3 +121,94 @@ A test asserts that serialized state contains no blinded value.
   and CPU is conserved.
 - Every Trial & Error ticket touches only this module, its components, and
   its route registrations.
+
+## Amendment (2026-09-23): Card-table presentation
+
+Recorded by T&E-UX-00 ([#942](https://github.com/fderuiter/portfolio/issues/942))
+before any card-table UI is built. It changes presentation only. The
+determinism boundary, the scoring pipeline, the `HandEvaluation` shape and
+the blinding-in-state rule above are unchanged.
+
+### Card table first
+
+The main screen is a hand of TLF cards, played as poker hands against the
+Blind. The T&E-01 QC Desk becomes the optional **Inspect** view on a card.
+Inspecting costs CPU, reveals hidden defects, and lets the player correct
+them for +Mult. Playing an uninspected card is a gamble, because an
+undiscovered fatal defect still triggers the zero-score rule. This is a
+re-framing, not a scoring change: the desk already scores Expected Value from
+revealed findings only, while Approve & Play scores the hand as it truly is.
+
+### Calm at rest, loud when scoring
+
+Planning happens in the spreadsheet-brutalist graphite identity of AGENTS.md
+§20. Discrete, event-driven **loud moments** break out into saturated colour,
+glow, screen shake and a CSS CRT/scanline layer. The loud moments are score
+resolution, a Blind cleared or failed, the shop, pack opening, boss and act
+intros, level-ups and CSR Lock.
+
+All effects are scoped inside the cabinet. They never reach the portfolio
+frame, the navbar or other routes. AGENTS.md §20 records this as a narrowly
+scoped arcade-cabinet exception.
+
+### Scoped tokens and the loud switch
+
+`app/globals.css` declares every presentation colour as a `--te-*` custom
+property under `[data-te-cabinet]`, following the scoped-token pattern of
+AGENTS.md §13 and §19. The tokens are graphite surfaces, hairline, text and
+muted text, the score colours, redline, validated, fire, and the five
+population suit bands. `__tests__/trial-and-error-tokens.test.ts` reads that
+block and asserts WCAG AA for every text token on both surfaces.
+
+Loud layers (`.te-loud-*`) apply only under
+`[data-te-cabinet][data-te-loud="on"]`. `TrialAndErrorClient` sets
+`data-te-loud` from `useTeMotion().loudEffectsEnabled`, which is false under
+`prefers-reduced-motion`, below 768px (AGENTS.md §16) and during server
+rendering. A test asserts that every `.te-loud-*` selector carries both
+attributes.
+
+### Score colour language
+
+Chips are steel-blue, +Mult is amber, and ×Mult flares rose-red. Redlines stay
+rose and validated cells stay emerald.
+
+### Rendering
+
+Cards are DOM `<button>` elements animated with `framer-motion`, which is
+already a dependency. The CRT, scanline and background layers are
+GPU-composited CSS that is active only during loud moments. Animations use
+`transform` and `opacity` only, keeping CLS at zero. There is no WebGL and no
+canvas renderer.
+
+### Score timeline
+
+The domain emits an ordered, pure **score timeline** derived from
+`HandEvaluation` (T&E-UX-02). The UI only plays it back and never computes a
+score. The animation, the reduced-motion tally and the screen-reader
+narration all read the same timeline, and a property test pins its sums to
+`evaluateHand`.
+
+### Pacing
+
+Game speed is 1×, 2× or 4×, persisted per viewer by `useTeMotion`
+(`localStorage` key `te:game-speed`, guarded and wrapped in try/catch), and
+click or Space skips. Under `prefers-reduced-motion` the result is an instant
+tally, with no shake, a single fade, and step-by-step live announcements.
+
+### Audio, mobile and voice
+
+- **Audio.** Synth SFX and one music loop on the existing `AudioProvider`.
+  Muted by default, and they respect the global toggle.
+- **Mobile.** Desktop-first but playable on phones, with a compact hand and
+  tap-to-select. No shake, CRT or blur below 768px.
+- **Voice.** Dry insider humour for relics, bosses and flavour text. It is
+  written for biostatisticians, stays legible to non-specialists, and is
+  never real clinical or regulatory advice.
+
+### Run shape and new mechanics
+
+A run is 3 acts × 3 blinds: Small (CRO QC), Big (DMC Open) and Boss (DMC
+Closed, FDA IR, or CSR Lock). The final boss is CSR Lock. **Guidance** cards
+level up hand types (T&E-UX-05). Meta-progression is browser-local only: the
+Codex, seeded runs, GCP-audit stakes and starter sponsors (T&E-UX-07 and
+T&E-UX-08).

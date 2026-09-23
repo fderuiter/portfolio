@@ -442,3 +442,10 @@ Fictional teaching material; nothing in the game is clinical or regulatory advic
 - **Hand**: A scored combination of outputs, from High Table (15 Chips / +1 Mult) to MedDRA Five of a Kind (200 / +18).
 - **CPU**: The action budget. Approve & Play costs 2 CPU; Reject & Discard costs 1 CPU.
 - **Draw Pile**: The ordered drafts a scenario stages. It is fixed per scenario; seeded randomness is reserved for the crisis deck and the shop.
+- **Card Table**: The main screen. It shows a hand of TLF cards, from which the player selects up to five to play as a poker hand against the Blind.
+- **Inspect**: Opening a card's QC Desk for CPU to reveal and correct its hidden defects. Playing an uninspected card is a gamble, because an undiscovered fatal defect still zeroes the hand.
+- **Loud Moment**: A discrete, event-driven burst of saturated colour, glow, shake or CRT effect (score resolution, Blind cleared, shop, boss intro), scoped inside the cabinet. It is disabled under reduced motion and below 768px.
+- **Score Timeline**: The ordered, pure sequence of scoring events derived from `HandEvaluation`. The UI plays it back as animation, instant tally and screen-reader narration, and never computes a score itself.
+- **Guidance Card**: A consumable named after real guidance (ICH E3, E9, E2A, CDISC IGs) that permanently levels up one hand type for the run.
+- **Stake (GCP Audit Level)**: A cumulative difficulty tier for a run, from Routine Monitoring to Warning Letter.
+- **Sponsor (Starter Sponsor)**: A starting configuration for a run: starting deck, starting item and one rule twist, such as Oncology Pharma or a Generic CRO.

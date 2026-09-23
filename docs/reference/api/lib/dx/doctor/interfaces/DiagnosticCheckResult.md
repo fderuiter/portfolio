@@ -58,4 +58,4 @@
 
 ### status
 
-> **status**: `"warn"` \| `"fail"` \| `"pass"` \| `"fixed"`
+> **status**: `"fixed"` \| `"warn"` \| `"fail"` \| `"pass"`

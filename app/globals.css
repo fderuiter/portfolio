@@ -330,6 +330,65 @@ body {
   line-height: 1.6;
 }
 
+/* Trial & Error: Biostat Ops cabinet tokens (ADR 0046 amendment, #942).
+ * Scoped to [data-te-cabinet] so nothing leaks into the portfolio frame.
+ * "Calm at rest, loud when scoring": .te-loud-* layers only apply while the
+ * cabinet opts in with data-te-loud="on", which useTeMotion() withholds under
+ * 768px and under prefers-reduced-motion. */
+[data-te-cabinet] {
+  --te-surface-0: #0d0e11;
+  --te-surface-1: #13151a;
+  --te-hairline: rgba(255, 255, 255, 0.08);
+  --te-text: #f4f4f6;
+  --te-text-muted: #a1a1aa;
+  --te-chips: #93c5fd;
+  --te-plus-mult: #f59e0b;
+  --te-x-mult: #fb7185;
+  --te-redline: #fda4af;
+  --te-validated: #34d399;
+  --te-fire: #fb923c;
+  --te-suit-itt: #7dd3fc;
+  --te-suit-safety: #bef264;
+  --te-suit-pp: #fde047;
+  --te-suit-fas: #5eead4;
+  --te-suit-screened: #94a3b8;
+}
+
+@keyframes te-loud-shake {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  25% {
+    transform: translate3d(-3px, 1px, 0);
+  }
+  50% {
+    transform: translate3d(2px, -2px, 0);
+  }
+  75% {
+    transform: translate3d(-1px, 2px, 0);
+  }
+}
+
+[data-te-cabinet][data-te-loud="on"] .te-loud-shake {
+  animation: te-loud-shake 240ms ease-out 1;
+}
+
+[data-te-cabinet][data-te-loud="on"] .te-loud-crt {
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.03) 0,
+    rgba(255, 255, 255, 0.03) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+[data-te-cabinet][data-te-loud="on"] .te-loud-glow {
+  text-shadow: 0 0 12px var(--te-fire);
+}
+
 /* Reduced motion compliance */
 @media (prefers-reduced-motion: reduce) {
   *,
