@@ -93,6 +93,14 @@ test.describe("Trial & Error: Biostat Ops QC Desk", () => {
     test(`has zero blocking axe violations in every game state at ${width}px`, async ({
       page,
     }) => {
+      // Five full-page axe scans plus a cabinet launch can outrun the default
+      // 30s test budget when workers share the CPU.
+      test.slow();
+      // Audit settled frames: the site footer's status ticker cross-fades every
+      // few seconds, and a scan landing mid-fade reads a blended ~1.3:1 colour
+      // (#952). Reduced motion makes that swap instant without narrowing the
+      // audit to the cabinet.
+      await page.emulateMedia({ reducedMotion: "reduce" });
       await page.setViewportSize({ width, height: 900 });
       await launch(page);
       await expectNoBlockingViolations(page, "fresh desk");
@@ -155,5 +163,43 @@ test.describe("Trial & Error: Biostat Ops QC Desk", () => {
             ).length
       );
     expect(lingering).toBe(0);
+  });
+  test.describe("cabinet loud-moment switch (ADR 0046 amendment)", () => {
+    const cabinet = (page: Page) => page.locator("[data-te-cabinet]");
+
+    test("enables loud layers on desktop without reduced motion", async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.emulateMedia({ reducedMotion: "no-preference" });
+      await launch(page);
+      await expect(cabinet(page)).toHaveAttribute("data-te-loud", "on");
+    });
+
+    test("keeps loud layers off under reduced motion", async ({ page }) => {
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await launch(page);
+      await expect(cabinet(page)).toHaveAttribute("data-te-loud", "off");
+    });
+
+    test("keeps loud layers off below 768px", async ({ page }) => {
+      await page.setViewportSize({ width: 375, height: 800 });
+      await page.emulateMedia({ reducedMotion: "no-preference" });
+      await launch(page);
+      await expect(cabinet(page)).toHaveAttribute("data-te-loud", "off");
+    });
+
+    test("scopes --te-* tokens to the cabinet", async ({ page }) => {
+      await launch(page);
+      const inside = await cabinet(page).evaluate((el) =>
+        getComputedStyle(el).getPropertyValue("--te-chips").trim()
+      );
+      const outside = await page.evaluate(() =>
+        getComputedStyle(document.body).getPropertyValue("--te-chips").trim()
+      );
+      expect(inside).toBe("#93c5fd");
+      expect(outside).toBe("");
+    });
   });
 });
