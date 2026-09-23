@@ -289,7 +289,7 @@ export function QcDesk({ scenario = DEMOGRAPHICS_SCENARIO }: QcDeskProps) {
                   <tr>
                     <th
                       scope="col"
-                      className="border border-zinc-800 bg-[#13151a] px-2 py-2 text-left font-normal text-zinc-400"
+                      className="sticky left-0 z-10 border border-zinc-800 bg-[#13151a] px-2 py-2 text-left font-normal text-zinc-400"
                     >
                       Parameter
                     </th>
@@ -309,7 +309,7 @@ export function QcDesk({ scenario = DEMOGRAPHICS_SCENARIO }: QcDeskProps) {
                     <tr key={r.id}>
                       <th
                         scope="row"
-                        className="border border-zinc-800 px-2 py-2 text-left font-normal text-zinc-300 break-words"
+                        className="sticky left-0 z-10 min-w-[7rem] border border-zinc-800 bg-[#0d0e11] px-2 py-2 text-left font-normal text-zinc-300 break-words"
                       >
                         {r.label}
                       </th>
