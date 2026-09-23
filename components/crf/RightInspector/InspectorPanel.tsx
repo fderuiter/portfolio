@@ -55,6 +55,7 @@ interface InspectorPanelProps {
     status: "resolved" | "open",
     author: StudyReviewActor
   ) => void;
+  onCommitReviewTargetChange: (fieldId: string) => void;
 }
 
 type InspectorTab = "properties" | "logic" | "cdash" | "review";
@@ -76,11 +77,15 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
   onReviewAuthorChange,
   onAddReviewComment,
   onSetReviewThreadStatus,
+  onCommitReviewTargetChange,
 }) => {
   const [activeTab, setActiveTab] = useState<InspectorTab>("properties");
   const [hasCopiedCli, setHasCopiedCli] = useState(false);
   const allFields = form.sections.flatMap((s) => s.fields);
   const healthMetrics = computeFormHealthMetrics(form);
+  const openReviewThreadCount = reviewThreads.filter(
+    (thread) => StudyProtocolEngine.getReviewThreadStatus(thread) === "open"
+  ).length;
 
   const handleCopyCli = async () => {
     const cmd = selectedField
@@ -211,7 +216,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
         </button>
         <button
           onClick={() => setActiveTab("review")}
-          aria-label={`Review threads (${reviewThreads.filter((thread) => StudyProtocolEngine.getReviewThreadStatus(thread) === "open").length} open)`}
+          aria-label={`Review threads (${openReviewThreadCount} open in study)`}
           className={`flex-1 py-2 text-center text-xs font-mono transition-colors border-b-2 flex items-center justify-center gap-1.5 ${
             activeTab === "review"
               ? "border-amber-400 text-amber-300 font-bold bg-zinc-900/40"
@@ -220,12 +225,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
         >
           <span>Review</span>
           <span className="rounded bg-zinc-800 px-1 text-[9px]">
-            {
-              reviewThreads.filter(
-                (thread) =>
-                  StudyProtocolEngine.getReviewThreadStatus(thread) === "open"
-              ).length
-            }
+            {openReviewThreadCount}
           </span>
         </button>
       </div>
@@ -240,6 +240,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
             onAuthorChange={onReviewAuthorChange}
             onAddComment={onAddReviewComment}
             onSetStatus={onSetReviewThreadStatus}
+            isTargetDeleted={StudyProtocolEngine.isReviewTargetDeleted}
             getStatus={(thread) =>
               StudyProtocolEngine.getReviewThreadStatus(thread)
             }
@@ -256,6 +257,9 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                 }
                 onSaveToStudyCodelist={onSaveCodelist}
                 onRenameEverywhere={onRenameEverywhere}
+                onCommitReviewTargetChange={() =>
+                  onCommitReviewTargetChange(selectedField.id)
+                }
               />
             )}
 

@@ -1,10 +1,14 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup } from "@testing-library/react";
 import { StudyProtocolEngine } from "@/lib/crf";
 import type { StudyReviewActor } from "@/lib/crf";
 import { ReviewThreadsTab } from "@/components/crf/RightInspector/ReviewThreadsTab";
+import { FieldPropertiesTab } from "@/components/crf/RightInspector/FieldPropertiesTab";
 
 describe("field review thread controls", () => {
+  afterEach(() => cleanup());
+
   it("requires a declared author and emits field comments and status changes", () => {
     const { form } = StudyProtocolEngine.addForm(
       StudyProtocolEngine.createInitialStudy(),
@@ -37,6 +41,7 @@ describe("field review thread controls", () => {
         onAuthorChange={vi.fn()}
         onAddComment={onAddComment}
         onSetStatus={onSetStatus}
+        isTargetDeleted={StudyProtocolEngine.isReviewTargetDeleted}
         getStatus={getStatus}
       />
     );
@@ -66,10 +71,117 @@ describe("field review thread controls", () => {
         onAuthorChange={vi.fn()}
         onAddComment={onAddComment}
         onSetStatus={onSetStatus}
+        isTargetDeleted={StudyProtocolEngine.isReviewTargetDeleted}
         getStatus={getStatus}
       />
     );
     fireEvent.click(screen.getByRole("button", { name: "Reopen thread" }));
     expect(onSetStatus).toHaveBeenLastCalledWith(thread.id, "open", author);
+  });
+
+  it("lets a reviewer reply to a deleted field thread without selecting a field", () => {
+    const { study, form } = StudyProtocolEngine.addForm(
+      StudyProtocolEngine.createInitialStudy(),
+      "VS"
+    );
+    const field = form.sections[0]?.fields[0];
+    expect(field).toBeDefined();
+    if (!field) throw new Error("The starter study needs a field");
+    const opened = StudyProtocolEngine.addReviewComment(
+      study,
+      field.id,
+      "Preserve this discussion.",
+      { name: "Alex Reviewer", role: "Clinical Reviewer" },
+      "2026-09-20T14:00:00.000Z"
+    );
+    const deleted = StudyProtocolEngine.removeField(
+      opened.study,
+      form.id,
+      field.id,
+      undefined,
+      { name: "Casey Reviewer", role: "Data Manager" },
+      "2026-09-20T14:05:00.000Z"
+    );
+    const thread = deleted.study.reviewThreads?.[0];
+    expect(thread).toBeDefined();
+    if (!thread) throw new Error("The deleted field thread should remain");
+    const author: StudyReviewActor = {
+      name: "Morgan Reviewer",
+      role: "Medical Monitor",
+    };
+    const onAddComment = vi.fn();
+
+    render(
+      <ReviewThreadsTab
+        threads={[thread]}
+        selectedField={null}
+        author={author}
+        onAuthorChange={vi.fn()}
+        onAddComment={onAddComment}
+        onSetStatus={vi.fn()}
+        isTargetDeleted={StudyProtocolEngine.isReviewTargetDeleted}
+        getStatus={StudyProtocolEngine.getReviewThreadStatus}
+      />
+    );
+
+    expect(screen.getByText("Deleted field · history retained")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Reply to thread" }));
+    fireEvent.change(screen.getByLabelText("Review comment"), {
+      target: { value: "Keep the historical context." },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Add comment" }));
+
+    expect(onAddComment).toHaveBeenCalledWith(
+      field.id,
+      "Keep the historical context.",
+      author
+    );
+  });
+
+  it("keeps variable name edits staged until the atomic rename action", () => {
+    const { form } = StudyProtocolEngine.addForm(
+      StudyProtocolEngine.createInitialStudy(),
+      "VS"
+    );
+    const field = form.sections[0]?.fields[0];
+    expect(field).toBeDefined();
+    if (!field) throw new Error("The starter study needs a field");
+    const onUpdateField = vi.fn();
+    const onRenameEverywhere = vi.fn();
+    const onCommitReviewTargetChange = vi.fn();
+
+    render(
+      <FieldPropertiesTab
+        field={field}
+        allFieldsInForm={form.sections.flatMap((section) => section.fields)}
+        codelists={[]}
+        onUpdateField={onUpdateField}
+        onRenameEverywhere={onRenameEverywhere}
+        onCommitReviewTargetChange={onCommitReviewTargetChange}
+      />
+    );
+
+    fireEvent.change(screen.getByDisplayValue(field.variableName), {
+      target: { value: "NEWVAR" },
+    });
+    expect(onUpdateField).not.toHaveBeenCalledWith({ variableName: "NEWVAR" });
+    fireEvent.click(
+      screen.getByRole("button", { name: "Rename Everywhere (Atomic)" })
+    );
+
+    expect(onRenameEverywhere).toHaveBeenCalledWith("NEWVAR");
+
+    const labelInput = screen.getByPlaceholderText(
+      "e.g. Primary Device Deficiency Classification"
+    );
+    fireEvent.change(labelInput, {
+      target: { value: "Updated question wording" },
+    });
+    fireEvent.blur(labelInput);
+
+    expect(onUpdateField).toHaveBeenCalledWith({
+      label: "Updated question wording",
+    });
+    expect(onCommitReviewTargetChange).toHaveBeenCalledTimes(1);
   });
 });

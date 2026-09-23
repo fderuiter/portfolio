@@ -1,7 +1,7 @@
 "use client";
 
 import "./studio-theme.css";
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 import { useClipboard } from "@/hooks/useClipboard";
 import {
   StudyProtocol,
@@ -590,7 +590,7 @@ export const CRFStudioContainer: React.FC = () => {
     [study]
   );
 
-  const handleAddReviewComment = (
+  const handleAddReviewComment = useCallback((
     fieldId: string,
     body: string,
     author: StudyReviewActor
@@ -602,9 +602,9 @@ export const CRFStudioContainer: React.FC = () => {
       author
     );
     updateStudyWithHistory(result.study);
-  };
+  }, [study, updateStudyWithHistory]);
 
-  const handleSetReviewThreadStatus = (
+  const handleSetReviewThreadStatus = useCallback((
     threadId: string,
     status: "resolved" | "open",
     author: StudyReviewActor
@@ -612,7 +612,51 @@ export const CRFStudioContainer: React.FC = () => {
     updateStudyWithHistory(
       StudyProtocolEngine.setReviewThreadStatus(study, threadId, status, author)
     );
-  };
+  }, [study, updateStudyWithHistory]);
+
+  const handleCommitReviewTargetChange = useCallback((
+    fieldId: string,
+    updates?: Partial<CRFField>
+  ) => {
+    let updatedStudy = study;
+    const targetForm = study.forms.find((form) =>
+      StudyProtocolEngine.getField(study, form.id, fieldId)
+    );
+    if (updates && targetForm) {
+      if (updates.variableName !== undefined) {
+        const rename = StudyProtocolEngine.renameFieldEverywhere(
+          study,
+          targetForm.id,
+          fieldId,
+          updates.variableName,
+          updates.label,
+          reviewAuthor
+        );
+        if (rename.error) return;
+        updatedStudy = rename.study;
+      } else {
+        const edit = StudyProtocolEngine.updateField(
+          study,
+          targetForm.id,
+          fieldId,
+          updates
+        );
+        if (edit.error) return;
+        updatedStudy = StudyProtocolEngine.recordReviewTargetChange(
+          edit.study,
+          fieldId,
+          reviewAuthor
+        );
+      }
+    } else {
+      updatedStudy = StudyProtocolEngine.recordReviewTargetChange(
+        study,
+        fieldId,
+        reviewAuthor
+      );
+    }
+    if (updatedStudy !== study) updateStudyWithHistory(updatedStudy);
+  }, [reviewAuthor, study, updateStudyWithHistory]);
 
   const handleUndo = useCallback(() => {
     if (history.length === 0) return;
@@ -990,7 +1034,9 @@ export const CRFStudioContainer: React.FC = () => {
       StudyProtocolEngine.removeSectionWithCascade(
         study,
         activeForm.id,
-        sectionId
+        sectionId,
+        undefined,
+        reviewAuthor
       );
     updateStudyWithHistory(updatedStudy);
   };
@@ -1270,7 +1316,8 @@ export const CRFStudioContainer: React.FC = () => {
           study,
           activeForm.id,
           impactPendingDeletion.section.id,
-          { purgeReferencingRules: true }
+          { purgeReferencingRules: true },
+          reviewAuthor
         );
       updateStudyWithHistory(updatedStudy);
     }
@@ -1344,20 +1391,26 @@ export const CRFStudioContainer: React.FC = () => {
     setSelectedFieldId(target.fieldId || null);
   };
 
+  const reviewThreadProps = useMemo(() => ({
+    reviewThreads: study?.reviewThreads || [],
+    reviewAuthor,
+    onReviewAuthorChange: setReviewAuthor,
+    onAddReviewComment: handleAddReviewComment,
+    onSetReviewThreadStatus: handleSetReviewThreadStatus,
+    onCommitReviewTargetChange: handleCommitReviewTargetChange,
+  }), [
+    handleAddReviewComment,
+    handleCommitReviewTargetChange,
+    handleSetReviewThreadStatus,
+    reviewAuthor,
+    study?.reviewThreads,
+  ]);
+
   if (!study || !study.forms) {
     return <CRFStudioSkeleton />;
   }
 
   const activeBranding = getStudyBranding(study);
-  const reviewThreadProps = {
-    reviewThreads: study.reviewThreads?.filter(
-      (thread) => thread.target.formId === activeForm?.id
-    ),
-    reviewAuthor,
-    onReviewAuthorChange: setReviewAuthor,
-    onAddReviewComment: handleAddReviewComment,
-    onSetReviewThreadStatus: handleSetReviewThreadStatus,
-  };
 
   return (
     <div
@@ -1542,6 +1595,7 @@ export const CRFStudioContainer: React.FC = () => {
                     onDuplicateField={handleDuplicateField}
                     onDeleteField={handleDeleteField}
                     onUpdateField={handleUpdateField}
+                    onCommitReviewTargetChange={handleCommitReviewTargetChange}
                     onOpenPalette={(sectionId) => {
                       setAddFieldTargetSectionId(sectionId ?? null);
                       setIsMobileWidgetDrawerOpen(true);
@@ -1606,6 +1660,7 @@ export const CRFStudioContainer: React.FC = () => {
                 onDuplicateField={handleDuplicateField}
                 onDeleteField={handleDeleteField}
                 onUpdateField={handleUpdateField}
+                onCommitReviewTargetChange={handleCommitReviewTargetChange}
                 onOpenPalette={(sectionId) => {
                   setAddFieldTargetSectionId(sectionId ?? null);
                   setIsLeftSidebarOpen(true);
@@ -1662,6 +1717,7 @@ export const CRFStudioContainer: React.FC = () => {
               selectedFieldId={selectedFieldId}
               onSelectField={handleSelectField}
               onUpdateField={handleUpdateField}
+              onCommitReviewTargetChange={handleCommitReviewTargetChange}
               onRenameEverywhere={(fId, newVar) =>
                 handleRenameFieldEverywhere(fId, newVar)
               }

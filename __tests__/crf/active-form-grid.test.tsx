@@ -127,6 +127,38 @@ describe("ActiveFormGrid - Integration, Atomicity, Validation & Accessibility", 
   });
 
   describe("3. Keyboard Navigation & Cell Editing", () => {
+    it("commits grid label edits through the review-target callback", () => {
+      const onCommitReviewTargetChange = vi.fn();
+      const { container } = render(
+        <ActiveFormGrid
+          form={activeForm}
+          study={sampleStudy}
+          selectedFieldId={null}
+          onSelectField={onSelectFieldMock}
+          onUpdateField={onUpdateFieldMock}
+          onCommitReviewTargetChange={onCommitReviewTargetChange}
+          onUpdateStudy={onUpdateStudyMock}
+        />
+      );
+      const field = activeForm.sections[0].fields[0];
+      const labelCell = container.querySelectorAll("tbody tr")[0]
+        ?.querySelectorAll("td")[3];
+      expect(labelCell).toBeDefined();
+      if (!labelCell) throw new Error("The first row needs a label cell");
+
+      fireEvent.doubleClick(labelCell);
+      const input = container.querySelector("tbody input");
+      expect(input).not.toBeNull();
+      if (!input) throw new Error("Editing the grid cell needs an input");
+      fireEvent.change(input, { target: { value: "Updated grid label" } });
+      fireEvent.blur(input);
+
+      expect(onCommitReviewTargetChange).toHaveBeenCalledWith(field.id, {
+        label: "Updated grid label",
+      });
+      expect(onUpdateFieldMock).not.toHaveBeenCalled();
+    });
+
     it("supports Enter to start edit, Escape to cancel edit, and Enter to commit edit", () => {
       const { container } = render(
         <ActiveFormGrid

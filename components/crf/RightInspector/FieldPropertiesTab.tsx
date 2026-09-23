@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   CRFField,
   CodelistDefinition,
@@ -29,6 +29,7 @@ interface FieldPropertiesTabProps {
   onUpdateField: (updates: Partial<CRFField>) => void;
   onSaveToStudyCodelist?: (codelist: CodelistDefinition) => void;
   onRenameEverywhere?: (newVar: string) => void;
+  onCommitReviewTargetChange?: () => void;
 }
 
 const DATA_TYPES: { type: ClinicalDataType; label: string }[] = [
@@ -189,6 +190,7 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
   onUpdateField,
   onSaveToStudyCodelist,
   onRenameEverywhere,
+  onCommitReviewTargetChange,
 }) => {
   const isCodelistField =
     field.dataType === "single_select" ||
@@ -207,6 +209,12 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
     null
   );
   const [renameSuccess, setRenameSuccess] = useState<string | null>(null);
+  const [variableNameDraft, setVariableNameDraft] = useState(field.variableName);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setVariableNameDraft(field.variableName);
+  }, [field.id, field.variableName]);
 
   // Active options list (custom or resolved from codelist)
   const currentCodelist = codelists.find((cl) => cl.id === field.codelistId);
@@ -361,7 +369,7 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
     setTimeout(() => setSaveSuccessMessage(null), 4000);
   };
 
-  const varValidation = validateCdashVariableName(field.variableName);
+  const varValidation = validateCdashVariableName(variableNameDraft);
 
   return (
     <div className="space-y-4 p-4 text-xs font-sans">
@@ -373,34 +381,32 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
             <span className="text-brand-cyan">*</span>
           </label>
           <span className="text-[10px] font-mono text-zinc-500">
-            {field.variableName.length}/8 chars
+            {variableNameDraft.length}/8 chars
           </span>
         </div>
         <input
           type="text"
           maxLength={8}
-          value={field.variableName}
-          onChange={(e) =>
-            onUpdateField({ variableName: e.target.value.toUpperCase() })
-          }
+          value={variableNameDraft}
+          onChange={(e) => setVariableNameDraft(e.target.value.toUpperCase())}
           className={`w-full px-2.5 py-1.5 bg-zinc-950 border rounded-lg text-white font-mono uppercase focus:outline-none ${
-            !varValidation.isValid && field.variableName
+            !varValidation.isValid && variableNameDraft
               ? "border-red-500/70 focus:border-red-400 ring-1 ring-red-500/20"
               : "border-zinc-800 focus:border-brand-cyan"
           }`}
           placeholder="e.g. BRTHYR, SYSBP, AETERM, DITERM"
         />
-        {!varValidation.isValid && field.variableName && (
+        {!varValidation.isValid && variableNameDraft && (
           <p className="text-[10px] text-red-400 font-mono mt-1">
             ⚠ {varValidation.error}
           </p>
         )}
-        {onRenameEverywhere && varValidation.isValid && field.variableName && (
+        {onRenameEverywhere && varValidation.isValid && variableNameDraft && (
           <div className="mt-1.5 flex items-center gap-2">
             <button
               type="button"
               onClick={() => {
-                onRenameEverywhere(field.variableName);
+                onRenameEverywhere(variableNameDraft);
                 setRenameSuccess("Renamed everywhere");
                 setTimeout(() => setRenameSuccess(null), 3000);
               }}
@@ -426,6 +432,7 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
           type="text"
           value={field.label}
           onChange={(e) => onUpdateField({ label: e.target.value })}
+          onBlur={onCommitReviewTargetChange}
           className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-white font-sans focus:border-brand-cyan focus:outline-none"
           placeholder="e.g. Primary Device Deficiency Classification"
         />

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import {
   StudyProtocolEngine,
   exportUniversalCrfJson,
@@ -7,36 +7,17 @@ import {
   saveStudyDraft,
   type StudyReviewActor,
 } from "@/lib/crf";
-
-class MemoryStorage implements Storage {
-  private readonly values = new Map<string, string>();
-
-  get length() {
-    return this.values.size;
-  }
-
-  clear() {
-    this.values.clear();
-  }
-
-  getItem(key: string) {
-    return this.values.get(key) ?? null;
-  }
-
-  key(index: number) {
-    return [...this.values.keys()][index] ?? null;
-  }
-
-  removeItem(key: string) {
-    this.values.delete(key);
-  }
-
-  setItem(key: string, value: string) {
-    this.values.set(key, String(value));
-  }
-}
+import { MockStorage } from "../vitest.setup";
 
 describe("StudyProtocol review threads", () => {
+  beforeEach(() => {
+    Object.defineProperty(globalThis, "localStorage", {
+      value: new MockStorage(),
+      writable: true,
+      configurable: true,
+    });
+  });
+
   it("attributes ordinary field deletion to the declared reviewer", () => {
     const { study, form } = StudyProtocolEngine.addForm(
       StudyProtocolEngine.createInitialStudy(),
@@ -71,6 +52,128 @@ describe("StudyProtocol review threads", () => {
       type: "target-deleted",
       at: "2026-09-20T14:05:00.000Z",
       author,
+    });
+  });
+
+  it("records a committed label edit from the thread's last known target", () => {
+    const { study: initial, form } = StudyProtocolEngine.addForm(
+      StudyProtocolEngine.createInitialStudy(),
+      "VS"
+    );
+    const field = form.sections[0]?.fields[0];
+    expect(field).toBeDefined();
+    if (!form || !field) throw new Error("The starter study needs a field");
+
+    const opened = StudyProtocolEngine.addReviewComment(
+      initial,
+      field.id,
+      "Please check the label.",
+      { name: "Alex Reviewer", role: "Clinical Reviewer" },
+      "2026-09-20T14:00:00.000Z"
+    );
+    const edit = StudyProtocolEngine.updateField(
+      opened.study,
+      form.id,
+      field.id,
+      { label: "Updated assessment label" }
+    );
+    const committed = StudyProtocolEngine.recordReviewTargetChange(
+      edit.study,
+      field.id,
+      { name: "Casey Reviewer", role: "Medical Monitor" },
+      "2026-09-20T14:05:00.000Z"
+    );
+    const thread = committed.reviewThreads?.[0];
+
+    expect(thread?.events[1]).toMatchObject({
+      type: "target-renamed",
+      previousLabel: field.label,
+      nextLabel: "Updated assessment label",
+      author: { name: "Casey Reviewer", role: "Medical Monitor" },
+      at: "2026-09-20T14:05:00.000Z",
+    });
+    expect(thread?.target).toMatchObject({
+      fieldId: field.id,
+      variableName: field.variableName,
+      label: "Updated assessment label",
+    });
+  });
+
+  it("allows a reply to continue after the target field is deleted", () => {
+    const { study: initial, form } = StudyProtocolEngine.addForm(
+      StudyProtocolEngine.createInitialStudy(),
+      "VS"
+    );
+    const field = form.sections[0]?.fields[0];
+    expect(field).toBeDefined();
+    if (!field) throw new Error("The starter study needs a field");
+
+    const opened = StudyProtocolEngine.addReviewComment(
+      initial,
+      field.id,
+      "Keep the original rationale.",
+      { name: "Alex Reviewer", role: "Clinical Reviewer" },
+      "2026-09-20T14:00:00.000Z"
+    );
+    const deleted = StudyProtocolEngine.removeField(
+      opened.study,
+      form.id,
+      field.id,
+      undefined,
+      { name: "Casey Reviewer", role: "Data Manager" },
+      "2026-09-20T14:05:00.000Z"
+    );
+    const replied = StudyProtocolEngine.addReviewComment(
+      deleted.study,
+      field.id,
+      "The rationale still applies to the deleted item.",
+      { name: "Morgan Reviewer", role: "Medical Monitor" },
+      "2026-09-20T14:10:00.000Z"
+    );
+
+    expect(replied.thread.target).toMatchObject({
+      fieldId: field.id,
+      variableName: field.variableName,
+    });
+    expect(replied.thread.events.map((event) => event.type)).toEqual([
+      "comment",
+      "target-deleted",
+      "comment",
+    ]);
+  });
+
+  it("records deletion events for each threaded field removed with a section", () => {
+    const { study: initial, form } = StudyProtocolEngine.addForm(
+      StudyProtocolEngine.createInitialStudy(),
+      "VS"
+    );
+    const section = form.sections[0];
+    const field = section?.fields[0];
+    expect(field).toBeDefined();
+    if (!section || !field) throw new Error("The starter form needs a field");
+    const expanded = StudyProtocolEngine.addSection(initial, form.id, "Keep");
+    const opened = StudyProtocolEngine.addReviewComment(
+      expanded.study,
+      field.id,
+      "Review before removing this section.",
+      { name: "Alex Reviewer", role: "Clinical Reviewer" },
+      "2026-09-20T14:00:00.000Z"
+    );
+
+    const deleted = StudyProtocolEngine.removeSectionWithCascade(
+      opened.study,
+      form.id,
+      section.id,
+      undefined,
+      { name: "Casey Reviewer", role: "Data Manager" },
+      "2026-09-20T14:05:00.000Z"
+    );
+
+    expect(deleted.study.reviewThreads?.[0]?.events[1]).toMatchObject({
+      type: "target-deleted",
+      target: { fieldId: field.id, variableName: field.variableName },
+      author: { name: "Casey Reviewer", role: "Data Manager" },
+      at: "2026-09-20T14:05:00.000Z",
     });
   });
 
@@ -109,6 +212,10 @@ describe("StudyProtocol review threads", () => {
       "2026-09-20T14:05:00.000Z"
     );
     expect(renamed.error).toBeUndefined();
+    expect(renamed.study.reviewThreads?.[0]?.target).toMatchObject({
+      fieldId: field.id,
+      variableName: "REVVAR",
+    });
 
     const resolved = StudyProtocolEngine.setReviewThreadStatus(
       renamed.study,
@@ -132,7 +239,7 @@ describe("StudyProtocol review threads", () => {
       author,
       "2026-09-20T14:20:00.000Z"
     );
-    const storage = new MemoryStorage();
+    const storage = globalThis.localStorage;
 
     expect(deleted.removedField?.id).toBe(field.id);
     expect(saveStudyDraft(deleted.study, storage).status).toBe("saved");
@@ -176,6 +283,7 @@ describe("StudyProtocol review threads", () => {
       "2026-09-20T14:20:00.000Z",
     ]);
     expect(StudyProtocolEngine.getReviewThreadStatus(thread!)).toBe("open");
+    expect(StudyProtocolEngine.isReviewTargetDeleted(thread!)).toBe(true);
     expect(StudyProtocolEngine.countOpenReviewThreads(restored.study)).toBe(1);
 
     const nativeReopen = parseUniversalCrf(

@@ -28,6 +28,10 @@ interface ActiveFormGridProps {
   selectedFieldId: string | null;
   onSelectField: (fieldId: string | null) => void;
   onUpdateField: (fieldId: string, updates: Partial<CRFField>) => void;
+  onCommitReviewTargetChange?: (
+    fieldId: string,
+    updates?: Partial<CRFField>
+  ) => void;
   onRenameEverywhere?: (fieldId: string, newVarName: string) => void;
   onUpdateStudy: (updatedStudy: StudyProtocol) => void;
   onSwitchMode?: (mode: StudioMode) => void;
@@ -99,6 +103,7 @@ export const ActiveFormGrid: React.FC<ActiveFormGridProps> = ({
   selectedFieldId,
   onSelectField,
   onUpdateField,
+  onCommitReviewTargetChange,
   onRenameEverywhere,
   onUpdateStudy,
   onSwitchMode,
@@ -326,7 +331,11 @@ export const ActiveFormGrid: React.FC<ActiveFormGridProps> = ({
       }
     } else if (col.key === "label") {
       if (trimmed !== row.field.label) {
-        onUpdateField(row.field.id, { label: trimmed });
+        if (onCommitReviewTargetChange) {
+          onCommitReviewTargetChange(row.field.id, { label: trimmed });
+        } else {
+          onUpdateField(row.field.id, { label: trimmed });
+        }
       }
     } else if (col.key === "dataType") {
       onUpdateField(row.field.id, { dataType: trimmed as ClinicalDataType });

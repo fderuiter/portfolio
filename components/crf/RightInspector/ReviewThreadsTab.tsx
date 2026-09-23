@@ -23,6 +23,7 @@ interface ReviewThreadsTabProps {
     status: "resolved" | "open",
     author: StudyReviewActor
   ) => void;
+  isTargetDeleted: (thread: StudyReviewThread) => boolean;
   getStatus: (thread: StudyReviewThread) => "open" | "resolved";
 }
 
@@ -40,18 +41,39 @@ export function ReviewThreadsTab({
   onAuthorChange,
   onAddComment,
   onSetStatus,
+  isTargetDeleted,
   getStatus,
 }: ReviewThreadsTabProps) {
   const [comment, setComment] = useState("");
+  const [replyingToThreadId, setReplyingToThreadId] = useState<string | null>(
+    null
+  );
   const actor = { ...author, name: author.name.trim() };
+  const replyingToThread = threads.find(
+    (thread) => thread.id === replyingToThreadId
+  );
   const fieldThread = selectedField
     ? threads.find((thread) => thread.target.fieldId === selectedField.id)
     : undefined;
+  const commentTarget = replyingToThread
+    ? {
+        fieldId: replyingToThread.target.fieldId,
+        variableName: replyingToThread.target.variableName,
+        label: replyingToThread.target.label,
+      }
+    : selectedField
+      ? {
+          fieldId: selectedField.id,
+          variableName: selectedField.variableName,
+          label: selectedField.label,
+        }
+      : null;
 
   const submitComment = () => {
-    if (!selectedField || !actor.name || !comment.trim()) return;
-    onAddComment(selectedField.id, comment.trim(), actor);
+    if (!commentTarget || !actor.name || !comment.trim()) return;
+    onAddComment(commentTarget.fieldId, comment.trim(), actor);
     setComment("");
+    setReplyingToThreadId(null);
   };
 
   return (
@@ -107,13 +129,17 @@ export function ReviewThreadsTab({
         </div>
       </div>
 
-      {selectedField && (
+      {commentTarget && (
         <div className="rounded-lg border border-zinc-800 p-3">
           <h4 className="text-xs font-semibold text-zinc-100">
-            {fieldThread ? "Continue field thread" : "Start a field thread"}
+            {replyingToThread
+              ? "Reply to field thread"
+              : fieldThread
+                ? "Continue field thread"
+                : "Start a field thread"}
           </h4>
           <p className="mt-1 text-[11px] text-zinc-400">
-            {selectedField.variableName} · {selectedField.label}
+            {commentTarget.variableName} · {commentTarget.label}
           </p>
           <label className="sr-only" htmlFor="review-comment">
             Review comment
@@ -139,7 +165,9 @@ export function ReviewThreadsTab({
 
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-2">
-          <h4 className="text-xs font-semibold text-zinc-100">Field threads</h4>
+          <h4 className="text-xs font-semibold text-zinc-100">
+            Study review threads
+          </h4>
           <span className="font-mono text-[10px] text-amber-300">
             {threads.filter((thread) => getStatus(thread) === "open").length}{" "}
             open
@@ -147,25 +175,12 @@ export function ReviewThreadsTab({
         </div>
         {threads.length === 0 ? (
           <p className="rounded border border-dashed border-zinc-800 p-3 text-xs text-zinc-500">
-            No review threads in this form yet. Select a field to start one.
+            No review threads in this study yet. Select a field to start one.
           </p>
         ) : (
           threads.map((thread) => {
             const status = getStatus(thread);
-            const latestTarget = [...thread.events]
-              .reverse()
-              .find((event) => event.type === "target-renamed");
-            const deleted = thread.events.some(
-              (event) => event.type === "target-deleted"
-            );
-            const variableName =
-              latestTarget?.type === "target-renamed"
-                ? latestTarget.nextVariableName
-                : thread.target.variableName;
-            const label =
-              latestTarget?.type === "target-renamed"
-                ? latestTarget.nextLabel
-                : thread.target.label;
+            const deleted = isTargetDeleted(thread);
 
             return (
               <article
@@ -175,12 +190,12 @@ export function ReviewThreadsTab({
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="break-words text-xs font-semibold text-zinc-100">
-                      {variableName} · {label}
+                      {thread.target.variableName} · {thread.target.label}
                     </p>
                     <p className="mt-1 text-[10px] text-zinc-500">
                       {deleted
                         ? "Deleted field · history retained"
-                        : thread.target.formName}
+                        : `${thread.target.formName} · ${thread.target.formId}`}
                     </p>
                   </div>
                   <span
@@ -216,6 +231,16 @@ export function ReviewThreadsTab({
                 </ol>
                 <button
                   type="button"
+                  onClick={() => {
+                    setComment("");
+                    setReplyingToThreadId(thread.id);
+                  }}
+                  className="mt-3 rounded border border-zinc-700 px-2 py-1 text-[10px] text-zinc-300 hover:border-zinc-500"
+                >
+                  Reply to thread
+                </button>
+                <button
+                  type="button"
                   onClick={() =>
                     onSetStatus(
                       thread.id,
@@ -224,7 +249,7 @@ export function ReviewThreadsTab({
                     )
                   }
                   disabled={!actor.name}
-                  className="mt-3 rounded border border-zinc-700 px-2 py-1 text-[10px] text-zinc-300 enabled:hover:border-zinc-500 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="ml-2 mt-3 rounded border border-zinc-700 px-2 py-1 text-[10px] text-zinc-300 enabled:hover:border-zinc-500 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {status === "open" ? "Resolve thread" : "Reopen thread"}
                 </button>

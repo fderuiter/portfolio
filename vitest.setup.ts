@@ -19,7 +19,7 @@ if (
 }
 
 // Mock localStorage if missing or defective in JSDOM / Node 25+
-class MockStorage implements Storage {
+export class MockStorage implements Storage {
   private store = new Map<string, string>();
 
   get length(): number {

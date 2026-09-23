@@ -1011,6 +1011,24 @@ IDs, CDASH non-conflicting variable names, and remapped rule conditions/formulas
 
 ***
 
+### isReviewTargetDeleted()
+
+> `static` **isReviewTargetDeleted**(`thread`): `boolean`
+
+Reports whether a thread's stable target has a deletion event in its history.
+
+#### Parameters
+
+##### thread
+
+[`StudyReviewThread`](../../types/interfaces/StudyReviewThread.md)
+
+#### Returns
+
+`boolean`
+
+***
+
 ### listBaselines()
 
 > `static` **listBaselines**(`storage?`): [`StudyBaseline`](../../types/interfaces/StudyBaseline.md)[]
@@ -1166,6 +1184,36 @@ Preview Blast Radius Before Deleting a Section (#542)
 #### Returns
 
 [`SectionImpactPreview`](../interfaces/SectionImpactPreview.md)
+
+***
+
+### recordReviewTargetChange()
+
+> `static` **recordReviewTargetChange**(`study`, `fieldId`, `author?`, `at?`): [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+Records a completed field name or label edit against each existing thread.
+
+#### Parameters
+
+##### study
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### fieldId
+
+`string`
+
+##### author?
+
+[`StudyReviewActor`](../../types/interfaces/StudyReviewActor.md) = `...`
+
+##### at?
+
+`string` = `...`
+
+#### Returns
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
 
 ***
 
@@ -1465,7 +1513,7 @@ Remove Form & Automatically Prune Visit and Arm Assignments
 
 ### removeSectionWithCascade()
 
-> `static` **removeSectionWithCascade**(`study`, `domainOrFormId`, `sectionId`, `options?`): `object`
+> `static` **removeSectionWithCascade**(`study`, `domainOrFormId`, `sectionId`, `options?`, `reviewAuthor?`, `reviewAt?`): `object`
 
 Remove Containing Section with Cascade: Removes section, all contained fields, and cleans up referencing rules (#542)
 
@@ -1488,6 +1536,14 @@ Remove Containing Section with Cascade: Removes section, all contained fields, a
 ###### purgeReferencingRules?
 
 `boolean`
+
+##### reviewAuthor?
+
+[`StudyReviewActor`](../../types/interfaces/StudyReviewActor.md) = `...`
+
+##### reviewAt?
+
+`string` = `...`
 
 #### Returns
 

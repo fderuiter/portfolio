@@ -37,6 +37,10 @@ interface FormCanvasProps {
   onDuplicateField: (sectionId: string, fieldId: string) => void;
   onDeleteField: (sectionId: string, fieldId: string) => void;
   onUpdateField?: (fieldId: string, updates: Partial<CRFField>) => void;
+  onCommitReviewTargetChange?: (
+    fieldId: string,
+    updates?: Partial<CRFField>
+  ) => void;
   /** Opens the widget palette. Pass a section id so the field the author
    * picks next is inserted into that section rather than a default one. */
   onOpenPalette: (sectionId?: string) => void;
@@ -59,6 +63,7 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
   onDuplicateField,
   onDeleteField,
   onUpdateField,
+  onCommitReviewTargetChange,
   onOpenPalette,
   onDuplicateForm,
   onOpenSlashPalette,
@@ -577,7 +582,13 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                             handleMoveField(section.id, fIdx, "down")
                           }
                           onUpdateField={(updates) => {
-                            if (onUpdateField) {
+                            if (
+                              onCommitReviewTargetChange &&
+                              (updates.label !== undefined ||
+                                updates.variableName !== undefined)
+                            ) {
+                              onCommitReviewTargetChange(field.id, updates);
+                            } else if (onUpdateField) {
                               onUpdateField(field.id, updates);
                             }
                           }}

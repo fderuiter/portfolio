@@ -343,19 +343,25 @@ export class StudyProtocolEngine {
     const found = study.forms
       .map((form) => this.getField(study, form.id, fieldId))
       .find((candidate) => candidate !== undefined);
-    if (!found) throw new Error(`Field '${fieldId}' was not found.`);
-
-    const target: StudyReviewTarget = {
-      fieldId: found.field.id,
-      formId: found.form.id,
-      formName: found.form.name,
-      variableName: found.field.variableName,
-      label: found.field.label,
-    };
     const threads = study.reviewThreads || [];
     const existing = threads.find(
       (thread) => thread.target.fieldId === fieldId
     );
+    if (!found && !existing) throw new Error(`Field '${fieldId}' was not found.`);
+
+    let target: StudyReviewTarget;
+    if (existing) {
+      target = existing.target;
+    } else {
+      if (!found) throw new Error(`Field '${fieldId}' was not found.`);
+      target = {
+        fieldId: found.field.id,
+        formId: found.form.id,
+        formName: found.form.name,
+        variableName: found.field.variableName,
+        label: found.field.label,
+      };
+    }
     const event: StudyReviewEvent = {
       id: generateEngineId("review_event"),
       type: "comment",
@@ -421,6 +427,11 @@ export class StudyProtocolEngine {
     return latestStatus?.type === "resolved" ? "resolved" : "open";
   }
 
+  /** Reports whether a thread's stable target has a deletion event in its history. */
+  static isReviewTargetDeleted(thread: StudyReviewThread): boolean {
+    return thread.events.some((event) => event.type === "target-deleted");
+  }
+
   /** Counts unresolved local authoring threads on a study. */
   static countOpenReviewThreads(study: StudyProtocol): number {
     return (study.reviewThreads || []).filter(
@@ -430,8 +441,8 @@ export class StudyProtocolEngine {
 
   private static recordReviewRename(
     study: StudyProtocol,
-    previous: CRFField,
-    next: CRFField,
+    previous: Pick<CRFField, "id" | "variableName" | "label">,
+    next: Pick<CRFField, "id" | "variableName" | "label">,
     author: StudyReviewActor,
     at: string
   ): StudyProtocol {
@@ -457,9 +468,47 @@ export class StudyProtocolEngine {
             : { ...this.defaultReviewActor },
           at,
         };
-        return { ...thread, events: [...thread.events, event] };
+        return {
+          ...thread,
+          target: {
+            ...thread.target,
+            variableName: next.variableName,
+            label: next.label,
+          },
+          events: [...thread.events, event],
+        };
       }),
     };
+  }
+
+  /** Records a completed field name or label edit against each existing thread. */
+  static recordReviewTargetChange(
+    study: StudyProtocol,
+    fieldId: string,
+    author: StudyReviewActor = this.defaultReviewActor,
+    at = new Date().toISOString()
+  ): StudyProtocol {
+    const thread = study.reviewThreads?.find(
+      (item) => item.target.fieldId === fieldId
+    );
+    if (!thread) return study;
+
+    const found = study.forms
+      .map((form) => this.getField(study, form.id, fieldId))
+      .find((candidate) => candidate !== undefined);
+    if (!found) return study;
+
+    return this.recordReviewRename(
+      study,
+      {
+        id: fieldId,
+        variableName: thread.target.variableName,
+        label: thread.target.label,
+      },
+      found.field,
+      author,
+      at
+    );
   }
 
   private static recordReviewDeletion(
@@ -489,7 +538,11 @@ export class StudyProtocolEngine {
             : { ...this.defaultReviewActor },
           at,
         };
-        return { ...thread, events: [...thread.events, event] };
+        return {
+          ...thread,
+          target,
+          events: [...thread.events, event],
+        };
       }),
     };
   }
@@ -2469,7 +2522,9 @@ export class StudyProtocolEngine {
     sectionId: string,
     options?: {
       purgeReferencingRules?: boolean;
-    }
+    },
+    reviewAuthor: StudyReviewActor = this.defaultReviewActor,
+    reviewAt = new Date().toISOString()
   ): {
     study: StudyProtocol;
     removedSection?: CRFSection;
@@ -2596,7 +2651,11 @@ export class StudyProtocolEngine {
     };
 
     return {
-      study: updatedStudy,
+      study: removedFields.reduce(
+        (nextStudy, field) =>
+          this.recordReviewDeletion(nextStudy, form, field, reviewAuthor, reviewAt),
+        updatedStudy
+      ),
       removedSection: targetSection,
       removedAtIndex: secIdx,
       removedFields,
