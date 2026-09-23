@@ -35,6 +35,7 @@ import {
   IconHelp,
   IconBolt,
   IconMusic,
+  IconMail,
 } from "@tabler/icons-react";
 import { FieldManualButton } from "@/components/FieldManualButton";
 import { FullscreenButton } from "@/components/arcade/FullscreenButton";
@@ -105,6 +106,14 @@ import {
   applyOfficeToSubject,
   applyOfficeToAuditor,
   pickOfficeAmbientEvent,
+  SponsorState,
+  createInitialSponsorState,
+  tickSponsor,
+  resolveSponsorChoice,
+  applySponsorSubmissionBoost,
+  applySponsorSkeletonsToReport,
+  getSponsorMoodLabel,
+  getFollowUpSubject,
 } from "@/lib/clinical-trial-chaos";
 
 import {
@@ -172,6 +181,12 @@ export const ClinicalTrialChaos: React.FC = () => {
   const [bgmEnabled, setBgmEnabled] = useState(false);
   const [officeId, setOfficeId] = useState<OfficeId>(DEFAULT_OFFICE_ID);
   const office = getOfficeById(officeId);
+  const [sponsor, setSponsor] = useState<SponsorState>(() =>
+    createInitialSponsorState()
+  );
+  const [gameOverReason, setGameOverReason] = useState<"auditor" | "sponsor">(
+    "auditor"
+  );
   const [activeTab, setActiveTab] = useState<
     "conveyor" | "sdtm_studio" | "audit_trail"
   >("conveyor");
@@ -256,6 +271,8 @@ export const ClinicalTrialChaos: React.FC = () => {
   const amendmentTimerRef = useRef<number>(0);
   const ambientTimerRef = useRef<number>(0);
   const officeSiteSeqRef = useRef<number>(3);
+  // Source of truth for the sponsor simulation; `sponsor` state mirrors it for rendering.
+  const sponsorRef = useRef<SponsorState>(sponsor);
   const terminalContainerRef = useRef<HTMLDivElement>(null);
   const particlesRef = useRef<Particle[]>([]);
   const activeProtocolRef = useRef<StudyProtocol | null>(activeProtocol);
@@ -321,6 +338,10 @@ export const ClinicalTrialChaos: React.FC = () => {
       setPlayState("playing");
       setAuditor(applyOfficeToAuditor(createInitialAuditorState(), office));
       ambientTimerRef.current = 0;
+      const freshSponsor = createInitialSponsorState();
+      sponsorRef.current = freshSponsor;
+      setSponsor(freshSponsor);
+      setGameOverReason("auditor");
       const phaseStations = getStationsForPhase(targetPhase, mode);
       setStations(phaseStations);
       setActiveAmendment(null);
@@ -625,6 +646,11 @@ export const ClinicalTrialChaos: React.FC = () => {
             maxCombo: Math.max(prev.maxCombo, prev.combo + 1),
           }));
 
+          sponsorRef.current = applySponsorSubmissionBoost(
+            sponsorRef.current,
+            true
+          );
+          setSponsor(sponsorRef.current);
           setSubmittedHistory((prev) => [...prev, cleanedSubject]);
           setConveyorSubjects((prev) =>
             prev.filter((s) => s.id !== activeSubject.id)
@@ -657,6 +683,67 @@ export const ClinicalTrialChaos: React.FC = () => {
       triggerSound,
       addAuditLog,
     ]
+  );
+
+  // 13b. Answer the sponsor's latest email
+  const handleSponsorChoice = useCallback(
+    (choiceIndex: number) => {
+      const request = sponsorRef.current.activeRequest?.request;
+      const choice = request?.choices[choiceIndex];
+      const {
+        state: next,
+        effects,
+        outcome,
+      } = resolveSponsorChoice(sponsorRef.current, choiceIndex);
+      if (!request || !choice || !effects) return;
+
+      sponsorRef.current = next;
+      setSponsor(next);
+      triggerSound("validate");
+
+      if (effects.suspicion !== 0) {
+        setAuditor((prev) => ({
+          ...prev,
+          suspicion: Math.min(
+            100,
+            Math.max(0, prev.suspicion + effects.suspicion)
+          ),
+        }));
+      }
+      if (effects.score !== 0) {
+        setScoreState((prev) => ({
+          ...prev,
+          score: Math.max(0, prev.score + effects.score),
+        }));
+      }
+      if (effects.timeBonusSeconds !== 0) {
+        setConveyorSubjects((prev) =>
+          prev.map((sub) => ({
+            ...sub,
+            timeRemaining: Math.max(
+              Math.min(sub.timeRemaining, 3),
+              Math.min(
+                sub.maxTime + 10,
+                sub.timeRemaining + effects.timeBonusSeconds
+              )
+            ),
+          }))
+        );
+      }
+      if (effects.powerUpCharge > 0) {
+        setPowerUps((pu) => chargePowerUps(pu, effects.powerUpCharge));
+      }
+
+      addAuditLog(
+        `[SPONSOR] Replied to ${request.from}: "${choice.label}". ${outcome}${
+          effects.skeleton ? " 🦴 (A new skeleton joins the closet.)" : ""
+        }`,
+        effects.skeleton || effects.suspicion > 0 ? "WARN" : "INFO",
+        effects.suspicion
+      );
+      announce(`Replied to ${request.from}. ${outcome}`, "polite");
+    },
+    [addAuditLog, triggerSound, announce]
   );
 
   // 14. Initiate 21 CFR Electronic Signature Modal
@@ -743,6 +830,13 @@ export const ClinicalTrialChaos: React.FC = () => {
         )
       );
 
+      // Sponsors love throughput
+      sponsorRef.current = applySponsorSubmissionBoost(
+        sponsorRef.current,
+        allClean
+      );
+      setSponsor(sponsorRef.current);
+
       // Record to submitted history
       setSubmittedHistory((prev) => [...prev, subj]);
 
@@ -757,15 +851,18 @@ export const ClinicalTrialChaos: React.FC = () => {
         if (scoreState.subjectsSubmitted + 1 >= targetCount) {
           setPlayState("phase_cleared");
           playSuccess();
-          const report = generateBIMOReport(
-            {
-              ...scoreState,
-              subjectsSubmitted: scoreState.subjectsSubmitted + 1,
-            },
-            auditor,
-            auditLogs,
-            ruleViolations,
-            activeProtocol
+          const report = applySponsorSkeletonsToReport(
+            generateBIMOReport(
+              {
+                ...scoreState,
+                subjectsSubmitted: scoreState.subjectsSubmitted + 1,
+              },
+              auditor,
+              auditLogs,
+              ruleViolations,
+              activeProtocol
+            ),
+            sponsorRef.current.skeletons
           );
           setBimoReport(report);
         }
@@ -1156,17 +1253,22 @@ export const ClinicalTrialChaos: React.FC = () => {
       ) {
         uiNeedsSync = true;
         triggerSoundRef.current("alarm");
+        playStateRef.current = "game_over";
+        setGameOverReason("auditor");
         setPlayState("game_over");
         addAuditLogRef.current(
           `[FDA NOTICE OF STUDY TERMINATION] 21 CFR Part 11 Audit Suspicion reached 100%. Form 483 Issued.`,
           "CRITICAL"
         );
-        const report = generateBIMOReport(
-          scoreStateRef.current,
-          updatedAuditor,
-          auditLogsRef.current,
-          ruleViolationsRef.current,
-          activeProtocolRef.current
+        const report = applySponsorSkeletonsToReport(
+          generateBIMOReport(
+            scoreStateRef.current,
+            updatedAuditor,
+            auditLogsRef.current,
+            ruleViolationsRef.current,
+            activeProtocolRef.current
+          ),
+          sponsorRef.current.skeletons
         );
         setBimoReport(report);
         setAuditor({ ...updatedAuditor });
@@ -1291,6 +1393,65 @@ export const ClinicalTrialChaos: React.FC = () => {
         setConveyorSubjects([...conveyorSubjectsRef.current]);
         if (!selectedSubjectIdRef.current) {
           setSelectedSubjectId(newSub.id);
+        }
+      }
+
+      // 6a. Sponsor inbox: mood decay, new emails, follow-up escalation
+      if (playStateRef.current === "playing") {
+        const prevSponsor = sponsorRef.current;
+        const { state: nextSponsor, events: sponsorEvents } = tickSponsor(
+          prevSponsor,
+          deltaSeconds
+        );
+        sponsorRef.current = nextSponsor;
+        for (const ev of sponsorEvents) {
+          if (ev.type === "request_arrived") {
+            triggerSoundRef.current("chute");
+            addAuditLogRef.current(
+              `[SPONSOR] 📧 New email from ${ev.request.from} (${ev.request.role}): "${ev.request.subject}"`,
+              "WARN"
+            );
+          } else if (ev.type === "follow_up") {
+            triggerSoundRef.current("error");
+            addAuditLogRef.current(
+              `[SPONSOR] 📧 ${ev.request.from}: "${ev.subjectLine}"`,
+              "WARN"
+            );
+          } else if (ev.type === "request_dropped") {
+            addAuditLogRef.current(
+              `[SPONSOR] ${ev.request.from} escalated "${ev.request.subject}" to your manager's manager. Satisfaction ${ev.moodDelta}%.`,
+              "CRITICAL"
+            );
+          } else if (ev.type === "contract_terminated") {
+            triggerSoundRef.current("alarm");
+            playStateRef.current = "game_over";
+            setGameOverReason("sponsor");
+            setPlayState("game_over");
+            addAuditLogRef.current(
+              "[CONTRACT TERMINATED] The sponsor has 'decided to go in a different direction' and moved the study to another CRO.",
+              "CRITICAL"
+            );
+            setBimoReport(
+              applySponsorSkeletonsToReport(
+                generateBIMOReport(
+                  scoreStateRef.current,
+                  auditorRef.current,
+                  auditLogsRef.current,
+                  ruleViolationsRef.current,
+                  activeProtocolRef.current
+                ),
+                nextSponsor.skeletons
+              )
+            );
+          }
+        }
+        if (
+          sponsorEvents.length > 0 ||
+          Math.round(prevSponsor.mood) !== Math.round(nextSponsor.mood) ||
+          Math.ceil(prevSponsor.activeRequest?.timeRemaining ?? 0) !==
+            Math.ceil(nextSponsor.activeRequest?.timeRemaining ?? 0)
+        ) {
+          setSponsor(nextSponsor);
         }
       }
 
@@ -1883,6 +2044,99 @@ export const ClinicalTrialChaos: React.FC = () => {
         </div>
       </div>
 
+      {/* Sponsor Relations: satisfaction meter and inbox */}
+      {playState === "playing" && (
+        <section
+          aria-label="Sponsor relations"
+          className="@container mt-3 rounded-xl border border-zinc-800 bg-[#13151a] p-3"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div className="flex min-w-0 items-center gap-2">
+              <IconMail className="h-4 w-4 shrink-0 text-zinc-400" />
+              <span className="font-bold text-zinc-300">
+                SPONSOR SATISFACTION:
+              </span>
+              <span className="font-mono tabular-nums text-zinc-100">
+                {Math.round(sponsor.mood)}%
+              </span>
+              <span className="min-w-0 break-words text-[10px] italic text-zinc-500">
+                {getSponsorMoodLabel(sponsor.mood)}
+              </span>
+            </div>
+            <span
+              className="shrink-0 text-[10px] font-mono text-zinc-500"
+              title="Shortcuts you took to please the sponsor. The inspector will find them."
+            >
+              🦴 Skeletons in the closet: {sponsor.skeletons.length}
+            </span>
+          </div>
+          <div
+            className="mt-2 h-1.5 w-full rounded-full bg-zinc-800"
+            role="meter"
+            aria-label="Sponsor satisfaction"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(sponsor.mood)}
+          >
+            <div
+              className={`h-full rounded-full transition-[width] ${
+                sponsor.mood >= 45
+                  ? "bg-emerald-500"
+                  : sponsor.mood >= 25
+                    ? "bg-amber-500"
+                    : "bg-rose-500"
+              }`}
+              style={{ width: `${Math.round(sponsor.mood)}%` }}
+            />
+          </div>
+
+          {sponsor.activeRequest && (
+            <div
+              className={`mt-3 rounded-lg border p-3 ${
+                sponsor.activeRequest.followUps > 0
+                  ? "border-rose-500/50 bg-rose-500/5"
+                  : "border-amber-500/40 bg-amber-500/5"
+              }`}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0" aria-live="polite">
+                  <p className="text-[10px] font-mono text-zinc-500 break-words">
+                    From: {sponsor.activeRequest.request.from} ·{" "}
+                    {sponsor.activeRequest.request.role}
+                  </p>
+                  <p className="text-xs font-bold text-zinc-100 break-words">
+                    {sponsor.activeRequest.followUps > 0
+                      ? getFollowUpSubject(
+                          sponsor.activeRequest.request,
+                          sponsor.activeRequest.followUps
+                        )
+                      : sponsor.activeRequest.request.subject}
+                  </p>
+                </div>
+                <span className="shrink-0 rounded bg-amber-500/15 px-2 py-0.5 text-xs font-mono font-bold tabular-nums text-amber-300">
+                  {Math.ceil(sponsor.activeRequest.timeRemaining)}s
+                </span>
+              </div>
+              <p className="mt-1 text-[11px] text-zinc-400 break-words">
+                {sponsor.activeRequest.request.body}
+              </p>
+              <div className="mt-2 grid grid-cols-1 @xl:grid-cols-3 gap-2">
+                {sponsor.activeRequest.request.choices.map((choice, idx) => (
+                  <button
+                    key={choice.label}
+                    type="button"
+                    onClick={() => handleSponsorChoice(idx)}
+                    className="min-w-0 rounded-lg border border-zinc-700 bg-[#0d0e11] px-3 py-2 text-left text-[11px] font-bold text-zinc-200 break-words transition hover:border-amber-500/60 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60"
+                  >
+                    {choice.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+      )}
+
       {/* Active Protocol Amendment Banner */}
       {activeAmendment && activeAmendment.active && (
         <div className="mt-3 flex items-center justify-between rounded-xl border border-amber-500/50 bg-amber-500/10 p-3 text-amber-200 animate-pulse">
@@ -2104,13 +2358,15 @@ export const ClinicalTrialChaos: React.FC = () => {
                     <div className="flex items-center justify-center gap-2 text-rose-400 font-bold mb-2">
                       <IconAlertTriangle className="h-6 w-6 text-rose-500 animate-bounce" />
                       <span className="text-lg">
-                        FDA FORM 483 ISSUED · TRIAL TERMINATED
+                        {gameOverReason === "sponsor"
+                          ? "CONTRACT TERMINATED · STUDY MOVED TO ANOTHER CRO"
+                          : "FDA FORM 483 ISSUED · TRIAL TERMINATED"}
                       </span>
                     </div>
                     <p className="text-xs text-zinc-400 mb-4 leading-relaxed">
-                      Auditor suspicion reached 100%. Major source data
-                      validation discrepancies triggered clinical hold under 21
-                      CFR § 312.44.
+                      {gameOverReason === "sponsor"
+                        ? "Sponsor satisfaction hit 0%. They 'decided to go in a different direction' and awarded the study to a vendor whose bid was 40% cheaper and entirely hypothetical."
+                        : "Auditor suspicion reached 100%. Major source data validation discrepancies triggered clinical hold under 21 CFR § 312.44."}
                     </p>
                     <div className="grid grid-cols-3 gap-2 bg-zinc-900/80 p-3 rounded-lg text-xs font-mono mb-4 text-left">
                       <div>
