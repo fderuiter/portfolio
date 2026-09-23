@@ -330,6 +330,57 @@ export interface StudyProtocol {
    * export and reopen alongside everything else the study holds.
    */
   testScenarios?: TestScenario[];
+  /** Local authoring discussion and lifecycle history, separate from EDC audit data. */
+  reviewThreads?: StudyReviewThread[];
+}
+
+/** Local authoring-review roles, unrelated to EDC permissions or audit roles. */
+export type StudyReviewRole =
+  "Data Manager" | "Medical Monitor" | "Biostatistician" | "Clinical Reviewer";
+
+/** Declared local author identity for an authoring review action. */
+export interface StudyReviewActor {
+  name: string;
+  role: StudyReviewRole;
+}
+
+/** A field's last known identity and readable context, retained after deletion. */
+export interface StudyReviewTarget {
+  fieldId: string;
+  formId: string;
+  formName: string;
+  variableName: string;
+  label: string;
+}
+
+/** Shared author and chronology attributes on an append-only review event. */
+export interface StudyReviewEventBase {
+  id: string;
+  at: string;
+  author: StudyReviewActor;
+}
+
+/** A comment, status transition, or retained target-lifecycle entry. */
+export type StudyReviewEvent =
+  | (StudyReviewEventBase & { type: "comment"; body: string })
+  | (StudyReviewEventBase & { type: "resolved" | "reopened" })
+  | (StudyReviewEventBase & {
+      type: "target-renamed";
+      previousVariableName: string;
+      nextVariableName: string;
+      previousLabel: string;
+      nextLabel: string;
+    })
+  | (StudyReviewEventBase & {
+      type: "target-deleted";
+      target: StudyReviewTarget;
+    });
+
+/** Local discussion anchored to a stable field identity across edits and deletion. */
+export interface StudyReviewThread {
+  id: string;
+  target: StudyReviewTarget;
+  events: StudyReviewEvent[];
 }
 
 /** Calculation outcomes a scenario can assert on. */

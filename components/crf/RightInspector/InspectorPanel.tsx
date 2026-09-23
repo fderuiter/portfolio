@@ -6,11 +6,15 @@ import {
   CRFField,
   CodelistDefinition,
   EditCheckRule,
-} from "@/lib/crf/types";
+  StudyReviewActor,
+  StudyReviewThread,
+  StudyProtocolEngine,
+} from "@/lib/crf";
 import { computeFormHealthMetrics } from "@/lib/crf/form-health";
 import { FieldPropertiesTab } from "./FieldPropertiesTab";
 import { LogicRulesTab } from "./LogicRulesTab";
 import { CdiscMetadataTab } from "./CdiscMetadataTab";
+import { ReviewThreadsTab } from "./ReviewThreadsTab";
 import {
   IconAdjustments,
   IconMathFunction,
@@ -38,9 +42,22 @@ interface InspectorPanelProps {
   onDuplicateField?: (fieldId: string) => void;
   onDuplicateForm?: (formId: string) => void;
   onRenameEverywhere?: (newVar: string) => void;
+  reviewThreads?: StudyReviewThread[];
+  reviewAuthor: StudyReviewActor;
+  onReviewAuthorChange: (author: StudyReviewActor) => void;
+  onAddReviewComment: (
+    fieldId: string,
+    body: string,
+    author: StudyReviewActor
+  ) => void;
+  onSetReviewThreadStatus: (
+    threadId: string,
+    status: "resolved" | "open",
+    author: StudyReviewActor
+  ) => void;
 }
 
-type InspectorTab = "properties" | "logic" | "cdash";
+type InspectorTab = "properties" | "logic" | "cdash" | "review";
 
 export const InspectorPanel: React.FC<InspectorPanelProps> = ({
   form,
@@ -54,6 +71,11 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
   onDuplicateField,
   onDuplicateForm,
   onRenameEverywhere,
+  reviewThreads = [],
+  reviewAuthor,
+  onReviewAuthorChange,
+  onAddReviewComment,
+  onSetReviewThreadStatus,
 }) => {
   const [activeTab, setActiveTab] = useState<InspectorTab>("properties");
   const [hasCopiedCli, setHasCopiedCli] = useState(false);
@@ -187,11 +209,42 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
           <IconDatabase className="w-3.5 h-3.5" />
           <span>CDASH / aCRF</span>
         </button>
+        <button
+          onClick={() => setActiveTab("review")}
+          aria-label={`Review threads (${reviewThreads.filter((thread) => StudyProtocolEngine.getReviewThreadStatus(thread) === "open").length} open)`}
+          className={`flex-1 py-2 text-center text-xs font-mono transition-colors border-b-2 flex items-center justify-center gap-1.5 ${
+            activeTab === "review"
+              ? "border-amber-400 text-amber-300 font-bold bg-zinc-900/40"
+              : "border-transparent text-zinc-400 hover:text-zinc-200"
+          }`}
+        >
+          <span>Review</span>
+          <span className="rounded bg-zinc-800 px-1 text-[9px]">
+            {
+              reviewThreads.filter(
+                (thread) =>
+                  StudyProtocolEngine.getReviewThreadStatus(thread) === "open"
+              ).length
+            }
+          </span>
+        </button>
       </div>
 
       {/* Tab Body */}
       <div className="flex-1 overflow-y-auto">
-        {selectedField ? (
+        {activeTab === "review" ? (
+          <ReviewThreadsTab
+            threads={reviewThreads}
+            selectedField={selectedField}
+            author={reviewAuthor}
+            onAuthorChange={onReviewAuthorChange}
+            onAddComment={onAddReviewComment}
+            onSetStatus={onSetReviewThreadStatus}
+            getStatus={(thread) =>
+              StudyProtocolEngine.getReviewThreadStatus(thread)
+            }
+          />
+        ) : selectedField ? (
           <>
             {activeTab === "properties" && (
               <FieldPropertiesTab

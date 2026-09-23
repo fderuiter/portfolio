@@ -14,6 +14,7 @@ import {
   EditCheckRule,
   StudyVisit,
   StudyBaseline,
+  StudyReviewActor,
   CodelistDefinition,
   StudyBranding,
   getPresetByIdSync,
@@ -191,6 +192,10 @@ export const CRFStudioContainer: React.FC = () => {
 
   const [history, setHistory] = useState<StudyProtocol[]>([]);
   const [future, setFuture] = useState<StudyProtocol[]>([]);
+  const [reviewAuthor, setReviewAuthor] = useState<StudyReviewActor>({
+    name: "Study author",
+    role: "Data Manager",
+  });
   const [baselineStudy, setBaselineStudy] = useState<StudyProtocol>(study);
   const [pendingStudyReplacement, setPendingStudyReplacement] = useState<{
     targetStudy: StudyProtocol;
@@ -584,6 +589,30 @@ export const CRFStudioContainer: React.FC = () => {
     },
     [study]
   );
+
+  const handleAddReviewComment = (
+    fieldId: string,
+    body: string,
+    author: StudyReviewActor
+  ) => {
+    const result = StudyProtocolEngine.addReviewComment(
+      study,
+      fieldId,
+      body,
+      author
+    );
+    updateStudyWithHistory(result.study);
+  };
+
+  const handleSetReviewThreadStatus = (
+    threadId: string,
+    status: "resolved" | "open",
+    author: StudyReviewActor
+  ) => {
+    updateStudyWithHistory(
+      StudyProtocolEngine.setReviewThreadStatus(study, threadId, status, author)
+    );
+  };
 
   const handleUndo = useCallback(() => {
     if (history.length === 0) return;
@@ -1210,7 +1239,9 @@ export const CRFStudioContainer: React.FC = () => {
     const { study: updatedStudy } = StudyProtocolEngine.removeField(
       study,
       activeForm.id,
-      fieldId
+      fieldId,
+      undefined,
+      reviewAuthor
     );
     updateStudyWithHistory(updatedStudy);
     if (selectedFieldId === fieldId) {
@@ -1226,7 +1257,8 @@ export const CRFStudioContainer: React.FC = () => {
           study,
           activeForm.id,
           impactPendingDeletion.field.id,
-          { purgeReferencingRules: true }
+          { purgeReferencingRules: true },
+          reviewAuthor
         );
       updateStudyWithHistory(updatedStudy);
       if (selectedFieldId === impactPendingDeletion.field.id) {
@@ -1247,7 +1279,8 @@ export const CRFStudioContainer: React.FC = () => {
 
   const handleRenameFieldEverywhere = (
     fieldId: string,
-    newVariableName: string
+    newVariableName: string,
+    author: StudyReviewActor = reviewAuthor
   ) => {
     if (!activeForm) return;
     const { study: updatedStudy, error } =
@@ -1255,7 +1288,9 @@ export const CRFStudioContainer: React.FC = () => {
         study,
         activeForm.id,
         fieldId,
-        newVariableName
+        newVariableName,
+        undefined,
+        author
       );
     if (error) {
       console.warn("Failed to rename field everywhere:", error);
@@ -1314,6 +1349,15 @@ export const CRFStudioContainer: React.FC = () => {
   }
 
   const activeBranding = getStudyBranding(study);
+  const reviewThreadProps = {
+    reviewThreads: study.reviewThreads?.filter(
+      (thread) => thread.target.formId === activeForm?.id
+    ),
+    reviewAuthor,
+    onReviewAuthorChange: setReviewAuthor,
+    onAddReviewComment: handleAddReviewComment,
+    onSetReviewThreadStatus: handleSetReviewThreadStatus,
+  };
 
   return (
     <div
@@ -1514,6 +1558,7 @@ export const CRFStudioContainer: React.FC = () => {
                     form={activeForm}
                     selectedField={selectedField}
                     codelists={study.codelists}
+                    {...reviewThreadProps}
                     onClose={() => {
                       setSelectedFieldId(null);
                       setMobileActiveView("canvas");
@@ -1582,6 +1627,7 @@ export const CRFStudioContainer: React.FC = () => {
                   form={activeForm}
                   selectedField={selectedField}
                   codelists={study.codelists}
+                  {...reviewThreadProps}
                   onClose={() => setSelectedFieldId(null)}
                   onUpdateField={handleUpdateField}
                   onUpdateFormMeta={handleUpdateFormMeta}
@@ -1636,6 +1682,7 @@ export const CRFStudioContainer: React.FC = () => {
                   form={activeForm}
                   selectedField={selectedField}
                   codelists={study.codelists}
+                  {...reviewThreadProps}
                   onClose={() => setSelectedFieldId(null)}
                   onUpdateField={handleUpdateField}
                   onUpdateFormMeta={handleUpdateFormMeta}

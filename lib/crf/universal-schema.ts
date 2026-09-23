@@ -355,6 +355,57 @@ export const TestScenarioSchema = z.object({
 });
 export type UniversalTestScenario = z.infer<typeof TestScenarioSchema>;
 
+const StudyReviewActorSchema = z.object({
+  name: z.string().min(1),
+  role: z.enum([
+    "Data Manager",
+    "Medical Monitor",
+    "Biostatistician",
+    "Clinical Reviewer",
+  ]),
+});
+
+const StudyReviewTargetSchema = z.object({
+  fieldId: z.string().min(1),
+  formId: z.string().min(1),
+  formName: z.string(),
+  variableName: z.string(),
+  label: z.string(),
+});
+
+const StudyReviewEventBaseSchema = z.object({
+  id: z.string().min(1),
+  at: z.string().datetime(),
+  author: StudyReviewActorSchema,
+});
+
+const StudyReviewEventSchema = z.discriminatedUnion("type", [
+  StudyReviewEventBaseSchema.extend({
+    type: z.literal("comment"),
+    body: z.string().min(1),
+  }),
+  StudyReviewEventBaseSchema.extend({
+    type: z.enum(["resolved", "reopened"]),
+  }),
+  StudyReviewEventBaseSchema.extend({
+    type: z.literal("target-renamed"),
+    previousVariableName: z.string(),
+    nextVariableName: z.string(),
+    previousLabel: z.string(),
+    nextLabel: z.string(),
+  }),
+  StudyReviewEventBaseSchema.extend({
+    type: z.literal("target-deleted"),
+    target: StudyReviewTargetSchema,
+  }),
+]);
+
+const StudyReviewThreadSchema = z.object({
+  id: z.string().min(1),
+  target: StudyReviewTargetSchema,
+  events: z.array(StudyReviewEventSchema).min(1),
+});
+
 // 9. Root Universal Study Protocol Schema
 export const UniversalCrfProtocolSchema = z.object({
   $schema: z.string().optional(),
@@ -379,6 +430,7 @@ export const UniversalCrfProtocolSchema = z.object({
   cohorts: z.array(StudyCohortSchema).default([]),
   biomedicalConcepts: z.array(BiomedicalConceptSchema).default([]),
   testScenarios: z.array(TestScenarioSchema).default([]),
+  reviewThreads: z.array(StudyReviewThreadSchema).optional(),
 });
 export type UniversalCrfProtocol = z.infer<typeof UniversalCrfProtocolSchema>;
 export const UniversalStudyProtocolSchema = UniversalCrfProtocolSchema;

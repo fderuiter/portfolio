@@ -220,6 +220,48 @@ Add / Scaffold CDASH Domain Form
 
 ***
 
+### addReviewComment()
+
+> `static` **addReviewComment**(`study`, `fieldId`, `body`, `author?`, `at?`): `object`
+
+Adds a field comment to its durable local authoring review thread.
+
+#### Parameters
+
+##### study
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### fieldId
+
+`string`
+
+##### body
+
+`string`
+
+##### author?
+
+[`StudyReviewActor`](../../types/interfaces/StudyReviewActor.md) = `...`
+
+##### at?
+
+`string` = `...`
+
+#### Returns
+
+`object`
+
+##### study
+
+> **study**: [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### thread
+
+> **thread**: [`StudyReviewThread`](../../types/interfaces/StudyReviewThread.md)
+
+***
+
 ### addRule()
 
 > `static` **addRule**(`study`, `domainOrFormId`, `ruleData`): `object`
@@ -437,6 +479,24 @@ Assign Forms to a Study Visit (Additive)
 ##### visit?
 
 > `optional` **visit?**: [`StudyVisit`](../../types/interfaces/StudyVisit.md)
+
+***
+
+### countOpenReviewThreads()
+
+> `static` **countOpenReviewThreads**(`study`): `number`
+
+Counts unresolved local authoring threads on a study.
+
+#### Parameters
+
+##### study
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+#### Returns
+
+`number`
 
 ***
 
@@ -749,6 +809,24 @@ Find Form by ID or Domain (Case-Insensitive)
 #### Returns
 
 [`CRFForm`](../../types/interfaces/CRFForm.md) \| `undefined`
+
+***
+
+### getReviewThreadStatus()
+
+> `static` **getReviewThreadStatus**(`thread`): `"resolved"` \| `"open"`
+
+Returns the thread's latest local authoring state; new threads start open.
+
+#### Parameters
+
+##### thread
+
+[`StudyReviewThread`](../../types/interfaces/StudyReviewThread.md)
+
+#### Returns
+
+`"resolved"` \| `"open"`
 
 ***
 
@@ -1183,7 +1261,7 @@ Remove Study Epoch from Protocol Graph
 
 ### removeField()
 
-> `static` **removeField**(`study`, `domainOrFormId`, `fieldIdOrVar`, `options?`): `object`
+> `static` **removeField**(`study`, `domainOrFormId`, `fieldIdOrVar`, `options?`, `reviewAuthor?`, `reviewAt?`): `object`
 
 Remove Field from Form & Prune AST Rules (Backwards-compatible wrapper over removeFieldWithCascade)
 
@@ -1206,6 +1284,14 @@ Remove Field from Form & Prune AST Rules (Backwards-compatible wrapper over remo
 ###### purgeReferencingRules?
 
 `boolean`
+
+##### reviewAuthor?
+
+[`StudyReviewActor`](../../types/interfaces/StudyReviewActor.md) = `...`
+
+##### reviewAt?
+
+`string` = `...`
 
 #### Returns
 
@@ -1249,7 +1335,7 @@ Remove Field from Form & Prune AST Rules (Backwards-compatible wrapper over remo
 
 ### removeFieldWithCascade()
 
-> `static` **removeFieldWithCascade**(`study`, `domainOrFormId`, `fieldIdOrVar`, `options?`): `object`
+> `static` **removeFieldWithCascade**(`study`, `domainOrFormId`, `fieldIdOrVar`, `options?`, `reviewAuthor?`, `reviewAt?`): `object`
 
 Remove Field with Cascade: Prunes referencing rules/conditions with 1-operation undo (#542)
 
@@ -1272,6 +1358,14 @@ Remove Field with Cascade: Prunes referencing rules/conditions with 1-operation 
 ###### purgeReferencingRules?
 
 `boolean`
+
+##### reviewAuthor?
+
+[`StudyReviewActor`](../../types/interfaces/StudyReviewActor.md) = `...`
+
+##### reviewAt?
+
+`string` = `...`
 
 #### Returns
 
@@ -1471,7 +1565,7 @@ Remove Study Visit from SoA Matrix
 
 ### renameFieldEverywhere()
 
-> `static` **renameFieldEverywhere**(`study`, `domainOrFormId`, `fieldIdOrVar`, `newVariableName`, `newLabel?`): `object`
+> `static` **renameFieldEverywhere**(`study`, `domainOrFormId`, `fieldIdOrVar`, `newVariableName`, `newLabel?`, `reviewAuthor?`, `reviewAt?`): `object`
 
 Rename Field Everywhere: Atomically updates variable name and all AST rules, conditions, and formulas (#542)
 
@@ -1496,6 +1590,14 @@ Rename Field Everywhere: Atomically updates variable name and all AST rules, con
 ##### newLabel?
 
 `string`
+
+##### reviewAuthor?
+
+[`StudyReviewActor`](../../types/interfaces/StudyReviewActor.md) = `...`
+
+##### reviewAt?
+
+`string` = `...`
 
 #### Returns
 
@@ -1670,6 +1772,40 @@ Persists an immutable, version-tagged baseline snapshot of the study.
 #### Returns
 
 [`SaveStudyBaselineResult`](../../study-baselines/type-aliases/SaveStudyBaselineResult.md)
+
+***
+
+### setReviewThreadStatus()
+
+> `static` **setReviewThreadStatus**(`study`, `threadId`, `status`, `author?`, `at?`): [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+Appends a resolve or reopen event without rewriting previous review history.
+
+#### Parameters
+
+##### study
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+##### threadId
+
+`string`
+
+##### status
+
+`"resolved"` \| `"open"`
+
+##### author?
+
+[`StudyReviewActor`](../../types/interfaces/StudyReviewActor.md) = `...`
+
+##### at?
+
+`string` = `...`
+
+#### Returns
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
 
 ***
 
