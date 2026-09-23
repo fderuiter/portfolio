@@ -346,6 +346,42 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     vi.useRealTimers();
   });
 
+  it("does not start a shift when Enter is pressed on a focused briefing button", async () => {
+    await act(async () => {
+      root.render(<ClinicalTrialChaos />);
+    });
+
+    const officeCard = Array.from(
+      container.querySelectorAll('[role="radio"]')
+    ).find((b) =>
+      b.textContent?.includes("Big Pharma Glass Tower")
+    ) as HTMLElement;
+    expect(officeCard).toBeDefined();
+
+    await act(async () => {
+      officeCard.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
+      );
+    });
+
+    expect(container.textContent).toContain("Shift briefing");
+    expect(mockRecordEvent).not.toHaveBeenCalled();
+
+    // Enter on the board itself still starts the shift
+    const board = container.querySelector(
+      '[data-keyboard-boundary="true"]'
+    ) as HTMLElement;
+    await act(async () => {
+      board.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
+      );
+    });
+    expect(mockRecordEvent).toHaveBeenCalledWith(
+      "clinical_trial_chaos",
+      "project_click"
+    );
+  });
+
   it("should load existing high score from localStorage", async () => {
     mockStorage.setItem("clinical_chaos_highscore", "9800");
 

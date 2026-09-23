@@ -1652,9 +1652,24 @@ export const ClinicalTrialChaos: React.FC = () => {
       e.preventDefault();
     }
 
+    // The inspection report sits on top of everything: Escape closes it and
+    // no other hotkey (e.g. Enter = start shift) may act behind it.
+    if (bimoReport) {
+      if (key === "ESCAPE") setBimoReport(null);
+      return;
+    }
+
     if (playState !== "playing") {
-      if (key === " " || key === "ENTER") {
-        startGame(gameMode, phase);
+      // Only when the board itself has focus: Enter/Space on a focused button
+      // (office card, mode toggle) must activate that button, not start a shift.
+      if ((key === " " || key === "ENTER") && e.target === e.currentTarget) {
+        e.preventDefault();
+        // Mirror the primary button of the current screen
+        if (playState === "phase_cleared") {
+          startGame("campaign", (phase < 3 ? phase + 1 : 1) as GamePhase);
+        } else {
+          startGame(gameMode, 1);
+        }
       }
       return;
     }
@@ -1896,7 +1911,7 @@ export const ClinicalTrialChaos: React.FC = () => {
       <div className="p-3">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0" aria-live="polite">
-            <p className="flex items-center gap-1.5 text-[10px] text-zinc-500">
+            <p className="flex items-center gap-1.5 text-[10px] text-zinc-400">
               <IconMail className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
               <span className="break-words">
                 {sponsor.activeRequest.request.from} ·{" "}
@@ -1931,7 +1946,7 @@ export const ClinicalTrialChaos: React.FC = () => {
             </button>
           ))}
         </div>
-        <p className="mt-2 text-[10px] text-zinc-500">
+        <p className="mt-2 text-[10px] text-zinc-400">
           Ignore it and they will follow up. Twice.
         </p>
       </div>
@@ -1966,13 +1981,13 @@ export const ClinicalTrialChaos: React.FC = () => {
       <div className="flex flex-wrap items-center gap-2 border-b border-zinc-800 pb-3 text-xs">
         <div className="relative flex min-h-[40px] items-center gap-2 rounded-lg border border-zinc-800 bg-[#13151a] px-2.5 sm:px-3">
           <IconTrophy className="h-4 w-4 text-amber-400" aria-hidden="true" />
-          <span className="sr-only text-[10px] uppercase text-zinc-500 sm:not-sr-only">
+          <span className="sr-only text-[10px] uppercase text-zinc-400 sm:not-sr-only">
             Score:
           </span>
           <span className="font-bold tabular-nums text-white">
             {scoreState.score}
           </span>
-          <span className="hidden text-[10px] tabular-nums text-zinc-500 sm:inline">
+          <span className="hidden text-[10px] tabular-nums text-zinc-400 sm:inline">
             Best {effectiveHighScore}
           </span>
           {scorePops.map((pop) => (
@@ -1994,11 +2009,11 @@ export const ClinicalTrialChaos: React.FC = () => {
         >
           <IconFlame
             className={`h-4 w-4 ${
-              scoreState.combo > 2 ? "text-amber-400" : "text-zinc-600"
+              scoreState.combo > 2 ? "text-amber-400" : "text-zinc-400"
             }`}
             aria-hidden="true"
           />
-          <span className="sr-only text-[10px] uppercase text-zinc-500 sm:not-sr-only">
+          <span className="sr-only text-[10px] uppercase text-zinc-400 sm:not-sr-only">
             Combo:
           </span>
           <span className="font-bold tabular-nums text-zinc-100">
@@ -2008,7 +2023,7 @@ export const ClinicalTrialChaos: React.FC = () => {
             className={`rounded px-1.5 py-0.5 text-[10px] font-bold tabular-nums ${
               scoreState.multiplier > 1
                 ? "bg-amber-500/15 text-amber-300"
-                : "text-zinc-500"
+                : "text-zinc-400"
             }`}
           >
             ×{scoreState.multiplier}
@@ -2016,7 +2031,7 @@ export const ClinicalTrialChaos: React.FC = () => {
         </div>
 
         <div className="flex min-h-[40px] min-w-0 items-center gap-2 rounded-lg border border-zinc-800 bg-[#13151a] px-2.5 sm:px-3">
-          <span className="text-[10px] uppercase text-zinc-500">
+          <span className="text-[10px] uppercase text-zinc-400">
             {gameMode === "campaign" ? `Phase ${phase}/3` : "Endless"}
           </span>
           {gameMode === "campaign" && (
@@ -2055,7 +2070,7 @@ export const ClinicalTrialChaos: React.FC = () => {
             className={`flex h-10 w-10 items-center justify-center rounded-lg border transition ${
               bgmEnabled
                 ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-300"
-                : "border-zinc-800 bg-[#13151a] text-zinc-500 hover:text-zinc-300"
+                : "border-zinc-800 bg-[#13151a] text-zinc-400 hover:text-zinc-300"
             }`}
           >
             <IconMusic className="h-4 w-4" />
@@ -2071,7 +2086,7 @@ export const ClinicalTrialChaos: React.FC = () => {
             {soundEnabled ? (
               <IconVolume className="h-4 w-4 text-brand-cyan" />
             ) : (
-              <IconVolumeOff className="h-4 w-4 text-zinc-600" />
+              <IconVolumeOff className="h-4 w-4 text-zinc-400" />
             )}
           </button>
           <FullscreenButton
@@ -2118,7 +2133,7 @@ export const ClinicalTrialChaos: React.FC = () => {
               className={`flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg px-3 text-xs font-bold transition ${
                 activeTab === tab.id
                   ? "border border-zinc-700 bg-zinc-800 text-zinc-100"
-                  : "border border-transparent text-zinc-500 hover:text-zinc-200"
+                  : "border border-transparent text-zinc-400 hover:text-zinc-200"
               }`}
             >
               {tab.icon}
@@ -2132,7 +2147,7 @@ export const ClinicalTrialChaos: React.FC = () => {
             </button>
           ))}
         </div>
-        <span className="hidden min-w-0 items-center gap-1.5 text-[10px] text-zinc-500 sm:flex">
+        <span className="hidden min-w-0 items-center gap-1.5 text-[10px] text-zinc-400 sm:flex">
           <span
             aria-hidden="true"
             className="h-2 w-2 shrink-0 rounded-full"
@@ -2231,7 +2246,7 @@ export const ClinicalTrialChaos: React.FC = () => {
               >
                 {AUDITOR_BEHAVIOR_LABELS[auditor.behavior]}
               </span>
-              <p className="hidden min-w-0 truncate text-[10px] text-zinc-500 sm:block">
+              <p className="hidden min-w-0 truncate text-[10px] text-zinc-400 sm:block">
                 Bad data and expired subjects raise it. 100% = Form 483.
               </p>
             </div>
@@ -2253,7 +2268,7 @@ export const ClinicalTrialChaos: React.FC = () => {
               </span>
               <span className="flex shrink-0 items-center gap-2">
                 <span
-                  className="hidden text-[10px] tabular-nums text-zinc-500 sm:inline"
+                  className="hidden text-[10px] tabular-nums text-zinc-400 sm:inline"
                   title="Shortcuts you took to please the sponsor. The inspector will find them."
                 >
                   🦴 {sponsor.skeletons.length}
@@ -2294,7 +2309,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                 style={{ width: `${Math.round(sponsor.mood)}%` }}
               />
             </div>
-            <p className="mt-1.5 truncate py-0.5 text-[10px] italic text-zinc-500">
+            <p className="mt-1.5 truncate py-0.5 text-[10px] italic text-zinc-400">
               {getSponsorMoodLabel(sponsor.mood)}
             </p>
           </div>
@@ -2557,16 +2572,16 @@ export const ClinicalTrialChaos: React.FC = () => {
                 className="min-w-0 rounded-xl border border-zinc-800 bg-[#13151a] p-3 sm:p-4 lg:col-span-7"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                     Queue · {conveyorSubjects.length}/5
                   </span>
-                  <span className="hidden text-[10px] text-zinc-600 sm:inline">
+                  <span className="hidden text-[10px] text-zinc-400 sm:inline">
                     Tab to cycle
                   </span>
                 </div>
                 <ul className="mt-2 flex gap-2 overflow-x-auto pb-1">
                   {conveyorSubjects.length === 0 && (
-                    <li className="py-3 text-[11px] text-zinc-500">
+                    <li className="py-3 text-[11px] text-zinc-400">
                       Waiting for the next packet from site…
                     </li>
                   )}
@@ -2630,7 +2645,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                   <div className="mt-3 border-t border-zinc-800 pt-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                           Active CRF
                         </span>
                         <h3
@@ -2644,7 +2659,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                             </span>
                           )}
                         </h3>
-                        <p className="truncate text-[10px] text-zinc-500">
+                        <p className="truncate text-[10px] text-zinc-400">
                           {activeSubject.studySite}
                         </p>
                       </div>
@@ -2690,7 +2705,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                               ? "border-amber-500/50 bg-amber-500/10 text-amber-200"
                               : step.done
                                 ? "border-emerald-500/30 bg-emerald-500/5 text-emerald-300"
-                                : "border-zinc-800 text-zinc-500"
+                                : "border-zinc-800 text-zinc-400"
                           }`}
                         >
                           <span className="font-bold tabular-nums">
@@ -2777,19 +2792,17 @@ export const ClinicalTrialChaos: React.FC = () => {
                             <span className="truncate text-[11px] font-bold text-zinc-300">
                               {obs.field}
                             </span>
-                            <span
-                              className="shrink-0 rounded px-1.5 py-0.5 text-[9px] font-bold"
-                              style={{
-                                color:
-                                  stations.find(
-                                    (st) => st.id === obs.destination
-                                  )?.color ?? "#94a3b8",
-                                backgroundColor:
-                                  stations.find(
-                                    (st) => st.id === obs.destination
-                                  )?.accentColor ?? "rgba(148,163,184,0.15)",
-                              }}
-                            >
+                            <span className="flex shrink-0 items-center gap-1 rounded bg-zinc-800 px-1.5 py-0.5 text-[9px] font-bold text-zinc-100">
+                              <span
+                                aria-hidden="true"
+                                className="h-1.5 w-1.5 rounded-full"
+                                style={{
+                                  backgroundColor:
+                                    stations.find(
+                                      (st) => st.id === obs.destination
+                                    )?.color ?? "#94a3b8",
+                                }}
+                              />
                               {obs.destination}
                             </span>
                           </span>
@@ -2824,7 +2837,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                     </div>
                   </div>
                 ) : (
-                  <p className="mt-3 border-t border-zinc-800 py-6 text-center text-xs text-zinc-500">
+                  <p className="mt-3 border-t border-zinc-800 py-6 text-center text-xs text-zinc-400">
                     Queue clear. Enjoy the silence while it lasts.
                   </p>
                 )}
@@ -2840,9 +2853,9 @@ export const ClinicalTrialChaos: React.FC = () => {
                   aria-label="EDC stations"
                   className="rounded-xl border border-zinc-800 bg-[#13151a] p-3"
                 >
-                  <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                  <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                     <span>Route to station</span>
-                    <span className="font-normal normal-case text-zinc-600">
+                    <span className="font-normal normal-case text-zinc-400">
                       Keys 1–{sortedStations.length}
                     </span>
                   </div>
@@ -2866,7 +2879,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                               : accepts
                                 ? "border-emerald-500/70 bg-emerald-500/10 shadow-[0_0_0_1px_rgba(16,185,129,0.35)]"
                                 : flowStep === 2
-                                  ? "border-zinc-800 bg-[#0d0e11] opacity-50"
+                                  ? "border-zinc-900 bg-transparent [&_h4]:text-zinc-400"
                                   : "border-zinc-800 bg-[#0d0e11] hover:border-zinc-600"
                           }`}
                         >
@@ -2889,10 +2902,10 @@ export const ClinicalTrialChaos: React.FC = () => {
                           <h4 className="mt-1 truncate text-xs font-bold text-white">
                             {station.label}
                           </h4>
-                          <span className="block truncate text-[10px] text-zinc-500">
+                          <span className="block truncate text-[10px] text-zinc-400">
                             {station.name}
                           </span>
-                          <span className="mt-1 flex items-center justify-between text-[10px] text-zinc-500">
+                          <span className="mt-1 flex items-center justify-between text-[10px] text-zinc-400">
                             <span>Submits:</span>
                             <span className="font-bold tabular-nums text-emerald-400">
                               {station.processedCount}
@@ -2908,9 +2921,9 @@ export const ClinicalTrialChaos: React.FC = () => {
                   aria-label="Lifelines"
                   className="rounded-xl border border-zinc-800 bg-[#13151a] p-3"
                 >
-                  <div className="flex flex-wrap items-center justify-between gap-x-2 text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                  <div className="flex flex-wrap items-center justify-between gap-x-2 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                     <span>Lifelines</span>
-                    <span className="font-normal normal-case text-zinc-600">
+                    <span className="font-normal normal-case text-zinc-400">
                       Charge by fixing and signing
                     </span>
                   </div>
@@ -2978,7 +2991,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                             </span>
                             <span
                               className={`text-[9px] font-bold tabular-nums ${
-                                isReady ? "text-emerald-300" : "text-zinc-500"
+                                isReady ? "text-emerald-300" : "text-zinc-400"
                               }`}
                             >
                               {isActive
@@ -3032,7 +3045,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                         className={`min-h-[40px] rounded-md px-3 text-xs font-bold transition ${
                           gameMode === mode
                             ? "bg-zinc-800 text-zinc-100"
-                            : "text-zinc-500 hover:text-zinc-300"
+                            : "text-zinc-400 hover:text-zinc-300"
                         }`}
                       >
                         {mode === "campaign" ? "Campaign" : "Endless"}
@@ -3055,7 +3068,7 @@ export const ClinicalTrialChaos: React.FC = () => {
               {/* How a shift works, shown rather than told */}
               <ol className="mt-5 grid grid-cols-1 gap-2 @2xl:grid-cols-3">
                 <li className="rounded-lg border border-zinc-800 bg-[#0d0e11] p-3">
-                  <p className="text-[10px] font-bold uppercase text-zinc-500">
+                  <p className="text-[10px] font-bold uppercase text-zinc-400">
                     1 · Fix
                   </p>
                   <div
@@ -3066,7 +3079,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                     <span className="font-bold text-rose-300 line-through">
                       180 m
                     </span>
-                    <span className="text-zinc-600">→</span>
+                    <span className="text-zinc-400">→</span>
                     <span className="font-bold text-emerald-300">180 cm</span>
                   </div>
                   <p className="mt-2 text-[11px] text-zinc-400">
@@ -3074,7 +3087,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                   </p>
                 </li>
                 <li className="rounded-lg border border-zinc-800 bg-[#0d0e11] p-3">
-                  <p className="text-[10px] font-bold uppercase text-zinc-500">
+                  <p className="text-[10px] font-bold uppercase text-zinc-400">
                     2 · Route
                   </p>
                   <div
@@ -3084,7 +3097,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                     <span className="rounded bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-bold text-emerald-300">
                       VS
                     </span>
-                    <span className="text-zinc-600">→</span>
+                    <span className="text-zinc-400">→</span>
                     <span className="rounded-md border border-emerald-500/70 bg-emerald-500/10 px-2 py-1 font-bold text-zinc-100">
                       VS Station{" "}
                       <span className="text-[9px] text-emerald-300">✓</span>
@@ -3096,7 +3109,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                   </p>
                 </li>
                 <li className="rounded-lg border border-zinc-800 bg-[#0d0e11] p-3">
-                  <p className="text-[10px] font-bold uppercase text-zinc-500">
+                  <p className="text-[10px] font-bold uppercase text-zinc-400">
                     3 · Sign
                   </p>
                   <div
@@ -3164,7 +3177,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                 >
                   Pick your office
                 </h4>
-                <span className="text-[10px] text-zinc-500">
+                <span className="text-[10px] text-zinc-400">
                   Each one bends the rules
                 </span>
               </div>
@@ -3202,7 +3215,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                             {o.name}
                           </span>
                         </span>
-                        <span className="shrink-0 text-[9px] uppercase text-zinc-500">
+                        <span className="shrink-0 text-[9px] uppercase text-zinc-400">
                           {o.difficulty}
                         </span>
                       </span>
@@ -3212,7 +3225,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                       <span className="mt-2 block text-[10px] text-amber-300/90 break-words">
                         {o.quirk}
                       </span>
-                      <span className="mt-1 block text-[10px] tabular-nums text-zinc-500">
+                      <span className="mt-1 block text-[10px] tabular-nums text-zinc-400">
                         {o.modifiers.scoreMultiplier}× score
                       </span>
                     </button>
@@ -3221,7 +3234,7 @@ export const ClinicalTrialChaos: React.FC = () => {
               </div>
 
               {/* Authored protocol hand-off */}
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-zinc-800 pt-3 text-[11px] text-zinc-500">
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-zinc-800 pt-3 text-[11px] text-zinc-400">
                 <span className="min-w-0 break-words">
                   {activeProtocol
                     ? `Using your authored protocol ${activeProtocol.protocolNumber} (${activeProtocol.forms?.length || 0} forms).`
@@ -3340,7 +3353,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                     key={stat.label}
                     className="rounded-lg border border-zinc-800 bg-[#0d0e11] p-2"
                   >
-                    <dt className="text-[10px] uppercase text-zinc-500">
+                    <dt className="text-[10px] uppercase text-zinc-400">
                       {stat.label}
                     </dt>
                     <dd
@@ -3442,7 +3455,7 @@ export const ClinicalTrialChaos: React.FC = () => {
 
           {/* Domain Filter Pills */}
           <div className="flex items-center gap-2 mb-3 overflow-x-auto pb-1">
-            <span className="text-[10px] text-zinc-500 uppercase shrink-0">
+            <span className="text-[10px] text-zinc-400 uppercase shrink-0">
               Filter Domain:
             </span>
             {["ALL", "DM", "VS", "AE", "LB", "CM", "EX", "DS", "MH"].map(
@@ -3482,7 +3495,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                   <tr>
                     <td
                       colSpan={8}
-                      className="p-6 text-center text-zinc-500 italic"
+                      className="p-6 text-center text-zinc-400 italic"
                     >
                       No compliant SDTM records generated yet. Complete
                       electronic signatures on conveyor subjects to populate
@@ -3495,7 +3508,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                       key={`${row.USUBJID}-${row.SEQ}-${idx}`}
                       className="hover:bg-zinc-800/40"
                     >
-                      <td className="p-2.5 text-zinc-500">{row.STUDYID}</td>
+                      <td className="p-2.5 text-zinc-400">{row.STUDYID}</td>
                       <td className="p-2.5 font-bold text-brand-cyan">
                         {row.DOMAIN}
                       </td>
@@ -3546,7 +3559,7 @@ export const ClinicalTrialChaos: React.FC = () => {
             className="h-64 overflow-y-auto font-mono text-xs space-y-1.5 scrollbar-thin scrollbar-thumb-zinc-800 p-2"
           >
             {auditLogs.length === 0 ? (
-              <p className="text-zinc-600 italic">
+              <p className="text-zinc-400 italic">
                 Audit logger standing by. Ready for event stream...
               </p>
             ) : (
@@ -3555,7 +3568,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                   key={log.id}
                   className="flex items-start gap-2 leading-relaxed"
                 >
-                  <span className="text-zinc-600 shrink-0">
+                  <span className="text-zinc-400 shrink-0">
                     {log.timestamp}
                   </span>
                   <span
@@ -3581,17 +3594,25 @@ export const ClinicalTrialChaos: React.FC = () => {
       {/* Multi-Choice Regulatory Validation Drawer Modal */}
       {validatingObs && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="max-w-lg w-full rounded-2xl border border-amber-500/50 bg-zinc-950 p-6 shadow-2xl">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cc-fix-dialog-title"
+            className="max-w-lg w-full rounded-2xl border border-amber-500/50 bg-zinc-950 p-6 shadow-2xl"
+          >
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
               <div className="flex items-center gap-2">
                 <IconHelp className="h-5 w-5 text-amber-400" />
-                <h3 className="text-base font-bold text-white">
+                <h3
+                  id="cc-fix-dialog-title"
+                  className="text-base font-bold text-white"
+                >
                   CDISC Controlled Terminology Validation
                 </h3>
               </div>
               <button
                 onClick={() => setValidatingObs(null)}
-                className="text-zinc-500 hover:text-white text-xs font-mono"
+                className="text-zinc-400 hover:text-white text-xs font-mono"
               >
                 ✕ ESC
               </button>
@@ -3600,7 +3621,7 @@ export const ClinicalTrialChaos: React.FC = () => {
             <div className="mt-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] text-zinc-500 uppercase block">
+                  <span className="text-[10px] text-zinc-400 uppercase block">
                     Clinical Variable
                   </span>
                   <p className="text-sm font-bold text-zinc-100">
@@ -3650,7 +3671,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                       }`}
                     >
                       <span className="flex items-center gap-2">
-                        <kbd className="rounded border border-zinc-700 px-1 text-[10px] font-normal text-zinc-500">
+                        <kbd className="rounded border border-zinc-700 px-1 text-[10px] font-normal text-zinc-400">
                           {optIdx + 1}
                         </kbd>
                         <span>{opt}</span>
@@ -3693,11 +3714,19 @@ export const ClinicalTrialChaos: React.FC = () => {
       {/* 21 CFR Part 11 Electronic Signature Modal */}
       {signatureModal.isOpen && signatureModal.subject && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="max-w-lg w-full rounded-2xl border border-brand-cyan/60 bg-zinc-950 p-6 shadow-2xl">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cc-sign-dialog-title"
+            className="max-w-lg w-full rounded-2xl border border-brand-cyan/60 bg-zinc-950 p-6 shadow-2xl"
+          >
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
               <div className="flex items-center gap-2">
                 <IconLock className="h-5 w-5 text-brand-cyan" />
-                <h3 className="text-base font-bold text-white">
+                <h3
+                  id="cc-sign-dialog-title"
+                  className="text-base font-bold text-white"
+                >
                   21 CFR Part 11 Electronic Signature
                 </h3>
               </div>
@@ -3709,12 +3738,12 @@ export const ClinicalTrialChaos: React.FC = () => {
             <div className="mt-4 space-y-4 text-xs font-mono">
               <div className="bg-zinc-900/80 p-3 rounded-xl border border-zinc-800">
                 <p className="text-zinc-400">
-                  <span className="text-zinc-500">SUBJECT:</span>{" "}
+                  <span className="text-zinc-400">SUBJECT:</span>{" "}
                   {signatureModal.subject.subjectLabel} (
                   {signatureModal.subject.studySite})
                 </p>
                 <p className="text-zinc-400 mt-1">
-                  <span className="text-zinc-500">TARGET EDC:</span>{" "}
+                  <span className="text-zinc-400">TARGET EDC:</span>{" "}
                   {targetRoutingStation} Domain Desk (
                   {stations.find((s) => s.id === targetRoutingStation)?.vendor})
                 </p>
@@ -3755,10 +3784,14 @@ export const ClinicalTrialChaos: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold uppercase text-zinc-400 mb-1">
+                <label
+                  htmlFor="cc-signature-password"
+                  className="block text-[10px] font-bold uppercase text-zinc-400 mb-1"
+                >
                   User Authenticator Password
                 </label>
                 <input
+                  id="cc-signature-password"
                   type="password"
                   value={signatureModal.passwordInput}
                   onChange={(e) =>
@@ -3771,7 +3804,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                 />
               </div>
 
-              <p className="text-[10px] text-zinc-500 leading-relaxed italic">
+              <p className="text-[10px] text-zinc-400 leading-relaxed italic">
                 By executing this signature, I legally attest that all clinical
                 data points conform to CDISC Controlled Terminology and ICH GCP
                 E6(R2) standards.
@@ -3806,22 +3839,30 @@ export const ClinicalTrialChaos: React.FC = () => {
       {/* FDA BIMO Inspection Report Modal */}
       {bimoReport && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="max-w-2xl w-full rounded-2xl border border-emerald-500/50 bg-zinc-950 p-6 shadow-2xl">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cc-report-dialog-title"
+            className="max-w-2xl w-full rounded-2xl border border-emerald-500/50 bg-zinc-950 p-6 shadow-2xl"
+          >
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
               <div className="flex items-center gap-2">
                 <IconShieldCheck className="h-6 w-6 text-emerald-400" />
                 <div>
-                  <h3 className="text-base font-bold text-white">
+                  <h3
+                    id="cc-report-dialog-title"
+                    className="text-base font-bold text-white"
+                  >
                     FDA Bioresearch Monitoring (BIMO) Report
                   </h3>
-                  <span className="text-[10px] text-zinc-500">
+                  <span className="text-[10px] text-zinc-400">
                     {bimoReport.runId} · {bimoReport.auditDate}
                   </span>
                 </div>
               </div>
               <button
                 onClick={() => setBimoReport(null)}
-                className="text-zinc-500 hover:text-white text-xs font-mono min-h-[48px] min-w-[48px] flex items-center justify-center p-2"
+                className="text-zinc-400 hover:text-white text-xs font-mono min-h-[48px] min-w-[48px] flex items-center justify-center p-2"
               >
                 ✕ ESC
               </button>
@@ -3830,7 +3871,7 @@ export const ClinicalTrialChaos: React.FC = () => {
             <div className="mt-4 space-y-4 text-xs font-mono">
               <div className="grid grid-cols-3 gap-3 bg-zinc-900/80 p-3 rounded-xl border border-zinc-800">
                 <div>
-                  <span className="text-[10px] text-zinc-500 uppercase block">
+                  <span className="text-[10px] text-zinc-400 uppercase block">
                     Compliance Score
                   </span>
                   <span className="text-lg font-bold text-emerald-400">
@@ -3838,7 +3879,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                   </span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-zinc-500 block uppercase">
+                  <span className="text-[10px] text-zinc-400 block uppercase">
                     Clean Rate
                   </span>
                   <span className="text-lg font-bold text-brand-cyan">
@@ -3846,7 +3887,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                   </span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-zinc-500 block uppercase">
+                  <span className="text-[10px] text-zinc-400 block uppercase">
                     CRFs Processed
                   </span>
                   <span className="text-lg font-bold text-white">
@@ -3880,7 +3921,12 @@ export const ClinicalTrialChaos: React.FC = () => {
                   <span className="text-[10px] font-bold text-zinc-400 uppercase block mb-1.5">
                     Inspection Findings ({bimoReport.findings.length})
                   </span>
-                  <div className="space-y-2 max-h-36 overflow-y-auto">
+                  <div
+                    className="space-y-2 max-h-36 overflow-y-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
+                    tabIndex={0}
+                    role="region"
+                    aria-label="Inspection findings"
+                  >
                     {bimoReport.findings.map((f) => (
                       <div
                         key={f.id}
@@ -3906,7 +3952,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                           <p className="mt-1 text-[11px] text-zinc-400">
                             {f.description}
                           </p>
-                          <span className="text-[9px] text-zinc-500 block mt-0.5">
+                          <span className="text-[9px] text-zinc-400 block mt-0.5">
                             {f.regulation}
                           </span>
                         </div>

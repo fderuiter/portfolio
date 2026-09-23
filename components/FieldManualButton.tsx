@@ -323,7 +323,7 @@ export function FieldManualButton({
           aria-label={`Open Field Manual for ${manual.title}`}
           className={`group flex items-center justify-center gap-2 px-3.5 py-1.5 min-h-[44px] min-w-[44px] text-xs font-mono font-bold rounded-xl transition-all border cursor-pointer touch-manipulation select-none active:scale-95 ${
             !hasSeenGuide
-              ? "bg-cyan-950/40 text-cyan-300 border-cyan-500/40 shadow-sm shadow-cyan-500/10 animate-pulse"
+              ? "bg-cyan-950/40 text-cyan-300 border-cyan-500/40 shadow-sm shadow-cyan-500/10"
               : "bg-zinc-900/60 hover:bg-zinc-850 text-zinc-300 hover:text-cyan-300 border-zinc-800 hover:border-cyan-500/40"
           } ${className}`}
         >
