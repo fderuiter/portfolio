@@ -27,6 +27,7 @@ import {
   type InspectionView,
 } from "./inspection";
 import { evaluateHand, ruleResultsFor } from "./scoring";
+import { scoreTimeline, type TimelineStep } from "./timeline";
 import { validate } from "./validator";
 
 /** The most recent Card Table outcome, phrased for a polite announcement. */
@@ -127,6 +128,8 @@ export interface TableView {
   canDiscard: boolean;
   canInspect: boolean;
   inspection: TableInspectionView | null;
+  /** The last played hand as an ordered scoring timeline, for playback. */
+  lastTimeline: TimelineStep[] | null;
 }
 
 const cardById = (scenario: Scenario, id: string): TlfCard | undefined =>
@@ -556,6 +559,20 @@ export function deriveTableView(
   }
 
   const reviewing = state.status === "REVIEWING";
+  const lastTimeline = state.lastPlay
+    ? scoreTimeline(state.lastPlay.evaluation, {
+        roundScoreBefore: state.roundScore - state.lastPlay.evaluation.score,
+        target: scenario.blind.quota,
+        cardNames: Object.fromEntries(
+          scenario.deck.map((c) => [c.id, c.number])
+        ),
+        zeroRuleLabels: Object.fromEntries(
+          scenario.rulebook.rules
+            .filter((r) => r.severity === "FATAL")
+            .map((r) => [r.id, `${r.category} ERROR`])
+        ),
+      })
+    : null;
   return {
     hand,
     classification,
@@ -574,5 +591,6 @@ export function deriveTableView(
       reviewing && state.selected.length > 0 && canAfford(state.cpu, "DISCARD"),
     canInspect: reviewing && canAfford(state.cpu, "INSPECT"),
     inspection,
+    lastTimeline,
   };
 }

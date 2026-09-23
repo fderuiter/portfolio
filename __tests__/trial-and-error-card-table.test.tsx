@@ -203,7 +203,7 @@ describe("CardTable", () => {
     const restart = screen.getByRole("button", { name: "Restart Blind" });
     expect(document.activeElement).toBe(restart);
     fireEvent.click(restart);
-    expect(screen.getByTestId("round-score").textContent).toBe("0");
+    expect(screen.getByTestId("round-score").textContent?.trim()).toBe("0");
     await waitFor(() => expect(document.activeElement).toBe(card(DRAFT_A)));
   });
 

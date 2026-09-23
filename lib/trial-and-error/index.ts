@@ -57,3 +57,9 @@ export {
   type TableState,
   type TableView,
 } from "./internal/table";
+export {
+  scoreTimeline,
+  type TimelineContext,
+  type TimelineRunning,
+  type TimelineStep,
+} from "./internal/timeline";

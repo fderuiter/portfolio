@@ -385,6 +385,35 @@ body {
   );
 }
 
+@keyframes te-loud-flicker {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scaleY(1);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scaleY(1.15);
+  }
+}
+
+/* The score plate "catches fire" when a hand crosses the Blind target: a
+ * bounded CSS flame (six flickers, transform and opacity only), never a loop. */
+[data-te-cabinet][data-te-loud="on"] .te-loud-fire {
+  position: relative;
+}
+
+[data-te-cabinet][data-te-loud="on"] .te-loud-fire::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 100% 0;
+  height: 1.25rem;
+  pointer-events: none;
+  background: linear-gradient(to top, var(--te-fire), transparent);
+  transform-origin: bottom;
+  animation: te-loud-flicker 320ms ease-in-out 6;
+}
+
 [data-te-cabinet][data-te-loud="on"] .te-loud-glow {
   text-shadow: 0 0 12px var(--te-fire);
 }

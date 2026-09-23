@@ -237,3 +237,37 @@ Recorded by [#943](https://github.com/fderuiter/portfolio/issues/943).
   fullscreen element during real fullscreen, so the site chrome cannot paint
   over it from outside the table's isolated stacking context. It carries
   `data-te-cabinet` so the scoped tokens still apply.
+
+### Score timeline implementation (T&E-UX-02)
+
+Recorded by [#944](https://github.com/fderuiter/portfolio/issues/944).
+
+- **Domain.** `scoreTimeline(evaluation, context)` in `internal/timeline.ts`
+  turns a `HandEvaluation` into ordered steps: hand base, each scored card,
+  non-zero rule results, relics, ×Mult factors, the zero-score rule, the
+  total and Blind progress. Every step carries its running Chips, +Mult and
+  ×Mult, so the player displays values and never computes them. A fast-check
+  property pins the final running totals and the TOTAL step to
+  `evaluateHand`. `TableView.lastTimeline` exposes the last hand's timeline,
+  with card numbers as names and `<category> ERROR` slam labels for the
+  rulebook's fatal rules.
+- **Pacing.** Each step lasts `min(450 ms, 3300 ms / steps) / speed`, followed
+  by a 600 ms hold on the final frame. At 1× a hand of any length therefore
+  resolves in under 4 s. Skip, by the focused Skip button, Space or a click
+  on the plate, jumps to the resolved state. Speed is set with the 1×, 2× and
+  4× buttons in the Blind panel.
+- **Input lock.** During playback the hand and action buttons are `inert`,
+  focus moves to Skip, and the round score, result panel and announcement
+  wait for the timeline to resolve. Focus then returns to the hand, or to
+  Restart when the Blind has ended.
+- **Reduced motion and screen readers.** Under reduced motion there is no
+  playback: the result appears at once, and the hand is announced as a single
+  polite summary. This follows #944's acceptance criteria, which supersede
+  the "step-by-step live announcements" in the Pacing section above. A "Last
+  hand breakdown" disclosure lists every step's text after resolution.
+- **No layout shift.** The plate has a fixed minimum height that fits both
+  the preview and the player. Effects use transform and opacity only. Shake
+  (×Mult, zero rule) and the flame (target crossed) are `.te-loud-*` classes,
+  so they render only inside a cabinet whose loud switch is on.
+- **Audio seam.** `useScorePlayback` accepts `onStep(step, index)` and calls
+  it once per step as it plays. T&E-UX-04 attaches SFX there.
