@@ -1392,7 +1392,7 @@ export const CRFStudioContainer: React.FC = () => {
   };
 
   const reviewThreadProps = useMemo(() => ({
-    reviewThreads: study?.reviewThreads || [],
+    reviewThreads: study.reviewThreads || [],
     reviewAuthor,
     onReviewAuthorChange: setReviewAuthor,
     onAddReviewComment: handleAddReviewComment,
@@ -1403,7 +1403,7 @@ export const CRFStudioContainer: React.FC = () => {
     handleCommitReviewTargetChange,
     handleSetReviewThreadStatus,
     reviewAuthor,
-    study?.reviewThreads,
+    study.reviewThreads,
   ]);
 
   if (!study || !study.forms) {
