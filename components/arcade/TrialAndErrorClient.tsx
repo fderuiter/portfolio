@@ -8,14 +8,14 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { PlayCabinet } from "@/components/arcade/PlayCabinet";
 import { useTeMotion } from "@/components/trial-and-error/useTeMotion";
 
-const QcDeskLoader = () =>
-  import("@/components/trial-and-error/QcDesk").then((mod) => mod.QcDesk);
+const CardTableLoader = () =>
+  import("@/components/trial-and-error/CardTable").then((mod) => mod.CardTable);
 
-const DynamicQcDesk = dynamic(QcDeskLoader, {
+const DynamicCardTable = dynamic(CardTableLoader, {
   ssr: false,
   loading: () => (
     <div className="flex min-h-[380px] items-center justify-center p-8 font-mono text-xs text-zinc-400">
-      Loading QC Desk…
+      Loading Card Table…
     </div>
   ),
 });
@@ -47,11 +47,11 @@ export const TrialAndErrorClient: React.FC = () => {
             <span className="text-amber-400">Biostat Ops</span>
           </h1>
           <p className="mt-2 max-w-3xl font-mono text-xs text-zinc-300 sm:text-sm">
-            A deckbuilder where clinical outputs are the cards. Review the
-            staged Demographics table against its SAP, correct the redlines, and
-            play a hand worth Chips × Mult to beat the Blind. Every study,
-            subject and rule here is fictional; nothing is clinical or
-            regulatory advice.
+            A deckbuilder where clinical outputs are the cards. Pair Tables with
+            their Listings, line up a CSR Straight, and play hands worth Chips ×
+            Mult to beat the Blind. Inspect a card first if you don&apos;t trust
+            the programmer. Every study, subject and rule here is fictional;
+            nothing is clinical or regulatory advice.
           </p>
         </div>
 
@@ -64,7 +64,7 @@ export const TrialAndErrorClient: React.FC = () => {
           <PlayCabinet
             gameId="trial-and-error"
             title="Trial & Error: Biostat Ops"
-            subtitle="QC Desk · Small Blind"
+            subtitle="Card Table · Small Blind"
             accentColor="amber"
             icon={
               <IconTable
@@ -72,17 +72,18 @@ export const TrialAndErrorClient: React.FC = () => {
                 aria-hidden="true"
               />
             }
-            instructions="Inspect each cell of Table 14.1.1 against the SAP. Correct redlines to earn +Mult; an uncorrected denominator error zeroes the hand. Approve & Play costs 2 CPU, Reject & Discard costs 1 CPU."
+            instructions="Select up to five TLF cards and play the best hand against the Blind. Inspect a card (1 CPU) to reveal and correct its defects for +Mult; an uninspected card can still hide a fatal error that zeroes the hand. Play costs 2 CPU, Discard 1 CPU."
             controls={[
-              { key: "Arrows", action: "Move the review cursor" },
-              { key: "Enter / Space", action: "Inspect cell" },
-              { key: "C", action: "Flag & correct finding" },
-              { key: "P", action: "Approve & Play (2 CPU)" },
-              { key: "D", action: "Reject & Discard (1 CPU)" },
+              { key: "← →", action: "Move across the hand" },
+              { key: "Space", action: "Select or deselect a card" },
+              { key: "Enter", action: "Play hand (2 CPU)" },
+              { key: "D", action: "Discard selected (1 CPU)" },
+              { key: "I", action: "Inspect card (1 CPU)" },
+              { key: "Esc", action: "Close Inspect" },
             ]}
-            importComponent={QcDeskLoader}
+            importComponent={CardTableLoader}
           >
-            <DynamicQcDesk />
+            <DynamicCardTable />
           </PlayCabinet>
         </div>
       </div>

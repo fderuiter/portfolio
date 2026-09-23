@@ -14,6 +14,12 @@ Re-exports [advanceDesk](internal/desk/functions/advanceDesk.md)
 
 ***
 
+### advanceTable
+
+Re-exports [advanceTable](internal/table/functions/advanceTable.md)
+
+***
+
 ### Arm
 
 Re-exports [Arm](types/type-aliases/Arm.md)
@@ -80,6 +86,18 @@ Re-exports [CellCoordinatesSchema](types/variables/CellCoordinatesSchema.md)
 
 ***
 
+### ClassifiableCard
+
+Re-exports [ClassifiableCard](internal/hands/type-aliases/ClassifiableCard.md)
+
+***
+
+### classifyHand
+
+Re-exports [classifyHand](internal/hands/functions/classifyHand.md)
+
+***
+
 ### ColumnArm
 
 Re-exports [ColumnArm](types/type-aliases/ColumnArm.md)
@@ -128,6 +146,30 @@ Re-exports [createDeskState](internal/desk/functions/createDeskState.md)
 
 ***
 
+### createInspectionState
+
+Re-exports [createInspectionState](internal/inspection/functions/createInspectionState.md)
+
+***
+
+### createTableState
+
+Re-exports [createTableState](internal/table/functions/createTableState.md)
+
+***
+
+### CsrStage
+
+Re-exports [CsrStage](types/type-aliases/CsrStage.md)
+
+***
+
+### CsrStageSchema
+
+Re-exports [CsrStageSchema](types/variables/CsrStageSchema.md)
+
+***
+
 ### decimalPlaces
 
 Re-exports [decimalPlaces](internal/rounding/functions/decimalPlaces.md)
@@ -146,6 +188,12 @@ Re-exports [deriveDeskView](internal/desk/functions/deriveDeskView.md)
 
 ***
 
+### deriveTableView
+
+Re-exports [deriveTableView](internal/table/functions/deriveTableView.md)
+
+***
+
 ### DeskAction
 
 Re-exports [DeskAction](internal/desk/type-aliases/DeskAction.md)
@@ -154,13 +202,13 @@ Re-exports [DeskAction](internal/desk/type-aliases/DeskAction.md)
 
 ### DeskCellStatus
 
-Re-exports [DeskCellStatus](internal/desk/type-aliases/DeskCellStatus.md)
+Re-exports [DeskCellStatus](internal/inspection/type-aliases/DeskCellStatus.md)
 
 ***
 
 ### DeskCellView
 
-Re-exports [DeskCellView](internal/desk/interfaces/DeskCellView.md)
+Re-exports [DeskCellView](internal/inspection/interfaces/DeskCellView.md)
 
 ***
 
@@ -200,6 +248,12 @@ Re-exports [HAND_BASE_SCORES](internal/hands/variables/HAND_BASE_SCORES.md)
 
 ***
 
+### HAND\_NAMES
+
+Re-exports [HAND_NAMES](internal/hands/variables/HAND_NAMES.md)
+
+***
+
 ### HandBaseScore
 
 Re-exports [HandBaseScore](types/type-aliases/HandBaseScore.md)
@@ -209,6 +263,18 @@ Re-exports [HandBaseScore](types/type-aliases/HandBaseScore.md)
 ### HandBaseScoreSchema
 
 Re-exports [HandBaseScoreSchema](types/variables/HandBaseScoreSchema.md)
+
+***
+
+### HandClassification
+
+Re-exports [HandClassification](types/type-aliases/HandClassification.md)
+
+***
+
+### HandClassificationSchema
+
+Re-exports [HandClassificationSchema](types/variables/HandClassificationSchema.md)
 
 ***
 
@@ -245,6 +311,24 @@ Re-exports [HandType](types/variables/HandType.md)
 ### HandTypeSchema
 
 Re-exports [HandTypeSchema](types/variables/HandTypeSchema.md)
+
+***
+
+### InspectionState
+
+Re-exports [InspectionState](internal/inspection/interfaces/InspectionState.md)
+
+***
+
+### InspectionView
+
+Re-exports [InspectionView](internal/inspection/interfaces/InspectionView.md)
+
+***
+
+### PlayedHand
+
+Re-exports [PlayedHand](internal/table/interfaces/PlayedHand.md)
 
 ***
 
@@ -488,6 +572,42 @@ Re-exports [SubjectSchema](types/variables/SubjectSchema.md)
 
 ***
 
+### TableAction
+
+Re-exports [TableAction](internal/table/type-aliases/TableAction.md)
+
+***
+
+### TableCardView
+
+Re-exports [TableCardView](internal/table/interfaces/TableCardView.md)
+
+***
+
+### TableEvent
+
+Re-exports [TableEvent](internal/table/interfaces/TableEvent.md)
+
+***
+
+### TableInspectionView
+
+Re-exports [TableInspectionView](internal/table/interfaces/TableInspectionView.md)
+
+***
+
+### TableRules
+
+Re-exports [TableRules](types/type-aliases/TableRules.md)
+
+***
+
+### TableRulesSchema
+
+Re-exports [TableRulesSchema](types/variables/TableRulesSchema.md)
+
+***
+
 ### TableShellSpec
 
 Re-exports [TableShellSpec](types/type-aliases/TableShellSpec.md)
@@ -497,6 +617,30 @@ Re-exports [TableShellSpec](types/type-aliases/TableShellSpec.md)
 ### TableShellSpecSchema
 
 Re-exports [TableShellSpecSchema](types/variables/TableShellSpecSchema.md)
+
+***
+
+### TableState
+
+Re-exports [TableState](internal/table/interfaces/TableState.md)
+
+***
+
+### TableView
+
+Re-exports [TableView](internal/table/interfaces/TableView.md)
+
+***
+
+### TlfCard
+
+Re-exports [TlfCard](types/type-aliases/TlfCard.md)
+
+***
+
+### TlfCardSchema
+
+Re-exports [TlfCardSchema](types/variables/TlfCardSchema.md)
 
 ***
 

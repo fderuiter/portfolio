@@ -30,6 +30,10 @@ Fresh desk state for a scenario: first draft staged, full CPU.
 
 `"SMALL_BLIND"` \| `"BIG_BLIND"` \| `"BOSS_BLIND"` = `BlindTierSchema`
 
+#### deck
+
+`object`[] = `...`
+
 #### drawPile
 
 `object`[] = `...`
@@ -149,6 +153,22 @@ Fresh desk state for a scenario: first draft staged, full CPU.
 #### summary
 
 `string` = `...`
+
+#### table
+
+\{ `handSize`: `number`; `maxSelection`: `number`; `startingCpu`: `number`; \} = `TableRulesSchema`
+
+#### table.handSize
+
+`number` = `...`
+
+#### table.maxSelection
+
+`number` = `...`
+
+#### table.startingCpu
+
+`number` = `nonNegativeInt`
 
 #### title
 

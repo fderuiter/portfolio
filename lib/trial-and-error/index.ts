@@ -8,7 +8,12 @@
 export * from "./types";
 export { DEMOGRAPHICS_SCENARIO, SCENARIOS } from "./scenarios";
 export { roundRatio, decimalPlaces } from "./internal/rounding";
-export { HAND_BASE_SCORES } from "./internal/hands";
+export {
+  HAND_BASE_SCORES,
+  HAND_NAMES,
+  classifyHand,
+  type ClassifiableCard,
+} from "./internal/hands";
 export { validate } from "./internal/validator";
 export {
   evaluateHand,
@@ -28,10 +33,27 @@ export {
   advanceDesk,
   deriveDeskView,
   type DeskAction,
-  type DeskCellStatus,
-  type DeskCellView,
   type DeskEvent,
   type DeskState,
   type DeskStatus,
   type DeskView,
 } from "./internal/desk";
+export {
+  createInspectionState,
+  type DeskCellStatus,
+  type DeskCellView,
+  type InspectionState,
+  type InspectionView,
+} from "./internal/inspection";
+export {
+  createTableState,
+  advanceTable,
+  deriveTableView,
+  type PlayedHand,
+  type TableAction,
+  type TableCardView,
+  type TableEvent,
+  type TableInspectionView,
+  type TableState,
+  type TableView,
+} from "./internal/table";

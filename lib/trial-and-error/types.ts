@@ -406,6 +406,56 @@ export const BlindSchema = z.object({
 /** A milestone Blind. */
 export type Blind = z.infer<typeof BlindSchema>;
 
+/** Stages of the standard CSR submission flow, in pipeline order. */
+export const CsrStageSchema = z.enum([
+  "DISPOSITION",
+  "BASELINE",
+  "EFFICACY",
+  "SAFETY_AE",
+  "PATIENT_LISTING",
+]);
+/** A CSR pipeline stage (CSR Straight). */
+export type CsrStage = z.infer<typeof CsrStageSchema>;
+
+/**
+ * A TLF card on the Card Table. `topic` links a Table to its supporting
+ * Listing (TLF Pair) and a Figure to the Table it depends on (Efficacy Full
+ * House). `draftId` points at a staged table in the scenario's draw pile when
+ * the card has reviewable cells.
+ */
+export const TlfCardSchema = z.object({
+  id: identifier,
+  cardType: CardTypeSchema,
+  number: z.string().min(1),
+  title: z.string().min(1),
+  population: PopulationTypeSchema,
+  chips: nonNegativeInt,
+  mult: nonNegativeInt,
+  topic: identifier,
+  csrStage: CsrStageSchema.optional(),
+  soc: z.string().min(1).optional(),
+  draftId: identifier.optional(),
+});
+/** A TLF card on the Card Table. */
+export type TlfCard = z.infer<typeof TlfCardSchema>;
+
+/** The best hand a selection makes, and the cards that actually score. */
+export const HandClassificationSchema = z.object({
+  handType: HandTypeSchema,
+  scoringCardIds: z.array(identifier).min(1),
+});
+/** The best hand a selection makes. */
+export type HandClassification = z.infer<typeof HandClassificationSchema>;
+
+/** Card Table rules for a scenario. */
+export const TableRulesSchema = z.object({
+  startingCpu: nonNegativeInt,
+  handSize: z.number().int().min(1).max(12),
+  maxSelection: z.number().int().min(1).max(5),
+});
+/** Card Table rules for a scenario. */
+export type TableRules = z.infer<typeof TableRulesSchema>;
+
 /** A playable scenario: SAP, snapshot, shell, and a fixed draw pile. */
 export const ScenarioSchema = z
   .object({
@@ -419,6 +469,8 @@ export const ScenarioSchema = z
     populationSnapshot: PopulationSnapshotSchema,
     shell: TableShellSpecSchema,
     drawPile: z.array(StagedTableSchema).min(1),
+    table: TableRulesSchema,
+    deck: z.array(TlfCardSchema).min(1),
   })
   .superRefine((scenario, ctx) => {
     if (scenario.shell.requiredRulebookId !== scenario.rulebook.id) {
@@ -441,6 +493,25 @@ export const ScenarioSchema = z
           code: "custom",
           path: ["drawPile", index, "populationSnapshotId"],
           message: "Every draft must reference the scenario's snapshot",
+        });
+      }
+    });
+    const draftIds = new Set(scenario.drawPile.map((draft) => draft.id));
+    const seen = new Set<string>();
+    scenario.deck.forEach((card, index) => {
+      if (seen.has(card.id)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["deck", index, "id"],
+          message: "Card ids must be unique",
+        });
+      }
+      seen.add(card.id);
+      if (card.draftId !== undefined && !draftIds.has(card.draftId)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["deck", index, "draftId"],
+          message: "A card's draft must exist in the draw pile",
         });
       }
     });

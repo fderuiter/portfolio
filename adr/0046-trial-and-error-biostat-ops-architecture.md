@@ -212,3 +212,28 @@ Closed, FDA IR, or CSR Lock). The final boss is CSR Lock. **Guidance** cards
 level up hand types (T&E-UX-05). Meta-progression is browser-local only: the
 Codex, seeded runs, GCP-audit stakes and starter sponsors (T&E-UX-07 and
 T&E-UX-08).
+
+### Card Table implementation (T&E-UX-01)
+
+Recorded by [#943](https://github.com/fderuiter/portfolio/issues/943).
+
+- **Hand detection.** `classifyHand` enumerates every subset of up to five
+  selected cards and returns the highest-ranked hand. Ties go to more Chips,
+  then to the earliest-selected cards. Only the scoring subset scores;
+  kickers do not. Cards carry a `topic` (Table–Listing pairs,
+  Figure–Table dependence), a `csrStage` and an optional MedDRA `soc`.
+- **Composition.** Per-card review (`inspectCell`, `correctFinding`, the
+  cell view and the slash value) lives in `internal/inspection.ts`. The T&E-01
+  desk reducer and the new table reducer both delegate to it, so review
+  behaviour is identical in both.
+- **Inspect costs CPU once.** Opening a card costs `CPU_COSTS.INSPECT` (1).
+  Reopening is free, and corrections persist on the card until it leaves the
+  hand. A card without reviewable cells refuses Inspect without charging CPU
+  and is never marked unverified, because it is not a gamble.
+- **Preview versus play.** The preview plate scores revealed findings only
+  and flags uninspected, inspectable cards as unverified. Play scores the true
+  findings of the scoring cards through `evaluateHand`.
+- **Stacking.** The Inspect drawer is portalled to `document.body`, or to the
+  fullscreen element during real fullscreen, so the site chrome cannot paint
+  over it from outside the table's isolated stacking context. It carries
+  `data-te-cabinet` so the scoped tokens still apply.

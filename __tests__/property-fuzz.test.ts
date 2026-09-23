@@ -19,10 +19,13 @@ import { NextRequest } from "next/server";
 import {
   DEMOGRAPHICS_SCENARIO,
   advanceDesk,
+  advanceTable,
   createDeskState,
+  createTableState,
   evaluateHand,
   roundRatio,
   type DeskAction,
+  type TableAction,
   type RoundingMode,
 } from "@/lib/trial-and-error";
 
@@ -414,6 +417,59 @@ describe("Shift-Left Fuzz & Property-Based Verification", () => {
             DEMOGRAPHICS_SCENARIO.startingCpu
           );
           expect(first.cpu.spent).toBe(first.handsPlayed * 2 + first.discards);
+        })
+      );
+    });
+
+    it("replays any Card Table move sequence identically, conserving CPU and bounding hand and selection", () => {
+      const cardIds = DEMOGRAPHICS_SCENARIO.deck.map((card) => card.id);
+      const tableAction: fc.Arbitrary<TableAction> = fc.oneof(
+        fc.record({
+          type: fc.constant("TOGGLE_SELECT" as const),
+          cardId: fc.constantFrom(...cardIds, "missing"),
+        }),
+        fc.record({
+          type: fc.constant("INSPECT_CARD" as const),
+          cardId: fc.constantFrom(...cardIds),
+        }),
+        fc.record({
+          type: fc.constant("INSPECT_CELL" as const),
+          row: fc.integer({ min: -1, max: 5 }),
+          col: fc.integer({ min: -1, max: 3 }),
+        }),
+        fc.record({
+          type: fc.constant("CORRECT_FINDING" as const),
+          findingId: fc.constantFrom(
+            "SAP-DM-01@r2c2",
+            "SAP-DM-02@r2c1",
+            "SAP-DM-03@r1c2",
+            "SAP-DM-02@r2c0",
+            "missing"
+          ),
+        }),
+        fc.constant<TableAction>({ type: "CLOSE_INSPECT" }),
+        fc.constant<TableAction>({ type: "PLAY_HAND" }),
+        fc.constant<TableAction>({ type: "DISCARD" })
+      );
+      const { table } = DEMOGRAPHICS_SCENARIO;
+      fc.assert(
+        fc.property(fc.array(tableAction, { maxLength: 60 }), (actions) => {
+          const replay = () =>
+            actions.reduce(
+              (state, action) =>
+                advanceTable(DEMOGRAPHICS_SCENARIO, state, action),
+              createTableState(DEMOGRAPHICS_SCENARIO)
+            );
+          const first = replay();
+          expect(replay()).toEqual(first);
+          expect(first.cpu.available).toBeGreaterThanOrEqual(0);
+          expect(first.cpu.available + first.cpu.spent).toBe(table.startingCpu);
+          expect(first.hand.length).toBeLessThanOrEqual(table.handSize);
+          expect(first.selected.length).toBeLessThanOrEqual(table.maxSelection);
+          expect(first.selected.every((id) => first.hand.includes(id))).toBe(
+            true
+          );
+          expect(new Set(first.hand).size).toBe(first.hand.length);
         })
       );
     });

@@ -18,7 +18,7 @@ Whether the ledger can pay for an action.
 
 ### action
 
-`"PLAY_HAND"` \| `"DISCARD"`
+`"PLAY_HAND"` \| `"DISCARD"` \| `"INSPECT"`
 
 ## Returns
 

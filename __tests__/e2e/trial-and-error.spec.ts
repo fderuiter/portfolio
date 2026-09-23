@@ -4,6 +4,8 @@ import AxeBuilder from "@axe-core/playwright";
 const ROUTE = "/arcade/trial-and-error";
 const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
 const BLOCKING = new Set(["critical", "serious", "moderate"]);
+const DRAFT_A = "C-T14.1.1-A";
+const DM_LISTING = "C-L16.2.4";
 
 async function launch(page: Page) {
   await page.goto(ROUTE, { waitUntil: "domcontentloaded" });
@@ -12,7 +14,7 @@ async function launch(page: Page) {
     if (await launchBtn.isVisible()) {
       await launchBtn.click();
     }
-    await expect(page.getByRole("grid")).toBeVisible({ timeout: 3000 });
+    await expect(page.getByTestId("hand")).toBeVisible({ timeout: 3000 });
   }).toPass({ timeout: 30000 });
 }
 
@@ -36,21 +38,26 @@ async function expectNoHorizontalOverflow(page: Page) {
   expect(overflow).toBeLessThanOrEqual(0);
 }
 
+const card = (page: Page, id: string) => page.locator(`[data-card-id="${id}"]`);
+const drawer = (page: Page) => page.getByTestId("inspect-drawer");
 const gridCell = (page: Page, row: number, col: number) =>
-  page
+  drawer(page)
     .getByRole("row")
     .nth(row + 1)
     .getByRole("gridcell")
     .nth(col);
 
-test.describe("Trial & Error: Biostat Ops QC Desk", () => {
-  test("is fully keyboard-playable: review, correct, play, and clear the Small Blind", async ({
+test.describe("Trial & Error: Biostat Ops Card Table", () => {
+  test("is fully keyboard-playable: inspect, correct, select, play and clear the Small Blind", async ({
     page,
   }) => {
     await launch(page);
-    await gridCell(page, 0, 0).focus();
+    await card(page, DRAFT_A).focus();
 
-    // Walk every cell with the arrow keys, inspecting and correcting as we go.
+    // Inspect Draft A (1 CPU): focus moves into the drawer's review grid.
+    await page.keyboard.press("i");
+    await expect(drawer(page)).toBeVisible();
+    await expect(gridCell(page, 0, 0)).toBeFocused();
     for (let row = 0; row < 5; row++) {
       for (let col = 0; col < 3; col++) {
         await expect(gridCell(page, row, col)).toBeFocused();
@@ -63,38 +70,62 @@ test.describe("Trial & Error: Biostat Ops QC Desk", () => {
         await page.keyboard.press("ArrowDown");
       }
     }
-
-    await expect(page.getByTestId("expected-value")).toHaveText(
+    await expect(drawer(page).getByTestId("expected-value")).toHaveText(
       "[57] × [8] = 456"
     );
-    await expect(page.getByTestId("desk-announcer")).not.toBeEmpty();
-    await page.keyboard.press("p");
+
+    // Escape closes the drawer and returns focus to the card.
+    await page.keyboard.press("Escape");
+    await expect(drawer(page)).toBeHidden();
+    await expect(card(page, DRAFT_A)).toBeFocused();
+
+    // Select the TLF Pair and play it with Enter.
+    await page.keyboard.press("Space");
+    await page.keyboard.press("ArrowRight");
+    await expect(card(page, DM_LISTING)).toBeFocused();
+    await page.keyboard.press("Space");
+    await expect(page.getByTestId("hand-preview")).toContainText("TLF Pair");
+    await expect(page.getByTestId("unverified-flag")).toBeHidden();
+    await page.keyboard.press("Enter");
+
     await expect(page.getByTestId("blind-result")).toContainText(
       "Blind cleared"
     );
+    await expect(page.getByTestId("blind-result")).toContainText("828 of 300");
     await expect(
       page.getByRole("button", { name: "Restart Blind" })
     ).toBeFocused();
     await page.keyboard.press("Enter");
-    await expect(gridCell(page, 0, 0)).toBeFocused();
+    await expect(card(page, DRAFT_A)).toBeFocused();
   });
 
-  test("discards with D for 1 CPU", async ({ page }) => {
+  test("an uninspected card still zeroes the hand, and D discards for 1 CPU", async ({
+    page,
+  }) => {
     await launch(page);
-    await gridCell(page, 0, 0).focus();
+    await card(page, DRAFT_A).focus();
+    await page.keyboard.press("Space");
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("Space");
+    await expect(page.getByTestId("unverified-flag")).toBeVisible();
+    await page.keyboard.press("Enter");
+    await expect(page.getByTestId("last-hand")).toContainText(
+      "(zero-score rule)"
+    );
+    await expect(page.getByTestId("cpu-counter")).toHaveText("8/10");
+
+    await page.keyboard.press("Space");
     await page.keyboard.press("d");
-    await expect(page.getByTestId("cpu-counter")).toContainText("5/6");
-    await expect(
-      page.getByText("Draft B (v0.2)", { exact: true })
-    ).toBeVisible();
+    await expect(page.getByTestId("cpu-counter")).toHaveText("7/10");
+    await expect(page.locator("[data-card-id]:focus")).toHaveCount(1);
   });
 
   for (const width of [390, 1440]) {
-    test(`has zero blocking axe violations in every game state at ${width}px`, async ({
+    test(`has zero blocking axe violations in every table state at ${width}px`, async ({
       page,
     }) => {
-      // Five full-page axe scans plus a cabinet launch can outrun the default
-      // 30s test budget when workers share the CPU.
+      // Several full-page axe scans plus a cabinet launch can outrun the
+      // default 30s test budget when workers share the CPU.
       test.slow();
       // Audit settled frames: the site footer's status ticker cross-fades every
       // few seconds, and a scan landing mid-fade reads a blended ~1.3:1 colour
@@ -103,22 +134,40 @@ test.describe("Trial & Error: Biostat Ops QC Desk", () => {
       await page.emulateMedia({ reducedMotion: "reduce" });
       await page.setViewportSize({ width, height: 900 });
       await launch(page);
-      await expectNoBlockingViolations(page, "fresh desk");
+      await expectNoBlockingViolations(page, "fresh hand");
 
+      await card(page, DRAFT_A).click();
+      await card(page, DM_LISTING).click();
+      await expect(page.getByTestId("unverified-flag")).toBeVisible();
+      await expectNoBlockingViolations(page, "pair selected, unverified");
+
+      await card(page, DRAFT_A).focus();
+      await page.keyboard.press("i");
+      await expect(drawer(page)).toBeVisible();
       await gridCell(page, 2, 2).click();
-      await expectNoBlockingViolations(page, "fatal redline revealed");
+      await expectNoBlockingViolations(
+        page,
+        "inspect drawer, fatal redline revealed"
+      );
 
-      await page.getByRole("button", { name: /Flag & Correct/ }).click();
-      await expectNoBlockingViolations(page, "finding corrected");
+      await drawer(page)
+        .getByRole("button", { name: /Flag & Correct/ })
+        .click();
+      await drawer(page)
+        .getByRole("button", { name: /Close Inspect/ })
+        .click();
+      await expect(drawer(page)).toBeHidden();
+      await expectNoBlockingViolations(page, "after a correction");
 
-      await page.getByRole("button", { name: /Approve & Play/ }).click();
-      await expect(
-        page.getByText("Draft B (v0.2)", { exact: true })
-      ).toBeVisible();
+      await page.getByRole("button", { name: /Play Hand/ }).click();
+      await expect(page.getByTestId("last-hand")).toBeVisible();
       await expectNoBlockingViolations(page, "after a played hand");
 
-      for (let i = 0; i < 2; i++) {
-        await page.getByRole("button", { name: /Reject & Discard/ }).click();
+      // Spend the remaining CPU on single-card hands until the Blind ends.
+      for (let i = 0; i < 6; i++) {
+        if (await page.getByTestId("blind-result").isVisible()) break;
+        await page.locator("[data-card-id]").first().click();
+        await page.getByRole("button", { name: /Play Hand/ }).click();
       }
       await expect(page.getByTestId("blind-result")).toBeVisible();
       await expectNoBlockingViolations(page, "blind over");
@@ -126,9 +175,16 @@ test.describe("Trial & Error: Biostat Ops QC Desk", () => {
   }
 
   for (const width of [320, 375, 768, 1440]) {
-    test(`has no horizontal page overflow at ${width}px`, async ({ page }) => {
+    test(`has no horizontal page overflow at ${width}px, with and without the drawer`, async ({
+      page,
+    }) => {
       await page.setViewportSize({ width, height: 800 });
       await launch(page);
+      await card(page, DRAFT_A).click();
+      await expectNoHorizontalOverflow(page);
+      await card(page, DRAFT_A).focus();
+      await page.keyboard.press("i");
+      await expect(drawer(page)).toBeVisible();
       await gridCell(page, 2, 1).click();
       await expectNoHorizontalOverflow(page);
     });
@@ -140,7 +196,7 @@ test.describe("Trial & Error: Biostat Ops QC Desk", () => {
     await page.evaluate(() => {
       document.documentElement.style.fontSize = "200%";
     });
-    await gridCell(page, 2, 2).click();
+    await card(page, DRAFT_A).click();
     await expectNoHorizontalOverflow(page);
   });
 
@@ -150,7 +206,7 @@ test.describe("Trial & Error: Biostat Ops QC Desk", () => {
     // globals.css clamps every animation to 0.01ms and one iteration under
     // reduced motion; any animation still running longer is a regression.
     const lingering = await page
-      .locator('section[aria-labelledby="qc-desk-heading"] *')
+      .locator('section[aria-labelledby="card-table-heading"] *')
       .evaluateAll(
         (els) =>
           els
@@ -164,6 +220,7 @@ test.describe("Trial & Error: Biostat Ops QC Desk", () => {
       );
     expect(lingering).toBe(0);
   });
+
   test.describe("cabinet loud-moment switch (ADR 0046 amendment)", () => {
     const cabinet = (page: Page) => page.locator("[data-te-cabinet]");
 

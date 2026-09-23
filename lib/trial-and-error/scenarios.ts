@@ -4,7 +4,7 @@
  * All subjects, values and rules are fictional teaching material. They supply
  * game context only and are not clinical or regulatory advice.
  */
-import type { Scenario, StagedTable, Subject } from "./types";
+import type { Scenario, StagedTable, Subject, TlfCard } from "./types";
 
 const snapshotId = "SNAP-DM-v1";
 
@@ -61,6 +61,172 @@ const draft = (
   cells,
 });
 
+const card = (c: TlfCard): TlfCard => c;
+
+/**
+ * The Small Blind deck, dealt in this order. Only the three Table 14.1.1
+ * drafts carry reviewable cells in this slice; the other outputs are dealt,
+ * classified and scored, and gain QC content with T&E-02 (#911).
+ */
+const DEMOGRAPHICS_DECK: TlfCard[] = [
+  card({
+    id: "C-T14.1.1-A",
+    cardType: "TABLE",
+    number: "Table 14.1.1",
+    title: "Demographics (Draft A)",
+    population: "ITT",
+    chips: 30,
+    mult: 1,
+    topic: "DM",
+    csrStage: "BASELINE",
+    draftId: "T-14.1.1-A",
+  }),
+  card({
+    id: "C-L16.2.4",
+    cardType: "LISTING",
+    number: "Listing 16.2.4",
+    title: "Demographic Data by Subject",
+    population: "ITT",
+    chips: 20,
+    mult: 0,
+    topic: "DM",
+    csrStage: "PATIENT_LISTING",
+  }),
+  card({
+    id: "C-T14.1.2",
+    cardType: "TABLE",
+    number: "Table 14.1.2",
+    title: "Subject Disposition",
+    population: "ITT",
+    chips: 25,
+    mult: 1,
+    topic: "DS",
+    csrStage: "DISPOSITION",
+  }),
+  card({
+    id: "C-T14.2.1",
+    cardType: "TABLE",
+    number: "Table 14.2.1",
+    title: "Primary Endpoint (ANCOVA)",
+    population: "FAS",
+    chips: 40,
+    mult: 1,
+    topic: "EFF",
+    csrStage: "EFFICACY",
+  }),
+  card({
+    id: "C-F14.2.1",
+    cardType: "FIGURE",
+    number: "Figure 14.2.1",
+    title: "Kaplan-Meier: Time to Response",
+    population: "FAS",
+    chips: 35,
+    mult: 0,
+    topic: "EFF",
+  }),
+  card({
+    id: "C-T14.3.1",
+    cardType: "TABLE",
+    number: "Table 14.3.1",
+    title: "Overview of Adverse Events",
+    population: "SAFETY",
+    chips: 35,
+    mult: 1,
+    topic: "AE",
+    csrStage: "SAFETY_AE",
+  }),
+  card({
+    id: "C-L16.2.7",
+    cardType: "LISTING",
+    number: "Listing 16.2.7",
+    title: "Adverse Events by Subject",
+    population: "SAFETY",
+    chips: 20,
+    mult: 0,
+    topic: "AE",
+    csrStage: "PATIENT_LISTING",
+  }),
+  card({
+    id: "C-L16.1.1",
+    cardType: "LISTING",
+    number: "Listing 16.1.1",
+    title: "Discontinued Subjects",
+    population: "ITT",
+    chips: 15,
+    mult: 0,
+    topic: "DS",
+    csrStage: "PATIENT_LISTING",
+  }),
+  card({
+    id: "C-T14.1.1-B",
+    cardType: "TABLE",
+    number: "Table 14.1.1",
+    title: "Demographics (Draft B)",
+    population: "ITT",
+    chips: 30,
+    mult: 1,
+    topic: "DM",
+    csrStage: "BASELINE",
+    draftId: "T-14.1.1-B",
+  }),
+  card({
+    id: "C-T14.2.2",
+    cardType: "TABLE",
+    number: "Table 14.2.2",
+    title: "Key Secondary Endpoint",
+    population: "FAS",
+    chips: 35,
+    mult: 1,
+    topic: "EFF",
+    csrStage: "EFFICACY",
+  }),
+  card({
+    id: "C-F14.2.2",
+    cardType: "FIGURE",
+    number: "Figure 14.2.2",
+    title: "Forest Plot by Subgroup",
+    population: "FAS",
+    chips: 30,
+    mult: 0,
+    topic: "EFF",
+  }),
+  card({
+    id: "C-T14.1.1-C",
+    cardType: "TABLE",
+    number: "Table 14.1.1",
+    title: "Demographics (Draft C)",
+    population: "ITT",
+    chips: 30,
+    mult: 1,
+    topic: "DM",
+    csrStage: "BASELINE",
+    draftId: "T-14.1.1-C",
+  }),
+  card({
+    id: "C-T14.3.2",
+    cardType: "TABLE",
+    number: "Table 14.3.2",
+    title: "AEs by SOC: Cardiac Disorders",
+    population: "SAFETY",
+    chips: 25,
+    mult: 1,
+    topic: "AE",
+    csrStage: "SAFETY_AE",
+    soc: "Cardiac disorders",
+  }),
+  card({
+    id: "C-L16.2.8",
+    cardType: "LISTING",
+    number: "Listing 16.2.8",
+    title: "Serious Adverse Events",
+    population: "SAFETY",
+    chips: 20,
+    mult: 0,
+    topic: "AE",
+    csrStage: "PATIENT_LISTING",
+  }),
+];
+
 /**
  * Demographics (Table 14.1.1) under SAP-DM-001. The SAP population is ITT
  * (N=12). FAS (N=11) is a distinct population here: the SAP declares no
@@ -80,6 +246,8 @@ export const DEMOGRAPHICS_SCENARIO: Scenario = {
   },
   handType: "HIGH_TABLE",
   startingCpu: 6,
+  table: { startingCpu: 10, handSize: 8, maxSelection: 5 },
+  deck: DEMOGRAPHICS_DECK,
   rulebook: {
     id: "SAP-DM-001",
     title: "SAP §9.1 Demographics and Baseline Characteristics",

@@ -40,7 +40,7 @@ function fixAll(state: DeskState): DeskAction[] {
 
 describe("CPU reducer", () => {
   it("charges 2 CPU to play and 1 CPU to discard", () => {
-    expect(CPU_COSTS).toEqual({ PLAY_HAND: 2, DISCARD: 1 });
+    expect(CPU_COSTS).toEqual({ PLAY_HAND: 2, DISCARD: 1, INSPECT: 1 });
     const ledger = { available: 3, spent: 0 };
     expect(cpuReducer(ledger, { type: "SPEND", action: "PLAY_HAND" })).toEqual({
       available: 1,

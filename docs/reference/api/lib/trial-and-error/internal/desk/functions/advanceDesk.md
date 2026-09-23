@@ -31,6 +31,10 @@ the same scenario and action sequence always yields the same state.
 
 `"SMALL_BLIND"` \| `"BIG_BLIND"` \| `"BOSS_BLIND"` = `BlindTierSchema`
 
+#### deck
+
+`object`[] = `...`
+
 #### drawPile
 
 `object`[] = `...`
@@ -150,6 +154,22 @@ the same scenario and action sequence always yields the same state.
 #### summary
 
 `string` = `...`
+
+#### table
+
+\{ `handSize`: `number`; `maxSelection`: `number`; `startingCpu`: `number`; \} = `TableRulesSchema`
+
+#### table.handSize
+
+`number` = `...`
+
+#### table.maxSelection
+
+`number` = `...`
+
+#### table.startingCpu
+
+`number` = `nonNegativeInt`
 
 #### title
 

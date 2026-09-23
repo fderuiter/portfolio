@@ -24,7 +24,7 @@ Everything the HUD renders, derived purely from scenario and state.
 
 ### cells
 
-> **cells**: [`DeskCellView`](DeskCellView.md)[][]
+> **cells**: [`DeskCellView`](../../inspection/interfaces/DeskCellView.md)[][]
 
 ***
 
