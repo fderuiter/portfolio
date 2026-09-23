@@ -252,6 +252,7 @@
 - [lib/trial-and-error/internal/rounding](lib/trial-and-error/internal/rounding/README.md)
 - [lib/trial-and-error/internal/scoring](lib/trial-and-error/internal/scoring/README.md)
 - [lib/trial-and-error/internal/table](lib/trial-and-error/internal/table/README.md)
+- [lib/trial-and-error/internal/timeline](lib/trial-and-error/internal/timeline/README.md)
 - [lib/trial-and-error/internal/validator](lib/trial-and-error/internal/validator/README.md)
 - [lib/trial-and-error/scenarios](lib/trial-and-error/scenarios/README.md)
 - [lib/trial-and-error/types](lib/trial-and-error/types/README.md)

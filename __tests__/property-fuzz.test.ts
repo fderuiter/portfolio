@@ -24,6 +24,7 @@ import {
   createTableState,
   evaluateHand,
   roundRatio,
+  scoreTimeline,
   type DeskAction,
   type TableAction,
   type RoundingMode,
@@ -471,6 +472,85 @@ describe("Shift-Left Fuzz & Property-Based Verification", () => {
           );
           expect(new Set(first.hand).size).toBe(first.hand.length);
         })
+      );
+    });
+
+    it("sums every score timeline back to evaluateHand exactly", () => {
+      const rule = fc.record({
+        ruleId: fc.constantFrom("R1", "R2", "R3"),
+        passed: fc.boolean(),
+        chipsDelta: fc.integer({ min: -50, max: 50 }),
+        multDelta: fc.integer({ min: -5, max: 5 }),
+        multMultiplier: fc.option(fc.constantFrom(0, 0.5, 1, 2), {
+          nil: undefined,
+        }),
+        evidence: fc.constant("fuzz"),
+      });
+      const relic = fc.record({
+        sourceId: fc.constantFrom("RELIC-A", "RELIC-B"),
+        label: fc.constant("relic"),
+        chips: fc.integer({ min: 0, max: 50 }),
+        plusMult: fc.integer({ min: 0, max: 5 }),
+        xMult: fc.constantFrom(1, 1.5, 2),
+      });
+      fc.assert(
+        fc.property(
+          fc.constantFrom(
+            "HIGH_TABLE" as const,
+            "TLF_PAIR" as const,
+            "CSR_STRAIGHT" as const
+          ),
+          fc.uniqueArray(
+            fc.record({
+              id: fc.constantFrom("A", "B", "C", "D", "E"),
+              chips: fc.nat(60),
+              mult: fc.nat(3),
+            }),
+            { minLength: 1, maxLength: 5, selector: (c) => c.id }
+          ),
+          fc.array(rule, { maxLength: 6 }),
+          fc.uniqueArray(relic, { maxLength: 2, selector: (r) => r.sourceId }),
+          fc.nat(1000),
+          (handType, cards, ruleResults, modifiers, before) => {
+            const evaluation = evaluateHand({
+              handType,
+              cards,
+              ruleResults,
+              modifiers,
+            });
+            const steps = scoreTimeline(evaluation, {
+              roundScoreBefore: before,
+              target: 500,
+            });
+            const total = steps.find((s) => s.kind === "TOTAL");
+            const progress = steps[steps.length - 1];
+            expect(total?.kind === "TOTAL" && total.score).toBe(
+              evaluation.score
+            );
+            expect(Math.max(0, total!.running.chips)).toBe(
+              evaluation.chips.total
+            );
+            expect(Math.max(0, total!.running.mult)).toBe(
+              evaluation.mult.total
+            );
+            expect(total!.running.xMult).toBeCloseTo(
+              evaluation.xMult.product,
+              9
+            );
+            expect(progress.kind === "BLIND_PROGRESS" && progress.after).toBe(
+              before + evaluation.score
+            );
+            expect(steps.filter((s) => s.kind === "ZERO_RULE")).toHaveLength(
+              evaluation.zeroRule.triggered ? 1 : 0
+            );
+            expect(
+              scoreTimeline(evaluation, {
+                roundScoreBefore: before,
+                target: 500,
+              })
+            ).toEqual(steps);
+          }
+        )
       );
     });
   });

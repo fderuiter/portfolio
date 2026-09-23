@@ -20,6 +20,11 @@ import { useAnnouncer } from "@/hooks/useAnnouncer";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { FieldManualButton } from "@/components/FieldManualButton";
 import { QcDesk } from "@/components/trial-and-error/QcDesk";
+import {
+  ScoreBreakdown,
+  ScorePlayer,
+  useScorePlayback,
+} from "@/components/trial-and-error/ScorePlayer";
 import { useTeMotion } from "@/components/trial-and-error/useTeMotion";
 
 interface CardTableProps {
@@ -30,6 +35,8 @@ type PendingFocus =
   { kind: "card"; cardId: string } | { kind: "hand"; index: number } | null;
 
 const RELIC_SLOTS = 5;
+const SPEEDS = [1, 2, 4] as const;
+const FIGURE_SPACE = "\u2007";
 
 const SUIT_BORDER: Record<PopulationType, string> = {
   ITT: "border-l-[color:var(--te-suit-itt)]",
@@ -93,7 +100,25 @@ export function CardTable({
   );
   const view = deriveTableView(scenario, state);
   const { announce } = useAnnouncer();
-  const { reducedMotion } = useTeMotion();
+  const { reducedMotion, speed, setSpeed, loudEffectsEnabled } = useTeMotion();
+  const timeline = view.lastTimeline;
+  const playback = useScorePlayback(timeline, state.lastPlay, {
+    speed,
+    reducedMotion,
+  });
+  const playing = playback.playing;
+  const progressStep = timeline?.[timeline.length - 1];
+  const progress =
+    progressStep?.kind === "BLIND_PROGRESS" ? progressStep : undefined;
+  // The Blind's round score ticks over when the TOTAL step lands.
+  const displayedRound =
+    playing && progress && playback.shown < (timeline?.length ?? 0) - 1
+      ? progress.before
+      : state.roundScore;
+  const flashCleared =
+    playing &&
+    progress?.crossed === true &&
+    playback.shown === (timeline?.length ?? 0);
 
   const [focusIndex, setFocusIndex] = useState(0);
   const activeIndex = Math.min(focusIndex, Math.max(0, view.hand.length - 1));
@@ -101,6 +126,7 @@ export function CardTable({
 
   const cardRefs = useRef(new Map<string, HTMLButtonElement>());
   const restartRef = useRef<HTMLButtonElement>(null);
+  const skipRef = useRef<HTMLButtonElement>(null);
   const deskFocusRef = useRef<HTMLElement | null>(null);
   const pendingFocus = useRef<PendingFocus>(null);
 
@@ -122,11 +148,17 @@ export function CardTable({
     dispatch(action);
   };
 
+  // A played hand is announced once, as a summary, after its timeline
+  // resolves, so screen readers are not flooded while it plays.
   useEffect(() => {
-    if (state.lastEvent) announce(state.lastEvent.message);
-  }, [state.lastEvent, announce]);
+    if (state.lastEvent && !playing) announce(state.lastEvent.message);
+  }, [state.lastEvent, announce, playing]);
 
   useEffect(() => {
+    if (playing) {
+      skipRef.current?.focus();
+      return;
+    }
     if (state.status !== "REVIEWING") {
       restartRef.current?.focus();
       return;
@@ -139,7 +171,7 @@ export function CardTable({
         ? target.cardId
         : state.hand[Math.min(target.index, state.hand.length - 1)];
     if (cardId) cardRefs.current.get(cardId)?.focus();
-  }, [state.lastEvent?.sequence, state.status, state.hand]);
+  }, [state.lastEvent?.sequence, state.status, state.hand, playing]);
 
   const play = () =>
     send({ type: "PLAY_HAND" }, { kind: "hand", index: activeIndex });
@@ -168,7 +200,7 @@ export function CardTable({
       cardRefs.current.get(view.hand[next].card.id)?.focus();
       return;
     }
-    if (event.target !== event.currentTarget) return;
+    if (event.target !== event.currentTarget || playing) return;
     if (event.metaKey || event.ctrlKey || event.altKey) return;
     const key = event.key.toLowerCase();
     if (event.key === " ") {
@@ -232,7 +264,12 @@ export function CardTable({
             </dd>
             <dt className="text-zinc-400">Round</dt>
             <dd className="text-right" data-testid="round-score">
-              {state.roundScore}
+              {/* Padded with figure spaces so the right-aligned score keeps
+                  its position as digits arrive (no layout shift). */}
+              {String(displayedRound).padStart(
+                String(view.quota).length + 1,
+                FIGURE_SPACE
+              )}
             </dd>
             <dt className="text-zinc-400">CPU</dt>
             <dd className="text-right" data-testid="cpu-counter">
@@ -255,6 +292,34 @@ export function CardTable({
               />
             ))}
           </div>
+          <p
+            className={`mt-2 min-h-[1.25rem] font-bold uppercase tracking-wider text-emerald-300 ${flashCleared && loudEffectsEnabled ? "te-loud-glow" : ""}`}
+            aria-hidden="true"
+            data-testid="blind-cleared-flash"
+          >
+            {flashCleared ? "Cleared" : ""}
+          </p>
+          <div
+            role="group"
+            aria-label="Scoring speed"
+            className="mt-2 grid grid-cols-3 gap-1"
+          >
+            {SPEEDS.map((s) => (
+              <button
+                key={s}
+                type="button"
+                aria-pressed={speed === s}
+                onClick={() => setSpeed(s)}
+                className={`min-h-[44px] border text-xs font-bold tabular-nums touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+                  speed === s
+                    ? "border-amber-400 bg-amber-500/10 text-amber-300"
+                    : "border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+                }`}
+              >
+                {s}×
+              </button>
+            ))}
+          </div>
         </aside>
 
         <div className="min-w-0 bg-[color:var(--te-surface-0)] p-3">
@@ -274,51 +339,68 @@ export function CardTable({
             ))}
           </ul>
 
-          <div
-            className="mt-3 border border-zinc-800 bg-[color:var(--te-surface-1)] px-3 py-2"
-            data-testid="hand-preview"
-          >
-            <p className="text-[10px] uppercase tracking-wider text-zinc-400">
-              {view.classification
-                ? HAND_NAMES[view.classification.handType]
-                : `Select up to ${scenario.table.maxSelection} cards`}
-            </p>
-            {preview && (
-              <p className="mt-1 text-lg font-bold tabular-nums break-words">
-                <span className="text-[color:var(--te-chips)]">
-                  [{preview.chips.total}]
-                </span>{" "}
-                × [
-                {slashed && (
-                  <s className="text-zinc-400 decoration-rose-400 decoration-2">
-                    {view.previewUnpenalizedMult}
-                  </s>
-                )}
-                {slashed && " "}
-                <span
-                  className={
-                    slashed
-                      ? "text-rose-300"
-                      : "text-[color:var(--te-plus-mult)]"
-                  }
+          {playing && timeline ? (
+            <div className="mt-3 min-h-[13rem] border border-zinc-800 bg-[color:var(--te-surface-1)] px-3 py-2">
+              <ScorePlayer
+                steps={timeline}
+                shown={playback.shown}
+                cards={(state.lastPlay?.cardIds ?? []).map((id) => ({
+                  id,
+                  number:
+                    scenario.deck.find((card) => card.id === id)?.number ?? id,
+                }))}
+                loudEffectsEnabled={loudEffectsEnabled}
+                onSkip={playback.skip}
+                skipRef={skipRef}
+              />
+            </div>
+          ) : (
+            <div
+              className="mt-3 min-h-[13rem] border border-zinc-800 bg-[color:var(--te-surface-1)] px-3 py-2"
+              data-testid="hand-preview"
+            >
+              <p className="text-[10px] uppercase tracking-wider text-zinc-400">
+                {view.classification
+                  ? HAND_NAMES[view.classification.handType]
+                  : `Select up to ${scenario.table.maxSelection} cards`}
+              </p>
+              {preview && (
+                <p className="mt-1 text-lg font-bold tabular-nums break-words">
+                  <span className="text-[color:var(--te-chips)]">
+                    [{preview.chips.total}]
+                  </span>{" "}
+                  × [
+                  {slashed && (
+                    <s className="text-zinc-400 decoration-rose-400 decoration-2">
+                      {view.previewUnpenalizedMult}
+                    </s>
+                  )}
+                  {slashed && " "}
+                  <span
+                    className={
+                      slashed
+                        ? "text-rose-300"
+                        : "text-[color:var(--te-plus-mult)]"
+                    }
+                  >
+                    {preview.finalMult}
+                  </span>
+                  ] = {preview.score}
+                </p>
+              )}
+              {view.previewUnverified && (
+                <p
+                  className="mt-1 text-xs text-amber-300"
+                  data-testid="unverified-flag"
                 >
-                  {preview.finalMult}
-                </span>
-                ] = {preview.score}
-              </p>
-            )}
-            {view.previewUnverified && (
-              <p
-                className="mt-1 text-xs text-amber-300"
-                data-testid="unverified-flag"
-              >
-                ? Unverified: an uninspected card may hide a fatal defect.
-              </p>
-            )}
-          </div>
+                  ? Unverified: an uninspected card may hide a fatal defect.
+                </p>
+              )}
+            </div>
+          )}
 
-          {state.status === "REVIEWING" ? (
-            <>
+          {state.status === "REVIEWING" || playing ? (
+            <div inert={playing}>
               <div
                 role="group"
                 aria-label={`Hand of ${view.hand.length}. Arrow keys move, Space selects, Enter plays, D discards, I inspects.`}
@@ -419,7 +501,7 @@ export function CardTable({
                   [I]
                 </button>
               </div>
-            </>
+            </div>
           ) : (
             <div className="mt-3 p-4 text-center" data-testid="blind-result">
               <p
@@ -447,12 +529,14 @@ export function CardTable({
             </div>
           )}
 
-          {state.lastPlay && (
+          {state.lastPlay && !playing && (
             <motion.p
               key={state.handsPlayed}
-              initial={{ opacity: reducedMotion ? 1 : 0 }}
+              // One opacity fade, which reduced motion also allows: under
+              // it this is the only motion a played hand gets.
+              initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: reducedMotion ? 0 : 0.3 }}
+              transition={{ duration: 0.2 }}
               className="mt-3 text-xs text-zinc-300 tabular-nums break-words"
               data-testid="last-hand"
             >
@@ -464,6 +548,7 @@ export function CardTable({
                 " (zero-score rule)"}
             </motion.p>
           )}
+          {timeline && !playing && <ScoreBreakdown steps={timeline} />}
         </div>
       </div>
 

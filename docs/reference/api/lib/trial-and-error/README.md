@@ -548,6 +548,12 @@ Re-exports [ScoreModifierSchema](types/variables/ScoreModifierSchema.md)
 
 ***
 
+### scoreTimeline
+
+Re-exports [scoreTimeline](internal/timeline/functions/scoreTimeline.md)
+
+***
+
 ### StagedTable
 
 Re-exports [StagedTable](types/type-aliases/StagedTable.md)
@@ -629,6 +635,24 @@ Re-exports [TableState](internal/table/interfaces/TableState.md)
 ### TableView
 
 Re-exports [TableView](internal/table/interfaces/TableView.md)
+
+***
+
+### TimelineContext
+
+Re-exports [TimelineContext](internal/timeline/interfaces/TimelineContext.md)
+
+***
+
+### TimelineRunning
+
+Re-exports [TimelineRunning](internal/timeline/interfaces/TimelineRunning.md)
+
+***
+
+### TimelineStep
+
+Re-exports [TimelineStep](internal/timeline/type-aliases/TimelineStep.md)
 
 ***
 

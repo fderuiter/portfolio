@@ -698,6 +698,12 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
         key: "D",
       },
       {
+        action: "Skip scoring",
+        description:
+          "While a played hand scores step by step, Space, the Skip button or a click on the score plate jumps to the result. The 1×, 2× and 4× buttons set the scoring speed.",
+        key: "Space",
+      },
+      {
         action: "Inspect",
         description:
           "Opens the focused card's QC Desk for 1 CPU (reopening is free). Enter or Space inspects a cell, C corrects a revealed finding, Esc closes.",
