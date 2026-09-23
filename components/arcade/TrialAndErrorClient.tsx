@@ -6,6 +6,7 @@ import Link from "next/link";
 import { IconArrowLeft, IconTable } from "@tabler/icons-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { PlayCabinet } from "@/components/arcade/PlayCabinet";
+import { useTeMotion } from "@/components/trial-and-error/useTeMotion";
 
 const QcDeskLoader = () =>
   import("@/components/trial-and-error/QcDesk").then((mod) => mod.QcDesk);
@@ -20,6 +21,7 @@ const DynamicQcDesk = dynamic(QcDeskLoader, {
 });
 
 export const TrialAndErrorClient: React.FC = () => {
+  const { loudEffectsEnabled } = useTeMotion();
   return (
     <div className="min-h-dvh overflow-x-hidden bg-[#0d0e11] px-4 pb-24 text-zinc-100 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
@@ -53,7 +55,12 @@ export const TrialAndErrorClient: React.FC = () => {
           </p>
         </div>
 
-        <div className="border border-zinc-800 bg-[#13151a] p-1.5 sm:p-4">
+        {/* Cabinet scope for the --te-* tokens and loud-moment layers (ADR 0046 amendment). */}
+        <div
+          data-te-cabinet=""
+          data-te-loud={loudEffectsEnabled ? "on" : "off"}
+          className="border border-zinc-800 bg-[#13151a] p-1.5 sm:p-4"
+        >
           <PlayCabinet
             gameId="trial-and-error"
             title="Trial & Error: Biostat Ops"

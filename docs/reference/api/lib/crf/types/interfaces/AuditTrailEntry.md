@@ -70,4 +70,4 @@
 
 ### userRole
 
-> **userRole**: `"Site Coordinator"` \| `"Principal Investigator"` \| `"CRA Monitor"` \| `"Data Manager"`
+> **userRole**: `"Data Manager"` \| `"Site Coordinator"` \| `"Principal Investigator"` \| `"CRA Monitor"`
