@@ -360,6 +360,32 @@ body {
   will-change: opacity;
 }
 
+/* Clinical Trial Chaos: floating score delta next to the HUD score */
+@keyframes cc-score-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-18px);
+  }
+}
+
+.cc-score-pop {
+  animation: cc-score-pop 900ms ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cc-score-pop {
+    animation: none;
+    opacity: 1;
+  }
+}
+
 [data-pretext-layer="semantic"] {
   color: transparent;
   -webkit-text-fill-color: transparent;

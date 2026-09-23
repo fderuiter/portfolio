@@ -88,3 +88,13 @@ describe("Clinical Trial Chaos - Office selection", () => {
     );
   });
 });
+
+describe("Clinical Trial Chaos - subject labels", () => {
+  it("never reuses a seeded subject label for generated subjects", async () => {
+    const { SEEDED_SCENARIOS } = await import("../lib/clinical-trial-chaos");
+    const seeded = new Set(SEEDED_SCENARIOS.map((s) => s.subjectLabel));
+    for (let i = 0; i < 5; i++) {
+      expect(seeded.has(generateClinicalSubject().subjectLabel)).toBe(false);
+    }
+  });
+});

@@ -39,7 +39,8 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
         correctedValue: "180 cm",
         errorType: "unit-error",
         hint: "Meters unit anomaly (expected cm)",
-        explanation: "CDISC SDTM DM domain specifies metric height standard (cm). 180 m would represent a skyscraper.",
+        explanation:
+          "CDISC SDTM DM domain specifies metric height standard (cm). 180 m would represent a skyscraper.",
         ctCode: "C25473",
         options: ["180 cm", "1.80 m", "1800 mm", "70.8 in"],
       },
@@ -48,7 +49,8 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
         correctedValue: "175 cm",
         errorType: "range-outlier",
         hint: "Extra zero outlier (>300cm)",
-        explanation: "1750 cm exceeds physiological human limits. Stripping the typographical trailing zero normalizes to 175 cm.",
+        explanation:
+          "1750 cm exceeds physiological human limits. Stripping the typographical trailing zero normalizes to 175 cm.",
         ctCode: "C25473",
         options: ["175 cm", "17.5 cm", "1750 mm", "175 in"],
       },
@@ -57,7 +59,8 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
         correctedValue: "168 cm",
         errorType: "negative-value",
         hint: "Negative height recorded",
-        explanation: "Height measurements must be positive real numbers. Remove erroneous negative polarity sign.",
+        explanation:
+          "Height measurements must be positive real numbers. Remove erroneous negative polarity sign.",
         ctCode: "C25473",
         options: ["168 cm", "0 cm", "N/A", "168 mm"],
       },
@@ -66,7 +69,8 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
         correctedValue: "180 cm",
         errorType: "unit-error",
         hint: "Imperial feet/inches format",
-        explanation: "Convert US customary imperial measurements (5'11\") to CDISC SDTM standard unit (180 cm).",
+        explanation:
+          "Convert US customary imperial measurements (5'11\") to CDISC SDTM standard unit (180 cm).",
         ctCode: "C25473",
         options: ["180 cm", "175 cm", "5.11 cm", "71 cm"],
       },
@@ -83,7 +87,8 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
         correctedValue: "75 kg",
         errorType: "negative-value",
         hint: "Negative weight recorded",
-        explanation: "Subject mass cannot be negative. Remove leading hyphen artifact.",
+        explanation:
+          "Subject mass cannot be negative. Remove leading hyphen artifact.",
         ctCode: "C25208",
         options: ["75 kg", "0 kg", "7.5 kg", "75 lbs"],
       },
@@ -92,7 +97,8 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
         correctedValue: "70 kg",
         errorType: "range-outlier",
         hint: "Typo in weight decimal",
-        explanation: "700 kg is outside standard study inclusion criteria [40-150 kg]. Correct missing decimal to 70 kg.",
+        explanation:
+          "700 kg is outside standard study inclusion criteria [40-150 kg]. Correct missing decimal to 70 kg.",
         ctCode: "C25208",
         options: ["70 kg", "7000 g", "7.0 kg", "154 lbs"],
       },
@@ -101,7 +107,8 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
         correctedValue: "68 kg",
         errorType: "unit-error",
         hint: "Imperial pounds instead of metric kg",
-        explanation: "150 lbs must be converted using 1 lb = 0.453592 kg -> rounded to 68 kg in SDTM STRESN.",
+        explanation:
+          "150 lbs must be converted using 1 lb = 0.453592 kg -> rounded to 68 kg in SDTM STRESN.",
         ctCode: "C25208",
         options: ["68 kg", "150 kg", "330 kg", "75 kg"],
       },
@@ -118,7 +125,8 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
         correctedValue: "1990-12-25",
         errorType: "invalid-date",
         hint: "Month 13 does not exist (ISO 8601 YYYY-MM-DD required)",
-        explanation: "Transposed month/day format. Convert MM/DD/YYYY error to ISO 8601 YYYY-MM-DD standard: 1990-12-25.",
+        explanation:
+          "Transposed month/day format. Convert MM/DD/YYYY error to ISO 8601 YYYY-MM-DD standard: 1990-12-25.",
         ctCode: "ISO8601",
         options: ["1990-12-25", "1990-13-25", "25-13-1990", "1990-01-25"],
       },
@@ -127,7 +135,8 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
         correctedValue: "1995-02-28",
         errorType: "invalid-date",
         hint: "Feb 30 is an invalid calendar date",
-        explanation: "February has at most 29 days in leap years. 1995 is non-leap, standardizing to end of month: 1995-02-28.",
+        explanation:
+          "February has at most 29 days in leap years. 1995 is non-leap, standardizing to end of month: 1995-02-28.",
         ctCode: "ISO8601",
         options: ["1995-02-28", "1995-03-01", "1995-02-29", "1995-02-03"],
       },
@@ -144,7 +153,8 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
         correctedValue: "M",
         errorType: "casing-mismatch",
         hint: "CDISC Controlled Terminology requires single-letter 'M' or 'F'",
-        explanation: "CDISC SDTM SEX variable codelist (C66731) specifies 1-character codes 'M', 'F', 'U', or 'UNDIFFERENTIATED'.",
+        explanation:
+          "CDISC SDTM SEX variable codelist (C66731) specifies 1-character codes 'M', 'F', 'U', or 'UNDIFFERENTIATED'.",
         ctCode: "C66731",
         options: ["M", "Male", "MALE", "1"],
       },
@@ -153,7 +163,8 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
         correctedValue: "F",
         errorType: "casing-mismatch",
         hint: "CDISC Controlled Terminology requires 'M' or 'F'",
-        explanation: "CDISC SDTM codelist C66731 standardizes full-text 'female' to single uppercase character 'F'.",
+        explanation:
+          "CDISC SDTM codelist C66731 standardizes full-text 'female' to single uppercase character 'F'.",
         ctCode: "C66731",
         options: ["F", "Female", "FEMALE", "2"],
       },
@@ -172,7 +183,8 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
         correctedValue: "120 mmHg",
         errorType: "missing-digit",
         hint: "Missing digit (12 mmHg is fatal)",
-        explanation: "Missing trailing zero in systolic arterial pressure. Normal resting adult systolic is ~120 mmHg.",
+        explanation:
+          "Missing trailing zero in systolic arterial pressure. Normal resting adult systolic is ~120 mmHg.",
         ctCode: "C25298",
         options: ["120 mmHg", "12 mmHg", "1200 mmHg", "112 mmHg"],
       },
@@ -181,7 +193,8 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
         correctedValue: "120 mmHg",
         errorType: "range-outlier",
         hint: "Explosive pressure typo (>300 mmHg)",
-        explanation: "1200 mmHg is an impossible physiological reading. Correct extra zero keystroke to 120 mmHg.",
+        explanation:
+          "1200 mmHg is an impossible physiological reading. Correct extra zero keystroke to 120 mmHg.",
         ctCode: "C25298",
         options: ["120 mmHg", "1200 mmHg", "102 mmHg", "140 mmHg"],
       },
@@ -190,7 +203,8 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
         correctedValue: "125 mmHg",
         errorType: "unit-error",
         hint: "Tire pressure unit (expected mmHg)",
-        explanation: "Vital signs blood pressure requires millimeters of mercury (mmHg) unit code in CDISC VSORRESU.",
+        explanation:
+          "Vital signs blood pressure requires millimeters of mercury (mmHg) unit code in CDISC VSORRESU.",
         ctCode: "C25298",
         options: ["125 mmHg", "125 psi", "125 kPa", "125 bar"],
       },
@@ -207,7 +221,8 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
         correctedValue: "80 mmHg",
         errorType: "missing-digit",
         hint: "Missing trailing zero",
-        explanation: "Diastolic pressure missing digit keystroke. Normalize to standard 80 mmHg reading.",
+        explanation:
+          "Diastolic pressure missing digit keystroke. Normalize to standard 80 mmHg reading.",
         ctCode: "C25299",
         options: ["80 mmHg", "8 mmHg", "88 mmHg", "78 mmHg"],
       },
@@ -216,7 +231,8 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
         correctedValue: "80 mmHg",
         errorType: "negative-value",
         hint: "Negative diastolic reading",
-        explanation: "Arterial pressure cannot be negative. Strip minus sign to 80 mmHg.",
+        explanation:
+          "Arterial pressure cannot be negative. Strip minus sign to 80 mmHg.",
         ctCode: "C25299",
         options: ["80 mmHg", "-80 mmHg", "0 mmHg", "85 mmHg"],
       },
@@ -233,7 +249,8 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
         correctedValue: "72 bpm",
         errorType: "range-outlier",
         hint: "Supra-physiological tachy-typo (>300 bpm)",
-        explanation: "720 bpm is fatal ventricular fibrillation artifact. Correct decimal entry to 72 bpm.",
+        explanation:
+          "720 bpm is fatal ventricular fibrillation artifact. Correct decimal entry to 72 bpm.",
         ctCode: "C49673",
         options: ["72 bpm", "720 bpm", "70 bpm", "120 bpm"],
       },
@@ -242,7 +259,8 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
         correctedValue: "70 bpm",
         errorType: "missing-digit",
         hint: "Missing digit for heart rate",
-        explanation: "7 bpm is extreme bradycardia incompatible with conscious office visit. Correct to 70 bpm.",
+        explanation:
+          "7 bpm is extreme bradycardia incompatible with conscious office visit. Correct to 70 bpm.",
         ctCode: "C49673",
         options: ["70 bpm", "7 bpm", "77 bpm", "60 bpm"],
       },
@@ -259,7 +277,8 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
         correctedValue: "37.0 °C",
         errorType: "unit-error",
         hint: "Fahrenheit recorded in Celsius trial form",
-        explanation: "Convert 98.6 °F using (98.6 - 32) * 5/9 = 37.0 °C standard.",
+        explanation:
+          "Convert 98.6 °F using (98.6 - 32) * 5/9 = 37.0 °C standard.",
         ctCode: "C25206",
         options: ["37.0 °C", "98.6 °C", "36.5 °C", "38.2 °C"],
       },
@@ -268,7 +287,8 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
         correctedValue: "37.0 °C",
         errorType: "range-outlier",
         hint: "Missing decimal point",
-        explanation: "370 °C is boiling furnace temperature. Correct missing decimal point to 37.0 °C.",
+        explanation:
+          "370 °C is boiling furnace temperature. Correct missing decimal point to 37.0 °C.",
         ctCode: "C25206",
         options: ["37.0 °C", "370 °C", "36.0 °C", "39.0 °C"],
       },
@@ -280,25 +300,42 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
     field: "Adverse Event Term",
     destination: "AE",
     testCode: "AETERM",
-    validValues: ["Headache (Grade 1)", "Nausea (Grade 1)", "Fatigue (Grade 1)", "No AE reported"],
+    validValues: [
+      "Headache (Grade 1)",
+      "Nausea (Grade 1)",
+      "Fatigue (Grade 1)",
+      "No AE reported",
+    ],
     corruptions: [
       {
         rawValue: "headache bad",
         correctedValue: "Headache (Grade 2)",
         errorType: "casing-mismatch",
         hint: "Map free-text verbatim to MedDRA PT: Headache",
-        explanation: "ICH GCP requires mapping verbatim text 'headache bad' to MedDRA Preferred Term 'Headache' with severity Grade 2.",
+        explanation:
+          "ICH GCP requires mapping verbatim text 'headache bad' to MedDRA Preferred Term 'Headache' with severity Grade 2.",
         ctCode: "MedDRA:10019211",
-        options: ["Headache (Grade 2)", "Headache Bad (Grade 1)", "Cephalea Severe", "Migraine (Grade 3)"],
+        options: [
+          "Headache (Grade 2)",
+          "Headache Bad (Grade 1)",
+          "Cephalea Severe",
+          "Migraine (Grade 3)",
+        ],
       },
       {
         rawValue: "PATIENT DIZZY",
         correctedValue: "Dizziness (Grade 1)",
         errorType: "casing-mismatch",
         hint: "Standardize MedDRA Preferred Term capitalization",
-        explanation: "Map ALL-CAPS verbatim entry 'PATIENT DIZZY' to MedDRA PT 'Dizziness' Grade 1.",
+        explanation:
+          "Map ALL-CAPS verbatim entry 'PATIENT DIZZY' to MedDRA PT 'Dizziness' Grade 1.",
         ctCode: "MedDRA:10013573",
-        options: ["Dizziness (Grade 1)", "PATIENT DIZZY", "Vertigo (Grade 2)", "Lightheadedness"],
+        options: [
+          "Dizziness (Grade 1)",
+          "PATIENT DIZZY",
+          "Vertigo (Grade 2)",
+          "Lightheadedness",
+        ],
       },
     ],
   },
@@ -313,9 +350,15 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
         correctedValue: "Grade 3 (Severe)",
         errorType: "range-outlier",
         hint: "NCI-CTCAE max severity scale is 1 to 5",
-        explanation: "NCI Common Terminology Criteria for Adverse Events (CTCAE v5.0) ranges from 1 to 5. Cap invalid grade 9 to Grade 3.",
+        explanation:
+          "NCI Common Terminology Criteria for Adverse Events (CTCAE v5.0) ranges from 1 to 5. Cap invalid grade 9 to Grade 3.",
         ctCode: "CTCAE:v5",
-        options: ["Grade 3 (Severe)", "Grade 9", "Grade 5 (Death)", "Grade 1 (Mild)"],
+        options: [
+          "Grade 3 (Severe)",
+          "Grade 9",
+          "Grade 5 (Death)",
+          "Grade 1 (Mild)",
+        ],
       },
     ],
   },
@@ -323,14 +366,19 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
     field: "AE Serious Criteria",
     destination: "AE",
     testCode: "AESER",
-    validValues: ["No", "Yes (Hospitalization Required)", "Yes (Life Threatening)"],
+    validValues: [
+      "No",
+      "Yes (Hospitalization Required)",
+      "Yes (Life Threatening)",
+    ],
     corruptions: [
       {
         rawValue: "maybe",
         correctedValue: "No",
         errorType: "casing-mismatch",
         hint: "Binary regulatory criteria (Yes/No required per 21 CFR § 312.32)",
-        explanation: "FDA 21 CFR § 312.32 regulatory safety reporting requires strict binary classification ('Y' / 'N').",
+        explanation:
+          "FDA 21 CFR § 312.32 regulatory safety reporting requires strict binary classification ('Y' / 'N').",
         ctCode: "C66742",
         options: ["No", "Yes", "Pending", "Unknown"],
       },
@@ -349,7 +397,8 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
         correctedValue: "0.9 mg/dL",
         errorType: "range-outlier",
         hint: "Missing leading zero decimal",
-        explanation: "90 mg/dL represents severe acute renal failure artifact. Correct to normal biological reference range (0.9 mg/dL).",
+        explanation:
+          "90 mg/dL represents severe acute renal failure artifact. Correct to normal biological reference range (0.9 mg/dL).",
         ctCode: "C25347",
         options: ["0.9 mg/dL", "90 mg/dL", "9.0 mg/dL", "0.09 mg/dL"],
       },
@@ -358,7 +407,8 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
         correctedValue: "1.0 mg/dL",
         errorType: "negative-value",
         hint: "Negative biochemistry concentration",
-        explanation: "Serum analyte concentrations cannot be negative. Normalize to 1.0 mg/dL.",
+        explanation:
+          "Serum analyte concentrations cannot be negative. Normalize to 1.0 mg/dL.",
         ctCode: "C25347",
         options: ["1.0 mg/dL", "-1.0 mg/dL", "0.1 mg/dL", "0.0 mg/dL"],
       },
@@ -375,7 +425,8 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
         correctedValue: "24 U/L",
         errorType: "range-outlier",
         hint: "Check sample dilution / decimal error",
-        explanation: "2400 U/L suggests fulminant hepatic necrosis artifact. Correct 100x decimal scale factor to 24 U/L.",
+        explanation:
+          "2400 U/L suggests fulminant hepatic necrosis artifact. Correct 100x decimal scale factor to 24 U/L.",
         ctCode: "C64433",
         options: ["24 U/L", "2400 U/L", "240 U/L", "2.4 U/L"],
       },
@@ -392,9 +443,15 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
         correctedValue: "6.2 x10^9/L",
         errorType: "unit-error",
         hint: "Scientific notation normalization required",
-        explanation: "Normalize raw SI particle count to standard CDISC laboratory notation (6.2 x10^9/L).",
+        explanation:
+          "Normalize raw SI particle count to standard CDISC laboratory notation (6.2 x10^9/L).",
         ctCode: "C51948",
-        options: ["6.2 x10^9/L", "62 x10^9/L", "6200000000000 /L", "0.62 x10^9/L"],
+        options: [
+          "6.2 x10^9/L",
+          "62 x10^9/L",
+          "6200000000000 /L",
+          "0.62 x10^9/L",
+        ],
       },
     ],
   },
@@ -404,25 +461,42 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
     field: "ConMed Medication",
     destination: "CM",
     testCode: "CMTRT",
-    validValues: ["Acetaminophen 500mg", "Lisinopril 10mg", "Metformin 850mg", "Atorvastatin 20mg"],
+    validValues: [
+      "Acetaminophen 500mg",
+      "Lisinopril 10mg",
+      "Metformin 850mg",
+      "Atorvastatin 20mg",
+    ],
     corruptions: [
       {
         rawValue: "tylenol extra",
         correctedValue: "Acetaminophen 500mg",
         errorType: "casing-mismatch",
         hint: "Map brand name to WHO-Drug standardized generic name & strength",
-        explanation: "ICH E6 GCP requires reconciling trade name 'Tylenol Extra' to WHO Drug Dictionary Preferred Name 'Acetaminophen 500mg'.",
+        explanation:
+          "ICH E6 GCP requires reconciling trade name 'Tylenol Extra' to WHO Drug Dictionary Preferred Name 'Acetaminophen 500mg'.",
         ctCode: "WHODrug:000182",
-        options: ["Acetaminophen 500mg", "Tylenol Extra", "Paracetamol 1000mg", "Ibuprofen 400mg"],
+        options: [
+          "Acetaminophen 500mg",
+          "Tylenol Extra",
+          "Paracetamol 1000mg",
+          "Ibuprofen 400mg",
+        ],
       },
       {
         rawValue: "ST. JOHN'S WORT",
         correctedValue: "Prohibited Herbal Supplement (Flagged)",
         errorType: "unapproved-conmed",
         hint: "Potent CYP3A4 inducer prohibited by study protocol",
-        explanation: "St. John's Wort is a prohibited concomitant medication due to severe CYP3A4 drug-drug interaction risk.",
+        explanation:
+          "St. John's Wort is a prohibited concomitant medication due to severe CYP3A4 drug-drug interaction risk.",
         ctCode: "PROHIBITED-01",
-        options: ["Prohibited Herbal Supplement (Flagged)", "Approved ConMed", "Placebo", "Vitamin C"],
+        options: [
+          "Prohibited Herbal Supplement (Flagged)",
+          "Approved ConMed",
+          "Placebo",
+          "Vitamin C",
+        ],
       },
     ],
   },
@@ -430,16 +504,27 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
     field: "ConMed Frequency",
     destination: "CM",
     testCode: "CMDOSFRQ",
-    validValues: ["BID (Twice Daily)", "QD (Once Daily)", "PRN (As Needed)", "TID (Three Times Daily)"],
+    validValues: [
+      "BID (Twice Daily)",
+      "QD (Once Daily)",
+      "PRN (As Needed)",
+      "TID (Three Times Daily)",
+    ],
     corruptions: [
       {
         rawValue: "2x per day whenever",
         correctedValue: "BID (Twice Daily)",
         errorType: "casing-mismatch",
         hint: "Map colloquial free-text to CDISC Frequency codelist (C71113)",
-        explanation: "CDISC Controlled Terminology codelist C71113 maps 'twice daily' to standard abbreviation 'BID'.",
+        explanation:
+          "CDISC Controlled Terminology codelist C71113 maps 'twice daily' to standard abbreviation 'BID'.",
         ctCode: "C71113",
-        options: ["BID (Twice Daily)", "QD (Once Daily)", "PRN (As Needed)", "QID (Four Times Daily)"],
+        options: [
+          "BID (Twice Daily)",
+          "QD (Once Daily)",
+          "PRN (As Needed)",
+          "QID (Four Times Daily)",
+        ],
       },
     ],
   },
@@ -456,7 +541,8 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
         correctedValue: "50 mg",
         errorType: "dose-calculation-error",
         hint: "100x Overdose Risk! Reconcile Investigational Product kit",
-        explanation: "5000 mg represents a catastrophic 100x overdose beyond protocol max ceiling (200 mg). Correct to Phase II cohort dose 50 mg.",
+        explanation:
+          "5000 mg represents a catastrophic 100x overdose beyond protocol max ceiling (200 mg). Correct to Phase II cohort dose 50 mg.",
         ctCode: "C25488",
         options: ["50 mg", "5000 mg", "500 mg", "5 mg"],
       },
@@ -465,7 +551,8 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
         correctedValue: "100 mg",
         errorType: "negative-value",
         hint: "Negative drug exposure recorded",
-        explanation: "Drug administration quantity cannot be negative. Normalize to 100 mg.",
+        explanation:
+          "Drug administration quantity cannot be negative. Normalize to 100 mg.",
         ctCode: "C25488",
         options: ["100 mg", "-100 mg", "0 mg", "10 mg"],
       },
@@ -482,7 +569,8 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
         correctedValue: "ORAL",
         errorType: "casing-mismatch",
         hint: "CDISC Route of Administration codelist (C38114)",
-        explanation: "CDISC SDTM codelist C38114 standardizes 'by mouth' to FDA NCIt term 'ORAL'.",
+        explanation:
+          "CDISC SDTM codelist C38114 standardizes 'by mouth' to FDA NCIt term 'ORAL'.",
         ctCode: "C38114",
         options: ["ORAL", "INTRAVENOUS", "SUBCUTANEOUS", "INHALATION"],
       },
@@ -494,16 +582,27 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
     field: "Protocol Disposition",
     destination: "DS",
     testCode: "DSDECOD",
-    validValues: ["COMPLETED", "ADVERSE EVENT", "WITHDRAWAL BY SUBJECT", "LOST TO FOLLOW-UP"],
+    validValues: [
+      "COMPLETED",
+      "ADVERSE EVENT",
+      "WITHDRAWAL BY SUBJECT",
+      "LOST TO FOLLOW-UP",
+    ],
     corruptions: [
       {
         rawValue: "patient dropped out cause sick",
         correctedValue: "ADVERSE EVENT",
         errorType: "casing-mismatch",
         hint: "CDISC Standard Disposition codelist (C66727)",
-        explanation: "Subject discontinuation due to sickness must be coded as primary reason 'ADVERSE EVENT' in SDTM DS domain.",
+        explanation:
+          "Subject discontinuation due to sickness must be coded as primary reason 'ADVERSE EVENT' in SDTM DS domain.",
         ctCode: "C66727",
-        options: ["ADVERSE EVENT", "COMPLETED", "WITHDRAWAL BY SUBJECT", "LOST TO FOLLOW-UP"],
+        options: [
+          "ADVERSE EVENT",
+          "COMPLETED",
+          "WITHDRAWAL BY SUBJECT",
+          "LOST TO FOLLOW-UP",
+        ],
       },
     ],
   },
@@ -513,16 +612,27 @@ export const MOCK_OBSERVATION_TEMPLATES: MockObservationTemplate[] = [
     field: "Historical Condition",
     destination: "MH",
     testCode: "MHTERM",
-    validValues: ["Hypertension (Resolved)", "Type 2 Diabetes", "Asthma (Mild)", "No Prior History"],
+    validValues: [
+      "Hypertension (Resolved)",
+      "Type 2 Diabetes",
+      "Asthma (Mild)",
+      "No Prior History",
+    ],
     corruptions: [
       {
         rawValue: "high blood pressure since 2012",
         correctedValue: "Hypertension (Ongoing)",
         errorType: "casing-mismatch",
         hint: "Standardize to MedDRA High Level Group Term / Preferred Term",
-        explanation: "Verbatim 'high blood pressure' maps to MedDRA PT 'Hypertension' with status 'Ongoing'.",
+        explanation:
+          "Verbatim 'high blood pressure' maps to MedDRA PT 'Hypertension' with status 'Ongoing'.",
         ctCode: "MedDRA:10020772",
-        options: ["Hypertension (Ongoing)", "High Blood Pressure 2012", "Hypotension", "Cardiomegaly"],
+        options: [
+          "Hypertension (Ongoing)",
+          "High Blood Pressure 2012",
+          "Hypotension",
+          "Cardiomegaly",
+        ],
       },
     ],
   },
@@ -533,7 +643,8 @@ export const ALL_STATIONS: StationConfig[] = [
     id: "DM",
     name: "Demographics",
     label: "DM Station",
-    description: "Demographics, age, sex, race, metric height/weight standardization",
+    description:
+      "Demographics, age, sex, race, metric height/weight standardization",
     color: "#3b82f6",
     accentColor: "rgba(59, 130, 246, 0.2)",
     positionIndex: 0,
@@ -569,7 +680,8 @@ export const ALL_STATIONS: StationConfig[] = [
     id: "LB",
     name: "Laboratory",
     label: "LB Station",
-    description: "Serum chemistry, hematology, urinalysis, biological reference ranges",
+    description:
+      "Serum chemistry, hematology, urinalysis, biological reference ranges",
     color: "#8b5cf6",
     accentColor: "rgba(139, 92, 246, 0.2)",
     positionIndex: 3,
@@ -593,7 +705,8 @@ export const ALL_STATIONS: StationConfig[] = [
     id: "EX",
     name: "Drug Exposure",
     label: "EX Station",
-    description: "Investigational product dose reconciliation, route, and schedule audit",
+    description:
+      "Investigational product dose reconciliation, route, and schedule audit",
     color: "#06b6d4",
     accentColor: "rgba(6, 182, 212, 0.2)",
     positionIndex: 5,
@@ -605,7 +718,8 @@ export const ALL_STATIONS: StationConfig[] = [
     id: "DS",
     name: "Disposition",
     label: "DS Station",
-    description: "Study completion, early withdrawal, protocol milestone tracking",
+    description:
+      "Study completion, early withdrawal, protocol milestone tracking",
     color: "#14b8a6",
     accentColor: "rgba(20, 184, 166, 0.2)",
     positionIndex: 6,
@@ -629,7 +743,10 @@ export const ALL_STATIONS: StationConfig[] = [
 
 export const INITIAL_STATIONS: StationConfig[] = ALL_STATIONS.slice(0, 4);
 
-export function getStationsForPhase(phase: GamePhase, mode: GameMode = "campaign"): StationConfig[] {
+export function getStationsForPhase(
+  phase: GamePhase,
+  mode: GameMode = "campaign"
+): StationConfig[] {
   if (mode === "endless") {
     return ALL_STATIONS.slice(0, 6);
   }
@@ -647,7 +764,8 @@ export const AMENDMENT_PRESETS: ProtocolAmendment[] = [
     id: "amd-001",
     version: "Protocol v2.1",
     title: "Station Conveyor Scramble",
-    description: "IRB approved site workflow restructuring — station conveyor docks swapped!",
+    description:
+      "IRB approved site workflow restructuring — station conveyor docks swapped!",
     type: "station-scramble",
     durationSeconds: 18,
     timeRemaining: 18,
@@ -657,7 +775,8 @@ export const AMENDMENT_PRESETS: ProtocolAmendment[] = [
     id: "amd-002",
     version: "Safety Alert v4.0",
     title: "SAE Emergency Expedited Priority",
-    description: "Serious Adverse Event reported! Urgent 24-hr FDA Form 3500A expedited triage required.",
+    description:
+      "Serious Adverse Event reported! Urgent 24-hr FDA Form 3500A expedited triage required.",
     type: "sae-priority-rush",
     durationSeconds: 16,
     timeRemaining: 16,
@@ -667,7 +786,8 @@ export const AMENDMENT_PRESETS: ProtocolAmendment[] = [
     id: "amd-003",
     version: "Protocol v3.0",
     title: "Metric Normalization Mandate",
-    description: "Global harmonization: All imperial units must be converted to metric immediately.",
+    description:
+      "Global harmonization: All imperial units must be converted to metric immediately.",
     type: "unit-shift-lbs-to-kg",
     durationSeconds: 20,
     timeRemaining: 20,
@@ -677,7 +797,8 @@ export const AMENDMENT_PRESETS: ProtocolAmendment[] = [
     id: "amd-004",
     version: "GCP Compliance Notice v5.2",
     title: "ConMed CYP3A4 Screening Surge",
-    description: "FDA alert on drug-drug interactions: Concomitant Medication reconciliation required on all active cohorts.",
+    description:
+      "FDA alert on drug-drug interactions: Concomitant Medication reconciliation required on all active cohorts.",
     type: "conmed-reconciliation-rush",
     durationSeconds: 22,
     timeRemaining: 22,
@@ -694,7 +815,8 @@ const STUDY_SITES = [
   "Site 033 (Oxford Clinical Hub)",
 ];
 
-let globalSubjSeq = 1001;
+// Seeded scenarios use SUBJ-1001..1003, so generated subjects start after them.
+let globalSubjSeq = 1004;
 
 /**
  * Generates a random or seeded ClinicalSubject with 2-4 observations.
@@ -715,7 +837,10 @@ export function generateClinicalSubject(
     activeDomains.includes(t.destination)
   );
 
-  const pool = eligibleTemplates.length >= 2 ? eligibleTemplates : MOCK_OBSERVATION_TEMPLATES;
+  const pool =
+    eligibleTemplates.length >= 2
+      ? eligibleTemplates
+      : MOCK_OBSERVATION_TEMPLATES;
 
   // Pick 2 to 3 observations across different CDISC domains
   const pickedTemplates = [...pool]
@@ -724,78 +849,86 @@ export function generateClinicalSubject(
 
   // If forceSAE, guarantee at least one AE observation
   if (forceSAE && !pickedTemplates.some((t) => t.destination === "AE")) {
-    const aeTemplate = MOCK_OBSERVATION_TEMPLATES.find((t) => t.destination === "AE");
+    const aeTemplate = MOCK_OBSERVATION_TEMPLATES.find(
+      (t) => t.destination === "AE"
+    );
     if (aeTemplate) pickedTemplates[0] = aeTemplate;
   }
 
-  const observations: ClinicalObservation[] = pickedTemplates.map((template, idx) => {
-    const hasError = Math.random() < errorProbability;
-    if (hasError && template.corruptions.length > 0) {
-      const corruption =
-        template.corruptions[Math.floor(Math.random() * template.corruptions.length)];
-      const astRule: EditCheckRule = {
-        id: `ast_rule_${seq}_${idx}`,
-        name: `CDISC Standard ${template.field} Rule`,
-        description: corruption.explanation,
-        triggerFieldIds: [template.field],
-        actionType: "raise_query",
-        targetFieldId: template.field,
-        conditions: [
-          {
-            fieldId: template.field,
-            operator: "eq",
-            value: corruption.correctedValue,
-          },
-        ],
-        logicalOperator: "AND",
-        queryMessage: corruption.explanation,
-      };
-      return {
-        id: `obs-${seq}-${idx}`,
-        field: template.field,
-        rawValue: corruption.rawValue,
-        correctedValue: corruption.correctedValue,
-        currentValue: corruption.rawValue,
-        destination: template.destination,
-        errorType: corruption.errorType,
-        hint: corruption.hint,
-        explanation: corruption.explanation,
-        ctCode: corruption.ctCode,
-        options: corruption.options,
-        isResolved: false,
-        astRule,
-      };
-    } else {
-      const validVal =
-        template.validValues[Math.floor(Math.random() * template.validValues.length)];
-      const astRule: EditCheckRule = {
-        id: `ast_rule_valid_${seq}_${idx}`,
-        name: `CDISC Standard ${template.field} Rule`,
-        description: `Value must equal ${validVal}`,
-        triggerFieldIds: [template.field],
-        actionType: "raise_query",
-        targetFieldId: template.field,
-        conditions: [
-          {
-            fieldId: template.field,
-            operator: "eq",
-            value: validVal,
-          },
-        ],
-        logicalOperator: "AND",
-      };
-      return {
-        id: `obs-${seq}-${idx}`,
-        field: template.field,
-        rawValue: validVal,
-        currentValue: validVal,
-        destination: template.destination,
-        ctCode: template.testCode,
-        isResolved: true,
-        astRule,
-      };
+  const observations: ClinicalObservation[] = pickedTemplates.map(
+    (template, idx) => {
+      const hasError = Math.random() < errorProbability;
+      if (hasError && template.corruptions.length > 0) {
+        const corruption =
+          template.corruptions[
+            Math.floor(Math.random() * template.corruptions.length)
+          ];
+        const astRule: EditCheckRule = {
+          id: `ast_rule_${seq}_${idx}`,
+          name: `CDISC Standard ${template.field} Rule`,
+          description: corruption.explanation,
+          triggerFieldIds: [template.field],
+          actionType: "raise_query",
+          targetFieldId: template.field,
+          conditions: [
+            {
+              fieldId: template.field,
+              operator: "eq",
+              value: corruption.correctedValue,
+            },
+          ],
+          logicalOperator: "AND",
+          queryMessage: corruption.explanation,
+        };
+        return {
+          id: `obs-${seq}-${idx}`,
+          field: template.field,
+          rawValue: corruption.rawValue,
+          correctedValue: corruption.correctedValue,
+          currentValue: corruption.rawValue,
+          destination: template.destination,
+          errorType: corruption.errorType,
+          hint: corruption.hint,
+          explanation: corruption.explanation,
+          ctCode: corruption.ctCode,
+          options: corruption.options,
+          isResolved: false,
+          astRule,
+        };
+      } else {
+        const validVal =
+          template.validValues[
+            Math.floor(Math.random() * template.validValues.length)
+          ];
+        const astRule: EditCheckRule = {
+          id: `ast_rule_valid_${seq}_${idx}`,
+          name: `CDISC Standard ${template.field} Rule`,
+          description: `Value must equal ${validVal}`,
+          triggerFieldIds: [template.field],
+          actionType: "raise_query",
+          targetFieldId: template.field,
+          conditions: [
+            {
+              fieldId: template.field,
+              operator: "eq",
+              value: validVal,
+            },
+          ],
+          logicalOperator: "AND",
+        };
+        return {
+          id: `obs-${seq}-${idx}`,
+          field: template.field,
+          rawValue: validVal,
+          currentValue: validVal,
+          destination: template.destination,
+          ctCode: template.testCode,
+          isResolved: true,
+          astRule,
+        };
+      }
     }
-  });
+  );
 
   const maxTime = forceSAE ? 22 : 36;
 
@@ -828,7 +961,8 @@ export function generateClinicalSubjectFromProtocol(
 
   const observations: ClinicalObservation[] = [];
 
-  const formsToUse = protocol.forms && protocol.forms.length > 0 ? protocol.forms : [];
+  const formsToUse =
+    protocol.forms && protocol.forms.length > 0 ? protocol.forms : [];
 
   formsToUse.forEach((form, fIdx) => {
     const fields = form.sections.flatMap((s) => s.fields);
@@ -859,7 +993,10 @@ export function generateClinicalSubjectFromProtocol(
         {
           fieldId: field.variableName,
           operator: "eq",
-          value: field.defaultValue !== undefined && field.defaultValue !== null ? String(field.defaultValue) : "Standard Value",
+          value:
+            field.defaultValue !== undefined && field.defaultValue !== null
+              ? String(field.defaultValue)
+              : "Standard Value",
         },
       ],
       logicalOperator: "AND",
@@ -872,7 +1009,10 @@ export function generateClinicalSubjectFromProtocol(
 
     if (field.customOptions && field.customOptions.length > 0) {
       validVal = field.customOptions[0].label || field.customOptions[0].code;
-      invalidVal = field.customOptions[1]?.label || field.customOptions[1]?.code || "Invalid Code";
+      invalidVal =
+        field.customOptions[1]?.label ||
+        field.customOptions[1]?.code ||
+        "Invalid Code";
     } else if (field.unit) {
       validVal = `100 ${field.unit}`;
       invalidVal = `10000 ${field.unit}`;
@@ -894,7 +1034,9 @@ export function generateClinicalSubjectFromProtocol(
       destination: domain,
       errorType: hasError ? "casing-mismatch" : undefined,
       hint: `Protocol rule: ${activeRule.name}`,
-      explanation: activeRule.description || `Field must comply with protocol edit check ${activeRule.name}`,
+      explanation:
+        activeRule.description ||
+        `Field must comply with protocol edit check ${activeRule.name}`,
       ctCode: field.variableName,
       options: [validVal, invalidVal, "Unverified Code", "Unknown"],
       isResolved: !hasError,
@@ -941,7 +1083,8 @@ export const SEEDED_SCENARIOS: readonly ClinicalSubject[] = [
         destination: "DM",
         errorType: "unit-error",
         hint: "Meters unit anomaly (expected cm)",
-        explanation: "CDISC SDTM DM domain specifies metric height standard (cm).",
+        explanation:
+          "CDISC SDTM DM domain specifies metric height standard (cm).",
         ctCode: "C25473",
         options: ["180 cm", "1.80 m", "1800 mm", "70.8 in"],
         isResolved: false,
@@ -974,7 +1117,8 @@ export const SEEDED_SCENARIOS: readonly ClinicalSubject[] = [
         destination: "DM",
         errorType: "invalid-date",
         hint: "Month 13 does not exist (ISO standard required)",
-        explanation: "Convert MM/DD/YYYY error to ISO 8601 YYYY-MM-DD standard: 1990-12-25.",
+        explanation:
+          "Convert MM/DD/YYYY error to ISO 8601 YYYY-MM-DD standard: 1990-12-25.",
         ctCode: "ISO8601",
         options: ["1990-12-25", "1990-13-25", "25-13-1990", "1990-01-25"],
         isResolved: false,
@@ -1014,9 +1158,15 @@ export const SEEDED_SCENARIOS: readonly ClinicalSubject[] = [
         destination: "AE",
         errorType: "casing-mismatch",
         hint: "Map free-text to MedDRA PT: Headache",
-        explanation: "Map verbatim text 'headache bad' to MedDRA Preferred Term 'Headache' Grade 2.",
+        explanation:
+          "Map verbatim text 'headache bad' to MedDRA Preferred Term 'Headache' Grade 2.",
         ctCode: "MedDRA:10019211",
-        options: ["Headache (Grade 2)", "Headache Bad (Grade 1)", "Cephalea Severe", "Migraine (Grade 3)"],
+        options: [
+          "Headache (Grade 2)",
+          "Headache Bad (Grade 1)",
+          "Cephalea Severe",
+          "Migraine (Grade 3)",
+        ],
         isResolved: false,
       },
       {
