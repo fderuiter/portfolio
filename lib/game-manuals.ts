@@ -662,46 +662,70 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
   "trial-and-error": {
     id: "trial-and-error",
     title: "Trial & Error: Biostat Ops",
-    subtitle: "SAP-Driven QC Desk & Roguelike Deckbuilder",
+    subtitle: "Card Table Deckbuilder & SAP QC Desk",
     genre: "Roguelike Deckbuilder",
     badge: "Chips × Mult",
     route: "/arcade/trial-and-error",
     accentColor: "from-amber-500/20 via-amber-500/5 to-transparent",
     badgeBg: "bg-amber-500/10 text-amber-300 border-amber-500/30",
     objective:
-      "Review the staged Demographics table (Table 14.1.1) against its Statistical Analysis Plan, correct the discrepancies you find, and play hands worth Chips × Mult until your round score reaches the Small Blind quota of 300.",
+      "Play hands of Tables, Listings and Figures against the Small Blind quota of 300. Inspect suspect cards on the QC Desk before you trust them: an uncorrected fatal defect zeroes the whole hand.",
     quickSummary:
-      "Move through the grid with the arrow keys, press Enter or Space to inspect a cell, press C to correct a revealed finding, then P to approve and play (2 CPU) or D to reject and discard the draft (1 CPU).",
+      "Move across the hand with ← →, select up to five cards with Space, and press Enter to play the best hand they make (2 CPU). D discards the selection (1 CPU). I opens the focused card's QC Desk (1 CPU): inspect cells with Enter or Space, correct with C, and close with Esc.",
     controls: [
       {
-        action: "Move the review cursor",
+        action: "Move across the hand",
         description:
-          "Arrow keys move between cells; Home and End jump to the ends of a row. Tab leaves the grid for the action buttons.",
-        key: "Arrow Keys",
+          "Left and right arrows move between cards; Home and End jump to the ends. Tab reaches the relic rack and the Play, Discard and Inspect buttons.",
+        key: "← → / Home / End",
       },
       {
-        action: "Inspect cell",
+        action: "Select a card",
         description:
-          "Re-derives the cell from the population snapshot and reveals any SAP findings with their rule, evidence and consequence.",
-        key: "Enter / Space",
+          "Toggles the focused card. Up to five cards can be selected; the table detects the best hand and previews its Chips × Mult.",
+        key: "Space",
       },
       {
-        action: "Flag & correct",
+        action: "Play hand",
         description:
-          "Corrects the revealed open finding on the active cell and earns its rule's +Mult bonus.",
-        key: "C",
+          "Scores the selected cards as they truly are, including defects you never inspected. Kickers that are not part of the hand do not score. Costs 2 CPU.",
+        key: "Enter",
       },
       {
-        action: "Approve & Play Hand",
+        action: "Discard",
         description:
-          "Scores the staged table as it truly is, including findings you did not inspect. Costs 2 CPU.",
-        key: "P",
-      },
-      {
-        action: "Reject & Discard",
-        description:
-          "Sends the draft back and stages the next one from the fixed draw pile. Costs 1 CPU.",
+          "Discards the selected cards and deals replacements. Costs 1 CPU.",
         key: "D",
+      },
+      {
+        action: "Read a card",
+        description:
+          "Opens an enlarged, readable view of the focused card's face for free (Inspect, which reveals hidden defects, still costs CPU). A long press does the same; on touch, tap a selected card again.",
+        key: "?",
+      },
+      {
+        action: "Reorder the hand",
+        description:
+          "Moves the focused card left or right. With a pointer, drag a card by the grip above it. Order is cosmetic.",
+        key: "Alt + ← →",
+      },
+      {
+        action: "Cabinet audio",
+        description:
+          "SFX and Music switch the cabinet's synthesized sounds and its music loop. Both stay silent while site sound is muted (the default); Unmute turns site sound on. Music is off until you turn it on.",
+        key: "SFX / Music",
+      },
+      {
+        action: "Skip scoring",
+        description:
+          "While a played hand scores step by step, Space, the Skip button or a click on the score plate jumps to the result. The 1×, 2× and 4× buttons set the scoring speed.",
+        key: "Space",
+      },
+      {
+        action: "Inspect",
+        description:
+          "Opens the focused card's QC Desk for 1 CPU (reopening is free). Enter or Space inspects a cell, C corrects a revealed finding, Esc closes.",
+        key: "I",
       },
     ],
     rules: [

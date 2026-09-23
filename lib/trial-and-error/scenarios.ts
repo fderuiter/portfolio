@@ -4,7 +4,7 @@
  * All subjects, values and rules are fictional teaching material. They supply
  * game context only and are not clinical or regulatory advice.
  */
-import type { Scenario, StagedTable, Subject } from "./types";
+import type { Scenario, StagedTable, Subject, TlfCard } from "./types";
 
 const snapshotId = "SNAP-DM-v1";
 
@@ -61,6 +61,308 @@ const draft = (
   cells,
 });
 
+const card = (c: TlfCard): TlfCard => c;
+// Face data below is fictional and consistent with the snapshot: ITT 6/6,
+// FAS 6/5 (S-008 has no post-baseline assessment), Safety 6/6.
+
+/**
+ * The Small Blind deck, dealt in this order. Only the three Table 14.1.1
+ * drafts carry reviewable cells in this slice; the other outputs are dealt,
+ * classified and scored, and gain QC content with T&E-02 (#911).
+ */
+const DEMOGRAPHICS_DECK: TlfCard[] = [
+  card({
+    id: "C-T14.1.1-A",
+    cardType: "TABLE",
+    number: "Table 14.1.1",
+    title: "Demographics (Draft A)",
+    population: "ITT",
+    chips: 30,
+    mult: 1,
+    topic: "DM",
+    csrStage: "BASELINE",
+    draftId: "T-14.1.1-A",
+  }),
+  card({
+    id: "C-L16.2.4",
+    cardType: "LISTING",
+    number: "Listing 16.2.4",
+    title: "Demographic Data by Subject",
+    population: "ITT",
+    chips: 20,
+    mult: 0,
+    topic: "DM",
+    csrStage: "PATIENT_LISTING",
+    face: {
+      kind: "LISTING",
+      columns: ["Subject", "Arm", "Age", "Sex"],
+      rows: [
+        ["S-001", "PBO", "34", "F"],
+        ["S-002", "PBO", "41", "M"],
+        ["S-007", "ACT", "22", "F"],
+        ["S-008", "ACT", "66", "M"],
+      ],
+    },
+  }),
+  card({
+    id: "C-T14.1.2",
+    cardType: "TABLE",
+    number: "Table 14.1.2",
+    title: "Subject Disposition",
+    population: "ITT",
+    chips: 25,
+    mult: 1,
+    topic: "DS",
+    csrStage: "DISPOSITION",
+    face: {
+      kind: "TABLE",
+      columns: ["Placebo", "Active", "Total"],
+      rows: [
+        { label: "Randomized", values: ["6", "6", "12"] },
+        { label: "Completed", values: ["5 (83.3)", "4 (66.7)", "9 (75.0)"] },
+        { label: "Discontinued", values: ["1 (16.7)", "2 (33.3)", "3 (25.0)"] },
+        { label: "Adverse event", values: ["0 (0.0)", "1 (16.7)", "1 (8.3)"] },
+      ],
+    },
+  }),
+  card({
+    id: "C-T14.2.1",
+    cardType: "TABLE",
+    number: "Table 14.2.1",
+    title: "Primary Endpoint (ANCOVA)",
+    population: "FAS",
+    chips: 40,
+    mult: 1,
+    topic: "EFF",
+    csrStage: "EFFICACY",
+    face: {
+      kind: "TABLE",
+      columns: ["Placebo", "Active", "Diff"],
+      rows: [
+        { label: "N", values: ["6", "5", "—"] },
+        { label: "LS mean", values: ["-1.2", "-4.8", "-3.6"] },
+        { label: "95% CI", values: ["—", "—", "(-6.9, -0.3)"] },
+        { label: "p-value", values: ["—", "—", "0.034"] },
+      ],
+    },
+  }),
+  card({
+    id: "C-F14.2.1",
+    cardType: "FIGURE",
+    number: "Figure 14.2.1",
+    title: "Kaplan-Meier: Time to Response",
+    population: "FAS",
+    chips: 35,
+    mult: 0,
+    topic: "EFF",
+    face: {
+      kind: "FIGURE",
+      plot: {
+        type: "KM",
+        series: [
+          {
+            label: "Placebo",
+            points: [
+              [0, 1],
+              [2, 1],
+              [4, 0.83],
+              [8, 0.67],
+              [12, 0.5],
+            ],
+          },
+          {
+            label: "Active",
+            points: [
+              [0, 1],
+              [2, 0.8],
+              [4, 0.6],
+              [8, 0.4],
+              [12, 0.2],
+            ],
+          },
+        ],
+      },
+    },
+  }),
+  card({
+    id: "C-T14.3.1",
+    cardType: "TABLE",
+    number: "Table 14.3.1",
+    title: "Overview of Adverse Events",
+    population: "SAFETY",
+    chips: 35,
+    mult: 1,
+    topic: "AE",
+    csrStage: "SAFETY_AE",
+    face: {
+      kind: "TABLE",
+      columns: ["Placebo", "Active", "Total"],
+      rows: [
+        { label: "Any TEAE", values: ["3 (50.0)", "5 (83.3)", "8 (66.7)"] },
+        { label: "Serious AE", values: ["1 (16.7)", "2 (33.3)", "3 (25.0)"] },
+        { label: "AE to discont.", values: ["0 (0.0)", "1 (16.7)", "1 (8.3)"] },
+        { label: "Deaths", values: ["0 (0.0)", "0 (0.0)", "0 (0.0)"] },
+      ],
+    },
+  }),
+  card({
+    id: "C-L16.2.7",
+    cardType: "LISTING",
+    number: "Listing 16.2.7",
+    title: "Adverse Events by Subject",
+    population: "SAFETY",
+    chips: 20,
+    mult: 0,
+    topic: "AE",
+    csrStage: "PATIENT_LISTING",
+    face: {
+      kind: "LISTING",
+      columns: ["Subject", "Preferred term", "Grade"],
+      rows: [
+        ["S-003", "Fatigue", "1"],
+        ["S-007", "Headache", "1"],
+        ["S-008", "Atrial fibrillation", "3"],
+        ["S-010", "Syncope", "3"],
+      ],
+    },
+  }),
+  card({
+    id: "C-L16.1.1",
+    cardType: "LISTING",
+    number: "Listing 16.1.1",
+    title: "Discontinued Subjects",
+    population: "ITT",
+    chips: 15,
+    mult: 0,
+    topic: "DS",
+    csrStage: "PATIENT_LISTING",
+    face: {
+      kind: "LISTING",
+      columns: ["Subject", "Arm", "Reason"],
+      rows: [
+        ["S-004", "PBO", "Withdrew consent"],
+        ["S-008", "ACT", "Adverse event"],
+        ["S-012", "ACT", "Lost to follow-up"],
+      ],
+    },
+  }),
+  card({
+    id: "C-T14.1.1-B",
+    cardType: "TABLE",
+    number: "Table 14.1.1",
+    title: "Demographics (Draft B)",
+    population: "ITT",
+    chips: 30,
+    mult: 1,
+    topic: "DM",
+    csrStage: "BASELINE",
+    draftId: "T-14.1.1-B",
+  }),
+  card({
+    id: "C-T14.2.2",
+    cardType: "TABLE",
+    number: "Table 14.2.2",
+    title: "Key Secondary Endpoint",
+    population: "FAS",
+    chips: 35,
+    mult: 1,
+    topic: "EFF",
+    csrStage: "EFFICACY",
+    face: {
+      kind: "TABLE",
+      columns: ["Placebo", "Active", "Diff"],
+      rows: [
+        { label: "N", values: ["6", "5", "—"] },
+        { label: "Responders", values: ["2 (33.3)", "4 (80.0)", "—"] },
+        { label: "Odds ratio", values: ["—", "—", "8.0"] },
+        { label: "p-value", values: ["—", "—", "0.24"] },
+      ],
+    },
+  }),
+  card({
+    id: "C-F14.2.2",
+    cardType: "FIGURE",
+    number: "Figure 14.2.2",
+    title: "Forest Plot by Subgroup",
+    population: "FAS",
+    chips: 30,
+    mult: 0,
+    topic: "EFF",
+    face: {
+      kind: "FIGURE",
+      plot: {
+        type: "FOREST",
+        reference: 0,
+        intervals: [
+          { label: "Overall", estimate: -3.6, lower: -6.9, upper: -0.3 },
+          { label: "Age < 65", estimate: -4.1, lower: -8, upper: -0.2 },
+          { label: "Age ≥ 65", estimate: -2.2, lower: -7.5, upper: 3.1 },
+          { label: "Female", estimate: -4.4, lower: -8.6, upper: -0.2 },
+        ],
+      },
+    },
+  }),
+  card({
+    id: "C-T14.1.1-C",
+    cardType: "TABLE",
+    number: "Table 14.1.1",
+    title: "Demographics (Draft C)",
+    population: "ITT",
+    chips: 30,
+    mult: 1,
+    topic: "DM",
+    csrStage: "BASELINE",
+    draftId: "T-14.1.1-C",
+  }),
+  card({
+    id: "C-T14.3.2",
+    cardType: "TABLE",
+    number: "Table 14.3.2",
+    title: "AEs by SOC: Cardiac Disorders",
+    population: "SAFETY",
+    chips: 25,
+    mult: 1,
+    topic: "AE",
+    csrStage: "SAFETY_AE",
+    soc: "Cardiac disorders",
+    face: {
+      kind: "TABLE",
+      columns: ["Placebo", "Active", "Total"],
+      rows: [
+        {
+          label: "Cardiac disorders",
+          values: ["0 (0.0)", "1 (16.7)", "1 (8.3)"],
+        },
+        {
+          label: "Atrial fibrillation",
+          values: ["0 (0.0)", "1 (16.7)", "1 (8.3)"],
+        },
+        { label: "Palpitations", values: ["0 (0.0)", "0 (0.0)", "0 (0.0)"] },
+      ],
+    },
+  }),
+  card({
+    id: "C-L16.2.8",
+    cardType: "LISTING",
+    number: "Listing 16.2.8",
+    title: "Serious Adverse Events",
+    population: "SAFETY",
+    chips: 20,
+    mult: 0,
+    topic: "AE",
+    csrStage: "PATIENT_LISTING",
+    face: {
+      kind: "LISTING",
+      columns: ["Subject", "Serious event", "Outcome"],
+      rows: [
+        ["S-005", "Pneumonia", "Recovered"],
+        ["S-008", "Atrial fibrillation", "Recovered"],
+        ["S-010", "Syncope", "Recovered"],
+      ],
+    },
+  }),
+];
+
 /**
  * Demographics (Table 14.1.1) under SAP-DM-001. The SAP population is ITT
  * (N=12). FAS (N=11) is a distinct population here: the SAP declares no
@@ -80,6 +382,8 @@ export const DEMOGRAPHICS_SCENARIO: Scenario = {
   },
   handType: "HIGH_TABLE",
   startingCpu: 6,
+  table: { startingCpu: 10, handSize: 8, maxSelection: 5 },
+  deck: DEMOGRAPHICS_DECK,
   rulebook: {
     id: "SAP-DM-001",
     title: "SAP §9.1 Demographics and Baseline Characteristics",

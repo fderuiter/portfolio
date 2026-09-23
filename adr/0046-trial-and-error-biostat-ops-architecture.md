@@ -212,3 +212,136 @@ Closed, FDA IR, or CSR Lock). The final boss is CSR Lock. **Guidance** cards
 level up hand types (T&E-UX-05). Meta-progression is browser-local only: the
 Codex, seeded runs, GCP-audit stakes and starter sponsors (T&E-UX-07 and
 T&E-UX-08).
+
+### Card Table implementation (T&E-UX-01)
+
+Recorded by [#943](https://github.com/fderuiter/portfolio/issues/943).
+
+- **Hand detection.** `classifyHand` enumerates every subset of up to five
+  selected cards and returns the highest-ranked hand. Ties go to more Chips,
+  then to the earliest-selected cards. Only the scoring subset scores;
+  kickers do not. Cards carry a `topic` (Table–Listing pairs,
+  Figure–Table dependence), a `csrStage` and an optional MedDRA `soc`.
+- **Composition.** Per-card review (`inspectCell`, `correctFinding`, the
+  cell view and the slash value) lives in `internal/inspection.ts`. The T&E-01
+  desk reducer and the new table reducer both delegate to it, so review
+  behaviour is identical in both.
+- **Inspect costs CPU once.** Opening a card costs `CPU_COSTS.INSPECT` (1).
+  Reopening is free, and corrections persist on the card until it leaves the
+  hand. A card without reviewable cells refuses Inspect without charging CPU
+  and is never marked unverified, because it is not a gamble.
+- **Preview versus play.** The preview plate scores revealed findings only
+  and flags uninspected, inspectable cards as unverified. Play scores the true
+  findings of the scoring cards through `evaluateHand`.
+- **Stacking.** The Inspect drawer is portalled to `document.body`, or to the
+  fullscreen element during real fullscreen, so the site chrome cannot paint
+  over it from outside the table's isolated stacking context. It carries
+  `data-te-cabinet` so the scoped tokens still apply.
+
+### Score timeline implementation (T&E-UX-02)
+
+Recorded by [#944](https://github.com/fderuiter/portfolio/issues/944).
+
+- **Domain.** `scoreTimeline(evaluation, context)` in `internal/timeline.ts`
+  turns a `HandEvaluation` into ordered steps: hand base, each scored card,
+  non-zero rule results, relics, ×Mult factors, the zero-score rule, the
+  total and Blind progress. Every step carries its running Chips, +Mult and
+  ×Mult, so the player displays values and never computes them. A fast-check
+  property pins the final running totals and the TOTAL step to
+  `evaluateHand`. `TableView.lastTimeline` exposes the last hand's timeline,
+  with card numbers as names and `<category> ERROR` slam labels for the
+  rulebook's fatal rules.
+- **Pacing.** Each step lasts `min(450 ms, 3300 ms / steps) / speed`, followed
+  by a 600 ms hold on the final frame. At 1× a hand of any length therefore
+  resolves in under 4 s. Skip, by the focused Skip button, Space or a click
+  on the plate, jumps to the resolved state. Speed is set with the 1×, 2× and
+  4× buttons in the Blind panel.
+- **Input lock.** During playback the hand and action buttons are `inert`,
+  focus moves to Skip, and the round score, result panel and announcement
+  wait for the timeline to resolve. Focus then returns to the hand, or to
+  Restart when the Blind has ended.
+- **Reduced motion and screen readers.** Under reduced motion there is no
+  playback: the result appears at once, and the hand is announced as a single
+  polite summary. This follows #944's acceptance criteria, which supersede
+  the "step-by-step live announcements" in the Pacing section above. A "Last
+  hand breakdown" disclosure lists every step's text after resolution.
+- **No layout shift.** The plate has a fixed minimum height that fits both
+  the preview and the player. Effects use transform and opacity only. Shake
+  (×Mult, zero rule) and the flame (target crossed) are `.te-loud-*` classes,
+  so they render only inside a cabinet whose loud switch is on.
+- **Audio seam.** `useScorePlayback` accepts `onStep(step, index)` and calls
+  it once per step as it plays. T&E-UX-04 attaches SFX there.
+
+### Card faces and physicality (T&E-UX-03)
+
+Recorded by [#945](https://github.com/fderuiter/portfolio/issues/945).
+
+- **Faces are data.** `TlfCard.face` is a Zod-validated `CardFace`: a Table
+  miniature (2–3 columns, 3–5 rows), a Listing (3–4 subject rows), a Figure
+  plot (Kaplan-Meier, sparkline or forest intervals) or a subject token. The
+  scenario schema requires exactly one of `face` or `draftId` per card, and
+  a face kind that matches the card type. Draft cards print the draft's
+  first five rows through `TableCardView.face`, and show corrected values
+  once the player fixes them. All face data is fictional and consistent with
+  the snapshot (ITT 6/6, FAS 6/5, Safety 6/6).
+- **Stamps.** `TableCardView.stamps` holds `REDLINE` while a revealed finding
+  is open, and `QC_PASS` only once every cell is reviewed and nothing is
+  open. The stamp never vouches for a defect the player has not looked for.
+  `CardStamp` already lists STALE, SEALED and BLINDED for later tickets,
+  which render in the same slot.
+- **Face-down cards carry nothing.** `RedactedCard` is a strict
+  `{ slot, faceDown: true }`. `TableView.drawPile` exposes the undealt deck
+  only as these slots, and `CardBack` accepts only a `RedactedCard`. A type
+  test and a serialization test pin both.
+- **Reorder is cosmetic.** `MOVE_CARD` moves a card within the hand for no
+  CPU and announces its new position. Drag-by-grip (pointer and touch)
+  commits one `MOVE_CARD` on drop, and Alt+←/→ is the keyboard equivalent.
+- **Physicality.** Cards are `framer-motion` buttons that fan on an arc with
+  overlap past five cards, lift and tilt toward the pointer, deal face down
+  and turn up (`CardFlip`), and breathe at rest. The breathing is a CSS
+  keyframe on the compositor, not React state. Fan, tilt and breathing are
+  off below 768px and under reduced motion; deal, flip and exit motion are
+  off under reduced motion. Below 768px the hand is a flat row that scrolls
+  inside its own container.
+- **Calm at rest.** The breathing is a sub-pixel, 0.35° drift, not a loud
+  layer: no colour, glow or shake. It follows #945's explicit request and
+  AGENTS.md §16 (compositor keyframe, suppressed on mobile).
+- **Reading a card is free.** `?`, a long press, or a second tap on a
+  selected card (touch) opens a focus-trapped detail dialog with the face at
+  full legibility (a real `<table>`, or a described SVG). It shows only
+  what the output prints; hidden findings still need Inspect.
+
+### Juice kit (T&E-UX-04)
+
+Recorded by [#946](https://github.com/fderuiter/portfolio/issues/946).
+
+- **Named cues.** `useTeSound().play(cue)` covers the 18 cues in `TE_CUES`,
+  from `chipTick` (pitch climbs per chip step, capped at an octave) to
+  `bossStinger`. Each is a synthesized recipe over the shared `SoundEngine`
+  (`playTone` with pitch ramps and audio-clock delays, `playNoise`). There
+  are no sampled assets and `AudioProvider` is unchanged.
+- **Gates.** `play` returns before any AudioContext work unless the cabinet
+  SFX switch is on, a user gesture has happened, and the engine allows sound.
+  That last check covers the site-wide mute (on by default) and its
+  accessibility bypass, which includes reduced motion. The cabinet's SFX
+  switch (on) and Music switch (off) persist under `te:audio` through
+  guarded storage. When the site is muted, the cabinet offers "Unmute",
+  which calls the provider's `setMuted(false)`. The cabinet has no hover
+  sounds, so the `(hover: none)` rule has nothing to skip.
+- **Wiring.** `cueForStep(timeline, index)` maps each score-timeline step to
+  its cue and `ScorePlayer`'s `onStep` plays it. Card-table events play
+  select, deselect, discard, deal and flip cues. A Blind that ends plays
+  `blindCleared` or `blindFailed` once the hand resolves.
+- **Music.** `TeMusicLoop` schedules a triangle pattern through a lowpass
+  filter on the audio clock with a 30 ms lookahead timer. It holds no React
+  state, so a beat never renders. It starts only when Music is on, the site
+  is unmuted and a gesture has happened. It stops when the cabinet unmounts,
+  the tab is hidden, the site mutes or audio is torn down
+  (`registerAudioCleanup`). Boss Blinds raise the tempo and the filter
+  cutoff, and the loop ducks while a hand resolves.
+- **Loud layers.** `LoudLayer` mounts a CRT overlay (scanlines, a vignette
+  and a radial mask for curvature) and a slow conic swirl only while a hand
+  resolves, and only when the cabinet's loud switch allows it. At rest it
+  renders nothing, so nothing animates. Screen shake takes its amplitude
+  from `--te-shake-amp`, set by `shakeAmplitude(intensity)` and capped at
+  `MAX_SHAKE_PX` (6). `LOUD_PRESETS` names the flame and glow classes.

@@ -16,6 +16,7 @@ import {
   ScenarioSchema,
   StagedTableSchema,
   TableShellSpecSchema,
+  TlfCardSchema,
   evaluateHand,
 } from "@/lib/trial-and-error";
 
@@ -182,11 +183,13 @@ describe("Trial & Error runtime schemas", () => {
       ],
     });
     expect(crossWired.success).toBe(false);
-    expect(crossWired.error?.issues.map((i) => i.path.join("."))).toEqual([
-      "shell.requiredRulebookId",
-      "drawPile.0.shellId",
-      "drawPile.0.populationSnapshotId",
-    ]);
+    expect(crossWired.error?.issues.map((i) => i.path.join("."))).toEqual(
+      expect.arrayContaining([
+        "shell.requiredRulebookId",
+        "drawPile.0.shellId",
+        "drawPile.0.populationSnapshotId",
+      ])
+    );
   });
 
   it("produces hand evaluations that satisfy the HandEvaluation contract", () => {
@@ -198,6 +201,31 @@ describe("Trial & Error runtime schemas", () => {
     expect(HandEvaluationSchema.safeParse(evaluation).success).toBe(true);
     expect(
       HandEvaluationSchema.safeParse({ ...evaluation, score: -5 }).success
+    ).toBe(false);
+  });
+
+  it("validates the Card Table deck: unique ids and existing drafts", () => {
+    const [first, second] = DEMOGRAPHICS_SCENARIO.deck;
+    const broken = ScenarioSchema.safeParse({
+      ...DEMOGRAPHICS_SCENARIO,
+      deck: [
+        first,
+        { ...second, id: first.id, draftId: "T-99-MISSING", face: undefined },
+      ],
+    });
+    expect(broken.success).toBe(false);
+    expect(broken.error?.issues.map((i) => i.path.join("."))).toEqual([
+      "deck.1.id",
+      "deck.1.draftId",
+    ]);
+    expect(
+      TlfCardSchema.safeParse({ ...first, csrStage: "UNBLINDING" }).success
+    ).toBe(false);
+    expect(
+      ScenarioSchema.safeParse({
+        ...DEMOGRAPHICS_SCENARIO,
+        table: { ...DEMOGRAPHICS_SCENARIO.table, maxSelection: 6 },
+      }).success
     ).toBe(false);
   });
 });

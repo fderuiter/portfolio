@@ -19,10 +19,15 @@ import { NextRequest } from "next/server";
 import {
   DEMOGRAPHICS_SCENARIO,
   advanceDesk,
+  advanceTable,
+  deriveTableView,
   createDeskState,
+  createTableState,
   evaluateHand,
   roundRatio,
+  scoreTimeline,
   type DeskAction,
+  type TableAction,
   type RoundingMode,
 } from "@/lib/trial-and-error";
 
@@ -415,6 +420,149 @@ describe("Shift-Left Fuzz & Property-Based Verification", () => {
           );
           expect(first.cpu.spent).toBe(first.handsPlayed * 2 + first.discards);
         })
+      );
+    });
+
+    it("replays any Card Table move sequence identically, conserving CPU and bounding hand and selection", () => {
+      const cardIds = DEMOGRAPHICS_SCENARIO.deck.map((card) => card.id);
+      const tableAction: fc.Arbitrary<TableAction> = fc.oneof(
+        fc.record({
+          type: fc.constant("TOGGLE_SELECT" as const),
+          cardId: fc.constantFrom(...cardIds, "missing"),
+        }),
+        fc.record({
+          type: fc.constant("INSPECT_CARD" as const),
+          cardId: fc.constantFrom(...cardIds),
+        }),
+        fc.record({
+          type: fc.constant("INSPECT_CELL" as const),
+          row: fc.integer({ min: -1, max: 5 }),
+          col: fc.integer({ min: -1, max: 3 }),
+        }),
+        fc.record({
+          type: fc.constant("CORRECT_FINDING" as const),
+          findingId: fc.constantFrom(
+            "SAP-DM-01@r2c2",
+            "SAP-DM-02@r2c1",
+            "SAP-DM-03@r1c2",
+            "SAP-DM-02@r2c0",
+            "missing"
+          ),
+        }),
+        fc.record({
+          type: fc.constant("MOVE_CARD" as const),
+          cardId: fc.constantFrom(...cardIds, "missing"),
+          toIndex: fc.integer({ min: -2, max: 10 }),
+        }),
+        fc.constant<TableAction>({ type: "CLOSE_INSPECT" }),
+        fc.constant<TableAction>({ type: "PLAY_HAND" }),
+        fc.constant<TableAction>({ type: "DISCARD" })
+      );
+      const { table } = DEMOGRAPHICS_SCENARIO;
+      fc.assert(
+        fc.property(fc.array(tableAction, { maxLength: 60 }), (actions) => {
+          const replay = () =>
+            actions.reduce(
+              (state, action) =>
+                advanceTable(DEMOGRAPHICS_SCENARIO, state, action),
+              createTableState(DEMOGRAPHICS_SCENARIO)
+            );
+          const first = replay();
+          expect(replay()).toEqual(first);
+          expect(first.cpu.available).toBeGreaterThanOrEqual(0);
+          expect(first.cpu.available + first.cpu.spent).toBe(table.startingCpu);
+          expect(first.hand.length).toBeLessThanOrEqual(table.handSize);
+          expect(first.selected.length).toBeLessThanOrEqual(table.maxSelection);
+          expect(first.selected.every((id) => first.hand.includes(id))).toBe(
+            true
+          );
+          expect(new Set(first.hand).size).toBe(first.hand.length);
+          // Reordering is cosmetic: every dealt card is in hand or spent.
+          const view = deriveTableView(DEMOGRAPHICS_SCENARIO, first);
+          expect(view.spentCount + first.hand.length).toBe(first.deckIndex);
+          expect(view.drawPile.length + first.deckIndex).toBe(
+            DEMOGRAPHICS_SCENARIO.deck.length
+          );
+        })
+      );
+    });
+
+    it("sums every score timeline back to evaluateHand exactly", () => {
+      const rule = fc.record({
+        ruleId: fc.constantFrom("R1", "R2", "R3"),
+        passed: fc.boolean(),
+        chipsDelta: fc.integer({ min: -50, max: 50 }),
+        multDelta: fc.integer({ min: -5, max: 5 }),
+        multMultiplier: fc.option(fc.constantFrom(0, 0.5, 1, 2), {
+          nil: undefined,
+        }),
+        evidence: fc.constant("fuzz"),
+      });
+      const relic = fc.record({
+        sourceId: fc.constantFrom("RELIC-A", "RELIC-B"),
+        label: fc.constant("relic"),
+        chips: fc.integer({ min: 0, max: 50 }),
+        plusMult: fc.integer({ min: 0, max: 5 }),
+        xMult: fc.constantFrom(1, 1.5, 2),
+      });
+      fc.assert(
+        fc.property(
+          fc.constantFrom(
+            "HIGH_TABLE" as const,
+            "TLF_PAIR" as const,
+            "CSR_STRAIGHT" as const
+          ),
+          fc.uniqueArray(
+            fc.record({
+              id: fc.constantFrom("A", "B", "C", "D", "E"),
+              chips: fc.nat(60),
+              mult: fc.nat(3),
+            }),
+            { minLength: 1, maxLength: 5, selector: (c) => c.id }
+          ),
+          fc.array(rule, { maxLength: 6 }),
+          fc.uniqueArray(relic, { maxLength: 2, selector: (r) => r.sourceId }),
+          fc.nat(1000),
+          (handType, cards, ruleResults, modifiers, before) => {
+            const evaluation = evaluateHand({
+              handType,
+              cards,
+              ruleResults,
+              modifiers,
+            });
+            const steps = scoreTimeline(evaluation, {
+              roundScoreBefore: before,
+              target: 500,
+            });
+            const total = steps.find((s) => s.kind === "TOTAL");
+            const progress = steps[steps.length - 1];
+            expect(total?.kind === "TOTAL" && total.score).toBe(
+              evaluation.score
+            );
+            expect(Math.max(0, total!.running.chips)).toBe(
+              evaluation.chips.total
+            );
+            expect(Math.max(0, total!.running.mult)).toBe(
+              evaluation.mult.total
+            );
+            expect(total!.running.xMult).toBeCloseTo(
+              evaluation.xMult.product,
+              9
+            );
+            expect(progress.kind === "BLIND_PROGRESS" && progress.after).toBe(
+              before + evaluation.score
+            );
+            expect(steps.filter((s) => s.kind === "ZERO_RULE")).toHaveLength(
+              evaluation.zeroRule.triggered ? 1 : 0
+            );
+            expect(
+              scoreTimeline(evaluation, {
+                roundScoreBefore: before,
+                target: 500,
+              })
+            ).toEqual(steps);
+          }
+        )
       );
     });
   });

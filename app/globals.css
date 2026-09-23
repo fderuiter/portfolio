@@ -354,19 +354,33 @@ body {
   --te-suit-screened: #94a3b8;
 }
 
+/* Shake amplitude comes from --te-shake-amp (default 3px), which the
+ * LoudLayer helper clamps to at most 6px. */
 @keyframes te-loud-shake {
   0%,
   100% {
     transform: translate3d(0, 0, 0);
   }
   25% {
-    transform: translate3d(-3px, 1px, 0);
+    transform: translate3d(
+      calc(var(--te-shake-amp, 3px) * -1),
+      calc(var(--te-shake-amp, 3px) / 3),
+      0
+    );
   }
   50% {
-    transform: translate3d(2px, -2px, 0);
+    transform: translate3d(
+      calc(var(--te-shake-amp, 3px) * 0.67),
+      calc(var(--te-shake-amp, 3px) * -0.67),
+      0
+    );
   }
   75% {
-    transform: translate3d(-1px, 2px, 0);
+    transform: translate3d(
+      calc(var(--te-shake-amp, 3px) / -3),
+      calc(var(--te-shake-amp, 3px) * 0.67),
+      0
+    );
   }
 }
 
@@ -374,15 +388,102 @@ body {
   animation: te-loud-shake 240ms ease-out 1;
 }
 
+/* CRT: scanlines, a vignette, and a slight barrel curvature from a radial
+ * mask. Gradients and a mask only; no blur, no canvas. */
 [data-te-cabinet][data-te-loud="on"] .te-loud-crt {
   pointer-events: none;
-  background-image: repeating-linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.03) 0,
-    rgba(255, 255, 255, 0.03) 1px,
-    transparent 1px,
-    transparent 3px
+  background-image:
+    radial-gradient(
+      ellipse at center,
+      transparent 60%,
+      rgba(0, 0, 0, 0.45) 100%
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.03) 0,
+      rgba(255, 255, 255, 0.03) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+  mask-image: radial-gradient(
+    ellipse 120% 110% at center,
+    #000 70%,
+    transparent 100%
   );
+}
+
+@keyframes te-loud-swirl {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Background swirl: mounted only during a loud moment, so it never runs at
+ * rest. A slow rotation of a faint amber/rose conic gradient. */
+[data-te-cabinet][data-te-loud="on"] .te-loud-swirl::before {
+  content: "";
+  position: absolute;
+  inset: -50%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(245, 158, 11, 0.07),
+    transparent 25%,
+    rgba(251, 113, 133, 0.06) 50%,
+    transparent 75%,
+    rgba(245, 158, 11, 0.07)
+  );
+  animation: te-loud-swirl 9s linear infinite;
+}
+
+@keyframes te-loud-flicker {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scaleY(1);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scaleY(1.15);
+  }
+}
+
+/* The score plate "catches fire" when a hand crosses the Blind target: a
+ * bounded CSS flame (six flickers, transform and opacity only), never a loop. */
+[data-te-cabinet][data-te-loud="on"] .te-loud-fire {
+  position: relative;
+}
+
+[data-te-cabinet][data-te-loud="on"] .te-loud-fire::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 100% 0;
+  height: 1.25rem;
+  pointer-events: none;
+  background: linear-gradient(to top, var(--te-fire), transparent);
+  transform-origin: bottom;
+  animation: te-loud-flicker 320ms ease-in-out 6;
+}
+
+@keyframes te-card-breathe {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-1px) rotate(0.35deg);
+  }
+}
+
+/* Idle card "breathing" (T&E-UX-03): a barely-there, desynchronized CSS
+ * keyframe on the compositor, never React state (AGENTS.md §16). Off below
+ * 768px and under reduced motion. */
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  [data-te-cabinet] .te-card-wobble {
+    animation: te-card-breathe 5.5s ease-in-out infinite;
+  }
 }
 
 [data-te-cabinet][data-te-loud="on"] .te-loud-glow {

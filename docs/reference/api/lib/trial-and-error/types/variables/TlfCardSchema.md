@@ -1,0 +1,9 @@
+[**fderuiter-portfolio**](../../../../README.md)
+
+***
+
+[fderuiter-portfolio](../../../../modules.md) / [lib/trial-and-error/types](../README.md) / TlfCardSchema
+
+# Variable: TlfCardSchema
+
+> `const` **TlfCardSchema**: `ZodObject`\<\{ `cardType`: `ZodEnum`\<\{ `FIGURE`: `"FIGURE"`; `LISTING`: `"LISTING"`; `SUBJECT_TOKEN`: `"SUBJECT_TOKEN"`; `TABLE`: `"TABLE"`; \}\>; `chips`: `ZodNumber`; `csrStage`: `ZodOptional`\<`ZodEnum`\<\{ `BASELINE`: `"BASELINE"`; `DISPOSITION`: `"DISPOSITION"`; `EFFICACY`: `"EFFICACY"`; `PATIENT_LISTING`: `"PATIENT_LISTING"`; `SAFETY_AE`: `"SAFETY_AE"`; \}\>\>; `draftId`: `ZodOptional`\<`ZodString`\>; `face`: `ZodOptional`\<`ZodDiscriminatedUnion`\<\[`ZodObject`\<\{ `columns`: `ZodArray`\<`ZodString`\>; `kind`: `ZodLiteral`\<`"TABLE"`\>; `rows`: `ZodArray`\<`ZodObject`\<\{ `label`: `ZodString`; `values`: `ZodArray`\<...\>; \}, `$strip`\>\>; \}, `$strip`\>, `ZodObject`\<\{ `columns`: `ZodArray`\<`ZodString`\>; `kind`: `ZodLiteral`\<`"LISTING"`\>; `rows`: `ZodArray`\<`ZodArray`\<`ZodString`\>\>; \}, `$strip`\>, `ZodObject`\<\{ `kind`: `ZodLiteral`\<`"FIGURE"`\>; `plot`: `ZodDiscriminatedUnion`\<\[`ZodObject`\<\{ `series`: ...; `type`: ...; \}, `$strip`\>, `ZodObject`\<\{ `series`: ...; `type`: ...; \}, `$strip`\>, `ZodObject`\<\{ `intervals`: ...; `reference`: ...; `type`: ...; \}, `$strip`\>\], `"type"`\>; \}, `$strip`\>, `ZodObject`\<\{ `cohort`: `ZodString`; `count`: `ZodNumber`; `kind`: `ZodLiteral`\<`"TOKEN"`\>; \}, `$strip`\>\], `"kind"`\>\>; `id`: `ZodString`; `mult`: `ZodNumber`; `number`: `ZodString`; `population`: `ZodEnum`\<\{ `FAS`: `"FAS"`; `ITT`: `"ITT"`; `PER_PROTOCOL`: `"PER_PROTOCOL"`; `SAFETY`: `"SAFETY"`; `SCREENED`: `"SCREENED"`; \}\>; `soc`: `ZodOptional`\<`ZodString`\>; `title`: `ZodString`; `topic`: `ZodString`; \}, `$strip`\>

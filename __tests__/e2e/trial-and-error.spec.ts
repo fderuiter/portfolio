@@ -4,6 +4,8 @@ import AxeBuilder from "@axe-core/playwright";
 const ROUTE = "/arcade/trial-and-error";
 const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
 const BLOCKING = new Set(["critical", "serious", "moderate"]);
+const DRAFT_A = "C-T14.1.1-A";
+const DM_LISTING = "C-L16.2.4";
 
 async function launch(page: Page) {
   await page.goto(ROUTE, { waitUntil: "domcontentloaded" });
@@ -12,7 +14,7 @@ async function launch(page: Page) {
     if (await launchBtn.isVisible()) {
       await launchBtn.click();
     }
-    await expect(page.getByRole("grid")).toBeVisible({ timeout: 3000 });
+    await expect(page.getByTestId("hand")).toBeVisible({ timeout: 3000 });
   }).toPass({ timeout: 30000 });
 }
 
@@ -36,21 +38,33 @@ async function expectNoHorizontalOverflow(page: Page) {
   expect(overflow).toBeLessThanOrEqual(0);
 }
 
+const card = (page: Page, id: string) => page.locator(`[data-card-id="${id}"]`);
+const player = (page: Page) => page.getByTestId("score-player");
+
+interface TeProbe {
+  seen: string[];
+  entries: { start: number; value: number; sources: string[] }[];
+  end: number | null;
+}
+const drawer = (page: Page) => page.getByTestId("inspect-drawer");
 const gridCell = (page: Page, row: number, col: number) =>
-  page
+  drawer(page)
     .getByRole("row")
     .nth(row + 1)
     .getByRole("gridcell")
     .nth(col);
 
-test.describe("Trial & Error: Biostat Ops QC Desk", () => {
-  test("is fully keyboard-playable: review, correct, play, and clear the Small Blind", async ({
+test.describe("Trial & Error: Biostat Ops Card Table", () => {
+  test("is fully keyboard-playable: inspect, correct, select, play and clear the Small Blind", async ({
     page,
   }) => {
     await launch(page);
-    await gridCell(page, 0, 0).focus();
+    await card(page, DRAFT_A).focus();
 
-    // Walk every cell with the arrow keys, inspecting and correcting as we go.
+    // Inspect Draft A (1 CPU): focus moves into the drawer's review grid.
+    await page.keyboard.press("i");
+    await expect(drawer(page)).toBeVisible();
+    await expect(gridCell(page, 0, 0)).toBeFocused();
     for (let row = 0; row < 5; row++) {
       for (let col = 0; col < 3; col++) {
         await expect(gridCell(page, row, col)).toBeFocused();
@@ -63,38 +77,69 @@ test.describe("Trial & Error: Biostat Ops QC Desk", () => {
         await page.keyboard.press("ArrowDown");
       }
     }
-
-    await expect(page.getByTestId("expected-value")).toHaveText(
+    await expect(drawer(page).getByTestId("expected-value")).toHaveText(
       "[57] × [8] = 456"
     );
-    await expect(page.getByTestId("desk-announcer")).not.toBeEmpty();
-    await page.keyboard.press("p");
+
+    // Escape closes the drawer and returns focus to the card.
+    await page.keyboard.press("Escape");
+    await expect(drawer(page)).toBeHidden();
+    await expect(card(page, DRAFT_A)).toBeFocused();
+
+    // Select the TLF Pair and play it with Enter.
+    await page.keyboard.press("Space");
+    await page.keyboard.press("ArrowRight");
+    await expect(card(page, DM_LISTING)).toBeFocused();
+    await page.keyboard.press("Space");
+    await expect(page.getByTestId("hand-preview")).toContainText("TLF Pair");
+    await expect(page.getByTestId("unverified-flag")).toBeHidden();
+    await page.keyboard.press("Enter");
+
+    // The scoring timeline takes focus on its Skip control; Space skips.
+    await expect(player(page)).toBeVisible();
+    await expect(page.getByRole("button", { name: /Skip/ })).toBeFocused();
+    await page.keyboard.press("Space");
+    await expect(player(page)).toBeHidden();
+
     await expect(page.getByTestId("blind-result")).toContainText(
       "Blind cleared"
     );
+    await expect(page.getByTestId("blind-result")).toContainText("828 of 300");
     await expect(
       page.getByRole("button", { name: "Restart Blind" })
     ).toBeFocused();
     await page.keyboard.press("Enter");
-    await expect(gridCell(page, 0, 0)).toBeFocused();
+    await expect(card(page, DRAFT_A)).toBeFocused();
   });
 
-  test("discards with D for 1 CPU", async ({ page }) => {
+  test("an uninspected card still zeroes the hand, and D discards for 1 CPU", async ({
+    page,
+  }) => {
     await launch(page);
-    await gridCell(page, 0, 0).focus();
+    await card(page, DRAFT_A).focus();
+    await page.keyboard.press("Space");
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("Space");
+    await expect(page.getByTestId("unverified-flag")).toBeVisible();
+    await page.keyboard.press("Enter");
+    await page.keyboard.press("Space");
+    await expect(page.getByTestId("last-hand")).toContainText(
+      "(zero-score rule)"
+    );
+    await expect(page.getByTestId("cpu-counter")).toHaveText("8/10");
+
+    await page.keyboard.press("Space");
     await page.keyboard.press("d");
-    await expect(page.getByTestId("cpu-counter")).toContainText("5/6");
-    await expect(
-      page.getByText("Draft B (v0.2)", { exact: true })
-    ).toBeVisible();
+    await expect(page.getByTestId("cpu-counter")).toHaveText("7/10");
+    await expect(page.locator("[data-card-id]:focus")).toHaveCount(1);
   });
 
   for (const width of [390, 1440]) {
-    test(`has zero blocking axe violations in every game state at ${width}px`, async ({
+    test(`has zero blocking axe violations in every table state at ${width}px`, async ({
       page,
     }) => {
-      // Five full-page axe scans plus a cabinet launch can outrun the default
-      // 30s test budget when workers share the CPU.
+      // Several full-page axe scans plus a cabinet launch can outrun the
+      // default 30s test budget when workers share the CPU.
       test.slow();
       // Audit settled frames: the site footer's status ticker cross-fades every
       // few seconds, and a scan landing mid-fade reads a blended ~1.3:1 colour
@@ -103,22 +148,40 @@ test.describe("Trial & Error: Biostat Ops QC Desk", () => {
       await page.emulateMedia({ reducedMotion: "reduce" });
       await page.setViewportSize({ width, height: 900 });
       await launch(page);
-      await expectNoBlockingViolations(page, "fresh desk");
+      await expectNoBlockingViolations(page, "fresh hand");
 
+      await card(page, DRAFT_A).click();
+      await card(page, DM_LISTING).click();
+      await expect(page.getByTestId("unverified-flag")).toBeVisible();
+      await expectNoBlockingViolations(page, "pair selected, unverified");
+
+      await card(page, DRAFT_A).focus();
+      await page.keyboard.press("i");
+      await expect(drawer(page)).toBeVisible();
       await gridCell(page, 2, 2).click();
-      await expectNoBlockingViolations(page, "fatal redline revealed");
+      await expectNoBlockingViolations(
+        page,
+        "inspect drawer, fatal redline revealed"
+      );
 
-      await page.getByRole("button", { name: /Flag & Correct/ }).click();
-      await expectNoBlockingViolations(page, "finding corrected");
+      await drawer(page)
+        .getByRole("button", { name: /Flag & Correct/ })
+        .click();
+      await drawer(page)
+        .getByRole("button", { name: /Close Inspect/ })
+        .click();
+      await expect(drawer(page)).toBeHidden();
+      await expectNoBlockingViolations(page, "after a correction");
 
-      await page.getByRole("button", { name: /Approve & Play/ }).click();
-      await expect(
-        page.getByText("Draft B (v0.2)", { exact: true })
-      ).toBeVisible();
+      await page.getByRole("button", { name: /Play Hand/ }).click();
+      await expect(page.getByTestId("last-hand")).toBeVisible();
       await expectNoBlockingViolations(page, "after a played hand");
 
-      for (let i = 0; i < 2; i++) {
-        await page.getByRole("button", { name: /Reject & Discard/ }).click();
+      // Spend the remaining CPU on single-card hands until the Blind ends.
+      for (let i = 0; i < 6; i++) {
+        if (await page.getByTestId("blind-result").isVisible()) break;
+        await page.locator("[data-card-id]").first().click();
+        await page.getByRole("button", { name: /Play Hand/ }).click();
       }
       await expect(page.getByTestId("blind-result")).toBeVisible();
       await expectNoBlockingViolations(page, "blind over");
@@ -126,9 +189,16 @@ test.describe("Trial & Error: Biostat Ops QC Desk", () => {
   }
 
   for (const width of [320, 375, 768, 1440]) {
-    test(`has no horizontal page overflow at ${width}px`, async ({ page }) => {
+    test(`has no horizontal page overflow at ${width}px, with and without the drawer`, async ({
+      page,
+    }) => {
       await page.setViewportSize({ width, height: 800 });
       await launch(page);
+      await card(page, DRAFT_A).click();
+      await expectNoHorizontalOverflow(page);
+      await card(page, DRAFT_A).focus();
+      await page.keyboard.press("i");
+      await expect(drawer(page)).toBeVisible();
       await gridCell(page, 2, 1).click();
       await expectNoHorizontalOverflow(page);
     });
@@ -140,7 +210,7 @@ test.describe("Trial & Error: Biostat Ops QC Desk", () => {
     await page.evaluate(() => {
       document.documentElement.style.fontSize = "200%";
     });
-    await gridCell(page, 2, 2).click();
+    await card(page, DRAFT_A).click();
     await expectNoHorizontalOverflow(page);
   });
 
@@ -150,7 +220,7 @@ test.describe("Trial & Error: Biostat Ops QC Desk", () => {
     // globals.css clamps every animation to 0.01ms and one iteration under
     // reduced motion; any animation still running longer is a regression.
     const lingering = await page
-      .locator('section[aria-labelledby="qc-desk-heading"] *')
+      .locator('section[aria-labelledby="card-table-heading"] *')
       .evaluateAll(
         (els) =>
           els
@@ -164,6 +234,360 @@ test.describe("Trial & Error: Biostat Ops QC Desk", () => {
       );
     expect(lingering).toBe(0);
   });
+
+  test.describe("scoring spectacle (T&E-UX-02)", () => {
+    async function correctDraftA(page: Page) {
+      await card(page, DRAFT_A).focus();
+      await page.keyboard.press("i");
+      await expect(drawer(page)).toBeVisible();
+      for (let row = 0; row < 5; row++) {
+        for (let col = 0; col < 3; col++) {
+          await gridCell(page, row, col).click();
+          await page.keyboard.press("c");
+        }
+      }
+      await page.keyboard.press("Escape");
+      await expect(drawer(page)).toBeHidden();
+    }
+
+    test("plays the timeline at 4× without layout shift and lands on CLEARED", async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.emulateMedia({ reducedMotion: "no-preference" });
+      await launch(page);
+      await page.getByRole("button", { name: "4×" }).click();
+      await expect(page.getByRole("button", { name: "4×" })).toHaveAttribute(
+        "aria-pressed",
+        "true"
+      );
+      await correctDraftA(page);
+      await card(page, DRAFT_A).click();
+      await card(page, DM_LISTING).click();
+
+      // Record what playback shows and any layout shift while it runs: at 4×
+      // the final frame holds for only 150 ms, too briefly to poll for.
+      await page.evaluate(() => {
+        const w = window as Window & { __te?: TeProbe };
+        const probe: TeProbe = { seen: [], entries: [], end: null };
+        w.__te = probe;
+        const note = (label: string) => {
+          if (!probe.seen.includes(label)) probe.seen.push(label);
+        };
+        new MutationObserver(() => {
+          const player = document.querySelector('[data-testid="score-player"]');
+          if (player) note("player");
+          if (player?.classList.contains("te-loud-fire")) note("fire");
+          if (document.querySelector('[data-testid="player-cleared"]')) {
+            note("player-cleared");
+          }
+          const flash = document.querySelector(
+            '[data-testid="blind-cleared-flash"]'
+          );
+          if (flash?.textContent === "Cleared") note("blind-cleared-flash");
+          if (!player && probe.seen.includes("player") && probe.end === null) {
+            probe.end = performance.now();
+          }
+        }).observe(document.body, {
+          subtree: true,
+          childList: true,
+          characterData: true,
+          attributes: true,
+        });
+        new PerformanceObserver((list) => {
+          for (const raw of list.getEntries()) {
+            const entry = raw as PerformanceEntry & {
+              value: number;
+              hadRecentInput: boolean;
+              sources?: { node?: Node | null }[];
+            };
+            if (entry.hadRecentInput) continue;
+            probe.entries.push({
+              start: entry.startTime,
+              value: entry.value,
+              sources: (entry.sources ?? []).map((source) => {
+                const el = source.node as HTMLElement | null;
+                return (
+                  el?.outerHTML ??
+                  source.node?.parentElement?.outerHTML ??
+                  ""
+                ).slice(0, 160);
+              }),
+            });
+          }
+        }).observe({ type: "layout-shift" });
+      });
+      // Document-relative, so clicking Play (which may scroll) is not a shift.
+      const handBox = () =>
+        page.getByTestId("hand").evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          return {
+            x: r.left + window.scrollX,
+            y: r.top + window.scrollY,
+            width: r.width,
+            height: r.height,
+          };
+        });
+      const handBefore = await handBox();
+
+      await page.getByRole("button", { name: /Play Hand/ }).click();
+      await expect(player(page)).toBeVisible();
+      expect(await handBox()).toEqual(handBefore);
+      await expect(player(page)).toBeHidden();
+
+      await expect(page.getByTestId("round-score")).toHaveText("828");
+      await expect(page.getByTestId("blind-result")).toContainText(
+        "Blind cleared"
+      );
+      await expect(page.getByTestId("blind-result")).toContainText(
+        "828 of 300"
+      );
+      const probe = await page.evaluate(
+        () => (window as Window & { __te?: TeProbe }).__te!
+      );
+      expect(probe.seen).toEqual(
+        expect.arrayContaining([
+          "player",
+          "fire",
+          "player-cleared",
+          "blind-cleared-flash",
+        ])
+      );
+      // Layout shift during playback only: the result panel replacing the
+      // hand after resolution is a deliberate end-of-Blind transition.
+      expect(probe.end).not.toBeNull();
+      const during = probe.entries.filter((e) => e.start < probe.end!);
+      expect(
+        during.reduce((sum, e) => sum + e.value, 0),
+        JSON.stringify(during, null, 1)
+      ).toBe(0);
+
+      const breakdown = page.getByTestId("score-breakdown");
+      await breakdown.locator("summary").focus();
+      await page.keyboard.press("Enter");
+      await expect(breakdown.getByRole("listitem").last()).toContainText(
+        "Target crossed: Blind cleared."
+      );
+    });
+
+    test("is axe clean mid-playback, with the zero-rule slam", async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.emulateMedia({ reducedMotion: "no-preference" });
+      await launch(page);
+      await card(page, DRAFT_A).click();
+      await card(page, DM_LISTING).click();
+      await page.getByRole("button", { name: /Play Hand/ }).click();
+      await expect(page.getByTestId("zero-slam")).toHaveText(
+        "DENOMINATOR ERROR ×0"
+      );
+      const results = await new AxeBuilder({ page })
+        .include('section[aria-labelledby="card-table-heading"]')
+        .withTags(WCAG_TAGS)
+        .analyze();
+      expect(
+        results.violations.filter((v) => BLOCKING.has(v.impact ?? ""))
+      ).toEqual([]);
+      // A slow scan can outlast playback, so skip only if it is still running.
+      await page.evaluate(() =>
+        document
+          .querySelector<HTMLElement>('[data-testid="score-player"]')
+          ?.click()
+      );
+      await expect(player(page)).toBeHidden();
+      await expect(page.getByTestId("last-hand")).toContainText(
+        "(zero-score rule)"
+      );
+    });
+
+    test("under reduced motion skips straight to the result", async ({
+      page,
+    }) => {
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await launch(page);
+      await card(page, DRAFT_A).click();
+      await card(page, DM_LISTING).click();
+      await page.getByRole("button", { name: /Play Hand/ }).click();
+      await expect(page.getByTestId("last-hand")).toBeVisible();
+      await expect(player(page)).toHaveCount(0);
+    });
+  });
+
+  test.describe("card faces and physicality (T&E-UX-03)", () => {
+    const order = (page: Page) =>
+      page
+        .locator("[data-card-id]")
+        .evaluateAll((els) => els.map((el) => el.getAttribute("data-card-id")));
+
+    test("prints a live mini-output on every card in hand", async ({
+      page,
+    }) => {
+      await launch(page);
+      const cards = page.locator("[data-card-id]");
+      await expect(cards).toHaveCount(8);
+      for (let i = 0; i < 8; i++) {
+        await expect(cards.nth(i).locator("[data-face-kind]")).toHaveCount(1);
+      }
+      await expect(
+        card(page, "C-L16.2.4").locator('[data-face-kind="LISTING"]')
+      ).toContainText("S-001");
+      await expect(
+        card(page, "C-F14.2.1").locator('[data-face-kind="FIGURE"] path')
+      ).toHaveCount(2);
+    });
+
+    test("reads a card with ? and reorders with Alt+arrows, axe clean", async ({
+      page,
+    }) => {
+      test.slow();
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await launch(page);
+      await card(page, "C-T14.1.2").focus();
+      await page.keyboard.press("Shift+Slash");
+      const detail = page.getByTestId("card-detail");
+      await expect(detail).toBeVisible();
+      await expect(detail.getByRole("table")).toContainText("Completed");
+      // The global Field Manual shortcut must not also fire.
+      await expect(page.getByRole("dialog")).toHaveCount(1);
+      await expectNoBlockingViolations(page, "card detail open");
+      await page.keyboard.press("Escape");
+      await expect(detail).toBeHidden();
+      await expect(card(page, "C-T14.1.2")).toBeFocused();
+
+      const before = await order(page);
+      await page.keyboard.press("Alt+ArrowLeft");
+      const after = await order(page);
+      const from = before.indexOf("C-T14.1.2");
+      expect(after[from - 1]).toBe("C-T14.1.2");
+      await expect(card(page, "C-T14.1.2")).toBeFocused();
+      await expectNoBlockingViolations(page, "after a keyboard reorder");
+    });
+
+    test("drags a card by its grip to reorder the hand", async ({ page }) => {
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await launch(page);
+      const first = (await order(page))[0]!;
+      const grip = page.getByTestId("drag-grip").first();
+      const target = await page.locator("[data-card-id]").nth(2).boundingBox();
+      const box = await grip.boundingBox();
+      await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(target!.x + target!.width * 0.75, box!.y + 4, {
+        steps: 20,
+      });
+      await page.mouse.up();
+      await expect.poll(async () => (await order(page)).indexOf(first)).toBe(2);
+    });
+
+    test("breathes at rest on desktop, and not below 768px", async ({
+      page,
+    }) => {
+      await page.emulateMedia({ reducedMotion: "no-preference" });
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await launch(page);
+      const wobble = () =>
+        page
+          .locator(".te-card-wobble")
+          .first()
+          .evaluate((el) => getComputedStyle(el).animationName);
+      expect(await wobble()).toBe("te-card-breathe");
+      await page.setViewportSize({ width: 375, height: 800 });
+      await expect.poll(wobble).toBe("none");
+    });
+
+    test("scrolls the hand inside its own container at 320px", async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 320, height: 700 });
+      await launch(page);
+      const hand = page.getByTestId("hand");
+      const { scroll, client } = await hand.evaluate((el) => ({
+        scroll: el.scrollWidth,
+        client: el.clientWidth,
+      }));
+      expect(scroll).toBeGreaterThan(client);
+      await expectNoHorizontalOverflow(page);
+      await card(page, "C-L16.1.1").scrollIntoViewIfNeeded();
+      await card(page, "C-L16.1.1").click();
+      await expect(card(page, "C-L16.1.1")).toHaveAttribute(
+        "aria-pressed",
+        "true"
+      );
+    });
+
+    test("keeps the card detail readable at 200% zoom", async ({ page }) => {
+      await page.setViewportSize({ width: 1280, height: 800 });
+      await launch(page);
+      await page.evaluate(() => {
+        document.documentElement.style.fontSize = "200%";
+      });
+      await card(page, "C-T14.3.1").focus();
+      await page.keyboard.press("Shift+Slash");
+      await expect(page.getByTestId("card-detail")).toBeVisible();
+      await expectNoHorizontalOverflow(page);
+    });
+  });
+
+  test.describe("juice kit loud layer (T&E-UX-04)", () => {
+    const layerAnimations = (page: Page) =>
+      page.evaluate(
+        () =>
+          document.getAnimations().filter((a) => {
+            const target = (a.effect as KeyframeEffect | null)?.target;
+            return target instanceof Element
+              ? target.closest("[data-te-loud-layer]") !== null
+              : false;
+          }).length
+      );
+
+    async function playPair(page: Page) {
+      await card(page, DRAFT_A).click();
+      await card(page, DM_LISTING).click();
+      await page.getByRole("button", { name: /Play Hand/ }).click();
+    }
+
+    test("is inert at rest and runs only during resolution at 1440px", async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.emulateMedia({ reducedMotion: "no-preference" });
+      await launch(page);
+      await expect(page.locator("[data-te-loud-layer]")).toHaveCount(0);
+      expect(await layerAnimations(page)).toBe(0);
+
+      await playPair(page);
+      await expect(page.locator("[data-te-loud-layer]")).toHaveCount(2);
+      expect(await layerAnimations(page)).toBeGreaterThan(0);
+
+      await expect(player(page)).toBeHidden();
+      await expect(page.locator("[data-te-loud-layer]")).toHaveCount(0);
+      expect(await layerAnimations(page)).toBe(0);
+    });
+
+    test("never appears at 375px", async ({ page }) => {
+      await page.setViewportSize({ width: 375, height: 800 });
+      await page.emulateMedia({ reducedMotion: "no-preference" });
+      await launch(page);
+      await playPair(page);
+      await expect(player(page)).toBeVisible();
+      await expect(page.locator("[data-te-loud-layer]")).toHaveCount(0);
+    });
+
+    test("offers cabinet SFX and Music switches that persist", async ({
+      page,
+    }) => {
+      await launch(page);
+      const music = page.getByRole("button", { name: "Music", exact: true });
+      await expect(music).toHaveAttribute("aria-pressed", "false");
+      await music.click();
+      await expect(music).toHaveAttribute("aria-pressed", "true");
+      expect(
+        await page.evaluate(() => window.localStorage.getItem("te:audio"))
+      ).toBe("sfx=1;music=1");
+    });
+  });
+
   test.describe("cabinet loud-moment switch (ADR 0046 amendment)", () => {
     const cabinet = (page: Page) => page.locator("[data-te-cabinet]");
 

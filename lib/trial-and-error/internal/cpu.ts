@@ -2,6 +2,7 @@
 export const CPU_COSTS = Object.freeze({
   PLAY_HAND: 2,
   DISCARD: 1,
+  INSPECT: 1,
 });
 
 /** An action that consumes CPU. */

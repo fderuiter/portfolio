@@ -8,6 +8,13 @@ import type {
 import { CPU_COSTS, canAfford, cpuReducer, type CpuLedger } from "./cpu";
 import { evaluateHand, ruleResultsFor } from "./scoring";
 import { validate } from "./validator";
+import {
+  correctFinding,
+  deriveInspectionView,
+  inspectCell,
+  unpenalizedMult,
+  type DeskCellView,
+} from "./inspection";
 
 /** Where the Blind stands. */
 export type DeskStatus = "REVIEWING" | "CLEARED" | "FAILED";
@@ -46,19 +53,7 @@ export type DeskAction =
   | { type: "DISCARD" }
   | { type: "RESET" };
 
-/** Review status of one displayed cell. */
-export type DeskCellStatus = "UNREVIEWED" | "CLEAN" | "REDLINE" | "CORRECTED";
-
-/** One grid cell as the HUD should render it. */
-export interface DeskCellView {
-  row: number;
-  col: number;
-  /** The corrected value once every finding on the cell is resolved. */
-  display: string;
-  observed: string;
-  status: DeskCellStatus;
-  findingIds: string[];
-}
+export type { DeskCellStatus, DeskCellView } from "./inspection";
 
 /** Everything the HUD renders, derived purely from scenario and state. */
 export interface DeskView {
@@ -79,8 +74,6 @@ export interface DeskView {
   canPlay: boolean;
   canDiscard: boolean;
 }
-
-const cellKey = (row: number, col: number) => `${row}:${col}`;
 
 /** Fresh desk state for a scenario: first draft staged, full CPU. */
 export function createDeskState(scenario: Scenario): DeskState {
@@ -183,65 +176,29 @@ export function advanceDesk(
   const report = reportFor(scenario, table);
 
   switch (action.type) {
-    case "INSPECT_CELL": {
-      const { row, col } = action;
-      const rowLabel = table.rows[row]?.label;
-      const colLabel = table.columns[col]?.label;
-      if (rowLabel === undefined || colLabel === undefined) {
-        return {
-          ...state,
-          lastEvent: withEvent(
-            state,
-            "REFUSED",
-            "That cell is outside the table."
-          ),
-        };
-      }
-      const key = cellKey(row, col);
-      const found = report.findings.filter(
-        (f) => f.cell.row === row && f.cell.col === col
-      );
-      const message =
-        found.length === 0
-          ? `${rowLabel}, ${colLabel}: clean.`
-          : `${rowLabel}, ${colLabel}: ${found.length} redline${found.length === 1 ? "" : "s"}. ${found.map((f) => `${f.category} (${f.severity})`).join(", ")}.`;
-      return {
-        ...state,
-        inspectedCells: state.inspectedCells.includes(key)
-          ? state.inspectedCells
-          : [...state.inspectedCells, key],
-        lastEvent: withEvent(state, "INSPECTED", message),
-      };
-    }
-
+    case "INSPECT_CELL":
     case "CORRECT_FINDING": {
-      const target = report.findings.find((f) => f.id === action.findingId);
-      const revealed =
-        target !== undefined &&
-        state.inspectedCells.includes(
-          cellKey(target.cell.row, target.cell.col)
-        );
-      if (
-        !target ||
-        !revealed ||
-        state.resolvedFindingIds.includes(target.id)
-      ) {
+      const current = {
+        inspectedCells: state.inspectedCells,
+        resolvedFindingIds: state.resolvedFindingIds,
+      };
+      const outcome =
+        action.type === "INSPECT_CELL"
+          ? inspectCell(table, report, current, action.row, action.col)
+          : correctFinding(report, current, action.findingId);
+      if (!outcome.ok) {
         return {
           ...state,
-          lastEvent: withEvent(
-            state,
-            "REFUSED",
-            "Inspect the cell to reveal an open finding before correcting it."
-          ),
+          lastEvent: withEvent(state, "REFUSED", outcome.message),
         };
       }
       return {
         ...state,
-        resolvedFindingIds: [...state.resolvedFindingIds, target.id],
+        ...outcome.inspection,
         lastEvent: withEvent(
           state,
-          "CORRECTED",
-          `Corrected ${target.observed} to ${target.expected} under ${target.ruleId}.`
+          action.type === "INSPECT_CELL" ? "INSPECTED" : "CORRECTED",
+          outcome.message
         ),
       };
     }
@@ -353,62 +310,20 @@ export function deriveDeskView(scenario: Scenario, state: DeskState): DeskView {
   }
 
   const report = reportFor(scenario, table);
-  const inspected = new Set(state.inspectedCells);
-  const resolved = new Set(state.resolvedFindingIds);
-  const visibleFindings = report.findings.filter((f) =>
-    inspected.has(cellKey(f.cell.row, f.cell.col))
-  );
-  const openFindings = visibleFindings.filter((f) => !resolved.has(f.id));
-
-  const cells = table.rows.map((_, row) =>
-    table.columns.map((__, col): DeskCellView => {
-      const observed = table.cells[row][col];
-      const onCell = report.findings.filter(
-        (f) => f.cell.row === row && f.cell.col === col
-      );
-      const allResolved = onCell.every((f) => resolved.has(f.id));
-      let status: DeskCellStatus = "UNREVIEWED";
-      if (inspected.has(cellKey(row, col))) {
-        status =
-          onCell.length === 0 ? "CLEAN" : allResolved ? "CORRECTED" : "REDLINE";
-      }
-      return {
-        row,
-        col,
-        observed,
-        display: status === "CORRECTED" ? onCell[0].expected : observed,
-        status,
-        findingIds: status === "UNREVIEWED" ? [] : onCell.map((f) => f.id),
-      };
-    })
-  );
-
+  const inspection = deriveInspectionView(table, report, state);
   const expected = scoreHand(
     scenario,
     report,
     state.resolvedFindingIds,
-    visibleFindings.map((f) => f.id)
+    inspection.visibleFindings.map((f) => f.id)
   );
-  const redlinePenalty = expected.ruleResults
-    .filter((r) => r.multDelta < 0)
-    .reduce((total, r) => total - r.multDelta, 0);
 
   return {
     ...base,
+    ...inspection,
     table,
-    cells,
-    visibleFindings,
-    openFindings,
     expected,
-    unpenalizedMult: Math.max(
-      0,
-      expected.mult.base +
-        expected.mult.cardsAndRules +
-        expected.mult.relics +
-        redlinePenalty
-    ),
-    reviewedCells: inspected.size,
-    totalCells: table.rows.length * table.columns.length,
+    unpenalizedMult: unpenalizedMult(expected),
     canPlay: canAfford(state.cpu, "PLAY_HAND"),
     canDiscard: canAfford(state.cpu, "DISCARD"),
   };

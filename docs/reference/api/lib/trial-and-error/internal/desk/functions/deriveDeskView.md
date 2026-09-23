@@ -30,6 +30,10 @@ Derives everything the HUD renders. Pure; safe to call on every render.
 
 `"SMALL_BLIND"` \| `"BIG_BLIND"` \| `"BOSS_BLIND"` = `BlindTierSchema`
 
+#### deck
+
+`object`[] = `...`
+
 #### drawPile
 
 `object`[] = `...`
@@ -149,6 +153,22 @@ Derives everything the HUD renders. Pure; safe to call on every render.
 #### summary
 
 `string` = `...`
+
+#### table
+
+\{ `handSize`: `number`; `maxSelection`: `number`; `startingCpu`: `number`; \} = `TableRulesSchema`
+
+#### table.handSize
+
+`number` = `...`
+
+#### table.maxSelection
+
+`number` = `...`
+
+#### table.startingCpu
+
+`number` = `nonNegativeInt`
 
 #### title
 
