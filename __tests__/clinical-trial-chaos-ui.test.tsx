@@ -343,6 +343,33 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
 
     expect(container.textContent).toContain("Submits:1");
 
+    // Regression: a terminated trial's SDTM rows must not leak into the next trial.
+    const sdtmTabLabel = () =>
+      Array.from(container.querySelectorAll("button")).find((b) =>
+        b.textContent?.includes("Live SDTM Studio")
+      )?.textContent ?? "";
+    expect(sdtmTabLabel()).not.toMatch(/Live SDTM Studio0$/);
+
+    // Let the remaining subjects expire until the auditor issues a 483
+    for (
+      let i = 0;
+      i < 60 && !container.textContent?.includes("TRIAL TERMINATED");
+      i++
+    ) {
+      await act(async () => {
+        vi.advanceTimersByTime(5000);
+      });
+    }
+    expect(container.textContent).toContain("TRIAL TERMINATED");
+
+    const restartBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Restart Phase I")
+    );
+    await act(async () => {
+      restartBtn?.click();
+    });
+    expect(sdtmTabLabel()).toMatch(/Live SDTM Studio0$/);
+
     vi.useRealTimers();
   });
 
@@ -380,6 +407,52 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
       "clinical_trial_chaos",
       "project_click"
     );
+  });
+
+  it("remembers the selected outfit and announces it at clock-in", async () => {
+    await act(async () => {
+      root.render(<ClinicalTrialChaos />);
+    });
+
+    const outfitCard = Array.from(
+      container.querySelectorAll('[role="radio"]')
+    ).find((b) => b.textContent?.includes("The WFH Mullet")) as HTMLElement;
+    expect(outfitCard).toBeDefined();
+
+    await act(async () => {
+      outfitCard.click();
+    });
+
+    expect(outfitCard.getAttribute("aria-checked")).toBe("true");
+    expect(mockStorage.getItem("clinical_chaos_outfit")).toBe("wfh-mullet");
+
+    // A fresh mount restores the saved outfit
+    act(() => {
+      root.unmount();
+    });
+    root = createRoot(container);
+    await act(async () => {
+      root.render(<ClinicalTrialChaos />);
+    });
+    const restored = Array.from(
+      container.querySelectorAll('[role="radio"][aria-checked="true"]')
+    ).map((el) => el.textContent);
+    expect(restored.some((t) => t?.includes("The WFH Mullet"))).toBe(true);
+
+    const startBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Start 3-Phase Campaign")
+    );
+    await act(async () => {
+      startBtn?.click();
+    });
+    const auditTab = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Audit Trail Log")
+    );
+    await act(async () => {
+      auditTab?.click();
+    });
+    expect(container.textContent).toContain("[WARDROBE]");
+    expect(container.textContent).toContain("pyjama bottoms");
   });
 
   it("should load existing high score from localStorage", async () => {

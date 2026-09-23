@@ -53,6 +53,7 @@
 - [lib/clinical-trial-chaos](lib/clinical-trial-chaos/README-1.md)
 - [lib/clinical-trial-chaos/engine](lib/clinical-trial-chaos/engine/README.md)
 - [lib/clinical-trial-chaos/offices](lib/clinical-trial-chaos/offices/README.md)
+- [lib/clinical-trial-chaos/outfits](lib/clinical-trial-chaos/outfits/README.md)
 - [lib/clinical-trial-chaos/scenarios](lib/clinical-trial-chaos/scenarios/README.md)
 - [lib/clinical-trial-chaos/sound-effects](lib/clinical-trial-chaos/sound-effects/README.md)
 - [lib/clinical-trial-chaos/sponsor](lib/clinical-trial-chaos/sponsor/README.md)

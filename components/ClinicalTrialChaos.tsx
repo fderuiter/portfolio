@@ -114,6 +114,12 @@ import {
   applySponsorSkeletonsToReport,
   getSponsorMoodLabel,
   getFollowUpSubject,
+  OUTFITS,
+  DEFAULT_OUTFIT_ID,
+  OutfitConfig,
+  OutfitId,
+  getOutfitById,
+  drawOutfitAvatar,
 } from "@/lib/clinical-trial-chaos";
 
 import {
@@ -174,6 +180,34 @@ interface Particle {
   life: number;
 }
 
+const OUTFIT_STORAGE_KEY = "clinical_chaos_outfit";
+
+function readStoredOutfitId(): OutfitId {
+  if (typeof window === "undefined") return DEFAULT_OUTFIT_ID;
+  try {
+    if (typeof window.localStorage?.getItem === "function") {
+      return getOutfitById(window.localStorage.getItem(OUTFIT_STORAGE_KEY)).id;
+    }
+  } catch {}
+  return DEFAULT_OUTFIT_ID;
+}
+
+/** Small canvas preview of an outfit, drawn with the same renderer as the game. */
+const OutfitPreview: React.FC<{ outfit: OutfitConfig }> = ({ outfit }) => {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const canvas = ref.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    canvas.width = 44 * dpr;
+    canvas.height = 56 * dpr;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawOutfitAvatar(ctx, 22 * dpr, 53 * dpr, outfit, dpr);
+  }, [outfit]);
+  return <canvas ref={ref} aria-hidden="true" className="h-14 w-11 shrink-0" />;
+};
+
 export const ClinicalTrialChaos: React.FC = () => {
   const isMounted = useSyncExternalStore(
     emptySubscribe,
@@ -198,6 +232,17 @@ export const ClinicalTrialChaos: React.FC = () => {
   const [bgmEnabled, setBgmEnabled] = useState(false);
   const [officeId, setOfficeId] = useState<OfficeId>(DEFAULT_OFFICE_ID);
   const office = getOfficeById(officeId);
+  // Cosmetic only; remembered per viewer
+  const [outfitId, setOutfitId] = useState<OutfitId>(readStoredOutfitId);
+  const outfit = getOutfitById(outfitId);
+  const selectOutfit = useCallback((id: OutfitId) => {
+    setOutfitId(id);
+    try {
+      if (typeof window.localStorage?.setItem === "function") {
+        window.localStorage.setItem(OUTFIT_STORAGE_KEY, id);
+      }
+    } catch {}
+  }, []);
   const [sponsor, setSponsor] = useState<SponsorState>(() =>
     createInitialSponsorState()
   );
@@ -393,6 +438,9 @@ export const ClinicalTrialChaos: React.FC = () => {
       setValidatingObs(null);
       setBimoReport(null);
       setLastBimoReport(null);
+      // A new trial (phase 1 or endless) starts a fresh SDTM dataset; advancing
+      // phases continues the same study, so its locked CRFs carry over.
+      if (targetPhase === 1) setSubmittedHistory([]);
       setRuleViolations([]);
       ruleViolationsRef.current = [];
       setPowerUps(createInitialPowerUpInventory());
@@ -406,36 +454,27 @@ export const ClinicalTrialChaos: React.FC = () => {
 
       // Initial subjects: Seeded for Phase 1 campaign or populated from active protocol
       const activeDomains = phaseStations.map((s) => s.id);
+      // Generated openers draw from the shared subject sequence so labels stay
+      // unique (SUBJ-1004+) instead of reusing fixed three-digit ids per run.
       const baseSubs: ClinicalSubject[] = activeProtocol
         ? [
-            generateClinicalSubjectFromProtocol(
-              activeProtocol,
-              0.4,
-              false,
-              100
-            ),
-            generateClinicalSubjectFromProtocol(
-              activeProtocol,
-              0.6,
-              false,
-              101
-            ),
+            generateClinicalSubjectFromProtocol(activeProtocol, 0.4, false),
+            generateClinicalSubjectFromProtocol(activeProtocol, 0.6, false),
             generateClinicalSubjectFromProtocol(
               activeProtocol,
               0.7,
-              targetPhase >= 2,
-              102
+              targetPhase >= 2
             ),
           ]
         : targetPhase === 1 && mode === "campaign"
           ? JSON.parse(JSON.stringify(SEEDED_SCENARIOS))
           : [
-              generateClinicalSubject(0.4, false, 100, activeDomains),
-              generateClinicalSubject(0.6, false, 101, activeDomains),
+              generateClinicalSubject(0.4, false, undefined, activeDomains),
+              generateClinicalSubject(0.6, false, undefined, activeDomains),
               generateClinicalSubject(
                 0.7,
                 targetPhase >= 2,
-                102,
+                undefined,
                 activeDomains
               ),
             ];
@@ -464,6 +503,7 @@ export const ClinicalTrialChaos: React.FC = () => {
         `[OFFICE] Clocked in at ${office.name}. ${office.quirk}`,
         "INFO"
       );
+      addAuditLog(`[WARDROBE] ${outfit.clockInLine}`, "INFO");
 
       recordEvent("clinical_trial_chaos", "project_click").catch(() => {});
 
@@ -496,6 +536,7 @@ export const ClinicalTrialChaos: React.FC = () => {
       effectiveHighScore,
       activeProtocol,
       office,
+      outfit,
       isFullscreen,
     ]
   );
@@ -1075,9 +1116,12 @@ export const ClinicalTrialChaos: React.FC = () => {
 
         // SAE Badge or Domain Badge
         if (subj.isSAE) {
-          ctx.fillStyle = "#ef4444";
+          // Right-aligned so it ends before the status pip; light text reads on the red card
+          ctx.fillStyle = "#fecaca";
           ctx.font = "bold 8px monospace";
-          ctx.fillText("⚡ SAE", px + slotWidth - 45, py + 16);
+          ctx.textAlign = "right";
+          ctx.fillText("⚡ SAE", px + slotWidth - 26, py + 16);
+          ctx.textAlign = "left";
         }
 
         // Compliance status pip
@@ -1100,16 +1144,17 @@ export const ClinicalTrialChaos: React.FC = () => {
         ctx.fillRect(px + 6, py + 38, (slotWidth - 22) * timePercent, 5);
       });
 
-      // Data Manager Desk Avatar (bottom left)
-      ctx.fillStyle = "#10b981";
-      ctx.fillRect(30, height - 28, 20, 20);
-      ctx.fillStyle = "#fed7aa";
-      ctx.beginPath();
-      ctx.arc(40, height - 33, 6, 0, Math.PI * 2);
-      ctx.fill();
+      // Player avatar (in the chosen outfit) at the data manager desk
+      ctx.fillStyle = "#3f3f46";
+      ctx.fillRect(40, height - 20, 34, 4);
+      ctx.fillRect(43, height - 16, 3, 14);
+      ctx.fillRect(68, height - 16, 3, 14);
+      ctx.fillStyle = "#38bdf8";
+      ctx.fillRect(52, height - 30, 14, 10);
+      drawOutfitAvatar(ctx, 26, height - 2, outfit);
       ctx.fillStyle = "#ffffff";
       ctx.font = "bold 8px monospace";
-      ctx.fillText("DM DESK", 18, height - 42);
+      ctx.fillText("YOU", 16, height - 50);
 
       // Auditor Sprite on Top Patrol Floor
       const auditorX = 50 + auditorState.x * (width - 100);
@@ -1201,7 +1246,7 @@ export const ClinicalTrialChaos: React.FC = () => {
         ctx.globalAlpha = 1;
       }
     },
-    [selectedSubjectId, office.floorColor]
+    [selectedSubjectId, office.floorColor, outfit]
   );
 
   // 16b. Mirroring Refs for Stable Game Loop
@@ -2861,7 +2906,9 @@ export const ClinicalTrialChaos: React.FC = () => {
                   </div>
                   <div
                     className={`mt-2 grid gap-2 ${
-                      sortedStations.length > 4 ? "grid-cols-3" : "grid-cols-2"
+                      sortedStations.length > 4
+                        ? "grid-cols-2 sm:grid-cols-3"
+                        : "grid-cols-2"
                     }`}
                   >
                     {sortedStations.map((station, index) => {
@@ -3227,6 +3274,55 @@ export const ClinicalTrialChaos: React.FC = () => {
                       </span>
                       <span className="mt-1 block text-[10px] tabular-nums text-zinc-400">
                         {o.modifiers.scoreMultiplier}× score
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Outfit picker (cosmetic) */}
+              <div className="mt-5 flex flex-wrap items-baseline justify-between gap-2">
+                <h4
+                  id="clinical-outfit-picker-heading"
+                  className="text-xs font-bold uppercase tracking-wider text-zinc-300"
+                >
+                  Pick your outfit
+                </h4>
+                <span className="text-[10px] text-zinc-400">
+                  Cosmetic only. The auditor judges you anyway.
+                </span>
+              </div>
+              <div
+                role="radiogroup"
+                aria-labelledby="clinical-outfit-picker-heading"
+                className="mt-2 grid grid-cols-1 gap-2 @md:grid-cols-2 @3xl:grid-cols-3"
+              >
+                {OUTFITS.map((o) => {
+                  const isSelected = o.id === outfitId;
+                  return (
+                    <button
+                      key={o.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={isSelected}
+                      onClick={() => {
+                        selectOutfit(o.id);
+                        announce(`Outfit set to ${o.name}`, "polite");
+                      }}
+                      className={`flex min-w-0 items-center gap-3 rounded-lg border p-2.5 text-left transition active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 ${
+                        isSelected
+                          ? "border-amber-500/70 bg-amber-500/5"
+                          : "border-zinc-800 bg-[#0d0e11] hover:border-zinc-600"
+                      }`}
+                    >
+                      <OutfitPreview outfit={o} />
+                      <span className="min-w-0">
+                        <span className="block text-xs font-bold text-zinc-100 break-words">
+                          {o.name}
+                        </span>
+                        <span className="mt-0.5 block text-[11px] italic text-zinc-400 break-words">
+                          {o.tagline}
+                        </span>
                       </span>
                     </button>
                   );

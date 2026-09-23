@@ -112,6 +112,12 @@ Re-exports [AuditorState](types/interfaces/AuditorState.md)
 
 ***
 
+### AvatarCanvas
+
+Re-exports [AvatarCanvas](outfits/type-aliases/AvatarCanvas.md)
+
+***
+
 ### BIMOFinding
 
 Re-exports [BIMOFinding](types/interfaces/BIMOFinding.md)
@@ -208,6 +214,18 @@ Re-exports [DEFAULT_OFFICE_ID](offices/variables/DEFAULT_OFFICE_ID.md)
 
 ***
 
+### DEFAULT\_OUTFIT\_ID
+
+Re-exports [DEFAULT_OUTFIT_ID](outfits/variables/DEFAULT_OUTFIT_ID.md)
+
+***
+
+### drawOutfitAvatar
+
+Re-exports [drawOutfitAvatar](outfits/functions/drawOutfitAvatar.md)
+
+***
+
 ### exportToCDISCODMXML
 
 Re-exports [exportToCDISCODMXML](engine/functions/exportToCDISCODMXML.md)
@@ -286,6 +304,12 @@ Re-exports [getOfficeById](offices/functions/getOfficeById.md)
 
 ***
 
+### getOutfitById
+
+Re-exports [getOutfitById](outfits/functions/getOutfitById.md)
+
+***
+
 ### getSponsorMoodLabel
 
 Re-exports [getSponsorMoodLabel](sponsor/functions/getSponsorMoodLabel.md)
@@ -343,6 +367,36 @@ Re-exports [OfficeModifiers](offices/interfaces/OfficeModifiers.md)
 ### OFFICES
 
 Re-exports [OFFICES](offices/variables/OFFICES.md)
+
+***
+
+### OutfitAccessory
+
+Re-exports [OutfitAccessory](outfits/type-aliases/OutfitAccessory.md)
+
+***
+
+### OutfitConfig
+
+Re-exports [OutfitConfig](outfits/interfaces/OutfitConfig.md)
+
+***
+
+### OutfitId
+
+Re-exports [OutfitId](outfits/type-aliases/OutfitId.md)
+
+***
+
+### OutfitPalette
+
+Re-exports [OutfitPalette](outfits/interfaces/OutfitPalette.md)
+
+***
+
+### OUTFITS
+
+Re-exports [OUTFITS](outfits/variables/OUTFITS.md)
 
 ***
 
