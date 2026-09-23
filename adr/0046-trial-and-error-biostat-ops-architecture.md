@@ -310,3 +310,38 @@ Recorded by [#945](https://github.com/fderuiter/portfolio/issues/945).
   selected card (touch) opens a focus-trapped detail dialog with the face at
   full legibility (a real `<table>`, or a described SVG). It shows only
   what the output prints; hidden findings still need Inspect.
+
+### Juice kit (T&E-UX-04)
+
+Recorded by [#946](https://github.com/fderuiter/portfolio/issues/946).
+
+- **Named cues.** `useTeSound().play(cue)` covers the 18 cues in `TE_CUES`,
+  from `chipTick` (pitch climbs per chip step, capped at an octave) to
+  `bossStinger`. Each is a synthesized recipe over the shared `SoundEngine`
+  (`playTone` with pitch ramps and audio-clock delays, `playNoise`). There
+  are no sampled assets and `AudioProvider` is unchanged.
+- **Gates.** `play` returns before any AudioContext work unless the cabinet
+  SFX switch is on, a user gesture has happened, and the engine allows sound.
+  That last check covers the site-wide mute (on by default) and its
+  accessibility bypass, which includes reduced motion. The cabinet's SFX
+  switch (on) and Music switch (off) persist under `te:audio` through
+  guarded storage. When the site is muted, the cabinet offers "Unmute",
+  which calls the provider's `setMuted(false)`. The cabinet has no hover
+  sounds, so the `(hover: none)` rule has nothing to skip.
+- **Wiring.** `cueForStep(timeline, index)` maps each score-timeline step to
+  its cue and `ScorePlayer`'s `onStep` plays it. Card-table events play
+  select, deselect, discard, deal and flip cues. A Blind that ends plays
+  `blindCleared` or `blindFailed` once the hand resolves.
+- **Music.** `TeMusicLoop` schedules a triangle pattern through a lowpass
+  filter on the audio clock with a 30 ms lookahead timer. It holds no React
+  state, so a beat never renders. It starts only when Music is on, the site
+  is unmuted and a gesture has happened. It stops when the cabinet unmounts,
+  the tab is hidden, the site mutes or audio is torn down
+  (`registerAudioCleanup`). Boss Blinds raise the tempo and the filter
+  cutoff, and the loop ducks while a hand resolves.
+- **Loud layers.** `LoudLayer` mounts a CRT overlay (scanlines, a vignette
+  and a radial mask for curvature) and a slow conic swirl only while a hand
+  resolves, and only when the cabinet's loud switch allows it. At rest it
+  renders nothing, so nothing animates. Screen shake takes its amplitude
+  from `--te-shake-amp`, set by `shakeAmplitude(intensity)` and capped at
+  `MAX_SHAKE_PX` (6). `LOUD_PRESETS` names the flame and glow classes.
