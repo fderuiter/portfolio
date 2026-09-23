@@ -92,6 +92,14 @@
 
 ***
 
+### reviewThreads?
+
+> `optional` **reviewThreads?**: [`StudyReviewThread`](StudyReviewThread.md)[]
+
+Local authoring discussion and lifecycle history, separate from EDC audit data.
+
+***
+
 ### rules?
 
 > `optional` **rules?**: [`EditCheckRule`](EditCheckRule.md)[]

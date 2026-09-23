@@ -1970,6 +1970,42 @@ Re-exports [StudyProvenance](types/interfaces/StudyProvenance.md)
 
 ***
 
+### StudyReviewActor
+
+Re-exports [StudyReviewActor](types/interfaces/StudyReviewActor.md)
+
+***
+
+### StudyReviewEvent
+
+Re-exports [StudyReviewEvent](types/type-aliases/StudyReviewEvent.md)
+
+***
+
+### StudyReviewEventBase
+
+Re-exports [StudyReviewEventBase](types/interfaces/StudyReviewEventBase.md)
+
+***
+
+### StudyReviewRole
+
+Re-exports [StudyReviewRole](types/type-aliases/StudyReviewRole.md)
+
+***
+
+### StudyReviewTarget
+
+Re-exports [StudyReviewTarget](types/interfaces/StudyReviewTarget.md)
+
+***
+
+### StudyReviewThread
+
+Re-exports [StudyReviewThread](types/interfaces/StudyReviewThread.md)
+
+***
+
 ### StudySnapshot
 
 Re-exports [StudySnapshot](study-draft-storage/interfaces/StudySnapshot.md)
