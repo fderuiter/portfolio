@@ -317,11 +317,22 @@ test.describe("Trial & Error: Biostat Ops Card Table", () => {
           }
         }).observe({ type: "layout-shift" });
       });
-      const handBox = await page.getByTestId("hand").boundingBox();
+      // Document-relative, so clicking Play (which may scroll) is not a shift.
+      const handBox = () =>
+        page.getByTestId("hand").evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          return {
+            x: r.left + window.scrollX,
+            y: r.top + window.scrollY,
+            width: r.width,
+            height: r.height,
+          };
+        });
+      const handBefore = await handBox();
 
       await page.getByRole("button", { name: /Play Hand/ }).click();
       await expect(player(page)).toBeVisible();
-      expect(await page.getByTestId("hand").boundingBox()).toEqual(handBox);
+      expect(await handBox()).toEqual(handBefore);
       await expect(player(page)).toBeHidden();
 
       await expect(page.getByTestId("round-score")).toHaveText("828");
@@ -515,6 +526,65 @@ test.describe("Trial & Error: Biostat Ops Card Table", () => {
       await page.keyboard.press("Shift+Slash");
       await expect(page.getByTestId("card-detail")).toBeVisible();
       await expectNoHorizontalOverflow(page);
+    });
+  });
+
+  test.describe("juice kit loud layer (T&E-UX-04)", () => {
+    const layerAnimations = (page: Page) =>
+      page.evaluate(
+        () =>
+          document.getAnimations().filter((a) => {
+            const target = (a.effect as KeyframeEffect | null)?.target;
+            return target instanceof Element
+              ? target.closest("[data-te-loud-layer]") !== null
+              : false;
+          }).length
+      );
+
+    async function playPair(page: Page) {
+      await card(page, DRAFT_A).click();
+      await card(page, DM_LISTING).click();
+      await page.getByRole("button", { name: /Play Hand/ }).click();
+    }
+
+    test("is inert at rest and runs only during resolution at 1440px", async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.emulateMedia({ reducedMotion: "no-preference" });
+      await launch(page);
+      await expect(page.locator("[data-te-loud-layer]")).toHaveCount(0);
+      expect(await layerAnimations(page)).toBe(0);
+
+      await playPair(page);
+      await expect(page.locator("[data-te-loud-layer]")).toHaveCount(2);
+      expect(await layerAnimations(page)).toBeGreaterThan(0);
+
+      await expect(player(page)).toBeHidden();
+      await expect(page.locator("[data-te-loud-layer]")).toHaveCount(0);
+      expect(await layerAnimations(page)).toBe(0);
+    });
+
+    test("never appears at 375px", async ({ page }) => {
+      await page.setViewportSize({ width: 375, height: 800 });
+      await page.emulateMedia({ reducedMotion: "no-preference" });
+      await launch(page);
+      await playPair(page);
+      await expect(player(page)).toBeVisible();
+      await expect(page.locator("[data-te-loud-layer]")).toHaveCount(0);
+    });
+
+    test("offers cabinet SFX and Music switches that persist", async ({
+      page,
+    }) => {
+      await launch(page);
+      const music = page.getByRole("button", { name: "Music", exact: true });
+      await expect(music).toHaveAttribute("aria-pressed", "false");
+      await music.click();
+      await expect(music).toHaveAttribute("aria-pressed", "true");
+      expect(
+        await page.evaluate(() => window.localStorage.getItem("te:audio"))
+      ).toBe("sfx=1;music=1");
     });
   });
 

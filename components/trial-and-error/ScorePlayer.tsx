@@ -3,6 +3,11 @@
 import React, { useEffect, useEffectEvent, useState } from "react";
 import { motion } from "framer-motion";
 import { HAND_NAMES, type TimelineStep } from "@/lib/trial-and-error";
+import {
+  LOUD_PRESETS,
+  MAX_SHAKE_PX,
+  shakeAmplitude,
+} from "@/components/trial-and-error/LoudLayer";
 
 /** Total budget for a hand's steps at 1×, before the closing hold. */
 const STEP_BUDGET_MS = 3300;
@@ -89,8 +94,12 @@ interface ScorePlayerProps {
   skipRef?: React.Ref<HTMLButtonElement>;
 }
 
-const isLoudStep = (step: TimelineStep | undefined) =>
-  step?.kind === "ZERO_RULE" || (step?.kind === "X_MULT" && step.factor !== 1);
+/** How hard a step shakes the plate: 0 for calm steps, the cap for ×0. */
+const shakeIntensity = (step: TimelineStep | undefined): number => {
+  if (step?.kind === "ZERO_RULE") return MAX_SHAKE_PX;
+  if (step?.kind === "X_MULT" && step.factor !== 1) return 2 + step.factor;
+  return 0;
+};
 
 /**
  * The scoring spectacle (T&E-UX-02). Displays the score timeline up to the
@@ -116,16 +125,27 @@ export function ScorePlayer({
   const scored = new Set(
     revealed.flatMap((s) => (s.kind === "CARD_SCORED" ? [s.cardId] : []))
   );
-  const loud = loudEffectsEnabled && isLoudStep(current);
+  const intensity = shakeIntensity(current);
+  const loud = loudEffectsEnabled && intensity > 0;
   const fire = loudEffectsEnabled && progress?.crossed;
 
   return (
     <div
-      className={`relative ${fire ? "te-loud-fire" : ""}`}
+      className={`relative ${fire ? LOUD_PRESETS.scorePlate : ""}`}
       onClick={onSkip}
       data-testid="score-player"
     >
-      <div key={loud ? shown : "calm"} className={loud ? "te-loud-shake" : ""}>
+      <div
+        key={loud ? shown : "calm"}
+        className={loud ? "te-loud-shake" : ""}
+        style={
+          loud
+            ? ({
+                "--te-shake-amp": shakeAmplitude(intensity),
+              } as React.CSSProperties)
+            : undefined
+        }
+      >
         <p className="text-[10px] uppercase tracking-wider text-zinc-400">
           {base?.kind === "HAND_BASE" ? HAND_NAMES[base.handType] : "Scoring"}
         </p>
@@ -176,7 +196,10 @@ export function ScorePlayer({
             </motion.span>
           )}
           {total?.kind === "TOTAL" && (
-            <span className={fire ? "te-loud-glow" : ""}> = {total.score}</span>
+            <span className={fire ? LOUD_PRESETS.clearedBlind : ""}>
+              {" "}
+              = {total.score}
+            </span>
           )}
         </p>
         <p className="mt-1 min-h-[2.5em] text-xs text-zinc-300 break-words">

@@ -710,6 +710,12 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
         key: "Alt + ← →",
       },
       {
+        action: "Cabinet audio",
+        description:
+          "SFX and Music switch the cabinet's synthesized sounds and its music loop. Both stay silent while site sound is muted (the default); Unmute turns site sound on. Music is off until you turn it on.",
+        key: "SFX / Music",
+      },
+      {
         action: "Skip scoring",
         description:
           "While a played hand scores step by step, Space, the Skip button or a click on the score plate jumps to the result. The 1×, 2× and 4× buttons set the scoring speed.",

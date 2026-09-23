@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useEffect, useReducer, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useEffectEvent,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, Reorder, motion } from "framer-motion";
 import {
@@ -30,6 +36,15 @@ import {
   useScorePlayback,
 } from "@/components/trial-and-error/ScorePlayer";
 import { useTeMotion } from "@/components/trial-and-error/useTeMotion";
+import {
+  LOUD_PRESETS,
+  LoudLayer,
+} from "@/components/trial-and-error/LoudLayer";
+import { cueForStep, type TeCue } from "@/components/trial-and-error/teAudio";
+import {
+  useTeMusic,
+  useTeSound,
+} from "@/components/trial-and-error/useTeSound";
 
 interface CardTableProps {
   scenario?: Scenario;
@@ -91,11 +106,22 @@ export function CardTable({
   const animateCards = !reducedMotion;
   const physical = !reducedMotion && !isCompactViewport;
   const timeline = view.lastTimeline;
+  const sound = useTeSound();
   const playback = useScorePlayback(timeline, state.lastPlay, {
     speed,
     reducedMotion,
+    onStep: (_step, index) => {
+      const cue = timeline && cueForStep(timeline, index);
+      if (cue) sound.play(cue.cue, { step: cue.step });
+    },
   });
   const playing = playback.playing;
+  useTeMusic({
+    enabled: sound.musicEnabled,
+    siteMuted: sound.siteMuted,
+    boss: scenario.blind.tier === "BOSS_BLIND",
+    ducked: playing,
+  });
   const progressStep = timeline?.[timeline.length - 1];
   const progress =
     progressStep?.kind === "BLIND_PROGRESS" ? progressStep : undefined;
@@ -147,8 +173,27 @@ export function CardTable({
 
   // A played hand is announced once, as a summary, after its timeline
   // resolves, so screen readers are not flooded while it plays.
+  const playEventCues = useEffectEvent(
+    (kind: NonNullable<TableState["lastEvent"]>["kind"]) => {
+      const cues: Partial<Record<typeof kind, TeCue[]>> = {
+        SELECTED: ["cardSelect"],
+        DESELECTED: ["cardDeselect"],
+        DISCARDED: ["discardWhoosh", "cardDeal"],
+        PLAYED: ["cardDeal"],
+        INSPECT_OPENED: ["cardFlip"],
+      };
+      cues[kind]?.forEach((cue) => sound.play(cue));
+      if (kind === "PLAYED" || kind === "DISCARDED") {
+        if (state.status === "CLEARED") sound.play("blindCleared");
+        if (state.status === "FAILED") sound.play("blindFailed");
+      }
+    }
+  );
+
   useEffect(() => {
-    if (state.lastEvent && !playing) announce(state.lastEvent.message);
+    if (!state.lastEvent || playing) return;
+    announce(state.lastEvent.message);
+    playEventCues(state.lastEvent.kind);
   }, [state.lastEvent, announce, playing]);
 
   useEffect(() => {
@@ -303,8 +348,9 @@ export function CardTable({
   return (
     <section
       aria-labelledby="card-table-heading"
-      className="w-full min-w-0 bg-[color:var(--te-surface-0)] font-mono text-[color:var(--te-text)] border border-zinc-800 section-isolate"
+      className="relative w-full min-w-0 bg-[color:var(--te-surface-0)] font-mono text-[color:var(--te-text)] border border-zinc-800 section-isolate"
     >
+      <LoudLayer loud={playing} enabled={loudEffectsEnabled} />
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800 px-4 py-3">
         <div className="min-w-0">
           <h2
@@ -317,7 +363,44 @@ export function CardTable({
             {scenario.summary}
           </p>
         </div>
-        <FieldManualButton manualId="trial-and-error" label="Manual" />
+        <div className="flex flex-wrap items-center gap-2">
+          <div
+            role="group"
+            aria-label="Cabinet audio"
+            className="flex flex-wrap items-center gap-1 text-[10px] font-bold uppercase tracking-wider"
+          >
+            {sound.siteMuted && (
+              <button
+                type="button"
+                onClick={sound.unmuteSite}
+                className="min-h-[44px] border border-zinc-600 px-3 text-zinc-200 touch-manipulation hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+              >
+                Sound off · Unmute
+              </button>
+            )}
+            {(
+              [
+                ["SFX", sound.sfxEnabled, sound.setSfxEnabled],
+                ["Music", sound.musicEnabled, sound.setMusicEnabled],
+              ] as const
+            ).map(([label, on, set]) => (
+              <button
+                key={label}
+                type="button"
+                aria-pressed={on}
+                onClick={() => set(!on)}
+                className={`min-h-[44px] border px-3 touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+                  on
+                    ? "border-amber-400 bg-amber-500/10 text-amber-300"
+                    : "border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <FieldManualButton manualId="trial-and-error" label="Manual" />
+        </div>
       </header>
 
       <div className="grid gap-px bg-zinc-800 md:grid-cols-[minmax(0,14rem)_minmax(0,1fr)]">
@@ -367,7 +450,7 @@ export function CardTable({
             ))}
           </div>
           <p
-            className={`mt-2 min-h-[1.25rem] font-bold uppercase tracking-wider text-emerald-300 ${flashCleared && loudEffectsEnabled ? "te-loud-glow" : ""}`}
+            className={`mt-2 min-h-[1.25rem] font-bold uppercase tracking-wider text-emerald-300 ${flashCleared && loudEffectsEnabled ? LOUD_PRESETS.clearedBlind : ""}`}
             aria-hidden="true"
             data-testid="blind-cleared-flash"
           >
