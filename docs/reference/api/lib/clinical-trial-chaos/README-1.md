@@ -34,6 +34,48 @@ Re-exports [AmendmentType](types/type-aliases/AmendmentType.md)
 
 ***
 
+### applyOfficeAmendmentInterval
+
+Re-exports [applyOfficeAmendmentInterval](offices/functions/applyOfficeAmendmentInterval.md)
+
+***
+
+### applyOfficeCharge
+
+Re-exports [applyOfficeCharge](offices/functions/applyOfficeCharge.md)
+
+***
+
+### applyOfficeErrorChance
+
+Re-exports [applyOfficeErrorChance](offices/functions/applyOfficeErrorChance.md)
+
+***
+
+### applyOfficeScore
+
+Re-exports [applyOfficeScore](offices/functions/applyOfficeScore.md)
+
+***
+
+### applyOfficeSpawnInterval
+
+Re-exports [applyOfficeSpawnInterval](offices/functions/applyOfficeSpawnInterval.md)
+
+***
+
+### applyOfficeToAuditor
+
+Re-exports [applyOfficeToAuditor](offices/functions/applyOfficeToAuditor.md)
+
+***
+
+### applyOfficeToSubject
+
+Re-exports [applyOfficeToSubject](offices/functions/applyOfficeToSubject.md)
+
+***
+
 ### AuditLogEntry
 
 Re-exports [AuditLogEntry](types/interfaces/AuditLogEntry.md)
@@ -136,6 +178,12 @@ Re-exports [createInitialScoreState](engine/functions/createInitialScoreState.md
 
 ***
 
+### DEFAULT\_OFFICE\_ID
+
+Re-exports [DEFAULT_OFFICE_ID](offices/variables/DEFAULT_OFFICE_ID.md)
+
+***
+
 ### exportToCDISCODMXML
 
 Re-exports [exportToCDISCODMXML](engine/functions/exportToCDISCODMXML.md)
@@ -202,6 +250,12 @@ Re-exports [generateSDTMDataset](engine/functions/generateSDTMDataset.md)
 
 ***
 
+### getOfficeById
+
+Re-exports [getOfficeById](offices/functions/getOfficeById.md)
+
+***
+
 ### getStationsForPhase
 
 Re-exports [getStationsForPhase](scenarios/functions/getStationsForPhase.md)
@@ -229,6 +283,36 @@ Re-exports [MOCK_OBSERVATION_TEMPLATES](scenarios/variables/MOCK_OBSERVATION_TEM
 ### MockObservationTemplate
 
 Re-exports [MockObservationTemplate](scenarios/interfaces/MockObservationTemplate.md)
+
+***
+
+### OfficeConfig
+
+Re-exports [OfficeConfig](offices/interfaces/OfficeConfig.md)
+
+***
+
+### OfficeId
+
+Re-exports [OfficeId](offices/type-aliases/OfficeId.md)
+
+***
+
+### OfficeModifiers
+
+Re-exports [OfficeModifiers](offices/interfaces/OfficeModifiers.md)
+
+***
+
+### OFFICES
+
+Re-exports [OFFICES](offices/variables/OFFICES.md)
+
+***
+
+### pickOfficeAmbientEvent
+
+Re-exports [pickOfficeAmbientEvent](offices/functions/pickOfficeAmbientEvent.md)
 
 ***
 

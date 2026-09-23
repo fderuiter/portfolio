@@ -93,6 +93,21 @@ import {
 } from "@/lib/clinical-trial-chaos/scenarios";
 
 import {
+  OFFICES,
+  DEFAULT_OFFICE_ID,
+  OfficeId,
+  getOfficeById,
+  applyOfficeSpawnInterval,
+  applyOfficeErrorChance,
+  applyOfficeAmendmentInterval,
+  applyOfficeScore,
+  applyOfficeCharge,
+  applyOfficeToSubject,
+  applyOfficeToAuditor,
+  pickOfficeAmbientEvent,
+} from "@/lib/clinical-trial-chaos";
+
+import {
   playValidationSound,
   playChoiceIncorrectSound,
   playSignatureVerifiedSound,
@@ -155,6 +170,8 @@ export const ClinicalTrialChaos: React.FC = () => {
   const [playState, setPlayState] = useState<PlayState>("idle");
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [bgmEnabled, setBgmEnabled] = useState(false);
+  const [officeId, setOfficeId] = useState<OfficeId>(DEFAULT_OFFICE_ID);
+  const office = getOfficeById(officeId);
   const [activeTab, setActiveTab] = useState<
     "conveyor" | "sdtm_studio" | "audit_trail"
   >("conveyor");
@@ -237,6 +254,8 @@ export const ClinicalTrialChaos: React.FC = () => {
   const lastTickTimeRef = useRef<number>(0);
   const spawnTimerRef = useRef<number>(0);
   const amendmentTimerRef = useRef<number>(0);
+  const ambientTimerRef = useRef<number>(0);
+  const officeSiteSeqRef = useRef<number>(3);
   const terminalContainerRef = useRef<HTMLDivElement>(null);
   const particlesRef = useRef<Particle[]>([]);
   const activeProtocolRef = useRef<StudyProtocol | null>(activeProtocol);
@@ -300,7 +319,8 @@ export const ClinicalTrialChaos: React.FC = () => {
       setGameMode(mode);
       setPhase(targetPhase);
       setPlayState("playing");
-      setAuditor(createInitialAuditorState());
+      setAuditor(applyOfficeToAuditor(createInitialAuditorState(), office));
+      ambientTimerRef.current = 0;
       const phaseStations = getStationsForPhase(targetPhase, mode);
       setStations(phaseStations);
       setActiveAmendment(null);
@@ -320,7 +340,7 @@ export const ClinicalTrialChaos: React.FC = () => {
 
       // Initial subjects: Seeded for Phase 1 campaign or populated from active protocol
       const activeDomains = phaseStations.map((s) => s.id);
-      const initialSubs = activeProtocol
+      const baseSubs: ClinicalSubject[] = activeProtocol
         ? [
             generateClinicalSubjectFromProtocol(
               activeProtocol,
@@ -354,6 +374,9 @@ export const ClinicalTrialChaos: React.FC = () => {
               ),
             ];
 
+      const initialSubs = baseSubs.map((sub, i) =>
+        applyOfficeToSubject(sub, office, i)
+      );
       setConveyorSubjects(initialSubs);
       setSelectedSubjectId(initialSubs[0]?.id ?? null);
       setScoreState({
@@ -371,10 +394,14 @@ export const ClinicalTrialChaos: React.FC = () => {
         }) EDC Stations Activated: [${activeDomains.join(", ")}].`,
         "INFO"
       );
+      addAuditLog(
+        `[OFFICE] Clocked in at ${office.name}. ${office.quirk}`,
+        "INFO"
+      );
 
       recordEvent("clinical_trial_chaos", "project_click").catch(() => {});
     },
-    [addAuditLog, recordEvent, effectiveHighScore, activeProtocol]
+    [addAuditLog, recordEvent, effectiveHighScore, activeProtocol, office]
   );
 
   // 9. Active Subject in Dossier
@@ -458,7 +485,7 @@ export const ClinicalTrialChaos: React.FC = () => {
         });
 
         // Charge power-ups
-        setPowerUps((pu) => chargePowerUps(pu, 1));
+        setPowerUps((pu) => chargePowerUps(pu, applyOfficeCharge(1, office)));
 
         addAuditLog(
           `Observation Standardized: ${obs.field} -> '${choice}' [${result.explanation}]`,
@@ -514,7 +541,14 @@ export const ClinicalTrialChaos: React.FC = () => {
         );
       }
     },
-    [validatingObs, activeProtocol, activeSubject, triggerSound, addAuditLog]
+    [
+      validatingObs,
+      activeProtocol,
+      activeSubject,
+      office,
+      triggerSound,
+      addAuditLog,
+    ]
   );
 
   // 13. Power-Up Trigger Execution
@@ -574,10 +608,13 @@ export const ClinicalTrialChaos: React.FC = () => {
             ),
           };
 
-          const points = calculateSubmissionPoints(
-            cleanedSubject,
-            scoreState.multiplier,
-            true
+          const points = applyOfficeScore(
+            calculateSubmissionPoints(
+              cleanedSubject,
+              scoreState.multiplier,
+              true
+            ),
+            office
           );
           setScoreState((prev) => ({
             ...prev,
@@ -616,6 +653,7 @@ export const ClinicalTrialChaos: React.FC = () => {
       playState,
       activeSubject,
       scoreState.multiplier,
+      office,
       triggerSound,
       addAuditLog,
     ]
@@ -655,10 +693,9 @@ export const ClinicalTrialChaos: React.FC = () => {
       addAuditLog(result.logMessage, "COMPLIANT", result.suspicionDelta);
 
       const allClean = isSubjectFullyCompliant(subj);
-      const points = calculateSubmissionPoints(
-        subj,
-        scoreState.multiplier,
-        allClean
+      const points = applyOfficeScore(
+        calculateSubmissionPoints(subj, scoreState.multiplier, allClean),
+        office
       );
       const nextCombo = scoreState.combo + 1;
       const nextMultiplier = Math.min(4, 1 + Math.floor(nextCombo / 3));
@@ -689,7 +726,9 @@ export const ClinicalTrialChaos: React.FC = () => {
       });
 
       // Charge power-ups
-      setPowerUps((pu) => chargePowerUps(pu, allClean ? 2 : 1));
+      setPowerUps((pu) =>
+        chargePowerUps(pu, applyOfficeCharge(allClean ? 2 : 1, office))
+      );
 
       // Cool down auditor suspicion
       setAuditor((prev) => ({
@@ -767,6 +806,7 @@ export const ClinicalTrialChaos: React.FC = () => {
     spawnSparkles,
     addAuditLog,
     playSuccess,
+    office,
   ]);
 
   // 16. Canvas 2D Simulation Renderer
@@ -781,8 +821,8 @@ export const ClinicalTrialChaos: React.FC = () => {
     ) => {
       ctx.clearRect(0, 0, width, height);
 
-      // Background Grid
-      ctx.fillStyle = "#09090b";
+      // Background Grid (tinted per office floor)
+      ctx.fillStyle = office.floorColor;
       ctx.fillRect(0, 0, width, height);
 
       ctx.strokeStyle = "#18181b";
@@ -979,12 +1019,13 @@ export const ClinicalTrialChaos: React.FC = () => {
         ctx.globalAlpha = 1;
       }
     },
-    [selectedSubjectId]
+    [selectedSubjectId, office.floorColor]
   );
 
   // 16b. Mirroring Refs for Stable Game Loop
   const playStateRef = useRef(playState);
   const phaseRef = useRef(phase);
+  const officeRef = useRef(office);
   const conveyorSubjectsRef = useRef(conveyorSubjects);
   const selectedSubjectIdRef = useRef(selectedSubjectId);
   const auditorRef = useRef(auditor);
@@ -1003,6 +1044,7 @@ export const ClinicalTrialChaos: React.FC = () => {
   useEffect(() => {
     playStateRef.current = playState;
     phaseRef.current = phase;
+    officeRef.current = office;
     conveyorSubjectsRef.current = conveyorSubjects;
     selectedSubjectIdRef.current = selectedSubjectId;
     auditorRef.current = auditor;
@@ -1176,8 +1218,10 @@ export const ClinicalTrialChaos: React.FC = () => {
 
       // 5. Random Protocol Amendments
       amendmentTimerRef.current += deltaSeconds;
-      const amendmentInterval =
-        phaseRef.current === 1 ? 40 : phaseRef.current === 2 ? 28 : 20;
+      const amendmentInterval = applyOfficeAmendmentInterval(
+        phaseRef.current === 1 ? 40 : phaseRef.current === 2 ? 28 : 20,
+        officeRef.current
+      );
       if (amendmentTimerRef.current > amendmentInterval) {
         uiNeedsSync = true;
         amendmentTimerRef.current = 0;
@@ -1192,11 +1236,15 @@ export const ClinicalTrialChaos: React.FC = () => {
         if (newAmendment.type === "station-scramble") {
           setStations((st) => scrambleStations(st));
         } else if (newAmendment.type === "sae-priority-rush") {
-          const saeSubj = generateClinicalSubject(
-            0.7,
-            true,
-            undefined,
-            stationsRef.current.map((s) => s.id)
+          const saeSubj = applyOfficeToSubject(
+            generateClinicalSubject(
+              0.7,
+              true,
+              undefined,
+              stationsRef.current.map((s) => s.id)
+            ),
+            officeRef.current,
+            officeSiteSeqRef.current++
           );
           conveyorSubjectsRef.current = [
             saeSubj,
@@ -1208,34 +1256,52 @@ export const ClinicalTrialChaos: React.FC = () => {
 
       // 6. Spawning new subjects
       spawnTimerRef.current += deltaSeconds;
-      const spawnInterval =
-        phaseRef.current === 1 ? 6.5 : phaseRef.current === 2 ? 4.8 : 3.5;
+      const spawnInterval = applyOfficeSpawnInterval(
+        phaseRef.current === 1 ? 6.5 : phaseRef.current === 2 ? 4.8 : 3.5,
+        officeRef.current
+      );
       if (
         spawnTimerRef.current > spawnInterval &&
         conveyorSubjectsRef.current.length < 5
       ) {
         uiNeedsSync = true;
         spawnTimerRef.current = 0;
-        const errorChance =
-          phaseRef.current === 1 ? 0.45 : phaseRef.current === 2 ? 0.65 : 0.8;
+        const errorChance = applyOfficeErrorChance(
+          phaseRef.current === 1 ? 0.45 : phaseRef.current === 2 ? 0.65 : 0.8,
+          officeRef.current
+        );
         const isSAE = Math.random() < (phaseRef.current === 1 ? 0.1 : 0.3);
-        const newSub = activeProtocolRef.current
-          ? generateClinicalSubjectFromProtocol(
-              activeProtocolRef.current,
-              errorChance,
-              isSAE
-            )
-          : generateClinicalSubject(
-              errorChance,
-              isSAE,
-              undefined,
-              stationsRef.current.map((s) => s.id)
-            );
+        const newSub = applyOfficeToSubject(
+          activeProtocolRef.current
+            ? generateClinicalSubjectFromProtocol(
+                activeProtocolRef.current,
+                errorChance,
+                isSAE
+              )
+            : generateClinicalSubject(
+                errorChance,
+                isSAE,
+                undefined,
+                stationsRef.current.map((s) => s.id)
+              ),
+          officeRef.current,
+          officeSiteSeqRef.current++
+        );
         conveyorSubjectsRef.current = [...conveyorSubjectsRef.current, newSub];
         setConveyorSubjects([...conveyorSubjectsRef.current]);
         if (!selectedSubjectIdRef.current) {
           setSelectedSubjectId(newSub.id);
         }
+      }
+
+      // 6b. Office ambient flavor events
+      ambientTimerRef.current += deltaSeconds;
+      if (ambientTimerRef.current > 24) {
+        ambientTimerRef.current = 0;
+        addAuditLogRef.current(
+          `[OFFICE] ${pickOfficeAmbientEvent(officeRef.current)}`,
+          "INFO"
+        );
       }
 
       // 7. UI State Sync: Sync React state only when DOM second display value changes or milestones occur
@@ -1698,6 +1764,9 @@ export const ClinicalTrialChaos: React.FC = () => {
           <p className="text-xs font-bold text-zinc-300">
             {gameMode === "campaign" ? `PHASE ${phase} OF 3` : "ENDLESS SPRINT"}
           </p>
+          <p className="text-[10px] text-zinc-500 truncate max-w-[14rem]">
+            {office.name}
+          </p>
         </div>
       </div>
 
@@ -2117,7 +2186,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                       Solve multi-choice Controlled Terminology puzzles, route
                       clinical packets across tiered EDC stations (DM, VS, AE,
                       LB, CM, EX), charge regulatory lifelines, and download
-                      real SDTM datasets.
+                      real SDTM datasets. Pick an office below first.
                     </p>
                     <div className="flex flex-wrap items-center justify-center gap-3">
                       <button
@@ -2139,6 +2208,80 @@ export const ClinicalTrialChaos: React.FC = () => {
               </div>
             )}
           </div>
+
+          {/* Office Picker: choose where the next shift is worked */}
+          {playState !== "playing" && (
+            <section
+              aria-labelledby="clinical-office-picker-heading"
+              className="@container mt-4 rounded-xl border border-zinc-800 bg-[#13151a] p-4"
+            >
+              <div className="flex flex-wrap items-baseline justify-between gap-2 mb-3">
+                <h3
+                  id="clinical-office-picker-heading"
+                  className="text-xs font-bold uppercase tracking-wider text-zinc-300"
+                >
+                  Choose Your Office
+                </h3>
+                <span className="text-[10px] font-mono text-zinc-500">
+                  Applies from the next shift
+                </span>
+              </div>
+              <div
+                role="radiogroup"
+                aria-labelledby="clinical-office-picker-heading"
+                className="grid grid-cols-1 @md:grid-cols-2 @3xl:grid-cols-3 gap-2"
+              >
+                {OFFICES.map((o) => {
+                  const isSelected = o.id === officeId;
+                  return (
+                    <button
+                      key={o.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={isSelected}
+                      onClick={() => {
+                        setOfficeId(o.id);
+                        announce(`Office set to ${o.name}`, "polite");
+                      }}
+                      className={`min-w-0 text-left rounded-lg border p-3 transition active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 ${
+                        isSelected
+                          ? "border-amber-500/60 bg-amber-500/5"
+                          : "border-zinc-800 bg-[#0d0e11] hover:border-zinc-700"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="flex min-w-0 items-center gap-2">
+                          <span
+                            aria-hidden="true"
+                            className="h-2 w-2 shrink-0 rounded-full"
+                            style={{ backgroundColor: o.accentColor }}
+                          />
+                          <span className="min-w-0 break-words text-xs font-bold text-zinc-100">
+                            {o.name}
+                          </span>
+                        </span>
+                        <span className="shrink-0 text-[9px] font-mono uppercase text-zinc-400">
+                          {o.difficulty}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-[11px] italic text-zinc-400 break-words">
+                        {o.tagline}
+                      </p>
+                      <p className="mt-1.5 text-[10px] text-zinc-500 break-words">
+                        {o.description}
+                      </p>
+                      <p className="mt-2 text-[10px] font-mono text-amber-400/90 break-words">
+                        {o.quirk}
+                      </p>
+                      <p className="mt-1 text-[10px] font-mono tabular-nums text-zinc-500">
+                        {o.modifiers.scoreMultiplier}x score
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          )}
 
           {/* Active Subject Dossier & EDC Domain Routing Stations */}
           <div className="mt-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
