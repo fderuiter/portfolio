@@ -52,10 +52,14 @@ Operational workflows for production releases—including Automated Canary Analy
 
 ## Project Roadmap
 
-Current work and release blockers are tracked on the
+Current portfolio work is planned on the
+[Portfolio Iterative Development](https://github.com/users/fderuiter/projects/19)
+board. It is the cross-repository view for active initiatives, priorities,
+workstreams, and delivery status. Release-specific risks and human-gated
+operational work are tracked on the focused
 [Portfolio Hub: Release Readiness](https://github.com/users/fderuiter/projects/18)
-board. The board and linked issues are the source of truth; completed epics are
-kept in GitHub history instead of copied into a static status table here.
+board. GitHub issues and project items are the source of truth; completed epics
+are kept in GitHub history instead of copied into a static status table here.
 
 Architectural decisions are recorded in
 [`adr/`](https://github.com/fderuiter/portfolio/tree/main/adr), and repository

@@ -57,9 +57,17 @@ test.describe("Arcade Games & Simulators Suite", () => {
     const laserCanvas = page.locator("canvas").first();
     await expect(laserCanvas).toBeVisible({ timeout: 15000 });
 
-    await page
-      .getByText("Game modes, weapons & audio", { exact: true })
-      .click();
+    // 2. Expand the "Game modes, weapons & audio" disclosure with hydration
+    // retry: the <summary> toggles natively, but React only attaches its own
+    // listeners once hydrated, so a click that lands early can be a no-op.
+    const optionsDisclosure = page.locator("details.arcade-shooter-options");
+    const disclosureSummary = page.getByText("Game modes, weapons & audio", {
+      exact: true,
+    });
+    await expect(async () => {
+      await disclosureSummary.click({ force: true });
+      await expect(optionsDisclosure).toHaveJSProperty("open", true);
+    }).toPass({ timeout: 15000 });
 
     // 3. Switch weapons to Emerald Beam (Aurora)
     const auroraBtn = page.getByRole("button", {
@@ -111,11 +119,15 @@ test.describe("Arcade Games & Simulators Suite", () => {
       });
     }).toPass({ timeout: 15000 });
 
-    // 4. Start simulation
+    // 4. Start simulation with hydration retry: verify the idle overlay
+    // actually dismisses rather than merely attempting the click.
     const startSimBtn = page.getByRole("button", { name: /START SIMULATION/i });
-    if (await startSimBtn.isVisible()) {
-      await startSimBtn.click({ force: true });
-    }
+    await expect(async () => {
+      if (await startSimBtn.isVisible()) {
+        await startSimBtn.click({ force: true });
+      }
+      await expect(startSimBtn).toBeHidden({ timeout: 2000 });
+    }).toPass({ timeout: 15000 });
   });
 
   test("Quasi-Perfect Puzzler allows level selection and tactic clicking", async ({
@@ -145,12 +157,16 @@ test.describe("Arcade Games & Simulators Suite", () => {
 
     const goalNode = page.locator('[data-node-id="eq-lvl1"]');
     await expect(goalNode).toBeVisible({ timeout: 15000 });
-    await goalNode.click();
 
-    // 4. Verify Q.E.D. Theorem Verified modal
-    await expect(page.getByText("Q.E.D. · THEOREM VERIFIED")).toBeVisible({
-      timeout: 15000,
-    });
+    // 4. Click the goal node to discharge it and open the Q.E.D. Theorem
+    // Verified modal, with hydration retry: executeTacticOnNode() is a no-op
+    // once the level is solved, so retrying this click is safe.
+    await expect(async () => {
+      await goalNode.click();
+      await expect(page.getByText("Q.E.D. · THEOREM VERIFIED")).toBeVisible({
+        timeout: 2000,
+      });
+    }).toPass({ timeout: 15000 });
   });
 
   test("Retro Labyrinth renders on 404 Error page with interactive canvas", async ({

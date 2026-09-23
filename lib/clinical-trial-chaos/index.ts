@@ -5,4 +5,7 @@
 export * from "./types";
 export * from "./engine";
 export * from "./scenarios";
+export * from "./offices";
+export * from "./sponsor";
+export * from "./outfits";
 export * from "./sound-effects";

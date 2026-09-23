@@ -2,7 +2,9 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -40,7 +42,10 @@ const mockPlaySuccess = vi.fn();
 const mockPlayNote = vi.fn();
 
 vi.mock("@/components/providers/AudioProvider", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/components/providers/AudioProvider")>();
+  const actual =
+    await importOriginal<
+      typeof import("@/components/providers/AudioProvider")
+    >();
   return {
     ...actual,
     useAudio: () => ({
@@ -103,6 +108,8 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     };
 
     HTMLCanvasElement.prototype.getContext = vi.fn(() => mockCtx as any);
+    // Starting a shift scrolls the board into view; JSDOM has no layout to scroll.
+    window.scrollTo = vi.fn() as unknown as typeof window.scrollTo;
     HTMLCanvasElement.prototype.getBoundingClientRect = vi.fn(() => ({
       left: 0,
       top: 0,
@@ -134,9 +141,21 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     });
 
     expect(container.textContent).toContain("Clinical Trial Chaos");
-    expect(container.textContent).toContain("FDA AUDITOR SCRUTINY");
     expect(container.textContent).toContain("Score:");
-    expect(container.textContent).toContain("COMBO:");
+    expect(container.textContent).toContain("Combo:");
+    // Idle shows the shift briefing and office picker, not the play area
+    expect(container.textContent).toContain("Shift briefing");
+    expect(container.textContent).toContain("Pick your office");
+
+    const startBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Start 3-Phase Campaign")
+    );
+    await act(async () => {
+      startBtn?.click();
+    });
+
+    expect(container.textContent).toContain("FDA AUDITOR SCRUTINY");
+    expect(container.textContent).toContain("SPONSOR SATISFACTION");
     expect(container.textContent).toContain("DM Station");
     expect(container.textContent).toContain("VS Station");
     expect(container.textContent).toContain("FDA Coffee Break");
@@ -158,8 +177,8 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
       root.render(<ClinicalTrialChaos />);
     });
 
-    const startBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Start 3-Phase Campaign")
+    const startBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Start 3-Phase Campaign")
     );
     expect(startBtn).toBeDefined();
 
@@ -167,7 +186,10 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
       startBtn?.click();
     });
 
-    expect(mockRecordEvent).toHaveBeenCalledWith("clinical_trial_chaos", "project_click");
+    expect(mockRecordEvent).toHaveBeenCalledWith(
+      "clinical_trial_chaos",
+      "project_click"
+    );
     expect(container.textContent).toContain("SUBJ-1001");
   });
 
@@ -179,17 +201,17 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     });
 
     // Start campaign
-    const startBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Start 3-Phase Campaign")
+    const startBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Start 3-Phase Campaign")
     );
     await act(async () => {
       startBtn?.click();
     });
 
     // Find and click the observation card with unvalidated prompt
-    const validateChoiceEl = Array.from(container.querySelectorAll("span")).find((s) =>
-      s.textContent?.includes("Validate Choice")
-    );
+    const validateChoiceEl = Array.from(
+      container.querySelectorAll("span")
+    ).find((s) => s.textContent?.includes("Validate Choice"));
     expect(validateChoiceEl).toBeDefined();
     const obsCard = validateChoiceEl?.closest(".cursor-pointer") as HTMLElement;
     expect(obsCard).not.toBeNull();
@@ -198,12 +220,16 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
       obsCard.click();
     });
 
-    expect(container.textContent).toContain("CDISC Controlled Terminology Validation");
-    expect(container.textContent).toContain("Select Compliant CDISC Standard Value / CT Code");
+    expect(container.textContent).toContain(
+      "CDISC Controlled Terminology Validation"
+    );
+    expect(container.textContent).toContain(
+      "Select Compliant CDISC Standard Value / CT Code"
+    );
 
     // Click the correct choice "180 cm"
     const choiceBtn = Array.from(container.querySelectorAll("button")).find(
-      (b) => b.textContent?.trim() === "180 cm"
+      (b) => b.textContent?.trim().replace(/^\d/, "") === "180 cm"
     );
     expect(choiceBtn).toBeDefined();
 
@@ -227,8 +253,8 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     });
 
     // Switch to Live SDTM Studio tab
-    const sdtmTabBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Live SDTM Studio")
+    const sdtmTabBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Live SDTM Studio")
     );
     expect(sdtmTabBtn).toBeDefined();
 
@@ -241,8 +267,8 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     expect(container.textContent).toContain("Export SDTM CSV");
 
     // Switch to Audit Trail tab
-    const auditTabBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Audit Trail Log")
+    const auditTabBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Audit Trail Log")
     );
     expect(auditTabBtn).toBeDefined();
 
@@ -250,7 +276,9 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
       auditTabBtn?.click();
     });
 
-    expect(container.textContent).toContain("21 CFR PART 11 IMMUTABLE AUDIT TRAIL");
+    expect(container.textContent).toContain(
+      "21 CFR PART 11 IMMUTABLE AUDIT TRAIL"
+    );
   });
 
   it("should open 21 CFR Part 11 signature modal and complete clean submission", async () => {
@@ -261,24 +289,24 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     });
 
     // Start campaign
-    const startBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Start 3-Phase Campaign")
+    const startBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Start 3-Phase Campaign")
     );
     await act(async () => {
       startBtn?.click();
     });
 
     // Resolve observation (Height: 180 m -> 180 cm)
-    const validateChoiceEl = Array.from(container.querySelectorAll("span")).find((s) =>
-      s.textContent?.includes("Validate Choice")
-    );
+    const validateChoiceEl = Array.from(
+      container.querySelectorAll("span")
+    ).find((s) => s.textContent?.includes("Validate Choice"));
     const obsCard = validateChoiceEl?.closest(".cursor-pointer") as HTMLElement;
     await act(async () => {
       obsCard.click();
     });
 
     const choiceBtn = Array.from(container.querySelectorAll("button")).find(
-      (b) => b.textContent?.trim() === "180 cm"
+      (b) => b.textContent?.trim().replace(/^\d/, "") === "180 cm"
     );
     await act(async () => {
       choiceBtn?.click();
@@ -299,11 +327,13 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
       dmStationCard.click();
     });
 
-    expect(container.textContent).toContain("21 CFR Part 11 Electronic Signature");
+    expect(container.textContent).toContain(
+      "21 CFR Part 11 Electronic Signature"
+    );
 
     // Confirm signature
-    const confirmBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Sign & Lock CRF (Enter)")
+    const confirmBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Sign & Lock CRF (Enter)")
     );
     expect(confirmBtn).toBeDefined();
 
@@ -313,7 +343,116 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
 
     expect(container.textContent).toContain("Submits:1");
 
+    // Regression: a terminated trial's SDTM rows must not leak into the next trial.
+    const sdtmTabLabel = () =>
+      Array.from(container.querySelectorAll("button")).find((b) =>
+        b.textContent?.includes("Live SDTM Studio")
+      )?.textContent ?? "";
+    expect(sdtmTabLabel()).not.toMatch(/Live SDTM Studio0$/);
+
+    // Let the remaining subjects expire until the auditor issues a 483
+    for (
+      let i = 0;
+      i < 60 && !container.textContent?.includes("TRIAL TERMINATED");
+      i++
+    ) {
+      await act(async () => {
+        vi.advanceTimersByTime(5000);
+      });
+    }
+    expect(container.textContent).toContain("TRIAL TERMINATED");
+
+    const restartBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Restart Phase I")
+    );
+    await act(async () => {
+      restartBtn?.click();
+    });
+    expect(sdtmTabLabel()).toMatch(/Live SDTM Studio0$/);
+
     vi.useRealTimers();
+  });
+
+  it("does not start a shift when Enter is pressed on a focused briefing button", async () => {
+    await act(async () => {
+      root.render(<ClinicalTrialChaos />);
+    });
+
+    const officeCard = Array.from(
+      container.querySelectorAll('[role="radio"]')
+    ).find((b) =>
+      b.textContent?.includes("Big Pharma Glass Tower")
+    ) as HTMLElement;
+    expect(officeCard).toBeDefined();
+
+    await act(async () => {
+      officeCard.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
+      );
+    });
+
+    expect(container.textContent).toContain("Shift briefing");
+    expect(mockRecordEvent).not.toHaveBeenCalled();
+
+    // Enter on the board itself still starts the shift
+    const board = container.querySelector(
+      '[data-keyboard-boundary="true"]'
+    ) as HTMLElement;
+    await act(async () => {
+      board.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
+      );
+    });
+    expect(mockRecordEvent).toHaveBeenCalledWith(
+      "clinical_trial_chaos",
+      "project_click"
+    );
+  });
+
+  it("remembers the selected outfit and announces it at clock-in", async () => {
+    await act(async () => {
+      root.render(<ClinicalTrialChaos />);
+    });
+
+    const outfitCard = Array.from(
+      container.querySelectorAll('[role="radio"]')
+    ).find((b) => b.textContent?.includes("The WFH Mullet")) as HTMLElement;
+    expect(outfitCard).toBeDefined();
+
+    await act(async () => {
+      outfitCard.click();
+    });
+
+    expect(outfitCard.getAttribute("aria-checked")).toBe("true");
+    expect(mockStorage.getItem("clinical_chaos_outfit")).toBe("wfh-mullet");
+
+    // A fresh mount restores the saved outfit
+    act(() => {
+      root.unmount();
+    });
+    root = createRoot(container);
+    await act(async () => {
+      root.render(<ClinicalTrialChaos />);
+    });
+    const restored = Array.from(
+      container.querySelectorAll('[role="radio"][aria-checked="true"]')
+    ).map((el) => el.textContent);
+    expect(restored.some((t) => t?.includes("The WFH Mullet"))).toBe(true);
+
+    const startBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Start 3-Phase Campaign")
+    );
+    await act(async () => {
+      startBtn?.click();
+    });
+    const auditTab = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Audit Trail Log")
+    );
+    await act(async () => {
+      auditTab?.click();
+    });
+    expect(container.textContent).toContain("[WARDROBE]");
+    expect(container.textContent).toContain("pyjama bottoms");
   });
 
   it("should load existing high score from localStorage", async () => {
@@ -334,8 +473,8 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     });
 
     // Start campaign
-    const startBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Start 3-Phase Campaign")
+    const startBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Start 3-Phase Campaign")
     );
     await act(async () => {
       startBtn?.click();
@@ -360,15 +499,17 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     expect(container.textContent).toContain("38s");
 
     // Find and click the observation card to open multi-choice validation drawer
-    const validateChoiceEl = Array.from(container.querySelectorAll("span")).find((s) =>
-      s.textContent?.includes("Validate Choice")
-    );
+    const validateChoiceEl = Array.from(
+      container.querySelectorAll("span")
+    ).find((s) => s.textContent?.includes("Validate Choice"));
     const obsCard = validateChoiceEl?.closest(".cursor-pointer") as HTMLElement;
     await act(async () => {
       obsCard.click();
     });
 
-    expect(container.textContent).toContain("CDISC Controlled Terminology Validation");
+    expect(container.textContent).toContain(
+      "CDISC Controlled Terminology Validation"
+    );
 
     // Let another 3 seconds pass while drawer is open
     await tickGame(3000, 100);
@@ -377,8 +518,8 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     expect(container.textContent).toContain("38s");
 
     // Close the drawer using the close button
-    const closeBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Close")
+    const closeBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Close")
     );
     await act(async () => {
       closeBtn?.click();
@@ -390,7 +531,6 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     // Timer should now have ticked down to 36s (37.5 - 2.0 = 35.5 -> Math.ceil = 36)
     expect(container.textContent).toContain("36s");
 
-
     // Open signature modal via DM Station
     const dmHeading = Array.from(container.querySelectorAll("h4")).find((h) =>
       h.textContent?.includes("DM Station")
@@ -400,7 +540,9 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
       dmStationCard.click();
     });
 
-    expect(container.textContent).toContain("21 CFR Part 11 Electronic Signature");
+    expect(container.textContent).toContain(
+      "21 CFR Part 11 Electronic Signature"
+    );
 
     // Let another 4 seconds pass while signature modal is open
     await tickGame(4000, 100);
@@ -409,8 +551,8 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     expect(container.textContent).toContain("36s");
 
     // Cancel signature modal (Close/Cancel)
-    const cancelBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Cancel")
+    const cancelBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Cancel")
     );
     await act(async () => {
       cancelBtn?.click();

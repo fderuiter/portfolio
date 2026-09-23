@@ -8,6 +8,12 @@
 
 ## References
 
+### ActiveSponsorRequest
+
+Re-exports [ActiveSponsorRequest](sponsor/interfaces/ActiveSponsorRequest.md)
+
+***
+
 ### ALL\_STATIONS
 
 Re-exports [ALL_STATIONS](scenarios/variables/ALL_STATIONS.md)
@@ -26,6 +32,60 @@ Re-exports [AmendmentType](types/type-aliases/AmendmentType.md)
 
 ***
 
+### applyOfficeAmendmentInterval
+
+Re-exports [applyOfficeAmendmentInterval](offices/functions/applyOfficeAmendmentInterval.md)
+
+***
+
+### applyOfficeCharge
+
+Re-exports [applyOfficeCharge](offices/functions/applyOfficeCharge.md)
+
+***
+
+### applyOfficeErrorChance
+
+Re-exports [applyOfficeErrorChance](offices/functions/applyOfficeErrorChance.md)
+
+***
+
+### applyOfficeScore
+
+Re-exports [applyOfficeScore](offices/functions/applyOfficeScore.md)
+
+***
+
+### applyOfficeSpawnInterval
+
+Re-exports [applyOfficeSpawnInterval](offices/functions/applyOfficeSpawnInterval.md)
+
+***
+
+### applyOfficeToAuditor
+
+Re-exports [applyOfficeToAuditor](offices/functions/applyOfficeToAuditor.md)
+
+***
+
+### applyOfficeToSubject
+
+Re-exports [applyOfficeToSubject](offices/functions/applyOfficeToSubject.md)
+
+***
+
+### applySponsorSkeletonsToReport
+
+Re-exports [applySponsorSkeletonsToReport](sponsor/functions/applySponsorSkeletonsToReport.md)
+
+***
+
+### applySponsorSubmissionBoost
+
+Re-exports [applySponsorSubmissionBoost](sponsor/functions/applySponsorSubmissionBoost.md)
+
+***
+
 ### AuditLogEntry
 
 Re-exports [AuditLogEntry](types/interfaces/AuditLogEntry.md)
@@ -41,6 +101,12 @@ Re-exports [AuditorBehavior](types/type-aliases/AuditorBehavior.md)
 ### AuditorState
 
 Re-exports [AuditorState](types/interfaces/AuditorState.md)
+
+***
+
+### AvatarCanvas
+
+Re-exports [AvatarCanvas](outfits/type-aliases/AvatarCanvas.md)
 
 ***
 
@@ -128,6 +194,30 @@ Re-exports [createInitialScoreState](engine/functions/createInitialScoreState.md
 
 ***
 
+### createInitialSponsorState
+
+Re-exports [createInitialSponsorState](sponsor/functions/createInitialSponsorState.md)
+
+***
+
+### DEFAULT\_OFFICE\_ID
+
+Re-exports [DEFAULT_OFFICE_ID](offices/variables/DEFAULT_OFFICE_ID.md)
+
+***
+
+### DEFAULT\_OUTFIT\_ID
+
+Re-exports [DEFAULT_OUTFIT_ID](outfits/variables/DEFAULT_OUTFIT_ID.md)
+
+***
+
+### drawOutfitAvatar
+
+Re-exports [drawOutfitAvatar](outfits/functions/drawOutfitAvatar.md)
+
+***
+
 ### exportToCDISCODMXML
 
 Re-exports [exportToCDISCODMXML](engine/functions/exportToCDISCODMXML.md)
@@ -194,6 +284,30 @@ Re-exports [generateSDTMDataset](engine/functions/generateSDTMDataset.md)
 
 ***
 
+### getFollowUpSubject
+
+Re-exports [getFollowUpSubject](sponsor/functions/getFollowUpSubject.md)
+
+***
+
+### getOfficeById
+
+Re-exports [getOfficeById](offices/functions/getOfficeById.md)
+
+***
+
+### getOutfitById
+
+Re-exports [getOutfitById](outfits/functions/getOutfitById.md)
+
+***
+
+### getSponsorMoodLabel
+
+Re-exports [getSponsorMoodLabel](sponsor/functions/getSponsorMoodLabel.md)
+
+***
+
 ### getStationsForPhase
 
 Re-exports [getStationsForPhase](scenarios/functions/getStationsForPhase.md)
@@ -221,6 +335,72 @@ Re-exports [MOCK_OBSERVATION_TEMPLATES](scenarios/variables/MOCK_OBSERVATION_TEM
 ### MockObservationTemplate
 
 Re-exports [MockObservationTemplate](scenarios/interfaces/MockObservationTemplate.md)
+
+***
+
+### OfficeConfig
+
+Re-exports [OfficeConfig](offices/interfaces/OfficeConfig.md)
+
+***
+
+### OfficeId
+
+Re-exports [OfficeId](offices/type-aliases/OfficeId.md)
+
+***
+
+### OfficeModifiers
+
+Re-exports [OfficeModifiers](offices/interfaces/OfficeModifiers.md)
+
+***
+
+### OFFICES
+
+Re-exports [OFFICES](offices/variables/OFFICES.md)
+
+***
+
+### OutfitAccessory
+
+Re-exports [OutfitAccessory](outfits/type-aliases/OutfitAccessory.md)
+
+***
+
+### OutfitConfig
+
+Re-exports [OutfitConfig](outfits/interfaces/OutfitConfig.md)
+
+***
+
+### OutfitId
+
+Re-exports [OutfitId](outfits/type-aliases/OutfitId.md)
+
+***
+
+### OutfitPalette
+
+Re-exports [OutfitPalette](outfits/interfaces/OutfitPalette.md)
+
+***
+
+### OUTFITS
+
+Re-exports [OUTFITS](outfits/variables/OUTFITS.md)
+
+***
+
+### pickOfficeAmbientEvent
+
+Re-exports [pickOfficeAmbientEvent](offices/functions/pickOfficeAmbientEvent.md)
+
+***
+
+### pickSponsorRequest
+
+Re-exports [pickSponsorRequest](sponsor/functions/pickSponsorRequest.md)
 
 ***
 
@@ -314,6 +494,12 @@ Re-exports [RecordedRuleViolation](types/interfaces/RecordedRuleViolation.md)
 
 ***
 
+### resolveSponsorChoice
+
+Re-exports [resolveSponsorChoice](sponsor/functions/resolveSponsorChoice.md)
+
+***
+
 ### scrambleStations
 
 Re-exports [scrambleStations](engine/functions/scrambleStations.md)
@@ -344,6 +530,78 @@ Re-exports [SignatureReason](types/type-aliases/SignatureReason.md)
 
 ***
 
+### SPONSOR\_DROPPED\_MOOD\_PENALTY
+
+Re-exports [SPONSOR_DROPPED_MOOD_PENALTY](sponsor/variables/SPONSOR_DROPPED_MOOD_PENALTY.md)
+
+***
+
+### SPONSOR\_FOLLOW\_UP\_MOOD\_PENALTY
+
+Re-exports [SPONSOR_FOLLOW_UP_MOOD_PENALTY](sponsor/variables/SPONSOR_FOLLOW_UP_MOOD_PENALTY.md)
+
+***
+
+### SPONSOR\_MAX\_FOLLOW\_UPS
+
+Re-exports [SPONSOR_MAX_FOLLOW_UPS](sponsor/variables/SPONSOR_MAX_FOLLOW_UPS.md)
+
+***
+
+### SPONSOR\_MOOD\_DECAY\_PER\_SECOND
+
+Re-exports [SPONSOR_MOOD_DECAY_PER_SECOND](sponsor/variables/SPONSOR_MOOD_DECAY_PER_SECOND.md)
+
+***
+
+### SPONSOR\_REQUESTS
+
+Re-exports [SPONSOR_REQUESTS](sponsor/variables/SPONSOR_REQUESTS.md)
+
+***
+
+### SPONSOR\_STARTING\_MOOD
+
+Re-exports [SPONSOR_STARTING_MOOD](sponsor/variables/SPONSOR_STARTING_MOOD.md)
+
+***
+
+### SponsorChoice
+
+Re-exports [SponsorChoice](sponsor/interfaces/SponsorChoice.md)
+
+***
+
+### SponsorChoiceEffects
+
+Re-exports [SponsorChoiceEffects](sponsor/interfaces/SponsorChoiceEffects.md)
+
+***
+
+### SponsorEvent
+
+Re-exports [SponsorEvent](sponsor/type-aliases/SponsorEvent.md)
+
+***
+
+### SponsorRequest
+
+Re-exports [SponsorRequest](sponsor/interfaces/SponsorRequest.md)
+
+***
+
+### SponsorSkeleton
+
+Re-exports [SponsorSkeleton](sponsor/interfaces/SponsorSkeleton.md)
+
+***
+
+### SponsorState
+
+Re-exports [SponsorState](sponsor/interfaces/SponsorState.md)
+
+***
+
 ### startProceduralBGM
 
 Re-exports [startProceduralBGM](sound-effects/functions/startProceduralBGM.md)
@@ -371,6 +629,12 @@ Re-exports [tickAuditor](engine/functions/tickAuditor.md)
 ### tickPowerUps
 
 Re-exports [tickPowerUps](engine/functions/tickPowerUps.md)
+
+***
+
+### tickSponsor
+
+Re-exports [tickSponsor](sponsor/functions/tickSponsor.md)
 
 ***
 

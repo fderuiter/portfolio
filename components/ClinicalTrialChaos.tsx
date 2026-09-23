@@ -35,6 +35,7 @@ import {
   IconHelp,
   IconBolt,
   IconMusic,
+  IconMail,
 } from "@tabler/icons-react";
 import { FieldManualButton } from "@/components/FieldManualButton";
 import { FullscreenButton } from "@/components/arcade/FullscreenButton";
@@ -93,6 +94,35 @@ import {
 } from "@/lib/clinical-trial-chaos/scenarios";
 
 import {
+  OFFICES,
+  DEFAULT_OFFICE_ID,
+  OfficeId,
+  getOfficeById,
+  applyOfficeSpawnInterval,
+  applyOfficeErrorChance,
+  applyOfficeAmendmentInterval,
+  applyOfficeScore,
+  applyOfficeCharge,
+  applyOfficeToSubject,
+  applyOfficeToAuditor,
+  pickOfficeAmbientEvent,
+  SponsorState,
+  createInitialSponsorState,
+  tickSponsor,
+  resolveSponsorChoice,
+  applySponsorSubmissionBoost,
+  applySponsorSkeletonsToReport,
+  getSponsorMoodLabel,
+  getFollowUpSubject,
+  OUTFITS,
+  DEFAULT_OUTFIT_ID,
+  OutfitConfig,
+  OutfitId,
+  getOutfitById,
+  drawOutfitAvatar,
+} from "@/lib/clinical-trial-chaos";
+
+import {
   playValidationSound,
   playChoiceIncorrectSound,
   playSignatureVerifiedSound,
@@ -122,6 +152,23 @@ const getHighScoreSnapshot = () => {
 };
 const getHighScoreServerSnapshot = () => "0";
 
+/** CRFs to lock before a campaign phase is cleared. */
+const PHASE_TARGETS: Record<GamePhase, number> = { 1: 5, 2: 8, 3: 12 };
+
+const AUDITOR_BEHAVIOR_LABELS: Record<AuditorState["behavior"], string> = {
+  patrolling: "Patrolling",
+  inspecting: "Inspecting",
+  suspicious: "Suspicious",
+  issuing_483: "Writing a 483",
+  coffee_break: "☕ Coffee break",
+};
+
+function timerBarColor(ratio: number): string {
+  if (ratio > 0.5) return "bg-emerald-500";
+  if (ratio > 0.25) return "bg-amber-500";
+  return "bg-rose-500";
+}
+
 interface Particle {
   x: number;
   y: number;
@@ -132,6 +179,34 @@ interface Particle {
   size: number;
   life: number;
 }
+
+const OUTFIT_STORAGE_KEY = "clinical_chaos_outfit";
+
+function readStoredOutfitId(): OutfitId {
+  if (typeof window === "undefined") return DEFAULT_OUTFIT_ID;
+  try {
+    if (typeof window.localStorage?.getItem === "function") {
+      return getOutfitById(window.localStorage.getItem(OUTFIT_STORAGE_KEY)).id;
+    }
+  } catch {}
+  return DEFAULT_OUTFIT_ID;
+}
+
+/** Small canvas preview of an outfit, drawn with the same renderer as the game. */
+const OutfitPreview: React.FC<{ outfit: OutfitConfig }> = ({ outfit }) => {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const canvas = ref.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    canvas.width = 44 * dpr;
+    canvas.height = 56 * dpr;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawOutfitAvatar(ctx, 22 * dpr, 53 * dpr, outfit, dpr);
+  }, [outfit]);
+  return <canvas ref={ref} aria-hidden="true" className="h-14 w-11 shrink-0" />;
+};
 
 export const ClinicalTrialChaos: React.FC = () => {
   const isMounted = useSyncExternalStore(
@@ -155,6 +230,25 @@ export const ClinicalTrialChaos: React.FC = () => {
   const [playState, setPlayState] = useState<PlayState>("idle");
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [bgmEnabled, setBgmEnabled] = useState(false);
+  const [officeId, setOfficeId] = useState<OfficeId>(DEFAULT_OFFICE_ID);
+  const office = getOfficeById(officeId);
+  // Cosmetic only; remembered per viewer
+  const [outfitId, setOutfitId] = useState<OutfitId>(readStoredOutfitId);
+  const outfit = getOutfitById(outfitId);
+  const selectOutfit = useCallback((id: OutfitId) => {
+    setOutfitId(id);
+    try {
+      if (typeof window.localStorage?.setItem === "function") {
+        window.localStorage.setItem(OUTFIT_STORAGE_KEY, id);
+      }
+    } catch {}
+  }, []);
+  const [sponsor, setSponsor] = useState<SponsorState>(() =>
+    createInitialSponsorState()
+  );
+  const [gameOverReason, setGameOverReason] = useState<"auditor" | "sponsor">(
+    "auditor"
+  );
   const [activeTab, setActiveTab] = useState<
     "conveyor" | "sdtm_studio" | "audit_trail"
   >("conveyor");
@@ -237,10 +331,41 @@ export const ClinicalTrialChaos: React.FC = () => {
   const lastTickTimeRef = useRef<number>(0);
   const spawnTimerRef = useRef<number>(0);
   const amendmentTimerRef = useRef<number>(0);
+  const ambientTimerRef = useRef<number>(0);
+  const officeSiteSeqRef = useRef<number>(3);
+  // Source of truth for the sponsor simulation; `sponsor` state mirrors it for rendering.
+  const sponsorRef = useRef<SponsorState>(sponsor);
   const terminalContainerRef = useRef<HTMLDivElement>(null);
   const particlesRef = useRef<Particle[]>([]);
   const activeProtocolRef = useRef<StudyProtocol | null>(activeProtocol);
   const ruleViolationsRef = useRef<RecordedRuleViolation[]>(ruleViolations);
+
+  // 4b. Juice: floating score deltas, station flash, last inspection report
+  const [scorePops, setScorePops] = useState<
+    { id: number; text: string; tone: "good" | "bad" }[]
+  >([]);
+  const scorePopSeqRef = useRef(0);
+  const pushScorePop = useCallback((amount: number) => {
+    if (amount === 0) return;
+    scorePopSeqRef.current += 1;
+    const id = scorePopSeqRef.current;
+    setScorePops((prev) => [
+      ...prev.slice(-3),
+      {
+        id,
+        text: `${amount > 0 ? "+" : ""}${amount}`,
+        tone: amount > 0 ? "good" : "bad",
+      },
+    ]);
+    setTimeout(() => {
+      setScorePops((prev) => prev.filter((pop) => pop.id !== id));
+    }, 900);
+  }, []);
+  const [flashStationId, setFlashStationId] = useState<CDISCDomain | null>(
+    null
+  );
+  const [lastBimoReport, setLastBimoReport] =
+    useState<BIMOInspectionReport | null>(null);
 
   // 5. Audit Logger
   const addAuditLog = useCallback(
@@ -300,13 +425,22 @@ export const ClinicalTrialChaos: React.FC = () => {
       setGameMode(mode);
       setPhase(targetPhase);
       setPlayState("playing");
-      setAuditor(createInitialAuditorState());
+      setAuditor(applyOfficeToAuditor(createInitialAuditorState(), office));
+      ambientTimerRef.current = 0;
+      const freshSponsor = createInitialSponsorState();
+      sponsorRef.current = freshSponsor;
+      setSponsor(freshSponsor);
+      setGameOverReason("auditor");
       const phaseStations = getStationsForPhase(targetPhase, mode);
       setStations(phaseStations);
       setActiveAmendment(null);
       setSelectedSubjectId(null);
       setValidatingObs(null);
       setBimoReport(null);
+      setLastBimoReport(null);
+      // A new trial (phase 1 or endless) starts a fresh SDTM dataset; advancing
+      // phases continues the same study, so its locked CRFs carry over.
+      if (targetPhase === 1) setSubmittedHistory([]);
       setRuleViolations([]);
       ruleViolationsRef.current = [];
       setPowerUps(createInitialPowerUpInventory());
@@ -320,40 +454,34 @@ export const ClinicalTrialChaos: React.FC = () => {
 
       // Initial subjects: Seeded for Phase 1 campaign or populated from active protocol
       const activeDomains = phaseStations.map((s) => s.id);
-      const initialSubs = activeProtocol
+      // Generated openers draw from the shared subject sequence so labels stay
+      // unique (SUBJ-1004+) instead of reusing fixed three-digit ids per run.
+      const baseSubs: ClinicalSubject[] = activeProtocol
         ? [
-            generateClinicalSubjectFromProtocol(
-              activeProtocol,
-              0.4,
-              false,
-              100
-            ),
-            generateClinicalSubjectFromProtocol(
-              activeProtocol,
-              0.6,
-              false,
-              101
-            ),
+            generateClinicalSubjectFromProtocol(activeProtocol, 0.4, false),
+            generateClinicalSubjectFromProtocol(activeProtocol, 0.6, false),
             generateClinicalSubjectFromProtocol(
               activeProtocol,
               0.7,
-              targetPhase >= 2,
-              102
+              targetPhase >= 2
             ),
           ]
         : targetPhase === 1 && mode === "campaign"
           ? JSON.parse(JSON.stringify(SEEDED_SCENARIOS))
           : [
-              generateClinicalSubject(0.4, false, 100, activeDomains),
-              generateClinicalSubject(0.6, false, 101, activeDomains),
+              generateClinicalSubject(0.4, false, undefined, activeDomains),
+              generateClinicalSubject(0.6, false, undefined, activeDomains),
               generateClinicalSubject(
                 0.7,
                 targetPhase >= 2,
-                102,
+                undefined,
                 activeDomains
               ),
             ];
 
+      const initialSubs = baseSubs.map((sub, i) =>
+        applyOfficeToSubject(sub, office, i)
+      );
       setConveyorSubjects(initialSubs);
       setSelectedSubjectId(initialSubs[0]?.id ?? null);
       setScoreState({
@@ -371,10 +499,46 @@ export const ClinicalTrialChaos: React.FC = () => {
         }) EDC Stations Activated: [${activeDomains.join(", ")}].`,
         "INFO"
       );
+      addAuditLog(
+        `[OFFICE] Clocked in at ${office.name}. ${office.quirk}`,
+        "INFO"
+      );
+      addAuditLog(`[WARDROBE] ${outfit.clockInLine}`, "INFO");
 
       recordEvent("clinical_trial_chaos", "project_click").catch(() => {});
+
+      // Bring the whole board into view (clear of the fixed site navbar) and
+      // focus it so hotkeys work: the Start button unmounts on click.
+      const board = containerRef.current;
+      if (board) {
+        const reduceMotion =
+          typeof window.matchMedia === "function" &&
+          window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        requestAnimationFrame(() => {
+          board.focus({ preventScroll: true });
+          if (isFullscreen || typeof window.scrollTo !== "function") return;
+          const NAVBAR_CLEARANCE_PX = 80;
+          window.scrollTo({
+            top: Math.max(
+              0,
+              window.scrollY +
+                board.getBoundingClientRect().top -
+                NAVBAR_CLEARANCE_PX
+            ),
+            behavior: reduceMotion ? "auto" : "smooth",
+          });
+        });
+      }
     },
-    [addAuditLog, recordEvent, effectiveHighScore, activeProtocol]
+    [
+      addAuditLog,
+      recordEvent,
+      effectiveHighScore,
+      activeProtocol,
+      office,
+      outfit,
+      isFullscreen,
+    ]
   );
 
   // 9. Active Subject in Dossier
@@ -448,6 +612,7 @@ export const ClinicalTrialChaos: React.FC = () => {
           })
         );
 
+        pushScorePop(result.scoreDelta);
         setScoreState((prev) => {
           const nextScore = prev.score + result.scoreDelta;
           return {
@@ -458,7 +623,7 @@ export const ClinicalTrialChaos: React.FC = () => {
         });
 
         // Charge power-ups
-        setPowerUps((pu) => chargePowerUps(pu, 1));
+        setPowerUps((pu) => chargePowerUps(pu, applyOfficeCharge(1, office)));
 
         addAuditLog(
           `Observation Standardized: ${obs.field} -> '${choice}' [${result.explanation}]`,
@@ -514,7 +679,15 @@ export const ClinicalTrialChaos: React.FC = () => {
         );
       }
     },
-    [validatingObs, activeProtocol, activeSubject, triggerSound, addAuditLog]
+    [
+      validatingObs,
+      activeProtocol,
+      activeSubject,
+      office,
+      triggerSound,
+      addAuditLog,
+      pushScorePop,
+    ]
   );
 
   // 13. Power-Up Trigger Execution
@@ -574,11 +747,15 @@ export const ClinicalTrialChaos: React.FC = () => {
             ),
           };
 
-          const points = calculateSubmissionPoints(
-            cleanedSubject,
-            scoreState.multiplier,
-            true
+          const points = applyOfficeScore(
+            calculateSubmissionPoints(
+              cleanedSubject,
+              scoreState.multiplier,
+              true
+            ),
+            office
           );
+          pushScorePop(points);
           setScoreState((prev) => ({
             ...prev,
             score: prev.score + points,
@@ -588,6 +765,11 @@ export const ClinicalTrialChaos: React.FC = () => {
             maxCombo: Math.max(prev.maxCombo, prev.combo + 1),
           }));
 
+          sponsorRef.current = applySponsorSubmissionBoost(
+            sponsorRef.current,
+            true
+          );
+          setSponsor(sponsorRef.current);
           setSubmittedHistory((prev) => [...prev, cleanedSubject]);
           setConveyorSubjects((prev) =>
             prev.filter((s) => s.id !== activeSubject.id)
@@ -616,9 +798,73 @@ export const ClinicalTrialChaos: React.FC = () => {
       playState,
       activeSubject,
       scoreState.multiplier,
+      office,
       triggerSound,
       addAuditLog,
+      pushScorePop,
     ]
+  );
+
+  // 13b. Answer the sponsor's latest email
+  const handleSponsorChoice = useCallback(
+    (choiceIndex: number) => {
+      const request = sponsorRef.current.activeRequest?.request;
+      const choice = request?.choices[choiceIndex];
+      const {
+        state: next,
+        effects,
+        outcome,
+      } = resolveSponsorChoice(sponsorRef.current, choiceIndex);
+      if (!request || !choice || !effects) return;
+
+      sponsorRef.current = next;
+      setSponsor(next);
+      triggerSound("validate");
+
+      if (effects.suspicion !== 0) {
+        setAuditor((prev) => ({
+          ...prev,
+          suspicion: Math.min(
+            100,
+            Math.max(0, prev.suspicion + effects.suspicion)
+          ),
+        }));
+      }
+      if (effects.score !== 0) {
+        pushScorePop(effects.score);
+        setScoreState((prev) => ({
+          ...prev,
+          score: Math.max(0, prev.score + effects.score),
+        }));
+      }
+      if (effects.timeBonusSeconds !== 0) {
+        setConveyorSubjects((prev) =>
+          prev.map((sub) => ({
+            ...sub,
+            timeRemaining: Math.max(
+              Math.min(sub.timeRemaining, 3),
+              Math.min(
+                sub.maxTime + 10,
+                sub.timeRemaining + effects.timeBonusSeconds
+              )
+            ),
+          }))
+        );
+      }
+      if (effects.powerUpCharge > 0) {
+        setPowerUps((pu) => chargePowerUps(pu, effects.powerUpCharge));
+      }
+
+      addAuditLog(
+        `[SPONSOR] Replied to ${request.from}: "${choice.label}". ${outcome}${
+          effects.skeleton ? " 🦴 (A new skeleton joins the closet.)" : ""
+        }`,
+        effects.skeleton || effects.suspicion > 0 ? "WARN" : "INFO",
+        effects.suspicion
+      );
+      announce(`Replied to ${request.from}. ${outcome}`, "polite");
+    },
+    [addAuditLog, triggerSound, announce, pushScorePop]
   );
 
   // 14. Initiate 21 CFR Electronic Signature Modal
@@ -652,17 +898,19 @@ export const ClinicalTrialChaos: React.FC = () => {
       triggerSound("sign");
       triggerSound("chute");
       spawnSparkles(380, 100, "#38bdf8");
+      setFlashStationId(domain);
+      setTimeout(() => setFlashStationId(null), 700);
       addAuditLog(result.logMessage, "COMPLIANT", result.suspicionDelta);
 
       const allClean = isSubjectFullyCompliant(subj);
-      const points = calculateSubmissionPoints(
-        subj,
-        scoreState.multiplier,
-        allClean
+      const points = applyOfficeScore(
+        calculateSubmissionPoints(subj, scoreState.multiplier, allClean),
+        office
       );
       const nextCombo = scoreState.combo + 1;
       const nextMultiplier = Math.min(4, 1 + Math.floor(nextCombo / 3));
 
+      pushScorePop(points);
       setScoreState((prev) => {
         const newScore = prev.score + points;
         const newHighScore = Math.max(newScore, prev.highScore);
@@ -689,7 +937,9 @@ export const ClinicalTrialChaos: React.FC = () => {
       });
 
       // Charge power-ups
-      setPowerUps((pu) => chargePowerUps(pu, allClean ? 2 : 1));
+      setPowerUps((pu) =>
+        chargePowerUps(pu, applyOfficeCharge(allClean ? 2 : 1, office))
+      );
 
       // Cool down auditor suspicion
       setAuditor((prev) => ({
@@ -704,6 +954,13 @@ export const ClinicalTrialChaos: React.FC = () => {
         )
       );
 
+      // Sponsors love throughput
+      sponsorRef.current = applySponsorSubmissionBoost(
+        sponsorRef.current,
+        allClean
+      );
+      setSponsor(sponsorRef.current);
+
       // Record to submitted history
       setSubmittedHistory((prev) => [...prev, subj]);
 
@@ -714,21 +971,25 @@ export const ClinicalTrialChaos: React.FC = () => {
 
       // Phase completion check in Campaign mode
       if (gameMode === "campaign") {
-        const targetCount = phase === 1 ? 5 : phase === 2 ? 8 : 12;
+        const targetCount = PHASE_TARGETS[phase];
         if (scoreState.subjectsSubmitted + 1 >= targetCount) {
           setPlayState("phase_cleared");
           playSuccess();
-          const report = generateBIMOReport(
-            {
-              ...scoreState,
-              subjectsSubmitted: scoreState.subjectsSubmitted + 1,
-            },
-            auditor,
-            auditLogs,
-            ruleViolations,
-            activeProtocol
+          const report = applySponsorSkeletonsToReport(
+            generateBIMOReport(
+              {
+                ...scoreState,
+                subjectsSubmitted: scoreState.subjectsSubmitted + 1,
+              },
+              auditor,
+              auditLogs,
+              ruleViolations,
+              activeProtocol
+            ),
+            sponsorRef.current.skeletons
           );
           setBimoReport(report);
+          setLastBimoReport(report);
         }
       }
     } else {
@@ -767,6 +1028,8 @@ export const ClinicalTrialChaos: React.FC = () => {
     spawnSparkles,
     addAuditLog,
     playSuccess,
+    office,
+    pushScorePop,
   ]);
 
   // 16. Canvas 2D Simulation Renderer
@@ -781,8 +1044,8 @@ export const ClinicalTrialChaos: React.FC = () => {
     ) => {
       ctx.clearRect(0, 0, width, height);
 
-      // Background Grid
-      ctx.fillStyle = "#09090b";
+      // Background Grid (tinted per office floor)
+      ctx.fillStyle = office.floorColor;
       ctx.fillRect(0, 0, width, height);
 
       ctx.strokeStyle = "#18181b";
@@ -853,9 +1116,12 @@ export const ClinicalTrialChaos: React.FC = () => {
 
         // SAE Badge or Domain Badge
         if (subj.isSAE) {
-          ctx.fillStyle = "#ef4444";
+          // Right-aligned so it ends before the status pip; light text reads on the red card
+          ctx.fillStyle = "#fecaca";
           ctx.font = "bold 8px monospace";
-          ctx.fillText("⚡ SAE", px + slotWidth - 45, py + 16);
+          ctx.textAlign = "right";
+          ctx.fillText("⚡ SAE", px + slotWidth - 26, py + 16);
+          ctx.textAlign = "left";
         }
 
         // Compliance status pip
@@ -878,16 +1144,17 @@ export const ClinicalTrialChaos: React.FC = () => {
         ctx.fillRect(px + 6, py + 38, (slotWidth - 22) * timePercent, 5);
       });
 
-      // Data Manager Desk Avatar (bottom left)
-      ctx.fillStyle = "#10b981";
-      ctx.fillRect(30, height - 28, 20, 20);
-      ctx.fillStyle = "#fed7aa";
-      ctx.beginPath();
-      ctx.arc(40, height - 33, 6, 0, Math.PI * 2);
-      ctx.fill();
+      // Player avatar (in the chosen outfit) at the data manager desk
+      ctx.fillStyle = "#3f3f46";
+      ctx.fillRect(40, height - 20, 34, 4);
+      ctx.fillRect(43, height - 16, 3, 14);
+      ctx.fillRect(68, height - 16, 3, 14);
+      ctx.fillStyle = "#38bdf8";
+      ctx.fillRect(52, height - 30, 14, 10);
+      drawOutfitAvatar(ctx, 26, height - 2, outfit);
       ctx.fillStyle = "#ffffff";
       ctx.font = "bold 8px monospace";
-      ctx.fillText("DM DESK", 18, height - 42);
+      ctx.fillText("YOU", 16, height - 50);
 
       // Auditor Sprite on Top Patrol Floor
       const auditorX = 50 + auditorState.x * (width - 100);
@@ -979,12 +1246,13 @@ export const ClinicalTrialChaos: React.FC = () => {
         ctx.globalAlpha = 1;
       }
     },
-    [selectedSubjectId]
+    [selectedSubjectId, office.floorColor, outfit]
   );
 
   // 16b. Mirroring Refs for Stable Game Loop
   const playStateRef = useRef(playState);
   const phaseRef = useRef(phase);
+  const officeRef = useRef(office);
   const conveyorSubjectsRef = useRef(conveyorSubjects);
   const selectedSubjectIdRef = useRef(selectedSubjectId);
   const auditorRef = useRef(auditor);
@@ -1003,6 +1271,7 @@ export const ClinicalTrialChaos: React.FC = () => {
   useEffect(() => {
     playStateRef.current = playState;
     phaseRef.current = phase;
+    officeRef.current = office;
     conveyorSubjectsRef.current = conveyorSubjects;
     selectedSubjectIdRef.current = selectedSubjectId;
     auditorRef.current = auditor;
@@ -1114,19 +1383,25 @@ export const ClinicalTrialChaos: React.FC = () => {
       ) {
         uiNeedsSync = true;
         triggerSoundRef.current("alarm");
+        playStateRef.current = "game_over";
+        setGameOverReason("auditor");
         setPlayState("game_over");
         addAuditLogRef.current(
           `[FDA NOTICE OF STUDY TERMINATION] 21 CFR Part 11 Audit Suspicion reached 100%. Form 483 Issued.`,
           "CRITICAL"
         );
-        const report = generateBIMOReport(
-          scoreStateRef.current,
-          updatedAuditor,
-          auditLogsRef.current,
-          ruleViolationsRef.current,
-          activeProtocolRef.current
+        const report = applySponsorSkeletonsToReport(
+          generateBIMOReport(
+            scoreStateRef.current,
+            updatedAuditor,
+            auditLogsRef.current,
+            ruleViolationsRef.current,
+            activeProtocolRef.current
+          ),
+          sponsorRef.current.skeletons
         );
         setBimoReport(report);
+        setLastBimoReport(report);
         setAuditor({ ...updatedAuditor });
       }
 
@@ -1176,8 +1451,10 @@ export const ClinicalTrialChaos: React.FC = () => {
 
       // 5. Random Protocol Amendments
       amendmentTimerRef.current += deltaSeconds;
-      const amendmentInterval =
-        phaseRef.current === 1 ? 40 : phaseRef.current === 2 ? 28 : 20;
+      const amendmentInterval = applyOfficeAmendmentInterval(
+        phaseRef.current === 1 ? 40 : phaseRef.current === 2 ? 28 : 20,
+        officeRef.current
+      );
       if (amendmentTimerRef.current > amendmentInterval) {
         uiNeedsSync = true;
         amendmentTimerRef.current = 0;
@@ -1192,11 +1469,15 @@ export const ClinicalTrialChaos: React.FC = () => {
         if (newAmendment.type === "station-scramble") {
           setStations((st) => scrambleStations(st));
         } else if (newAmendment.type === "sae-priority-rush") {
-          const saeSubj = generateClinicalSubject(
-            0.7,
-            true,
-            undefined,
-            stationsRef.current.map((s) => s.id)
+          const saeSubj = applyOfficeToSubject(
+            generateClinicalSubject(
+              0.7,
+              true,
+              undefined,
+              stationsRef.current.map((s) => s.id)
+            ),
+            officeRef.current,
+            officeSiteSeqRef.current++
           );
           conveyorSubjectsRef.current = [
             saeSubj,
@@ -1208,34 +1489,111 @@ export const ClinicalTrialChaos: React.FC = () => {
 
       // 6. Spawning new subjects
       spawnTimerRef.current += deltaSeconds;
-      const spawnInterval =
-        phaseRef.current === 1 ? 6.5 : phaseRef.current === 2 ? 4.8 : 3.5;
+      const spawnInterval = applyOfficeSpawnInterval(
+        phaseRef.current === 1 ? 6.5 : phaseRef.current === 2 ? 4.8 : 3.5,
+        officeRef.current
+      );
       if (
         spawnTimerRef.current > spawnInterval &&
         conveyorSubjectsRef.current.length < 5
       ) {
         uiNeedsSync = true;
         spawnTimerRef.current = 0;
-        const errorChance =
-          phaseRef.current === 1 ? 0.45 : phaseRef.current === 2 ? 0.65 : 0.8;
+        const errorChance = applyOfficeErrorChance(
+          phaseRef.current === 1 ? 0.45 : phaseRef.current === 2 ? 0.65 : 0.8,
+          officeRef.current
+        );
         const isSAE = Math.random() < (phaseRef.current === 1 ? 0.1 : 0.3);
-        const newSub = activeProtocolRef.current
-          ? generateClinicalSubjectFromProtocol(
-              activeProtocolRef.current,
-              errorChance,
-              isSAE
-            )
-          : generateClinicalSubject(
-              errorChance,
-              isSAE,
-              undefined,
-              stationsRef.current.map((s) => s.id)
-            );
+        const newSub = applyOfficeToSubject(
+          activeProtocolRef.current
+            ? generateClinicalSubjectFromProtocol(
+                activeProtocolRef.current,
+                errorChance,
+                isSAE
+              )
+            : generateClinicalSubject(
+                errorChance,
+                isSAE,
+                undefined,
+                stationsRef.current.map((s) => s.id)
+              ),
+          officeRef.current,
+          officeSiteSeqRef.current++
+        );
         conveyorSubjectsRef.current = [...conveyorSubjectsRef.current, newSub];
         setConveyorSubjects([...conveyorSubjectsRef.current]);
         if (!selectedSubjectIdRef.current) {
           setSelectedSubjectId(newSub.id);
         }
+      }
+
+      // 6a. Sponsor inbox: mood decay, new emails, follow-up escalation
+      if (playStateRef.current === "playing") {
+        const prevSponsor = sponsorRef.current;
+        const { state: nextSponsor, events: sponsorEvents } = tickSponsor(
+          prevSponsor,
+          deltaSeconds
+        );
+        sponsorRef.current = nextSponsor;
+        for (const ev of sponsorEvents) {
+          if (ev.type === "request_arrived") {
+            triggerSoundRef.current("chute");
+            addAuditLogRef.current(
+              `[SPONSOR] 📧 New email from ${ev.request.from} (${ev.request.role}): "${ev.request.subject}"`,
+              "WARN"
+            );
+          } else if (ev.type === "follow_up") {
+            triggerSoundRef.current("error");
+            addAuditLogRef.current(
+              `[SPONSOR] 📧 ${ev.request.from}: "${ev.subjectLine}"`,
+              "WARN"
+            );
+          } else if (ev.type === "request_dropped") {
+            addAuditLogRef.current(
+              `[SPONSOR] ${ev.request.from} escalated "${ev.request.subject}" to your manager's manager. Satisfaction ${ev.moodDelta}%.`,
+              "CRITICAL"
+            );
+          } else if (ev.type === "contract_terminated") {
+            triggerSoundRef.current("alarm");
+            playStateRef.current = "game_over";
+            setGameOverReason("sponsor");
+            setPlayState("game_over");
+            addAuditLogRef.current(
+              "[CONTRACT TERMINATED] The sponsor has 'decided to go in a different direction' and moved the study to another CRO.",
+              "CRITICAL"
+            );
+            const sponsorReport = applySponsorSkeletonsToReport(
+              generateBIMOReport(
+                scoreStateRef.current,
+                auditorRef.current,
+                auditLogsRef.current,
+                ruleViolationsRef.current,
+                activeProtocolRef.current
+              ),
+              nextSponsor.skeletons
+            );
+            setBimoReport(sponsorReport);
+            setLastBimoReport(sponsorReport);
+          }
+        }
+        if (
+          sponsorEvents.length > 0 ||
+          Math.round(prevSponsor.mood) !== Math.round(nextSponsor.mood) ||
+          Math.ceil(prevSponsor.activeRequest?.timeRemaining ?? 0) !==
+            Math.ceil(nextSponsor.activeRequest?.timeRemaining ?? 0)
+        ) {
+          setSponsor(nextSponsor);
+        }
+      }
+
+      // 6b. Office ambient flavor events
+      ambientTimerRef.current += deltaSeconds;
+      if (ambientTimerRef.current > 24) {
+        ambientTimerRef.current = 0;
+        addAuditLogRef.current(
+          `[OFFICE] ${pickOfficeAmbientEvent(officeRef.current)}`,
+          "INFO"
+        );
       }
 
       // 7. UI State Sync: Sync React state only when DOM second display value changes or milestones occur
@@ -1284,6 +1642,35 @@ export const ClinicalTrialChaos: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playState]);
 
+  // 17a. Keep hotkeys working: return focus to the board when a dialog closes
+  useEffect(() => {
+    if (playState !== "playing" || validatingObs || signatureModal.isOpen) {
+      return;
+    }
+    const board = containerRef.current;
+    const active = document.activeElement;
+    if (board && (!active || active === document.body)) {
+      board.focus({ preventScroll: true });
+    }
+  }, [playState, validatingObs, signatureModal.isOpen]);
+
+  // 17b. Draw a single static frame while the shift is not running
+  useEffect(() => {
+    if (playState === "playing" || activeTab !== "conveyor") return;
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (canvas && ctx) {
+      renderConveyorCanvas(
+        ctx,
+        canvas.width,
+        canvas.height,
+        auditor,
+        conveyorSubjects,
+        particlesRef.current
+      );
+    }
+  }, [playState, activeTab, renderConveyorCanvas, auditor, conveyorSubjects]);
+
   // 18. Hotkeys and Keyboard Boundary
   const handleKeyDown = (e: React.KeyboardEvent) => {
     const key = e.key.toUpperCase();
@@ -1310,9 +1697,24 @@ export const ClinicalTrialChaos: React.FC = () => {
       e.preventDefault();
     }
 
+    // The inspection report sits on top of everything: Escape closes it and
+    // no other hotkey (e.g. Enter = start shift) may act behind it.
+    if (bimoReport) {
+      if (key === "ESCAPE") setBimoReport(null);
+      return;
+    }
+
     if (playState !== "playing") {
-      if (key === " " || key === "ENTER") {
-        startGame(gameMode, phase);
+      // Only when the board itself has focus: Enter/Space on a focused button
+      // (office card, mode toggle) must activate that button, not start a shift.
+      if ((key === " " || key === "ENTER") && e.target === e.currentTarget) {
+        e.preventDefault();
+        // Mirror the primary button of the current screen
+        if (playState === "phase_cleared") {
+          startGame("campaign", (phase < 3 ? phase + 1 : 1) as GamePhase);
+        } else {
+          startGame(gameMode, 1);
+        }
       }
       return;
     }
@@ -1320,6 +1722,17 @@ export const ClinicalTrialChaos: React.FC = () => {
     if (validatingObs) {
       if (key === "ESCAPE") {
         setValidatingObs(null);
+      } else if (!validatingObs.feedback?.isValid) {
+        // Number keys pick an answer in the fix dialog
+        const options = validatingObs.obs.options || [
+          validatingObs.obs.correctedValue || validatingObs.obs.rawValue,
+          validatingObs.obs.rawValue,
+        ];
+        const optionIdx = parseInt(key, 10) - 1;
+        if (optionIdx >= 0 && optionIdx < options.length) {
+          e.preventDefault();
+          handleSelectChoice(options[optionIdx]);
+        }
       }
       return;
     }
@@ -1329,6 +1742,21 @@ export const ClinicalTrialChaos: React.FC = () => {
         setSignatureModal((prev) => ({ ...prev, isOpen: false }));
       } else if (key === "ENTER") {
         handleConfirmSignature();
+      }
+      return;
+    }
+
+    // Enter performs the next step: fix the next flagged field, or route a clean CRF
+    if (key === "ENTER" && activeSubject && e.target === e.currentTarget) {
+      e.preventDefault();
+      const flagged = activeSubject.observations.find((o) => !o.isResolved);
+      if (flagged) {
+        setValidatingObs({ subjectId: activeSubject.id, obs: flagged });
+      } else {
+        const target = activeSubject.observations.find((o) =>
+          stations.some((st) => st.id === o.destination)
+        );
+        if (target) handleInitiateSubmission(target.destination);
       }
       return;
     }
@@ -1484,6 +1912,92 @@ export const ClinicalTrialChaos: React.FC = () => {
     (a, b) => a.positionIndex - b.positionIndex
   );
 
+  // Derived guidance for the "what do I do next" flow: fix → route → sign
+  const phaseTarget = PHASE_TARGETS[phase];
+  const flaggedObs =
+    activeSubject?.observations.filter((o) => !o.isResolved) ?? [];
+  const nextFlaggedObs = flaggedObs[0] ?? null;
+  const routeDomains: CDISCDomain[] =
+    activeSubject && flaggedObs.length === 0
+      ? Array.from(
+          new Set(activeSubject.observations.map((o) => o.destination))
+        ).filter((d) => stations.some((s) => s.id === d))
+      : [];
+  const flowStep: 0 | 1 | 2 = !activeSubject ? 0 : nextFlaggedObs ? 1 : 2;
+  const stationHotkey = (id: CDISCDomain) =>
+    sortedStations.findIndex((s) => s.id === id) + 1;
+
+  const sponsorEmailCard = sponsor.activeRequest ? (
+    <section
+      aria-label="Sponsor email"
+      className={`overflow-hidden rounded-xl border ${
+        sponsor.activeRequest.followUps > 0
+          ? "border-rose-500/50 bg-rose-500/5"
+          : "border-amber-500/40 bg-amber-500/5"
+      }`}
+    >
+      <div className="h-1 bg-zinc-800">
+        <div
+          className={`h-full transition-[width] duration-500 ease-linear ${
+            sponsor.activeRequest.followUps > 0 ? "bg-rose-500" : "bg-amber-500"
+          }`}
+          style={{
+            width: `${Math.max(
+              0,
+              (sponsor.activeRequest.timeRemaining /
+                (sponsor.activeRequest.followUps > 0
+                  ? 12
+                  : sponsor.activeRequest.request.deadlineSeconds)) *
+                100
+            )}%`,
+          }}
+        />
+      </div>
+      <div className="p-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0" aria-live="polite">
+            <p className="flex items-center gap-1.5 text-[10px] text-zinc-400">
+              <IconMail className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              <span className="break-words">
+                {sponsor.activeRequest.request.from} ·{" "}
+                {sponsor.activeRequest.request.role}
+              </span>
+            </p>
+            <p className="mt-0.5 text-xs font-bold text-zinc-100 break-words">
+              {sponsor.activeRequest.followUps > 0
+                ? getFollowUpSubject(
+                    sponsor.activeRequest.request,
+                    sponsor.activeRequest.followUps
+                  )
+                : sponsor.activeRequest.request.subject}
+            </p>
+          </div>
+          <span className="shrink-0 text-xs font-bold tabular-nums text-amber-300">
+            {Math.ceil(sponsor.activeRequest.timeRemaining)}s
+          </span>
+        </div>
+        <p className="mt-1 text-[11px] text-zinc-400 break-words">
+          {sponsor.activeRequest.request.body}
+        </p>
+        <div className="mt-2 grid gap-1.5">
+          {sponsor.activeRequest.request.choices.map((choice, idx) => (
+            <button
+              key={choice.label}
+              type="button"
+              onClick={() => handleSponsorChoice(idx)}
+              className="min-h-[40px] min-w-0 rounded-lg border border-zinc-700 bg-[#0d0e11] px-3 py-2 text-left text-[11px] font-bold text-zinc-200 break-words transition hover:border-amber-500/60 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60"
+            >
+              {choice.label}
+            </button>
+          ))}
+        </div>
+        <p className="mt-2 text-[10px] text-zinc-400">
+          Ignore it and they will follow up. Twice.
+        </p>
+      </div>
+    </section>
+  ) : null;
+
   return (
     <div
       ref={containerRef}
@@ -1493,7 +2007,7 @@ export const ClinicalTrialChaos: React.FC = () => {
       className={`relative w-full font-mono focus:outline-none transition-all ${
         isFullscreen
           ? "fixed inset-0 z-50 w-full h-[100dvh] max-h-[100dvh] max-w-none rounded-none border-none bg-black p-3 sm:p-6 overflow-y-auto select-none"
-          : "rounded-2xl border border-blue-500/30 bg-zinc-950 p-4 md:p-6 shadow-2xl focus:ring-1 focus:ring-brand-cyan"
+          : "rounded-2xl border border-blue-500/30 bg-zinc-950 p-2.5 sm:p-4 md:p-6 shadow-2xl focus:ring-1 focus:ring-brand-cyan"
       }`}
     >
       <FullscreenButton
@@ -1505,109 +2019,194 @@ export const ClinicalTrialChaos: React.FC = () => {
       {/* Tablet Orientation Recommendation */}
       <TabletOrientationHint className="w-full mb-4" />
 
-      {/* Header Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-800 pb-4">
-        <div>
-          <div className="inline-flex items-center gap-2">
-            <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse" />
-            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-brand-cyan">
-              21 CFR Part 11 &amp; CDISC SDTM Mega-Arcade · Zero PHI
-            </p>
-          </div>
-          <h2
-            id="clinical-chaos-heading"
-            className="mt-1 text-2xl md:text-3xl font-extrabold text-white tracking-tight"
-          >
-            Clinical Trial Chaos:{" "}
-            <span className="text-emerald-400">CDISC Compliance</span>
-          </h2>
+      {/* HUD: score, combo, phase goal, office, audio */}
+      <h2 id="clinical-chaos-heading" className="sr-only">
+        Clinical Trial Chaos: CDISC Compliance
+      </h2>
+      <div className="flex flex-wrap items-center gap-2 border-b border-zinc-800 pb-3 text-xs">
+        <div className="relative flex min-h-[40px] items-center gap-2 rounded-lg border border-zinc-800 bg-[#13151a] px-2.5 sm:px-3">
+          <IconTrophy className="h-4 w-4 text-amber-400" aria-hidden="true" />
+          <span className="sr-only text-[10px] uppercase text-zinc-400 sm:not-sr-only">
+            Score:
+          </span>
+          <span className="font-bold tabular-nums text-white">
+            {scoreState.score}
+          </span>
+          <span className="hidden text-[10px] tabular-nums text-zinc-400 sm:inline">
+            Best {effectiveHighScore}
+          </span>
+          {scorePops.map((pop) => (
+            <span
+              key={pop.id}
+              aria-hidden="true"
+              className={`cc-score-pop pointer-events-none absolute -top-2 right-2 text-xs font-bold tabular-nums ${
+                pop.tone === "good" ? "text-emerald-400" : "text-rose-400"
+              }`}
+            >
+              {pop.text}
+            </span>
+          ))}
         </div>
 
-        {/* Score, Sound, & Manual Controls */}
-        <div className="flex flex-wrap items-center gap-3">
+        <div
+          className="flex min-h-[40px] items-center gap-1.5 rounded-lg border border-zinc-800 bg-[#13151a] px-2.5 sm:px-3"
+          title="Lock CRFs back-to-back to build a combo. Every 3 in a row raises the multiplier."
+        >
+          <IconFlame
+            className={`h-4 w-4 ${
+              scoreState.combo > 2 ? "text-amber-400" : "text-zinc-400"
+            }`}
+            aria-hidden="true"
+          />
+          <span className="sr-only text-[10px] uppercase text-zinc-400 sm:not-sr-only">
+            Combo:
+          </span>
+          <span className="font-bold tabular-nums text-zinc-100">
+            {scoreState.combo}
+          </span>
+          <span
+            className={`rounded px-1.5 py-0.5 text-[10px] font-bold tabular-nums ${
+              scoreState.multiplier > 1
+                ? "bg-amber-500/15 text-amber-300"
+                : "text-zinc-400"
+            }`}
+          >
+            ×{scoreState.multiplier}
+          </span>
+        </div>
+
+        <div className="flex min-h-[40px] min-w-0 items-center gap-2 rounded-lg border border-zinc-800 bg-[#13151a] px-2.5 sm:px-3">
+          <span className="text-[10px] uppercase text-zinc-400">
+            {gameMode === "campaign" ? `Phase ${phase}/3` : "Endless"}
+          </span>
+          {gameMode === "campaign" && (
+            <span
+              className="flex items-center gap-1"
+              role="img"
+              aria-label={`${Math.min(scoreState.subjectsSubmitted, phaseTarget)} of ${phaseTarget} CRFs locked`}
+            >
+              {Array.from({ length: phaseTarget }, (_, i) => (
+                <span
+                  key={i}
+                  className={`h-2 w-2 rounded-sm transition-colors ${
+                    i < scoreState.subjectsSubmitted
+                      ? "bg-emerald-400"
+                      : "bg-zinc-700"
+                  }`}
+                />
+              ))}
+            </span>
+          )}
+          <span className="tabular-nums text-zinc-300">
+            {scoreState.subjectsSubmitted}
+            {gameMode === "campaign" ? `/${phaseTarget}` : ""}
+            <span className="hidden sm:inline"> locked</span>
+          </span>
+        </div>
+
+        <div className="ml-auto flex items-center gap-1.5">
           <FieldManualButton manualId="clinical-chaos" label="Manual" />
+          <button
+            type="button"
+            onClick={() => setBgmEnabled(!bgmEnabled)}
+            aria-pressed={bgmEnabled}
+            aria-label="Background music"
+            title="Toggle 8-bit background music"
+            className={`flex h-10 w-10 items-center justify-center rounded-lg border transition ${
+              bgmEnabled
+                ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-300"
+                : "border-zinc-800 bg-[#13151a] text-zinc-400 hover:text-zinc-300"
+            }`}
+          >
+            <IconMusic className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setSoundEnabled(!soundEnabled)}
+            aria-pressed={soundEnabled}
+            aria-label="Sound effects"
+            title={soundEnabled ? "Mute sound effects" : "Unmute sound effects"}
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-800 bg-[#13151a] text-zinc-400 transition hover:text-white"
+          >
+            {soundEnabled ? (
+              <IconVolume className="h-4 w-4 text-brand-cyan" />
+            ) : (
+              <IconVolumeOff className="h-4 w-4 text-zinc-400" />
+            )}
+          </button>
           <FullscreenButton
             isFullscreen={isFullscreen}
             onToggle={toggleFullscreen}
             variant="header"
           />
-
-          {/* Score Counter */}
-          <div className="flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900/90 px-3 py-1.5 text-xs">
-            <IconTrophy className="h-4 w-4 text-amber-400" />
-            <div>
-              <span className="text-[10px] text-zinc-400 uppercase">
-                Score:{" "}
-              </span>
-              <span className="font-bold text-white">{scoreState.score}</span>
-              <span className="text-[10px] text-zinc-500 ml-2">
-                (High: {effectiveHighScore})
-              </span>
-            </div>
-          </div>
-
-          {/* Combo Meter */}
-          <div className="hidden sm:flex items-center gap-1 rounded-lg border border-zinc-800 bg-zinc-900/90 px-2.5 py-1.5 text-xs">
-            <IconFlame
-              className={`h-4 w-4 ${
-                scoreState.combo > 2
-                  ? "text-rose-500 animate-bounce"
-                  : "text-zinc-500"
-              }`}
-            />
-            <span className="text-zinc-400 text-[10px]">COMBO:</span>
-            <span className="font-bold text-brand-cyan">
-              {scoreState.combo}x
-            </span>
-            <span className="text-[10px] text-amber-400 ml-1">
-              ({scoreState.multiplier}x Multiplier)
-            </span>
-          </div>
-
-          {/* Procedural BGM Synth Toggle */}
-          <button
-            onClick={() => setBgmEnabled(!bgmEnabled)}
-            className={`rounded-lg border px-2.5 py-1.5 text-xs font-bold transition flex items-center gap-1.5 ${
-              bgmEnabled
-                ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.2)]"
-                : "border-zinc-800 bg-zinc-900 text-zinc-500 hover:text-zinc-300"
-            }`}
-            title="Toggle 8-Bit Procedural Synth BGM"
-          >
-            <IconMusic className="h-3.5 w-3.5" />
-            <span className="text-[10px] uppercase">
-              BGM {bgmEnabled ? "ON" : "OFF"}
-            </span>
-          </button>
-
-          {/* Master SFX Mute */}
-          <button
-            onClick={() => setSoundEnabled(!soundEnabled)}
-            className="rounded-lg border border-zinc-800 bg-zinc-900 p-2 text-zinc-400 hover:text-white transition"
-            title={soundEnabled ? "Mute Arcade SFX" : "Unmute Arcade SFX"}
-          >
-            {soundEnabled ? (
-              <IconVolume className="h-4 w-4 text-brand-cyan" />
-            ) : (
-              <IconVolumeOff className="h-4 w-4 text-zinc-600" />
-            )}
-          </button>
         </div>
       </div>
 
-      {/* Authored Protocol Engine Status Banner */}
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl border border-emerald-500/30 bg-emerald-950/40 text-xs font-mono">
-        <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-emerald-300 font-bold">
-            {activeProtocol
-              ? `AUTHORED PROTOCOL ENGINE: ${activeProtocol.protocolNumber} - ${activeProtocol.studyName} (${activeProtocol.forms?.length || 0} Forms, ${activeProtocol.rules?.length || 0} AST Rules)`
-              : "BUILT-IN PRESET SCENARIOS ACTIVE (Fallback Mode)"}
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          {activeProtocol ? (
+      {/* View switcher */}
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex gap-1 overflow-x-auto" aria-label="Game views">
+          {(
+            [
+              {
+                id: "conveyor",
+                label: "Conveyor Floor",
+                short: "Floor",
+                icon: <IconBolt className="h-3.5 w-3.5" />,
+                badge: null,
+              },
+              {
+                id: "sdtm_studio",
+                label: "Live SDTM Studio",
+                short: "SDTM",
+                icon: <IconDatabase className="h-3.5 w-3.5" />,
+                badge: sdtmDataset.length,
+              },
+              {
+                id: "audit_trail",
+                label: "Audit Trail Log",
+                short: "Audit",
+                icon: <IconFileText className="h-3.5 w-3.5" />,
+                badge: null,
+              },
+            ] as const
+          ).map((tab) => (
             <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              aria-pressed={activeTab === tab.id}
+              className={`flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg px-3 text-xs font-bold transition ${
+                activeTab === tab.id
+                  ? "border border-zinc-700 bg-zinc-800 text-zinc-100"
+                  : "border border-transparent text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              {tab.icon}
+              <span className="sm:hidden">{tab.short}</span>
+              <span className="hidden sm:inline">{tab.label}</span>
+              {tab.badge !== null && (
+                <span className="rounded bg-zinc-900 px-1.5 text-[10px] tabular-nums text-zinc-400">
+                  {tab.badge}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+        <span className="hidden min-w-0 items-center gap-1.5 text-[10px] text-zinc-400 sm:flex">
+          <span
+            aria-hidden="true"
+            className="h-2 w-2 shrink-0 rounded-full"
+            style={{ backgroundColor: office.accentColor }}
+          />
+          <span className="truncate">{office.name}</span>
+        </span>
+        {activeProtocol && (
+          <div className="flex min-w-0 items-center gap-2 text-[10px] text-zinc-400">
+            <span className="truncate">
+              Protocol {activeProtocol.protocolNumber}
+            </span>
+            <button
+              type="button"
               onClick={() => {
                 setActiveProtocol(null);
                 try {
@@ -1618,219 +2217,183 @@ export const ClinicalTrialChaos: React.FC = () => {
                   "INFO"
                 );
               }}
-              className="px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-700 hover:bg-zinc-800 text-zinc-300 text-[11px]"
+              className="min-h-[32px] rounded-lg border border-zinc-700 px-2 text-zinc-300 hover:bg-zinc-800"
             >
               Use Built-in Presets
             </button>
-          ) : (
-            <button
-              onClick={() => {
-                if (typeof window !== "undefined") {
-                  try {
-                    const stored = localStorage.getItem("crf_active_protocol");
-                    if (stored) {
-                      const parsed = JSON.parse(stored);
-                      setActiveProtocol(parsed);
-                      addAuditLog(
-                        `Loaded active protocol ${parsed.protocolNumber} into simulation.`,
-                        "COMPLIANT"
-                      );
-                      return;
-                    }
-                  } catch {}
-                  alert(
-                    "No custom protocol found in storage. Author a protocol in CRF Studio and click 'Simulate Protocol'!"
-                  );
-                }
-              }}
-              className="px-2.5 py-1 rounded-lg bg-emerald-600/30 border border-emerald-500/50 hover:bg-emerald-600/50 text-emerald-200 text-[11px] font-bold"
-            >
-              Load Authored Protocol
-            </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
-      {/* Navigation View Switcher (Conveyor Ops vs Live SDTM Studio vs Audit Log) */}
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-b border-zinc-800/80 pb-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={() => setActiveTab("conveyor")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-              activeTab === "conveyor"
-                ? "bg-brand-cyan/20 text-cyan-300 border border-brand-cyan/40"
-                : "text-zinc-400 hover:text-white"
-            }`}
-          >
-            <IconBolt className="h-3.5 w-3.5" />
-            <span>Conveyor Floor</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("sdtm_studio")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-              activeTab === "sdtm_studio"
-                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
-                : "text-zinc-400 hover:text-white"
-            }`}
-          >
-            <IconDatabase className="h-3.5 w-3.5" />
-            <span>Live SDTM Studio ({sdtmDataset.length} rows)</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab("audit_trail")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-              activeTab === "audit_trail"
-                ? "bg-purple-500/20 text-purple-300 border border-purple-500/40"
-                : "text-zinc-400 hover:text-white"
-            }`}
-          >
-            <IconFileText className="h-3.5 w-3.5" />
-            <span>Audit Trail Log</span>
-          </button>
-        </div>
-
-        <div className="text-right">
-          <span className="text-[10px] text-zinc-500 uppercase">
-            MODE: {gameMode.toUpperCase()}
-          </span>
-          <p className="text-xs font-bold text-zinc-300">
-            {gameMode === "campaign" ? `PHASE ${phase} OF 3` : "ENDLESS SPRINT"}
-          </p>
-        </div>
-      </div>
-
-      {/* Auditor Pressure Gauge & Power-Up Lifelines Bar */}
-      <div className="mt-4 grid grid-cols-1 lg:grid-cols-12 gap-3 items-center">
-        {/* Auditor Gauge */}
-        <div className="lg:col-span-6 rounded-xl border border-zinc-800 bg-zinc-900/80 p-3">
-          <div className="flex items-center justify-between text-xs mb-1.5">
-            <div className="flex items-center gap-2">
-              <IconShieldCheck
-                className={`h-4 w-4 ${auditor.suspicion > 60 ? "text-rose-500" : "text-blue-400"}`}
-              />
-              <span className="font-bold text-zinc-300">
-                FDA AUDITOR SCRUTINY:
+      {/* The core tension: FDA auditor vs sponsor */}
+      {playState !== "idle" && (
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <div className="min-w-0 rounded-xl border border-zinc-800 bg-[#13151a] p-3">
+            <div className="flex items-center justify-between gap-2 text-xs">
+              <span className="flex min-w-0 items-center gap-2">
+                <IconShieldCheck
+                  className={`h-4 w-4 shrink-0 ${
+                    auditor.suspicion > 60 ? "text-rose-400" : "text-zinc-400"
+                  }`}
+                  aria-hidden="true"
+                />
+                <span className="truncate font-bold text-zinc-300">
+                  FDA
+                  <span className="hidden sm:inline"> AUDITOR SCRUTINY</span>
+                </span>
               </span>
-              <span
-                className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${
-                  auditor.behavior === "issuing_483"
-                    ? "bg-rose-600 text-white animate-pulse"
-                    : auditor.behavior === "coffee_break"
-                      ? "bg-purple-500/20 text-purple-300 border border-purple-500/40"
-                      : auditor.behavior === "suspicious"
-                        ? "bg-amber-500/20 text-amber-300"
-                        : "bg-blue-500/20 text-blue-300"
-                }`}
-              >
-                {auditor.behavior === "coffee_break"
-                  ? "☕ COFFEE BREAK"
-                  : auditor.behavior}
+              <span className="flex shrink-0 items-center gap-2">
+                <span
+                  className={`font-bold tabular-nums ${
+                    auditor.suspicion > 75
+                      ? "text-rose-400"
+                      : auditor.suspicion > 40
+                        ? "text-amber-300"
+                        : "text-emerald-400"
+                  }`}
+                >
+                  {Math.round(auditor.suspicion)}%
+                </span>
               </span>
             </div>
-            <span
-              className={`font-mono font-bold ${
-                auditor.suspicion > 75
-                  ? "text-rose-400 animate-pulse"
-                  : auditor.suspicion > 40
-                    ? "text-amber-300"
-                    : "text-emerald-400"
-              }`}
+            <div
+              className="relative mt-2 h-2 overflow-hidden rounded-full bg-zinc-800"
+              role="meter"
+              aria-label="FDA auditor suspicion"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(auditor.suspicion)}
             >
-              {Math.round(auditor.suspicion)}% SUSPICION
-            </span>
-          </div>
-          <div className="w-full h-3 rounded-full bg-zinc-950 border border-zinc-800 overflow-hidden relative">
-            <div
-              className={`h-full transition-all duration-300 ${
-                auditor.suspicion > 75
-                  ? "bg-gradient-to-r from-amber-500 to-rose-600"
-                  : auditor.suspicion > 40
-                    ? "bg-gradient-to-r from-blue-500 to-amber-500"
-                    : "bg-gradient-to-r from-teal-500 to-emerald-500"
-              }`}
-              style={{ width: `${Math.min(100, auditor.suspicion)}%` }}
-            />
-            <div
-              className="absolute right-0 top-0 bottom-0 w-1 bg-rose-500"
-              title="Form 483 Termination Threshold (100%)"
-            />
-          </div>
-        </div>
-
-        {/* Combo-Charged Regulatory Lifelines */}
-        <div className="lg:col-span-6 grid grid-cols-2 sm:grid-cols-4 gap-2">
-          {(
-            [
-              "fda-coffee-break",
-              "auto-clean",
-              "query-extension",
-              "fast-sign",
-            ] as PowerUpType[]
-          ).map((type) => {
-            const p = powerUps[type];
-            const isReady = p.charge >= p.maxCharge;
-            return (
-              <button
-                key={type}
-                onClick={() => triggerPowerUp(type)}
-                disabled={!isReady || playState !== "playing"}
-                className={`p-2 rounded-xl border flex flex-col justify-between text-left transition ${
-                  isReady
-                    ? "border-emerald-500/60 bg-emerald-500/10 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.25)] hover:bg-emerald-500/20"
-                    : "border-zinc-800 bg-zinc-900/60 text-zinc-500 opacity-70"
+              <div
+                aria-hidden="true"
+                className="absolute inset-y-0 right-0 w-1/4 bg-rose-500/15"
+              />
+              <div
+                className={`relative h-full rounded-full transition-[width] duration-300 ${
+                  auditor.suspicion > 75
+                    ? "bg-rose-500"
+                    : auditor.suspicion > 40
+                      ? "bg-amber-500"
+                      : "bg-emerald-500"
                 }`}
-                title={p.description}
+                style={{ width: `${Math.min(100, auditor.suspicion)}%` }}
+              />
+            </div>
+            <div className="mt-1.5 flex items-center gap-2">
+              <span
+                className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                  auditor.behavior === "issuing_483"
+                    ? "bg-rose-600 text-white"
+                    : auditor.behavior === "suspicious"
+                      ? "bg-amber-500/15 text-amber-300"
+                      : "bg-zinc-800 text-zinc-400"
+                }`}
               >
-                <div className="flex items-center justify-between text-[10px]">
-                  <span className="font-bold font-mono">[{p.hotkey}]</span>
-                  {type === "fda-coffee-break" && (
-                    <IconCoffee className="w-3.5 h-3.5" />
-                  )}
-                  {type === "auto-clean" && (
-                    <IconSparkles className="w-3.5 h-3.5" />
-                  )}
-                  {type === "query-extension" && (
-                    <IconClock className="w-3.5 h-3.5" />
-                  )}
-                  {type === "fast-sign" && <IconBolt className="w-3.5 h-3.5" />}
-                </div>
-                <p className="text-[10px] font-bold mt-1 truncate text-zinc-200">
-                  {p.name}
-                </p>
-                <div className="mt-1.5 flex items-center justify-between text-[9px]">
-                  <span
-                    className={
-                      isReady ? "text-emerald-400 font-bold" : "text-zinc-500"
-                    }
-                  >
-                    {isReady ? "READY!" : `${p.charge}/${p.maxCharge}`}
-                  </span>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Active Protocol Amendment Banner */}
-      {activeAmendment && activeAmendment.active && (
-        <div className="mt-3 flex items-center justify-between rounded-xl border border-amber-500/50 bg-amber-500/10 p-3 text-amber-200 animate-pulse">
-          <div className="flex items-center gap-2">
-            <IconArrowsShuffle className="h-5 w-5 text-amber-400 shrink-0" />
-            <div>
-              <span className="font-bold text-xs uppercase tracking-wider text-amber-300">
-                PROTOCOL AMENDMENT ALERT: {activeAmendment.title}
+                {AUDITOR_BEHAVIOR_LABELS[auditor.behavior]}
               </span>
-              <p className="text-[11px] text-amber-200/80">
-                {activeAmendment.description}
+              <p className="hidden min-w-0 truncate text-[10px] text-zinc-400 sm:block">
+                Bad data and expired subjects raise it. 100% = Form 483.
               </p>
             </div>
           </div>
-          <span className="text-xs font-bold font-mono px-2 py-1 rounded bg-amber-500/20 text-amber-300 shrink-0">
-            {Math.ceil(activeAmendment.timeRemaining)}s
-          </span>
+
+          <div className="min-w-0 rounded-xl border border-zinc-800 bg-[#13151a] p-3">
+            <div className="flex items-center justify-between gap-2 text-xs">
+              <span className="flex min-w-0 items-center gap-2">
+                <IconMail
+                  className={`h-4 w-4 shrink-0 ${
+                    sponsor.mood < 25 ? "text-rose-400" : "text-zinc-400"
+                  }`}
+                  aria-hidden="true"
+                />
+                <span className="truncate font-bold text-zinc-300">
+                  SPONSOR
+                  <span className="hidden sm:inline"> SATISFACTION</span>
+                </span>
+              </span>
+              <span className="flex shrink-0 items-center gap-2">
+                <span
+                  className="hidden text-[10px] tabular-nums text-zinc-400 sm:inline"
+                  title="Shortcuts you took to please the sponsor. The inspector will find them."
+                >
+                  🦴 {sponsor.skeletons.length}
+                </span>
+                <span
+                  className={`font-bold tabular-nums ${
+                    sponsor.mood < 25
+                      ? "text-rose-400"
+                      : sponsor.mood < 45
+                        ? "text-amber-300"
+                        : "text-emerald-400"
+                  }`}
+                >
+                  {Math.round(sponsor.mood)}%
+                </span>
+              </span>
+            </div>
+            <div
+              className="relative mt-2 h-2 overflow-hidden rounded-full bg-zinc-800"
+              role="meter"
+              aria-label="Sponsor satisfaction"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(sponsor.mood)}
+            >
+              <div
+                aria-hidden="true"
+                className="absolute inset-y-0 left-0 w-1/4 bg-rose-500/15"
+              />
+              <div
+                className={`relative h-full rounded-full transition-[width] duration-300 ${
+                  sponsor.mood >= 45
+                    ? "bg-emerald-500"
+                    : sponsor.mood >= 25
+                      ? "bg-amber-500"
+                      : "bg-rose-500"
+                }`}
+                style={{ width: `${Math.round(sponsor.mood)}%` }}
+              />
+            </div>
+            <p className="mt-1.5 truncate py-0.5 text-[10px] italic text-zinc-400">
+              {getSponsorMoodLabel(sponsor.mood)}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Active Protocol Amendment Banner */}
+      {playState === "playing" && activeAmendment && activeAmendment.active && (
+        <div
+          role="status"
+          className="mt-3 overflow-hidden rounded-xl border border-amber-500/40 bg-amber-500/5"
+        >
+          <div className="flex items-start justify-between gap-3 p-3">
+            <div className="flex min-w-0 items-start gap-2">
+              <IconArrowsShuffle
+                className="mt-0.5 h-4 w-4 shrink-0 text-amber-400"
+                aria-hidden="true"
+              />
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-amber-300 break-words">
+                  Protocol amendment: {activeAmendment.title}
+                </p>
+                <p className="text-[11px] text-zinc-400 break-words">
+                  {activeAmendment.description}
+                </p>
+              </div>
+            </div>
+            <span className="shrink-0 text-xs font-bold tabular-nums text-amber-300">
+              {Math.ceil(activeAmendment.timeRemaining)}s
+            </span>
+          </div>
+          <div className="h-1 bg-zinc-800">
+            <div
+              className="h-full bg-amber-500 transition-[width] duration-500 ease-linear"
+              style={{
+                width: `${Math.max(0, (activeAmendment.timeRemaining / activeAmendment.durationSeconds) * 100)}%`,
+              }}
+            />
+          </div>
         </div>
       )}
 
@@ -1838,7 +2401,7 @@ export const ClinicalTrialChaos: React.FC = () => {
       {activeTab === "conveyor" && (
         <>
           {/* HTML5 Canvas Simulation */}
-          <div className="mt-4 relative rounded-xl border border-zinc-800 bg-black overflow-hidden">
+          <div className="mt-3 relative rounded-xl border border-zinc-800 bg-black overflow-hidden">
             <canvas
               ref={canvasRef}
               width={760}
@@ -2027,295 +2590,926 @@ export const ClinicalTrialChaos: React.FC = () => {
               </fieldset>
             </div>
 
-            {/* Overlays for Idle / Paused / Game Over / Cleared */}
+            {/* Canvas status caption while the conveyor is stopped */}
             {playState !== "playing" && (
-              <div className="absolute inset-0 bg-black/85 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center z-20">
-                {playState === "game_over" ? (
-                  <div className="max-w-md w-full border border-rose-500/40 bg-zinc-950 p-5 rounded-2xl shadow-2xl">
-                    <div className="flex items-center justify-center gap-2 text-rose-400 font-bold mb-2">
-                      <IconAlertTriangle className="h-6 w-6 text-rose-500 animate-bounce" />
-                      <span className="text-lg">
-                        FDA FORM 483 ISSUED · TRIAL TERMINATED
-                      </span>
-                    </div>
-                    <p className="text-xs text-zinc-400 mb-4 leading-relaxed">
-                      Auditor suspicion reached 100%. Major source data
-                      validation discrepancies triggered clinical hold under 21
-                      CFR § 312.44.
-                    </p>
-                    <div className="grid grid-cols-3 gap-2 bg-zinc-900/80 p-3 rounded-lg text-xs font-mono mb-4 text-left">
-                      <div>
-                        <span className="text-[10px] text-zinc-500 block">
-                          SCORE
-                        </span>
-                        <span className="font-bold text-white">
-                          {scoreState.score}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] text-zinc-500 block">
-                          SUBMITTED
-                        </span>
-                        <span className="font-bold text-emerald-400">
-                          {scoreState.subjectsSubmitted} CRFs
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] text-zinc-500 block">
-                          VIOLATIONS
-                        </span>
-                        <span className="font-bold text-rose-400">
-                          {scoreState.auditViolations}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => startGame("campaign", 1)}
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold text-xs uppercase tracking-wider hover:opacity-90 transition shadow-lg"
-                      >
-                        <IconRefresh className="h-4 w-4" /> Restart Phase I
-                      </button>
-                    </div>
-                  </div>
-                ) : playState === "phase_cleared" ? (
-                  <div className="max-w-md w-full border border-emerald-500/40 bg-zinc-950 p-5 rounded-2xl shadow-2xl">
-                    <div className="flex items-center justify-center gap-2 text-emerald-400 font-bold mb-2">
-                      <IconShieldCheck className="h-6 w-6 text-emerald-400" />
-                      <span className="text-lg">
-                        {phase < 3
-                          ? `PHASE ${phase} COMPLIANCE AUDIT PASSED!`
-                          : "STUDY PROTOCOL APPROVED FOR NDA SUBMISSION!"}
-                      </span>
-                    </div>
-                    <p className="text-xs text-zinc-400 mb-4">
-                      {phase < 3
-                        ? `The FDA inspection concluded with 100% verified CDISC SDTM mappings. Advance to Phase ${phase + 1} with expanded EDC domains?`
-                        : "Full 21 CFR Part 11 database lock achieved. All trial data successfully validated and archived."}
-                    </p>
-                    <button
-                      onClick={() =>
-                        startGame(
-                          "campaign",
-                          (phase < 3 ? phase + 1 : 1) as GamePhase
-                        )
-                      }
-                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-500 text-black font-bold text-xs uppercase tracking-wider hover:bg-emerald-400 transition"
-                    >
-                      {phase < 3
-                        ? `Advance to Phase ${phase + 1}`
-                        : "Play Victory Lap / Re-run"}
-                    </button>
-                  </div>
-                ) : (
-                  <div>
-                    <p className="text-base font-bold text-zinc-100 mb-2">
-                      Manage Multi-Center Clinical Data under 21 CFR &amp; CDISC
-                      Audit Scrutiny
-                    </p>
-                    <p className="text-xs text-zinc-400 max-w-md mx-auto mb-4">
-                      Solve multi-choice Controlled Terminology puzzles, route
-                      clinical packets across tiered EDC stations (DM, VS, AE,
-                      LB, CM, EX), charge regulatory lifelines, and download
-                      real SDTM datasets.
-                    </p>
-                    <div className="flex flex-wrap items-center justify-center gap-3">
-                      <button
-                        onClick={() => startGame("campaign", 1)}
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cyan-500 text-black font-bold text-xs uppercase tracking-wider hover:bg-cyan-400 transition shadow-[0_0_20px_-3px_rgba(6,182,212,0.5)]"
-                      >
-                        <IconPlayerPlay className="h-4 w-4" /> Start 3-Phase
-                        Campaign
-                      </button>
-                      <button
-                        onClick={() => startGame("endless", 1)}
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-700 bg-zinc-900 text-zinc-200 font-bold text-xs uppercase tracking-wider hover:bg-zinc-800 transition"
-                      >
-                        Endless Sprint Mode
-                      </button>
-                    </div>
-                  </div>
-                )}
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/55">
+                <span className="rounded-full border border-zinc-700 bg-[#0d0e11]/90 px-3 py-1 text-[11px] text-zinc-300">
+                  {playState === "idle"
+                    ? "Conveyor idle · clock in below"
+                    : playState === "phase_cleared"
+                      ? "Phase cleared · conveyor stopped"
+                      : "Shift over · conveyor stopped"}
+                </span>
               </div>
             )}
           </div>
 
-          {/* Active Subject Dossier & EDC Domain Routing Stations */}
-          <div className="mt-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
-            {/* Active Subject Dossier Card */}
-            <div className="lg:col-span-7 rounded-xl border border-zinc-800 bg-zinc-900/60 p-4">
-              <div className="flex items-center justify-between mb-3 border-b border-zinc-800/80 pb-2">
-                <div>
-                  <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
-                    ACTIVE CASE REPORT FORM (CRF)
-                  </span>
-                  <h3 className="text-base font-bold text-white flex items-center gap-2">
-                    {activeSubject
-                      ? activeSubject.subjectLabel
-                      : "NO SUBJECT SELECTED"}
-                    {activeSubject?.isSAE && (
-                      <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30">
-                        ⚡ SAE EXPEDITED
-                      </span>
-                    )}
-                  </h3>
-                </div>
-                {activeSubject && (
-                  <div className="text-right">
-                    <span className="text-[10px] text-zinc-400 block">
-                      {activeSubject.studySite}
-                    </span>
-                    <span className="text-xs font-mono font-bold text-amber-400 flex items-center gap-1 justify-end">
-                      <IconClock className="h-3.5 w-3.5" />{" "}
-                      {Math.ceil(activeSubject.timeRemaining)}s
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* Observations Grid */}
-              {activeSubject ? (
-                <div className="grid gap-2 sm:grid-cols-2">
-                  {activeSubject.observations.map((obs) => (
-                    <div
-                      key={obs.id}
-                      onClick={() =>
-                        setValidatingObs({ subjectId: activeSubject.id, obs })
-                      }
-                      className={`cursor-pointer rounded-lg border p-3 transition ${
-                        !obs.isResolved
-                          ? "border-amber-500/40 bg-amber-500/5 hover:border-amber-500 hover:bg-amber-500/10 shadow-[0_0_15px_-4px_rgba(245,158,11,0.2)]"
-                          : "border-zinc-800 bg-zinc-950/70 hover:border-zinc-700"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold text-zinc-300">
-                          {obs.field}
-                        </span>
-                        <span
-                          className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${
-                            obs.destination === "DM"
-                              ? "bg-blue-500/20 text-blue-400"
-                              : obs.destination === "VS"
-                                ? "bg-emerald-500/20 text-emerald-400"
-                                : obs.destination === "AE"
-                                  ? "bg-amber-500/20 text-amber-400"
-                                  : obs.destination === "LB"
-                                    ? "bg-purple-500/20 text-purple-400"
-                                    : obs.destination === "CM"
-                                      ? "bg-pink-500/20 text-pink-400"
-                                      : "bg-cyan-500/20 text-cyan-400"
-                          }`}
-                        >
-                          {obs.destination}
-                        </span>
-                      </div>
-                      <div className="mt-1 flex items-center justify-between">
-                        <p
-                          className={`text-sm font-bold ${
-                            !obs.isResolved ? "text-amber-300" : "text-zinc-100"
-                          }`}
-                        >
-                          {obs.currentValue}
-                        </p>
-                        {!obs.isResolved ? (
-                          <span className="text-[10px] font-bold text-amber-400 underline">
-                            Validate Choice →
-                          </span>
-                        ) : (
-                          <IconCheck className="h-4 w-4 text-emerald-400" />
-                        )}
-                      </div>
-                      {obs.hint && !obs.isResolved && (
-                        <p className="mt-1.5 text-[10px] text-amber-400/80 italic">
-                          {obs.hint}
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="py-8 text-center text-zinc-500 text-xs">
-                  Conveyor empty or all subjects submitted. Awaiting next site
-                  transfer...
-                </div>
+          {playState === "playing" ? (
+            <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-12 lg:items-start">
+              {/* Mobile: urgent sponsor email sits above the work */}
+              {sponsorEmailCard && (
+                <div className="lg:hidden">{sponsorEmailCard}</div>
               )}
 
-              {/* Conveyor Subject Queue Selector */}
-              <div className="mt-4 pt-3 border-t border-zinc-800/80 flex items-center gap-2 overflow-x-auto pb-1">
-                <span className="text-[10px] text-zinc-500 uppercase shrink-0">
-                  Queue:
-                </span>
-                {conveyorSubjects.map((sub) => (
-                  <button
-                    key={sub.id}
-                    onClick={() => setSelectedSubjectId(sub.id)}
-                    className={`px-2.5 py-1 rounded-md text-xs font-mono shrink-0 border transition ${
-                      sub.id === selectedSubjectId
-                        ? "border-brand-cyan bg-cyan-950/60 text-cyan-300 font-bold"
-                        : "border-zinc-800 bg-zinc-950 text-zinc-400 hover:border-zinc-700"
-                    }`}
-                  >
-                    {sub.subjectLabel} {sub.isSAE && "⚡"}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* EDC Domain Workstations (DM, VS, AE, LB, CM, EX, etc.) */}
-            <div className="lg:col-span-5 flex flex-col justify-between gap-2">
-              <div className="flex items-center justify-between text-[11px] font-bold text-zinc-400 uppercase">
-                <span>Tiered EDC Workstations</span>
-                <span className="text-zinc-500">
-                  Hotkeys: [1-{sortedStations.length}]
-                </span>
-              </div>
-
-              <div
-                className={`grid gap-2 flex-1 ${
-                  sortedStations.length > 4 ? "grid-cols-3" : "grid-cols-2"
-                }`}
+              {/* Left column: queue + active CRF */}
+              <section
+                aria-labelledby="cc-dossier-title"
+                className="min-w-0 rounded-xl border border-zinc-800 bg-[#13151a] p-3 sm:p-4 lg:col-span-7"
               >
-                {sortedStations.map((station, index) => (
-                  <div
-                    key={station.id}
-                    onClick={() => handleInitiateSubmission(station.id)}
-                    className="group cursor-pointer rounded-xl border border-zinc-800 bg-zinc-900/90 p-3 hover:border-brand-cyan/60 hover:bg-zinc-800/90 transition flex flex-col justify-between"
-                    style={{ borderColor: station.accentColor }}
-                  >
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-mono font-bold text-zinc-500">
-                          [{index + 1}]
-                        </span>
-                        <span className="text-[8px] font-bold uppercase px-1 py-0.5 rounded bg-zinc-800 text-zinc-400 truncate max-w-[80px]">
-                          {station.vendor}
-                        </span>
-                      </div>
-                      <h4 className="mt-1 text-sm font-bold text-white group-hover:text-brand-cyan transition">
-                        {station.label}
-                      </h4>
-                      <p className="text-[9px] text-zinc-400 mt-0.5 leading-tight">
-                        {station.name}
-                      </p>
-                    </div>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                    Queue · {conveyorSubjects.length}/5
+                  </span>
+                  <span className="hidden text-[10px] text-zinc-400 sm:inline">
+                    Tab to cycle
+                  </span>
+                </div>
+                <ul className="mt-2 flex gap-2 overflow-x-auto pb-1">
+                  {conveyorSubjects.length === 0 && (
+                    <li className="py-3 text-[11px] text-zinc-400">
+                      Waiting for the next packet from site…
+                    </li>
+                  )}
+                  {conveyorSubjects.map((sub) => {
+                    const left = sub.observations.filter(
+                      (o) => !o.isResolved
+                    ).length;
+                    const ratio =
+                      sub.maxTime > 0 ? sub.timeRemaining / sub.maxTime : 0;
+                    const isSelected = sub.id === activeSubject?.id;
+                    return (
+                      <li key={sub.id} className="shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedSubjectId(sub.id)}
+                          aria-pressed={isSelected}
+                          className={`flex min-h-[56px] w-[7.5rem] flex-col justify-between rounded-lg border p-2 text-left transition active:scale-[0.98] ${
+                            isSelected
+                              ? "border-cyan-400/80 bg-cyan-950/30"
+                              : sub.isSAE
+                                ? "border-rose-500/40 bg-[#0d0e11] hover:border-rose-400"
+                                : "border-zinc-800 bg-[#0d0e11] hover:border-zinc-600"
+                          }`}
+                        >
+                          <span className="flex items-center justify-between gap-1">
+                            <span
+                              className={`text-[11px] font-bold ${
+                                isSelected ? "text-cyan-200" : "text-zinc-200"
+                              }`}
+                            >
+                              {sub.subjectLabel}
+                            </span>
+                            {sub.isSAE && (
+                              <span className="rounded bg-rose-500/20 px-1 text-[9px] font-bold text-rose-300">
+                                SAE
+                              </span>
+                            )}
+                          </span>
+                          <span
+                            className={`text-[10px] ${
+                              left > 0 ? "text-amber-300" : "text-emerald-400"
+                            }`}
+                          >
+                            {left > 0 ? `${left} to fix` : "Ready ✓"}
+                          </span>
+                          <span className="mt-1 block h-1 overflow-hidden rounded-full bg-zinc-800">
+                            <span
+                              className={`block h-full transition-[width] duration-500 ease-linear ${timerBarColor(ratio)}`}
+                              style={{
+                                width: `${Math.max(0, Math.min(100, ratio * 100))}%`,
+                              }}
+                            />
+                          </span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
 
-                    <div className="mt-2 flex items-center justify-between border-t border-zinc-800 pt-1.5 text-[10px]">
-                      <span className="text-zinc-500">Submits:</span>
-                      <span className="font-bold text-emerald-400">
-                        {station.processedCount}
+                {activeSubject ? (
+                  <div className="mt-3 border-t border-zinc-800 pt-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                          Active CRF
+                        </span>
+                        <h3
+                          id="cc-dossier-title"
+                          className="flex flex-wrap items-center gap-2 text-base font-bold text-white"
+                        >
+                          {activeSubject.subjectLabel}
+                          {activeSubject.isSAE && (
+                            <span className="rounded border border-rose-500/30 bg-rose-500/15 px-1.5 py-0.5 text-[9px] font-bold uppercase text-rose-300">
+                              ⚡ SAE expedited
+                            </span>
+                          )}
+                        </h3>
+                        <p className="truncate text-[10px] text-zinc-400">
+                          {activeSubject.studySite}
+                        </p>
+                      </div>
+                      <span
+                        className={`flex shrink-0 items-center gap-1 text-sm font-bold tabular-nums ${
+                          activeSubject.timeRemaining / activeSubject.maxTime <
+                          0.25
+                            ? "text-rose-400"
+                            : "text-amber-300"
+                        }`}
+                      >
+                        <IconClock className="h-4 w-4" aria-hidden="true" />
+                        {Math.ceil(activeSubject.timeRemaining)}s
                       </span>
                     </div>
+
+                    {/* Fix → Route → Sign stepper */}
+                    <ol
+                      className="mt-3 grid grid-cols-3 gap-1.5 text-[10px]"
+                      aria-label="CRF progress"
+                    >
+                      {[
+                        {
+                          label:
+                            flaggedObs.length > 0
+                              ? `Fix (${flaggedObs.length})`
+                              : "Clean",
+                          done: flowStep > 1,
+                          current: flowStep === 1,
+                        },
+                        {
+                          label: "Route",
+                          done: false,
+                          current: flowStep === 2,
+                        },
+                        { label: "Sign", done: false, current: false },
+                      ].map((step, i) => (
+                        <li
+                          key={step.label}
+                          aria-current={step.current ? "step" : undefined}
+                          className={`flex items-center gap-1.5 rounded-md border px-2 py-1.5 ${
+                            step.current
+                              ? "border-amber-500/50 bg-amber-500/10 text-amber-200"
+                              : step.done
+                                ? "border-emerald-500/30 bg-emerald-500/5 text-emerald-300"
+                                : "border-zinc-800 text-zinc-400"
+                          }`}
+                        >
+                          <span className="font-bold tabular-nums">
+                            {step.done ? "✓" : i + 1}
+                          </span>
+                          <span className="truncate">{step.label}</span>
+                        </li>
+                      ))}
+                    </ol>
+
+                    {/* Next action */}
+                    {nextFlaggedObs ? (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setValidatingObs({
+                            subjectId: activeSubject.id,
+                            obs: nextFlaggedObs,
+                          })
+                        }
+                        className="mt-3 flex min-h-[48px] w-full items-center justify-between gap-3 rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-2 text-left transition hover:bg-amber-500/15 active:scale-[0.99]"
+                      >
+                        <span className="min-w-0 text-xs text-zinc-200">
+                          <span className="font-bold text-amber-300">
+                            Next:
+                          </span>{" "}
+                          {nextFlaggedObs.field} reads{" "}
+                          <span className="font-bold text-rose-300">
+                            {nextFlaggedObs.currentValue}
+                          </span>
+                        </span>
+                        <span className="flex shrink-0 items-center gap-1.5 text-xs font-bold text-amber-300">
+                          Fix it
+                          <kbd className="rounded border border-amber-500/40 px-1 text-[10px]">
+                            Enter
+                          </kbd>
+                        </span>
+                      </button>
+                    ) : (
+                      <div className="mt-3 rounded-lg border border-emerald-500/40 bg-emerald-500/5 p-3">
+                        <p className="text-xs text-zinc-200">
+                          <span className="font-bold text-emerald-300">
+                            Clean.
+                          </span>{" "}
+                          Route it to a matching station, then sign.
+                        </p>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {routeDomains.map((domain) => (
+                            <button
+                              key={domain}
+                              type="button"
+                              onClick={() => handleInitiateSubmission(domain)}
+                              className="flex min-h-[40px] items-center gap-2 rounded-lg bg-emerald-500 px-3 text-xs font-bold text-black transition hover:bg-emerald-400 active:scale-[0.98]"
+                            >
+                              <kbd className="rounded bg-black/15 px-1 text-[10px]">
+                                {stationHotkey(domain)}
+                              </kbd>
+                              Route to {domain}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Observations */}
+                    <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                      {activeSubject.observations.map((obs) => (
+                        <button
+                          key={obs.id}
+                          type="button"
+                          onClick={() =>
+                            setValidatingObs({
+                              subjectId: activeSubject.id,
+                              obs,
+                            })
+                          }
+                          className={`cursor-pointer min-w-0 rounded-lg border p-3 text-left transition active:scale-[0.99] ${
+                            !obs.isResolved
+                              ? "border-amber-500/50 bg-amber-500/5 hover:border-amber-400"
+                              : "border-zinc-800 bg-[#0d0e11] hover:border-zinc-700"
+                          }`}
+                        >
+                          <span className="flex items-center justify-between gap-2">
+                            <span className="truncate text-[11px] font-bold text-zinc-300">
+                              {obs.field}
+                            </span>
+                            <span className="flex shrink-0 items-center gap-1 rounded bg-zinc-800 px-1.5 py-0.5 text-[9px] font-bold text-zinc-100">
+                              <span
+                                aria-hidden="true"
+                                className="h-1.5 w-1.5 rounded-full"
+                                style={{
+                                  backgroundColor:
+                                    stations.find(
+                                      (st) => st.id === obs.destination
+                                    )?.color ?? "#94a3b8",
+                                }}
+                              />
+                              {obs.destination}
+                            </span>
+                          </span>
+                          <span className="mt-1 flex items-center justify-between gap-2">
+                            <span
+                              className={`truncate text-sm font-bold ${
+                                !obs.isResolved
+                                  ? "text-amber-300"
+                                  : "text-zinc-100"
+                              }`}
+                            >
+                              {obs.currentValue}
+                            </span>
+                            {!obs.isResolved ? (
+                              <span className="shrink-0 text-[10px] font-bold text-amber-300">
+                                Validate Choice →
+                              </span>
+                            ) : (
+                              <IconCheck
+                                className="h-4 w-4 shrink-0 text-emerald-400"
+                                aria-label="Resolved"
+                              />
+                            )}
+                          </span>
+                          {obs.hint && !obs.isResolved && (
+                            <span className="mt-1.5 block text-[10px] italic text-amber-400/80">
+                              {obs.hint}
+                            </span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                ))}
+                ) : (
+                  <p className="mt-3 border-t border-zinc-800 py-6 text-center text-xs text-zinc-400">
+                    Queue clear. Enjoy the silence while it lasts.
+                  </p>
+                )}
+              </section>
+
+              {/* Right column: email, stations, lifelines */}
+              <div className="flex min-w-0 flex-col gap-3 lg:col-span-5">
+                {sponsorEmailCard && (
+                  <div className="hidden lg:block">{sponsorEmailCard}</div>
+                )}
+
+                <section
+                  aria-label="EDC stations"
+                  className="rounded-xl border border-zinc-800 bg-[#13151a] p-3"
+                >
+                  <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                    <span>Route to station</span>
+                    <span className="font-normal normal-case text-zinc-400">
+                      Keys 1–{sortedStations.length}
+                    </span>
+                  </div>
+                  <div
+                    className={`mt-2 grid gap-2 ${
+                      sortedStations.length > 4
+                        ? "grid-cols-2 sm:grid-cols-3"
+                        : "grid-cols-2"
+                    }`}
+                  >
+                    {sortedStations.map((station, index) => {
+                      const accepts =
+                        flowStep === 2 && routeDomains.includes(station.id);
+                      const isFlashing = flashStationId === station.id;
+                      return (
+                        <button
+                          key={station.id}
+                          type="button"
+                          onClick={() => handleInitiateSubmission(station.id)}
+                          className={`group min-w-0 rounded-lg border p-2.5 text-left transition active:scale-[0.98] ${
+                            isFlashing
+                              ? "border-emerald-400 bg-emerald-500/20"
+                              : accepts
+                                ? "border-emerald-500/70 bg-emerald-500/10 shadow-[0_0_0_1px_rgba(16,185,129,0.35)]"
+                                : flowStep === 2
+                                  ? "border-zinc-900 bg-transparent [&_h4]:text-zinc-400"
+                                  : "border-zinc-800 bg-[#0d0e11] hover:border-zinc-600"
+                          }`}
+                        >
+                          <span className="flex items-center justify-between gap-1">
+                            <kbd className="rounded border border-zinc-700 px-1 text-[10px] text-zinc-400">
+                              {index + 1}
+                            </kbd>
+                            {accepts ? (
+                              <span className="text-[9px] font-bold text-emerald-300">
+                                Accepts ✓
+                              </span>
+                            ) : (
+                              <span
+                                aria-hidden="true"
+                                className="h-2 w-2 rounded-full"
+                                style={{ backgroundColor: station.color }}
+                              />
+                            )}
+                          </span>
+                          <h4 className="mt-1 truncate text-xs font-bold text-white">
+                            {station.label}
+                          </h4>
+                          <span className="block truncate text-[10px] text-zinc-400">
+                            {station.name}
+                          </span>
+                          <span className="mt-1 flex items-center justify-between text-[10px] text-zinc-400">
+                            <span>Submits:</span>
+                            <span className="font-bold tabular-nums text-emerald-400">
+                              {station.processedCount}
+                            </span>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+
+                <section
+                  aria-label="Lifelines"
+                  className="rounded-xl border border-zinc-800 bg-[#13151a] p-3"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-x-2 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                    <span>Lifelines</span>
+                    <span className="font-normal normal-case text-zinc-400">
+                      Charge by fixing and signing
+                    </span>
+                  </div>
+                  <div className="mt-2 grid grid-cols-2 gap-2">
+                    {(
+                      [
+                        "fda-coffee-break",
+                        "auto-clean",
+                        "query-extension",
+                        "fast-sign",
+                      ] as PowerUpType[]
+                    ).map((type) => {
+                      const p = powerUps[type];
+                      const isReady = p.charge >= p.maxCharge;
+                      const isActive = p.activeSecondsRemaining > 0;
+                      return (
+                        <button
+                          key={type}
+                          type="button"
+                          onClick={() => triggerPowerUp(type)}
+                          disabled={!isReady}
+                          title={p.description}
+                          className={`flex min-h-[56px] min-w-0 flex-col justify-between rounded-lg border p-2 text-left transition active:scale-[0.98] ${
+                            isActive
+                              ? "border-violet-400/60 bg-violet-500/10"
+                              : isReady
+                                ? "border-emerald-500/70 bg-emerald-500/10 hover:bg-emerald-500/15"
+                                : "border-zinc-800 bg-[#0d0e11] opacity-80"
+                          }`}
+                        >
+                          <span className="flex items-center justify-between gap-1">
+                            <span
+                              className={`flex min-w-0 items-center gap-1.5 text-[11px] font-bold leading-tight ${
+                                isReady ? "text-emerald-200" : "text-zinc-300"
+                              }`}
+                            >
+                              {type === "fda-coffee-break" && (
+                                <IconCoffee className="h-3.5 w-3.5 shrink-0" />
+                              )}
+                              {type === "auto-clean" && (
+                                <IconSparkles className="h-3.5 w-3.5 shrink-0" />
+                              )}
+                              {type === "query-extension" && (
+                                <IconClock className="h-3.5 w-3.5 shrink-0" />
+                              )}
+                              {type === "fast-sign" && (
+                                <IconBolt className="h-3.5 w-3.5 shrink-0" />
+                              )}
+                              <span className="break-words">{p.name}</span>
+                            </span>
+                            <kbd className="shrink-0 rounded border border-zinc-700 px-1 text-[10px] text-zinc-400">
+                              {p.hotkey}
+                            </kbd>
+                          </span>
+                          <span className="mt-1.5 flex items-center gap-2">
+                            <span className="block h-1 flex-1 overflow-hidden rounded-full bg-zinc-800">
+                              <span
+                                className={`block h-full transition-[width] duration-300 ${
+                                  isReady ? "bg-emerald-400" : "bg-zinc-500"
+                                }`}
+                                style={{
+                                  width: `${(p.charge / p.maxCharge) * 100}%`,
+                                }}
+                              />
+                            </span>
+                            <span
+                              className={`text-[9px] font-bold tabular-nums ${
+                                isReady ? "text-emerald-300" : "text-zinc-400"
+                              }`}
+                            >
+                              {isActive
+                                ? `${Math.ceil(p.activeSecondsRemaining)}s`
+                                : isReady
+                                  ? "READY"
+                                  : `${p.charge}/${p.maxCharge}`}
+                            </span>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+              </div>
+            </div>
+          ) : playState === "idle" ? (
+            <section
+              aria-labelledby="cc-briefing-title"
+              className="@container mt-3 rounded-xl border border-zinc-800 bg-[#13151a] p-4 sm:p-5"
+            >
+              <div className="flex flex-wrap items-end justify-between gap-4">
+                <div className="min-w-0 max-w-xl">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
+                    Shift briefing
+                  </p>
+                  <h3
+                    id="cc-briefing-title"
+                    className="mt-1 text-lg font-bold tracking-[-0.02em] text-zinc-100"
+                  >
+                    Clean the data. Lock the CRFs. Keep everyone happy.
+                  </h3>
+                  <p className="mt-1 text-[11px] text-zinc-400">
+                    {gameMode === "campaign"
+                      ? `Lock ${PHASE_TARGETS[1]} CRFs to clear Phase 1. Three phases, each busier than the last.`
+                      : "No finish line. Lock as many CRFs as you can before someone ends your career."}
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <div
+                    className="flex rounded-lg border border-zinc-800 bg-[#0d0e11] p-0.5"
+                    role="group"
+                    aria-label="Game mode"
+                  >
+                    {(["campaign", "endless"] as GameMode[]).map((mode) => (
+                      <button
+                        key={mode}
+                        type="button"
+                        onClick={() => setGameMode(mode)}
+                        aria-pressed={gameMode === mode}
+                        className={`min-h-[40px] rounded-md px-3 text-xs font-bold transition ${
+                          gameMode === mode
+                            ? "bg-zinc-800 text-zinc-100"
+                            : "text-zinc-400 hover:text-zinc-300"
+                        }`}
+                      >
+                        {mode === "campaign" ? "Campaign" : "Endless"}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => startGame(gameMode, 1)}
+                    className="flex min-h-[48px] items-center gap-2 rounded-xl bg-amber-500 px-5 text-xs font-bold uppercase tracking-wider text-black transition hover:bg-amber-400 active:scale-[0.98]"
+                  >
+                    <IconPlayerPlay className="h-4 w-4" aria-hidden="true" />
+                    {gameMode === "campaign"
+                      ? "Start 3-Phase Campaign"
+                      : "Start Endless Sprint"}
+                  </button>
+                </div>
               </div>
 
-              <p className="text-[10px] text-zinc-500 text-center">
-                Route validated packet with 21 CFR Part 11 signature. Press
-                [Tab] to cycle queue.
+              {/* How a shift works, shown rather than told */}
+              <ol className="mt-5 grid grid-cols-1 gap-2 @2xl:grid-cols-3">
+                <li className="rounded-lg border border-zinc-800 bg-[#0d0e11] p-3">
+                  <p className="text-[10px] font-bold uppercase text-zinc-400">
+                    1 · Fix
+                  </p>
+                  <div
+                    className="mt-2 flex items-center gap-2 rounded-md border border-amber-500/40 bg-amber-500/5 px-2 py-1.5 text-xs"
+                    aria-hidden="true"
+                  >
+                    <span className="text-zinc-400">Height</span>
+                    <span className="font-bold text-rose-300 line-through">
+                      180 m
+                    </span>
+                    <span className="text-zinc-400">→</span>
+                    <span className="font-bold text-emerald-300">180 cm</span>
+                  </div>
+                  <p className="mt-2 text-[11px] text-zinc-400">
+                    Click the flagged field and pick the CDISC-standard value.
+                  </p>
+                </li>
+                <li className="rounded-lg border border-zinc-800 bg-[#0d0e11] p-3">
+                  <p className="text-[10px] font-bold uppercase text-zinc-400">
+                    2 · Route
+                  </p>
+                  <div
+                    className="mt-2 flex items-center gap-2 text-xs"
+                    aria-hidden="true"
+                  >
+                    <span className="rounded bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-bold text-emerald-300">
+                      VS
+                    </span>
+                    <span className="text-zinc-400">→</span>
+                    <span className="rounded-md border border-emerald-500/70 bg-emerald-500/10 px-2 py-1 font-bold text-zinc-100">
+                      VS Station{" "}
+                      <span className="text-[9px] text-emerald-300">✓</span>
+                    </span>
+                  </div>
+                  <p className="mt-2 text-[11px] text-zinc-400">
+                    Send the clean CRF to a station that matches its data.
+                    Matching stations light up.
+                  </p>
+                </li>
+                <li className="rounded-lg border border-zinc-800 bg-[#0d0e11] p-3">
+                  <p className="text-[10px] font-bold uppercase text-zinc-400">
+                    3 · Sign
+                  </p>
+                  <div
+                    className="mt-2 flex items-center gap-2 text-xs"
+                    aria-hidden="true"
+                  >
+                    <IconLock className="h-4 w-4 text-brand-cyan" />
+                    <span className="rounded-md border border-cyan-500/50 bg-cyan-950/40 px-2 py-1 font-bold text-cyan-200">
+                      Intent to Submit
+                    </span>
+                  </div>
+                  <p className="mt-2 text-[11px] text-zinc-400">
+                    Pick a valid signature reason. Back-to-back locks build your
+                    combo.
+                  </p>
+                </li>
+              </ol>
+
+              {/* The two ways to lose */}
+              <div
+                className="mt-2 grid grid-cols-1 gap-2 @xl:grid-cols-2"
+                aria-label="How you lose"
+              >
+                <div className="flex items-center gap-3 rounded-lg border border-zinc-800 bg-[#0d0e11] p-3">
+                  <IconShieldCheck
+                    className="h-4 w-4 shrink-0 text-zinc-400"
+                    aria-hidden="true"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11px] text-zinc-300">
+                      FDA auditor hits{" "}
+                      <span className="font-bold text-rose-300">100%</span> →
+                      Form 483
+                    </p>
+                    <div
+                      className="mt-1 h-1 rounded-full bg-gradient-to-r from-emerald-500/60 via-amber-500/60 to-rose-500"
+                      aria-hidden="true"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 rounded-lg border border-zinc-800 bg-[#0d0e11] p-3">
+                  <IconMail
+                    className="h-4 w-4 shrink-0 text-zinc-400"
+                    aria-hidden="true"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11px] text-zinc-300">
+                      Sponsor hits{" "}
+                      <span className="font-bold text-rose-300">0%</span> →
+                      study moves to another CRO
+                    </p>
+                    <div
+                      className="mt-1 h-1 rounded-full bg-gradient-to-r from-rose-500 via-amber-500/60 to-emerald-500/60"
+                      aria-hidden="true"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Office picker */}
+              <div className="mt-5 flex flex-wrap items-baseline justify-between gap-2">
+                <h4
+                  id="clinical-office-picker-heading"
+                  className="text-xs font-bold uppercase tracking-wider text-zinc-300"
+                >
+                  Pick your office
+                </h4>
+                <span className="text-[10px] text-zinc-400">
+                  Each one bends the rules
+                </span>
+              </div>
+              <div
+                role="radiogroup"
+                aria-labelledby="clinical-office-picker-heading"
+                className="mt-2 grid grid-cols-1 gap-2 @md:grid-cols-2 @3xl:grid-cols-3"
+              >
+                {OFFICES.map((o) => {
+                  const isSelected = o.id === officeId;
+                  return (
+                    <button
+                      key={o.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={isSelected}
+                      onClick={() => {
+                        setOfficeId(o.id);
+                        announce(`Office set to ${o.name}`, "polite");
+                      }}
+                      className={`min-w-0 rounded-lg border p-3 text-left transition active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 ${
+                        isSelected
+                          ? "border-amber-500/70 bg-amber-500/5"
+                          : "border-zinc-800 bg-[#0d0e11] hover:border-zinc-600"
+                      }`}
+                    >
+                      <span className="flex items-start justify-between gap-2">
+                        <span className="flex min-w-0 items-center gap-2">
+                          <span
+                            aria-hidden="true"
+                            className="h-2 w-2 shrink-0 rounded-full"
+                            style={{ backgroundColor: o.accentColor }}
+                          />
+                          <span className="min-w-0 text-xs font-bold text-zinc-100 break-words">
+                            {o.name}
+                          </span>
+                        </span>
+                        <span className="shrink-0 text-[9px] uppercase text-zinc-400">
+                          {o.difficulty}
+                        </span>
+                      </span>
+                      <span className="mt-1 block text-[11px] italic text-zinc-400 break-words">
+                        {o.tagline}
+                      </span>
+                      <span className="mt-2 block text-[10px] text-amber-300/90 break-words">
+                        {o.quirk}
+                      </span>
+                      <span className="mt-1 block text-[10px] tabular-nums text-zinc-400">
+                        {o.modifiers.scoreMultiplier}× score
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Outfit picker (cosmetic) */}
+              <div className="mt-5 flex flex-wrap items-baseline justify-between gap-2">
+                <h4
+                  id="clinical-outfit-picker-heading"
+                  className="text-xs font-bold uppercase tracking-wider text-zinc-300"
+                >
+                  Pick your outfit
+                </h4>
+                <span className="text-[10px] text-zinc-400">
+                  Cosmetic only. The auditor judges you anyway.
+                </span>
+              </div>
+              <div
+                role="radiogroup"
+                aria-labelledby="clinical-outfit-picker-heading"
+                className="mt-2 grid grid-cols-1 gap-2 @md:grid-cols-2 @3xl:grid-cols-3"
+              >
+                {OUTFITS.map((o) => {
+                  const isSelected = o.id === outfitId;
+                  return (
+                    <button
+                      key={o.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={isSelected}
+                      onClick={() => {
+                        selectOutfit(o.id);
+                        announce(`Outfit set to ${o.name}`, "polite");
+                      }}
+                      className={`flex min-w-0 items-center gap-3 rounded-lg border p-2.5 text-left transition active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 ${
+                        isSelected
+                          ? "border-amber-500/70 bg-amber-500/5"
+                          : "border-zinc-800 bg-[#0d0e11] hover:border-zinc-600"
+                      }`}
+                    >
+                      <OutfitPreview outfit={o} />
+                      <span className="min-w-0">
+                        <span className="block text-xs font-bold text-zinc-100 break-words">
+                          {o.name}
+                        </span>
+                        <span className="mt-0.5 block text-[11px] italic text-zinc-400 break-words">
+                          {o.tagline}
+                        </span>
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Authored protocol hand-off */}
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-zinc-800 pt-3 text-[11px] text-zinc-400">
+                <span className="min-w-0 break-words">
+                  {activeProtocol
+                    ? `Using your authored protocol ${activeProtocol.protocolNumber} (${activeProtocol.forms?.length || 0} forms).`
+                    : "Using built-in scenarios. Authored a study in CRF Studio? Play it here."}
+                </span>
+                {!activeProtocol && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      try {
+                        const stored = localStorage.getItem(
+                          "crf_active_protocol"
+                        );
+                        if (stored) {
+                          const parsed = JSON.parse(stored);
+                          setActiveProtocol(parsed);
+                          addAuditLog(
+                            `Loaded active protocol ${parsed.protocolNumber} into simulation.`,
+                            "COMPLIANT"
+                          );
+                          announce("Authored protocol loaded", "polite");
+                          return;
+                        }
+                      } catch {}
+                      announce(
+                        "No authored protocol found. Author one in CRF Studio first.",
+                        "polite"
+                      );
+                      addAuditLog(
+                        "No authored protocol found. Author one in CRF Studio and click 'Simulate Protocol'.",
+                        "WARN"
+                      );
+                    }}
+                    className="min-h-[40px] rounded-lg border border-zinc-700 px-3 font-bold text-zinc-300 transition hover:bg-zinc-800"
+                  >
+                    Load Authored Protocol
+                  </button>
+                )}
+              </div>
+            </section>
+          ) : (
+            <section
+              aria-labelledby="cc-end-title"
+              className={`mt-3 rounded-xl border p-5 text-center ${
+                playState === "phase_cleared"
+                  ? "border-emerald-500/40 bg-emerald-500/5"
+                  : "border-rose-500/40 bg-rose-500/5"
+              }`}
+            >
+              <div
+                className={`mx-auto flex h-10 w-10 items-center justify-center rounded-full ${
+                  playState === "phase_cleared"
+                    ? "bg-emerald-500/15 text-emerald-300"
+                    : "bg-rose-500/15 text-rose-300"
+                }`}
+                aria-hidden="true"
+              >
+                {playState === "phase_cleared" ? (
+                  <IconShieldCheck className="h-5 w-5" />
+                ) : gameOverReason === "sponsor" ? (
+                  <IconMail className="h-5 w-5" />
+                ) : (
+                  <IconAlertTriangle className="h-5 w-5" />
+                )}
+              </div>
+              <h3
+                id="cc-end-title"
+                className={`mt-3 text-base font-bold tracking-[-0.02em] ${
+                  playState === "phase_cleared"
+                    ? "text-emerald-300"
+                    : "text-rose-300"
+                }`}
+              >
+                {playState === "phase_cleared"
+                  ? phase < 3
+                    ? `PHASE ${phase} COMPLIANCE AUDIT PASSED!`
+                    : "STUDY PROTOCOL APPROVED FOR NDA SUBMISSION!"
+                  : gameOverReason === "sponsor"
+                    ? "CONTRACT TERMINATED · STUDY MOVED TO ANOTHER CRO"
+                    : "FDA FORM 483 ISSUED · TRIAL TERMINATED"}
+              </h3>
+              <p className="mx-auto mt-1 max-w-md text-xs text-zinc-400">
+                {playState === "phase_cleared"
+                  ? phase < 3
+                    ? `Phase ${phase + 1} opens more EDC stations and a faster conveyor.`
+                    : "Database locked. All trial data validated and archived."
+                  : gameOverReason === "sponsor"
+                    ? "Sponsor satisfaction hit 0%. They 'decided to go in a different direction' and awarded the study to a vendor whose bid was 40% cheaper and entirely hypothetical."
+                    : "Auditor suspicion reached 100%. Major source data validation discrepancies triggered clinical hold under 21 CFR § 312.44."}
               </p>
-            </div>
-          </div>
+
+              <dl className="mx-auto mt-4 grid max-w-lg grid-cols-2 gap-2 text-left sm:grid-cols-4">
+                {[
+                  {
+                    label: "Score",
+                    value: scoreState.score,
+                    tone: "text-white",
+                  },
+                  {
+                    label: "CRFs locked",
+                    value: scoreState.subjectsSubmitted,
+                    tone: "text-emerald-300",
+                  },
+                  {
+                    label: "Violations",
+                    value: scoreState.auditViolations,
+                    tone: "text-rose-300",
+                  },
+                  {
+                    label: "Skeletons",
+                    value: sponsor.skeletons.length,
+                    tone: "text-amber-300",
+                  },
+                ].map((stat) => (
+                  <div
+                    key={stat.label}
+                    className="rounded-lg border border-zinc-800 bg-[#0d0e11] p-2"
+                  >
+                    <dt className="text-[10px] uppercase text-zinc-400">
+                      {stat.label}
+                    </dt>
+                    <dd
+                      className={`text-sm font-bold tabular-nums ${stat.tone}`}
+                    >
+                      {stat.value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                {playState === "phase_cleared" ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      startGame(
+                        "campaign",
+                        (phase < 3 ? phase + 1 : 1) as GamePhase
+                      )
+                    }
+                    className="flex min-h-[48px] items-center gap-2 rounded-xl bg-emerald-500 px-5 text-xs font-bold uppercase tracking-wider text-black transition hover:bg-emerald-400 active:scale-[0.98]"
+                  >
+                    <IconPlayerPlay className="h-4 w-4" aria-hidden="true" />
+                    {phase < 3
+                      ? `Advance to Phase ${phase + 1}`
+                      : "Play Victory Lap / Re-run"}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => startGame(gameMode, 1)}
+                    className="flex min-h-[48px] items-center gap-2 rounded-xl bg-amber-500 px-5 text-xs font-bold uppercase tracking-wider text-black transition hover:bg-amber-400 active:scale-[0.98]"
+                  >
+                    <IconRefresh className="h-4 w-4" aria-hidden="true" />
+                    {gameMode === "campaign"
+                      ? "Restart Phase I"
+                      : "Restart Endless Sprint"}
+                  </button>
+                )}
+                {lastBimoReport && (
+                  <button
+                    type="button"
+                    onClick={() => setBimoReport(lastBimoReport)}
+                    className="flex min-h-[48px] items-center gap-2 rounded-xl border border-zinc-700 px-4 text-xs font-bold text-zinc-200 transition hover:bg-zinc-800"
+                  >
+                    <IconFileText className="h-4 w-4" aria-hidden="true" />
+                    Inspection report
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setPlayState("idle")}
+                  className="min-h-[48px] rounded-xl px-4 text-xs font-bold text-zinc-400 transition hover:text-zinc-200"
+                >
+                  Change office
+                </button>
+              </div>
+            </section>
+          )}
         </>
       )}
 
@@ -2357,7 +3551,7 @@ export const ClinicalTrialChaos: React.FC = () => {
 
           {/* Domain Filter Pills */}
           <div className="flex items-center gap-2 mb-3 overflow-x-auto pb-1">
-            <span className="text-[10px] text-zinc-500 uppercase shrink-0">
+            <span className="text-[10px] text-zinc-400 uppercase shrink-0">
               Filter Domain:
             </span>
             {["ALL", "DM", "VS", "AE", "LB", "CM", "EX", "DS", "MH"].map(
@@ -2397,7 +3591,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                   <tr>
                     <td
                       colSpan={8}
-                      className="p-6 text-center text-zinc-500 italic"
+                      className="p-6 text-center text-zinc-400 italic"
                     >
                       No compliant SDTM records generated yet. Complete
                       electronic signatures on conveyor subjects to populate
@@ -2410,7 +3604,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                       key={`${row.USUBJID}-${row.SEQ}-${idx}`}
                       className="hover:bg-zinc-800/40"
                     >
-                      <td className="p-2.5 text-zinc-500">{row.STUDYID}</td>
+                      <td className="p-2.5 text-zinc-400">{row.STUDYID}</td>
                       <td className="p-2.5 font-bold text-brand-cyan">
                         {row.DOMAIN}
                       </td>
@@ -2461,7 +3655,7 @@ export const ClinicalTrialChaos: React.FC = () => {
             className="h-64 overflow-y-auto font-mono text-xs space-y-1.5 scrollbar-thin scrollbar-thumb-zinc-800 p-2"
           >
             {auditLogs.length === 0 ? (
-              <p className="text-zinc-600 italic">
+              <p className="text-zinc-400 italic">
                 Audit logger standing by. Ready for event stream...
               </p>
             ) : (
@@ -2470,7 +3664,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                   key={log.id}
                   className="flex items-start gap-2 leading-relaxed"
                 >
-                  <span className="text-zinc-600 shrink-0">
+                  <span className="text-zinc-400 shrink-0">
                     {log.timestamp}
                   </span>
                   <span
@@ -2496,17 +3690,25 @@ export const ClinicalTrialChaos: React.FC = () => {
       {/* Multi-Choice Regulatory Validation Drawer Modal */}
       {validatingObs && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="max-w-lg w-full rounded-2xl border border-amber-500/50 bg-zinc-950 p-6 shadow-2xl">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cc-fix-dialog-title"
+            className="max-w-lg w-full rounded-2xl border border-amber-500/50 bg-zinc-950 p-6 shadow-2xl"
+          >
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
               <div className="flex items-center gap-2">
                 <IconHelp className="h-5 w-5 text-amber-400" />
-                <h3 className="text-base font-bold text-white">
+                <h3
+                  id="cc-fix-dialog-title"
+                  className="text-base font-bold text-white"
+                >
                   CDISC Controlled Terminology Validation
                 </h3>
               </div>
               <button
                 onClick={() => setValidatingObs(null)}
-                className="text-zinc-500 hover:text-white text-xs font-mono"
+                className="text-zinc-400 hover:text-white text-xs font-mono"
               >
                 ✕ ESC
               </button>
@@ -2515,7 +3717,7 @@ export const ClinicalTrialChaos: React.FC = () => {
             <div className="mt-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] text-zinc-500 uppercase block">
+                  <span className="text-[10px] text-zinc-400 uppercase block">
                     Clinical Variable
                   </span>
                   <p className="text-sm font-bold text-zinc-100">
@@ -2552,7 +3754,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                         validatingObs.obs.rawValue,
                       validatingObs.obs.rawValue,
                     ]
-                  ).map((opt) => (
+                  ).map((opt, optIdx) => (
                     <button
                       key={opt}
                       onClick={() => handleSelectChoice(opt)}
@@ -2564,7 +3766,12 @@ export const ClinicalTrialChaos: React.FC = () => {
                           : "border-zinc-800 bg-zinc-900 text-zinc-300 hover:border-brand-cyan hover:bg-zinc-800"
                       }`}
                     >
-                      {opt}
+                      <span className="flex items-center gap-2">
+                        <kbd className="rounded border border-zinc-700 px-1 text-[10px] font-normal text-zinc-400">
+                          {optIdx + 1}
+                        </kbd>
+                        <span>{opt}</span>
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -2603,11 +3810,19 @@ export const ClinicalTrialChaos: React.FC = () => {
       {/* 21 CFR Part 11 Electronic Signature Modal */}
       {signatureModal.isOpen && signatureModal.subject && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="max-w-lg w-full rounded-2xl border border-brand-cyan/60 bg-zinc-950 p-6 shadow-2xl">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cc-sign-dialog-title"
+            className="max-w-lg w-full rounded-2xl border border-brand-cyan/60 bg-zinc-950 p-6 shadow-2xl"
+          >
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
               <div className="flex items-center gap-2">
                 <IconLock className="h-5 w-5 text-brand-cyan" />
-                <h3 className="text-base font-bold text-white">
+                <h3
+                  id="cc-sign-dialog-title"
+                  className="text-base font-bold text-white"
+                >
                   21 CFR Part 11 Electronic Signature
                 </h3>
               </div>
@@ -2619,12 +3834,12 @@ export const ClinicalTrialChaos: React.FC = () => {
             <div className="mt-4 space-y-4 text-xs font-mono">
               <div className="bg-zinc-900/80 p-3 rounded-xl border border-zinc-800">
                 <p className="text-zinc-400">
-                  <span className="text-zinc-500">SUBJECT:</span>{" "}
+                  <span className="text-zinc-400">SUBJECT:</span>{" "}
                   {signatureModal.subject.subjectLabel} (
                   {signatureModal.subject.studySite})
                 </p>
                 <p className="text-zinc-400 mt-1">
-                  <span className="text-zinc-500">TARGET EDC:</span>{" "}
+                  <span className="text-zinc-400">TARGET EDC:</span>{" "}
                   {targetRoutingStation} Domain Desk (
                   {stations.find((s) => s.id === targetRoutingStation)?.vendor})
                 </p>
@@ -2665,10 +3880,14 @@ export const ClinicalTrialChaos: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold uppercase text-zinc-400 mb-1">
+                <label
+                  htmlFor="cc-signature-password"
+                  className="block text-[10px] font-bold uppercase text-zinc-400 mb-1"
+                >
                   User Authenticator Password
                 </label>
                 <input
+                  id="cc-signature-password"
                   type="password"
                   value={signatureModal.passwordInput}
                   onChange={(e) =>
@@ -2681,7 +3900,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                 />
               </div>
 
-              <p className="text-[10px] text-zinc-500 leading-relaxed italic">
+              <p className="text-[10px] text-zinc-400 leading-relaxed italic">
                 By executing this signature, I legally attest that all clinical
                 data points conform to CDISC Controlled Terminology and ICH GCP
                 E6(R2) standards.
@@ -2716,22 +3935,30 @@ export const ClinicalTrialChaos: React.FC = () => {
       {/* FDA BIMO Inspection Report Modal */}
       {bimoReport && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="max-w-2xl w-full rounded-2xl border border-emerald-500/50 bg-zinc-950 p-6 shadow-2xl">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cc-report-dialog-title"
+            className="max-w-2xl w-full rounded-2xl border border-emerald-500/50 bg-zinc-950 p-6 shadow-2xl"
+          >
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
               <div className="flex items-center gap-2">
                 <IconShieldCheck className="h-6 w-6 text-emerald-400" />
                 <div>
-                  <h3 className="text-base font-bold text-white">
+                  <h3
+                    id="cc-report-dialog-title"
+                    className="text-base font-bold text-white"
+                  >
                     FDA Bioresearch Monitoring (BIMO) Report
                   </h3>
-                  <span className="text-[10px] text-zinc-500">
+                  <span className="text-[10px] text-zinc-400">
                     {bimoReport.runId} · {bimoReport.auditDate}
                   </span>
                 </div>
               </div>
               <button
                 onClick={() => setBimoReport(null)}
-                className="text-zinc-500 hover:text-white text-xs font-mono min-h-[48px] min-w-[48px] flex items-center justify-center p-2"
+                className="text-zinc-400 hover:text-white text-xs font-mono min-h-[48px] min-w-[48px] flex items-center justify-center p-2"
               >
                 ✕ ESC
               </button>
@@ -2740,7 +3967,7 @@ export const ClinicalTrialChaos: React.FC = () => {
             <div className="mt-4 space-y-4 text-xs font-mono">
               <div className="grid grid-cols-3 gap-3 bg-zinc-900/80 p-3 rounded-xl border border-zinc-800">
                 <div>
-                  <span className="text-[10px] text-zinc-500 uppercase block">
+                  <span className="text-[10px] text-zinc-400 uppercase block">
                     Compliance Score
                   </span>
                   <span className="text-lg font-bold text-emerald-400">
@@ -2748,7 +3975,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                   </span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-zinc-500 block uppercase">
+                  <span className="text-[10px] text-zinc-400 block uppercase">
                     Clean Rate
                   </span>
                   <span className="text-lg font-bold text-brand-cyan">
@@ -2756,7 +3983,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                   </span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-zinc-500 block uppercase">
+                  <span className="text-[10px] text-zinc-400 block uppercase">
                     CRFs Processed
                   </span>
                   <span className="text-lg font-bold text-white">
@@ -2790,7 +4017,12 @@ export const ClinicalTrialChaos: React.FC = () => {
                   <span className="text-[10px] font-bold text-zinc-400 uppercase block mb-1.5">
                     Inspection Findings ({bimoReport.findings.length})
                   </span>
-                  <div className="space-y-2 max-h-36 overflow-y-auto">
+                  <div
+                    className="space-y-2 max-h-36 overflow-y-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
+                    tabIndex={0}
+                    role="region"
+                    aria-label="Inspection findings"
+                  >
                     {bimoReport.findings.map((f) => (
                       <div
                         key={f.id}
@@ -2816,7 +4048,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                           <p className="mt-1 text-[11px] text-zinc-400">
                             {f.description}
                           </p>
-                          <span className="text-[9px] text-zinc-500 block mt-0.5">
+                          <span className="text-[9px] text-zinc-400 block mt-0.5">
                             {f.regulation}
                           </span>
                         </div>
@@ -2854,26 +4086,28 @@ export const ClinicalTrialChaos: React.FC = () => {
       )}
 
       {/* Case Study Cross-Link */}
-      <div className="mt-4 rounded-xl border border-brand-blue/30 bg-brand-blue/5 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="text-xs">
-          <div className="flex items-center gap-2 font-bold text-brand-blue uppercase tracking-wider text-[11px]">
-            <IconFileText className="h-4 w-4" />
-            <span>Case Study Synergy: iMednet Python SDK</span>
+      {playState !== "playing" && (
+        <div className="mt-4 rounded-xl border border-brand-blue/30 bg-brand-blue/5 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="text-xs">
+            <div className="flex items-center gap-2 font-bold text-brand-blue uppercase tracking-wider text-[11px]">
+              <IconFileText className="h-4 w-4" />
+              <span>Case Study Synergy: iMednet Python SDK</span>
+            </div>
+            <p className="text-zinc-400 mt-1 leading-relaxed">
+              Interested in real-world clinical EDC integration and CDISC ODM
+              XML extraction? Explore the production architecture case study.
+            </p>
           </div>
-          <p className="text-zinc-400 mt-1 leading-relaxed">
-            Interested in real-world clinical EDC integration and CDISC ODM XML
-            extraction? Explore the production architecture case study.
-          </p>
-        </div>
 
-        <Link
-          href="/case-studies/imednet-python-sdk"
-          className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-brand-blue/40 bg-brand-blue/15 text-xs font-bold text-brand-cyan hover:bg-brand-blue/25 transition shadow-sm"
-        >
-          <span>Read SDK Case Study</span>
-          <IconExternalLink className="h-3.5 w-3.5" />
-        </Link>
-      </div>
+          <Link
+            href="/case-studies/imednet-python-sdk"
+            className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-brand-blue/40 bg-brand-blue/15 text-xs font-bold text-brand-cyan hover:bg-brand-blue/25 transition shadow-sm"
+          >
+            <span>Read SDK Case Study</span>
+            <IconExternalLink className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+      )}
     </div>
   );
 };
