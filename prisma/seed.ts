@@ -6,7 +6,7 @@ import { neonConfig } from "@neondatabase/serverless";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "../app/generated/prisma/client";
 import ws from "ws";
-import { scanFile, scanText } from "../lib/validation-scanner";
+import { formatFinding, scanFile, scanText } from "../lib/security-scan";
 import {
   IMEDNET_COMMANDS_OBJ,
   IMEDNET_PLAYBACK_OBJ,
@@ -2242,9 +2242,7 @@ async function main() {
         `❌ Credentials detected programmatically in seeding payload for "${payload.title}":`
       );
       for (const m of combinedMatches) {
-        console.error(
-          `  - Matched Category: [${m.category}] on relative line ${m.lineNumber}: "${m.matchedText}"`
-        );
+        console.error(formatFinding(m));
       }
       console.error(
         "Seeding halted. Zero records were inserted into the database."
@@ -2263,9 +2261,7 @@ async function main() {
         `❌ Credentials detected programmatically in blog seeding payload for "${post.title}":`
       );
       for (const m of combinedMatches) {
-        console.error(
-          `  - Matched Category: [${m.category}] on relative line ${m.lineNumber}: "${m.matchedText}"`
-        );
+        console.error(formatFinding(m));
       }
       console.error(
         "Seeding halted. Zero records were inserted into the database."
@@ -2279,8 +2275,8 @@ async function main() {
   const fallbackFile = path.resolve(process.cwd(), "app/page.tsx");
 
   console.log("Scanning seed file and fallback configurations...");
-  const seedMatches = scanFile(seedFile);
-  const fallbackMatches = scanFile(fallbackFile);
+  const seedMatches = scanFile(seedFile, "prisma/seed.ts");
+  const fallbackMatches = scanFile(fallbackFile, "app/page.tsx");
 
   // Filter out any connection strings in seed.ts that match the actual DB connection string template / process.env lines,
   // but we want to fail on actual hardcoded secrets/connection strings.
@@ -2292,16 +2288,10 @@ async function main() {
       "\n❌ Regex Guard alert: Hardcoded secrets or DB connection strings detected in source code/configs!"
     );
     for (const match of seedMatches) {
-      console.error(
-        `  - [In Seed File] Line ${match.lineNumber}: Category [${match.category}]`
-      );
-      console.error(`    Matched: "${match.matchedText}"`);
+      console.error(`  - [In Seed File] ${formatFinding(match)}`);
     }
     for (const match of fallbackMatches) {
-      console.error(
-        `  - [In Fallback Config] Line ${match.lineNumber}: Category [${match.category}]`
-      );
-      console.error(`    Matched: "${match.matchedText}"`);
+      console.error(`  - [In Fallback Config] ${formatFinding(match)}`);
     }
     console.error(
       "Seeding halted. Zero records were inserted into the database."

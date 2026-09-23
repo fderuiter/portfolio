@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { execSync } from "child_process";
-import { scanFile } from "../validation-scanner";
+import { scanFile } from "../security-scan";
 import { colors, badge, formatHeader } from "./utils";
 import { checkEnvironmentVariables } from "./env-guard";
 import { checkGitHygieneConfig } from "./git-guard";
@@ -430,18 +430,12 @@ export function checkSecretLeaks(root: string): DiagnosticCheckResult {
     if (ignoredFiles.includes(baseName) || baseName.startsWith(".env")) {
       continue;
     }
-    // This file necessarily contains detector regexes and exact inert fixtures.
-    // The history-aware audit scans it with fixture-level allowlisting, while
-    // the simpler Doctor scanner would otherwise flag the detector definitions.
-    if (relativeFile === "scripts/audit-secret-history.ts") {
-      continue;
-    }
-    const matches = scanFile(file);
-    for (const match of matches) {
+    const findings = scanFile(file, relativeFile);
+    for (const finding of findings) {
       leaks.push({
-        file: relativeFile,
-        line: match.lineNumber,
-        category: match.category,
+        file: finding.file,
+        line: finding.line,
+        category: finding.category,
       });
     }
   }

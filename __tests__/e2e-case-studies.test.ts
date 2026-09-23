@@ -10,7 +10,7 @@ import {
 import { ROUTE_METADATA_CONFIGS } from "@/lib/seo-metadata";
 import { CANONICAL_ROUTES } from "@/lib/dx/page-bench";
 import { CANONICAL_GLOSSARY } from "@/lib/term-glossary";
-import { scanText } from "@/lib/validation-scanner";
+import { scanText } from "@/lib/security-scan";
 import { getSoftwareSourceCodeSchema, getBreadcrumbSchema } from "@/lib/seo";
 
 vi.mock("@/lib/db", () => ({
