@@ -445,6 +445,8 @@ Fictional teaching material; nothing in the game is clinical or regulatory advic
 - **Card Table**: The main screen. It shows a hand of TLF cards, from which the player selects up to five to play as a poker hand against the Blind.
 - **Inspect**: Opening a card's QC Desk for CPU to reveal and correct its hidden defects. Playing an uninspected card is a gamble, because an undiscovered fatal defect still zeroes the hand.
 - **Loud Moment**: A discrete, event-driven burst of saturated colour, glow, shake or CRT effect (score resolution, Blind cleared, shop, boss intro), scoped inside the cabinet. It is disabled under reduced motion and below 768px.
+- **Card Face**: The live mini-output printed on a card from its data: a miniature table, subject listing, plot or cohort chip, with the population suit written in text and a stamp slot (REDLINE, QC ✓).
+- **Card Back**: The shared face-down design. It renders only a redacted slot, so an undealt or blinded card carries no face values.
 - **Score Timeline**: The ordered, pure sequence of scoring events derived from `HandEvaluation`. The UI plays it back as animation, instant tally and screen-reader narration, and never computes a score itself.
 - **Guidance Card**: A consumable named after real guidance (ICH E3, E9, E2A, CDISC IGs) that permanently levels up one hand type for the run.
 - **Stake (GCP Audit Level)**: A cumulative difficulty tier for a run, from Routine Monitoring to Warning Letter.

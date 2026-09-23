@@ -208,7 +208,10 @@ describe("Trial & Error runtime schemas", () => {
     const [first, second] = DEMOGRAPHICS_SCENARIO.deck;
     const broken = ScenarioSchema.safeParse({
       ...DEMOGRAPHICS_SCENARIO,
-      deck: [first, { ...second, id: first.id, draftId: "T-99-MISSING" }],
+      deck: [
+        first,
+        { ...second, id: first.id, draftId: "T-99-MISSING", face: undefined },
+      ],
     });
     expect(broken.success).toBe(false);
     expect(broken.error?.issues.map((i) => i.path.join("."))).toEqual([

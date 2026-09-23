@@ -414,6 +414,25 @@ body {
   animation: te-loud-flicker 320ms ease-in-out 6;
 }
 
+@keyframes te-card-breathe {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-1px) rotate(0.35deg);
+  }
+}
+
+/* Idle card "breathing" (T&E-UX-03): a barely-there, desynchronized CSS
+ * keyframe on the compositor, never React state (AGENTS.md §16). Off below
+ * 768px and under reduced motion. */
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  [data-te-cabinet] .te-card-wobble {
+    animation: te-card-breathe 5.5s ease-in-out infinite;
+  }
+}
+
 [data-te-cabinet][data-te-loud="on"] .te-loud-glow {
   text-shadow: 0 0 12px var(--te-fire);
 }

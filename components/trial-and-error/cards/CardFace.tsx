@@ -1,0 +1,118 @@
+import React from "react";
+import type {
+  CardFace as CardFaceData,
+  PopulationType,
+  TableCardView,
+} from "@/lib/trial-and-error";
+import {
+  MiniFigure,
+  describePlot,
+} from "@/components/trial-and-error/cards/MiniFigure";
+import { MiniTable } from "@/components/trial-and-error/cards/MiniTable";
+import { StampSlot } from "@/components/trial-and-error/cards/Stamp";
+
+export const POPULATION_LABEL: Record<PopulationType, string> = {
+  ITT: "ITT",
+  SAFETY: "Safety",
+  PER_PROTOCOL: "PP",
+  FAS: "FAS",
+  SCREENED: "Screened",
+};
+
+export const SUIT_TEXT: Record<PopulationType, string> = {
+  ITT: "text-[color:var(--te-suit-itt)]",
+  SAFETY: "text-[color:var(--te-suit-safety)]",
+  PER_PROTOCOL: "text-[color:var(--te-suit-pp)]",
+  FAS: "text-[color:var(--te-suit-fas)]",
+  SCREENED: "text-[color:var(--te-suit-screened)]",
+};
+
+/** The live mini-output: a miniature of the card's actual data. */
+export function MiniOutput({
+  face,
+  size,
+  caption,
+}: {
+  face: CardFaceData;
+  size: "card" | "detail";
+  caption?: string;
+}) {
+  switch (face.kind) {
+    case "TABLE":
+    case "LISTING":
+      return <MiniTable face={face} size={size} caption={caption} />;
+    case "FIGURE":
+      return (
+        <MiniFigure
+          plot={face.plot}
+          size={size}
+          label={size === "detail" ? describePlot(face.plot) : undefined}
+        />
+      );
+    case "TOKEN":
+      return (
+        <span
+          data-face-kind="TOKEN"
+          className={`inline-flex items-center gap-1 rounded-full border border-zinc-600 px-2 py-0.5 tabular-nums ${size === "detail" ? "text-sm" : "text-[10px]"}`}
+        >
+          {face.cohort} · N={face.count}
+        </span>
+      );
+  }
+}
+
+/**
+ * A card's face, printed from its data: type, suit (in colour and in text),
+ * number, title, the live mini-output, the Chips badge, the unverified "?"
+ * badge and the stamp slot. Decorative inside the card button, whose
+ * accessible name carries the same facts.
+ */
+export function CardFace({ view }: { view: TableCardView }) {
+  const { card } = view;
+  return (
+    <span aria-hidden="true" className="relative flex h-full flex-col gap-1">
+      <span className="flex items-center justify-between gap-1 text-[10px] uppercase tracking-wider text-zinc-400">
+        <span className="flex items-center gap-1">
+          {card.cardType === "SUBJECT_TOKEN" ? "Token" : card.cardType}
+          {view.unverified && (
+            <span
+              className="border border-amber-400 px-1 font-bold text-amber-300"
+              data-testid="unverified-badge"
+            >
+              ?
+            </span>
+          )}
+        </span>
+        <span className={SUIT_TEXT[card.population]}>
+          {POPULATION_LABEL[card.population]}
+        </span>
+      </span>
+      <span className="block font-bold leading-tight break-words">
+        {card.number}
+      </span>
+      <span className="block truncate text-[10px] text-zinc-300">
+        {card.title}
+      </span>
+      <span className="flex h-[4.75rem] min-w-0 items-start overflow-hidden border border-zinc-800 bg-[color:var(--te-surface-0)] p-0.5">
+        <MiniOutput face={view.face} size="card" />
+      </span>
+      <span className="mt-auto flex items-center justify-between gap-1 text-[10px]">
+        <span className="border border-[color:var(--te-chips)]/60 px-1 tabular-nums text-[color:var(--te-chips)]">
+          {card.chips} Chips
+        </span>
+        {view.inspected && (
+          <span
+            className={
+              view.openRedlines > 0 ? "text-rose-300" : "text-emerald-300"
+            }
+          >
+            {view.openRedlines > 0
+              ? `${view.openRedlines} redline${view.openRedlines === 1 ? "" : "s"}`
+              : "Inspected"}
+          </span>
+        )}
+      </span>
+      <StampSlot stamps={view.stamps} />
+    </span>
+  );
+}

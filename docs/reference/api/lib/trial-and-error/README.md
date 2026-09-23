@@ -62,6 +62,30 @@ Re-exports [canAfford](internal/cpu/functions/canAfford.md)
 
 ***
 
+### CardFace
+
+Re-exports [CardFace](types/type-aliases/CardFace.md)
+
+***
+
+### CardFaceSchema
+
+Re-exports [CardFaceSchema](types/variables/CardFaceSchema.md)
+
+***
+
+### CardStamp
+
+Re-exports [CardStamp](types/type-aliases/CardStamp.md)
+
+***
+
+### CardStampSchema
+
+Re-exports [CardStampSchema](types/variables/CardStampSchema.md)
+
+***
+
 ### CardType
 
 Re-exports [CardType](types/type-aliases/CardType.md)
@@ -242,6 +266,24 @@ Re-exports [evaluateHand](internal/scoring/functions/evaluateHand.md)
 
 ***
 
+### FACE\_KIND\_BY\_CARD\_TYPE
+
+Re-exports [FACE_KIND_BY_CARD_TYPE](types/variables/FACE_KIND_BY_CARD_TYPE.md)
+
+***
+
+### FigurePlot
+
+Re-exports [FigurePlot](types/type-aliases/FigurePlot.md)
+
+***
+
+### FigurePlotSchema
+
+Re-exports [FigurePlotSchema](types/variables/FigurePlotSchema.md)
+
+***
+
 ### HAND\_BASE\_SCORES
 
 Re-exports [HAND_BASE_SCORES](internal/hands/variables/HAND_BASE_SCORES.md)
@@ -413,6 +455,18 @@ Re-exports [QcSeverity](types/type-aliases/QcSeverity.md)
 ### QcSeveritySchema
 
 Re-exports [QcSeveritySchema](types/variables/QcSeveritySchema.md)
+
+***
+
+### RedactedCard
+
+Re-exports [RedactedCard](types/type-aliases/RedactedCard.md)
+
+***
+
+### RedactedCardSchema
+
+Re-exports [RedactedCardSchema](types/variables/RedactedCardSchema.md)
 
 ***
 
