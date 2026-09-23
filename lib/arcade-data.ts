@@ -134,6 +134,25 @@ export const ARCADE_GAMES_METADATA: ArcadeGameMetadata[] = [
     route: "/arcade/clinical-chaos",
   },
   {
+    id: "trial-and-error",
+    slug: "trial-and-error",
+    title: "Trial & Error: Biostat Ops",
+    subtitle: "SAP QC Roguelike Deckbuilder",
+    genre: "Roguelike Deckbuilder",
+    description:
+      "Clinical outputs are the cards. Review tables against the SAP, correct redlines for +Mult, and play Chips × Mult hands to beat regulatory Blinds.",
+    mechanics: ["SAP Rulebook QC", "Chips × Mult Hands", "CPU Economy"],
+    techStack: [
+      "Exact Rational Rounding",
+      "Pure Deterministic Reducers",
+      "Zod Scenario Contracts",
+    ],
+    accentColor: "text-amber-400",
+    borderHover: "hover:border-amber-500/50",
+    badgeBg: "bg-amber-500/10 text-amber-300 border-amber-500/30",
+    route: "/arcade/trial-and-error",
+  },
+  {
     id: "retro-labyrinth",
     slug: "retro-labyrinth",
     title: "Retro Labyrinth: Graveyard Roguelike",

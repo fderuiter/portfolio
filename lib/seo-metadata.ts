@@ -149,6 +149,22 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     locale: "en-US",
     isAccessibleForFree: true,
   },
+  trialAndError: {
+    title: "Trial & Error: Biostat Ops",
+    description:
+      "Review clinical tables against a statistical analysis plan, correct the redlines, and play Chips × Mult hands to beat regulatory Blinds.",
+    path: "/arcade/trial-and-error",
+    keywords: [
+      "Biostatistics Deckbuilder",
+      "Statistical Analysis Plan QC",
+      "TLF Quality Control Game",
+      "Clinical Trial Roguelike",
+      "Deterministic Scoring Engine",
+    ],
+    inLanguage: "en-US",
+    locale: "en-US",
+    isAccessibleForFree: true,
+  },
   retroLabyrinth: {
     title: "Retro Labyrinth",
     description:
