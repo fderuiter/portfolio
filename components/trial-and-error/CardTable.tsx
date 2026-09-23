@@ -1,8 +1,14 @@
 "use client";
 
-import React, { useEffect, useReducer, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useEffectEvent,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
-import { motion } from "framer-motion";
+import { AnimatePresence, Reorder, motion } from "framer-motion";
 import {
   CPU_COSTS,
   DEMOGRAPHICS_SCENARIO,
@@ -10,7 +16,6 @@ import {
   advanceTable,
   createTableState,
   deriveTableView,
-  type PopulationType,
   type Scenario,
   type TableAction,
   type TableCardView,
@@ -20,12 +25,26 @@ import { useAnnouncer } from "@/hooks/useAnnouncer";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { FieldManualButton } from "@/components/FieldManualButton";
 import { QcDesk } from "@/components/trial-and-error/QcDesk";
+import { CardBack } from "@/components/trial-and-error/cards/CardBack";
+import { CardDetail } from "@/components/trial-and-error/cards/CardDetail";
+import { POPULATION_LABEL } from "@/components/trial-and-error/cards/CardFace";
+import { HandCard } from "@/components/trial-and-error/cards/HandCard";
+import { STAMP_LABELS } from "@/components/trial-and-error/cards/Stamp";
 import {
   ScoreBreakdown,
   ScorePlayer,
   useScorePlayback,
 } from "@/components/trial-and-error/ScorePlayer";
 import { useTeMotion } from "@/components/trial-and-error/useTeMotion";
+import {
+  LOUD_PRESETS,
+  LoudLayer,
+} from "@/components/trial-and-error/LoudLayer";
+import { cueForStep, type TeCue } from "@/components/trial-and-error/teAudio";
+import {
+  useTeMusic,
+  useTeSound,
+} from "@/components/trial-and-error/useTeSound";
 
 interface CardTableProps {
   scenario?: Scenario;
@@ -37,30 +56,6 @@ type PendingFocus =
 const RELIC_SLOTS = 5;
 const SPEEDS = [1, 2, 4] as const;
 const FIGURE_SPACE = "\u2007";
-
-const SUIT_BORDER: Record<PopulationType, string> = {
-  ITT: "border-l-[color:var(--te-suit-itt)]",
-  SAFETY: "border-l-[color:var(--te-suit-safety)]",
-  PER_PROTOCOL: "border-l-[color:var(--te-suit-pp)]",
-  FAS: "border-l-[color:var(--te-suit-fas)]",
-  SCREENED: "border-l-[color:var(--te-suit-screened)]",
-};
-
-const SUIT_TEXT: Record<PopulationType, string> = {
-  ITT: "text-[color:var(--te-suit-itt)]",
-  SAFETY: "text-[color:var(--te-suit-safety)]",
-  PER_PROTOCOL: "text-[color:var(--te-suit-pp)]",
-  FAS: "text-[color:var(--te-suit-fas)]",
-  SCREENED: "text-[color:var(--te-suit-screened)]",
-};
-
-const POPULATION_LABEL: Record<PopulationType, string> = {
-  ITT: "ITT",
-  SAFETY: "Safety",
-  PER_PROTOCOL: "PP",
-  FAS: "FAS",
-  SCREENED: "Screened",
-};
 
 const BUTTON_BASE =
   "min-h-[48px] px-4 py-3 border font-mono text-xs font-bold uppercase tracking-wider touch-manipulation active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 disabled:cursor-not-allowed disabled:border-zinc-700 disabled:bg-transparent disabled:text-zinc-400";
@@ -81,6 +76,7 @@ function cardLabel(view: TableCardView): string {
         : "inspected"
     );
   }
+  parts.push(...view.stamps.map((stamp) => STAMP_LABELS[stamp]));
   if (view.selected) parts.push("selected");
   return parts.join(", ");
 }
@@ -100,13 +96,32 @@ export function CardTable({
   );
   const view = deriveTableView(scenario, state);
   const { announce } = useAnnouncer();
-  const { reducedMotion, speed, setSpeed, loudEffectsEnabled } = useTeMotion();
+  const {
+    reducedMotion,
+    speed,
+    setSpeed,
+    loudEffectsEnabled,
+    isCompactViewport,
+  } = useTeMotion();
+  const animateCards = !reducedMotion;
+  const physical = !reducedMotion && !isCompactViewport;
   const timeline = view.lastTimeline;
+  const sound = useTeSound();
   const playback = useScorePlayback(timeline, state.lastPlay, {
     speed,
     reducedMotion,
+    onStep: (_step, index) => {
+      const cue = timeline && cueForStep(timeline, index);
+      if (cue) sound.play(cue.cue, { step: cue.step });
+    },
   });
   const playing = playback.playing;
+  useTeMusic({
+    enabled: sound.musicEnabled,
+    siteMuted: sound.siteMuted,
+    boss: scenario.blind.tier === "BOSS_BLIND",
+    ducked: playing,
+  });
   const progressStep = timeline?.[timeline.length - 1];
   const progress =
     progressStep?.kind === "BLIND_PROGRESS" ? progressStep : undefined;
@@ -121,6 +136,10 @@ export function CardTable({
     playback.shown === (timeline?.length ?? 0);
 
   const [focusIndex, setFocusIndex] = useState(0);
+  // Local order while a card is being dragged; committed as MOVE_CARD on drop.
+  const [dragOrder, setDragOrder] = useState<string[] | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(null);
+  const detailView = view.hand.find((h) => h.card.id === detailId);
   const activeIndex = Math.min(focusIndex, Math.max(0, view.hand.length - 1));
   const focusedCard = view.hand[activeIndex];
 
@@ -143,6 +162,10 @@ export function CardTable({
     returnFocus: false,
   });
 
+  const detailRef = useFocusTrap<HTMLDivElement>(detailView !== undefined, {
+    onEscape: () => setDetailId(null),
+  });
+
   const send = (action: TableAction, focus: PendingFocus = null) => {
     pendingFocus.current = focus;
     dispatch(action);
@@ -150,8 +173,27 @@ export function CardTable({
 
   // A played hand is announced once, as a summary, after its timeline
   // resolves, so screen readers are not flooded while it plays.
+  const playEventCues = useEffectEvent(
+    (kind: NonNullable<TableState["lastEvent"]>["kind"]) => {
+      const cues: Partial<Record<typeof kind, TeCue[]>> = {
+        SELECTED: ["cardSelect"],
+        DESELECTED: ["cardDeselect"],
+        DISCARDED: ["discardWhoosh", "cardDeal"],
+        PLAYED: ["cardDeal"],
+        INSPECT_OPENED: ["cardFlip"],
+      };
+      cues[kind]?.forEach((cue) => sound.play(cue));
+      if (kind === "PLAYED" || kind === "DISCARDED") {
+        if (state.status === "CLEARED") sound.play("blindCleared");
+        if (state.status === "FAILED") sound.play("blindFailed");
+      }
+    }
+  );
+
   useEffect(() => {
-    if (state.lastEvent && !playing) announce(state.lastEvent.message);
+    if (!state.lastEvent || playing) return;
+    announce(state.lastEvent.message);
+    playEventCues(state.lastEvent.kind);
   }, [state.lastEvent, announce, playing]);
 
   useEffect(() => {
@@ -181,12 +223,56 @@ export function CardTable({
     if (cardId) send({ type: "INSPECT_CARD", cardId });
   };
 
+  const handOrder =
+    dragOrder &&
+    dragOrder.length === state.hand.length &&
+    dragOrder.every((id) => state.hand.includes(id))
+      ? dragOrder
+      : state.hand;
+
+  const commitDrag = (cardId: string) => {
+    const to = handOrder.indexOf(cardId);
+    setDragOrder(null);
+    if (to !== -1 && to !== state.hand.indexOf(cardId)) {
+      setFocusIndex(to);
+      send(
+        { type: "MOVE_CARD", cardId, toIndex: to },
+        { kind: "card", cardId }
+      );
+    }
+  };
+
+  const activateCard = (index: number, cardId: string, pointerType: string) => {
+    // On touch, a second tap on a selected card reads it instead of
+    // deselecting it; the detail view offers Deselect.
+    if (pointerType === "touch" && state.selected.includes(cardId)) {
+      setDetailId(cardId);
+      return;
+    }
+    setFocusIndex(index);
+    send({ type: "TOGGLE_SELECT", cardId });
+  };
+
   const onCardKeyDown = (
     event: React.KeyboardEvent<HTMLButtonElement>,
     index: number,
     cardId: string
   ) => {
     const last = view.hand.length - 1;
+    if (
+      event.altKey &&
+      (event.key === "ArrowLeft" || event.key === "ArrowRight")
+    ) {
+      event.preventDefault();
+      if (playing) return;
+      const to = event.key === "ArrowLeft" ? index - 1 : index + 1;
+      setFocusIndex(Math.max(0, Math.min(last, to)));
+      send(
+        { type: "MOVE_CARD", cardId, toIndex: to },
+        { kind: "card", cardId }
+      );
+      return;
+    }
     const moves: Record<string, number> = {
       ArrowLeft: Math.max(0, index - 1),
       ArrowRight: Math.min(last, index + 1),
@@ -215,8 +301,41 @@ export function CardTable({
     } else if (key === "i") {
       event.preventDefault();
       inspect(cardId);
+    } else if (event.key === "?") {
+      // On a focused card, ? reads that card; elsewhere it still opens the
+      // Field Manual, whose listener sits on window in the bubble phase.
+      event.preventDefault();
+      event.stopPropagation();
+      setDetailId(cardId);
     }
   };
+
+  const handCards = handOrder.map((id, index) => {
+    const h = view.hand.find((c) => c.card.id === id);
+    if (!h) return null;
+    const viewIndex = state.hand.indexOf(id);
+    return (
+      <HandCard
+        key={id}
+        view={h}
+        index={index}
+        count={handOrder.length}
+        physical={physical}
+        animate={animateCards}
+        tabIndex={viewIndex === activeIndex ? 0 : -1}
+        label={cardLabel(h)}
+        buttonRef={(el) => {
+          if (el) cardRefs.current.set(id, el);
+          else cardRefs.current.delete(id);
+        }}
+        onActivate={(pointerType) => activateCard(viewIndex, id, pointerType)}
+        onFocus={() => setFocusIndex(viewIndex)}
+        onKeyDown={(e) => onCardKeyDown(e, viewIndex, id)}
+        onLongPress={() => setDetailId(id)}
+        onDragEnd={() => commitDrag(id)}
+      />
+    );
+  });
 
   const preview = view.preview;
   const slashed =
@@ -229,8 +348,9 @@ export function CardTable({
   return (
     <section
       aria-labelledby="card-table-heading"
-      className="w-full min-w-0 bg-[color:var(--te-surface-0)] font-mono text-[color:var(--te-text)] border border-zinc-800 section-isolate"
+      className="relative w-full min-w-0 bg-[color:var(--te-surface-0)] font-mono text-[color:var(--te-text)] border border-zinc-800 section-isolate"
     >
+      <LoudLayer loud={playing} enabled={loudEffectsEnabled} />
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800 px-4 py-3">
         <div className="min-w-0">
           <h2
@@ -243,7 +363,44 @@ export function CardTable({
             {scenario.summary}
           </p>
         </div>
-        <FieldManualButton manualId="trial-and-error" label="Manual" />
+        <div className="flex flex-wrap items-center gap-2">
+          <div
+            role="group"
+            aria-label="Cabinet audio"
+            className="flex flex-wrap items-center gap-1 text-[10px] font-bold uppercase tracking-wider"
+          >
+            {sound.siteMuted && (
+              <button
+                type="button"
+                onClick={sound.unmuteSite}
+                className="min-h-[44px] border border-zinc-600 px-3 text-zinc-200 touch-manipulation hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+              >
+                Sound off · Unmute
+              </button>
+            )}
+            {(
+              [
+                ["SFX", sound.sfxEnabled, sound.setSfxEnabled],
+                ["Music", sound.musicEnabled, sound.setMusicEnabled],
+              ] as const
+            ).map(([label, on, set]) => (
+              <button
+                key={label}
+                type="button"
+                aria-pressed={on}
+                onClick={() => set(!on)}
+                className={`min-h-[44px] border px-3 touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+                  on
+                    ? "border-amber-400 bg-amber-500/10 text-amber-300"
+                    : "border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <FieldManualButton manualId="trial-and-error" label="Manual" />
+        </div>
       </header>
 
       <div className="grid gap-px bg-zinc-800 md:grid-cols-[minmax(0,14rem)_minmax(0,1fr)]">
@@ -293,7 +450,7 @@ export function CardTable({
             ))}
           </div>
           <p
-            className={`mt-2 min-h-[1.25rem] font-bold uppercase tracking-wider text-emerald-300 ${flashCleared && loudEffectsEnabled ? "te-loud-glow" : ""}`}
+            className={`mt-2 min-h-[1.25rem] font-bold uppercase tracking-wider text-emerald-300 ${flashCleared && loudEffectsEnabled ? LOUD_PRESETS.clearedBlind : ""}`}
             aria-hidden="true"
             data-testid="blind-cleared-flash"
           >
@@ -401,74 +558,66 @@ export function CardTable({
 
           {state.status === "REVIEWING" || playing ? (
             <div inert={playing}>
-              <div
+              <div className="mt-3 flex items-end justify-between gap-2 text-[10px] uppercase tracking-wider text-zinc-400">
+                <div
+                  className="flex items-center gap-2"
+                  data-testid="discard-stack"
+                >
+                  <span className="relative h-12 w-9">
+                    {view.spentCount > 0 && (
+                      <CardBack
+                        card={{ slot: "discard-top", faceDown: true }}
+                        className="absolute inset-0 -rotate-6 opacity-60"
+                      />
+                    )}
+                    <span className="absolute inset-0 border border-dashed border-zinc-700" />
+                  </span>
+                  <span className="tabular-nums">Spent {view.spentCount}</span>
+                </div>
+                <div
+                  className="flex items-center gap-2"
+                  data-testid="draw-pile"
+                >
+                  <span className="tabular-nums">
+                    Deck {view.drawPile.length}
+                  </span>
+                  <span className="relative h-12 w-9">
+                    {/* Only redacted slots reach the pile: no card data. */}
+                    {view.drawPile.slice(0, 3).map((back, i) => (
+                      <span
+                        key={back.slot}
+                        className="absolute inset-0"
+                        style={{
+                          transform: `translate(${i * 2}px, ${-i * 2}px)`,
+                        }}
+                      >
+                        <CardBack card={back} className="h-full w-full" />
+                      </span>
+                    ))}
+                    {view.drawPile.length === 0 && (
+                      <span className="absolute inset-0 border border-dashed border-zinc-700" />
+                    )}
+                  </span>
+                </div>
+              </div>
+              <Reorder.Group
+                as="div"
+                axis="x"
+                values={handOrder}
+                onReorder={setDragOrder}
                 role="group"
-                aria-label={`Hand of ${view.hand.length}. Arrow keys move, Space selects, Enter plays, D discards, I inspects.`}
-                className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4"
+                aria-label={`Hand of ${view.hand.length}. Arrow keys move, Space selects, Enter plays, D discards, I inspects, question mark reads the card, Alt with arrows reorders.`}
+                className="-mx-3 mt-1 flex overflow-x-auto px-3 pb-3 pt-7 [scrollbar-width:thin]"
                 data-testid="hand"
               >
-                {view.hand.map((h, index) => (
-                  <button
-                    key={h.card.id}
-                    type="button"
-                    ref={(el) => {
-                      if (el) cardRefs.current.set(h.card.id, el);
-                      else cardRefs.current.delete(h.card.id);
-                    }}
-                    tabIndex={index === activeIndex ? 0 : -1}
-                    aria-pressed={h.selected}
-                    aria-label={cardLabel(h)}
-                    data-card-id={h.card.id}
-                    onClick={() => {
-                      setFocusIndex(index);
-                      send({ type: "TOGGLE_SELECT", cardId: h.card.id });
-                    }}
-                    onFocus={() => setFocusIndex(index)}
-                    onKeyDown={(e) => onCardKeyDown(e, index, h.card.id)}
-                    className={`relative min-h-[7.5rem] min-w-0 border border-l-4 p-2 text-left text-xs touch-manipulation active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 motion-safe:transition-transform ${SUIT_BORDER[h.card.population]} ${
-                      h.selected
-                        ? "-translate-y-1 border-amber-400 bg-amber-500/10"
-                        : "border-zinc-700 bg-[color:var(--te-surface-1)]"
-                    }`}
-                  >
-                    <span className="flex items-center justify-between gap-1 text-[10px] uppercase tracking-wider text-zinc-400">
-                      <span className="flex items-center gap-1">
-                        {h.card.cardType}
-                        {h.unverified && (
-                          <span
-                            className="border border-amber-400 px-1 font-bold text-amber-300"
-                            aria-hidden="true"
-                          >
-                            ?
-                          </span>
-                        )}
-                      </span>
-                      <span className={SUIT_TEXT[h.card.population]}>
-                        {POPULATION_LABEL[h.card.population]}
-                      </span>
-                    </span>
-                    <span className="mt-1 block font-bold break-words">
-                      {h.card.number}
-                    </span>
-                    <span className="block text-zinc-300 break-words">
-                      {h.card.title}
-                    </span>
-                    <span className="mt-1 block tabular-nums text-[color:var(--te-chips)]">
-                      {h.card.chips} Chips
-                    </span>
-                    {h.inspected && (
-                      <span
-                        className={`mt-1 block text-[10px] ${h.openRedlines > 0 ? "text-rose-300" : "text-emerald-300"}`}
-                        aria-hidden="true"
-                      >
-                        {h.openRedlines > 0
-                          ? `${h.openRedlines} redline${h.openRedlines === 1 ? "" : "s"}`
-                          : "Inspected"}
-                      </span>
-                    )}
-                  </button>
-                ))}
-              </div>
+                {animateCards ? (
+                  <AnimatePresence mode="popLayout">
+                    {handCards}
+                  </AnimatePresence>
+                ) : (
+                  handCards
+                )}
+              </Reorder.Group>
 
               <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
                 <button
@@ -591,6 +740,45 @@ export function CardTable({
                   className={`${BUTTON_BASE} w-full border-zinc-600 text-zinc-200 hover:bg-zinc-800`}
                 >
                   Close Inspect [Esc]
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.fullscreenElement ?? document.body
+        )}
+
+      {detailView &&
+        createPortal(
+          <div
+            data-te-cabinet=""
+            className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-0 sm:items-center sm:p-4"
+          >
+            <div
+              ref={detailRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="card-detail-heading"
+              className="max-h-[90dvh] w-full max-w-2xl overflow-y-auto border border-zinc-700 bg-[color:var(--te-surface-0)] font-mono text-[color:var(--te-text)]"
+              data-testid="card-detail"
+            >
+              <CardDetail view={detailView} headingId="card-detail-heading" />
+              <div className="grid grid-cols-1 gap-2 border-t border-zinc-800 p-3 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    send({ type: "TOGGLE_SELECT", cardId: detailView.card.id })
+                  }
+                  aria-pressed={detailView.selected}
+                  className={`${BUTTON_BASE} border-amber-500 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20`}
+                >
+                  {detailView.selected ? "Deselect" : "Select"} [Space]
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDetailId(null)}
+                  className={`${BUTTON_BASE} border-zinc-600 text-zinc-200 hover:bg-zinc-800`}
+                >
+                  Close [Esc]
                 </button>
               </div>
             </div>

@@ -30,6 +30,12 @@ One card in hand as the table should render it.
 
 > `optional` **draftId?**: `string`
 
+#### face?
+
+> `optional` **face?**: \{ `columns`: `string`[]; `kind`: `"TABLE"`; `rows`: `object`[]; \} \| \{ `columns`: `string`[]; `kind`: `"LISTING"`; `rows`: `string`[][]; \} \| \{ `kind`: `"FIGURE"`; `plot`: \{ `series`: `object`[]; `type`: `"KM"`; \} \| \{ `series`: `object`[]; `type`: `"SPARKLINE"`; \} \| \{ `intervals`: `object`[]; `reference`: `number`; `type`: `"FOREST"`; \}; \} \| \{ `cohort`: `string`; `count`: `number`; `kind`: `"TOKEN"`; \}
+
+Face data. Draft cards derive their face from the draft table instead.
+
 #### id
 
 > **id**: `string` = `identifier`
@@ -60,6 +66,14 @@ One card in hand as the table should render it.
 
 ***
 
+### face
+
+> **face**: \{ `columns`: `string`[]; `kind`: `"TABLE"`; `rows`: `object`[]; \} \| \{ `columns`: `string`[]; `kind`: `"LISTING"`; `rows`: `string`[][]; \} \| \{ `kind`: `"FIGURE"`; `plot`: \{ `series`: `object`[]; `type`: `"KM"`; \} \| \{ `series`: `object`[]; `type`: `"SPARKLINE"`; \} \| \{ `intervals`: `object`[]; `reference`: `number`; `type`: `"FOREST"`; \}; \} \| \{ `cohort`: `string`; `count`: `number`; `kind`: `"TOKEN"`; \}
+
+The live mini-output printed on the card, as currently reviewed.
+
+***
+
 ### inspectable
 
 > **inspectable**: `boolean`
@@ -87,6 +101,14 @@ Revealed findings still uncorrected.
 ### selected
 
 > **selected**: `boolean`
+
+***
+
+### stamps
+
+> **stamps**: (`"REDLINE"` \| `"QC_PASS"` \| `"STALE"` \| `"SEALED"` \| `"BLINDED"`)[]
+
+Marks stamped on the face, in display order.
 
 ***
 

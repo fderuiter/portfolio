@@ -698,6 +698,24 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
         key: "D",
       },
       {
+        action: "Read a card",
+        description:
+          "Opens an enlarged, readable view of the focused card's face for free (Inspect, which reveals hidden defects, still costs CPU). A long press does the same; on touch, tap a selected card again.",
+        key: "?",
+      },
+      {
+        action: "Reorder the hand",
+        description:
+          "Moves the focused card left or right. With a pointer, drag a card by the grip above it. Order is cosmetic.",
+        key: "Alt + ← →",
+      },
+      {
+        action: "Cabinet audio",
+        description:
+          "SFX and Music switch the cabinet's synthesized sounds and its music loop. Both stay silent while site sound is muted (the default); Unmute turns site sound on. Music is off until you turn it on.",
+        key: "SFX / Music",
+      },
+      {
         action: "Skip scoring",
         description:
           "While a played hand scores step by step, Space, the Skip button or a click on the score plate jumps to the result. The 1×, 2× and 4× buttons set the scoring speed.",

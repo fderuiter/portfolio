@@ -423,6 +423,134 @@ export type CsrStage = z.infer<typeof CsrStageSchema>;
  * House). `draftId` points at a staged table in the scenario's draw pile when
  * the card has reviewable cells.
  */
+const faceText = z.string().min(1).max(24);
+
+/** One plotted series on a Figure face, as `[x, y]` points in data units. */
+const FigureSeriesSchema = z.object({
+  label: faceText,
+  points: z
+    .array(z.tuple([z.number(), z.number()]))
+    .min(2)
+    .max(12),
+});
+
+/** One subgroup row on a forest-plot face. */
+const ForestIntervalSchema = z
+  .object({
+    label: faceText,
+    estimate: z.number(),
+    lower: z.number(),
+    upper: z.number(),
+  })
+  .refine((i) => i.lower <= i.estimate && i.estimate <= i.upper, {
+    message: "A forest interval must contain its estimate",
+  });
+
+/** What a Figure face plots. */
+export const FigurePlotSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("KM"),
+    series: z.array(FigureSeriesSchema).min(1).max(2),
+  }),
+  z.object({
+    type: z.literal("SPARKLINE"),
+    series: z.array(FigureSeriesSchema).min(1).max(2),
+  }),
+  z.object({
+    type: z.literal("FOREST"),
+    reference: z.number(),
+    intervals: z.array(ForestIntervalSchema).min(2).max(5),
+  }),
+]);
+/** What a Figure face plots. */
+export type FigurePlot = z.infer<typeof FigurePlotSchema>;
+
+/**
+ * A card's face: a live miniature of the output it represents, rendered from
+ * this data rather than from an illustration.
+ */
+export const CardFaceSchema = z
+  .discriminatedUnion("kind", [
+    z.object({
+      kind: z.literal("TABLE"),
+      columns: z.array(faceText).min(2).max(3),
+      rows: z
+        .array(z.object({ label: faceText, values: z.array(faceText) }))
+        .min(3)
+        .max(5),
+    }),
+    z.object({
+      kind: z.literal("LISTING"),
+      columns: z.array(faceText).min(2).max(4),
+      rows: z.array(z.array(faceText)).min(3).max(4),
+    }),
+    z.object({ kind: z.literal("FIGURE"), plot: FigurePlotSchema }),
+    z.object({
+      kind: z.literal("TOKEN"),
+      cohort: faceText,
+      count: nonNegativeInt,
+    }),
+  ])
+  .superRefine((face, ctx) => {
+    if (face.kind === "TABLE") {
+      face.rows.forEach((row, index) => {
+        if (row.values.length !== face.columns.length) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["rows", index, "values"],
+            message: "Each face row needs one value per column",
+          });
+        }
+      });
+    }
+    if (face.kind === "LISTING") {
+      face.rows.forEach((row, index) => {
+        if (row.length !== face.columns.length) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["rows", index],
+            message: "Each listing row needs one value per column",
+          });
+        }
+      });
+    }
+  });
+/** A card's face data. */
+export type CardFace = z.infer<typeof CardFaceSchema>;
+
+/** The face kind each card type renders. */
+export const FACE_KIND_BY_CARD_TYPE = {
+  TABLE: "TABLE",
+  LISTING: "LISTING",
+  FIGURE: "FIGURE",
+  SUBJECT_TOKEN: "TOKEN",
+} as const satisfies Record<CardType, CardFace["kind"]>;
+
+/**
+ * Marks stamped on a card face. T&E-UX-03 produces REDLINE and QC_PASS; the
+ * rest are the slots later tickets fill (stale outputs, sealed and blinded
+ * sessions).
+ */
+export const CardStampSchema = z.enum([
+  "REDLINE",
+  "QC_PASS",
+  "STALE",
+  "SEALED",
+  "BLINDED",
+]);
+/** A mark stamped on a card face. */
+export type CardStamp = z.infer<typeof CardStampSchema>;
+
+/**
+ * A face-down card: an opaque slot and nothing else. It cannot carry face
+ * values, so a blinded or undealt card can be rendered without leaking them.
+ */
+export const RedactedCardSchema = z
+  .object({ slot: identifier, faceDown: z.literal(true) })
+  .strict();
+/** A face-down card. */
+export type RedactedCard = z.infer<typeof RedactedCardSchema>;
+
 export const TlfCardSchema = z.object({
   id: identifier,
   cardType: CardTypeSchema,
@@ -435,6 +563,8 @@ export const TlfCardSchema = z.object({
   csrStage: CsrStageSchema.optional(),
   soc: z.string().min(1).optional(),
   draftId: identifier.optional(),
+  /** Face data. Draft cards derive their face from the draft table instead. */
+  face: CardFaceSchema.optional(),
 });
 /** A TLF card on the Card Table. */
 export type TlfCard = z.infer<typeof TlfCardSchema>;
@@ -512,6 +642,23 @@ export const ScenarioSchema = z
           code: "custom",
           path: ["deck", index, "draftId"],
           message: "A card's draft must exist in the draw pile",
+        });
+      }
+      if ((card.face === undefined) === (card.draftId === undefined)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["deck", index, "face"],
+          message: "A card needs exactly one of face data or a draft",
+        });
+      }
+      if (
+        card.face !== undefined &&
+        card.face.kind !== FACE_KIND_BY_CARD_TYPE[card.cardType]
+      ) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["deck", index, "face", "kind"],
+          message: "A card's face must match its card type",
         });
       }
     });

@@ -86,12 +86,25 @@ test.describe("Visual Regression & Drift Detection", () => {
 
   // Routes carried through the full multi-viewport overflow matrix. Patrol
   // Shift joins the landing page here per Issue #756 (M10 launch QA).
-  const overflowRoutes = [
+  // Trial & Error's hand joins per #945 (T&E-UX-03): it is launched from its
+  // cabinet, and the fanned hand must scroll inside its own container.
+  const overflowRoutes: {
+    name: string;
+    path: string;
+    ready: string;
+    launch?: boolean;
+  }[] = [
     { name: "Landing", path: "/", ready: "body" },
     {
       name: "Patrol Shift",
       path: "/patrol",
       ready: '[data-testid="patrol-shift-container"]',
+    },
+    {
+      name: "Trial & Error hand",
+      path: "/arcade/trial-and-error",
+      ready: '[data-testid="hand"]',
+      launch: true,
     },
   ];
 
@@ -103,6 +116,17 @@ test.describe("Visual Regression & Drift Detection", () => {
         await page.setViewportSize({ width: vp.width, height: vp.height });
         await page.goto(route.path);
         await page.waitForLoadState("domcontentloaded");
+        if (route.launch) {
+          await expect(async () => {
+            const launch = page.getByRole("button", {
+              name: /Launch Cabinet/i,
+            });
+            if (await launch.isVisible()) await launch.click();
+            await expect(page.locator(route.ready)).toBeVisible({
+              timeout: 3000,
+            });
+          }).toPass({ timeout: 15000 });
+        }
         await page.waitForSelector(route.ready, { timeout: 15000 });
 
         // Detect any uncontained element overflowing the horizontal viewport boundary

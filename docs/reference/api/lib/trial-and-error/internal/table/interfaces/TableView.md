@@ -46,6 +46,22 @@ Everything the Card Table renders, derived purely from scenario and state.
 
 ***
 
+### drawPile
+
+> **drawPile**: `object`[]
+
+The undealt deck, face down: opaque slots that carry no card data.
+
+#### faceDown
+
+> **faceDown**: `true`
+
+#### slot
+
+> **slot**: `string` = `identifier`
+
+***
+
 ### hand
 
 > **hand**: [`TableCardView`](TableCardView.md)[]
@@ -97,3 +113,11 @@ Any selected card is inspectable but uninspected.
 ### quota
 
 > **quota**: `number`
+
+***
+
+### spentCount
+
+> **spentCount**: `number`
+
+Cards dealt and since played or discarded: the discard stack.

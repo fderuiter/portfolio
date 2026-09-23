@@ -62,6 +62,8 @@ const draft = (
 });
 
 const card = (c: TlfCard): TlfCard => c;
+// Face data below is fictional and consistent with the snapshot: ITT 6/6,
+// FAS 6/5 (S-008 has no post-baseline assessment), Safety 6/6.
 
 /**
  * The Small Blind deck, dealt in this order. Only the three Table 14.1.1
@@ -91,6 +93,16 @@ const DEMOGRAPHICS_DECK: TlfCard[] = [
     mult: 0,
     topic: "DM",
     csrStage: "PATIENT_LISTING",
+    face: {
+      kind: "LISTING",
+      columns: ["Subject", "Arm", "Age", "Sex"],
+      rows: [
+        ["S-001", "PBO", "34", "F"],
+        ["S-002", "PBO", "41", "M"],
+        ["S-007", "ACT", "22", "F"],
+        ["S-008", "ACT", "66", "M"],
+      ],
+    },
   }),
   card({
     id: "C-T14.1.2",
@@ -102,6 +114,16 @@ const DEMOGRAPHICS_DECK: TlfCard[] = [
     mult: 1,
     topic: "DS",
     csrStage: "DISPOSITION",
+    face: {
+      kind: "TABLE",
+      columns: ["Placebo", "Active", "Total"],
+      rows: [
+        { label: "Randomized", values: ["6", "6", "12"] },
+        { label: "Completed", values: ["5 (83.3)", "4 (66.7)", "9 (75.0)"] },
+        { label: "Discontinued", values: ["1 (16.7)", "2 (33.3)", "3 (25.0)"] },
+        { label: "Adverse event", values: ["0 (0.0)", "1 (16.7)", "1 (8.3)"] },
+      ],
+    },
   }),
   card({
     id: "C-T14.2.1",
@@ -113,6 +135,16 @@ const DEMOGRAPHICS_DECK: TlfCard[] = [
     mult: 1,
     topic: "EFF",
     csrStage: "EFFICACY",
+    face: {
+      kind: "TABLE",
+      columns: ["Placebo", "Active", "Diff"],
+      rows: [
+        { label: "N", values: ["6", "5", "—"] },
+        { label: "LS mean", values: ["-1.2", "-4.8", "-3.6"] },
+        { label: "95% CI", values: ["—", "—", "(-6.9, -0.3)"] },
+        { label: "p-value", values: ["—", "—", "0.034"] },
+      ],
+    },
   }),
   card({
     id: "C-F14.2.1",
@@ -123,6 +155,34 @@ const DEMOGRAPHICS_DECK: TlfCard[] = [
     chips: 35,
     mult: 0,
     topic: "EFF",
+    face: {
+      kind: "FIGURE",
+      plot: {
+        type: "KM",
+        series: [
+          {
+            label: "Placebo",
+            points: [
+              [0, 1],
+              [2, 1],
+              [4, 0.83],
+              [8, 0.67],
+              [12, 0.5],
+            ],
+          },
+          {
+            label: "Active",
+            points: [
+              [0, 1],
+              [2, 0.8],
+              [4, 0.6],
+              [8, 0.4],
+              [12, 0.2],
+            ],
+          },
+        ],
+      },
+    },
   }),
   card({
     id: "C-T14.3.1",
@@ -134,6 +194,16 @@ const DEMOGRAPHICS_DECK: TlfCard[] = [
     mult: 1,
     topic: "AE",
     csrStage: "SAFETY_AE",
+    face: {
+      kind: "TABLE",
+      columns: ["Placebo", "Active", "Total"],
+      rows: [
+        { label: "Any TEAE", values: ["3 (50.0)", "5 (83.3)", "8 (66.7)"] },
+        { label: "Serious AE", values: ["1 (16.7)", "2 (33.3)", "3 (25.0)"] },
+        { label: "AE to discont.", values: ["0 (0.0)", "1 (16.7)", "1 (8.3)"] },
+        { label: "Deaths", values: ["0 (0.0)", "0 (0.0)", "0 (0.0)"] },
+      ],
+    },
   }),
   card({
     id: "C-L16.2.7",
@@ -145,6 +215,16 @@ const DEMOGRAPHICS_DECK: TlfCard[] = [
     mult: 0,
     topic: "AE",
     csrStage: "PATIENT_LISTING",
+    face: {
+      kind: "LISTING",
+      columns: ["Subject", "Preferred term", "Grade"],
+      rows: [
+        ["S-003", "Fatigue", "1"],
+        ["S-007", "Headache", "1"],
+        ["S-008", "Atrial fibrillation", "3"],
+        ["S-010", "Syncope", "3"],
+      ],
+    },
   }),
   card({
     id: "C-L16.1.1",
@@ -156,6 +236,15 @@ const DEMOGRAPHICS_DECK: TlfCard[] = [
     mult: 0,
     topic: "DS",
     csrStage: "PATIENT_LISTING",
+    face: {
+      kind: "LISTING",
+      columns: ["Subject", "Arm", "Reason"],
+      rows: [
+        ["S-004", "PBO", "Withdrew consent"],
+        ["S-008", "ACT", "Adverse event"],
+        ["S-012", "ACT", "Lost to follow-up"],
+      ],
+    },
   }),
   card({
     id: "C-T14.1.1-B",
@@ -179,6 +268,16 @@ const DEMOGRAPHICS_DECK: TlfCard[] = [
     mult: 1,
     topic: "EFF",
     csrStage: "EFFICACY",
+    face: {
+      kind: "TABLE",
+      columns: ["Placebo", "Active", "Diff"],
+      rows: [
+        { label: "N", values: ["6", "5", "—"] },
+        { label: "Responders", values: ["2 (33.3)", "4 (80.0)", "—"] },
+        { label: "Odds ratio", values: ["—", "—", "8.0"] },
+        { label: "p-value", values: ["—", "—", "0.24"] },
+      ],
+    },
   }),
   card({
     id: "C-F14.2.2",
@@ -189,6 +288,19 @@ const DEMOGRAPHICS_DECK: TlfCard[] = [
     chips: 30,
     mult: 0,
     topic: "EFF",
+    face: {
+      kind: "FIGURE",
+      plot: {
+        type: "FOREST",
+        reference: 0,
+        intervals: [
+          { label: "Overall", estimate: -3.6, lower: -6.9, upper: -0.3 },
+          { label: "Age < 65", estimate: -4.1, lower: -8, upper: -0.2 },
+          { label: "Age ≥ 65", estimate: -2.2, lower: -7.5, upper: 3.1 },
+          { label: "Female", estimate: -4.4, lower: -8.6, upper: -0.2 },
+        ],
+      },
+    },
   }),
   card({
     id: "C-T14.1.1-C",
@@ -213,6 +325,21 @@ const DEMOGRAPHICS_DECK: TlfCard[] = [
     topic: "AE",
     csrStage: "SAFETY_AE",
     soc: "Cardiac disorders",
+    face: {
+      kind: "TABLE",
+      columns: ["Placebo", "Active", "Total"],
+      rows: [
+        {
+          label: "Cardiac disorders",
+          values: ["0 (0.0)", "1 (16.7)", "1 (8.3)"],
+        },
+        {
+          label: "Atrial fibrillation",
+          values: ["0 (0.0)", "1 (16.7)", "1 (8.3)"],
+        },
+        { label: "Palpitations", values: ["0 (0.0)", "0 (0.0)", "0 (0.0)"] },
+      ],
+    },
   }),
   card({
     id: "C-L16.2.8",
@@ -224,6 +351,15 @@ const DEMOGRAPHICS_DECK: TlfCard[] = [
     mult: 0,
     topic: "AE",
     csrStage: "PATIENT_LISTING",
+    face: {
+      kind: "LISTING",
+      columns: ["Subject", "Serious event", "Outcome"],
+      rows: [
+        ["S-005", "Pneumonia", "Recovered"],
+        ["S-008", "Atrial fibrillation", "Recovered"],
+        ["S-010", "Syncope", "Recovered"],
+      ],
+    },
   }),
 ];
 

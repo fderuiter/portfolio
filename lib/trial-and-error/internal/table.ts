@@ -6,6 +6,9 @@ import type {
   Scenario,
   StagedTable,
   TlfCard,
+  CardFace,
+  CardStamp,
+  RedactedCard,
 } from "../types";
 import {
   CPU_COSTS,
@@ -41,6 +44,7 @@ export interface TableEvent {
     | "INSPECT_CLOSED"
     | "INSPECTED"
     | "CORRECTED"
+    | "MOVED"
     | "REFUSED"
     | "RESET";
   message: string;
@@ -86,6 +90,8 @@ export type TableAction =
   | { type: "CLOSE_INSPECT" }
   | { type: "INSPECT_CELL"; row: number; col: number }
   | { type: "CORRECT_FINDING"; findingId: string }
+  /** Cosmetic: moves a card within the hand. Costs nothing. */
+  | { type: "MOVE_CARD"; cardId: string; toIndex: number }
   | { type: "RESET" };
 
 /** One card in hand as the table should render it. */
@@ -100,6 +106,10 @@ export interface TableCardView {
   unverified: boolean;
   /** Revealed findings still uncorrected. */
   openRedlines: number;
+  /** The live mini-output printed on the card, as currently reviewed. */
+  face: CardFace;
+  /** Marks stamped on the face, in display order. */
+  stamps: CardStamp[];
 }
 
 /** The open Inspect drawer's content. */
@@ -122,6 +132,10 @@ export interface TableView {
   previewUnverified: boolean;
   quota: number;
   deckRemaining: number;
+  /** Cards dealt and since played or discarded: the discard stack. */
+  spentCount: number;
+  /** The undealt deck, face down: opaque slots that carry no card data. */
+  drawPile: RedactedCard[];
   handsAffordable: number;
   discardsAffordable: number;
   canPlay: boolean;
@@ -130,6 +144,28 @@ export interface TableView {
   inspection: TableInspectionView | null;
   /** The last played hand as an ordered scoring timeline, for playback. */
   lastTimeline: TimelineStep[] | null;
+}
+
+/**
+ * A card's face. Draft cards print the draft table's first five rows, showing
+ * corrected values once the player has fixed them.
+ */
+function faceFor(
+  card: TlfCard,
+  draft: StagedTable | undefined,
+  review: InspectionView | null
+): CardFace {
+  if (!draft) return card.face as CardFace;
+  return {
+    kind: "TABLE",
+    columns: draft.columns.map((c) => c.label),
+    rows: draft.rows.slice(0, 5).map((row, r) => ({
+      label: row.label,
+      values: draft.columns.map(
+        (_, c) => review?.cells[r][c].display ?? draft.cells[r][c]
+      ),
+    })),
+  };
 }
 
 const cardById = (scenario: Scenario, id: string): TlfCard | undefined =>
@@ -298,6 +334,37 @@ export function advanceTable(
   }
 
   switch (action.type) {
+    case "MOVE_CARD": {
+      const from = state.hand.indexOf(action.cardId);
+      if (from === -1) return refuse(state, "That card is not in your hand.");
+      const to = Math.max(
+        0,
+        Math.min(state.hand.length - 1, Math.trunc(action.toIndex) || 0)
+      );
+      const card = cardById(scenario, action.cardId) as TlfCard;
+      if (to === from) {
+        const where =
+          to === 0
+            ? "first"
+            : to === state.hand.length - 1
+              ? "last"
+              : `at position ${to + 1}`;
+        return refuse(state, `${card.number} is already ${where} in the hand.`);
+      }
+      const hand = [...state.hand];
+      hand.splice(from, 1);
+      hand.splice(to, 0, action.cardId);
+      return {
+        ...state,
+        hand,
+        lastEvent: nextEvent(
+          state,
+          "MOVED",
+          `${card.number} moved to position ${to + 1} of ${hand.length}.`
+        ),
+      };
+    }
+
     case "TOGGLE_SELECT": {
       const card = cardById(scenario, action.cardId);
       if (!card || !state.hand.includes(card.id)) {
@@ -494,11 +561,18 @@ export function deriveTableView(
     const card = cardById(scenario, id) as TlfCard;
     const draft = draftFor(scenario, card);
     const inspection = state.inspections[id];
-    const openRedlines =
+    const review =
       draft && inspection
         ? deriveInspectionView(draft, reportFor(scenario, draft), inspection)
-            .openFindings.length
-        : 0;
+        : null;
+    const openRedlines = review?.openFindings.length ?? 0;
+    const stamps: CardStamp[] = [];
+    if (openRedlines > 0) stamps.push("REDLINE");
+    // QC ✓ only once every cell is reviewed, so it never vouches for a
+    // defect the player has not looked for.
+    if (review && review.reviewedCells === review.totalCells && !openRedlines) {
+      stamps.push("QC_PASS");
+    }
     return {
       card,
       selected: selected.has(id),
@@ -506,6 +580,8 @@ export function deriveTableView(
       inspected: inspection !== undefined,
       unverified: draft !== undefined && inspection === undefined,
       openRedlines,
+      face: faceFor(card, draft, review),
+      stamps,
     };
   });
 
@@ -581,6 +657,14 @@ export function deriveTableView(
     previewUnverified: hand.some((h) => h.selected && h.unverified),
     quota: scenario.blind.quota,
     deckRemaining: scenario.deck.length - state.deckIndex,
+    spentCount: state.deckIndex - state.hand.length,
+    drawPile: Array.from(
+      { length: scenario.deck.length - state.deckIndex },
+      (_, i): RedactedCard => ({
+        slot: `draw-${state.deckIndex + i}`,
+        faceDown: true,
+      })
+    ),
     handsAffordable: Math.floor(state.cpu.available / CPU_COSTS.PLAY_HAND),
     discardsAffordable: Math.floor(state.cpu.available / CPU_COSTS.DISCARD),
     canPlay:

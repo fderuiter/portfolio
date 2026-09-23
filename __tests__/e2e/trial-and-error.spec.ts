@@ -317,11 +317,22 @@ test.describe("Trial & Error: Biostat Ops Card Table", () => {
           }
         }).observe({ type: "layout-shift" });
       });
-      const handBox = await page.getByTestId("hand").boundingBox();
+      // Document-relative, so clicking Play (which may scroll) is not a shift.
+      const handBox = () =>
+        page.getByTestId("hand").evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          return {
+            x: r.left + window.scrollX,
+            y: r.top + window.scrollY,
+            width: r.width,
+            height: r.height,
+          };
+        });
+      const handBefore = await handBox();
 
       await page.getByRole("button", { name: /Play Hand/ }).click();
       await expect(player(page)).toBeVisible();
-      expect(await page.getByTestId("hand").boundingBox()).toEqual(handBox);
+      expect(await handBox()).toEqual(handBefore);
       await expect(player(page)).toBeHidden();
 
       await expect(page.getByTestId("round-score")).toHaveText("828");
@@ -400,6 +411,180 @@ test.describe("Trial & Error: Biostat Ops Card Table", () => {
       await page.getByRole("button", { name: /Play Hand/ }).click();
       await expect(page.getByTestId("last-hand")).toBeVisible();
       await expect(player(page)).toHaveCount(0);
+    });
+  });
+
+  test.describe("card faces and physicality (T&E-UX-03)", () => {
+    const order = (page: Page) =>
+      page
+        .locator("[data-card-id]")
+        .evaluateAll((els) => els.map((el) => el.getAttribute("data-card-id")));
+
+    test("prints a live mini-output on every card in hand", async ({
+      page,
+    }) => {
+      await launch(page);
+      const cards = page.locator("[data-card-id]");
+      await expect(cards).toHaveCount(8);
+      for (let i = 0; i < 8; i++) {
+        await expect(cards.nth(i).locator("[data-face-kind]")).toHaveCount(1);
+      }
+      await expect(
+        card(page, "C-L16.2.4").locator('[data-face-kind="LISTING"]')
+      ).toContainText("S-001");
+      await expect(
+        card(page, "C-F14.2.1").locator('[data-face-kind="FIGURE"] path')
+      ).toHaveCount(2);
+    });
+
+    test("reads a card with ? and reorders with Alt+arrows, axe clean", async ({
+      page,
+    }) => {
+      test.slow();
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await launch(page);
+      await card(page, "C-T14.1.2").focus();
+      await page.keyboard.press("Shift+Slash");
+      const detail = page.getByTestId("card-detail");
+      await expect(detail).toBeVisible();
+      await expect(detail.getByRole("table")).toContainText("Completed");
+      // The global Field Manual shortcut must not also fire.
+      await expect(page.getByRole("dialog")).toHaveCount(1);
+      await expectNoBlockingViolations(page, "card detail open");
+      await page.keyboard.press("Escape");
+      await expect(detail).toBeHidden();
+      await expect(card(page, "C-T14.1.2")).toBeFocused();
+
+      const before = await order(page);
+      await page.keyboard.press("Alt+ArrowLeft");
+      const after = await order(page);
+      const from = before.indexOf("C-T14.1.2");
+      expect(after[from - 1]).toBe("C-T14.1.2");
+      await expect(card(page, "C-T14.1.2")).toBeFocused();
+      await expectNoBlockingViolations(page, "after a keyboard reorder");
+    });
+
+    test("drags a card by its grip to reorder the hand", async ({ page }) => {
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await launch(page);
+      const first = (await order(page))[0]!;
+      const grip = page.getByTestId("drag-grip").first();
+      const target = await page.locator("[data-card-id]").nth(2).boundingBox();
+      const box = await grip.boundingBox();
+      await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(target!.x + target!.width * 0.75, box!.y + 4, {
+        steps: 20,
+      });
+      await page.mouse.up();
+      await expect.poll(async () => (await order(page)).indexOf(first)).toBe(2);
+    });
+
+    test("breathes at rest on desktop, and not below 768px", async ({
+      page,
+    }) => {
+      await page.emulateMedia({ reducedMotion: "no-preference" });
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await launch(page);
+      const wobble = () =>
+        page
+          .locator(".te-card-wobble")
+          .first()
+          .evaluate((el) => getComputedStyle(el).animationName);
+      expect(await wobble()).toBe("te-card-breathe");
+      await page.setViewportSize({ width: 375, height: 800 });
+      await expect.poll(wobble).toBe("none");
+    });
+
+    test("scrolls the hand inside its own container at 320px", async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 320, height: 700 });
+      await launch(page);
+      const hand = page.getByTestId("hand");
+      const { scroll, client } = await hand.evaluate((el) => ({
+        scroll: el.scrollWidth,
+        client: el.clientWidth,
+      }));
+      expect(scroll).toBeGreaterThan(client);
+      await expectNoHorizontalOverflow(page);
+      await card(page, "C-L16.1.1").scrollIntoViewIfNeeded();
+      await card(page, "C-L16.1.1").click();
+      await expect(card(page, "C-L16.1.1")).toHaveAttribute(
+        "aria-pressed",
+        "true"
+      );
+    });
+
+    test("keeps the card detail readable at 200% zoom", async ({ page }) => {
+      await page.setViewportSize({ width: 1280, height: 800 });
+      await launch(page);
+      await page.evaluate(() => {
+        document.documentElement.style.fontSize = "200%";
+      });
+      await card(page, "C-T14.3.1").focus();
+      await page.keyboard.press("Shift+Slash");
+      await expect(page.getByTestId("card-detail")).toBeVisible();
+      await expectNoHorizontalOverflow(page);
+    });
+  });
+
+  test.describe("juice kit loud layer (T&E-UX-04)", () => {
+    const layerAnimations = (page: Page) =>
+      page.evaluate(
+        () =>
+          document.getAnimations().filter((a) => {
+            const target = (a.effect as KeyframeEffect | null)?.target;
+            return target instanceof Element
+              ? target.closest("[data-te-loud-layer]") !== null
+              : false;
+          }).length
+      );
+
+    async function playPair(page: Page) {
+      await card(page, DRAFT_A).click();
+      await card(page, DM_LISTING).click();
+      await page.getByRole("button", { name: /Play Hand/ }).click();
+    }
+
+    test("is inert at rest and runs only during resolution at 1440px", async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.emulateMedia({ reducedMotion: "no-preference" });
+      await launch(page);
+      await expect(page.locator("[data-te-loud-layer]")).toHaveCount(0);
+      expect(await layerAnimations(page)).toBe(0);
+
+      await playPair(page);
+      await expect(page.locator("[data-te-loud-layer]")).toHaveCount(2);
+      expect(await layerAnimations(page)).toBeGreaterThan(0);
+
+      await expect(player(page)).toBeHidden();
+      await expect(page.locator("[data-te-loud-layer]")).toHaveCount(0);
+      expect(await layerAnimations(page)).toBe(0);
+    });
+
+    test("never appears at 375px", async ({ page }) => {
+      await page.setViewportSize({ width: 375, height: 800 });
+      await page.emulateMedia({ reducedMotion: "no-preference" });
+      await launch(page);
+      await playPair(page);
+      await expect(player(page)).toBeVisible();
+      await expect(page.locator("[data-te-loud-layer]")).toHaveCount(0);
+    });
+
+    test("offers cabinet SFX and Music switches that persist", async ({
+      page,
+    }) => {
+      await launch(page);
+      const music = page.getByRole("button", { name: "Music", exact: true });
+      await expect(music).toHaveAttribute("aria-pressed", "false");
+      await music.click();
+      await expect(music).toHaveAttribute("aria-pressed", "true");
+      expect(
+        await page.evaluate(() => window.localStorage.getItem("te:audio"))
+      ).toBe("sfx=1;music=1");
     });
   });
 

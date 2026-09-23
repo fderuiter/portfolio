@@ -20,6 +20,7 @@ import {
   DEMOGRAPHICS_SCENARIO,
   advanceDesk,
   advanceTable,
+  deriveTableView,
   createDeskState,
   createTableState,
   evaluateHand,
@@ -448,6 +449,11 @@ describe("Shift-Left Fuzz & Property-Based Verification", () => {
             "missing"
           ),
         }),
+        fc.record({
+          type: fc.constant("MOVE_CARD" as const),
+          cardId: fc.constantFrom(...cardIds, "missing"),
+          toIndex: fc.integer({ min: -2, max: 10 }),
+        }),
         fc.constant<TableAction>({ type: "CLOSE_INSPECT" }),
         fc.constant<TableAction>({ type: "PLAY_HAND" }),
         fc.constant<TableAction>({ type: "DISCARD" })
@@ -471,6 +477,12 @@ describe("Shift-Left Fuzz & Property-Based Verification", () => {
             true
           );
           expect(new Set(first.hand).size).toBe(first.hand.length);
+          // Reordering is cosmetic: every dealt card is in hand or spent.
+          const view = deriveTableView(DEMOGRAPHICS_SCENARIO, first);
+          expect(view.spentCount + first.hand.length).toBe(first.deckIndex);
+          expect(view.drawPile.length + first.deckIndex).toBe(
+            DEMOGRAPHICS_SCENARIO.deck.length
+          );
         })
       );
     });
