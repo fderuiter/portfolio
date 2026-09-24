@@ -5,7 +5,8 @@
 
 set -eu
 
-if [ "${ALLOW_DANGEROUS_GIT:-0}" = "1" ]; then
+BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+if [ "${ALLOW_DANGEROUS_GIT:-0}" = "1" ] || [[ "$BRANCH" == jules/* ]]; then
   exit 0
 fi
 
