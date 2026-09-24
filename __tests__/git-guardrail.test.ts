@@ -192,7 +192,7 @@ describe("Git Safety Guardrail Interceptor (scripts/git-guardrail.sh)", () => {
     const blockedDeploys: Array<[string, string]> = [
       ["npx vercel deploy --prebuilt", "fallback content"],
       ["vercel deploy --prod --prebuilt", "fallback content"],
-      ["npx vercel deploy --prod", "release.yml governance"],
+      ["npx vercel deploy --prod", "merge-to-main release path"],
       ["vercel env rm DATABASE_URL production", "hard to undo"],
       ["vercel domains rm deruiter.dev", "detaches production traffic"],
       ["npx prisma migrate deploy", "disposable branch"],
@@ -214,9 +214,9 @@ describe("Git Safety Guardrail Interceptor (scripts/git-guardrail.sh)", () => {
       expect(result.stderr).toContain("npx vercel deploy --prod");
     });
 
-    it("leaves the release.yml --prebuilt path untouched under CI", () => {
-      // ADR 0038 builds once and promotes the same artifact, with migration and
-      // verification steps around it, so --prebuilt is correct there.
+    it("leaves deliberate CI automation untouched", () => {
+      // Automation that deploys under CI carries its own verification; the
+      // guard exists to stop an unreviewed deploy from a developer machine.
       const result = runGuardrail("npx vercel deploy --prebuilt", {
         CI: "true",
       });

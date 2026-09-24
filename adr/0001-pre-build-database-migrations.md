@@ -1,5 +1,12 @@
 # 0001. Pipeline Release Gate and Offline Application Compilation
 
+## Status
+
+**Superseded for production builds by
+[ADR 0049](0049-deploy-main-on-green-ci.md) on 2026-09-24:** Vercel's
+production build of `main` now applies migrations before compiling. CI,
+local and preview builds still compile offline without migrating.
+
 ## Context
 
 Running live database migrations during static application builds caused deployment deadlocks, database lock contention, and exposed sensitive database write credentials to frontend compilation steps. Additionally, migration integrity and safety checks were fragmented across separate scripts.

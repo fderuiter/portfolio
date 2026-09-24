@@ -72,12 +72,12 @@ process.env.WS_NO_UTF_8_VALIDATE = "1";
 process.env.SKIP_DB_HEALTH_CHECK = "true";
 
 // Helper function to run a step and exit if it fails
-function runStep(command, args) {
+function runStep(command, args, env = process.env) {
   console.log(`Executing: ${command} ${args.join(" ")}`);
   const result = spawnSync(command, args, {
     stdio: "inherit",
     shell: true,
-    env: process.env,
+    env,
   });
   if (result.status !== 0) {
     console.error(
@@ -106,6 +106,31 @@ console.log(
   "\n--- Phase 1.5: Offline Migration Integrity and Safety Validation ---"
 );
 runStep("npm", ["run", "check:migrations"]);
+
+// 3.2. Production Migrations (Phase 1.6, ADR 0049)
+//
+// Vercel's production build of `main` is the only release path, so it applies
+// pending migrations before compiling anything. Only a build running on Vercel
+// for the production environment migrates: preview builds share the same Neon
+// credentials, and CI and local builds must stay offline. Migrations need the
+// unpooled endpoint (see prisma.config.ts), which the Neon integration
+// provisions as DATABASE_URL_UNPOOLED. A failure here stops the build, so
+// nothing is promoted over a schema it was not built against.
+if (process.env.VERCEL === "1" && process.env.VERCEL_ENV === "production") {
+  console.log("\n--- Phase 1.6: Applying Production Migrations ---");
+  const migrationUrl = process.env.DATABASE_URL_UNPOOLED;
+  if (!migrationUrl) {
+    console.error(
+      "Error: DATABASE_URL_UNPOOLED is not set. Production migrations need the " +
+        "unpooled Neon endpoint; reconnect the Neon integration in Vercel."
+    );
+    process.exit(1);
+  }
+  runStep("npx", ["prisma", "migrate", "deploy"], {
+    ...process.env,
+    DIRECT_URL: migrationUrl,
+  });
+}
 
 // 3.5. Documentation Compilation Phase (Phase 1.8)
 console.log(
