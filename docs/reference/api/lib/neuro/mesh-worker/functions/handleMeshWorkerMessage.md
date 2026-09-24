@@ -18,7 +18,7 @@ Event listener callback that handles incoming MessageEvent requests and posts wo
 
 ### target?
 
-`EventTarget` = `...`
+[`MeshWorkerTarget`](../interfaces/MeshWorkerTarget.md) = `...`
 
 ## Returns
 

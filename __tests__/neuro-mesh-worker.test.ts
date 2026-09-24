@@ -95,28 +95,6 @@ describe("NeuroRecon Web Worker (lib/neuro/mesh-worker.ts) Test Suite", () => {
     unbind();
   });
 
-  it("keeps plain EventTarget registration compatible and replies through the default worker scope", () => {
-    const target: EventTarget = new EventTarget();
-    const unbind = registerMeshWorker(target);
-
-    target.dispatchEvent(
-      new MessageEvent("message", {
-        data: {
-          id: "plain-event-target",
-          mode: "aseg",
-          hemiFilter: "lh",
-        } satisfies MeshWorkerRequest,
-      })
-    );
-
-    expect(postMessageSpy).toHaveBeenCalledTimes(1);
-    expect(postMessageSpy.mock.calls[0][0]).toMatchObject({
-      id: "plain-event-target",
-    });
-
-    unbind();
-  });
-
   it("handles subcortical (aseg) mode across both, lh, and rh hemisphere filters", () => {
     const filters = ["both", "lh", "rh"] as const;
     for (const hemiFilter of filters) {

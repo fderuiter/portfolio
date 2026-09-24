@@ -111,28 +111,18 @@ export function processMeshWorkerRequest(req: MeshWorkerRequest): {
  */
 export function handleMeshWorkerMessage(
   event: MessageEvent<MeshWorkerRequest>,
-  target: EventTarget = getDefaultMeshWorkerTarget()
+  target: MeshWorkerTarget = getDefaultMeshWorkerTarget()
 ): void {
   if (!event.data || typeof event.data !== "object") return;
   const { response, transferables } = processMeshWorkerRequest(event.data);
-  const responseTarget = isMeshWorkerTarget(target)
-    ? target
-    : getDefaultMeshWorkerTarget();
-  responseTarget.postMessage(response, transferables);
-}
-
-function isMeshWorkerTarget(target: EventTarget): target is MeshWorkerTarget {
-  return (
-    typeof (target as EventTarget & { postMessage?: unknown }).postMessage ===
-    "function"
-  );
+  target.postMessage(response, transferables);
 }
 
 /**
  * Registers the mesh worker message listener on a target event scope (defaulting to self/globalThis).
  */
 export function registerMeshWorker(
-  target: EventTarget = getDefaultMeshWorkerTarget()
+  target: MeshWorkerTarget = getDefaultMeshWorkerTarget()
 ): () => void {
   const listener = (event: Event) => {
     handleMeshWorkerMessage(event as MessageEvent<MeshWorkerRequest>, target);
@@ -148,5 +138,5 @@ if (
   typeof (self as unknown as { importScripts?: unknown }).importScripts ===
     "function"
 ) {
-  registerMeshWorker(self);
+  registerMeshWorker(getDefaultMeshWorkerTarget());
 }

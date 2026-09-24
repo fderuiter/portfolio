@@ -14,7 +14,7 @@ Registers the mesh worker message listener on a target event scope (defaulting t
 
 ### target?
 
-`EventTarget` = `...`
+[`MeshWorkerTarget`](../interfaces/MeshWorkerTarget.md) = `...`
 
 ## Returns
 
