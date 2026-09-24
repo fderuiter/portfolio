@@ -211,6 +211,28 @@ test.describe("Trial & Error: Biostat Ops Card Table", () => {
     });
   }
 
+  for (const width of [320, 375, 768]) {
+    test(`reviews every Inspect cell by click at ${width}px (#956)`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 800 });
+      await launch(page);
+      await card(page, DRAFT_A).focus();
+      await page.keyboard.press("i");
+      await expect(drawer(page)).toBeVisible();
+      for (let row = 0; row < 5; row++) {
+        for (let col = 0; col < 3; col++) {
+          const cell = gridCell(page, row, col);
+          await cell.click();
+          await expect(cell).not.toHaveAttribute("data-status", "UNREVIEWED");
+        }
+      }
+      await expect(drawer(page).getByTestId("reviewed-count")).toHaveText(
+        "15/15"
+      );
+    });
+  }
+
   test("reflows without page overflow at 200% zoom", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await launch(page);

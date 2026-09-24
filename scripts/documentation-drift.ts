@@ -3,6 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { compileDocumentation } from "./compile-docs";
+import { sameExceptUnionOrder } from "./docs-union-order";
 
 export interface DocumentationGitStatus {
   modified: string[];
@@ -55,9 +56,11 @@ function getGeneratedDifferences(
     if (!fs.existsSync(documentationPath)) {
       return [`Stale generated reference: missing ${displayPath}`];
     }
-    return fs
-      .readFileSync(generatedPath)
-      .equals(fs.readFileSync(documentationPath))
+    // Literal-union order is load-order noise, not drift (#951).
+    return sameExceptUnionOrder(
+      fs.readFileSync(generatedPath, "utf8"),
+      fs.readFileSync(documentationPath, "utf8")
+    )
       ? []
       : [
           `Stale generated reference: ${displayPath} differs from generated output`,

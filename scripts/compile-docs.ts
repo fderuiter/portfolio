@@ -1,5 +1,8 @@
 import { execFileSync } from "node:child_process";
+import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
+import { syncGeneratedDocumentation } from "./docs-union-order";
 
 /** Relative to the workspace root: where compiled TypeDoc reference markdown is checked in (ADR 0023). */
 export const API_REFERENCE_RELATIVE_PATH = path.join(
@@ -46,6 +49,27 @@ export function compileDocumentation(
   });
 }
 
+/**
+ * Regenerates the checked-in reference. TypeDoc compiles into a scratch
+ * directory first, and only pages that changed beyond literal-union order
+ * are copied in, so an unrelated change never rewrites a page (#951).
+ */
+export function regenerateDocumentation(workspaceRoot: string): string[] {
+  const scratch = fs.mkdtempSync(path.join(os.tmpdir(), "portfolio-docs-"));
+  try {
+    compileDocumentation(workspaceRoot, scratch);
+    return syncGeneratedDocumentation(
+      scratch,
+      path.join(workspaceRoot, API_REFERENCE_RELATIVE_PATH)
+    );
+  } finally {
+    fs.rmSync(scratch, { recursive: true, force: true });
+  }
+}
+
 if (require.main === module) {
-  compileDocumentation(process.cwd(), API_REFERENCE_RELATIVE_PATH);
+  const written = regenerateDocumentation(process.cwd());
+  console.log(
+    `Updated ${written.length} reference page${written.length === 1 ? "" : "s"} in ${API_REFERENCE_RELATIVE_PATH}.`
+  );
 }
