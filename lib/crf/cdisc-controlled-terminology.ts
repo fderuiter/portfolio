@@ -22,7 +22,12 @@ export const STANDARD_CODELISTS: CodelistDefinition[] = [
     options: [
       { code: "M", label: "Male", nciCode: "C20197", order: 1 },
       { code: "F", label: "Female", nciCode: "C16576", order: 2 },
-      { code: "UNDIFFERENTIATED", label: "Undifferentiated", nciCode: "C45908", order: 3 },
+      {
+        code: "UNDIFFERENTIATED",
+        label: "Undifferentiated",
+        nciCode: "C45908",
+        order: 3,
+      },
       { code: "UNKNOWN", label: "Unknown", nciCode: "C17998", order: 4 },
     ],
   },
@@ -32,10 +37,25 @@ export const STANDARD_CODELISTS: CodelistDefinition[] = [
     nciCodelistCode: "C74457",
     isStandard: true,
     options: [
-      { code: "AMERICAN INDIAN OR ALASKA NATIVE", label: "American Indian or Alaska Native", nciCode: "C41259", order: 1 },
+      {
+        code: "AMERICAN INDIAN OR ALASKA NATIVE",
+        label: "American Indian or Alaska Native",
+        nciCode: "C41259",
+        order: 1,
+      },
       { code: "ASIAN", label: "Asian", nciCode: "C41260", order: 2 },
-      { code: "BLACK OR AFRICAN AMERICAN", label: "Black or African American", nciCode: "C16352", order: 3 },
-      { code: "NATIVE HAWAIIAN OR OTHER PACIFIC ISLANDER", label: "Native Hawaiian or Other Pacific Islander", nciCode: "C41219", order: 4 },
+      {
+        code: "BLACK OR AFRICAN AMERICAN",
+        label: "Black or African American",
+        nciCode: "C16352",
+        order: 3,
+      },
+      {
+        code: "NATIVE HAWAIIAN OR OTHER PACIFIC ISLANDER",
+        label: "Native Hawaiian or Other Pacific Islander",
+        nciCode: "C41219",
+        order: 4,
+      },
       { code: "WHITE", label: "White", nciCode: "C41261", order: 5 },
       { code: "OTHER", label: "Other", nciCode: "C17649", order: 6 },
     ],
@@ -46,9 +66,24 @@ export const STANDARD_CODELISTS: CodelistDefinition[] = [
     nciCodelistCode: "C66790",
     isStandard: true,
     options: [
-      { code: "HISPANIC OR LATINO", label: "Hispanic or Latino", nciCode: "C41222", order: 1 },
-      { code: "NOT HISPANIC OR LATINO", label: "Not Hispanic or Latino", nciCode: "C41221", order: 2 },
-      { code: "NOT REPORTED", label: "Not Reported", nciCode: "C43234", order: 3 },
+      {
+        code: "HISPANIC OR LATINO",
+        label: "Hispanic or Latino",
+        nciCode: "C41222",
+        order: 1,
+      },
+      {
+        code: "NOT HISPANIC OR LATINO",
+        label: "Not Hispanic or Latino",
+        nciCode: "C41221",
+        order: 2,
+      },
+      {
+        code: "NOT REPORTED",
+        label: "Not Reported",
+        nciCode: "C43234",
+        order: 3,
+      },
       { code: "UNKNOWN", label: "Unknown", nciCode: "C17998", order: 4 },
     ],
   },
@@ -58,11 +93,36 @@ export const STANDARD_CODELISTS: CodelistDefinition[] = [
     nciCodelistCode: "C66769",
     isStandard: true,
     options: [
-      { code: "GRADE 1 - MILD", label: "Grade 1 (Mild / Asymptomatic)", nciCode: "C48275", order: 1 },
-      { code: "GRADE 2 - MODERATE", label: "Grade 2 (Moderate / Minimal Local Intervention)", nciCode: "C48276", order: 2 },
-      { code: "GRADE 3 - SEVERE", label: "Grade 3 (Severe / Medically Significant)", nciCode: "C48277", order: 3 },
-      { code: "GRADE 4 - LIFE-THREATENING", label: "Grade 4 (Life-threatening / Urgent Intervention)", nciCode: "C48278", order: 4 },
-      { code: "GRADE 5 - DEATH", label: "Grade 5 (Death Related to AE)", nciCode: "C48279", order: 5 },
+      {
+        code: "GRADE 1 - MILD",
+        label: "Grade 1 (Mild / Asymptomatic)",
+        nciCode: "C48275",
+        order: 1,
+      },
+      {
+        code: "GRADE 2 - MODERATE",
+        label: "Grade 2 (Moderate / Minimal Local Intervention)",
+        nciCode: "C48276",
+        order: 2,
+      },
+      {
+        code: "GRADE 3 - SEVERE",
+        label: "Grade 3 (Severe / Medically Significant)",
+        nciCode: "C48277",
+        order: 3,
+      },
+      {
+        code: "GRADE 4 - LIFE-THREATENING",
+        label: "Grade 4 (Life-threatening / Urgent Intervention)",
+        nciCode: "C48278",
+        order: 4,
+      },
+      {
+        code: "GRADE 5 - DEATH",
+        label: "Grade 5 (Death Related to AE)",
+        nciCode: "C48279",
+        order: 5,
+      },
     ],
   },
   {
@@ -71,11 +131,36 @@ export const STANDARD_CODELISTS: CodelistDefinition[] = [
     nciCodelistCode: "C66768",
     isStandard: true,
     options: [
-      { code: "NOT RELATED", label: "Not Related", nciCode: "C48280", order: 1 },
-      { code: "UNLIKELY RELATED", label: "Unlikely Related", nciCode: "C48281", order: 2 },
-      { code: "POSSIBLY RELATED", label: "Possibly Related", nciCode: "C48282", order: 3 },
-      { code: "PROBABLY RELATED", label: "Probably Related", nciCode: "C48283", order: 4 },
-      { code: "DEFINITELY RELATED", label: "Definitely Related", nciCode: "C48284", order: 5 },
+      {
+        code: "NOT RELATED",
+        label: "Not Related",
+        nciCode: "C48280",
+        order: 1,
+      },
+      {
+        code: "UNLIKELY RELATED",
+        label: "Unlikely Related",
+        nciCode: "C48281",
+        order: 2,
+      },
+      {
+        code: "POSSIBLY RELATED",
+        label: "Possibly Related",
+        nciCode: "C48282",
+        order: 3,
+      },
+      {
+        code: "PROBABLY RELATED",
+        label: "Probably Related",
+        nciCode: "C48283",
+        order: 4,
+      },
+      {
+        code: "DEFINITELY RELATED",
+        label: "Definitely Related",
+        nciCode: "C48284",
+        order: 5,
+      },
     ],
   },
   {
@@ -84,10 +169,30 @@ export const STANDARD_CODELISTS: CodelistDefinition[] = [
     nciCodelistCode: "C66767",
     isStandard: true,
     options: [
-      { code: "RECOVERED/RESOLVED", label: "Recovered / Resolved", nciCode: "C49494", order: 1 },
-      { code: "RECOVERING/RESOLVING", label: "Recovering / Resolving", nciCode: "C49495", order: 2 },
-      { code: "NOT RECOVERED/NOT RESOLVED", label: "Not Recovered / Not Resolved", nciCode: "C49496", order: 3 },
-      { code: "RECOVERED WITH SEQUELAE", label: "Recovered with Sequelae", nciCode: "C49497", order: 4 },
+      {
+        code: "RECOVERED/RESOLVED",
+        label: "Recovered / Resolved",
+        nciCode: "C49494",
+        order: 1,
+      },
+      {
+        code: "RECOVERING/RESOLVING",
+        label: "Recovering / Resolving",
+        nciCode: "C49495",
+        order: 2,
+      },
+      {
+        code: "NOT RECOVERED/NOT RESOLVED",
+        label: "Not Recovered / Not Resolved",
+        nciCode: "C49496",
+        order: 3,
+      },
+      {
+        code: "RECOVERED WITH SEQUELAE",
+        label: "Recovered with Sequelae",
+        nciCode: "C49497",
+        order: 4,
+      },
       { code: "FATAL", label: "Fatal", nciCode: "C49498", order: 5 },
       { code: "UNKNOWN", label: "Unknown", nciCode: "C17998", order: 6 },
     ],
@@ -98,10 +203,25 @@ export const STANDARD_CODELISTS: CodelistDefinition[] = [
     nciCodelistCode: "C96642",
     isStandard: true,
     options: [
-      { code: "CR", label: "Complete Response (CR)", nciCode: "C48270", order: 1 },
-      { code: "PR", label: "Partial Response (PR)", nciCode: "C48271", order: 2 },
+      {
+        code: "CR",
+        label: "Complete Response (CR)",
+        nciCode: "C48270",
+        order: 1,
+      },
+      {
+        code: "PR",
+        label: "Partial Response (PR)",
+        nciCode: "C48271",
+        order: 2,
+      },
       { code: "SD", label: "Stable Disease (SD)", nciCode: "C48272", order: 3 },
-      { code: "PD", label: "Progressive Disease (PD)", nciCode: "C48273", order: 4 },
+      {
+        code: "PD",
+        label: "Progressive Disease (PD)",
+        nciCode: "C48273",
+        order: 4,
+      },
       { code: "NE", label: "Not Evaluable (NE)", nciCode: "C48274", order: 5 },
     ],
   },
@@ -112,9 +232,24 @@ export const STANDARD_CODELISTS: CodelistDefinition[] = [
     isStandard: true,
     options: [
       { code: "ORAL", label: "Oral (PO)", nciCode: "C38288", order: 1 },
-      { code: "INTRAVENOUS", label: "Intravenous (IV)", nciCode: "C38276", order: 2 },
-      { code: "SUBCUTANEOUS", label: "Subcutaneous (SC)", nciCode: "C38299", order: 3 },
-      { code: "INTRAMUSCULAR", label: "Intramuscular (IM)", nciCode: "C38209", order: 4 },
+      {
+        code: "INTRAVENOUS",
+        label: "Intravenous (IV)",
+        nciCode: "C38276",
+        order: 2,
+      },
+      {
+        code: "SUBCUTANEOUS",
+        label: "Subcutaneous (SC)",
+        nciCode: "C38299",
+        order: 3,
+      },
+      {
+        code: "INTRAMUSCULAR",
+        label: "Intramuscular (IM)",
+        nciCode: "C38209",
+        order: 4,
+      },
       { code: "TOPICAL", label: "Topical", nciCode: "C38304", order: 5 },
       { code: "INHALATION", label: "Inhalation", nciCode: "C38216", order: 6 },
     ],
@@ -125,11 +260,36 @@ export const STANDARD_CODELISTS: CodelistDefinition[] = [
     nciCodelistCode: "C112023",
     isStandard: true,
     options: [
-      { code: "MALFUNCTION", label: "Device Malfunction / Failure", nciCode: "C48285", order: 1 },
-      { code: "USE ERROR", label: "User / Operator Error", nciCode: "C50414", order: 2 },
-      { code: "INADEQUATE LABELING", label: "Inadequate IFU / Labeling", nciCode: "C112025", order: 3 },
-      { code: "EARLY DETERIORATION", label: "Premature Wear / Deterioration", nciCode: "C112026", order: 4 },
-      { code: "OTHER DEFICIENCY", label: "Other Device Deficiency", nciCode: "C17649", order: 5 },
+      {
+        code: "MALFUNCTION",
+        label: "Device Malfunction / Failure",
+        nciCode: "C48285",
+        order: 1,
+      },
+      {
+        code: "USE ERROR",
+        label: "User / Operator Error",
+        nciCode: "C50414",
+        order: 2,
+      },
+      {
+        code: "INADEQUATE LABELING",
+        label: "Inadequate IFU / Labeling",
+        nciCode: "C112025",
+        order: 3,
+      },
+      {
+        code: "EARLY DETERIORATION",
+        label: "Premature Wear / Deterioration",
+        nciCode: "C112026",
+        order: 4,
+      },
+      {
+        code: "OTHER DEFICIENCY",
+        label: "Other Device Deficiency",
+        nciCode: "C17649",
+        order: 5,
+      },
     ],
   },
   {
@@ -138,11 +298,36 @@ export const STANDARD_CODELISTS: CodelistDefinition[] = [
     nciCodelistCode: "C112024",
     isStandard: true,
     options: [
-      { code: "DEFINITELY RELATED", label: "Definitely Related to Device", nciCode: "C48284", order: 1 },
-      { code: "PROBABLY RELATED", label: "Probably Related to Device", nciCode: "C48283", order: 2 },
-      { code: "POSSIBLY RELATED", label: "Possibly Related to Device", nciCode: "C48282", order: 3 },
-      { code: "NOT RELATED", label: "Not Related to Device", nciCode: "C48280", order: 4 },
-      { code: "PROCEDURE RELATED", label: "Related to Implantation Procedure Only", nciCode: "C112027", order: 5 },
+      {
+        code: "DEFINITELY RELATED",
+        label: "Definitely Related to Device",
+        nciCode: "C48284",
+        order: 1,
+      },
+      {
+        code: "PROBABLY RELATED",
+        label: "Probably Related to Device",
+        nciCode: "C48283",
+        order: 2,
+      },
+      {
+        code: "POSSIBLY RELATED",
+        label: "Possibly Related to Device",
+        nciCode: "C48282",
+        order: 3,
+      },
+      {
+        code: "NOT RELATED",
+        label: "Not Related to Device",
+        nciCode: "C48280",
+        order: 4,
+      },
+      {
+        code: "PROCEDURE RELATED",
+        label: "Related to Implantation Procedure Only",
+        nciCode: "C112027",
+        order: 5,
+      },
     ],
   },
   {
@@ -151,11 +336,36 @@ export const STANDARD_CODELISTS: CodelistDefinition[] = [
     nciCodelistCode: "C112028",
     isStandard: true,
     options: [
-      { code: "EXPLANTED/REMOVED", label: "Explanted / Removed from Subject", nciCode: "C112029", order: 1 },
-      { code: "REPLACED", label: "Replaced with New Device", nciCode: "C112030", order: 2 },
-      { code: "REPROGRAMMED/ADJUSTED", label: "Reprogrammed / Settings Adjusted", nciCode: "C112031", order: 3 },
-      { code: "REPAIRED", label: "Repaired In-Situ", nciCode: "C112032", order: 4 },
-      { code: "NO ACTION TAKEN", label: "No Action Taken / Kept In-Situ", nciCode: "C48286", order: 5 },
+      {
+        code: "EXPLANTED/REMOVED",
+        label: "Explanted / Removed from Subject",
+        nciCode: "C112029",
+        order: 1,
+      },
+      {
+        code: "REPLACED",
+        label: "Replaced with New Device",
+        nciCode: "C112030",
+        order: 2,
+      },
+      {
+        code: "REPROGRAMMED/ADJUSTED",
+        label: "Reprogrammed / Settings Adjusted",
+        nciCode: "C112031",
+        order: 3,
+      },
+      {
+        code: "REPAIRED",
+        label: "Repaired In-Situ",
+        nciCode: "C112032",
+        order: 4,
+      },
+      {
+        code: "NO ACTION TAKEN",
+        label: "No Action Taken / Kept In-Situ",
+        nciCode: "C48286",
+        order: 5,
+      },
     ],
   },
   {
@@ -164,10 +374,25 @@ export const STANDARD_CODELISTS: CodelistDefinition[] = [
     nciCodelistCode: "C112033",
     isStandard: true,
     options: [
-      { code: "IMPLANTED ACTIVE", label: "Implanted & Active In-Situ", nciCode: "C112034", order: 1 },
+      {
+        code: "IMPLANTED ACTIVE",
+        label: "Implanted & Active In-Situ",
+        nciCode: "C112034",
+        order: 1,
+      },
       { code: "EXPLANTED", label: "Explanted", nciCode: "C112029", order: 2 },
-      { code: "DEPLOYMENT FAILED", label: "Deployment Failed / Never Implanted", nciCode: "C112035", order: 3 },
-      { code: "STORED", label: "In Site Inventory / Stored", nciCode: "C112036", order: 4 },
+      {
+        code: "DEPLOYMENT FAILED",
+        label: "Deployment Failed / Never Implanted",
+        nciCode: "C112035",
+        order: 3,
+      },
+      {
+        code: "STORED",
+        label: "In Site Inventory / Stored",
+        nciCode: "C112036",
+        order: 4,
+      },
     ],
   },
   {
@@ -176,10 +401,30 @@ export const STANDARD_CODELISTS: CodelistDefinition[] = [
     nciCodelistCode: "C112037",
     isStandard: true,
     options: [
-      { code: "COMPLETE SUCCESS", label: "Complete Procedural Success", nciCode: "C112038", order: 1 },
-      { code: "PARTIAL SUCCESS", label: "Partial Success (Sub-optimal deployment)", nciCode: "C112039", order: 2 },
-      { code: "PROCEDURE ABORTED", label: "Procedure Aborted / Cancelled", nciCode: "C112040", order: 3 },
-      { code: "CONVERTED SURGERY", label: "Converted to Emergent Open Surgery", nciCode: "C112041", order: 4 },
+      {
+        code: "COMPLETE SUCCESS",
+        label: "Complete Procedural Success",
+        nciCode: "C112038",
+        order: 1,
+      },
+      {
+        code: "PARTIAL SUCCESS",
+        label: "Partial Success (Sub-optimal deployment)",
+        nciCode: "C112039",
+        order: 2,
+      },
+      {
+        code: "PROCEDURE ABORTED",
+        label: "Procedure Aborted / Cancelled",
+        nciCode: "C112040",
+        order: 3,
+      },
+      {
+        code: "CONVERTED SURGERY",
+        label: "Converted to Emergent Open Surgery",
+        nciCode: "C112041",
+        order: 4,
+      },
     ],
   },
   {
@@ -188,13 +433,48 @@ export const STANDARD_CODELISTS: CodelistDefinition[] = [
     nciCodelistCode: "C66735",
     isStandard: true,
     options: [
-      { code: "COMPLETED", label: "Completed Protocol Defined Period", nciCode: "C25250", order: 1 },
-      { code: "ADVERSE EVENT", label: "Adverse Event / Safety Concern", nciCode: "C41331", order: 2 },
-      { code: "LACK OF EFFICACY", label: "Lack of Efficacy / Disease Progression", nciCode: "C48269", order: 3 },
-      { code: "WITHDRAWAL BY SUBJECT", label: "Withdrawal of Consent by Subject", nciCode: "C49491", order: 4 },
-      { code: "LOST TO FOLLOW-UP", label: "Lost to Follow-Up", nciCode: "C48288", order: 5 },
-      { code: "PHYSICIAN DECISION", label: "Investigator / Physician Decision", nciCode: "C49490", order: 6 },
-      { code: "PROTOCOL VIOLATION", label: "Protocol Deviation / Violation", nciCode: "C49492", order: 7 },
+      {
+        code: "COMPLETED",
+        label: "Completed Protocol Defined Period",
+        nciCode: "C25250",
+        order: 1,
+      },
+      {
+        code: "ADVERSE EVENT",
+        label: "Adverse Event / Safety Concern",
+        nciCode: "C41331",
+        order: 2,
+      },
+      {
+        code: "LACK OF EFFICACY",
+        label: "Lack of Efficacy / Disease Progression",
+        nciCode: "C48269",
+        order: 3,
+      },
+      {
+        code: "WITHDRAWAL BY SUBJECT",
+        label: "Withdrawal of Consent by Subject",
+        nciCode: "C49491",
+        order: 4,
+      },
+      {
+        code: "LOST TO FOLLOW-UP",
+        label: "Lost to Follow-Up",
+        nciCode: "C48288",
+        order: 5,
+      },
+      {
+        code: "PHYSICIAN DECISION",
+        label: "Investigator / Physician Decision",
+        nciCode: "C49490",
+        order: 6,
+      },
+      {
+        code: "PROTOCOL VIOLATION",
+        label: "Protocol Deviation / Violation",
+        nciCode: "C49492",
+        order: 7,
+      },
       { code: "DEATH", label: "Death", nciCode: "C28554", order: 8 },
     ],
   },
@@ -204,9 +484,24 @@ export const STANDARD_CODELISTS: CodelistDefinition[] = [
     nciCodelistCode: "C66736",
     isStandard: true,
     options: [
-      { code: "RECONCILED", label: "Fully Reconciled (100% Accounted)", nciCode: "C49488", order: 1 },
-      { code: "DISCREPANCY", label: "Discrepancy Documented", nciCode: "C48285", order: 2 },
-      { code: "LOST/DESTROYED", label: "Lost / Accidental Destruction", nciCode: "C48286", order: 3 },
+      {
+        code: "RECONCILED",
+        label: "Fully Reconciled (100% Accounted)",
+        nciCode: "C49488",
+        order: 1,
+      },
+      {
+        code: "DISCREPANCY",
+        label: "Discrepancy Documented",
+        nciCode: "C48285",
+        order: 2,
+      },
+      {
+        code: "LOST/DESTROYED",
+        label: "Lost / Accidental Destruction",
+        nciCode: "C48286",
+        order: 3,
+      },
     ],
   },
   {
@@ -219,10 +514,30 @@ export const STANDARD_CODELISTS: CodelistDefinition[] = [
       { code: "G", label: "Gram (g)", nciCode: "C48155", order: 2 },
       { code: "MCG", label: "Microgram (mcg/µg)", nciCode: "C48153", order: 3 },
       { code: "ML", label: "Milliliter (mL)", nciCode: "C28254", order: 4 },
-      { code: "MG/KG", label: "Milligrams per Kilogram (mg/kg)", nciCode: "C67417", order: 5 },
-      { code: "MG/M2", label: "Milligrams per m² (mg/m²)", nciCode: "C67418", order: 6 },
-      { code: "IU", label: "International Units (IU)", nciCode: "C48154", order: 7 },
-      { code: "TABLETS", label: "Tablets / Capsules", nciCode: "C42998", order: 8 },
+      {
+        code: "MG/KG",
+        label: "Milligrams per Kilogram (mg/kg)",
+        nciCode: "C67417",
+        order: 5,
+      },
+      {
+        code: "MG/M2",
+        label: "Milligrams per m² (mg/m²)",
+        nciCode: "C67418",
+        order: 6,
+      },
+      {
+        code: "IU",
+        label: "International Units (IU)",
+        nciCode: "C48154",
+        order: 7,
+      },
+      {
+        code: "TABLETS",
+        label: "Tablets / Capsules",
+        nciCode: "C42998",
+        order: 8,
+      },
     ],
   },
   {
@@ -231,14 +546,252 @@ export const STANDARD_CODELISTS: CodelistDefinition[] = [
     nciCodelistCode: "C66737",
     isStandard: true,
     options: [
-      { code: "CARDIOVASCULAR", label: "Cardiovascular / Vascular", nciCode: "C12727", order: 1 },
-      { code: "RESPIRATORY", label: "Respiratory / Pulmonary", nciCode: "C12728", order: 2 },
-      { code: "GASTROINTESTINAL", label: "Gastrointestinal / Hepatic", nciCode: "C12729", order: 3 },
-      { code: "NEUROLOGICAL", label: "Neurological / Psychiatric", nciCode: "C12730", order: 4 },
-      { code: "ENDOCRINE", label: "Endocrine / Metabolic (e.g. Diabetes)", nciCode: "C12731", order: 5 },
-      { code: "ONCOLOGY", label: "Oncology / Prior Malignancy", nciCode: "C12732", order: 6 },
-      { code: "MUSCULOSKELETAL", label: "Musculoskeletal / Rheumatology", nciCode: "C12733", order: 7 },
-      { code: "OTHER", label: "Other Medical History", nciCode: "C17649", order: 8 },
+      {
+        code: "CARDIOVASCULAR",
+        label: "Cardiovascular / Vascular",
+        nciCode: "C12727",
+        order: 1,
+      },
+      {
+        code: "RESPIRATORY",
+        label: "Respiratory / Pulmonary",
+        nciCode: "C12728",
+        order: 2,
+      },
+      {
+        code: "GASTROINTESTINAL",
+        label: "Gastrointestinal / Hepatic",
+        nciCode: "C12729",
+        order: 3,
+      },
+      {
+        code: "NEUROLOGICAL",
+        label: "Neurological / Psychiatric",
+        nciCode: "C12730",
+        order: 4,
+      },
+      {
+        code: "ENDOCRINE",
+        label: "Endocrine / Metabolic (e.g. Diabetes)",
+        nciCode: "C12731",
+        order: 5,
+      },
+      {
+        code: "ONCOLOGY",
+        label: "Oncology / Prior Malignancy",
+        nciCode: "C12732",
+        order: 6,
+      },
+      {
+        code: "MUSCULOSKELETAL",
+        label: "Musculoskeletal / Rheumatology",
+        nciCode: "C12733",
+        order: 7,
+      },
+      {
+        code: "OTHER",
+        label: "Other Medical History",
+        nciCode: "C17649",
+        order: 8,
+      },
     ],
   },
 ];
+
+/**
+ * Regex format for NCI Thesaurus Concept Codes (e.g., C66741, C49487)
+ */
+export const NCI_CODE_REGEX = /^C\d+$/i;
+
+/**
+ * Finds a codelist definition by its unique identifier (e.g. "CL_SEX", "CL_NY").
+ */
+export function findCodelistById(
+  id: string,
+  codelists: CodelistDefinition[] = STANDARD_CODELISTS
+): CodelistDefinition | undefined {
+  if (!id) return undefined;
+  return codelists.find((cl) => cl.id === id);
+}
+
+/**
+ * Finds a codelist definition by its NCI Codelist Concept Code (e.g. "C66742").
+ */
+export function findCodelistByNciCode(
+  nciCode: string,
+  codelists: CodelistDefinition[] = STANDARD_CODELISTS
+): CodelistDefinition | undefined {
+  if (!nciCode) return undefined;
+  const normalized = nciCode.trim().toUpperCase();
+  return codelists.find(
+    (cl) =>
+      cl.nciCodelistCode && cl.nciCodelistCode.toUpperCase() === normalized
+  );
+}
+
+/**
+ * Resolves a codelist argument (either string ID / NCI code or CodelistDefinition object).
+ */
+function resolveCodelist(
+  codelistInput: CodelistDefinition | string,
+  codelists: CodelistDefinition[] = STANDARD_CODELISTS
+): CodelistDefinition | undefined {
+  if (typeof codelistInput !== "string") {
+    return codelistInput;
+  }
+  return (
+    findCodelistById(codelistInput, codelists) ||
+    findCodelistByNciCode(codelistInput, codelists)
+  );
+}
+
+/**
+ * Finds an option within a codelist by its submission code (e.g. "Y", "M", "GRADE 1 - MILD").
+ */
+export function findOptionByCode(
+  codelist: CodelistDefinition | string,
+  code: string,
+  codelists: CodelistDefinition[] = STANDARD_CODELISTS
+): import("./types").CodelistOption | undefined {
+  if (!code) return undefined;
+  const cl = resolveCodelist(codelist, codelists);
+  if (!cl || !Array.isArray(cl.options)) return undefined;
+
+  const normalizedCode = code.trim().toUpperCase();
+  return cl.options.find(
+    (opt) => opt.code && opt.code.trim().toUpperCase() === normalizedCode
+  );
+}
+
+/**
+ * Finds an option within a codelist by its NCI Concept Code (e.g. "C49488", "C20197").
+ */
+export function findOptionByNciCode(
+  codelist: CodelistDefinition | string,
+  nciCode: string,
+  codelists: CodelistDefinition[] = STANDARD_CODELISTS
+): import("./types").CodelistOption | undefined {
+  if (!nciCode) return undefined;
+  const cl = resolveCodelist(codelist, codelists);
+  if (!cl || !Array.isArray(cl.options)) return undefined;
+
+  const normalizedNci = nciCode.trim().toUpperCase();
+  return cl.options.find(
+    (opt) => opt.nciCode && opt.nciCode.trim().toUpperCase() === normalizedNci
+  );
+}
+
+/**
+ * Matches an option within a codelist by its human-readable term label.
+ */
+export function matchTermByLabel(
+  codelist: CodelistDefinition | string,
+  label: string,
+  options: { caseSensitive?: boolean; codelists?: CodelistDefinition[] } = {}
+): import("./types").CodelistOption | undefined {
+  if (!label) return undefined;
+  const { caseSensitive = false, codelists = STANDARD_CODELISTS } = options;
+  const cl = resolveCodelist(codelist, codelists);
+  if (!cl || !Array.isArray(cl.options)) return undefined;
+
+  const searchLabel = caseSensitive ? label.trim() : label.trim().toLowerCase();
+
+  return cl.options.find((opt) => {
+    if (!opt.label) return false;
+    const optLabel = caseSensitive
+      ? opt.label.trim()
+      : opt.label.trim().toLowerCase();
+    return optLabel === searchLabel;
+  });
+}
+
+/**
+ * Validates a list of codelists for integrity:
+ * - Checks for duplicate codelist IDs.
+ * - Checks for duplicate NCI codelist concept codes.
+ * - Validates NCI C-code regex formatting.
+ * - Checks option uniqueness and option NCI code formats within each codelist.
+ */
+export function validateCodelists(
+  codelists: CodelistDefinition[] = STANDARD_CODELISTS
+): { valid: boolean; errors: string[] } {
+  const errors: string[] = [];
+  const seenIds = new Set<string>();
+  const seenNciCodes = new Map<string, string>();
+
+  codelists.forEach((cl, index) => {
+    // Check ID existence & uniqueness
+    if (!cl.id) {
+      errors.push(`Codelist at index ${index} is missing an 'id'.`);
+    } else if (seenIds.has(cl.id)) {
+      errors.push(`Duplicate codelist ID detected: "${cl.id}".`);
+    } else {
+      seenIds.add(cl.id);
+    }
+
+    // Check NCI codelist code format & uniqueness
+    if (cl.nciCodelistCode) {
+      if (!NCI_CODE_REGEX.test(cl.nciCodelistCode)) {
+        errors.push(
+          `Codelist "${cl.id || index}" has invalid nciCodelistCode format: "${cl.nciCodelistCode}". Must match NCI C-code format (e.g. C12345).`
+        );
+      }
+      const upperNci = cl.nciCodelistCode.toUpperCase();
+      if (seenNciCodes.has(upperNci)) {
+        errors.push(
+          `Duplicate NCI Codelist Code detected: "${cl.nciCodelistCode}" in codelist "${cl.id}" (previously seen in "${seenNciCodes.get(upperNci)}").`
+        );
+      } else {
+        seenNciCodes.set(upperNci, cl.id);
+      }
+    } else {
+      errors.push(`Codelist "${cl.id || index}" is missing 'nciCodelistCode'.`);
+    }
+
+    // Check options
+    if (!Array.isArray(cl.options) || cl.options.length === 0) {
+      errors.push(`Codelist "${cl.id || index}" has no options defined.`);
+    } else {
+      const seenOptionCodes = new Set<string>();
+      cl.options.forEach((opt, optIdx) => {
+        if (!opt.code) {
+          errors.push(
+            `Codelist "${cl.id}" option at index ${optIdx} is missing 'code'.`
+          );
+        } else {
+          const upperOptCode = opt.code.toUpperCase();
+          if (seenOptionCodes.has(upperOptCode)) {
+            errors.push(
+              `Codelist "${cl.id}" contains duplicate option submission code: "${opt.code}".`
+            );
+          } else {
+            seenOptionCodes.add(upperOptCode);
+          }
+        }
+
+        if (!opt.label) {
+          errors.push(
+            `Codelist "${cl.id}" option "${opt.code || optIdx}" is missing 'label'.`
+          );
+        }
+
+        if (opt.nciCode) {
+          if (!NCI_CODE_REGEX.test(opt.nciCode)) {
+            errors.push(
+              `Codelist "${cl.id}" option "${opt.code}" has invalid option nciCode: "${opt.nciCode}". Must match NCI C-code format.`
+            );
+          }
+        } else {
+          errors.push(
+            `Codelist "${cl.id}" option "${opt.code}" is missing option 'nciCode'.`
+          );
+        }
+      });
+    }
+  });
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
+}
