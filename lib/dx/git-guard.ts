@@ -47,7 +47,7 @@ export function validateCommitMessage(message: string): CommitValidationResult {
   // Handle merge commits, squash headers, or automated release commits
   if (
     cleanMsg.startsWith("Merge ") ||
-    cleanMsg.startsWith("Revert \"") ||
+    cleanMsg.startsWith('Revert "') ||
     cleanMsg.startsWith("v") ||
     cleanMsg.startsWith("Release ")
   ) {
@@ -89,8 +89,18 @@ export function validateCommitMessage(message: string): CommitValidationResult {
       errors.push("Commit subject should not end with a period.");
     }
     // Subject should be lowercase start (soft convention)
-    if (/^[A-Z]/.test(subject) && !subject.startsWith("API") && !subject.startsWith("DX") && !subject.startsWith("WCAG") && !subject.startsWith("AST") && !subject.startsWith("CRF") && !subject.startsWith("ADR")) {
-      errors.push("Commit subject should start with a lowercase letter or canonical acronym.");
+    if (
+      /^[A-Z]/.test(subject) &&
+      !subject.startsWith("API") &&
+      !subject.startsWith("DX") &&
+      !subject.startsWith("WCAG") &&
+      !subject.startsWith("AST") &&
+      !subject.startsWith("CRF") &&
+      !subject.startsWith("ADR")
+    ) {
+      errors.push(
+        "Commit subject should start with a lowercase letter or canonical acronym."
+      );
     }
   }
 
@@ -108,15 +118,29 @@ export function validateCommitMessage(message: string): CommitValidationResult {
 }
 
 /**
- * Validates branch names against team convention: feat/*, fix/*, chore/*, refactor/*, docs/*, perf/*, dx/*, main, master.
+ * Validates branch names against team convention: feat/*, fix/*, chore/*, refactor/*, docs/*, perf/*, dx/*, test/*, dev/*, jules/* (branches opened by the Jules agent), main, master.
  */
-export function validateBranchName(branch: string): { valid: boolean; error?: string } {
+export function validateBranchName(branch: string): {
+  valid: boolean;
+  error?: string;
+} {
   const cleanBranch = branch.trim();
   if (["main", "master", "develop", "dev", "HEAD"].includes(cleanBranch)) {
     return { valid: true };
   }
 
-  const validPrefixes = ["feat/", "fix/", "chore/", "refactor/", "docs/", "perf/", "dx/", "test/", "dev/", "jules/"];
+  const validPrefixes = [
+    "feat/",
+    "fix/",
+    "chore/",
+    "refactor/",
+    "docs/",
+    "perf/",
+    "dx/",
+    "test/",
+    "dev/",
+    "jules/",
+  ];
   const hasValidPrefix = validPrefixes.some((p) => cleanBranch.startsWith(p));
 
   if (!hasValidPrefix) {
@@ -140,7 +164,10 @@ export function validateBranchName(branch: string): { valid: boolean; error?: st
 /**
  * Diagnostic check for Husky git hooks and commit hygiene policy.
  */
-export function checkGitHygieneConfig(root: string, fix = false): DiagnosticCheckResult {
+export function checkGitHygieneConfig(
+  root: string,
+  fix = false
+): DiagnosticCheckResult {
   const huskyDir = path.join(root, ".husky");
   const preCommitHook = path.join(huskyDir, "pre-commit");
   const commitMsgHook = path.join(huskyDir, "commit-msg");
@@ -174,7 +201,8 @@ export function checkGitHygieneConfig(root: string, fix = false): DiagnosticChec
         name: "Git Hooks & Commit Hygiene Standards",
         category: "quality",
         status: "fixed",
-        message: "Installed and configured Husky git hooks for Conventional Commits.",
+        message:
+          "Installed and configured Husky git hooks for Conventional Commits.",
         fixedMessage: "Created .husky/commit-msg hook.",
       };
     }
@@ -195,6 +223,7 @@ export function checkGitHygieneConfig(root: string, fix = false): DiagnosticChec
     name: "Git Hooks & Commit Hygiene Standards",
     category: "quality",
     status: "pass",
-    message: "Husky pre-commit and commit-msg hooks are properly configured for Conventional Commits.",
+    message:
+      "Husky pre-commit and commit-msg hooks are properly configured for Conventional Commits.",
   };
 }
