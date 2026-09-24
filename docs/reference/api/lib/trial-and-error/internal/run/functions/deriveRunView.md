@@ -1,0 +1,35 @@
+[**fderuiter-portfolio**](../../../../../README.md)
+
+***
+
+[fderuiter-portfolio](../../../../../modules.md) / [lib/trial-and-error/internal/run](../README.md) / deriveRunView
+
+# Function: deriveRunView()
+
+> **deriveRunView**(`act`, `run`): [`RunView`](../interfaces/RunView.md)
+
+Derives everything a run renders. Pure; safe to call on every render.
+
+## Parameters
+
+### act
+
+#### blinds
+
+`object`[] = `...`
+
+#### id
+
+`string` = `identifier`
+
+#### title
+
+`string` = `...`
+
+### run
+
+[`RunState`](../interfaces/RunState.md)
+
+## Returns
+
+[`RunView`](../interfaces/RunView.md)

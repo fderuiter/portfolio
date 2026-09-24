@@ -221,15 +221,14 @@ describe("classifyHand", () => {
     expect(HandClassificationSchema.safeParse(result).success).toBe(true);
   });
 
-  it("finds a Straight, a Pair and a Flush in the shipped Small Blind deck", () => {
+  it("finds a Two Pair, a Pair and a Flush in the shipped Small Blind deck", () => {
     const deck = DEMOGRAPHICS_SCENARIO.deck;
     const pick = (...cardIds: string[]) =>
       cardIds.map((id) => deck.find((card) => card.id === id)!);
     expect(
-      classifyHand(
-        pick("C-T14.1.2", "C-T14.1.1-A", "C-T14.2.1", "C-T14.3.1", "C-L16.2.7")
-      )?.handType
-    ).toBe("CSR_STRAIGHT");
+      classifyHand(pick("C-T14.1.1-A", "C-L16.2.4", "C-T14.3.1", "C-L16.2.7"))
+        ?.handType
+    ).toBe("TLF_TWO_PAIR");
     expect(classifyHand(pick("C-T14.1.1-A", "C-L16.2.4"))?.handType).toBe(
       "TLF_PAIR"
     );

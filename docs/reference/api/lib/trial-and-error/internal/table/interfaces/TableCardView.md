@@ -66,6 +66,14 @@ Face data. Draft cards derive their face from the draft table instead.
 
 ***
 
+### debuffed
+
+> **debuffed**: `boolean`
+
+The Boss Blind's debuff cancels this card's Chips.
+
+***
+
 ### face
 
 > **face**: \{ `columns`: `string`[]; `kind`: `"TABLE"`; `rows`: `object`[]; \} \| \{ `columns`: `string`[]; `kind`: `"LISTING"`; `rows`: `string`[][]; \} \| \{ `kind`: `"FIGURE"`; `plot`: \{ `series`: `object`[]; `type`: `"KM"`; \} \| \{ `series`: `object`[]; `type`: `"SPARKLINE"`; \} \| \{ `intervals`: `object`[]; `reference`: `number`; `type`: `"FOREST"`; \}; \} \| \{ `cohort`: `string`; `count`: `number`; `kind`: `"TOKEN"`; \}

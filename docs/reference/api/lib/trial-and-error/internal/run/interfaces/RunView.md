@@ -1,0 +1,391 @@
+[**fderuiter-portfolio**](../../../../../README.md)
+
+***
+
+[fderuiter-portfolio](../../../../../modules.md) / [lib/trial-and-error/internal/run](../README.md) / RunView
+
+# Interface: RunView
+
+Everything a run renders, derived purely from act and state.
+
+## Properties
+
+### blind
+
+> **blind**: `object`
+
+#### blind
+
+> **blind**: `object` = `BlindSchema`
+
+##### blind.name
+
+> **name**: `string`
+
+##### blind.quota
+
+> **quota**: `number`
+
+##### blind.tier
+
+> **tier**: `"SMALL_BLIND"` \| `"BIG_BLIND"` \| `"BOSS_BLIND"` = `BlindTierSchema`
+
+#### boss?
+
+> `optional` **boss?**: `object`
+
+Present only on a Boss Blind.
+
+##### boss.debuffType
+
+> **debuffType**: `"DISABLE_POPULATION"` \| `"HAND_LIMIT"` \| `"DISCARD_PENALTY"` \| `"BLIND_FIREWALL"` = `BossDebuffTypeSchema`
+
+##### boss.description
+
+> **description**: `string`
+
+##### boss.disabledPopulations?
+
+> `optional` **disabledPopulations?**: (`"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`)[]
+
+##### boss.discardCpuPenalty?
+
+> `optional` **discardCpuPenalty?**: `number`
+
+##### boss.id
+
+> **id**: `string` = `identifier`
+
+##### boss.maxHandsAllowed?
+
+> `optional` **maxHandsAllowed?**: `number`
+
+##### boss.name
+
+> **name**: `string`
+
+#### deck
+
+> **deck**: `object`[]
+
+#### drawPile
+
+> **drawPile**: `object`[]
+
+#### handType
+
+> **handType**: `"HIGH_TABLE"` \| `"TLF_PAIR"` \| `"TLF_TWO_PAIR"` \| `"POPULATION_FLUSH"` \| `"CSR_STRAIGHT"` \| `"EFFICACY_FULL_HOUSE"` \| `"MEDDRA_FIVE_OF_A_KIND"` = `HandTypeSchema`
+
+#### id
+
+> **id**: `string` = `identifier`
+
+#### intro
+
+> **intro**: `string`
+
+The short intro card shown when the Blind starts.
+
+#### populationSnapshot
+
+> **populationSnapshot**: `object` = `PopulationSnapshotSchema`
+
+##### populationSnapshot.capturedAt
+
+> **capturedAt**: `string`
+
+##### populationSnapshot.id
+
+> **id**: `string` = `identifier`
+
+##### populationSnapshot.subjects
+
+> **subjects**: `object`[]
+
+##### populationSnapshot.version
+
+> **version**: `number`
+
+#### rulebook
+
+> **rulebook**: `object` = `SapRulebookSchema`
+
+##### rulebook.id
+
+> **id**: `string` = `identifier`
+
+##### rulebook.meanPrecision
+
+> **meanPrecision**: `number`
+
+##### rulebook.percentPrecision
+
+> **percentPrecision**: `number`
+
+##### rulebook.populationAliases
+
+> **populationAliases**: `object`[]
+
+##### rulebook.populationSuit
+
+> **populationSuit**: `"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"` = `PopulationTypeSchema`
+
+##### rulebook.roundingMode
+
+> **roundingMode**: `"HALF_EVEN"` \| `"HALF_AWAY_FROM_ZERO"` \| `"TRUNCATE"` = `RoundingModeSchema`
+
+##### rulebook.rules
+
+> **rules**: `object`[]
+
+##### rulebook.title
+
+> **title**: `string`
+
+#### shells
+
+> **shells**: `object`[]
+
+#### startingCpu
+
+> **startingCpu**: `number` = `nonNegativeInt`
+
+#### summary
+
+> **summary**: `string`
+
+#### table
+
+> **table**: `object` = `TableRulesSchema`
+
+##### table.handSize
+
+> **handSize**: `number`
+
+##### table.maxSelection
+
+> **maxSelection**: `number`
+
+##### table.startingCpu
+
+> **startingCpu**: `number` = `nonNegativeInt`
+
+#### title
+
+> **title**: `string`
+
+***
+
+### blindCount
+
+> **blindCount**: `number`
+
+***
+
+### blindIndex
+
+> **blindIndex**: `number`
+
+***
+
+### isFinalBlind
+
+> **isFinalBlind**: `boolean`
+
+***
+
+### nextBlind
+
+> **nextBlind**: \{ `blind`: \{ `name`: `string`; `quota`: `number`; `tier`: `"SMALL_BLIND"` \| `"BIG_BLIND"` \| `"BOSS_BLIND"`; \}; `boss?`: \{ `debuffType`: `"DISABLE_POPULATION"` \| `"HAND_LIMIT"` \| `"DISCARD_PENALTY"` \| `"BLIND_FIREWALL"`; `description`: `string`; `disabledPopulations?`: (`"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`)[]; `discardCpuPenalty?`: `number`; `id`: `string`; `maxHandsAllowed?`: `number`; `name`: `string`; \}; `deck`: `object`[]; `drawPile`: `object`[]; `handType`: `"HIGH_TABLE"` \| `"TLF_PAIR"` \| `"TLF_TWO_PAIR"` \| `"POPULATION_FLUSH"` \| `"CSR_STRAIGHT"` \| `"EFFICACY_FULL_HOUSE"` \| `"MEDDRA_FIVE_OF_A_KIND"`; `id`: `string`; `intro`: `string`; `populationSnapshot`: \{ `capturedAt`: `string`; `id`: `string`; `subjects`: `object`[]; `version`: `number`; \}; `rulebook`: \{ `id`: `string`; `meanPrecision`: `number`; `percentPrecision`: `number`; `populationAliases`: `object`[]; `populationSuit`: `"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`; `roundingMode`: `"HALF_EVEN"` \| `"HALF_AWAY_FROM_ZERO"` \| `"TRUNCATE"`; `rules`: `object`[]; `title`: `string`; \}; `shells`: `object`[]; `startingCpu`: `number`; `summary`: `string`; `table`: \{ `handSize`: `number`; `maxSelection`: `number`; `startingCpu`: `number`; \}; `title`: `string`; \} \| `null`
+
+The Blind that follows this one, if any.
+
+#### Union Members
+
+##### Type Literal
+
+\{ `blind`: \{ `name`: `string`; `quota`: `number`; `tier`: `"SMALL_BLIND"` \| `"BIG_BLIND"` \| `"BOSS_BLIND"`; \}; `boss?`: \{ `debuffType`: `"DISABLE_POPULATION"` \| `"HAND_LIMIT"` \| `"DISCARD_PENALTY"` \| `"BLIND_FIREWALL"`; `description`: `string`; `disabledPopulations?`: (`"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`)[]; `discardCpuPenalty?`: `number`; `id`: `string`; `maxHandsAllowed?`: `number`; `name`: `string`; \}; `deck`: `object`[]; `drawPile`: `object`[]; `handType`: `"HIGH_TABLE"` \| `"TLF_PAIR"` \| `"TLF_TWO_PAIR"` \| `"POPULATION_FLUSH"` \| `"CSR_STRAIGHT"` \| `"EFFICACY_FULL_HOUSE"` \| `"MEDDRA_FIVE_OF_A_KIND"`; `id`: `string`; `intro`: `string`; `populationSnapshot`: \{ `capturedAt`: `string`; `id`: `string`; `subjects`: `object`[]; `version`: `number`; \}; `rulebook`: \{ `id`: `string`; `meanPrecision`: `number`; `percentPrecision`: `number`; `populationAliases`: `object`[]; `populationSuit`: `"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`; `roundingMode`: `"HALF_EVEN"` \| `"HALF_AWAY_FROM_ZERO"` \| `"TRUNCATE"`; `rules`: `object`[]; `title`: `string`; \}; `shells`: `object`[]; `startingCpu`: `number`; `summary`: `string`; `table`: \{ `handSize`: `number`; `maxSelection`: `number`; `startingCpu`: `number`; \}; `title`: `string`; \}
+
+##### blind
+
+> **blind**: `object` = `BlindSchema`
+
+###### blind.name
+
+> **name**: `string`
+
+###### blind.quota
+
+> **quota**: `number`
+
+###### blind.tier
+
+> **tier**: `"SMALL_BLIND"` \| `"BIG_BLIND"` \| `"BOSS_BLIND"` = `BlindTierSchema`
+
+##### boss?
+
+> `optional` **boss?**: `object`
+
+Present only on a Boss Blind.
+
+###### boss.debuffType
+
+> **debuffType**: `"DISABLE_POPULATION"` \| `"HAND_LIMIT"` \| `"DISCARD_PENALTY"` \| `"BLIND_FIREWALL"` = `BossDebuffTypeSchema`
+
+###### boss.description
+
+> **description**: `string`
+
+###### boss.disabledPopulations?
+
+> `optional` **disabledPopulations?**: (`"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`)[]
+
+###### boss.discardCpuPenalty?
+
+> `optional` **discardCpuPenalty?**: `number`
+
+###### boss.id
+
+> **id**: `string` = `identifier`
+
+###### boss.maxHandsAllowed?
+
+> `optional` **maxHandsAllowed?**: `number`
+
+###### boss.name
+
+> **name**: `string`
+
+##### deck
+
+> **deck**: `object`[]
+
+##### drawPile
+
+> **drawPile**: `object`[]
+
+##### handType
+
+> **handType**: `"HIGH_TABLE"` \| `"TLF_PAIR"` \| `"TLF_TWO_PAIR"` \| `"POPULATION_FLUSH"` \| `"CSR_STRAIGHT"` \| `"EFFICACY_FULL_HOUSE"` \| `"MEDDRA_FIVE_OF_A_KIND"` = `HandTypeSchema`
+
+##### id
+
+> **id**: `string` = `identifier`
+
+##### intro
+
+> **intro**: `string`
+
+The short intro card shown when the Blind starts.
+
+##### populationSnapshot
+
+> **populationSnapshot**: `object` = `PopulationSnapshotSchema`
+
+###### populationSnapshot.capturedAt
+
+> **capturedAt**: `string`
+
+###### populationSnapshot.id
+
+> **id**: `string` = `identifier`
+
+###### populationSnapshot.subjects
+
+> **subjects**: `object`[]
+
+###### populationSnapshot.version
+
+> **version**: `number`
+
+##### rulebook
+
+> **rulebook**: `object` = `SapRulebookSchema`
+
+###### rulebook.id
+
+> **id**: `string` = `identifier`
+
+###### rulebook.meanPrecision
+
+> **meanPrecision**: `number`
+
+###### rulebook.percentPrecision
+
+> **percentPrecision**: `number`
+
+###### rulebook.populationAliases
+
+> **populationAliases**: `object`[]
+
+###### rulebook.populationSuit
+
+> **populationSuit**: `"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"` = `PopulationTypeSchema`
+
+###### rulebook.roundingMode
+
+> **roundingMode**: `"HALF_EVEN"` \| `"HALF_AWAY_FROM_ZERO"` \| `"TRUNCATE"` = `RoundingModeSchema`
+
+###### rulebook.rules
+
+> **rules**: `object`[]
+
+###### rulebook.title
+
+> **title**: `string`
+
+##### shells
+
+> **shells**: `object`[]
+
+##### startingCpu
+
+> **startingCpu**: `number` = `nonNegativeInt`
+
+##### summary
+
+> **summary**: `string`
+
+##### table
+
+> **table**: `object` = `TableRulesSchema`
+
+###### table.handSize
+
+> **handSize**: `number`
+
+###### table.maxSelection
+
+> **maxSelection**: `number`
+
+###### table.startingCpu
+
+> **startingCpu**: `number` = `nonNegativeInt`
+
+##### title
+
+> **title**: `string`
+
+***
+
+`null`
+
+***
+
+### phase
+
+> **phase**: [`RunPhase`](../type-aliases/RunPhase.md)
+
+***
+
+### showIntro
+
+> **showIntro**: `boolean`
+
+The Blind has just started: nothing has been played or discarded.
+
+***
+
+### table
+
+> **table**: [`TableView`](../../table/interfaces/TableView.md)

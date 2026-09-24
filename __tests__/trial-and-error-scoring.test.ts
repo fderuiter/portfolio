@@ -253,9 +253,9 @@ describe("Demographics QC scoring cases", () => {
       handType: scenario.handType,
       cards: [
         {
-          id: scenario.shell.id,
-          chips: scenario.shell.chips,
-          mult: scenario.shell.mult,
+          id: scenario.shells[0].id,
+          chips: scenario.shells[0].chips,
+          mult: scenario.shells[0].mult,
         },
       ],
       ruleResults: ruleResultsFor(report, scenario.rulebook, {

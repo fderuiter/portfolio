@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  ACT_I,
   CardFaceSchema,
   DEMOGRAPHICS_SCENARIO,
   FACE_KIND_BY_CARD_TYPE,
@@ -47,6 +48,19 @@ describe("card faces", () => {
     }
   });
 
+  it("gives every card in every Act I Blind a valid face, drafts included", () => {
+    for (const blind of ACT_I.blinds) {
+      const everyCard = {
+        ...createTableState(blind),
+        hand: blind.deck.map((c) => c.id),
+      };
+      for (const h of deriveTableView(blind, everyCard).hand) {
+        expect(h.face.kind).toBe(FACE_KIND_BY_CARD_TYPE[h.card.cardType]);
+        expect(CardFaceSchema.safeParse(h.face).success).toBe(true);
+      }
+    }
+  });
+
   it("prints a draft's observed cells, then the corrected value once fixed", () => {
     const fresh = cardView(createTableState(scenario), DRAFT_A).face;
     expect(fresh).toMatchObject({
@@ -67,11 +81,14 @@ describe("card faces", () => {
     expect(face.rows[2].values[2]).toBe("7 (58.3)");
   });
 
-  it("renders the Figure faces from data: a KM curve and a forest plot", () => {
-    const km = scenario.deck.find((c) => c.id === "C-F14.2.1")!.face!;
-    const forest = scenario.deck.find((c) => c.id === "C-F14.2.2")!.face!;
-    expect(km).toMatchObject({ kind: "FIGURE", plot: { type: "KM" } });
-    expect(forest).toMatchObject({ kind: "FIGURE", plot: { type: "FOREST" } });
+  it("deals no efficacy outputs or Figures anywhere in Act I", () => {
+    for (const blind of ACT_I.blinds) {
+      for (const card of blind.deck) {
+        expect(card.cardType).not.toBe("FIGURE");
+        expect(card.topic).not.toBe("EFF");
+        expect(card.csrStage).not.toBe("EFFICACY");
+      }
+    }
   });
 });
 

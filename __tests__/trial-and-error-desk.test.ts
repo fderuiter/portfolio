@@ -154,7 +154,7 @@ describe("QC Desk reducer", () => {
     expect(state.cpu).toEqual({ available: 4, spent: 2 });
     expect(state.lastEvaluation?.score).toBe(456);
     expect(state.lastEvent?.message).toContain(
-      "Small Blind: Internal CRO QC cleared."
+      "Small Blind: Internal QC cleared."
     );
     const view = deriveDeskView(scenario, state);
     expect(view.table).toBeNull();

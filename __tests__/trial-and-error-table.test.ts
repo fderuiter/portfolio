@@ -51,7 +51,7 @@ describe("Card Table reducer", () => {
     expect(view).toMatchObject({
       classification: null,
       preview: null,
-      deckRemaining: 6,
+      deckRemaining: 2,
       handsAffordable: 5,
       discardsAffordable: 10,
       canPlay: false,
@@ -59,9 +59,9 @@ describe("Card Table reducer", () => {
       canInspect: true,
       inspection: null,
     });
-    // Only the Demographics drafts are gambles in this slice.
+    // Only the Demographics drafts carry reviewable cells in the Small Blind.
     expect(view.hand.filter((c) => c.unverified).map((c) => c.card.id)).toEqual(
-      [DRAFT_A]
+      [DRAFT_A, "C-T14.1.1-B", "C-T14.1.1-C"]
     );
   });
 
@@ -114,7 +114,7 @@ describe("Card Table reducer", () => {
     expect(state.cpu).toEqual({ available: 8, spent: 2 });
     expect(state.hand).toHaveLength(8);
     expect(state.hand).not.toContain(DRAFT_A);
-    expect(state.hand.slice(-2)).toEqual(["C-T14.1.1-B", "C-T14.2.2"]);
+    expect(state.hand.slice(-2)).toEqual(["C-T14.3.2", "C-L16.2.8"]);
   });
 
   it("matches evaluateHand exactly for preview and play", () => {
@@ -142,7 +142,7 @@ describe("Card Table reducer", () => {
     expect(played.roundScore).toBe(828);
     expect(played.status).toBe("CLEARED");
     expect(played.lastEvent?.message).toContain(
-      "Small Blind: Internal CRO QC cleared."
+      "Small Blind: Internal QC cleared."
     );
   });
 
@@ -214,15 +214,12 @@ describe("Card Table reducer", () => {
     expect(run([{ type: "PLAY_HAND" }]).lastEvent?.message).toBe(
       "Select at least one card to play."
     );
-    const state = run([
-      ...select(DRAFT_A, "C-T14.1.2", "C-F14.2.1"),
-      { type: "DISCARD" },
-    ]);
+    const state = run([...select(DRAFT_A, "C-T14.1.2"), { type: "DISCARD" }]);
     expect(state.cpu.available).toBe(9);
     expect(state.discards).toBe(1);
     expect(state.hand).toHaveLength(8);
     expect(state.selected).toEqual([]);
-    expect(state.lastEvent?.message).toBe("Discarded 3 cards.");
+    expect(state.lastEvent?.message).toBe("Discarded 2 cards.");
     expect(
       run([...select(DM_LISTING), { type: "DISCARD" }]).lastEvent?.message
     ).toBe("Discarded 1 card.");
@@ -279,7 +276,7 @@ describe("Card Table reducer", () => {
       [
         ...select("C-L16.1.1"),
         { type: "DISCARD" },
-        ...select("C-F14.2.1"),
+        ...select("C-L16.2.7"),
         { type: "DISCARD" },
       ],
       createTableState(tight),
