@@ -171,6 +171,9 @@ describe("Developer Experience (DX) Tooling Suite", () => {
       const invalidBranch = validateBranchName("random_branch_name");
       expect(invalidBranch.valid).toBe(false);
       expect(invalidBranch.error).toContain("Expected prefixes");
+
+      expect(validateBranchName("test/some-test").valid).toBe(false);
+      expect(validateBranchName("jules/some-branch").valid).toBe(false);
     });
 
     it("passes checkGitHygieneConfig diagnostic check", () => {
