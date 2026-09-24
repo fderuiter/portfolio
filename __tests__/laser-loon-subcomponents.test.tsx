@@ -18,77 +18,8 @@ import {
 describe("Laser Loon Subcomponents Test Suite", () => {
   let container: HTMLDivElement;
   let root: Root;
-  let mockCtx: Record<string, any>;
 
   beforeEach(() => {
-    mockCtx = {
-      save: vi.fn(),
-      restore: vi.fn(),
-      translate: vi.fn(),
-      rotate: vi.fn(),
-      scale: vi.fn(),
-      fillRect: vi.fn(),
-      strokeRect: vi.fn(),
-      clearRect: vi.fn(),
-      beginPath: vi.fn(),
-      closePath: vi.fn(),
-      moveTo: vi.fn(),
-      lineTo: vi.fn(),
-      arc: vi.fn(),
-      arcTo: vi.fn(),
-      ellipse: vi.fn(),
-      roundRect: vi.fn(),
-      rect: vi.fn(),
-      fill: vi.fn(),
-      stroke: vi.fn(),
-      fillText: vi.fn(),
-      strokeText: vi.fn(),
-      quadraticCurveTo: vi.fn(),
-      bezierCurveTo: vi.fn(),
-      clip: vi.fn(),
-      setLineDash: vi.fn(),
-      getLineDash: vi.fn(() => []),
-      measureText: vi.fn((text: string) => ({
-        width: (text || "").length * 8,
-        height: 16,
-      })),
-      createImageData: vi.fn((w?: number | ImageData, h?: number) => {
-        const width = typeof w === "number" && w > 0 ? w : 256;
-        const height = typeof h === "number" && h > 0 ? h : 256;
-        return {
-          width,
-          height,
-          data: new Uint8ClampedArray(width * height * 4),
-        };
-      }),
-      getImageData: vi.fn(
-        (_sx?: number, _sy?: number, sw?: number, sh?: number) => {
-          const width = typeof sw === "number" && sw > 0 ? sw : 256;
-          const height = typeof sh === "number" && sh > 0 ? sh : 256;
-          return {
-            width,
-            height,
-            data: new Uint8ClampedArray(width * height * 4),
-          };
-        }
-      ),
-      putImageData: vi.fn(),
-      drawImage: vi.fn(),
-      transform: vi.fn(),
-      resetTransform: vi.fn(),
-      createRadialGradient: vi.fn(() => ({
-        addColorStop: vi.fn(),
-      })),
-      createLinearGradient: vi.fn(() => ({
-        addColorStop: vi.fn(),
-      })),
-    };
-
-    HTMLCanvasElement.prototype.getContext = vi.fn((contextId: string) => {
-      if (contextId === "2d") return mockCtx as any;
-      return null;
-    });
-
     HTMLCanvasElement.prototype.getBoundingClientRect = vi.fn(() => ({
       left: 0,
       top: 0,
@@ -119,7 +50,7 @@ describe("Laser Loon Subcomponents Test Suite", () => {
       expect(AssetDistributionViewer).toBe(AssetDistributionHub);
     });
 
-    it("should mount AssetDistributionViewer and assert canvas rendering properties", async () => {
+    it("should mount AssetDistributionViewer and assert canvas rendering properties using standard project mock", async () => {
       await act(async () => {
         root.render(<AssetDistributionViewer />);
       });
@@ -133,14 +64,125 @@ describe("Laser Loon Subcomponents Test Suite", () => {
       expect(canvas.width).toBe(720);
       expect(canvas.height).toBe(80);
 
-      // Verify canvas 2D rendering pipeline context interactions
-      expect(HTMLCanvasElement.prototype.getContext).toHaveBeenCalledWith("2d");
-      expect(mockCtx.clearRect).toHaveBeenCalledWith(0, 0, 720, 80);
-      expect(mockCtx.fillRect).toHaveBeenCalled();
-      expect(mockCtx.beginPath).toHaveBeenCalled();
-      expect(mockCtx.moveTo).toHaveBeenCalled();
-      expect(mockCtx.lineTo).toHaveBeenCalled();
-      expect(mockCtx.stroke).toHaveBeenCalled();
+      const ctx = canvas.getContext("2d") as any;
+      expect(ctx).not.toBeNull();
+      expect(ctx.clearRect).toHaveBeenCalledWith(0, 0, 720, 80);
+      expect(ctx.fillRect).toHaveBeenCalled();
+      expect(ctx.beginPath).toHaveBeenCalled();
+      expect(ctx.moveTo).toHaveBeenCalled();
+      expect(ctx.lineTo).toHaveBeenCalled();
+      expect(ctx.stroke).toHaveBeenCalled();
+    });
+
+    it("should dynamically calculate bar dimensions and draw category labels for default asset distribution", async () => {
+      await act(async () => {
+        root.render(<AssetDistributionViewer />);
+      });
+
+      const canvas = container.querySelector(
+        '[data-testid="asset-distribution-canvas"]'
+      ) as HTMLCanvasElement;
+      const ctx = canvas.getContext("2d") as any;
+
+      // Assert actual text drawing calls for calculated category labels
+      const fillTextCalls = ctx.fillText.mock.calls.map(
+        (args: [string, number, number]) => args[0]
+      );
+
+      expect(fillTextCalls).toContain("Vector Print (3)");
+      expect(fillTextCalls).toContain("Web & UI (2)");
+      expect(fillTextCalls).toContain("Raster Edit (2)");
+      expect(fillTextCalls).toContain("ACTIVE: ALL");
+    });
+
+    it("should update dynamic bar widths and category labels when custom asset distribution inputs are passed", async () => {
+      const customItems = [
+        {
+          filename: "custom1.ai",
+          ext: "AI",
+          classification: "Master Vector Source",
+          targetApp: "Illustrator",
+          attributes: "Vector source",
+          href: "/files/custom1.ai",
+          icon: null,
+          category: "vector" as const,
+        },
+        {
+          filename: "custom2.eps",
+          ext: "EPS",
+          classification: "Print Vector Standard",
+          targetApp: "Print",
+          attributes: "Vector print",
+          href: "/files/custom2.eps",
+          icon: null,
+          category: "vector" as const,
+        },
+        {
+          filename: "custom3.pdf",
+          ext: "PDF",
+          classification: "Vector PDF",
+          targetApp: "PDF Viewer",
+          attributes: "Vector PDF",
+          href: "/files/custom3.pdf",
+          icon: null,
+          category: "vector" as const,
+        },
+        {
+          filename: "custom4.ai",
+          ext: "AI",
+          classification: "Vector Source 2",
+          targetApp: "Illustrator",
+          attributes: "Vector source",
+          href: "/files/custom4.ai",
+          icon: null,
+          category: "vector" as const,
+        },
+        {
+          filename: "custom5.ai",
+          ext: "AI",
+          classification: "Vector Source 3",
+          targetApp: "Illustrator",
+          attributes: "Vector source",
+          href: "/files/custom5.ai",
+          icon: null,
+          category: "vector" as const,
+        },
+        {
+          filename: "custom6.svg",
+          ext: "SVG",
+          classification: "Web Vector",
+          targetApp: "Web",
+          attributes: "Web SVG",
+          href: "/files/custom6.svg",
+          icon: null,
+          category: "web" as const,
+        },
+      ];
+
+      await act(async () => {
+        root.render(<AssetDistributionViewer items={customItems} />);
+      });
+
+      const canvas = container.querySelector(
+        '[data-testid="asset-distribution-canvas"]'
+      ) as HTMLCanvasElement;
+      const ctx = canvas.getContext("2d") as any;
+
+      const fillTextCalls = ctx.fillText.mock.calls.map(
+        (args: [string, number, number]) => args[0]
+      );
+
+      // Verify dynamic label calculation from custom distribution input (5 vector, 1 web, 0 raster)
+      expect(fillTextCalls).toContain("Vector Print (5)");
+      expect(fillTextCalls).toContain("Web & UI (1)");
+      expect(fillTextCalls).toContain("Raster Edit (0)");
+
+      // Check fillRect call for recalculated proportional bar width for vector (5/6 of available width)
+      const fillRectWidths = ctx.fillRect.mock.calls.map(
+        (args: [number, number, number, number]) => args[2]
+      );
+      // Available width is 650. Vector proportion is 5/6 = ~542px
+      expect(fillRectWidths).toContain(542);
     });
 
     it("should render all asset categories, download links, and CC license information", async () => {
@@ -199,6 +241,7 @@ describe("Laser Loon Subcomponents Test Suite", () => {
         '[data-testid="asset-distribution-canvas"]'
       ) as HTMLCanvasElement;
       expect(canvas).not.toBeNull();
+      const ctx = canvas.getContext("2d") as any;
 
       // Mouse movement over canvas
       await act(async () => {
@@ -211,14 +254,14 @@ describe("Laser Loon Subcomponents Test Suite", () => {
         );
       });
 
-      expect(mockCtx.quadraticCurveTo).toHaveBeenCalled();
-      expect(mockCtx.measureText).toHaveBeenCalled();
+      expect(ctx.quadraticCurveTo).toHaveBeenCalled();
+      expect(ctx.measureText).toHaveBeenCalled();
 
-      // Click on canvas to filter category
+      // Click on canvas to filter category (clientX = 400 lands on Web bar: x=314..500)
       await act(async () => {
         canvas.dispatchEvent(
           new MouseEvent("click", {
-            clientX: 300,
+            clientX: 400,
             clientY: 40,
             bubbles: true,
           })

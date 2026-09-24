@@ -102,7 +102,13 @@ const ASSET_ITEMS: AssetFormatItem[] = [
   },
 ];
 
-export const AssetDistributionHub: React.FC = () => {
+export interface AssetDistributionHubProps {
+  items?: AssetFormatItem[];
+}
+
+export const AssetDistributionHub: React.FC<AssetDistributionHubProps> = ({
+  items = ASSET_ITEMS,
+}) => {
   const [copied, setCopied] = React.useState(false);
   const [activeCategory, setActiveCategory] = React.useState<
     "all" | "vector" | "web" | "raster"
@@ -113,32 +119,47 @@ export const AssetDistributionHub: React.FC = () => {
   const [hoveredAsset, setHoveredAsset] = React.useState<string | null>(null);
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
 
-  const categories = React.useMemo(
-    () => [
+  const categories = React.useMemo(() => {
+    const catConfigs = [
       {
         key: "vector" as const,
         color: "#f59e0b",
-        x: 20,
-        w: 200,
-        label: "Vector Print (3)",
+        name: "Vector Print",
       },
       {
         key: "web" as const,
         color: "#22d3ee",
-        x: 240,
-        w: 200,
-        label: "Web & UI (2)",
+        name: "Web & UI",
       },
       {
         key: "raster" as const,
         color: "#60a5fa",
-        x: 460,
-        w: 200,
-        label: "Raster Edit (2)",
+        name: "Raster Edit",
       },
-    ],
-    []
-  );
+    ];
+
+    const total = items.length || 1;
+    const startX = 20;
+    const gap = 15;
+    const totalAvailWidth = 720 - startX * 2 - gap * (catConfigs.length - 1);
+
+    let currentX = startX;
+    return catConfigs.map((cat) => {
+      const count = items.filter((i) => i.category === cat.key).length;
+      const proportion = items.length > 0 ? count / total : 1 / catConfigs.length;
+      const w = Math.round(proportion * totalAvailWidth);
+      const x = currentX;
+      currentX += w + gap;
+      return {
+        key: cat.key,
+        color: cat.color,
+        x,
+        w,
+        count,
+        label: `${cat.name} (${count})`,
+      };
+    });
+  }, [items]);
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
@@ -163,7 +184,7 @@ export const AssetDistributionHub: React.FC = () => {
       const isHovered =
         hoveredCategory === cat.key ||
         (hoveredAsset &&
-          ASSET_ITEMS.find((i) => i.filename === hoveredAsset)?.category ===
+          items.find((i) => i.filename === hoveredAsset)?.category ===
             cat.key);
       const isActive = activeCategory === "all" || activeCategory === cat.key;
 
@@ -198,7 +219,7 @@ export const AssetDistributionHub: React.FC = () => {
       hoveredCategory ? ` | HOVER: ${hoveredCategory.toUpperCase()}` : ""
     }`;
     ctx.fillText(statusText, 20, 15);
-  }, [activeCategory, hoveredCategory, hoveredAsset, categories]);
+  }, [activeCategory, hoveredCategory, hoveredAsset, categories, items]);
 
   const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
