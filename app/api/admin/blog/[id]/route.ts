@@ -4,6 +4,7 @@ import { isCurrentUserAdmin } from "@/lib/auth/admin";
 import { BlogPostService } from "@/lib/services/blog-service";
 import { createApiHandler } from "@/lib/route-wrapper";
 import { sanitizeError } from "@/lib/error-sanitization";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -65,7 +66,7 @@ export const GET = createApiHandler(async (_req: NextRequest, { params }) => {
     }
     return NextResponse.json({ data: draft });
   } catch (error) {
-    console.error("API admin blog draft read failed:", sanitizeError(error));
+    logger.error("API admin blog draft read failed:", sanitizeError(error));
     return NextResponse.json(
       { error: "Failed to load blog draft" },
       { status: 500 }
@@ -109,7 +110,7 @@ export const PATCH = createApiHandler(
         return NextResponse.json(duplicateSlugResponse(), { status: 409 });
       }
 
-      console.error("API admin blog draft edit failed:", sanitizeError(error));
+      logger.error("API admin blog draft edit failed:", sanitizeError(error));
       return NextResponse.json(
         { error: "Failed to update blog draft" },
         { status: 500 }
@@ -148,7 +149,7 @@ export const DELETE = createApiHandler(
       }
       return NextResponse.json({ success: true, data: { id: parsed.id } });
     } catch (error) {
-      console.error("API admin blog deletion failed:", sanitizeError(error));
+      logger.error("API admin blog deletion failed:", sanitizeError(error));
       return NextResponse.json(
         { error: "Failed to delete blog post" },
         { status: 500 }

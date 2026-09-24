@@ -1,4 +1,5 @@
 import { sanitizeError } from "@/lib/error-sanitization";
+import { logger } from "@/lib/logger";
 
 /**
  * Default maximum number of queued items retained in the outbox.
@@ -80,7 +81,11 @@ export interface TelemetryOutboxConfig {
   storage?: TelemetryStorage | null;
   storageKey?: string;
   autoFlushOnUnload?: boolean;
-  onRollback?: (item: TelemetryOutboxItem, reason: RollbackReason, error?: unknown) => void;
+  onRollback?: (
+    item: TelemetryOutboxItem,
+    reason: RollbackReason,
+    error?: unknown
+  ) => void;
   onSuccess?: (item: TelemetryOutboxItem) => void;
 }
 
@@ -116,7 +121,11 @@ export class TelemetryOutbox {
   private storage: TelemetryStorage | null;
   private storageKey: string;
   private autoFlushOnUnload: boolean;
-  private onRollback?: (item: TelemetryOutboxItem, reason: RollbackReason, error?: unknown) => void;
+  private onRollback?: (
+    item: TelemetryOutboxItem,
+    reason: RollbackReason,
+    error?: unknown
+  ) => void;
   private onSuccess?: (item: TelemetryOutboxItem) => void;
   private retryTimer: ReturnType<typeof setTimeout> | null = null;
   private _isDestroyed = false;
@@ -124,10 +133,22 @@ export class TelemetryOutbox {
   private visibilityListener?: () => void;
 
   constructor(config?: TelemetryOutboxConfig) {
-    this.capacity = config?.maxCapacity && config.maxCapacity > 0 ? config.maxCapacity : DEFAULT_OUTBOX_CAPACITY;
-    this.maxRetries = typeof config?.maxRetries === "number" ? config.maxRetries : DEFAULT_MAX_RETRIES;
-    this.baseDelayMs = typeof config?.baseDelayMs === "number" ? config.baseDelayMs : DEFAULT_BASE_DELAY_MS;
-    this.maxDelayMs = typeof config?.maxDelayMs === "number" ? config.maxDelayMs : DEFAULT_MAX_DELAY_MS;
+    this.capacity =
+      config?.maxCapacity && config.maxCapacity > 0
+        ? config.maxCapacity
+        : DEFAULT_OUTBOX_CAPACITY;
+    this.maxRetries =
+      typeof config?.maxRetries === "number"
+        ? config.maxRetries
+        : DEFAULT_MAX_RETRIES;
+    this.baseDelayMs =
+      typeof config?.baseDelayMs === "number"
+        ? config.baseDelayMs
+        : DEFAULT_BASE_DELAY_MS;
+    this.maxDelayMs =
+      typeof config?.maxDelayMs === "number"
+        ? config.maxDelayMs
+        : DEFAULT_MAX_DELAY_MS;
     this.transport = config?.transport ?? defaultTransport;
     this.storageKey = config?.storageKey ?? DEFAULT_STORAGE_KEY;
     this.autoFlushOnUnload = config?.autoFlushOnUnload ?? true;
@@ -136,7 +157,10 @@ export class TelemetryOutbox {
 
     if (config && "storage" in config) {
       this.storage = config.storage ?? null;
-    } else if (typeof window !== "undefined" && typeof window.localStorage?.getItem === "function") {
+    } else if (
+      typeof window !== "undefined" &&
+      typeof window.localStorage?.getItem === "function"
+    ) {
       this.storage = window.localStorage;
     } else {
       this.storage = null;
@@ -164,7 +188,10 @@ export class TelemetryOutbox {
         }
       }
     } catch (err) {
-      console.warn("Failed to hydrate telemetry outbox from storage:", sanitizeError(err));
+      logger.warn(
+        "Failed to hydrate telemetry outbox from storage:",
+        sanitizeError(err)
+      );
     }
   }
 
@@ -181,7 +208,10 @@ export class TelemetryOutbox {
         this.storage.setItem(this.storageKey, JSON.stringify(this.queue));
       }
     } catch (err) {
-      console.warn("Failed to persist telemetry outbox to storage:", sanitizeError(err));
+      logger.warn(
+        "Failed to persist telemetry outbox to storage:",
+        sanitizeError(err)
+      );
     }
   }
 
@@ -198,15 +228,24 @@ export class TelemetryOutbox {
     };
 
     this.visibilityListener = () => {
-      if (typeof document !== "undefined" && document.visibilityState === "hidden") {
+      if (
+        typeof document !== "undefined" &&
+        document.visibilityState === "hidden"
+      ) {
         this.flush({ keepalive: true }).catch(() => {});
       }
     };
 
     const win = window as unknown as Record<string, EventListener | undefined>;
     if (win.__telemetryOutboxUnloadListener) {
-      window.removeEventListener("pagehide", win.__telemetryOutboxUnloadListener);
-      window.removeEventListener("beforeunload", win.__telemetryOutboxUnloadListener);
+      window.removeEventListener(
+        "pagehide",
+        win.__telemetryOutboxUnloadListener
+      );
+      window.removeEventListener(
+        "beforeunload",
+        win.__telemetryOutboxUnloadListener
+      );
     }
     win.__telemetryOutboxUnloadListener = this.unloadListener as EventListener;
 
@@ -214,11 +253,18 @@ export class TelemetryOutbox {
     window.addEventListener("beforeunload", this.unloadListener);
 
     if (typeof document !== "undefined") {
-      const doc = document as unknown as Record<string, EventListener | undefined>;
+      const doc = document as unknown as Record<
+        string,
+        EventListener | undefined
+      >;
       if (doc.__telemetryOutboxVisibilityListener) {
-        document.removeEventListener("visibilitychange", doc.__telemetryOutboxVisibilityListener);
+        document.removeEventListener(
+          "visibilitychange",
+          doc.__telemetryOutboxVisibilityListener
+        );
       }
-      doc.__telemetryOutboxVisibilityListener = this.visibilityListener as EventListener;
+      doc.__telemetryOutboxVisibilityListener = this
+        .visibilityListener as EventListener;
       document.addEventListener("visibilitychange", this.visibilityListener);
     }
   }
@@ -227,17 +273,24 @@ export class TelemetryOutbox {
    * Schedules a delayed background worker to process retries using exponential backoff.
    */
   private scheduleRetryWorker(): void {
-    if (this._isDestroyed || this.queue.length === 0 || this.retryTimer !== null) {
+    if (
+      this._isDestroyed ||
+      this.queue.length === 0 ||
+      this.retryTimer !== null
+    ) {
       return;
     }
 
     const minRetries = Math.min(...this.queue.map((item) => item.retries ?? 0));
-    const delay = Math.min(this.maxDelayMs, this.baseDelayMs * Math.pow(2, minRetries));
+    const delay = Math.min(
+      this.maxDelayMs,
+      this.baseDelayMs * Math.pow(2, minRetries)
+    );
 
     this.retryTimer = setTimeout(() => {
       this.retryTimer = null;
       this.flush().catch((err) => {
-        console.warn("Telemetry outbox flush error:", sanitizeError(err));
+        logger.warn("Telemetry outbox flush error:", sanitizeError(err));
       });
     }, delay);
   }
@@ -255,7 +308,12 @@ export class TelemetryOutbox {
     try {
       const res = await this.transport(item, { keepalive: false });
       const ok = "ok" in res ? Boolean(res.ok) : false;
-      const status = "status" in res && typeof res.status === "number" ? res.status : (ok ? 200 : 500);
+      const status =
+        "status" in res && typeof res.status === "number"
+          ? res.status
+          : ok
+            ? 200
+            : 500;
 
       if (ok) {
         if (this.onSuccess) {
@@ -265,7 +323,7 @@ export class TelemetryOutbox {
       }
 
       if (status === 429) {
-        console.warn("Telemetry record rate limited by API.");
+        logger.warn("Telemetry record rate limited by API.");
         if (this.onRollback) {
           this.onRollback(item, "rate_limited");
         }
@@ -331,9 +389,16 @@ export class TelemetryOutbox {
 
     for (const item of currentBatch) {
       try {
-        const res = await this.transport(item, { keepalive: options?.keepalive ?? false });
+        const res = await this.transport(item, {
+          keepalive: options?.keepalive ?? false,
+        });
         const ok = "ok" in res ? Boolean(res.ok) : false;
-        const status = "status" in res && typeof res.status === "number" ? res.status : (ok ? 200 : 500);
+        const status =
+          "status" in res && typeof res.status === "number"
+            ? res.status
+            : ok
+              ? 200
+              : 500;
 
         if (ok) {
           if (this.onSuccess) {
@@ -343,7 +408,7 @@ export class TelemetryOutbox {
         }
 
         if (status === 429) {
-          console.warn("Telemetry record rate limited by API.");
+          logger.warn("Telemetry record rate limited by API.");
           if (this.onRollback) {
             this.onRollback(item, "rate_limited");
           }

@@ -14,3 +14,4 @@
 
 - [calculateFOV](functions/calculateFOV.md)
 - [hasLineOfSight](functions/hasLineOfSight.md)
+- [resetFogOfWar](functions/resetFogOfWar.md)
