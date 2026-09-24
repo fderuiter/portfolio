@@ -167,6 +167,23 @@ describe("DX Invariant Doctor Engine", () => {
       expect(result.status).toBe("fail");
     });
 
+    it("skips agent worktrees and Stryker sandboxes, which copy the source tree (#964)", () => {
+      const leak =
+        'const key = "' + "ghp_" + '123456789012345678901234567890123456";';
+      for (const dir of [
+        path.join(".claude", "worktrees", "agent-x", "lib"),
+        path.join(".stryker-tmp", "sandbox-1", "lib"),
+      ]) {
+        fs.mkdirSync(path.join(tempDir, dir), { recursive: true });
+        fs.writeFileSync(path.join(tempDir, dir, "allowlist.ts"), leak);
+      }
+      expect(checkSecretLeaks(tempDir).status).toBe("pass");
+
+      // The same content in the real tree is still caught.
+      fs.writeFileSync(path.join(tempDir, "leaked.ts"), leak);
+      expect(checkSecretLeaks(tempDir).status).toBe("fail");
+    });
+
     it("still ignores known-safe placeholder values from .env.example / env-guard.ts", () => {
       fs.writeFileSync(
         path.join(tempDir, ".env.example"),
