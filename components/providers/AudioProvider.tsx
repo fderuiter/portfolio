@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { getSoundEngine } from "@/lib/audio/sound-engine";
-import { useMediaQuery, usePrefersReducedMotion } from "@/hooks/useMediaQuery";
+import { getMatchMediaMatches } from "@/hooks/useMediaQuery";
 
 export type AudioProfile = "8-bit" | "90s-retro" | "ambient";
 
@@ -74,17 +74,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   const [volume, setVolumeState] = useState(0.3);
   const [muted, setMutedState] = useState(true);
   const [profile, setProfileState] = useState<AudioProfile>("8-bit");
-
-  const isForcedColors = useMediaQuery("(forced-colors: active)");
-  const isHighContrast = useMediaQuery("(-ms-high-contrast: active)");
-  const prefersReducedMotion = usePrefersReducedMotion();
-  const isHoverNone = useMediaQuery("(hover: none)");
-
-  const bypassActive =
-    isForcedColors ||
-    isHighContrast ||
-    prefersReducedMotion ||
-    (typeof window !== "undefined" && getSoundEngine().isBypassActive());
+  const [bypassActive, setBypassActive] = useState(false);
 
   // Sync state with central SoundEngine instance on client mount
   useEffect(() => {
@@ -99,10 +89,36 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     setTimeout(() => {
       setVolumeState(engine.getVolume());
       setMutedState(engine.isMuted());
+      setBypassActive(engine.isBypassActive());
       if (savedProfile !== null) {
         setProfileState(savedProfile as AudioProfile);
       }
     }, 0);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const checkBypass = () => {
+      const engine = getSoundEngine();
+      setBypassActive(engine.isBypassActive());
+    };
+
+    checkBypass();
+
+    const mqForced = window.matchMedia?.("(forced-colors: active)");
+    const mqContrast = window.matchMedia?.("(-ms-high-contrast: active)");
+    const mqMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+
+    mqForced?.addEventListener?.("change", checkBypass);
+    mqContrast?.addEventListener?.("change", checkBypass);
+    mqMotion?.addEventListener?.("change", checkBypass);
+
+    return () => {
+      mqForced?.removeEventListener?.("change", checkBypass);
+      mqContrast?.removeEventListener?.("change", checkBypass);
+      mqMotion?.removeEventListener?.("change", checkBypass);
+    };
   }, []);
 
   useEffect(() => {
@@ -208,13 +224,13 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   };
 
   const playHover = (pan?: number) => {
-    if (isHoverNone) return;
+    if (getMatchMediaMatches("(hover: none)")) return;
     const freq = profile === "ambient" ? 440.0 : 880.0;
     playNote(freq, 0.02, pan);
   };
 
   const playSkillHover = () => {
-    if (isHoverNone) return;
+    if (getMatchMediaMatches("(hover: none)")) return;
     const notes = [261.63, 293.66, 329.63, 392.0, 440.0];
     const randomFreq = notes[Math.floor(Math.random() * notes.length)];
     playNote(randomFreq, 0.1);

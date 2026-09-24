@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore, useCallback } from "react";
+import { useSyncExternalStore } from "react";
 
 /**
  * SSR-safe helper that checks whether a media query matches window.matchMedia.
@@ -15,18 +15,19 @@ export function getMatchMediaMatches(query: string): boolean {
   }
 }
 
-/**
- * Hydration-safe React hook that subscribes to CSS media query changes.
- *
- * Uses `useSyncExternalStore` so the initial client render matches the server
- * render (false) before syncing with window.matchMedia.
- *
- * @param query - A valid CSS media query string (e.g. "(max-width: 767px)").
- * @returns True if the media query matches, false otherwise.
- */
-export function useMediaQuery(query: string): boolean {
-  const subscribe = useCallback(
-    (callback: () => void) => {
+interface QueryStore {
+  subscribe: (callback: () => void) => () => void;
+  getSnapshot: () => boolean;
+  getServerSnapshot: () => boolean;
+}
+
+const storeCache = new Map<string, QueryStore>();
+
+function getQueryStore(query: string, serverSnapshot = false): QueryStore {
+  const cacheKey = `${query}:${serverSnapshot}`;
+  let store = storeCache.get(cacheKey);
+  if (!store) {
+    const subscribe = (callback: () => void) => {
       if (typeof window === "undefined" || !window.matchMedia) {
         return () => {};
       }
@@ -39,19 +40,37 @@ export function useMediaQuery(query: string): boolean {
         return () => mql.removeListener(callback);
       }
       return () => {};
-    },
-    [query]
+    };
+
+    const getSnapshot = () => getMatchMediaMatches(query);
+    const getServerSnapshot = () => serverSnapshot;
+
+    store = { subscribe, getSnapshot, getServerSnapshot };
+    storeCache.set(cacheKey, store);
+  }
+  return store;
+}
+
+/**
+ * Hydration-safe React hook that subscribes to CSS media query changes.
+ *
+ * Uses `useSyncExternalStore` so the initial client render matches the server
+ * render (false by default) before syncing with window.matchMedia.
+ *
+ * @param query - A valid CSS media query string (e.g. "(max-width: 767px)").
+ * @param serverSnapshot - Optional initial value during server rendering (default: false).
+ * @returns True if the media query matches, false otherwise.
+ */
+export function useMediaQuery(
+  query: string,
+  serverSnapshot = false
+): boolean {
+  const store = getQueryStore(query, serverSnapshot);
+  return useSyncExternalStore(
+    store.subscribe,
+    store.getSnapshot,
+    store.getServerSnapshot
   );
-
-  const getSnapshot = useCallback(() => {
-    return getMatchMediaMatches(query);
-  }, [query]);
-
-  const getServerSnapshot = useCallback(() => {
-    return false;
-  }, []);
-
-  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
 
 /**
