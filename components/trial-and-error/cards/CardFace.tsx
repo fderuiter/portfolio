@@ -66,7 +66,7 @@ export function MiniOutput({
  * The seal slot: one wax-stamp badge per footnote seal affixed to the
  * output. It presses on with a small loud flash when the cabinet allows it.
  */
-export function SealSlot({ view }: { view: TableCardView }) {
+function SealSlot({ view }: { view: TableCardView }) {
   if (view.seals.length === 0) return null;
   return (
     <span className="pointer-events-none absolute right-0 top-5 flex flex-col gap-0.5">
