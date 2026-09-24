@@ -15,9 +15,34 @@ export const MultiGoalTabs: React.FC<MultiGoalTabsProps> = ({
   activeGoalIndex,
   onSelectGoal,
 }) => {
+  const tabRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
+
   if (subgoals.length <= 1) return null;
 
   const completedCount = subgoals.filter((g) => g.isCompleted).length;
+
+  const handleTabKeyDown = (
+    event: React.KeyboardEvent<HTMLButtonElement>,
+    currentIndex: number
+  ) => {
+    let nextIndex: number | null = null;
+
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      nextIndex = (currentIndex + 1) % subgoals.length;
+    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      nextIndex = (currentIndex - 1 + subgoals.length) % subgoals.length;
+    } else if (event.key === "Home") {
+      nextIndex = 0;
+    } else if (event.key === "End") {
+      nextIndex = subgoals.length - 1;
+    }
+
+    if (nextIndex === null) return;
+
+    event.preventDefault();
+    onSelectGoal(nextIndex);
+    tabRefs.current[nextIndex]?.focus();
+  };
 
   return (
     <div className="rounded-xl border border-purple-500/30 bg-purple-950/20 p-3 font-mono">
@@ -31,16 +56,29 @@ export const MultiGoalTabs: React.FC<MultiGoalTabsProps> = ({
         </span>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div
+        className="flex flex-wrap gap-2"
+        role="tablist"
+        aria-label="Active Proof Subgoals"
+      >
         {subgoals.map((sg, idx) => {
           const isActive = idx === activeGoalIndex;
           const isDone = sg.isCompleted;
 
           return (
             <button
+              ref={(node) => {
+                tabRefs.current[idx] = node;
+              }}
               key={sg.id}
               type="button"
+              id={`subgoal-tab-${sg.id}`}
+              role="tab"
+              aria-selected={isActive}
+              aria-controls={`subgoal-panel-${sg.id}`}
+              tabIndex={isActive ? 0 : -1}
               onClick={() => onSelectGoal(idx)}
+              onKeyDown={(e) => handleTabKeyDown(e, idx)}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 isActive
                   ? "bg-purple-600 text-white shadow-[0_0_12px_rgba(168,85,247,0.5)] border border-purple-400"
