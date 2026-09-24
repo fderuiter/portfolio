@@ -137,7 +137,9 @@ export function validateBranchName(branch: string): {
     "docs/",
     "perf/",
     "dx/",
+    "test/",
     "dev/",
+    "jules/",
   ];
   const hasValidPrefix = validPrefixes.some((p) => cleanBranch.startsWith(p));
 
