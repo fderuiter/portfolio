@@ -77,6 +77,7 @@ Retrieves a media asset from storage by key.
 > `static` **saveMediaAsset**(`key`, `buffer`, `contentType`): `Promise`\<`string`\>
 
 Saves a validated media buffer to storage and returns its relative asset URL.
+If primary cloud storage upload fails, falls back to local storage.
 
 #### Parameters
 
