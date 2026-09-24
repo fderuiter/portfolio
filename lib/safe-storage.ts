@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { sanitizeError } from "./error-sanitization";
+import { logger } from "@/lib/logger";
 
 export const STORAGE_CHANGE_EVENT = "portfolio-persistent-state-change";
 
@@ -169,7 +170,7 @@ export class SafeStorageAdapter {
       }
     } catch (error) {
       const sanitized = sanitizeError(error);
-      console.warn(`SafeStorage: getItem failed for key "${key}":`, sanitized);
+      logger.warn(`SafeStorage: getItem failed for key "${key}":`, sanitized);
       const cached = this.memoryCache.get(key);
       if (cached) {
         return cached.parsedValue as T;
@@ -247,7 +248,7 @@ export class SafeStorageAdapter {
         window.localStorage.removeItem(key);
       } catch (error) {
         const sanitized = sanitizeError(error);
-        console.warn(
+        logger.warn(
           `SafeStorage: removeItem failed for key "${key}":`,
           sanitized
         );
@@ -268,7 +269,7 @@ export class SafeStorageAdapter {
         window.localStorage.clear();
       } catch (error) {
         const sanitized = sanitizeError(error);
-        console.warn("SafeStorage: clear failed:", sanitized);
+        logger.warn("SafeStorage: clear failed:", sanitized);
       }
     }
 
@@ -376,7 +377,7 @@ export class SafeStorageAdapter {
         }
       } catch (error) {
         const sanitized = sanitizeError(error);
-        console.warn("SafeStorage: error during pruneExpired:", sanitized);
+        logger.warn("SafeStorage: error during pruneExpired:", sanitized);
       }
     }
 
@@ -489,7 +490,7 @@ export class SafeStorageAdapter {
 
     // If quota constraint persists after evicting all expirable keys, retain active state in memory fallback cache
     const sanitized = sanitizeError(initialError);
-    console.warn(
+    logger.warn(
       `SafeStorage: Storage quota exceeded for key "${key}". Active state retained in memory.`,
       sanitized
     );

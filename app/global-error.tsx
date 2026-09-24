@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { reportClientError } from "@/lib/client-sentry";
 import { sanitizeError } from "@/lib/error-sanitization";
 import { resolveBaseUrl } from "@/lib/domain";
+import { logger } from "@/lib/logger";
 
 export default function GlobalError({
   error,
@@ -12,11 +13,13 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  const [canonicalUrl, setCanonicalUrl] = useState<string>(`${resolveBaseUrl()}/`);
+  const [canonicalUrl, setCanonicalUrl] = useState<string>(
+    `${resolveBaseUrl()}/`
+  );
 
   useEffect(() => {
     reportClientError(error);
-    console.error("Global uncaught crash boundary:", sanitizeError(error));
+    logger.error("Global uncaught crash boundary:", sanitizeError(error));
     if (typeof window !== "undefined") {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setCanonicalUrl(window.location.href);
@@ -41,7 +44,9 @@ export default function GlobalError({
           </h1>
 
           <p className="text-sm text-neutral-400 leading-relaxed mb-8">
-            The root layout rendering tree has failed to compile. The details of this crash have been reported to our automated observability system. A critical reset of all DOM and state variables is required.
+            The root layout rendering tree has failed to compile. The details of
+            this crash have been reported to our automated observability system.
+            A critical reset of all DOM and state variables is required.
           </p>
 
           <button

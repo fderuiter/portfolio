@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { TelemetryEventSchema } from "@/lib/schemas";
 import { TelemetryService } from "@/lib/services/telemetry-service";
 import { createApiHandler } from "@/lib/route-wrapper";
+import { logger } from "@/lib/logger";
 import * as Sentry from "@sentry/nextjs";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +19,7 @@ export const GET = createApiHandler(async () => {
     });
   } catch (err) {
     Sentry.captureException(err);
-    console.error("Telemetry statistics aggregate query failed:", err);
+    logger.error("Telemetry statistics aggregate query failed:", err);
     return NextResponse.json(
       { error: "Failed to compile aggregate portfolio telemetry" },
       { status: 500 }
@@ -58,7 +59,7 @@ export const POST = createApiHandler(
       return response;
     } catch (err) {
       Sentry.captureException(err);
-      console.error("Failed to commit telemetry event log:", err);
+      logger.error("Failed to commit telemetry event log:", err);
       return NextResponse.json(
         { error: "Failed to record telemetry interaction event" },
         { status: 500 }

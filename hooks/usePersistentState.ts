@@ -1,8 +1,18 @@
 "use client";
 
-import { useSyncExternalStore, useCallback, Dispatch, SetStateAction } from "react";
-import { safeStorage, STORAGE_CHANGE_EVENT, type StorageOptions } from "@/lib/safe-storage";
+import {
+  useSyncExternalStore,
+  useCallback,
+  Dispatch,
+  SetStateAction,
+} from "react";
+import {
+  safeStorage,
+  STORAGE_CHANGE_EVENT,
+  type StorageOptions,
+} from "@/lib/safe-storage";
 import { sanitizeError } from "@/lib/error-sanitization";
+import { logger } from "@/lib/logger";
 
 const subscribers = new Set<() => void>();
 
@@ -51,7 +61,10 @@ export function usePersistentState<T>(
   initialValue: T,
   options?: StorageOptions
 ): [T, Dispatch<SetStateAction<T>>] {
-  const getSnapshot = useCallback(() => getStoredSnapshot(key, initialValue), [key, initialValue]);
+  const getSnapshot = useCallback(
+    () => getStoredSnapshot(key, initialValue),
+    [key, initialValue]
+  );
   const getServerSnapshot = useCallback(() => initialValue, [initialValue]);
 
   const state = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
@@ -69,7 +82,7 @@ export function usePersistentState<T>(
         notifySubscribers();
       } catch (error) {
         const sanitized = sanitizeError(error);
-        console.warn(`Error setting localStorage key "${key}":`, sanitized);
+        logger.warn(`Error setting localStorage key "${key}":`, sanitized);
       }
     },
     [key, initialValue, options]
@@ -77,4 +90,3 @@ export function usePersistentState<T>(
 
   return [state, setPersistentState];
 }
-

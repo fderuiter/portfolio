@@ -5,6 +5,7 @@ import { getConnectionHashFromRequest } from "@/lib/services/privacy-service";
 import { createApiHandler } from "@/lib/route-wrapper";
 import { checkSubmissionAttemptRateLimit } from "@/lib/moderation";
 import { EmailService } from "@/lib/services/email-service";
+import { logger } from "@/lib/logger";
 import * as Sentry from "@sentry/nextjs";
 
 export const dynamic = "force-dynamic";
@@ -38,13 +39,13 @@ export const POST = createApiHandler(
         );
       }
 
-      const result = await CaseStudyService.submitFeedback(data, connectionHash);
+      const result = await CaseStudyService.submitFeedback(
+        data,
+        connectionHash
+      );
 
       if (result.rateLimited) {
-        return NextResponse.json(
-          { error: result.message },
-          { status: 429 }
-        );
+        return NextResponse.json({ error: result.message }, { status: 429 });
       }
 
       // Non-blocking notification dispatch
@@ -56,7 +57,7 @@ export const POST = createApiHandler(
           connectionHash,
           submittedAt: new Date(),
         }).catch((err) => {
-          console.error("Non-blocking feedback email dispatch error:", err);
+          logger.error("Non-blocking feedback email dispatch error:", err);
         });
       }
 
@@ -70,7 +71,7 @@ export const POST = createApiHandler(
       );
     } catch (err) {
       Sentry.captureException(err);
-      console.error("Failed to process feedback submission:", err);
+      logger.error("Failed to process feedback submission:", err);
       return NextResponse.json(
         { error: "Internal server error processing feedback submission" },
         { status: 500 }
@@ -82,11 +83,16 @@ export const POST = createApiHandler(
     type: "body",
     customJsonError: "Invalid JSON body payload",
     customValidationError: (err) => {
-      const issues = (err as { issues: Array<{ path: Array<string | number>; message: string }> }).issues;
-      const isToneViolation = issues.some((i) =>
-        i.message.toLowerCase().includes("tone") ||
-        i.message.toLowerCase().includes("constructive") ||
-        i.message.toLowerCase().includes("profanity")
+      const issues = (
+        err as {
+          issues: Array<{ path: Array<string | number>; message: string }>;
+        }
+      ).issues;
+      const isToneViolation = issues.some(
+        (i) =>
+          i.message.toLowerCase().includes("tone") ||
+          i.message.toLowerCase().includes("constructive") ||
+          i.message.toLowerCase().includes("profanity")
       );
       return {
         error: isToneViolation
