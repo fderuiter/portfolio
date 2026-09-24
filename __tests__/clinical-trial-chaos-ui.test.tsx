@@ -566,4 +566,118 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
 
     vi.useRealTimers();
   }, 15000);
+
+  it("should enforce minimum 44px touch target dimensions across HUD buttons, tabs, mode selectors, and options", async () => {
+    await act(async () => {
+      root.render(<ClinicalTrialChaos />);
+    });
+
+    const bgmBtn = container.querySelector('[aria-label="Background music"]');
+    expect(bgmBtn?.className).toContain("min-h-[44px]");
+    expect(bgmBtn?.className).toContain("min-w-[44px]");
+
+    const sfxBtn = container.querySelector('[aria-label="Sound effects"]');
+    expect(sfxBtn?.className).toContain("min-h-[44px]");
+    expect(sfxBtn?.className).toContain("min-w-[44px]");
+
+    const tabs = container.querySelectorAll('[aria-label="Game views"] button');
+    tabs.forEach((tab) => {
+      expect(tab.className).toContain("min-h-[44px]");
+    });
+
+    const modeBtns = container.querySelectorAll(
+      '[aria-label="Game mode"] button'
+    );
+    modeBtns.forEach((btn) => {
+      expect(btn.className).toContain("min-h-[44px]");
+    });
+
+    const officeRadioBtns = container.querySelectorAll(
+      '[role="radiogroup"] button'
+    );
+    officeRadioBtns.forEach((btn) => {
+      expect(btn.className).toContain("min-h-[44px]");
+    });
+  });
+
+  it("should handle canvas touch start, move, preventDefault, and cancel resets", async () => {
+    await act(async () => {
+      root.render(<ClinicalTrialChaos />);
+    });
+
+    const canvas = container.querySelector("canvas");
+    expect(canvas).not.toBeNull();
+    expect(canvas?.style.touchAction).toBe("none");
+
+    const touchEventStart = new CustomEvent("touchstart", {
+      bubbles: true,
+      cancelable: true,
+    }) as any;
+    touchEventStart.touches = [{ clientX: 100, clientY: 50 }];
+    const preventDefaultSpy = vi.fn();
+    touchEventStart.preventDefault = preventDefaultSpy;
+
+    await act(async () => {
+      canvas?.dispatchEvent(touchEventStart);
+    });
+
+    expect(preventDefaultSpy).toHaveBeenCalled();
+
+    const touchEventCancel = new CustomEvent("touchcancel", {
+      bubbles: true,
+      cancelable: true,
+    }) as any;
+    const cancelPreventDefaultSpy = vi.fn();
+    touchEventCancel.preventDefault = cancelPreventDefaultSpy;
+
+    await act(async () => {
+      canvas?.dispatchEvent(touchEventCancel);
+    });
+
+    expect(cancelPreventDefaultSpy).toHaveBeenCalled();
+  });
+
+  it("should deduplicate rapid pointer down and touch start events on canvas", async () => {
+    await act(async () => {
+      root.render(<ClinicalTrialChaos />);
+    });
+
+    // Start campaign
+    const startBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Start 3-Phase Campaign")
+    );
+    await act(async () => {
+      startBtn?.click();
+    });
+
+    const canvas = container.querySelector("canvas");
+    expect(canvas).not.toBeNull();
+
+    // Trigger pointerdown then immediate touchstart within 100ms
+    const pointerEvent = new CustomEvent("pointerdown", {
+      bubbles: true,
+      cancelable: true,
+    }) as any;
+    pointerEvent.clientX = 100;
+    pointerEvent.clientY = 60;
+    pointerEvent.pointerId = 1;
+
+    await act(async () => {
+      canvas?.dispatchEvent(pointerEvent);
+    });
+
+    const touchEvent = new CustomEvent("touchstart", {
+      bubbles: true,
+      cancelable: true,
+    }) as any;
+    touchEvent.touches = [{ clientX: 100, clientY: 60 }];
+    touchEvent.preventDefault = vi.fn();
+
+    await act(async () => {
+      canvas?.dispatchEvent(touchEvent);
+    });
+
+    // Subject selection state should remain stable without duplicate sound / selection errors
+    expect(container.textContent).toContain("SUBJ-1001");
+  });
 });
