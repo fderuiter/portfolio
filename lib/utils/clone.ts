@@ -67,7 +67,26 @@ function cloneDeepFallback<T>(
     return clonedSet as unknown as T;
   }
 
-  // Handle ArrayBuffer / TypedArray
+  // Handle ArrayBuffer
+  if (value instanceof ArrayBuffer) {
+    const clonedBuffer = value.slice(0);
+    cache.set(value as object, clonedBuffer);
+    return clonedBuffer as unknown as T;
+  }
+
+  // Handle DataView
+  if (value instanceof DataView) {
+    const clonedBuffer = cloneDeepFallback(value.buffer, cache);
+    const clonedDataView = new DataView(
+      clonedBuffer,
+      value.byteOffset,
+      value.byteLength
+    );
+    cache.set(value as object, clonedDataView);
+    return clonedDataView as unknown as T;
+  }
+
+  // Handle TypedArray (Uint8Array, Float32Array, etc.)
   if (ArrayBuffer.isView(value)) {
     const typedArray = value as unknown as Uint8Array;
     const clonedTypedArray = typedArray.slice();

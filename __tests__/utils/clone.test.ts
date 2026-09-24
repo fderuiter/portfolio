@@ -218,4 +218,43 @@ describe("cloneDeep utility", () => {
     expect("description" in clonedField).toBe(true);
     expect(clonedField.description).toBeUndefined();
   });
+
+  it("clones ArrayBuffer, DataView, and TypedArray in fallback mode when structuredClone fails", () => {
+    const rawBuffer = new ArrayBuffer(16);
+    const u8 = new Uint8Array(rawBuffer);
+    u8[0] = 42;
+    u8[1] = 99;
+
+    const view = new DataView(rawBuffer, 0, 8);
+    const typedArray = new Uint8Array([1, 2, 3, 4]);
+
+    const uncloneableObj = {
+      buffer: rawBuffer,
+      view: view,
+      typedArray: typedArray,
+      fn: () => "trigger fallback",
+    };
+
+    const cloned = cloneDeep(uncloneableObj);
+
+    expect(cloned).not.toBe(uncloneableObj);
+
+    // Verify ArrayBuffer cloning
+    expect(cloned.buffer).toBeInstanceOf(ArrayBuffer);
+    expect(cloned.buffer).not.toBe(rawBuffer);
+    expect(cloned.buffer.byteLength).toBe(16);
+    expect(new Uint8Array(cloned.buffer)[0]).toBe(42);
+
+    // Verify DataView cloning
+    expect(cloned.view).toBeInstanceOf(DataView);
+    expect(cloned.view).not.toBe(view);
+    expect(cloned.view.buffer).not.toBe(rawBuffer);
+    expect(cloned.view.getUint8(0)).toBe(42);
+    expect(cloned.view.getUint8(1)).toBe(99);
+
+    // Verify TypedArray cloning
+    expect(cloned.typedArray).toBeInstanceOf(Uint8Array);
+    expect(cloned.typedArray).not.toBe(typedArray);
+    expect(Array.from(cloned.typedArray)).toEqual([1, 2, 3, 4]);
+  });
 });
