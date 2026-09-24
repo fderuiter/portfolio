@@ -4,6 +4,8 @@ import * as Sentry from "@sentry/nextjs";
 import { sanitizeError } from "@/lib/error-sanitization";
 import { applySecurityHeaders } from "@/lib/security-headers";
 
+export type ApiAuthRequirement = "clerk_admin" | "cron_secret" | "public";
+
 export interface ApiWrapperOptions<TSchema extends ZodSchema = ZodSchema> {
   schema?: TSchema;
   type?: "body" | "query";
@@ -13,7 +15,7 @@ export interface ApiWrapperOptions<TSchema extends ZodSchema = ZodSchema> {
   ) => { error: string; details?: Array<{ path: string; message: string }> };
   customJsonError?: string;
   defaultStatus?: number;
-  auth?: "clerk_admin" | "cron_secret" | "public";
+  auth?: ApiAuthRequirement;
 }
 
 export type ApiHandler<TData = unknown> = (
@@ -39,7 +41,7 @@ export type ApiRouteHandler = {
       params: Promise<Record<string, string | string[] | undefined>>;
     }
   ): Promise<NextResponse>;
-  auth?: "clerk_admin" | "cron_secret" | "public";
+  auth?: ApiAuthRequirement;
 };
 
 /**
