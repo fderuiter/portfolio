@@ -4,7 +4,7 @@ import { EmailService } from "@/lib/services/email-service";
 import { getConnectionHashFromRequest } from "@/lib/services/privacy-service";
 import { createApiHandler } from "@/lib/route-wrapper";
 import { checkSubmissionAttemptRateLimit } from "@/lib/moderation";
-import * as Sentry from "@sentry/nextjs";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -96,8 +96,7 @@ export const POST = createApiHandler(
         { status: 201 }
       );
     } catch (err) {
-      Sentry.captureException(err);
-      console.error("Failed to process newsletter subscription:", err);
+      logger.error("Failed to process newsletter subscription:", err);
       return NextResponse.json(
         { error: "Internal server error processing newsletter subscription" },
         { status: 500 }

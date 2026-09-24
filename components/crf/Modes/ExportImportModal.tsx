@@ -31,6 +31,17 @@ interface ExportImportModalProps {
 type ExportTab =
   "universal" | "usdm" | "odm" | "sas" | "r" | "json" | "fhir" | "sdtm_spec";
 
+const EXPORT_TABS: ExportTab[] = [
+  "universal",
+  "usdm",
+  "odm",
+  "sas",
+  "r",
+  "fhir",
+  "sdtm_spec",
+  "json",
+];
+
 export const ExportImportModal: React.FC<ExportImportModalProps> = ({
   study,
   onImportStudy,
@@ -44,6 +55,42 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
   const [importError, setImportError] = useState<string | null>(null);
   const [activeContent, setActiveContent] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState<boolean>(true);
+
+  const tabRefs = React.useRef<Record<ExportTab, HTMLButtonElement | null>>({
+    universal: null,
+    usdm: null,
+    odm: null,
+    sas: null,
+    r: null,
+    fhir: null,
+    sdtm_spec: null,
+    json: null,
+  });
+
+  const handleTabKeyDown = (
+    event: React.KeyboardEvent<HTMLButtonElement>,
+    currentTab: ExportTab
+  ) => {
+    const currentIndex = EXPORT_TABS.indexOf(currentTab);
+    let nextIndex: number | null = null;
+
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      nextIndex = (currentIndex + 1) % EXPORT_TABS.length;
+    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      nextIndex = (currentIndex - 1 + EXPORT_TABS.length) % EXPORT_TABS.length;
+    } else if (event.key === "Home") {
+      nextIndex = 0;
+    } else if (event.key === "End") {
+      nextIndex = EXPORT_TABS.length - 1;
+    }
+
+    if (nextIndex === null) return;
+
+    event.preventDefault();
+    const nextTab = EXPORT_TABS[nextIndex];
+    setActiveTab(nextTab);
+    tabRefs.current[nextTab]?.focus();
+  };
 
   const selectedForm =
     selectedFormId === "all"
@@ -282,9 +329,23 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-zinc-800 gap-2 overflow-x-auto">
+      <div
+        className="flex border-b border-zinc-800 gap-2 overflow-x-auto"
+        role="tablist"
+        aria-label="Export Format Tabs"
+      >
         <button
+          ref={(node) => {
+            tabRefs.current.universal = node;
+          }}
+          type="button"
+          id="export-tab-universal"
+          role="tab"
+          aria-selected={activeTab === "universal"}
+          aria-controls="export-panel-universal"
+          tabIndex={activeTab === "universal" ? 0 : -1}
           onClick={() => setActiveTab("universal")}
+          onKeyDown={(e) => handleTabKeyDown(e, "universal")}
           className={`px-3 sm:px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
             activeTab === "universal"
               ? "border-brand-cyan text-brand-cyan font-bold"
@@ -296,7 +357,17 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
         </button>
 
         <button
+          ref={(node) => {
+            tabRefs.current.usdm = node;
+          }}
+          type="button"
+          id="export-tab-usdm"
+          role="tab"
+          aria-selected={activeTab === "usdm"}
+          aria-controls="export-panel-usdm"
+          tabIndex={activeTab === "usdm" ? 0 : -1}
           onClick={() => setActiveTab("usdm")}
+          onKeyDown={(e) => handleTabKeyDown(e, "usdm")}
           className={`px-3 sm:px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
             activeTab === "usdm"
               ? "border-brand-cyan text-brand-cyan font-bold"
@@ -308,7 +379,17 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
         </button>
 
         <button
+          ref={(node) => {
+            tabRefs.current.odm = node;
+          }}
+          type="button"
+          id="export-tab-odm"
+          role="tab"
+          aria-selected={activeTab === "odm"}
+          aria-controls="export-panel-odm"
+          tabIndex={activeTab === "odm" ? 0 : -1}
           onClick={() => setActiveTab("odm")}
+          onKeyDown={(e) => handleTabKeyDown(e, "odm")}
           className={`px-3 sm:px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
             activeTab === "odm"
               ? "border-brand-cyan text-brand-cyan font-bold"
@@ -320,7 +401,17 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
         </button>
 
         <button
+          ref={(node) => {
+            tabRefs.current.sas = node;
+          }}
+          type="button"
+          id="export-tab-sas"
+          role="tab"
+          aria-selected={activeTab === "sas"}
+          aria-controls="export-panel-sas"
+          tabIndex={activeTab === "sas" ? 0 : -1}
           onClick={() => setActiveTab("sas")}
+          onKeyDown={(e) => handleTabKeyDown(e, "sas")}
           className={`px-3 sm:px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
             activeTab === "sas"
               ? "border-brand-cyan text-brand-cyan font-bold"
@@ -332,7 +423,17 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
         </button>
 
         <button
+          ref={(node) => {
+            tabRefs.current.r = node;
+          }}
+          type="button"
+          id="export-tab-r"
+          role="tab"
+          aria-selected={activeTab === "r"}
+          aria-controls="export-panel-r"
+          tabIndex={activeTab === "r" ? 0 : -1}
           onClick={() => setActiveTab("r")}
+          onKeyDown={(e) => handleTabKeyDown(e, "r")}
           className={`px-3 sm:px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
             activeTab === "r"
               ? "border-brand-cyan text-brand-cyan font-bold"
@@ -344,7 +445,17 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
         </button>
 
         <button
+          ref={(node) => {
+            tabRefs.current.fhir = node;
+          }}
+          type="button"
+          id="export-tab-fhir"
+          role="tab"
+          aria-selected={activeTab === "fhir"}
+          aria-controls="export-panel-fhir"
+          tabIndex={activeTab === "fhir" ? 0 : -1}
           onClick={() => setActiveTab("fhir")}
+          onKeyDown={(e) => handleTabKeyDown(e, "fhir")}
           className={`px-3 sm:px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
             activeTab === "fhir"
               ? "border-brand-cyan text-brand-cyan font-bold"
@@ -356,7 +467,17 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
         </button>
 
         <button
+          ref={(node) => {
+            tabRefs.current.sdtm_spec = node;
+          }}
+          type="button"
+          id="export-tab-sdtm_spec"
+          role="tab"
+          aria-selected={activeTab === "sdtm_spec"}
+          aria-controls="export-panel-sdtm_spec"
+          tabIndex={activeTab === "sdtm_spec" ? 0 : -1}
           onClick={() => setActiveTab("sdtm_spec")}
+          onKeyDown={(e) => handleTabKeyDown(e, "sdtm_spec")}
           className={`px-3 sm:px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
             activeTab === "sdtm_spec"
               ? "border-brand-cyan text-brand-cyan font-bold"
@@ -368,7 +489,17 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
         </button>
 
         <button
+          ref={(node) => {
+            tabRefs.current.json = node;
+          }}
+          type="button"
+          id="export-tab-json"
+          role="tab"
+          aria-selected={activeTab === "json"}
+          aria-controls="export-panel-json"
+          tabIndex={activeTab === "json" ? 0 : -1}
           onClick={() => setActiveTab("json")}
+          onKeyDown={(e) => handleTabKeyDown(e, "json")}
           className={`px-3 sm:px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
             activeTab === "json"
               ? "border-brand-cyan text-brand-cyan font-bold"
@@ -381,68 +512,104 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
       </div>
 
       {/* Main Tab Content */}
-      {activeTab === "sdtm_spec" ? (
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 overflow-x-auto shadow-xl">
-          <table className="w-full text-left border-collapse text-xs font-mono">
-            <thead>
-              <tr className="border-b border-zinc-800 bg-zinc-950/80 text-zinc-400">
-                <th className="p-3">Domain</th>
-                <th className="p-3">Form</th>
-                <th className="p-3">Variable (CDASH)</th>
-                <th className="p-3">Label</th>
-                <th className="p-3">Data Type</th>
-                <th className="p-3">Core</th>
-                <th className="p-3">aCRF Overlay Tag</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-850">
-              {specFields.map(({ field, form }) => (
-                <tr
-                  key={`${form.id}_${field.id}`}
-                  className="hover:bg-zinc-850/40"
-                >
-                  <td className="p-3 font-bold text-brand-cyan">
-                    {form.domain}
-                  </td>
-                  <td className="p-3 text-zinc-300 font-sans">{form.name}</td>
-                  <td className="p-3 font-bold text-white">
-                    {field.variableName}
-                  </td>
-                  <td className="p-3 text-zinc-300 font-sans">{field.label}</td>
-                  <td className="p-3 text-zinc-500">{field.dataType}</td>
-                  <td className="p-3 text-zinc-400">
-                    {field.cdashMetadata?.core || (field.required ? "R" : "O")}
-                  </td>
-                  <td className="p-3 text-sky-400">
-                    {field.cdashMetadata?.acrfAnnotation ||
-                      `${form.domain}.${field.variableName}`}
-                  </td>
-                </tr>
-              ))}
-              {specFields.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="p-4 text-center text-zinc-500">
-                    No fields found for selected form/domain scope.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-4 font-mono text-xs overflow-x-auto max-h-[450px]">
-          {isGenerating ? (
-            <div className="flex items-center gap-2 text-zinc-400 py-6 justify-center font-mono">
-              <IconLoader2 className="w-4 h-4 animate-spin text-brand-cyan" />
-              <span>Generating export representation...</span>
+      {EXPORT_TABS.map((tabId) => {
+        if (tabId === "sdtm_spec") {
+          return (
+            <div
+              key={tabId}
+              id="export-panel-sdtm_spec"
+              role="tabpanel"
+              aria-labelledby="export-tab-sdtm_spec"
+              tabIndex={0}
+              hidden={activeTab !== "sdtm_spec"}
+              className={
+                activeTab === "sdtm_spec"
+                  ? "rounded-2xl border border-zinc-800 bg-zinc-900/50 overflow-x-auto shadow-xl"
+                  : "hidden"
+              }
+            >
+              <table className="w-full text-left border-collapse text-xs font-mono">
+                <thead>
+                  <tr className="border-b border-zinc-800 bg-zinc-950/80 text-zinc-400">
+                    <th className="p-3">Domain</th>
+                    <th className="p-3">Form</th>
+                    <th className="p-3">Variable (CDASH)</th>
+                    <th className="p-3">Label</th>
+                    <th className="p-3">Data Type</th>
+                    <th className="p-3">Core</th>
+                    <th className="p-3">aCRF Overlay Tag</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-850">
+                  {specFields.map(({ field, form }) => (
+                    <tr
+                      key={`${form.id}_${field.id}`}
+                      className="hover:bg-zinc-850/40"
+                    >
+                      <td className="p-3 font-bold text-brand-cyan">
+                        {form.domain}
+                      </td>
+                      <td className="p-3 text-zinc-300 font-sans">
+                        {form.name}
+                      </td>
+                      <td className="p-3 font-bold text-white">
+                        {field.variableName}
+                      </td>
+                      <td className="p-3 text-zinc-300 font-sans">
+                        {field.label}
+                      </td>
+                      <td className="p-3 text-zinc-500">{field.dataType}</td>
+                      <td className="p-3 text-zinc-400">
+                        {field.cdashMetadata?.core ||
+                          (field.required ? "R" : "O")}
+                      </td>
+                      <td className="p-3 text-sky-400">
+                        {field.cdashMetadata?.acrfAnnotation ||
+                          `${form.domain}.${field.variableName}`}
+                      </td>
+                    </tr>
+                  ))}
+                  {specFields.length === 0 && (
+                    <tr>
+                      <td colSpan={7} className="p-4 text-center text-zinc-500">
+                        No fields found for selected form/domain scope.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
-          ) : (
-            <pre className="text-zinc-300 whitespace-pre-wrap leading-relaxed">
-              {activeContent}
-            </pre>
-          )}
-        </div>
-      )}
+          );
+        }
+
+        return (
+          <div
+            key={tabId}
+            id={`export-panel-${tabId}`}
+            role="tabpanel"
+            aria-labelledby={`export-tab-${tabId}`}
+            tabIndex={0}
+            hidden={activeTab !== tabId}
+            className={
+              activeTab === tabId
+                ? "rounded-2xl border border-zinc-800 bg-zinc-950 p-4 font-mono text-xs overflow-x-auto max-h-[450px]"
+                : "hidden"
+            }
+          >
+            {activeTab === tabId &&
+              (isGenerating ? (
+                <div className="flex items-center gap-2 text-zinc-400 py-6 justify-center font-mono">
+                  <IconLoader2 className="w-4 h-4 animate-spin text-brand-cyan" />
+                  <span>Generating export representation...</span>
+                </div>
+              ) : (
+                <pre className="text-zinc-300 whitespace-pre-wrap leading-relaxed">
+                  {activeContent}
+                </pre>
+              ))}
+          </div>
+        );
+      })}
 
       {/* Import Section */}
       <div className="p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800 space-y-3">

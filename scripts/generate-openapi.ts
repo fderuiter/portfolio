@@ -110,6 +110,7 @@ export const openApiSpec = {
         summary: "Submit draft technical post-mortem case study",
         description:
           "Submits a new technical case study or prototype post-mortem as an unpublished draft record.",
+        security: [{ ClerkAuth: [] }],
         requestBody: {
           required: true,
           content: {
@@ -596,6 +597,7 @@ export const openApiSpec = {
         summary: "Run the unified daily maintenance pipeline",
         description:
           "Authenticated Vercel Hobby cron route that drains telemetry and reaction buffers, processes a bounded email retry batch, and rolls raw telemetry older than 30 days into daily aggregates before pruning it. Returns isolated per-phase outcomes under an eight-second overall deadline.",
+        security: [{ CronSecretAuth: [] }],
         parameters: [
           {
             name: "Authorization",
@@ -632,6 +634,7 @@ export const openApiSpec = {
         summary: "Cron synchronization of buffered events",
         description:
           "Backward-compatible alias for the unified daily maintenance pass. Pulls buffered telemetry events from the secondary Redis cache and flushes them to the primary datastore in batches, then drains the case-study reaction write-buffer into Postgres.",
+        security: [{ CronSecretAuth: [] }],
         parameters: [
           {
             name: "Authorization",
@@ -877,6 +880,7 @@ export const openApiSpec = {
         summary: "List unpublished blog drafts",
         description:
           "Returns persisted unpublished BlogPost rows for authorized administrators only. Public fallback content is never used for this inventory.",
+        security: [{ ClerkAuth: [] }],
         parameters: [
           {
             name: "page",
@@ -930,6 +934,7 @@ export const openApiSpec = {
         summary: "Create an unpublished sanitized blog draft",
         description:
           "Creates a persisted BlogPost in server-owned unpublished state for an authorized administrator. Publication, identity, and timestamp fields are rejected.",
+        security: [{ ClerkAuth: [] }],
         requestBody: {
           required: true,
           content: {
@@ -990,6 +995,7 @@ export const openApiSpec = {
         summary: "Read an unpublished blog draft",
         description:
           "Returns one persisted unpublished BlogPost row for an authorized administrator. Published records and public fallback content are not available through this endpoint.",
+        security: [{ ClerkAuth: [] }],
         parameters: [
           {
             name: "id",
@@ -1045,6 +1051,7 @@ export const openApiSpec = {
         summary: "Edit an unpublished sanitized blog draft",
         description:
           "Partially updates a persisted BlogPost only while it remains unpublished. Publication, identity, and timestamp fields are rejected, changed HTML is sanitized, and old and new slug caches are invalidated only after persistence succeeds.",
+        security: [{ ClerkAuth: [] }],
         parameters: [
           {
             name: "id",
@@ -1120,6 +1127,7 @@ export const openApiSpec = {
         summary: "Delete a blog post or draft",
         description:
           "Deletes a persisted BlogPost or draft record by ID and evicts associated caches.",
+        security: [{ ClerkAuth: [] }],
         parameters: [
           {
             name: "id",
@@ -1188,6 +1196,7 @@ export const openApiSpec = {
         summary: "Upload and link project hero image",
         description:
           "Stores a validated media asset and updates the target case study hero image URL for authorized administrators.",
+        security: [{ ClerkAuth: [] }],
         parameters: [
           {
             name: "slug",
@@ -1267,6 +1276,7 @@ export const openApiSpec = {
         summary: "Clear project hero image",
         description:
           "Clears the hero image URL associated with a project for authorized administrators.",
+        security: [{ ClerkAuth: [] }],
         parameters: [
           {
             name: "slug",
@@ -1343,6 +1353,20 @@ export const openApiSpec = {
     },
   },
   components: {
+    securitySchemes: {
+      ClerkAuth: {
+        type: "http",
+        scheme: "bearer",
+        bearerFormat: "JWT",
+        description: "Clerk session token or administrative JWT",
+      },
+      CronSecretAuth: {
+        type: "http",
+        scheme: "bearer",
+        bearerFormat: "Secret",
+        description: "Cron secret bearer authorization header",
+      },
+    },
     schemas: {
       MaintenanceSummary: zodToOpenApi(MaintenanceSummarySchema),
       CaseStudySummary: zodToOpenApi(CaseStudySummarySchema),
@@ -1381,11 +1405,127 @@ export const openApiSpec = {
   },
 };
 
+function getRouteFileAuthMetadata(
+  file: string
+): Record<string, "clerk_admin" | "cron_secret" | "public"> {
+  const result: Record<string, "clerk_admin" | "cron_secret" | "public"> = {};
+  let routeModule: Record<
+    string,
+    { auth?: "clerk_admin" | "cron_secret" | "public" }
+  > | null = null;
+
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    routeModule = require(file);
+  } catch {
+    routeModule = null;
+  }
+
+  const content = fs.readFileSync(file, "utf8");
+  const methods = ["GET", "POST", "PUT", "PATCH", "DELETE"] as const;
+
+  for (const method of methods) {
+    const handler = routeModule ? routeModule[method] : null;
+    if (handler && typeof handler === "function") {
+      const fn = handler as unknown as {
+        auth?: "clerk_admin" | "cron_secret" | "public";
+      };
+      result[method.toLowerCase()] = fn.auth || "public";
+      continue;
+    }
+
+    const methodRegex = new RegExp(
+      `export\\s+(const|async\\s+function)\\s+${method}\\b([\\s\\S]*?)(?=(export\\s+|$))`
+    );
+    const match = methodRegex.exec(content);
+    if (match) {
+      const block = match[0];
+      const authMatch =
+        /auth\s*:\s*["'](clerk_admin|cron_secret|public)["']/.exec(block);
+      result[method.toLowerCase()] = authMatch
+        ? (authMatch[1] as "clerk_admin" | "cron_secret" | "public")
+        : "public";
+    }
+  }
+
+  return result;
+}
+
+export function checkRouteSecurityDrift(
+  workspaceRoot: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  spec: any
+): string[] {
+  const mismatches: string[] = [];
+  const apiDir = path.join(workspaceRoot, "app", "api");
+  const routeFiles = findRouteFiles(apiDir);
+
+  const schemes = spec.components?.securitySchemes;
+  if (!schemes?.ClerkAuth) {
+    mismatches.push(
+      "Missing components.securitySchemes.ClerkAuth definition in OpenAPI spec"
+    );
+  }
+  if (!schemes?.CronSecretAuth) {
+    mismatches.push(
+      "Missing components.securitySchemes.CronSecretAuth definition in OpenAPI spec"
+    );
+  }
+
+  for (const file of routeFiles) {
+    const rel = path
+      .relative(apiDir, path.dirname(file))
+      .replace(/\\/g, "/")
+      .replace(/\[([^\]/]+)\]/g, "{$1}");
+    const routePath = rel === "" ? "/api" : `/api/${rel}`;
+
+    const methodAuthMap = getRouteFileAuthMetadata(file);
+
+    for (const [method, auth] of Object.entries(methodAuthMap)) {
+      let expectedSecurity: Array<Record<string, string[]>> | undefined =
+        undefined;
+      if (auth === "clerk_admin") {
+        expectedSecurity = [{ ClerkAuth: [] }];
+      } else if (auth === "cron_secret") {
+        expectedSecurity = [{ CronSecretAuth: [] }];
+      }
+
+      const pathItem = spec.paths[routePath];
+      if (!pathItem) {
+        mismatches.push(
+          `Route ${routePath} is defined on disk but missing from openapi.json paths`
+        );
+        continue;
+      }
+
+      const operation = pathItem[method];
+      if (!operation) {
+        mismatches.push(
+          `Route ${routePath} [${method.toUpperCase()}] is exported on disk but missing from openapi.json operation spec`
+        );
+        continue;
+      }
+
+      const actualSecurity = operation.security;
+      if (JSON.stringify(actualSecurity) !== JSON.stringify(expectedSecurity)) {
+        mismatches.push(
+          `Route ${routePath} [${method.toUpperCase()}] handler auth is '${auth}', but OpenAPI spec security is ${JSON.stringify(
+            actualSecurity
+          )}`
+        );
+      }
+    }
+  }
+
+  return mismatches;
+}
+
 export function generateOpenApi(
   workspaceRoot: string = path.resolve(__dirname, "..")
 ): {
   generatedJson: string;
   missingRoutes: string[];
+  securityMismatches: string[];
   hasDrift: boolean;
 } {
   const specFilePath = path.join(workspaceRoot, "openapi.json");
@@ -1395,6 +1535,11 @@ export function generateOpenApi(
   const missingRoutes = expectedRoutes.filter(
     (r) => !documentedRoutes.includes(r)
   );
+
+  const securityMismatches = checkRouteSecurityDrift(
+    workspaceRoot,
+    openApiSpec
+  );
   const generatedJson = JSON.stringify(openApiSpec, null, 2);
 
   let existingJson = "";
@@ -1402,18 +1547,21 @@ export function generateOpenApi(
     existingJson = fs.readFileSync(specFilePath, "utf8");
   }
 
-  const hasDrift = existingJson !== generatedJson;
+  const hasDrift =
+    existingJson !== generatedJson || securityMismatches.length > 0;
 
   return {
     generatedJson,
     missingRoutes,
+    securityMismatches,
     hasDrift,
   };
 }
 
 function main() {
   const root = path.resolve(__dirname, "..");
-  const { generatedJson, missingRoutes, hasDrift } = generateOpenApi(root);
+  const { generatedJson, missingRoutes, securityMismatches, hasDrift } =
+    generateOpenApi(root);
   const specFilePath = path.join(root, "openapi.json");
 
   if (missingRoutes.length > 0) {
@@ -1426,13 +1574,23 @@ function main() {
     process.exit(1);
   }
 
+  if (securityMismatches.length > 0) {
+    console.error(
+      `❌ [OPENAPI ERROR] Security scheme or route operation security mismatches detected:`
+    );
+    for (const m of securityMismatches) {
+      console.error(`  • ${m}`);
+    }
+    process.exit(1);
+  }
+
   const isCI =
     process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";
 
   if (hasDrift) {
     if (isCI) {
       console.error(
-        "❌ ERROR: The API schemas have been modified, but openapi.json is not updated!"
+        "❌ ERROR: The API schemas or security contracts have been modified, but openapi.json is not updated!"
       );
       console.error(
         "Please run the generation script locally ('npx tsx scripts/generate-openapi.ts') and commit the updated 'openapi.json' file."

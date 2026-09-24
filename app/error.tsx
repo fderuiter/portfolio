@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { reportClientError } from "@/lib/client-sentry";
-import { sanitizeError } from "@/lib/error-sanitization";
 import { resolveBaseUrl } from "@/lib/domain";
+import { logger } from "@/lib/logger";
 
 export default function Error({
   error,
@@ -19,7 +19,7 @@ export default function Error({
   useEffect(() => {
     // Capture the error in external observability system
     reportClientError(error);
-    console.error("Layout compile error:", sanitizeError(error));
+    logger.error("Layout compile error:", error, { skipTelemetry: true });
     if (typeof window !== "undefined") {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setCanonicalUrl(window.location.href);

@@ -13,6 +13,7 @@ import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useAnnouncer } from "@/hooks/useAnnouncer";
 import { cloneDeep } from "@/lib/utils";
+import { getMatchMediaMatches } from "@/hooks/useMediaQuery";
 import {
   IconAlertTriangle,
   IconCheck,
@@ -512,9 +513,9 @@ export const ClinicalTrialChaos: React.FC = () => {
       // focus it so hotkeys work: the Start button unmounts on click.
       const board = containerRef.current;
       if (board) {
-        const reduceMotion =
-          typeof window.matchMedia === "function" &&
-          window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const reduceMotion = getMatchMediaMatches(
+          "(prefers-reduced-motion: reduce)"
+        );
         requestAnimationFrame(() => {
           board.focus({ preventScroll: true });
           if (isFullscreen || typeof window.scrollTo !== "function") return;

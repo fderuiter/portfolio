@@ -7,6 +7,7 @@ import { isCurrentUserAdmin } from "@/lib/auth/admin";
 import { BlogPostService } from "@/lib/services/blog-service";
 import { createApiHandler } from "@/lib/route-wrapper";
 import { sanitizeError } from "@/lib/error-sanitization";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +42,7 @@ export const GET = createApiHandler(
         pagination: { page: data.page, pageSize: data.pageSize, total },
       });
     } catch (error) {
-      console.error("API admin blog draft list failed:", sanitizeError(error));
+      logger.error("API admin blog draft list failed:", sanitizeError(error));
       return NextResponse.json(
         { error: "Failed to load blog drafts" },
         { status: 500 }
@@ -52,6 +53,7 @@ export const GET = createApiHandler(
     schema: BlogDraftPaginationSchema,
     type: "query",
     customValidationError: validationError,
+    auth: "clerk_admin",
   }
 );
 
@@ -91,7 +93,7 @@ export const POST = createApiHandler(
         );
       }
 
-      console.error(
+      logger.error(
         "API admin blog draft creation failed:",
         sanitizeError(error)
       );
@@ -106,5 +108,6 @@ export const POST = createApiHandler(
     type: "body",
     customJsonError: "Invalid JSON payload",
     customValidationError: validationError,
+    auth: "clerk_admin",
   }
 );
