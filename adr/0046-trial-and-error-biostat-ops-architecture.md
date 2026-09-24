@@ -8,6 +8,8 @@ Later Trial & Error tickets amend this record rather than contradict it.
 Amended on 2026-09-23 for card-table presentation
 ([#942](https://github.com/fderuiter/portfolio/issues/942)); see
 [the amendment](#amendment-2026-09-23-card-table-presentation).
+Amended again on 2026-09-23 to fix the game's narrative frame; see
+[the narrative amendment](#amendment-2026-09-23-narrative-frame).
 
 ## Context
 
@@ -122,6 +124,124 @@ A test asserts that serialized state contains no blinded value.
 - Every Trial & Error ticket touches only this module, its components, and
   its route registrations.
 
+## Amendment (2026-09-23): Narrative frame
+
+Recorded after a story review of the governing map and all of its child
+tickets, on the owner's decision in the project thread. It fixes who the
+player is, what a run is, and what each mechanic stands for, so that later
+tickets write scenarios, boss names and flavour text against one story.
+It changes no scoring rule. Where a child ticket's text disagrees with this
+section, the ticket is updated to match it.
+
+### Premise
+
+The player is the lead statistician at a small, fictional CRO (working
+name: _Fold Change Biometrics_). A sponsor has contracted it to carry one
+compound through clinical development. Programmers produce drafts; the
+player decides which drafts go into each package, checks the ones there is
+capacity to check, and signs what is sent. The thesis is the scoring
+formula: `Chips × Mult` is how much is delivered times how much it can be
+trusted, so rigour is a multiplier, not a tax.
+
+Committees, the sponsor and the FDA are not villains. They are the people
+the numbers must convince. Pressure comes from deadlines and from the data.
+
+### A run is one compound through three studies
+
+Each act is a new study for the same compound: Phase I (First in Human),
+Phase II (Proof of Concept) and Phase III (Blinded Pivotal).
+
+| Carries over between acts                          | Resets with each new study              |
+| -------------------------------------------------- | --------------------------------------- |
+| The deck: the player's library of table shells     | Subjects, populations and snapshots     |
+| Relics: the team members, macros and SOPs acquired | The SAP rulebook                        |
+| Hand levels from Guidance cards                    | Every compiled output, which goes stale |
+| Study budget                                       |                                         |
+
+Losing a Blind ends the run: the sponsor moves the program to another
+vendor. Clearing CSR Lock ends it in victory: the CSR is locked and the
+package is submitted.
+
+### The Blind ladder
+
+The Small Blind is the player's own team, the Big Blind is the client or
+an open committee session, and the Boss is someone who can stop the
+program.
+
+| Act             | Small Blind                    | Big Blind                                  | Boss Blind                                                          |
+| --------------- | ------------------------------ | ------------------------------------------ | ------------------------------------------------------------------- |
+| I · Phase I     | Internal QC                    | Sponsor safety review                      | Dose Escalation Committee                                           |
+| II · Phase II   | Internal QC (efficacy dry run) | DMC open session                           | Drawn: DMC closed session or End-of-Phase-2 FDA Information Request |
+| III · Phase III | Blinded data review            | DMC open session or sponsor topline review | CSR Lock (fixed)                                                    |
+
+- **Boss pools.** An act's boss is drawn from that act's pool by the seeded
+  event draw that T&E-05 already owns, so boss selection adds no new source
+  of randomness. The Act III boss is always CSR Lock.
+- **Act I is about safety.** Phase I measures safety and dosing, not
+  efficacy. The Dose Escalation Committee scores Safety-population outputs
+  only (`DISABLE_POPULATION` for every other suit). Kaplan–Meier figures
+  and the Efficacy Full House first appear in Act II.
+- **The FDA encounter** is framed as an End-of-Phase-2 Information Request:
+  the questions that gate the move to Phase III. Its 48-hour clock exists
+  only inside that encounter.
+- **CSR Lock** accepts only a complete CSR Straight. That is why a hand that
+  scores less than a Full House can still win the game.
+
+### Mechanics in the story
+
+| Mechanic              | In the story                                                                                                          |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Deck                  | The player's shell library. The shop's table shells add to it.                                                        |
+| Drawing a card        | A programmer compiles one shell against the current snapshot, and the draft lands on the desk, possibly with defects. |
+| Hand of 8             | The desk's inbox of drafts for this milestone.                                                                        |
+| Population suit       | The analysis set an output is built on.                                                                               |
+| Play hand             | Submit a package to this milestone's reviewer.                                                                        |
+| Discard               | Send drafts back to programming.                                                                                      |
+| Inspect               | Run the independent double-programming compare on one draft, which reveals its discrepancies for correction.          |
+| CPU                   | The milestone's allocation on the statistics compute grid. Runs, reruns and QC compares all spend it.                 |
+| Chips                 | Volume: how much of the study the package covers, including the subjects it verifiably accounts for.                  |
+| +Mult                 | Rigour: rules met and redlines corrected.                                                                             |
+| ×Mult                 | Coherence across outputs, such as a figure that reconciles with its table or a table traced to its listing.           |
+| ×0                    | A number that cannot be defended: a wrong denominator, or an unblinding.                                              |
+| Stale card            | The data moved under the output.                                                                                      |
+| Relics                | People and tools only (a lead programmer, a validated macro suite, a double-programming SOP).                         |
+| Guidance cards        | Documents only (ICH E3, E9, E9(R1), E2A, CDISC IGs, FDA TCG).                                                         |
+| Footnote seals        | Real table footnotes that legitimise a presentation choice.                                                           |
+| Study budget          | What the sponsor pays at each milestone. Clean, early delivery earns a bonus.                                         |
+| Site activation packs | New sites enroll subjects: more Chips, and a new snapshot that stales outputs.                                        |
+| Crisis cards          | Things that happen to a study: dropouts, amendments, audits, migrations.                                              |
+| DMC firewall          | The CRO's own firewall between its blinded study team and its independent DMC statisticians.                          |
+| Starter sponsors      | The client whose compound it is.                                                                                      |
+| Stakes                | How closely the CRO is being watched.                                                                                 |
+
+### Consequences for the tickets
+
+- **One role.** The player is one person throughout. The CRO holds both the
+  study contract and, behind a firewall, the independent statistical
+  contract for the DMC. The two-stage DMC encounter (T&E-09) is the player
+  changing seats, and peeking is a breach of the CRO's own firewall.
+- **Subjects are data, not hand cards.** Subjects live in the population
+  snapshot and are credited as Chips through the scoring pipeline above.
+  `SUBJECT_TOKEN` is retired as a playable card type; the ticket that next
+  touches `CardTypeSchema` removes it. Discarding sends drafts back to
+  programming rather than filtering data tokens.
+- **Population Booster Packs become Site Activation Packs** (T&E-UX-06).
+  Opening one enrolls subjects into the current study, which creates a new
+  snapshot through T&E-03.
+- **Relics are people and tools; documents are Guidance cards.** The relic
+  once called "FDA Guidance 1998" duplicated ICH E9 and becomes
+  _The ITT Purist_ (retriggers all ITT cards).
+- **Campaign meters are reduced to two.** Study budget is the shop money,
+  and the clock exists only in the FDA encounter. Sponsor Satisfaction and
+  Scientific Integrity are not meters: goodwill shows up as cash-out
+  bonuses, and integrity as redlines and the zero-score rule. Crisis cards
+  act on CPU, Footnotes, budget and snapshots.
+- **The default starter sponsor is Virtual Biotech**, a small client with
+  no in-house biometrics. "Generic CRO" read as the player's own company.
+- **Clinical Trial Chaos** sits upstream of this game (site data cleaning
+  and SDTM mapping); Trial & Error sits downstream (analysis, tables and
+  the study report). The two may share fictional names, never code.
+
 ## Amendment (2026-09-23): Card-table presentation
 
 Recorded by T&E-UX-00 ([#942](https://github.com/fderuiter/portfolio/issues/942))
@@ -207,8 +327,10 @@ tally, with no shake, a single fade, and step-by-step live announcements.
 
 ### Run shape and new mechanics
 
-A run is 3 acts × 3 blinds: Small (CRO QC), Big (DMC Open) and Boss (DMC
-Closed, FDA IR, or CSR Lock). The final boss is CSR Lock. **Guidance** cards
+A run is 3 acts × 3 blinds. Which reviewer sits at each Blind, and which
+bosses each act can draw, is fixed by the
+[narrative amendment](#amendment-2026-09-23-narrative-frame). The final
+boss is always CSR Lock. **Guidance** cards
 level up hand types (T&E-UX-05). Meta-progression is browser-local only: the
 Codex, seeded runs, GCP-audit stakes and starter sponsors (T&E-UX-07 and
 T&E-UX-08).
