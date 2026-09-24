@@ -5,11 +5,6 @@
 
 set -eu
 
-CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
-case "$CURRENT_BRANCH" in
-  jules/*) exit 0 ;;
-esac
-
 if [ "${ALLOW_DANGEROUS_GIT:-0}" = "1" ]; then
   exit 0
 fi
