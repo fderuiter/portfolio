@@ -16,13 +16,13 @@ describe("Dungeon Field of View (FOV) & Occlusion Test Suite", () => {
     ];
 
     it("marks wall tiles as visible but blocks light rays from penetrating behind walls", () => {
-      // Player at (1, 2), looking right towards walls at (2,2), (3,2), (4,2)
-      const fov = calculateFOV(gridWithWall, 1, 2, 5);
+      // Player at (1, 1), looking towards wall at (2,2)
+      const fov = calculateFOV(gridWithWall, 1, 1, 5);
 
-      // Player position is visible
-      expect(fov.visible[2][1]).toBe(true);
+      // Player position (1, 1) is visible
+      expect(fov.visible[1][1]).toBe(true);
 
-      // Open floor tile right before wall is visible
+      // Open floor tile right before wall at (1, 2) is visible
       expect(fov.visible[2][1]).toBe(true);
 
       // Wall tile (2, 2) is visible (player can see the face of the wall)
