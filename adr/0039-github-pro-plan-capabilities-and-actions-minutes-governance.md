@@ -1,12 +1,13 @@
-# ADR 0039: GitHub Pro Plan Capabilities and Actions Minutes Governance
+# ADR 0039: GitHub Plan Capabilities and Actions Governance
 
 ## Status
 
-Accepted on 2026-09-13. **Partially corrected on 2026-09-18** — see
-[Correction 2026-09-18](#correction-2026-09-18). The plan premise below is
-wrong: the account is on GitHub **Free**, not Pro. The Actions-minutes
-governance in Decision §2 stands and is now more binding, not less; the
-branch-protection decision in Decision §1 is not achievable on this plan.
+Accepted on 2026-09-13. **Corrected on 2026-09-18 and amended on 2026-09-24.**
+The account is on GitHub Free. The repository became public on 2026-09-23,
+which restores public-repository branch protection and rulesets and makes
+standard GitHub-hosted runner minutes free. Actual branch-rule configuration
+remains unverified and is tracked by #732. See
+[Amendment 2026-09-24](#amendment-2026-09-24--public-repository-state).
 
 Extends ADR 0036's free-tier governance pattern to a resource ADR 0036 does
 not cover: GitHub Actions minutes. Its attempt to correct ADR 0037's context
@@ -138,11 +139,11 @@ after minutes reset, not on guessing further from a starved account.
   immediately; this ADR removes the plan-decision blocker ADR 0037/0038 and
   the 2026-09-12 audit left open. #732 is corrected to reflect this rather
   than presenting it as a cost/upgrade decision still to be made.
-- No further CI runs are possible on this repository until the Actions
-  minutes allowance resets for the current billing cycle, or until the
-  redesign in the follow-up issue reduces per-run cost enough that the
-  remaining allowance covers verification of the changes already
-  queued (#729, #730, #731, and this ADR's own follow-up work).
+- **Historical at the 2026-09-12 private-repository outage:** no further CI
+  runs were possible until the Actions-minutes allowance reset or the
+  follow-up redesign reduced per-run cost. The repository became public on
+  2026-09-23; the 2026-09-24 amendment below records the current public-runner
+  policy and supersedes that temporary outage state (#729, #730, #731).
 - Every future workflow change must state its expected cost impact (jobs ×
   matrix size × expected duration) the same way a database migration states
   its lock behavior — cost is now a reviewed property of CI changes, not an
@@ -189,13 +190,15 @@ Ecosystem` check. The full four-device matrix remains available on demand via
    > rules on `production-release` (requiring reviewers).
    > [ADR 0049](0049-deploy-main-on-green-ci.md) removed that environment.
 
-3. **Future Measured Actions Costs**: Job `timeout-minutes` caps (`fast-gate`: 20,
+3. **Historical Measurement Note (superseded 2026-09-24)**: Job `timeout-minutes` caps (`fast-gate`: 20,
    `security-gate`: 15, `heavy-gate`: 40, `device-gate`: 25, `merge-gate`: 5) remain
-   provisional estimates rather than verified runtime measurements. September
-   GitHub Actions minutes are exhausted on this account; per this ADR's
-   no-paid-overage invariant, no cloud workflows may be dispatched or retried until
-   next month's billing cycle reset. Live empirical measurement of runtime and
-   cost remains deferred under #733.
+   provisional estimates rather than verified runtime measurements. At the time
+   this section was written, the private-repository Actions allowance was
+   exhausted and runs were deferred. The repository became public on 2026-09-23;
+   standard public-runner minutes are free, so the old allowance is no longer a
+   current reason to defer runs. Review successful run durations before changing
+   timeout caps. Larger runners and artifact/cache storage remain separately
+   billable as described in the 2026-09-24 amendment below.
 
 ## Correction 2026-09-18
 
@@ -231,7 +234,7 @@ real budget is one third smaller than every downstream document has stated.
 The no-paid-overage invariant is unchanged and was applied as written when
 the allowance was exhausted a second time.
 
-### Second exhaustion, 2026-09-13
+### Historical Second Exhaustion, 2026-09-13
 
 The allowance was exhausted again in the same billing cycle this ADR was
 written in, by the same mechanism. September private-repository consumption
@@ -270,12 +273,39 @@ decision: it is the larger saving, but it removes the only post-merge signal
 on the branch Vercel deploys from, and unlike a PR gate there is no branch
 protection available to compensate.
 
-### Deferred measurement is unchanged
+### Historical Deferred Measurement Note
 
 Job `timeout-minutes` caps remain provisional. Every job in every workflow
 declares one — audited 2026-09-18, no unbounded job exists — but the caps
 are loose relative to a 2,000-minute budget: a single hung PR run can reach
 105 minutes (5.3% of the monthly allowance) and a hung `verify-release`
 reaches 90 (4.5%). Ratcheting them down requires one clean measured run and
-remains owned by #733; tightening them by guess would trade cost risk for
-false-failure risk.
+was previously assigned to #733; tightening them by guess would trade cost
+risk for false-failure risk. Review successful current runs before ratcheting.
+
+## Amendment 2026-09-24 — Public Repository State
+
+The repository changed from private to public on 2026-09-23. The 2026-09-18
+correction remains an accurate historical record of the then-private GitHub
+Free plan, but its private-repository restrictions no longer describe the
+current repository:
+
+- Standard GitHub-hosted runner usage is free for public repositories. Larger
+  runners and artifact/cache storage remain subject to separate billing and
+  limits. Do not describe the private 2,000-minute allowance or the September
+  exhaustion as a current standard-runner limit.
+- Public repositories on GitHub Free can use classic branch protection and
+  repository rulesets. The current rule configuration is not confirmed: the
+  connected GitHub API could not read branch-protection settings. Verify the
+  `main` required check and merge restrictions in the dashboard under #732
+  before relying on server-side enforcement.
+- Keep job timeouts, standard runner labels, and the no-duplicate-gating rule
+  as reliability and resource-storage safeguards. The no-paid-overage policy
+  continues to apply to larger runners and paid storage.
+- ADR 0050 records the one-time Jules consolidation on `dev`; after that
+  release, feature pull requests target `main` under ADR 0037.
+
+These current facts are supported by GitHub's
+[Actions billing documentation](https://docs.github.com/en/billing/concepts/product-billing/github-actions),
+[protected branches documentation](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches),
+and [rulesets documentation](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets).

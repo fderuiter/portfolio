@@ -15,6 +15,7 @@ import { MermaidDiagram } from "@/components/MermaidDiagram";
 import { usePersistentState } from "@/hooks/usePersistentState"; // Imported for static analysis test validation
 import { useTerminology } from "@/components/providers/TerminologyProvider";
 import { env } from "@/lib/env";
+import { logger } from "@/lib/logger";
 
 const emptySubscribe = () => () => {};
 
@@ -267,7 +268,7 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
           });
         }
       } catch (e) {
-        console.error("Error rehydrating rich narrative terminology tags:", e);
+        logger.error("Error rehydrating rich narrative terminology tags:", e);
       }
     };
 

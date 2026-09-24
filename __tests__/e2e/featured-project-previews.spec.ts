@@ -24,9 +24,14 @@ for (const viewport of viewports) {
     await expect(cards).toHaveCount(3);
 
     for (const card of await cards.all()) {
-      const reducedMotionDuration = await card.evaluate((element) =>
-        Number.parseFloat(window.getComputedStyle(element).transitionDuration)
-      );
+      const reducedMotionDuration = await card.evaluate((element) => {
+        const raw = window.getComputedStyle(element).transitionDuration;
+        if (!raw) return 0;
+        const durations = raw
+          .split(",")
+          .map((s) => Number.parseFloat(s.trim()) || 0);
+        return Math.max(...durations);
+      });
       expect(reducedMotionDuration).toBeLessThanOrEqual(0.00001);
       await expect(card.getByText("Problem", { exact: true })).toBeVisible();
       await expect(

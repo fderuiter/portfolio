@@ -14,7 +14,7 @@ function runGuardrail(
     const result = spawnSync("bash", [guardrailScript], {
       input: commandOrJson,
       encoding: "utf-8",
-      env: { ...process.env, ...env },
+      env: { ...process.env, ALLOW_DANGEROUS_GIT: "0", CI: "", ...env },
     });
     return {
       exitCode: result.status,
@@ -28,7 +28,7 @@ function runGuardrail(
     [guardrailScript, ...commandOrJson.split(" ")],
     {
       encoding: "utf-8",
-      env: { ...process.env, ...env },
+      env: { ...process.env, ALLOW_DANGEROUS_GIT: "0", CI: "", ...env },
     }
   );
   return {
@@ -42,6 +42,9 @@ describe("Git Safety Guardrail Interceptor (scripts/git-guardrail.sh)", () => {
   describe("Dangerous Commands Interception (Exit Code 2)", () => {
     const dangerousCommands = [
       "git push --force",
+      "git push --force-with-lease",
+      "git push --force-with-lease=dev origin dev",
+      "git push origin dev --force-with-lease",
       "git push origin --force",
       "git push origin feat/test --force",
       "git push -f",

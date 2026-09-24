@@ -38,22 +38,29 @@ describe("Husky hook wiring", () => {
      * Runs the real pre-push hook against a scratch repository. The script path
      * resolves from the workspace, while git resolves the branch from GIT_DIR.
      */
-    const runPrePush = (branch: string) => {
+    const runPrePush = (
+      branch: string,
+      options: { julesSession?: boolean } = {}
+    ) => {
       spawnSync("git", ["checkout", "-q", "-B", branch], {
         cwd: repo,
         encoding: "utf-8",
       });
 
+      const env: NodeJS.ProcessEnv = {
+        ...process.env,
+        GIT_DIR: path.join(repo, ".git"),
+        GIT_WORK_TREE: repo,
+      };
+      delete env.ALLOW_DANGEROUS_GIT;
+      delete env.JULES_SESSION_ID;
+      if (options.julesSession) env.JULES_SESSION_ID = "test-session";
+
       return spawnSync("bash", [path.join(workspaceRoot, ".husky/pre-push")], {
         cwd: workspaceRoot,
         input: "",
         encoding: "utf-8",
-        env: {
-          ...process.env,
-          GIT_DIR: path.join(repo, ".git"),
-          GIT_WORK_TREE: repo,
-          ALLOW_DANGEROUS_GIT: "0",
-        },
+        env,
       });
     };
 
@@ -62,6 +69,12 @@ describe("Husky hook wiring", () => {
       expect(result.status).toBe(1);
       const output = `${result.stdout}${result.stderr}`;
       expect(output).toContain("npm run dx branch");
+    });
+
+    it("still validates branch names inside Jules sessions", () => {
+      const result = runPrePush("nope", { julesSession: true });
+      expect(result.status).toBe(1);
+      expect(`${result.stdout}${result.stderr}`).toContain("npm run dx branch");
     });
 
     it("accepts a conforming branch", () => {

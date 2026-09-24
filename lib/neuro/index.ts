@@ -11,3 +11,4 @@ export * from "./progress-bus";
 export * from "./qa-engine";
 export * from "./volume-generator";
 export * from "./mesh-generator";
+export * from "./mesh-worker";

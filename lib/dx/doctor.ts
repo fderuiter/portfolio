@@ -14,6 +14,8 @@ import {
 } from "./benchmark-evidence";
 import { type RemediationAction } from "./cli-parser";
 import { getEnv } from "../env";
+import { FALLBACK_CASE_STUDIES } from "../case-studies-data";
+import { FALLBACK_BLOG_POSTS } from "../fallback-blog-posts";
 
 export interface DiagnosticCheckResult {
   id: string;
@@ -183,6 +185,273 @@ export function checkRouteIndexing(
     details: missingRoutes.map(
       (m) => `Missing registration for ${m.url} (from app/${m.routePath})`
     ),
+    fixable: true,
+  };
+}
+
+const PAGE_FILENAMES = ["page.tsx", "page.ts", "page.jsx", "page.js"] as const;
+
+function hasPageFile(dir: string): boolean {
+  return PAGE_FILENAMES.some((f) => fs.existsSync(path.join(dir, f)));
+}
+
+/**
+ * Helper to check if a route path exists on disk under appDir (either as a static page or matching dynamic route)
+ */
+export function routeExistsOnDisk(routePath: string, appDir: string): boolean {
+  if (!fs.existsSync(appDir)) return false;
+  if (routePath === "/") {
+    return hasPageFile(appDir);
+  }
+
+  const segments = routePath.split("/").filter(Boolean);
+
+  function checkSegments(currentDir: string, segIndex: number): boolean {
+    if (segIndex === segments.length) {
+      return hasPageFile(currentDir);
+    }
+
+    if (!fs.existsSync(currentDir)) return false;
+
+    const target = segments[segIndex];
+    // 1. Direct directory match
+    const directPath = path.join(currentDir, target);
+    if (fs.existsSync(directPath) && fs.statSync(directPath).isDirectory()) {
+      if (checkSegments(directPath, segIndex + 1)) return true;
+    }
+
+    // 2. Dynamic parameter match (e.g., [slug], [...rest], [[...rest]])
+    try {
+      const entries = fs.readdirSync(currentDir, { withFileTypes: true });
+      for (const entry of entries) {
+        if (
+          entry.isDirectory() &&
+          entry.name.startsWith("[") &&
+          entry.name.endsWith("]")
+        ) {
+          const parentDirName = path.basename(currentDir);
+
+          // Verify dynamic case study slugs
+          if (
+            parentDirName === "case-studies" &&
+            (entry.name === "[slug]" || entry.name.includes("slug"))
+          ) {
+            const isValidCaseStudy = FALLBACK_CASE_STUDIES.some(
+              (cs) => cs.slug === target && cs.published !== false
+            );
+            if (!isValidCaseStudy) {
+              continue;
+            }
+          }
+
+          // Verify dynamic blog post slugs
+          if (
+            parentDirName === "blog" &&
+            (entry.name === "[slug]" || entry.name.includes("slug"))
+          ) {
+            const isValidBlogPost = FALLBACK_BLOG_POSTS.some(
+              (post) => post.slug === target && post.published !== false
+            );
+            if (!isValidBlogPost) {
+              continue;
+            }
+          }
+
+          if (checkSegments(path.join(currentDir, entry.name), segIndex + 1)) {
+            return true;
+          }
+        }
+      }
+    } catch {
+      // Ignore reading errors
+    }
+
+    return false;
+  }
+
+  return checkSegments(appDir, 0);
+}
+
+/**
+ * Check Public Route Registry Drift (lib/public-routes.ts vs app/ filesystem)
+ */
+export function checkPublicRouteRegistryDrift(
+  root: string,
+  fix = false
+): DiagnosticCheckResult {
+  const appDir = path.join(root, "app");
+  const publicRoutesFile = path.join(root, "lib", "public-routes.ts");
+
+  if (!fs.existsSync(publicRoutesFile)) {
+    return {
+      id: "routes-public-registry-drift",
+      name: "Public Route Registry Alignment",
+      category: "routes",
+      status: "fail",
+      message: "lib/public-routes.ts not found",
+      fixable: false,
+    };
+  }
+
+  if (!fs.existsSync(appDir)) {
+    return {
+      id: "routes-public-registry-drift",
+      name: "Public Route Registry Alignment",
+      category: "routes",
+      status: "fail",
+      message: "app/ directory not found",
+      fixable: false,
+    };
+  }
+
+  const fileContent = fs.readFileSync(publicRoutesFile, "utf-8");
+
+  // Extract registered route paths from PUBLIC_ROUTE_REGISTRY in lib/public-routes.ts
+  const registeredPaths: string[] = [];
+  const routeRegex = /path:\s*["'\`]([^"'\`]+)["'\`]/g;
+  let match: RegExpExecArray | null;
+  while ((match = routeRegex.exec(fileContent)) !== null) {
+    registeredPaths.push(match[1]);
+  }
+  const registeredSet = new Set(registeredPaths);
+
+  // Discover all static public page routes under app/
+  const pageFiles = findFiles(appDir, /^page\.(tsx?|jsx?)$/);
+  const staticPublicRoutes: string[] = [];
+
+  for (const pageFile of pageFiles) {
+    const relative = path.relative(appDir, pageFile).replace(/\\/g, "/");
+    // Exclude api, admin, or dynamic parameter routes [slug]
+    if (
+      relative.startsWith("api/") ||
+      relative.startsWith("admin/") ||
+      relative.includes("[") ||
+      relative.includes("]")
+    ) {
+      continue;
+    }
+
+    let routeUrl = "/" + path.dirname(relative);
+    if (routeUrl === "/.") routeUrl = "/";
+    staticPublicRoutes.push(routeUrl);
+  }
+
+  const uniqueStaticPublicRoutes = Array.from(
+    new Set(staticPublicRoutes)
+  ).sort();
+
+  // Find missing static routes (in app/ but not in PUBLIC_ROUTE_REGISTRY)
+  const unregisteredRoutes = uniqueStaticPublicRoutes.filter(
+    (r) => !registeredSet.has(r)
+  );
+
+  // Find stale routes (in PUBLIC_ROUTE_REGISTRY but pointing to missing page file)
+  const staleRoutes = registeredPaths.filter(
+    (r) => !routeExistsOnDisk(r, appDir)
+  );
+
+  if (unregisteredRoutes.length === 0 && staleRoutes.length === 0) {
+    return {
+      id: "routes-public-registry-drift",
+      name: "Public Route Registry Alignment",
+      category: "routes",
+      status: "pass",
+      message:
+        "All static public pages in app/ are registered in PUBLIC_ROUTE_REGISTRY with zero stale route entries.",
+    };
+  }
+
+  if (fix) {
+    let updatedContent = fileContent;
+
+    // 1. Remove stale routes
+    for (const staleRoute of staleRoutes) {
+      const escaped = staleRoute.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const staleEntryRegex = new RegExp(
+        `\\n?\\s*\\{[^{}]*path:\\s*["'\`]${escaped}["'\`][^{}]*\\},?`,
+        "g"
+      );
+      updatedContent = updatedContent.replace(staleEntryRegex, "");
+    }
+
+    // 2. Add missing routes
+    if (unregisteredRoutes.length > 0) {
+      const registryEndRegex =
+        /(\n\]\s*as\s+const\s+satisfies\s+readonly\s+PublicRouteDefinition\[\];)/;
+      const endMatch = updatedContent.match(registryEndRegex);
+
+      if (endMatch) {
+        const newEntries = unregisteredRoutes.map((r) => {
+          let category: "top-level" | "case-study" | "arcade" | "tool" =
+            "top-level";
+          if (r.startsWith("/case-studies") || r.startsWith("/work")) {
+            category = "case-study";
+          } else if (r.startsWith("/arcade")) {
+            category = "arcade";
+          } else if (
+            ["/proof", "/neuro", "/crf", "/patrol", "/simulator"].includes(r)
+          ) {
+            category = "tool";
+          }
+
+          const slug = r.split("/").filter(Boolean).pop() || "home";
+          const title = slug
+            .split("-")
+            .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+            .join(" ");
+
+          let name = title;
+          if (category === "arcade") {
+            name = `Game: ${title}`;
+          } else if (category === "case-study") {
+            name = `CS: ${title}`;
+          }
+
+          return `  {\n    path: "${r}",\n    name: "${name}",\n    category: "${category}",\n  },`;
+        });
+
+        const insertion = "\n" + newEntries.join("\n");
+        updatedContent = updatedContent.replace(
+          registryEndRegex,
+          `${insertion}$1`
+        );
+      }
+    }
+
+    fs.writeFileSync(publicRoutesFile, updatedContent, "utf-8");
+
+    return {
+      id: "routes-public-registry-drift",
+      name: "Public Route Registry Alignment",
+      category: "routes",
+      status: "fixed",
+      message: `Auto-remediated public route registry drift in lib/public-routes.ts (${unregisteredRoutes.length} added, ${staleRoutes.length} removed).`,
+      details: [
+        ...unregisteredRoutes.map(
+          (r) => `Registered missing public route: ${r}`
+        ),
+        ...staleRoutes.map((r) => `Removed stale public route: ${r}`),
+      ],
+    };
+  }
+
+  const details: string[] = [];
+  for (const r of unregisteredRoutes) {
+    details.push(`Unregistered public page route: ${r} (found in app/)`);
+  }
+  for (const r of staleRoutes) {
+    details.push(
+      `Stale route entry in PUBLIC_ROUTE_REGISTRY: ${r} (no matching page file on disk)`
+    );
+  }
+
+  return {
+    id: "routes-public-registry-drift",
+    name: "Public Route Registry Alignment",
+    category: "routes",
+    status: "fail",
+    message: `${unregisteredRoutes.length + staleRoutes.length} public route registry drift issue(s) detected (${unregisteredRoutes.length} unregistered page(s), ${staleRoutes.length} stale entry/entries). Run 'npm run doctor:fix' to align.`,
+    details,
     fixable: true,
   };
 }
@@ -2130,6 +2399,7 @@ export async function runDiagnostics(
 
   const rawChecks: DiagnosticCheckResult[] = [
     checkRouteIndexing(root, fix),
+    checkPublicRouteRegistryDrift(root, fix),
     checkNavbarHierarchy(root),
     checkPageTopPadding(root),
     checkTestPathResolution(root),

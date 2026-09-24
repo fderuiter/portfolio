@@ -218,6 +218,12 @@ Re-exports [getNeuroScenariosSync](loader/functions/getNeuroScenariosSync.md)
 
 ***
 
+### handleMeshWorkerMessage
+
+Re-exports [handleMeshWorkerMessage](mesh-worker/functions/handleMeshWorkerMessage.md)
+
+***
+
 ### HemisphereBufferTransfer
 
 Re-exports [HemisphereBufferTransfer](types/interfaces/HemisphereBufferTransfer.md)
@@ -260,6 +266,18 @@ Re-exports [MeshWorkerResponse](types/interfaces/MeshWorkerResponse.md)
 
 ***
 
+### MeshWorkerTarget
+
+Re-exports [MeshWorkerTarget](mesh-worker/interfaces/MeshWorkerTarget.md)
+
+***
+
+### processMeshWorkerRequest
+
+Re-exports [processMeshWorkerRequest](mesh-worker/functions/processMeshWorkerRequest.md)
+
+***
+
 ### progressBus
 
 Re-exports [progressBus](progress-bus/variables/progressBus.md)
@@ -287,6 +305,12 @@ Re-exports [QAMetrics](types/interfaces/QAMetrics.md)
 ### RawGeometryBuffer
 
 Re-exports [RawGeometryBuffer](types/interfaces/RawGeometryBuffer.md)
+
+***
+
+### registerMeshWorker
+
+Re-exports [registerMeshWorker](mesh-worker/functions/registerMeshWorker.md)
 
 ***
 

@@ -17,6 +17,32 @@ import { sanitizeString, sanitizeError } from "@/lib/error-sanitization";
 import { validateSyncRequest } from "@/lib/security";
 import { NextRequest } from "next/server";
 import {
+  boundingBoxOverlap,
+  calculateScoreMultiplier,
+  clamp,
+  createSeededRandom,
+  lerp,
+  scaleScoreWithMultiplier,
+  type Rect,
+} from "@/lib/arcade";
+import { calculateFOV, hasLineOfSight } from "@/lib/dungeon";
+import {
+  assignTransportPriority,
+  calculateDebriefScore,
+  calculateInjurySeverity,
+  createInitialOetDescentState,
+  derivePlayfulStats,
+  evaluateIncidentDebrief,
+  evaluateOETCompliance,
+  filterEventsBySeverity,
+  filterEventsByType,
+  sortEventsByTimestamp,
+  type OetMetrics,
+  type PatrolEvent,
+  type PatrolScenario,
+  type VitalsData,
+} from "@/lib/patrol";
+import {
   DEMOGRAPHICS_SCENARIO,
   advanceDesk,
   advanceTable,
@@ -61,6 +87,121 @@ const astArbitrary: fc.Arbitrary<PropAst> = fc.letrec((tie) => ({
     })
   ),
 })).tree;
+
+const rectArbitrary: fc.Arbitrary<Rect> = fc.record({
+  x: fc.integer({ min: -1_000, max: 1_000 }),
+  y: fc.integer({ min: -1_000, max: 1_000 }),
+  width: fc.integer({ min: 0, max: 300 }),
+  height: fc.integer({ min: 0, max: 300 }),
+});
+
+const patrolEventArbitrary: fc.Arbitrary<PatrolEvent> = fc.record({
+  id: fc.nat(10_000).map((id) => `event-${id}`),
+  timestamp: fc.integer({ min: -100_000, max: 100_000 }),
+  scenarioId: fc.constantFrom("incident-a", "incident-b", "hub"),
+  action: fc.constantFrom(
+    "phase_transition_dispatch",
+    "assess-scene-safety",
+    "DIALOGUE_CHOICE",
+    "OET_TRANSPORT_COMPLETED",
+    "HAZARD_ALERT"
+  ),
+  type: fc.option(
+    fc.constantFrom("DIALOGUE_CHOICE", "WEATHER_ALERT", "HAZARD_ALERT"),
+    { nil: undefined }
+  ),
+  severity: fc.constantFrom(
+    "info" as const,
+    "warning" as const,
+    "critical" as const
+  ),
+  context: fc.option(
+    fc.record({
+      category: fc.constantFrom(
+        "assessment",
+        "treatment",
+        "communication",
+        "transport"
+      ),
+      closesLoop: fc.boolean(),
+      style: fc.constantFrom("directive", "collaborative", "candid"),
+      to: fc.constantFrom("DISPATCH", "SCENE", "DEBRIEF"),
+      location: fc.constantFrom("East Slopes", "West Slopes", "The Back Bowl"),
+    }),
+    { nil: undefined }
+  ),
+  description: fc.string({ maxLength: 40 }),
+});
+
+const debriefHistoryArbitrary: fc.Arbitrary<PatrolEvent[]> = fc
+  .array(
+    fc.record({
+      action: fc.constantFrom(
+        "assess-scene-safety",
+        "secondary-assessment",
+        "splint-wrist",
+        "package-for-transport",
+        "DIALOGUE_CHOICE",
+        "HAZARD_ALERT",
+        "OET_TRANSPORT_COMPLETED",
+        "reassess-patient-status"
+      ),
+      type: fc.option(fc.constantFrom("DIALOGUE_CHOICE", "HAZARD_ALERT"), {
+        nil: undefined,
+      }),
+      scenarioId: fc.constantFrom("incident-a", "incident-b", "hub"),
+      severity: fc.constantFrom(
+        "info" as const,
+        "warning" as const,
+        "critical" as const
+      ),
+      description: fc.string({ maxLength: 40 }),
+      context: fc.record({
+        category: fc.constantFrom(
+          "assessment",
+          "treatment",
+          "communication",
+          "transport"
+        ),
+        closesLoop: fc.boolean(),
+        style: fc.constantFrom("directive", "collaborative", "candid"),
+        to: fc.constantFrom("DISPATCH", "SCENE", "DEBRIEF"),
+        location: fc.constantFrom(
+          "East Slopes",
+          "West Slopes",
+          "The Back Bowl"
+        ),
+      }),
+    }),
+    { maxLength: 25 }
+  )
+  .map((entries) =>
+    entries.map((entry, index) => ({ ...entry, timestamp: index }))
+  );
+
+const oetMetricsArbitrary: fc.Arbitrary<OetMetrics> = fc.record({
+  excessiveSpeedTime: fc.integer({ min: 0, max: 180 }),
+  abruptDirectionChanges: fc.integer({ min: 0, max: 30 }),
+  boundaryViolations: fc.integer({ min: 0, max: 10 }),
+  collisions: fc.integer({ min: 0, max: 10 }),
+  controlledStops: fc.integer({ min: 0, max: 10 }),
+  routeEfficiency: fc.integer({ min: 0, max: 100 }),
+  judgmentScore: fc.integer({ min: 0, max: 100 }),
+});
+
+const vitalsArbitrary: fc.Arbitrary<VitalsData> = fc.record({
+  heartRate: fc.integer({ min: 0, max: 220 }),
+  respiration: fc.integer({ min: 0, max: 60 }),
+  bpSystolic: fc.integer({ min: 40, max: 220 }),
+  spo2: fc.integer({ min: 50, max: 100 }),
+  gcs: fc.integer({ min: 3, max: 15 }),
+  avpu: fc.constantFrom("A" as const, "V" as const, "P" as const, "U" as const),
+  pms: fc.constantFrom(
+    "intact" as const,
+    "compromised" as const,
+    "absent" as const
+  ),
+});
 
 describe("Shift-Left Fuzz & Property-Based Verification", () => {
   describe("Formal Logic AST & Proof Engine Invariants", () => {
@@ -229,6 +370,545 @@ describe("Shift-Left Fuzz & Property-Based Verification", () => {
           }
         ),
         { numRuns: 100 }
+      );
+    });
+  });
+
+  describe("Arcade Utility Invariants", () => {
+    it("clamp always returns a value inside the ordered bounds", () => {
+      fc.assert(
+        fc.property(
+          fc.integer({ min: -100_000, max: 100_000 }),
+          fc.integer({ min: -1_000, max: 1_000 }),
+          fc.integer({ min: -1_000, max: 1_000 }),
+          (value, firstBound, secondBound) => {
+            const lower = Math.min(firstBound, secondBound);
+            const upper = Math.max(firstBound, secondBound);
+            const result = clamp(value, firstBound, secondBound);
+
+            expect(result).toBeGreaterThanOrEqual(lower);
+            expect(result).toBeLessThanOrEqual(upper);
+            if (value < lower) expect(result).toBe(lower);
+            if (value > upper) expect(result).toBe(upper);
+            if (value >= lower && value <= upper) expect(result).toBe(value);
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    it("lerp stays between its endpoints and returns exact endpoints outside the unit interval", () => {
+      fc.assert(
+        fc.property(
+          fc.integer({ min: -10_000, max: 10_000 }),
+          fc.integer({ min: -10_000, max: 10_000 }),
+          fc.integer({ min: -200, max: 300 }),
+          (start, end, progressPercent) => {
+            const progress = progressPercent / 100;
+            const result = lerp(start, end, progress);
+
+            if (progress <= 0) expect(result).toBe(start);
+            else if (progress >= 1) expect(result).toBe(end);
+            else {
+              expect(result).toBeGreaterThanOrEqual(Math.min(start, end));
+              expect(result).toBeLessThanOrEqual(Math.max(start, end));
+            }
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    it("AABB overlap is symmetric and rectangles touching only at an edge do not collide", () => {
+      fc.assert(
+        fc.property(rectArbitrary, rectArbitrary, (first, second) => {
+          expect(boundingBoxOverlap(first, second)).toBe(
+            boundingBoxOverlap(second, first)
+          );
+
+          const edgeTouching: Rect = {
+            x: first.x + first.width,
+            y: first.y,
+            width: second.width,
+            height: first.height,
+          };
+          expect(boundingBoxOverlap(first, edgeTouching)).toBe(false);
+        }),
+        { numRuns: 100 }
+      );
+    });
+
+    it("seeded random streams are repeatable and stay in the half-open unit interval", () => {
+      fc.assert(
+        fc.property(fc.integer({ min: -2_000_000, max: 2_000_000 }), (seed) => {
+          const firstRandom = createSeededRandom(seed);
+          const secondRandom = createSeededRandom(seed);
+          const firstValues = Array.from({ length: 32 }, () => firstRandom());
+          const secondValues = Array.from({ length: 32 }, () => secondRandom());
+
+          expect(firstValues).toEqual(secondValues);
+          expect(firstValues.every((value) => value >= 0 && value < 1)).toBe(
+            true
+          );
+        }),
+        { numRuns: 80 }
+      );
+    });
+
+    it("combo multipliers increase monotonically and stay within their configured cap", () => {
+      fc.assert(
+        fc.property(
+          fc.integer({ min: 0, max: 10 }),
+          fc.integer({ min: 0, max: 10 }),
+          fc.integer({ min: 1, max: 10 }),
+          fc.integer({ min: 0, max: 500 }),
+          fc.integer({ min: 0, max: 500 }),
+          (baseMultiplier, capOffset, step, firstCombo, secondCombo) => {
+            const smallerCombo = Math.min(firstCombo, secondCombo);
+            const largerCombo = Math.max(firstCombo, secondCombo);
+            const options = {
+              baseMultiplier,
+              maxMultiplier: baseMultiplier + capOffset,
+              step,
+            };
+            const smallerResult = calculateScoreMultiplier(
+              smallerCombo,
+              options
+            );
+            const largerResult = calculateScoreMultiplier(largerCombo, options);
+
+            expect(smallerResult).toBeGreaterThanOrEqual(baseMultiplier);
+            expect(largerResult).toBeGreaterThanOrEqual(smallerResult);
+            expect(largerResult).toBeLessThanOrEqual(
+              baseMultiplier + capOffset
+            );
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    it("scaled scores preserve component-wise monotonicity for non-negative inputs", () => {
+      fc.assert(
+        fc.property(
+          fc.integer({ min: 0, max: 10_000 }),
+          fc.integer({ min: 0, max: 10_000 }),
+          fc.integer({ min: 0, max: 20 }),
+          fc.integer({ min: 0, max: 20 }),
+          (base, baseIncrease, multiplier, multiplierIncrease) => {
+            const lowerScore = scaleScoreWithMultiplier(
+              base,
+              multiplier,
+              false
+            );
+            const higherBaseScore = scaleScoreWithMultiplier(
+              base + baseIncrease,
+              multiplier,
+              false
+            );
+            const higherMultiplierScore = scaleScoreWithMultiplier(
+              base,
+              multiplier + multiplierIncrease,
+              false
+            );
+
+            expect(lowerScore).toBeGreaterThanOrEqual(0);
+            expect(higherBaseScore).toBeGreaterThanOrEqual(lowerScore);
+            expect(higherMultiplierScore).toBeGreaterThanOrEqual(lowerScore);
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+  });
+
+  describe("Dungeon Field-of-View Invariants", () => {
+    it("preserves explored cells on dimensionally valid maps", () => {
+      fc.assert(
+        fc.property(
+          fc.array(fc.boolean(), { minLength: 64, maxLength: 64 }),
+          fc.integer({ min: 0, max: 7 }),
+          fc.integer({ min: 0, max: 7 }),
+          (cells, playerX, playerY) => {
+            const grid = Array.from({ length: 8 }, () =>
+              Array.from({ length: 8 }, () => " ")
+            );
+            const explored = Array.from({ length: 8 }, (_, row) =>
+              cells.slice(row * 8, (row + 1) * 8)
+            );
+            const result = calculateFOV(grid, playerX, playerY, 0, explored);
+
+            expect(result.explored).toHaveLength(8);
+            expect(result.explored.every((row) => row.length === 8)).toBe(true);
+            for (let y = 0; y < 8; y += 1) {
+              for (let x = 0; x < 8; x += 1) {
+                if (explored[y][x]) expect(result.explored[y][x]).toBe(true);
+              }
+            }
+            expect(result.visible[playerY][playerX]).toBe(true);
+          }
+        ),
+        { numRuns: 80 }
+      );
+    });
+
+    it("rejects adjacent line-of-sight targets just beyond each map edge", () => {
+      fc.assert(
+        fc.property(
+          fc.integer({ min: 1, max: 12 }),
+          fc.integer({ min: 1, max: 12 }),
+          fc.constantFrom("left", "right", "top", "bottom"),
+          fc.nat(100),
+          (width, height, edge, offset) => {
+            const grid = Array.from({ length: height }, () =>
+              Array.from({ length: width }, () => " ")
+            );
+            let originX = 0;
+            let originY = 0;
+            let targetX = 0;
+            let targetY = 0;
+
+            if (edge === "left") {
+              originX = 0;
+              originY = offset % height;
+              targetX = -1;
+              targetY = originY;
+            } else if (edge === "right") {
+              originX = width - 1;
+              originY = offset % height;
+              targetX = width;
+              targetY = originY;
+            } else if (edge === "top") {
+              originX = offset % width;
+              originY = 0;
+              targetX = originX;
+              targetY = -1;
+            } else {
+              originX = offset % width;
+              originY = height - 1;
+              targetX = originX;
+              targetY = height;
+            }
+
+            expect(
+              hasLineOfSight(grid, originX, originY, targetX, targetY)
+            ).toBe(false);
+          }
+        ),
+        { numRuns: 80 }
+      );
+    });
+  });
+
+  describe("Patrol Events, OET & Debrief Invariants", () => {
+    it("event filters retain only matching records, and timestamp sorting preserves the input", () => {
+      const eventsArbitrary = fc.uniqueArray(patrolEventArbitrary, {
+        maxLength: 40,
+        selector: (event) => event.id,
+      });
+
+      fc.assert(
+        fc.property(
+          eventsArbitrary,
+          fc.constantFrom(
+            "info" as const,
+            "warning" as const,
+            "critical" as const
+          ),
+          fc.constantFrom(
+            "DIALOGUE_CHOICE",
+            "WEATHER_ALERT",
+            "HAZARD_ALERT",
+            "assess-scene-safety"
+          ),
+          (events, severity, type) => {
+            const original = [...events];
+            const bySeverity = filterEventsBySeverity(events, severity);
+            const byType = filterEventsByType(events, type);
+            const ascending = sortEventsByTimestamp(events, "asc");
+            const descending = sortEventsByTimestamp(events, "desc");
+            const ascendingTimes = ascending.map((event) =>
+              Number(event.timestamp)
+            );
+            const descendingTimes = descending.map((event) =>
+              Number(event.timestamp)
+            );
+
+            expect(bySeverity).toEqual(
+              events.filter((event) => event.severity === severity)
+            );
+            expect(byType).toEqual(
+              events.filter(
+                (event) => event.type === type || event.action === type
+              )
+            );
+            expect(ascending.map((event) => event.id).sort()).toEqual(
+              events.map((event) => event.id).sort()
+            );
+            expect(descending.map((event) => event.id).sort()).toEqual(
+              events.map((event) => event.id).sort()
+            );
+            expect(
+              ascendingTimes.every(
+                (timestamp, index) =>
+                  index === 0 || timestamp >= ascendingTimes[index - 1]
+              )
+            ).toBe(true);
+            expect(
+              descendingTimes.every(
+                (timestamp, index) =>
+                  index === 0 || timestamp <= descendingTimes[index - 1]
+              )
+            ).toBe(true);
+            expect(events).toEqual(original);
+          }
+        ),
+        { numRuns: 80 }
+      );
+    });
+
+    it("OET initialization is repeatable and keeps the sled and gates within the selected course", () => {
+      fc.assert(
+        fc.property(
+          fc.boolean(),
+          fc.boolean(),
+          fc.integer({ min: 360, max: 700 }),
+          fc.integer({ min: 100, max: 10_000 }),
+          (narrowTrails, treeHazards, requestedWidth, totalDistance) => {
+            const options = {
+              conditions: { narrowTrails, treeHazards },
+              trailWidth: requestedWidth,
+              totalDistance,
+            };
+            const state = createInitialOetDescentState(options);
+            const repeatedState = createInitialOetDescentState(options);
+            const expectedWidth = narrowTrails ? 360 : requestedWidth;
+
+            expect(repeatedState).toEqual(state);
+            expect(state.trailWidth).toBe(expectedWidth);
+            expect(state.trailRight - state.trailLeft).toBe(expectedWidth);
+            expect(
+              Math.abs(state.trailLeft + state.trailRight - 800)
+            ).toBeLessThanOrEqual(1);
+            expect(
+              Math.abs(state.sled.x - (state.trailLeft + state.trailRight) / 2)
+            ).toBeLessThanOrEqual(0.5);
+            expect(state.sled.chainBrakeEngaged).toBe(true);
+            expect(state.sled.isStopped).toBe(true);
+            expect(
+              state.gates.every((gate, index) => gate.y === (index + 1) * 220)
+            ).toBe(true);
+            expect(
+              state.gates.every((gate) => gate.y <= totalDistance - 100)
+            ).toBe(true);
+            expect(
+              state.obstacles.every(
+                (obstacle) =>
+                  obstacle.x >= state.trailLeft &&
+                  obstacle.x <= state.trailRight
+              )
+            ).toBe(true);
+          }
+        ),
+        { numRuns: 60 }
+      );
+    });
+
+    it("injury assessment and transport assignments remain bounded and internally consistent", () => {
+      fc.assert(
+        fc.property(
+          fc.constantFrom(
+            "wrist pain",
+            "suspected head injury",
+            "femur fracture",
+            "chest pain",
+            "localized discomfort"
+          ),
+          fc.constantFrom(
+            "low-speed fall",
+            "high-speed collision",
+            "tree impact",
+            "fall > 15ft"
+          ),
+          vitalsArbitrary,
+          fc.integer({ min: -60, max: 60 }),
+          (complaint, mechanism, vitals, temperatureFahrenheit) => {
+            const patient = { complaint, mechanism, vitals };
+            const environment = { temperatureFahrenheit };
+            const assessment = calculateInjurySeverity(
+              patient,
+              vitals,
+              environment
+            );
+            const assignment = assignTransportPriority(assessment, vitals);
+            const repeatedAssignment = assignTransportPriority(
+              assessment,
+              vitals
+            );
+            const numericPriority = {
+              BLACK: 0,
+              RED: 1,
+              YELLOW: 2,
+              GREEN: 3,
+            }[assignment.priority];
+
+            expect(assessment.score).toBeGreaterThanOrEqual(0);
+            expect(assessment.score).toBeLessThanOrEqual(100);
+            expect(Number.isFinite(assessment.score)).toBe(true);
+            expect(assessment.factors.length).toBeGreaterThan(0);
+            if (assessment.vitalsCompromised) {
+              expect(assessment.level).toBe("critical");
+            }
+            if (assessment.spinalPrecautionRequired) {
+              expect(assessment.level).not.toBe("minor");
+            }
+            expect(repeatedAssignment).toEqual(assignment);
+            expect(assignment.numericPriority).toBe(numericPriority);
+            expect(assignment.tobogganRequired).toBe(
+              assignment.priority !== "GREEN"
+            );
+            expect(
+              assignment.estimatedTransportTimeMinutes
+            ).toBeGreaterThanOrEqual(0);
+            if (
+              assignment.priority === "BLACK" ||
+              assignment.priority === "RED"
+            ) {
+              expect(assignment.alsInterventionRequired).toBe(true);
+            }
+          }
+        ),
+        { numRuns: 80 }
+      );
+    });
+
+    it("OET compliance evaluates live scores without mutating scenario rules", () => {
+      const scenario: PatrolScenario = {
+        id: "oet-property-scenario",
+        title: "OET property scenario",
+        actions: [],
+        debriefRules: [
+          {
+            id: "oet-control",
+            title: "Controlled descent",
+            category: "oet",
+            passed: false,
+            score: 60,
+            feedback: "Initial scenario feedback.",
+          },
+          {
+            id: "scene-safety",
+            title: "Scene safety",
+            category: "scene",
+            passed: true,
+            score: 40,
+            feedback: "Scene was secured.",
+          },
+        ],
+      };
+
+      fc.assert(
+        fc.property(fc.integer({ min: 0, max: 100 }), (judgmentScore) => {
+          const originalRules = scenario.debriefRules.map((rule) => ({
+            ...rule,
+          }));
+          const metrics: OetMetrics = {
+            excessiveSpeedTime: 0,
+            abruptDirectionChanges: 0,
+            boundaryViolations: 0,
+            collisions: 0,
+            controlledStops: 0,
+            routeEfficiency: judgmentScore,
+            judgmentScore,
+          };
+          const result = evaluateOETCompliance(scenario, [], metrics);
+
+          expect(result.evaluatedRules[0].passed).toBe(judgmentScore >= 70);
+          expect(result.evaluatedRules[1].passed).toBe(true);
+          expect(result.passedCount + result.failedCount).toBe(2);
+          expect(result.score).toBeGreaterThanOrEqual(0);
+          expect(result.score).toBeLessThanOrEqual(100);
+          expect(scenario.debriefRules).toEqual(originalRules);
+        }),
+        { numRuns: 80 }
+      );
+    });
+
+    it("debrief grades are capped, while incident summaries ignore input ordering", () => {
+      fc.assert(
+        fc.property(fc.integer({ min: -100, max: 200 }), (rawScore) => {
+          const score = Math.max(0, Math.min(100, rawScore));
+          const result = calculateDebriefScore({ rawScore });
+          const expectedGrade =
+            score >= 90
+              ? "A"
+              : score >= 80
+                ? "B"
+                : score >= 70
+                  ? "C"
+                  : score >= 60
+                    ? "D"
+                    : "F";
+
+          expect(result.score).toBe(score);
+          expect(result.percentage).toBe(score);
+          expect(result.grade).toBe(expectedGrade);
+          expect(result.summary.length).toBeGreaterThan(0);
+        }),
+        { numRuns: 80 }
+      );
+
+      fc.assert(
+        fc.property(
+          debriefHistoryArbitrary,
+          oetMetricsArbitrary,
+          (events, metrics) => {
+            const originalEvents = events.map((event) => ({
+              ...event,
+              context: event.context ? { ...event.context } : undefined,
+            }));
+            const report = evaluateIncidentDebrief(
+              "property-incident",
+              events,
+              metrics
+            );
+            const reversedReport = evaluateIncidentDebrief(
+              "property-incident",
+              [...events].reverse(),
+              metrics
+            );
+            const stats = derivePlayfulStats(events);
+
+            expect(reversedReport).toEqual(report);
+            expect(derivePlayfulStats([...events].reverse())).toEqual(stats);
+            expect(events).toEqual(originalEvents);
+            expect(
+              Object.values(report.dimensions).every(
+                (dimension) =>
+                  Number.isFinite(dimension.score) &&
+                  dimension.score >= 0 &&
+                  dimension.score <= 10
+              )
+            ).toBe(true);
+            for (const count of [
+              stats.callsHandled,
+              stats.radioTransmissions,
+              stats.patientsAssisted,
+              stats.sledTransports,
+              stats.trailsChecked,
+              stats.hazardsMarked,
+              stats.pmsChecksPerformed,
+              stats.reassessmentsLogged,
+              stats.closedLoopDelegations,
+              stats.guestsAssisted ?? 0,
+            ]) {
+              expect(Number.isInteger(count)).toBe(true);
+              expect(count).toBeGreaterThanOrEqual(0);
+              expect(count).toBeLessThanOrEqual(events.length);
+            }
+          }
+        ),
+        { numRuns: 60 }
       );
     });
   });
