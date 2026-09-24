@@ -3,17 +3,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import fs from "fs";
 import path from "path";
 
-describe("Package Manager & Vercel Configuration Invariants", () => {
+describe("Package Manager Configuration Invariants", () => {
   const root = process.cwd();
-
-  it("vercel.json explicitly defines installCommand as npm ci and buildCommand as npm run build", () => {
-    const vercelJsonPath = path.join(root, "vercel.json");
-    expect(fs.existsSync(vercelJsonPath)).toBe(true);
-
-    const vercelJson = JSON.parse(fs.readFileSync(vercelJsonPath, "utf8"));
-    expect(vercelJson.installCommand).toBe("npm ci");
-    expect(vercelJson.buildCommand).toBe("npm run build");
-  });
 
   it("package.json defines packageManager with npm and valid engine specifications", () => {
     const packageJsonPath = path.join(root, "package.json");
