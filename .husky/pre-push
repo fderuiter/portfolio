@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Pre-Push Hook: Git Safety & Protected Branch Guard
-# Validates branch naming, then prevents force pushes and direct pushes to main.
+# Validates branch naming, then prevents branch deletions, non-fast-forward
+# updates, and direct pushes to main.
 # Bypass with: ALLOW_DANGEROUS_GIT=1 git push ...
 
 set -eu
@@ -9,8 +10,8 @@ if [ "${ALLOW_DANGEROUS_GIT:-0}" = "1" ]; then
   exit 0
 fi
 
-# Branch naming convention (AGENTS.md section 15). The ADR 0037 and ADR 0049
-# workflows both assume prefixed short-lived branches cut from main.
+# Branch naming convention (AGENTS.md section 15). Validate Jules-managed
+# branches too; the validator accepts their reserved `jules/` prefix.
 npx tsx scripts/validate-branch.ts
 
 # Read pushed refs from stdin
@@ -23,6 +24,26 @@ while read -r local_ref local_sha remote_ref remote_sha; do
     echo "To bypass in an emergency, set ALLOW_DANGEROUS_GIT=1 before pushing." >&2
     exit 1
   fi
+
+  case "$remote_ref" in
+    refs/heads/*)
+      # A zero local SHA is a branch deletion. Shared branch history must stay
+      # intact, so reject deletions and all non-fast-forward branch updates.
+      if printf '%s' "$local_sha" | grep -Eq '^0+$'; then
+        echo "BLOCKED: Deleting remote branch '$remote_ref' is prohibited." >&2
+        echo "To bypass in an emergency, set ALLOW_DANGEROUS_GIT=1 before pushing." >&2
+        exit 1
+      fi
+
+      if ! printf '%s' "$remote_sha" | grep -Eq '^0+$' &&
+        ! git merge-base --is-ancestor "$remote_sha" "$local_sha"; then
+        echo "BLOCKED: Non-fast-forward update to '$remote_ref' is prohibited." >&2
+        echo "Use a merge or rebase that preserves the remote branch history." >&2
+        echo "To bypass in an emergency, set ALLOW_DANGEROUS_GIT=1 before pushing." >&2
+        exit 1
+      fi
+      ;;
+  esac
 done
 
 exit 0

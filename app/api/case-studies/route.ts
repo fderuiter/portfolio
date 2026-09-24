@@ -5,25 +5,29 @@ import { createApiHandler } from "@/lib/route-wrapper";
 import { sanitizeError } from "@/lib/error-sanitization";
 import { checkRequestSubmissionRateLimit } from "@/lib/moderation";
 import { isCurrentUserAdmin } from "@/lib/auth/admin";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
-export const GET = createApiHandler(async () => {
-  try {
-    const studies = await CaseStudyService.getPublishedCaseStudies();
-    return NextResponse.json(studies, {
-      headers: {
-        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=3600",
-      },
-    });
-  } catch (err) {
-    console.error("API Case Studies search data fetch failed:", err);
-    return NextResponse.json(
-      { error: "Failed to load case studies telemetry data" },
-      { status: 500 }
-    );
-  }
-});
+export const GET = createApiHandler(
+  async () => {
+    try {
+      const studies = await CaseStudyService.getPublishedCaseStudies();
+      return NextResponse.json(studies, {
+        headers: {
+          "Cache-Control": "public, s-maxage=300, stale-while-revalidate=3600",
+        },
+      });
+    } catch (err) {
+      logger.error("API Case Studies search data fetch failed:", err);
+      return NextResponse.json(
+        { error: "Failed to load case studies telemetry data" },
+        { status: 500 }
+      );
+    }
+  },
+  { auth: "public" }
+);
 
 export const POST = createApiHandler(
   async (req: NextRequest, { data }) => {
@@ -73,7 +77,7 @@ export const POST = createApiHandler(
       }
 
       const sanitized = sanitizeError(err);
-      console.error("API Case Study submission failed:", sanitized);
+      logger.error("API Case Study submission failed:", sanitized);
       return NextResponse.json(
         { error: "Failed to submit case study" },
         { status: 500 }
@@ -107,5 +111,6 @@ export const POST = createApiHandler(
         details,
       };
     },
+    auth: "clerk_admin",
   }
 );

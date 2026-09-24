@@ -11,6 +11,7 @@
  * would make the worker's chunk start itself, a runtime chunk cycle (#853).
  */
 
+import { logger } from "@/lib/logger";
 import { createCorticalSurfaceMeshBuffers } from "./internal/mesh-geometry";
 import {
   HemisphereFilter,
@@ -53,7 +54,7 @@ function getMeshWorker(): Worker | null {
         }
       };
       workerInstance.onerror = (err) => {
-        console.warn("Mesh generator Web Worker error:", err);
+        logger.warn("Mesh generator Web Worker error:", err);
         pendingRequests.clear();
       };
     } catch {

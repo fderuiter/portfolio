@@ -14,6 +14,12 @@
 
 ## Properties
 
+### auth?
+
+> `optional` **auth?**: [`ApiAuthRequirement`](../type-aliases/ApiAuthRequirement.md)
+
+***
+
 ### customJsonError?
 
 > `optional` **customJsonError?**: `string`

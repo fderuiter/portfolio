@@ -10,9 +10,8 @@
 
 Hydration-safe read of whether the viewport is in the mobile band.
 
-Uses `useSyncExternalStore` rather than an effect-plus-flag so the first
-client render already agrees with the server render (which always reports
-desktop), per the hydration rules in AGENTS.md section 4.
+Uses `useMediaQuery` so the first client render agrees with the server render
+(which always reports desktop), per the hydration rules in AGENTS.md section 4.
 
 ## Returns
 

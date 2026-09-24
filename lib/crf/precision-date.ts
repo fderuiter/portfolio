@@ -415,10 +415,9 @@ export function generateCdashVariableName(
   baseName: string,
   existingVarNames: Set<string> | string[] | Iterable<string>
 ): string {
-  const existing =
-    existingVarNames instanceof Set
-      ? existingVarNames
-      : new Set(Array.from(existingVarNames).map((v) => v.toUpperCase()));
+  const existing = new Set(
+    Array.from(existingVarNames).map((v) => v.toUpperCase())
+  );
 
   // Clean non-alphanumeric/underscore and ensure uppercase
   let cleaned = (baseName || "VAR").toUpperCase().replace(/[^A-Z0-9_]/g, "");

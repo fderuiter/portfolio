@@ -22,7 +22,9 @@
 
 > `static` **deleteMediaAsset**(`key`): `Promise`\<`boolean`\>
 
-Deletes a media asset from storage by key.
+Deletes a media asset from the active provider by key.
+Returns false when deletion fails. Provider selection/configuration errors
+remain exceptions so missing production credentials fail closed.
 
 #### Parameters
 
@@ -76,7 +78,9 @@ Retrieves a media asset from storage by key.
 
 > `static` **saveMediaAsset**(`key`, `buffer`, `contentType`): `Promise`\<`string`\>
 
-Saves a validated media buffer to storage and returns its relative asset URL.
+Saves a validated media buffer to the active storage provider and returns
+its asset URL. Upload failures are propagated so callers never persist a
+URL for an asset that was not stored durably.
 
 #### Parameters
 

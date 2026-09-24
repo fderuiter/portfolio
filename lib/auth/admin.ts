@@ -1,6 +1,7 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { getEnv } from "@/lib/env";
 import { redirect } from "next/navigation";
+import { logger } from "@/lib/logger";
 
 /**
  * Parses comma-separated string of allowed identifiers into a trimmed lowercase set.
@@ -85,7 +86,7 @@ export async function isCurrentUserAdmin(): Promise<boolean> {
 
     return isUserAuthorizedAdmin(userId, emailAddresses);
   } catch (error) {
-    console.error("[AUTH] Error verifying current admin user:", error);
+    logger.error("[AUTH] Error verifying current admin user:", error);
     return false;
   }
 }

@@ -18,8 +18,24 @@ import {
   RawGeometryBuffer,
 } from "./types";
 
-self.addEventListener("message", (event: MessageEvent<MeshWorkerRequest>) => {
-  const { id, mode, hemiFilter, wireframe = false } = event.data;
+/** Message target used to receive generated geometry and its transferable buffers. */
+export interface MeshWorkerTarget extends EventTarget {
+  postMessage(message: MeshWorkerResponse, transfer: Transferable[]): void;
+}
+
+function getDefaultMeshWorkerTarget(): MeshWorkerTarget {
+  const target = typeof self !== "undefined" ? self : globalThis;
+  return target as unknown as MeshWorkerTarget;
+}
+
+/**
+ * Core handler processing a single MeshWorkerRequest payload and computing geometry buffers with zero-copy transferables.
+ */
+export function processMeshWorkerRequest(req: MeshWorkerRequest): {
+  response: MeshWorkerResponse;
+  transferables: ArrayBuffer[];
+} {
+  const { id, mode, hemiFilter, wireframe = false } = req;
 
   const buffers: RawGeometryBuffer[] = [];
   const transferables: ArrayBuffer[] = [];
@@ -42,11 +58,7 @@ self.addEventListener("message", (event: MessageEvent<MeshWorkerRequest>) => {
       buffers,
       isSubcortical: true,
     };
-    (self as unknown as Worker).postMessage(
-      response,
-      transferables as unknown as Transferable[]
-    );
-    return;
+    return { response, transferables };
   }
 
   if (hemiFilter === "both" || hemiFilter === "lh") {
@@ -94,8 +106,40 @@ self.addEventListener("message", (event: MessageEvent<MeshWorkerRequest>) => {
     isSubcortical: false,
   };
 
-  (self as unknown as Worker).postMessage(
-    response,
-    transferables as unknown as Transferable[]
-  );
-});
+  return { response, transferables };
+}
+
+/**
+ * Event listener callback that handles incoming MessageEvent requests and posts worker responses.
+ */
+export function handleMeshWorkerMessage(
+  event: MessageEvent<MeshWorkerRequest>,
+  target: MeshWorkerTarget = getDefaultMeshWorkerTarget()
+): void {
+  if (!event.data || typeof event.data !== "object") return;
+  const { response, transferables } = processMeshWorkerRequest(event.data);
+  target.postMessage(response, transferables);
+}
+
+/**
+ * Registers the mesh worker message listener on a target event scope (defaulting to self/globalThis).
+ */
+export function registerMeshWorker(
+  target: MeshWorkerTarget = getDefaultMeshWorkerTarget()
+): () => void {
+  const listener = (event: Event) => {
+    handleMeshWorkerMessage(event as MessageEvent<MeshWorkerRequest>, target);
+  };
+  target.addEventListener("message", listener);
+  return () => {
+    target.removeEventListener("message", listener);
+  };
+}
+
+if (
+  typeof self !== "undefined" &&
+  typeof (self as unknown as { importScripts?: unknown }).importScripts ===
+    "function"
+) {
+  registerMeshWorker(getDefaultMeshWorkerTarget());
+}

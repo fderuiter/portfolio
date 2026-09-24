@@ -914,6 +914,30 @@ Re-exports [fillSampleValues](form-test-harness/functions/fillSampleValues.md)
 
 ***
 
+### findCodelistById
+
+Re-exports [findCodelistById](cdisc-controlled-terminology/functions/findCodelistById.md)
+
+***
+
+### findCodelistByNciCode
+
+Re-exports [findCodelistByNciCode](cdisc-controlled-terminology/functions/findCodelistByNciCode.md)
+
+***
+
+### findOptionByCode
+
+Re-exports [findOptionByCode](cdisc-controlled-terminology/functions/findOptionByCode.md)
+
+***
+
+### findOptionByNciCode
+
+Re-exports [findOptionByNciCode](cdisc-controlled-terminology/functions/findOptionByNciCode.md)
+
+***
+
 ### fingerprintForm
 
 Re-exports [fingerprintForm](test-scenarios/functions/fingerprintForm.md)
@@ -1385,6 +1409,18 @@ Re-exports [LoadStudyDraftResult](study-draft-storage/type-aliases/LoadStudyDraf
 ### mapPresetToFormVariables
 
 Re-exports [mapPresetToFormVariables](formula-presets/functions/mapPresetToFormVariables.md)
+
+***
+
+### matchTermByLabel
+
+Re-exports [matchTermByLabel](cdisc-controlled-terminology/functions/matchTermByLabel.md)
+
+***
+
+### NCI\_CODE\_REGEX
+
+Re-exports [NCI_CODE_REGEX](cdisc-controlled-terminology/variables/NCI_CODE_REGEX.md)
 
 ***
 
@@ -2351,6 +2387,12 @@ Re-exports [UsdmStudyDesign](usdm-adapter/interfaces/UsdmStudyDesign.md)
 ### validateCdashVariableName
 
 Re-exports [validateCdashVariableName](precision-date/functions/validateCdashVariableName.md)
+
+***
+
+### validateCodelists
+
+Re-exports [validateCodelists](cdisc-controlled-terminology/functions/validateCodelists.md)
 
 ***
 

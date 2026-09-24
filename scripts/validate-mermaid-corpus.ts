@@ -72,28 +72,3 @@ export async function validateCorpus(
     await browser.close();
   }
 }
-
-if (process.argv[1] && process.argv[1].endsWith("validate-mermaid-corpus.ts")) {
-  validateCorpus().then(({ total, results }) => {
-    const failed = results.filter((result) => !result.valid);
-    console.log(`Extracted ${total} total Mermaid blocks across corpus files.`);
-    for (const result of results) {
-      console.log(
-        `[${result.valid ? "PASS" : "FAIL"}] ${result.file} #${result.index}`
-      );
-      if (!result.valid) {
-        console.error(`  Error: ${result.error}`);
-        console.error(`  Source snippet: ${result.source.slice(0, 100)}...`);
-      }
-    }
-
-    if (failed.length > 0) {
-      console.error(
-        `\nValidation failed: ${failed.length}/${total} diagrams invalid.`
-      );
-      process.exitCode = 1;
-    } else {
-      console.log(`\nAll ${total} diagrams rendered successfully!`);
-    }
-  });
-}

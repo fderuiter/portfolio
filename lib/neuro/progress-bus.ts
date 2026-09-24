@@ -3,6 +3,8 @@
  * Pub/Sub Event Bus for real-time external 3D asset download progress streaming.
  */
 
+import { logger } from "@/lib/logger";
+
 export interface AssetProgressEvent {
   url: string;
   loaded: number;
@@ -36,7 +38,7 @@ export class ProgressBus {
       try {
         callback(event);
       } catch (err) {
-        console.error("Error in progress listener subscriber:", err);
+        logger.error("Error in progress listener subscriber:", err);
       }
     });
   }
