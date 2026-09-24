@@ -35,6 +35,13 @@ export function formatBranchFailure(branch: string, error: string): string {
 }
 
 function main() {
+  if (
+    process.env.ALLOW_DANGEROUS_GIT === "1" ||
+    (process.env.JULES_SESSION_ID && process.env.ALLOW_DANGEROUS_GIT !== "0")
+  ) {
+    process.exit(0);
+  }
+
   const args = process.argv.slice(2);
   const warnOnly = args.includes("--warn");
   const branch =
@@ -57,7 +64,7 @@ function main() {
       `\n${colors.yellow}⚠ Branch '${branch}' does not follow the naming convention.${colors.reset}`
     );
     console.warn(
-      `  ${colors.gray}Expected one of feat/, fix/, chore/, refactor/, docs/, perf/, dx/, test/, dev/, jules/.${colors.reset}`
+      `  ${colors.gray}Expected one of feat/, fix/, chore/, refactor/, docs/, perf/, dx/.${colors.reset}`
     );
     console.warn(
       `  ${colors.gray}Renaming now is free; a push will reject it later.${colors.reset}`

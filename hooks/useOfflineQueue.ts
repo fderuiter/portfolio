@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore, useCallback, useEffect } from "react";
+import { logger } from "@/lib/logger";
 
 export type QueueItemType = "telemetry" | "reaction" | "feedback" | string;
 
@@ -73,7 +74,7 @@ function readStorage(): QueuedRequest[] {
       return parsed;
     }
   } catch (error) {
-    console.warn("Failed to read offline queue from storage:", error);
+    logger.warn("Failed to read offline queue from storage:", error);
   }
 
   memoryCache = { raw: null, items: [] };
@@ -81,7 +82,10 @@ function readStorage(): QueuedRequest[] {
 }
 
 function writeStorage(items: QueuedRequest[]): void {
-  memoryCache = { raw: isStorageAvailable() ? JSON.stringify(items) : null, items };
+  memoryCache = {
+    raw: isStorageAvailable() ? JSON.stringify(items) : null,
+    items,
+  };
   if (isStorageAvailable()) {
     try {
       const raw = JSON.stringify(items);
@@ -89,7 +93,7 @@ function writeStorage(items: QueuedRequest[]): void {
       memoryCache = { raw, items };
       window.dispatchEvent(new CustomEvent(QUEUE_CHANGE_EVENT));
     } catch (error) {
-      console.warn("Failed to write offline queue to storage:", error);
+      logger.warn("Failed to write offline queue to storage:", error);
     }
   }
   notifySubscribers();
@@ -127,7 +131,9 @@ if (typeof window !== "undefined") {
  * @returns Complete QueuedRequest object with assigned ID.
  */
 export function enqueueOfflineRequest<T = unknown>(
-  request: Omit<QueuedRequest<T>, "id" | "createdAt" | "retries"> & { id?: string }
+  request: Omit<QueuedRequest<T>, "id" | "createdAt" | "retries"> & {
+    id?: string;
+  }
 ): QueuedRequest<T> {
   const current = readStorage();
 
@@ -204,7 +210,10 @@ export function getOfflineQueueLength(): number {
  *
  * @returns Object summarizing processed and failed items count.
  */
-export async function flushOfflineQueue(): Promise<{ processed: number; failed: number }> {
+export async function flushOfflineQueue(): Promise<{
+  processed: number;
+  failed: number;
+}> {
   if (isProcessingQueue) {
     return { processed: 0, failed: 0 };
   }
@@ -241,10 +250,17 @@ export async function flushOfflineQueue(): Promise<{ processed: number; failed: 
       const res = await fetch(item.endpoint, {
         method: item.method || "POST",
         headers: item.headers || { "Content-Type": "application/json" },
-        body: typeof item.body === "string" ? item.body : JSON.stringify(item.body),
+        body:
+          typeof item.body === "string" ? item.body : JSON.stringify(item.body),
       });
 
-      if (res.ok || (res.status >= 400 && res.status < 500 && res.status !== 429 && res.status !== 408)) {
+      if (
+        res.ok ||
+        (res.status >= 400 &&
+          res.status < 500 &&
+          res.status !== 429 &&
+          res.status !== 408)
+      ) {
         dequeueOfflineRequest(item.id);
         processed++;
       } else {
@@ -341,7 +357,11 @@ export interface UseOfflineQueueOptions {
  */
 export function useOfflineQueue(options?: UseOfflineQueueOptions) {
   const queue = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  const isOnline = useSyncExternalStore(subscribeOnline, getOnlineSnapshot, getServerOnlineSnapshot);
+  const isOnline = useSyncExternalStore(
+    subscribeOnline,
+    getOnlineSnapshot,
+    getServerOnlineSnapshot
+  );
 
   useEffect(() => {
     if (options?.autoFlushOnOnline !== false && isOnline && queue.length > 0) {
@@ -350,8 +370,11 @@ export function useOfflineQueue(options?: UseOfflineQueueOptions) {
   }, [isOnline, queue.length, options?.autoFlushOnOnline]);
 
   const enqueue = useCallback(
-    <T = unknown>(request: Omit<QueuedRequest<T>, "id" | "createdAt" | "retries"> & { id?: string }) =>
-      enqueueOfflineRequest(request),
+    <T = unknown>(
+      request: Omit<QueuedRequest<T>, "id" | "createdAt" | "retries"> & {
+        id?: string;
+      }
+    ) => enqueueOfflineRequest(request),
     []
   );
 
