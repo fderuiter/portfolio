@@ -2,6 +2,7 @@ import path from "node:path";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { existsSync } from "node:fs";
 import { chromium, type Browser, type LaunchOptions } from "@playwright/test";
+import { fromPartial } from "@total-typescript/shoehorn";
 import { launchChromiumWithFallback } from "@/lib/dx/browser-launch";
 
 const { mockExistsSync } = vi.hoisted(() => ({
@@ -29,7 +30,7 @@ vi.mock("@playwright/test", () => ({
 }));
 
 describe("launchChromiumWithFallback", () => {
-  const mockBrowser = { close: vi.fn() } as unknown as Browser;
+  const mockBrowser = fromPartial<Browser>({ close: vi.fn() });
   const originalBrowsersPath = process.env.PLAYWRIGHT_BROWSERS_PATH;
 
   beforeEach(() => {
