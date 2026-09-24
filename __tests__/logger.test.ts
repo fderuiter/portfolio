@@ -114,4 +114,41 @@ describe("StructuredLogger", () => {
     expect(Sentry.captureException).not.toHaveBeenCalled();
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
+
+  it("preserves actionable stack trace for Sentry in production while sanitizing console output", () => {
+    vi.stubEnv("NODE_ENV", "production");
+
+    try {
+      const testLogger = new StructuredLogger();
+      const prodError = new Error(
+        "Database query failed: /Users/admin/app/secret.ts"
+      );
+      prodError.stack =
+        "Error: Database query failed\n    at query (/Users/admin/app/db.ts:10:5)\n    at process (/Users/admin/app/main.ts:20:3)";
+
+      testLogger.error("Production DB failure", prodError);
+
+      // Sentry must receive the original error with intact stack trace
+      expect(Sentry.captureException).toHaveBeenCalledWith(prodError, {
+        extra: { message: "Production DB failure" },
+      });
+
+      // Console error must receive sanitized error with deep stack stripped
+      const consoleArg = consoleErrorSpy.mock.calls[0]?.[1] as Error;
+      expect(consoleArg).toBeDefined();
+      expect(consoleArg.stack).not.toContain("at query");
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("bypasses telemetry dispatch when skipTelemetry option is passed in meta", () => {
+    const testLogger = new StructuredLogger();
+    const testErr = new Error("Handled elsewhere");
+
+    testLogger.error("Client boundary error", testErr, { skipTelemetry: true });
+
+    expect(Sentry.captureException).not.toHaveBeenCalled();
+    expect(consoleErrorSpy).toHaveBeenCalled();
+  });
 });

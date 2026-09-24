@@ -125,22 +125,22 @@ export class StructuredLogger {
     const timestamp = new Date().toISOString();
     const sanitizedMsg =
       typeof message === "string" ? sanitizeString(message) : String(message);
-    const sanitizedErr = error !== undefined ? sanitizeError(error) : undefined;
+    const consoleErr = error !== undefined ? sanitizeError(error) : undefined;
 
     const entry: LogEntry = {
       level,
       message: sanitizedMsg,
       timestamp,
       ...(meta && Object.keys(meta).length > 0 ? { meta } : {}),
-      ...(sanitizedErr !== undefined ? { error: sanitizedErr } : {}),
+      ...(consoleErr !== undefined ? { error: consoleErr } : {}),
     };
 
-    if (this.enableTelemetry) {
-      this.dispatchTelemetry(level, sanitizedMsg, sanitizedErr, meta);
+    if (this.enableTelemetry && !meta?.skipTelemetry) {
+      this.dispatchTelemetry(level, sanitizedMsg, error, meta);
     }
 
     if (!this.silent) {
-      this.writeToConsole(level, sanitizedMsg, sanitizedErr, meta);
+      this.writeToConsole(level, sanitizedMsg, consoleErr, meta);
     }
 
     return entry;

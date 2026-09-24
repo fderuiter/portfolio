@@ -5,7 +5,6 @@ import {
   verifySvixSignature,
 } from "@/lib/services/email-service";
 import { logger } from "@/lib/logger";
-import * as Sentry from "@sentry/nextjs";
 
 export const dynamic = "force-dynamic";
 
@@ -84,7 +83,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       { status: 200 }
     );
   } catch (err) {
-    Sentry.captureException(err);
     logger.error("Unhandled error processing Resend webhook:", err);
     return NextResponse.json(
       { error: "Internal server error processing webhook" },

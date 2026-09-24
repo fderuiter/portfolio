@@ -1,5 +1,4 @@
 import { NextRequest } from "next/server";
-import * as Sentry from "@sentry/nextjs";
 import { prisma } from "@/lib/db";
 import { redis, getScopedRedisKey } from "@/lib/redis";
 import { RateLimitParamsSchema } from "@/lib/schemas";
@@ -298,7 +297,6 @@ export class TelemetryService {
       }
     } catch (err) {
       // Losing the event here is silent by nature: nothing else holds it.
-      Sentry.captureException(err);
       logger.error("Failed to commit telemetry event to Redis buffer:", err);
       return { event: eventData, buffered: false };
     }

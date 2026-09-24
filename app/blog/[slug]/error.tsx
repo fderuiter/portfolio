@@ -19,7 +19,7 @@ export default function BlogPostError({
 
   useEffect(() => {
     reportClientError(error);
-    logger.error("Blog post route error:", error);
+    logger.error("Blog post route error:", error, { skipTelemetry: true });
     if (typeof window !== "undefined") {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setCanonicalUrl(window.location.href);

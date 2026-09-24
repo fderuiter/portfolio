@@ -5,7 +5,6 @@ import { getConnectionHashFromRequest } from "@/lib/services/privacy-service";
 import { createApiHandler } from "@/lib/route-wrapper";
 import { checkSubmissionAttemptRateLimit } from "@/lib/moderation";
 import { logger } from "@/lib/logger";
-import * as Sentry from "@sentry/nextjs";
 
 export const dynamic = "force-dynamic";
 
@@ -99,7 +98,6 @@ export const POST = createApiHandler(
         { status: 201 }
       );
     } catch (err) {
-      Sentry.captureException(err);
       logger.error("Failed to process contact submission:", err);
       return NextResponse.json(
         { error: "Internal server error processing contact submission" },

@@ -19,7 +19,7 @@ export default function CaseStudyError({
 
   useEffect(() => {
     reportClientError(error);
-    logger.error("Case study route error:", error);
+    logger.error("Case study route error:", error, { skipTelemetry: true });
     if (typeof window !== "undefined") {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setCanonicalUrl(window.location.href);
