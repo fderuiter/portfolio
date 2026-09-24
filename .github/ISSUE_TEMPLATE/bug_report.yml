@@ -2,7 +2,8 @@ name: Bug report
 description: Report a reproducible defect in the portfolio or developer tooling.
 title: "bug: "
 labels:
-  - bug
+  - type:bug
+  - needs-triage
 body:
   - type: markdown
     attributes:

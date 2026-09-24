@@ -2,7 +2,8 @@ name: Feature request
 description: Propose a focused improvement to the portfolio or its tooling.
 title: "feat: "
 labels:
-  - enhancement
+  - type:feature
+  - needs-triage
 body:
   - type: textarea
     id: problem
