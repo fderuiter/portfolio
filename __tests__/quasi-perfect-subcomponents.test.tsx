@@ -218,9 +218,14 @@ describe("Quasi-Perfect Puzzler Subcomponents Test Suite", () => {
       expect(handleSelectNode).toHaveBeenCalledWith("sub-1");
     });
 
-    it("respects controlled expandedNodeIds prop", () => {
+    it("respects controlled expandedNodeIds prop and requests expansion on click", () => {
+      const handleToggleExpand = vi.fn();
       render(
-        <ProofTree rootNode={sampleTree} expandedNodeIds={["root"]} />
+        <ProofTree
+          rootNode={sampleTree}
+          expandedNodeIds={["root"]}
+          onToggleExpand={handleToggleExpand}
+        />
       );
 
       // root is in expandedNodeIds -> children sub-1 & sub-2 visible
@@ -229,6 +234,12 @@ describe("Quasi-Perfect Puzzler Subcomponents Test Suite", () => {
 
       // sub-2 is NOT in expandedNodeIds -> sub-2-1 should be hidden
       expect(screen.queryByText("Premise hQ: Q")).toBeNull();
+
+      // Click toggle on sub-2 (collapsed in controlled mode) -> should report true
+      const sub2ToggleBtn = screen.getByLabelText("Toggle expand for node Subgoal 2: Q");
+      fireEvent.click(sub2ToggleBtn);
+
+      expect(handleToggleExpand).toHaveBeenCalledWith("sub-2", true);
     });
   });
 
