@@ -116,7 +116,7 @@ export function validateBranchName(branch: string): { valid: boolean; error?: st
     return { valid: true };
   }
 
-  const validPrefixes = ["feat/", "fix/", "chore/", "refactor/", "docs/", "perf/", "dx/", "test/", "dev/"];
+  const validPrefixes = ["feat/", "fix/", "chore/", "refactor/", "docs/", "perf/", "dx/", "test/", "dev/", "jules/"];
   const hasValidPrefix = validPrefixes.some((p) => cleanBranch.startsWith(p));
 
   if (!hasValidPrefix) {

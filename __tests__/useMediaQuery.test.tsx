@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
+import { renderToString } from "react-dom/server";
 import {
   useMediaQuery,
   usePrefersReducedMotion,
@@ -125,12 +126,28 @@ describe("useMediaQuery & usePrefersReducedMotion hooks", () => {
     });
 
     it("uses true as server snapshot for conservative reduced motion during SSR", () => {
-      installMatchMediaMock({ "(prefers-reduced-motion: reduce)": false });
-      // Verify query store's getServerSnapshot returns true for usePrefersReducedMotion
-      const { result } = renderHook(() =>
-        useMediaQuery("(prefers-reduced-motion: reduce)", true)
-      );
-      expect(result.current).toBe(false); // client matchMedia match overrides
+      function TestComponent() {
+        const reducedMotion = usePrefersReducedMotion();
+        return <div data-testid="reduced-motion">{String(reducedMotion)}</div>;
+      }
+      const html = renderToString(<TestComponent />);
+      expect(html).toContain('data-testid="reduced-motion">true</div>');
+    });
+
+    it("distinguishes server snapshots: usePrefersReducedMotion defaults true while generic useMediaQuery defaults false during SSR", () => {
+      function TestComponent() {
+        const reducedMotion = usePrefersReducedMotion();
+        const isMobile = useMediaQuery("(max-width: 767px)");
+        return (
+          <div>
+            <span data-testid="reduced">{String(reducedMotion)}</span>
+            <span data-testid="mobile">{String(isMobile)}</span>
+          </div>
+        );
+      }
+      const html = renderToString(<TestComponent />);
+      expect(html).toContain('data-testid="reduced">true</span>');
+      expect(html).toContain('data-testid="mobile">false</span>');
     });
   });
 });
