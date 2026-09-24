@@ -92,11 +92,11 @@ flowchart TD
 - **Usage**: Serverless API route handlers and server components (`lib/db.ts`).
 - **Purpose**: Prevents connection exhaustion during traffic bursts by multiplexing client connections through PgBouncer.
 
-### 2. Migration Direct Connection (`DIRECT_URL`)
+### 2. Production Migration Direct Connection (`DATABASE_URL_UNPOOLED`)
 
-- **Configuration**: Set in `DIRECT_URL` (and `DATABASE_URL_UNPOOLED` / `POSTGRES_URL_NON_POOLING`).
+- **Configuration**: Provisioned as `DATABASE_URL_UNPOOLED` by the Vercel/Neon integration.
 - **Endpoint**: Direct compute endpoint (`ep-xxx.us-east-2.aws.neon.tech`).
-- **Usage**: Prisma CLI commands (`prisma migrate deploy`, `npx prisma migrate status`), release gate script (`scripts/release-gate.ts`), and schema drift checks (`npm run check:migrations:drift`).
+- **Usage**: `scripts/build.js` maps it to Prisma’s `DIRECT_URL` only when `VERCEL=1` and `VERCEL_ENV=production`. Local drift checks use disposable non-production targets.
 - **Purpose**: Directly targets compute to execute PostgreSQL session-level advisory locks (`SELECT pg_advisory_lock(...)`) and schema DDL statements without PgBouncer session pooling timeouts (`P1002`).
 
 ## Cold-Start Protection & Upstash Read-Through Cache

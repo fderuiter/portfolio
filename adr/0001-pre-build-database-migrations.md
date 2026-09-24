@@ -13,7 +13,7 @@ Running live database migrations during static application builds caused deploym
 
 ## Decision
 
-We offloaded live database migration execution (`npx prisma migrate deploy`) from application compilation (`scripts/build.js`) to a dedicated Pipeline Release Gate stage (`npm run release:gate` / `scripts/release-gate.ts`). Static application compilation executes strictly offline using fallback credentials (`DATABASE_URL`, `DIRECT_URL`, `CRON_SECRET`), without requiring live remote database connectivity or write credentials. Migration integrity, provider parity, and destructive statement checks are consolidated into a unified validator (`npm run check:migrations`).
+This decision originally offloaded live database migration execution from application compilation to a dedicated pipeline stage. ADR 0049 removed that stage and placed production migration execution behind the Vercel-only guard in `scripts/build.js`. Local, CI, and preview builds remain offline, while migration integrity, provider parity, and destructive statement checks remain consolidated in `npm run check:migrations`.
 
 ## Consequences
 

@@ -594,8 +594,9 @@ export function checkMigrationGuard(root: string): DiagnosticCheckResult {
           pattern: /migration:replay/i,
         },
         {
-          name: "pipeline release gate execution ('npm run release:gate' or 'release-gate.ts')",
-          pattern: /release:gate|release-gate\.ts/i,
+          name: "guarded Vercel production migration execution",
+          pattern:
+            /VERCEL=1[\s\S]*VERCEL_ENV=production|Vercel production build/i,
         },
         {
           name: "destructive migration environment variable ('ALLOW_DESTRUCTIVE_MIGRATIONS')",
@@ -613,6 +614,24 @@ export function checkMigrationGuard(root: string): DiagnosticCheckResult {
             `DATABASE_MIGRATIONS.md is missing documentation for ${cmd.name}`
           );
         }
+      }
+
+      const buildPath = path.join(root, "scripts", "build.js");
+      const buildContent = fs.existsSync(buildPath)
+        ? fs.readFileSync(buildPath, "utf-8")
+        : "";
+      const productionGuard =
+        /process\.env\.VERCEL\s*===\s*["']1["']\s*&&\s*process\.env\.VERCEL_ENV\s*===\s*["']production["']/;
+      if (
+        !productionGuard.test(buildContent) ||
+        !/process\.env\.DATABASE_URL_UNPOOLED/.test(buildContent) ||
+        !/runStep\(["']npx["'],\s*\[["']prisma["'],\s*["']migrate["'],\s*["']deploy["']\]/.test(
+          buildContent
+        )
+      ) {
+        failures.push(
+          "scripts/build.js is missing the guarded Vercel production migration block"
+        );
       }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);

@@ -629,15 +629,4 @@ export const COMMAND_REGISTRY: CommandDescriptor[] = [
     options: [],
     examples: ["npm run dx check:migrations"],
   },
-  {
-    name: "release:gate",
-    summary:
-      "Run pre-release security audit, migration checks, and deploy gate",
-    description:
-      "Executes end-to-end release readiness checks prior to production deployment.",
-    category: "system",
-    isMutating: false,
-    options: [],
-    examples: ["npm run dx release:gate"],
-  },
 ];

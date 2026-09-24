@@ -59,7 +59,7 @@ Automated security checks are enforced across continuous integration and release
 
 - **Pre-Commit Hook Gate:** Local commits perform dependency security vulnerability checks via `npm run audit:security` in `.husky/pre-commit` before remote push.
 - **Pull Request & Branch CI Gate:** In `.github/workflows/ci.yml`, the `security-gate` job executes both audits against full Git history on every push to `main` and pull request targeting `main`. Unhandled vulnerabilities or unallowlisted secret-shaped values fail the gate.
-- **Release Gate Pipeline:** Pre-deployment release operations execute `npm run release:gate` (`scripts/release-gate.ts`), which runs the vulnerability security audit step (`runSecurityAudit`) prior to database migration deployments and production builds. Any unhandled high or critical vulnerabilities halt the release pipeline immediately.
+- **Production Build Gate:** Vercel’s production build of `main` runs the offline migration integrity checks, applies migrations through the environment-guarded block in `scripts/build.js`, and then compiles the application. Dependency and secret audits remain mandatory CI and pre-commit gates; production database credentials remain confined to Vercel.
 
 ## Vulnerability Override Governance Rules
 

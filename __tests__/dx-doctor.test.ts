@@ -227,7 +227,7 @@ describe("DX Invariant Doctor Engine", () => {
         "CREATE TABLE users (id INT);"
       );
 
-      // Incomplete DATABASE_MIGRATIONS.md without release:gate or check:migrations:drift
+      // Incomplete documentation without Vercel production migration or drift guidance
       fs.writeFileSync(
         path.join(tempDir, "DATABASE_MIGRATIONS.md"),
         "# Migrations\n- `20260814000000_init`\n\nRun `npm run check:migrations`."
@@ -239,7 +239,9 @@ describe("DX Invariant Doctor Engine", () => {
         result.details?.some((d) => d.includes("schema drift verification"))
       ).toBe(true);
       expect(
-        result.details?.some((d) => d.includes("pipeline release gate"))
+        result.details?.some((d) =>
+          d.includes("guarded Vercel production migration")
+        )
       ).toBe(true);
     });
   });

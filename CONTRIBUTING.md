@@ -246,7 +246,6 @@ npm run quality
 | `npm run check`                      | `fast-gate` / Type Check & Lint                                  | Static TypeScript checking, ESLint, and dependency-boundary enforcement                               |
 | `npm run lint:docs`                  | `fast-gate` / Lint Documentation                                 | Markdown formatting and structure linting via `markdownlint-cli`                                      |
 | `npm run check-docs-drift`           | `fast-gate` / Check Documentation Drift                          | Verifies lockstep synchronization for TypeDoc API docs, OpenAPI schemas, and onboarding guides        |
-| `npm run release:gate`               | `fast-gate` / Execute Pipeline Release Gate                      | Pre-deployment release gate validating security audits and migration integrity                        |
 | `npm run check:migrations:drift`     | `fast-gate` / Check Schema Drift                                 | Verifies Prisma database schema against active migrations and checks for drift                        |
 | `npm test` / `npm run test:ci`       | `fast-gate` / Run Logic Tests (Vitest)                           | Comprehensive unit, logic, and state-engine tests with optional coverage                              |
 | `npm run test:fuzz`                  | `fast-gate` / Run Shift-Left Property Fuzz Testing Gate          | Fast-check property-based testing and generative invariant verification                               |

@@ -29,4 +29,26 @@ describe("production deploy configuration", () => {
       fs.readFileSync(path.join(root, "playwright.config.ts"), "utf8")
     ).toContain("x-vercel-protection-bypass");
   });
+
+  it("documents Vercel as the only production migration path", () => {
+    const productionDocs = [
+      "DATABASE_MIGRATIONS.md",
+      "SECURITY.md",
+      "CONTRIBUTING.md",
+      "docs/how-to/release-and-deploy.md",
+    ].map((file) => ({
+      file,
+      content: fs.readFileSync(path.join(root, file), "utf8"),
+    }));
+
+    for (const { file, content } of productionDocs) {
+      expect(content, file).not.toMatch(/release:gate|release-gate\.ts/i);
+      expect(content, file).not.toMatch(/npx prisma migrate deploy/i);
+    }
+
+    const migrationGuide = productionDocs[0].content;
+    expect(migrationGuide).toContain("VERCEL=1");
+    expect(migrationGuide).toContain("VERCEL_ENV=production");
+    expect(migrationGuide).toContain("DATABASE_URL_UNPOOLED");
+  });
 });
