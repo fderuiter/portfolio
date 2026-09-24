@@ -9,6 +9,7 @@ import React, {
 } from "react";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { getSoundEngine } from "@/lib/audio/sound-engine";
+import { getMatchMediaMatches } from "@/hooks/useMediaQuery";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { clamp } from "@/lib/game-utils";
 import {
@@ -128,10 +129,7 @@ export const LaserLoon: React.FC = () => {
   const [activePowerUpTimeMs, setActivePowerUpTimeMs] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
   const [screenShakeEnabled, setScreenShakeEnabled] = useState<boolean>(() => {
-    if (typeof window !== "undefined" && window.matchMedia) {
-      return !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    }
-    return true;
+    return !getMatchMediaMatches("(prefers-reduced-motion: reduce)");
   });
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [gravity, setGravity] = useState<number>(0.15); // for sandbox mode

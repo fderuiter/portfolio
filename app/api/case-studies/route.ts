@@ -9,22 +9,25 @@ import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
-export const GET = createApiHandler(async () => {
-  try {
-    const studies = await CaseStudyService.getPublishedCaseStudies();
-    return NextResponse.json(studies, {
-      headers: {
-        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=3600",
-      },
-    });
-  } catch (err) {
-    logger.error("API Case Studies search data fetch failed:", err);
-    return NextResponse.json(
-      { error: "Failed to load case studies telemetry data" },
-      { status: 500 }
-    );
-  }
-});
+export const GET = createApiHandler(
+  async () => {
+    try {
+      const studies = await CaseStudyService.getPublishedCaseStudies();
+      return NextResponse.json(studies, {
+        headers: {
+          "Cache-Control": "public, s-maxage=300, stale-while-revalidate=3600",
+        },
+      });
+    } catch (err) {
+      logger.error("API Case Studies search data fetch failed:", err);
+      return NextResponse.json(
+        { error: "Failed to load case studies telemetry data" },
+        { status: 500 }
+      );
+    }
+  },
+  { auth: "public" }
+);
 
 export const POST = createApiHandler(
   async (req: NextRequest, { data }) => {
@@ -108,5 +111,6 @@ export const POST = createApiHandler(
         details,
       };
     },
+    auth: "clerk_admin",
   }
 );

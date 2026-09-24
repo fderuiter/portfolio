@@ -102,8 +102,160 @@ const ASSET_ITEMS: AssetFormatItem[] = [
   },
 ];
 
-export const AssetDistributionHub: React.FC = () => {
+export interface AssetDistributionHubProps {
+  items?: AssetFormatItem[];
+}
+
+export const AssetDistributionHub: React.FC<AssetDistributionHubProps> = ({
+  items = ASSET_ITEMS,
+}) => {
   const [copied, setCopied] = React.useState(false);
+  const [activeCategory, setActiveCategory] = React.useState<
+    "all" | "vector" | "web" | "raster"
+  >("all");
+  const [hoveredCategory, setHoveredCategory] = React.useState<
+    "vector" | "web" | "raster" | null
+  >(null);
+  const [hoveredAsset, setHoveredAsset] = React.useState<string | null>(null);
+  const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
+
+  const categories = React.useMemo(() => {
+    const catConfigs = [
+      {
+        key: "vector" as const,
+        color: "#f59e0b",
+        name: "Vector Print",
+      },
+      {
+        key: "web" as const,
+        color: "#22d3ee",
+        name: "Web & UI",
+      },
+      {
+        key: "raster" as const,
+        color: "#60a5fa",
+        name: "Raster Edit",
+      },
+    ];
+
+    const total = items.length || 1;
+    const startX = 20;
+    const gap = 15;
+    const totalAvailWidth = 720 - startX * 2 - gap * (catConfigs.length - 1);
+
+    let currentX = startX;
+    return catConfigs.map((cat) => {
+      const count = items.filter((i) => i.category === cat.key).length;
+      const proportion =
+        items.length > 0 ? count / total : 1 / catConfigs.length;
+      const w = Math.round(proportion * totalAvailWidth);
+      const x = currentX;
+      currentX += w + gap;
+      return {
+        key: cat.key,
+        color: cat.color,
+        x,
+        w,
+        count,
+        label: `${cat.name} (${count})`,
+      };
+    });
+  }, [items]);
+
+  React.useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#09090b";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.strokeStyle = "#27272a";
+    ctx.lineWidth = 1;
+    for (let x = 0; x < canvas.width; x += 40) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, canvas.height);
+      ctx.stroke();
+    }
+
+    categories.forEach((cat) => {
+      const isHovered =
+        hoveredCategory === cat.key ||
+        (hoveredAsset &&
+          items.find((i) => i.filename === hoveredAsset)?.category === cat.key);
+      const isActive = activeCategory === "all" || activeCategory === cat.key;
+
+      ctx.fillStyle = isActive || isHovered ? cat.color : "#27272a";
+      ctx.fillRect(cat.x, 25, cat.w, 30);
+
+      if (isHovered || activeCategory === cat.key) {
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(cat.x - 1, 24, cat.w + 2, 32);
+
+        // Interactive highlight curve
+        ctx.beginPath();
+        ctx.moveTo(cat.x, 20);
+        ctx.quadraticCurveTo(cat.x + cat.w / 2, 10, cat.x + cat.w, 20);
+        ctx.strokeStyle = cat.color;
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = isActive || isHovered ? "#ffffff" : "#71717a";
+      ctx.font = "11px monospace";
+      const text = cat.label;
+      const metrics = ctx.measureText(text);
+      const textX = cat.x + (cat.w - (metrics?.width || 100)) / 2;
+      ctx.fillText(text, textX, 44);
+    });
+
+    // Active category status telemetry
+    ctx.fillStyle = "#a1a1aa";
+    ctx.font = "10px monospace";
+    const statusText = `ACTIVE: ${activeCategory.toUpperCase()}${
+      hoveredCategory ? ` | HOVER: ${hoveredCategory.toUpperCase()}` : ""
+    }`;
+    ctx.fillText(statusText, 20, 15);
+  }, [activeCategory, hoveredCategory, hoveredAsset, categories, items]);
+
+  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / (rect.width || 1);
+    const mouseX = (e.clientX - rect.left) * scaleX;
+
+    const hit = categories.find(
+      (cat) => mouseX >= cat.x && mouseX <= cat.x + cat.w
+    );
+    if (hit) {
+      setHoveredCategory(hit.key);
+    } else {
+      setHoveredCategory(null);
+    }
+  };
+
+  const handleCanvasMouseLeave = () => {
+    setHoveredCategory(null);
+  };
+
+  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / (rect.width || 1);
+    const mouseX = (e.clientX - rect.left) * scaleX;
+
+    const hit = categories.find(
+      (cat) => mouseX >= cat.x && mouseX <= cat.x + cat.w
+    );
+    if (hit) {
+      setActiveCategory((prev) => (prev === hit.key ? "all" : hit.key));
+    }
+  };
 
   const handleShare = async () => {
     const url = typeof window !== "undefined" ? window.location.href : "";
@@ -161,6 +313,45 @@ export const AssetDistributionHub: React.FC = () => {
         </div>
       </div>
 
+      {/* Asset Distribution Canvas Preview */}
+      <div className="mb-8 relative z-10 p-4 rounded-2xl bg-zinc-900/40 border border-zinc-800/80">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+          <span className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">
+            Asset Distribution Interactive Canvas Preview
+          </span>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {(["all", "vector", "web", "raster"] as const).map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                onMouseEnter={() =>
+                  setHoveredCategory(cat === "all" ? null : cat)
+                }
+                onMouseLeave={() => setHoveredCategory(null)}
+                className={`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase transition-all cursor-pointer ${
+                  activeCategory === cat
+                    ? "bg-amber-500/20 text-amber-400 border border-amber-500/40"
+                    : "bg-zinc-900/60 text-zinc-400 hover:text-zinc-200 border border-zinc-800"
+                }`}
+              >
+                {cat === "all" ? "All Formats" : cat}
+              </button>
+            ))}
+          </div>
+        </div>
+        <canvas
+          ref={canvasRef}
+          data-testid="asset-distribution-canvas"
+          width={720}
+          height={80}
+          onMouseMove={handleCanvasMouseMove}
+          onMouseLeave={handleCanvasMouseLeave}
+          onClick={handleCanvasClick}
+          className="w-full h-20 rounded-xl border border-zinc-800 bg-zinc-950 object-cover cursor-pointer"
+          aria-label="Asset distribution interactive rendering canvas"
+        />
+      </div>
+
       {/* Asset Categories Grid */}
       <div className="space-y-8 relative z-10">
         {/* Category 1: Vector Print */}
@@ -172,7 +363,12 @@ export const AssetDistributionHub: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {ASSET_ITEMS.filter((item) => item.category === "vector").map(
               (item) => (
-                <AssetCard key={item.filename} item={item} />
+                <AssetCard
+                  key={item.filename}
+                  item={item}
+                  activeCategory={activeCategory}
+                  onHover={setHoveredAsset}
+                />
               )
             )}
           </div>
@@ -187,7 +383,12 @@ export const AssetDistributionHub: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {ASSET_ITEMS.filter((item) => item.category === "web").map(
               (item) => (
-                <AssetCard key={item.filename} item={item} />
+                <AssetCard
+                  key={item.filename}
+                  item={item}
+                  activeCategory={activeCategory}
+                  onHover={setHoveredAsset}
+                />
               )
             )}
           </div>
@@ -202,7 +403,12 @@ export const AssetDistributionHub: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {ASSET_ITEMS.filter((item) => item.category === "raster").map(
               (item) => (
-                <AssetCard key={item.filename} item={item} />
+                <AssetCard
+                  key={item.filename}
+                  item={item}
+                  activeCategory={activeCategory}
+                  onHover={setHoveredAsset}
+                />
               )
             )}
           </div>
@@ -242,9 +448,27 @@ export const AssetDistributionHub: React.FC = () => {
   );
 };
 
-function AssetCard({ item }: { item: AssetFormatItem }) {
+function AssetCard({
+  item,
+  activeCategory = "all",
+  onHover,
+}: {
+  item: AssetFormatItem;
+  activeCategory?: string;
+  onHover?: (filename: string | null) => void;
+}) {
+  const isMatch = activeCategory === "all" || activeCategory === item.category;
+
   return (
-    <div className="group flex flex-col justify-between p-4 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 hover:border-zinc-700 hover:bg-zinc-900/80 transition-all duration-200">
+    <div
+      onMouseEnter={() => onHover?.(item.filename)}
+      onMouseLeave={() => onHover?.(null)}
+      className={`group flex flex-col justify-between p-4 rounded-2xl border transition-all duration-200 ${
+        isMatch
+          ? "bg-zinc-900/40 border-zinc-800/80 hover:border-zinc-700 hover:bg-zinc-900/80 opacity-100"
+          : "bg-zinc-950/20 border-zinc-900 opacity-40 hover:opacity-80"
+      }`}
+    >
       <div>
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
@@ -279,3 +503,5 @@ function AssetCard({ item }: { item: AssetFormatItem }) {
     </div>
   );
 }
+
+export const AssetDistributionViewer = AssetDistributionHub;

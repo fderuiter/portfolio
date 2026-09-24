@@ -9,6 +9,7 @@ import React, {
 } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { getMatchMediaMatches } from "@/hooks/useMediaQuery";
 import {
   MEME_QUOTES,
   SOUNDBOARD_BUTTONS,
@@ -64,9 +65,9 @@ const AudioWaveformVisualizer: React.FC<{
 
   useEffect(() => {
     let animFrame: number;
-    const prefersReduced =
-      typeof window !== "undefined" &&
-      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const prefersReduced = getMatchMediaMatches(
+      "(prefers-reduced-motion: reduce)"
+    );
 
     if (prefersReduced) {
       for (let i = 0; i < 24; i++) {
