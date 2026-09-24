@@ -32,6 +32,7 @@ import type {
   StudyProtocol,
 } from "./types";
 import { generateEngineId, generateCdashVariableName } from "./precision-date";
+import { cloneDeep } from "../utils/clone";
 
 /** localStorage key holding the author's personal block library. */
 export const PERSONAL_LIBRARY_STORAGE_KEY = "crf_studio_personal_library_v1";
@@ -147,7 +148,7 @@ export interface InstantiateLibraryEntryOptions {
 }
 
 function deepClone<T>(value: T): T {
-  return JSON.parse(JSON.stringify(value)) as T;
+  return cloneDeep(value);
 }
 
 function isLibraryEntryShape(value: unknown): value is PersonalLibraryEntry {

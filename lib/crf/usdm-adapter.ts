@@ -23,6 +23,7 @@ import {
   getUniversalCrfSchemaUrl,
   validateUniversalCrf,
 } from "./universal-schema";
+import { cloneDeep } from "../utils/clone";
 import { STANDARD_CODELISTS } from "./cdisc-controlled-terminology";
 
 export interface UsdmBiomedicalConceptProperty {
@@ -291,7 +292,7 @@ export function exportStudyToUsdmObject(study: StudyProtocol): UsdmDocument {
   });
 
   // Clone forms so we don't mutate original
-  const forms: CRFForm[] = JSON.parse(JSON.stringify(study.forms || []));
+  const forms: CRFForm[] = cloneDeep(study.forms || []);
 
   forms.forEach((form) => {
     form.sections?.forEach((section) => {

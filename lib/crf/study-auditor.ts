@@ -9,6 +9,7 @@ import {
   STANDARD_CODELISTS,
 } from "@/lib/crf/cdisc-cdash-library";
 import { lintFormula, FormulaLintResult } from "@/lib/crf/formula-linter";
+import { cloneDeep } from "@/lib/utils/clone";
 
 /**
  * Diagnostic finding tier categorization.
@@ -465,7 +466,7 @@ export class StudyAuditor {
       return study;
     }
 
-    const cloned: StudyProtocol = JSON.parse(JSON.stringify(study));
+    const cloned: StudyProtocol = cloneDeep(study);
 
     if (
       target.autoFixType === "truncate_variable" &&
