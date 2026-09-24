@@ -168,6 +168,9 @@ describe("Developer Experience (DX) Tooling Suite", () => {
       expect(validateBranchName("fix/proof-ast-bug").valid).toBe(true);
       expect(validateBranchName("dx/commit-wizard").valid).toBe(true);
 
+      expect(validateBranchName("jules/test-branch").valid).toBe(false);
+      expect(validateBranchName("test/some-test").valid).toBe(false);
+
       const invalidBranch = validateBranchName("random_branch_name");
       expect(invalidBranch.valid).toBe(false);
       expect(invalidBranch.error).toContain("Expected prefixes");
