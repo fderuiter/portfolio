@@ -438,17 +438,22 @@ Fictional teaching material; nothing in the game is clinical or regulatory advic
 - **+Mult / ×Mult**: Additive and multiplicative multipliers. A hand scores `Chips × (Σ +Mult) × (Π ×Mult)`.
 - **Zero-Score Rule**: Any rule result carrying ×0 (an uncorrected fatal denominator error, or closed-session unblinding) sets final Mult to 0.
 - **Redline**: A revealed, uncorrected non-fatal finding that subtracts its rule's penalty from +Mult.
-- **Blind**: A milestone delivery quota (Small, Big or Boss) the round score must reach.
+- **Blind**: A milestone delivery quota (Small, Big or Boss) the round score must reach. The Small Blind is the player's own team, the Big Blind is the client or an open committee session, and the Boss is someone who can stop the program.
 - **Hand**: A scored combination of outputs, from High Table (15 Chips / +1 Mult) to MedDRA Five of a Kind (200 / +18).
-- **CPU**: The action budget. Approve & Play costs 2 CPU; Reject & Discard costs 1 CPU.
-- **Draw Pile**: The ordered drafts a scenario stages. It is fixed per scenario; seeded randomness is reserved for the crisis deck and the shop.
+- **CPU**: The action budget: the milestone's allocation on the statistics compute grid. Approve & Play costs 2 CPU; Reject & Discard costs 1 CPU.
+- **Draw Pile**: The ordered drafts a scenario stages; each draw is a programmer compiling one of the player's shells against the current snapshot. It is fixed per scenario; seeded randomness is reserved for the crisis deck and the shop.
 - **Card Table**: The main screen. It shows a hand of TLF cards, from which the player selects up to five to play as a poker hand against the Blind.
-- **Inspect**: Opening a card's QC Desk for CPU to reveal and correct its hidden defects. Playing an uninspected card is a gamble, because an undiscovered fatal defect still zeroes the hand.
+- **Inspect**: Opening a card's QC Desk for CPU to reveal and correct its hidden defects, standing for the independent double-programming compare. Playing an uninspected card is a gamble, because an undiscovered fatal defect still zeroes the hand.
 - **Loud Moment**: A discrete, event-driven burst of saturated colour, glow, shake or CRT effect (score resolution, Blind cleared, shop, boss intro), scoped inside the cabinet. It is disabled under reduced motion and below 768px.
 - **Card Face**: The live mini-output printed on a card from its data: a miniature table, subject listing, plot or cohort chip, with the population suit written in text and a stamp slot (REDLINE, QC ✓).
 - **Card Back**: The shared face-down design. It renders only a redacted slot, so an undealt or blinded card carries no face values.
 - **Juice Kit**: The cabinet's reusable effects: named synthesized sound cues, an ambient music loop, and CSS-only loud-moment layers (CRT, swirl, capped shake, flame and glow). Later features trigger effects by name.
 - **Score Timeline**: The ordered, pure sequence of scoring events derived from `HandEvaluation`. The UI plays it back as animation, instant tally and screen-reader narration, and never computes a score itself.
-- **Guidance Card**: A consumable named after real guidance (ICH E3, E9, E2A, CDISC IGs) that permanently levels up one hand type for the run.
+- **Guidance Card**: A consumable named after real guidance (ICH E3, E9, E2A, CDISC IGs) that permanently levels up one hand type for the run. Documents are always Guidance cards, never relics.
+- **Act (Study)**: One of the run's three studies of the same compound: Phase I (First in Human), Phase II (Proof of Concept) and Phase III (Blinded Pivotal). The deck, relics, hand levels and budget carry over; subjects, snapshots, the SAP and compiled outputs reset.
+- **Boss Pool**: The bosses an act can draw from the seeded event draw. Act I draws the Dose Escalation Committee, Act II draws a DMC closed session or an End-of-Phase-2 FDA Information Request, and Act III is always CSR Lock.
+- **Relic (SOP Relic)**: A passive modifier that is a person or a tool on the player's team, such as a lead programmer, a validated macro suite or a double-programming SOP.
+- **Site Activation Pack**: A booster pack that enrolls new subjects into the current study, adding Chips and creating a new population snapshot that stales dependent outputs.
+- **Blinding Firewall**: The CRO's separation between its blinded study team and its independent DMC statisticians. The player works both seats; peeking across triggers the zero-score rule.
 - **Stake (GCP Audit Level)**: A cumulative difficulty tier for a run, from Routine Monitoring to Warning Letter.
-- **Sponsor (Starter Sponsor)**: A starting configuration for a run: starting deck, starting item and one rule twist, such as Oncology Pharma or a Generic CRO.
+- **Sponsor (Starter Sponsor)**: A starting configuration for a run: starting deck, starting item and one rule twist, such as Oncology Pharma or Virtual Biotech (the default). The sponsor is the client whose compound the player is developing.
