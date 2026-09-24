@@ -11,9 +11,10 @@ import {
   IconPlayerPause,
   IconPlayerSkipForward,
   IconPlayerSkipBack,
-  IconRotate
+  IconRotate,
 } from "@tabler/icons-react";
 import { usePersistentState } from "@/hooks/usePersistentState";
+import { logger } from "@/lib/logger";
 import { useAnnouncer } from "@/components/providers/A11yProvider";
 import { useAudio } from "@/components/providers/AudioProvider";
 import {
@@ -34,9 +35,13 @@ interface LogItem {
   jsonPayload?: unknown;
 }
 
-const COMMAND_REGISTRY: Record<string, { description: string; payload: unknown }> = {
+const COMMAND_REGISTRY: Record<
+  string,
+  { description: string; payload: unknown }
+> = {
   "imednet studies list": {
-    description: "Retrieve a list of all active clinical trials from the iMednet EDC platform.",
+    description:
+      "Retrieve a list of all active clinical trials from the iMednet EDC platform.",
     payload: [
       {
         studyID: "BRIGHT-01",
@@ -58,11 +63,12 @@ const COMMAND_REGISTRY: Record<string, { description: string; payload: unknown }
         status: "COMPLETED",
         subjectsCount: 310,
         version: "v2.5.0",
-      }
+      },
     ],
   },
   "imednet subjects get --id 123": {
-    description: "Query specific details and records for subject 123 (HIPAA-anonymized).",
+    description:
+      "Query specific details and records for subject 123 (HIPAA-anonymized).",
     payload: {
       subjectID: "SUB-123",
       studyID: "BRIGHT-01",
@@ -80,7 +86,8 @@ const COMMAND_REGISTRY: Record<string, { description: string; payload: unknown }
     },
   },
   "imednet records search --study BRIGHT-01": {
-    description: "Search dynamic patient records and EDC form entries matching active trials.",
+    description:
+      "Search dynamic patient records and EDC form entries matching active trials.",
     payload: {
       studyID: "BRIGHT-01",
       totalRecordsMatched: 3,
@@ -112,7 +119,7 @@ const COMMAND_REGISTRY: Record<string, { description: string; payload: unknown }
           systolicBP: 108,
           diastolicBP: 70,
           timestamp: "2026-05-20T10:00Z",
-        }
+        },
       ],
     },
   },
@@ -121,16 +128,17 @@ const COMMAND_REGISTRY: Record<string, { description: string; payload: unknown }
 const DEFAULT_PLAYBACK = [
   {
     command: "imednet studies list",
-    description: "Retrieve active clinical trials from the iMednet EDC platform"
+    description:
+      "Retrieve active clinical trials from the iMednet EDC platform",
   },
   {
     command: "imednet subjects get --id 123",
-    description: "Query details and demographics for subject 123"
+    description: "Query details and demographics for subject 123",
   },
   {
     command: "imednet records search --study BRIGHT-01",
-    description: "Search patient records matching active trial BRIGHT-01"
-  }
+    description: "Search patient records matching active trial BRIGHT-01",
+  },
 ];
 
 // Pure ID Generator outside rendering pipeline to satisfy react-hooks/purity rules
@@ -161,7 +169,10 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
       text: "iMednet Python SDK CLI Sandbox [Version 2.3.1]\nType 'help' to list available commands. Click the badges below for instant inputs.",
     },
   ]);
-  const [commandHistory, setCommandHistory] = usePersistentState<string[]>("sandbox_terminal_history", []);
+  const [commandHistory, setCommandHistory] = usePersistentState<string[]>(
+    "sandbox_terminal_history",
+    []
+  );
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isExecuting, setIsExecuting] = useState(false);
 
@@ -179,7 +190,9 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
   const logsContainerRef = useRef<HTMLDivElement>(null);
   const typingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const playbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const startPlaybackLoopRef = useRef<((targetIdx?: number) => void) | null>(null);
+  const startPlaybackLoopRef = useRef<((targetIdx?: number) => void) | null>(
+    null
+  );
 
   const activeRegistry = commands || COMMAND_REGISTRY;
   const activePlayback = playback || DEFAULT_PLAYBACK;
@@ -199,336 +212,394 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
   // Scroll to bottom internally when logs update
   useEffect(() => {
     if (logsContainerRef.current) {
-      logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
+      logsContainerRef.current.scrollTop =
+        logsContainerRef.current.scrollHeight;
     }
   }, [logs]);
 
   // Execute terminal commands
-  const executeCommand = React.useCallback((cmdText: string) => {
-    const trimmed = cmdText.trim();
-    if (!trimmed) return;
+  const executeCommand = React.useCallback(
+    (cmdText: string) => {
+      const trimmed = cmdText.trim();
+      if (!trimmed) return;
 
-    // Add command to output log
-    const cmdId = generateLogId();
-    setLogs((prev) => [...prev, { id: cmdId, type: "command", text: trimmed }]);
-    setInput("");
+      // Add command to output log
+      const cmdId = generateLogId();
+      setLogs((prev) => [
+        ...prev,
+        { id: cmdId, type: "command", text: trimmed },
+      ]);
+      setInput("");
 
-    // Add to command history list
-    setCommandHistory((prev) => {
-      const filtered = prev.filter((c) => c !== trimmed);
-      return [...filtered, trimmed];
-    });
-    setHistoryIndex(-1);
-    setIsExecuting(true);
-    announce("Command execution started", "polite");
+      // Add to command history list
+      setCommandHistory((prev) => {
+        const filtered = prev.filter((c) => c !== trimmed);
+        return [...filtered, trimmed];
+      });
+      setHistoryIndex(-1);
+      setIsExecuting(true);
+      announce("Command execution started", "polite");
 
-    // Simulated short response lag for realism
-    setTimeout(() => {
-      setIsExecuting(false);
-      const outputId = generateLogId();
+      // Simulated short response lag for realism
+      setTimeout(() => {
+        setIsExecuting(false);
+        const outputId = generateLogId();
 
-      if (trimmed === "clear") {
-        setLogs([]);
-        announce("Console cleared", "polite");
-        return;
-      }
-
-      if (trimmed === "help") {
-        const cmdLines = Object.entries(activeRegistry)
-          .map(([cmd, data]) => `  ${cmd.padEnd(40)} -> ${data.description}`)
-          .join("\n");
-
-        setLogs((prev) => [
-          ...prev,
-          {
-            id: outputId,
-            type: "info",
-            text: `Available Curated Clinical EDC SDK Commands:\n\n` +
-              cmdLines + `\n` +
-              `  clear                                    -> Clear the terminal console\n` +
-              `  help                                     -> View available command registry`,
-          },
-        ]);
-        announce("Help menu loaded displaying available SDK commands.", "polite");
-        return;
-      }
-
-      // --- Easter Egg & UNIX Meme Command Handlers ---
-      const lower = trimmed.toLowerCase();
-
-      if (lower.startsWith("cowsay")) {
-        const customText = trimmed.replace(/^cowsay\s*/i, "").trim() || "Moo! Ships with 100% test coverage.";
-        unlockAchievement("terminal-cowboy");
-        playMemeSound("laser");
-        setLogs((prev) => [
-          ...prev,
-          {
-            id: outputId,
-            type: "info",
-            text: ASCII_COWSAY(customText),
-          },
-        ]);
-        announce(`Cowsay output: ${customText}`, "polite");
-        return;
-      }
-
-      if (lower === "loon" || lower === "laser" || lower === "laser-loon") {
-        unlockAchievement("terminal-cowboy");
-        playMemeSound("laser");
-        setLogs((prev) => [
-          ...prev,
-          {
-            id: outputId,
-            type: "info",
-            text: ASCII_LASER_LOON(),
-          },
-        ]);
-        announce("Laser Loon cryo-optics rendered.", "polite");
-        return;
-      }
-
-      if (lower === "sl") {
-        unlockAchievement("terminal-cowboy");
-        playMemeSound("level-up");
-        setLogs((prev) => [
-          ...prev,
-          {
-            id: outputId,
-            type: "info",
-            text: ASCII_TRAIN() + "\nCHOO-CHOO! Developer Express on track 1.",
-          },
-        ]);
-        announce("Steam locomotive animation executed.", "polite");
-        return;
-      }
-
-      if (lower === "ls" || lower === "dir") {
-        unlockAchievement("terminal-cowboy");
-        setLogs((prev) => [
-          ...prev,
-          {
-            id: outputId,
-            type: "info",
-            text: "src/   components/   app/   lib/   duck_treats.db   secrets/   package.json",
-          },
-        ]);
-        announce("Directory contents listed.", "polite");
-        return;
-      }
-
-      if (lower === "fortune") {
-        unlockAchievement("terminal-cowboy");
-        playMemeSound("level-up");
-        const fortune = FORTUNES[Math.floor(Math.random() * FORTUNES.length)];
-        setLogs((prev) => [
-          ...prev,
-          {
-            id: outputId,
-            type: "info",
-            text: `🥠 Fortune: "${fortune}"`,
-          },
-        ]);
-        announce(`Fortune received: ${fortune}`, "polite");
-        return;
-      }
-
-      if (lower === "duck" || lower === "pet duck" || lower === "woof") {
-        unlockAchievement("duck-whisperer");
-        playMemeSound("bark");
-        setLogs((prev) => [
-          ...prev,
-          {
-            id: outputId,
-            type: "info",
-            text: ASCII_DUCK() + "\nDuck wags his tail enthusiastically! *Woof!*",
-          },
-        ]);
-        announce("Duck the golden retriever puppy was summoned!", "polite");
-        return;
-      }
-
-      if (lower === "matrix") {
-        unlockAchievement("terminal-cowboy");
-        playMemeSound("matrix-glitch");
-        setLogs((prev) => [
-          ...prev,
-          {
-            id: outputId,
-            type: "info",
-            text: "01000011 01101000 01100001 01101111 01110011\nWake up, developer...\nThe Matrix has you.\nFollow the white puppy 🐾",
-          },
-        ]);
-        announce("Matrix terminal stream initialized.", "polite");
-        return;
-      }
-
-      if (lower.startsWith("sudo")) {
-        unlockAchievement("terminal-cowboy");
-        playMemeSound("fda-siren");
-        setLogs((prev) => [
-          ...prev,
-          {
-            id: outputId,
-            type: "error",
-            text: "Permission denied: Duck 🐾 is guarding the root filesystem. Nice try, sudoer!",
-          },
-        ]);
-        announce("Sudo command denied by Duck the puppy.", "polite");
-        return;
-      }
-
-      if (lower.includes("git push") && (lower.includes("-f") || lower.includes("force"))) {
-        unlockAchievement("friday-survivor");
-        playMemeSound("friday-alarm");
-        setLogs((prev) => [
-          ...prev,
-          {
-            id: outputId,
-            type: "error",
-            text: "🚨 CRITICAL ALERT: Force-pushing to main on a Friday at 4:59 PM!\nremote: Resolving deltas: 100% (42/42), done.\nremote: Error: You bypassed 18 CI invariant checks and broke staging!\nremote: Duck is currently debugging your merge conflict in production.",
-          },
-        ]);
-        announce("Friday force push disaster simulation triggered!", "polite");
-        return;
-      }
-
-      if (lower === "secret" || lower === "meme" || lower === "vault" || lower === "chaos") {
-        unlockAchievement("terminal-cowboy");
-        setVaultUnlocked(true);
-        playMemeSound("fanfare");
-        if (typeof window !== "undefined") {
-          window.dispatchEvent(new CustomEvent("trigger_retro_chaos"));
+        if (trimmed === "clear") {
+          setLogs([]);
+          announce("Console cleared", "polite");
+          return;
         }
-        setLogs((prev) => [
-          ...prev,
-          {
-            id: outputId,
-            type: "info",
-            text: "🔓 SECRET MEME VAULT UNLOCKED!\nOpening Retro Chaos Mode... Visit /arcade/meme-vault to explore the full soundboard and meme cards!",
-          },
-        ]);
-        announce("Secret Meme Vault unlocked and opened.", "polite");
-        return;
-      }
 
-      if (lower === "418" || lower === "coffee" || lower === "tea") {
-        unlockAchievement("rfc-barista");
-        playMemeSound("teapot-whistle");
-        setLogs((prev) => [
-          ...prev,
-          {
-            id: outputId,
-            type: "error",
-            text: "HTTP 418: I'm a teapot (RFC 2324 / RFC 7168 HTCPCP/1.0).\nCannot brew coffee: Connected device is a clinical database engine, not a kettle.",
-          },
-        ]);
-        announce("HTTP 418 I'm a teapot response received.", "polite");
-        return;
-      }
+        if (trimmed === "help") {
+          const cmdLines = Object.entries(activeRegistry)
+            .map(([cmd, data]) => `  ${cmd.padEnd(40)} -> ${data.description}`)
+            .join("\n");
 
-      const match = activeRegistry[trimmed];
-      if (match) {
-        setLogs((prev) => [
-          ...prev,
-          {
-            id: outputId,
-            type: "output",
-            text: "",
-            jsonPayload: match.payload,
-          },
-        ]);
-        playSuccess();
-        if (trimmed === "imednet studies list") {
-          announce("Command execution completed. Returned active clinical trials: BRIGHT-01, ONCO-2026, and CARDIO-REF.", "polite");
-        } else if (trimmed === "imednet subjects get --id 123") {
-          announce("Command execution completed. Returned clinical records and HIPAA-anonymized demographics for subject 123.", "polite");
-        } else if (trimmed === "imednet records search --study BRIGHT-01") {
-          announce("Command execution completed. Returned 3 vital sign records matching study BRIGHT-01.", "polite");
+          setLogs((prev) => [
+            ...prev,
+            {
+              id: outputId,
+              type: "info",
+              text:
+                `Available Curated Clinical EDC SDK Commands:\n\n` +
+                cmdLines +
+                `\n` +
+                `  clear                                    -> Clear the terminal console\n` +
+                `  help                                     -> View available command registry`,
+            },
+          ]);
+          announce(
+            "Help menu loaded displaying available SDK commands.",
+            "polite"
+          );
+          return;
+        }
+
+        // --- Easter Egg & UNIX Meme Command Handlers ---
+        const lower = trimmed.toLowerCase();
+
+        if (lower.startsWith("cowsay")) {
+          const customText =
+            trimmed.replace(/^cowsay\s*/i, "").trim() ||
+            "Moo! Ships with 100% test coverage.";
+          unlockAchievement("terminal-cowboy");
+          playMemeSound("laser");
+          setLogs((prev) => [
+            ...prev,
+            {
+              id: outputId,
+              type: "info",
+              text: ASCII_COWSAY(customText),
+            },
+          ]);
+          announce(`Cowsay output: ${customText}`, "polite");
+          return;
+        }
+
+        if (lower === "loon" || lower === "laser" || lower === "laser-loon") {
+          unlockAchievement("terminal-cowboy");
+          playMemeSound("laser");
+          setLogs((prev) => [
+            ...prev,
+            {
+              id: outputId,
+              type: "info",
+              text: ASCII_LASER_LOON(),
+            },
+          ]);
+          announce("Laser Loon cryo-optics rendered.", "polite");
+          return;
+        }
+
+        if (lower === "sl") {
+          unlockAchievement("terminal-cowboy");
+          playMemeSound("level-up");
+          setLogs((prev) => [
+            ...prev,
+            {
+              id: outputId,
+              type: "info",
+              text:
+                ASCII_TRAIN() + "\nCHOO-CHOO! Developer Express on track 1.",
+            },
+          ]);
+          announce("Steam locomotive animation executed.", "polite");
+          return;
+        }
+
+        if (lower === "ls" || lower === "dir") {
+          unlockAchievement("terminal-cowboy");
+          setLogs((prev) => [
+            ...prev,
+            {
+              id: outputId,
+              type: "info",
+              text: "src/   components/   app/   lib/   duck_treats.db   secrets/   package.json",
+            },
+          ]);
+          announce("Directory contents listed.", "polite");
+          return;
+        }
+
+        if (lower === "fortune") {
+          unlockAchievement("terminal-cowboy");
+          playMemeSound("level-up");
+          const fortune = FORTUNES[Math.floor(Math.random() * FORTUNES.length)];
+          setLogs((prev) => [
+            ...prev,
+            {
+              id: outputId,
+              type: "info",
+              text: `🥠 Fortune: "${fortune}"`,
+            },
+          ]);
+          announce(`Fortune received: ${fortune}`, "polite");
+          return;
+        }
+
+        if (lower === "duck" || lower === "pet duck" || lower === "woof") {
+          unlockAchievement("duck-whisperer");
+          playMemeSound("bark");
+          setLogs((prev) => [
+            ...prev,
+            {
+              id: outputId,
+              type: "info",
+              text:
+                ASCII_DUCK() + "\nDuck wags his tail enthusiastically! *Woof!*",
+            },
+          ]);
+          announce("Duck the golden retriever puppy was summoned!", "polite");
+          return;
+        }
+
+        if (lower === "matrix") {
+          unlockAchievement("terminal-cowboy");
+          playMemeSound("matrix-glitch");
+          setLogs((prev) => [
+            ...prev,
+            {
+              id: outputId,
+              type: "info",
+              text: "01000011 01101000 01100001 01101111 01110011\nWake up, developer...\nThe Matrix has you.\nFollow the white puppy 🐾",
+            },
+          ]);
+          announce("Matrix terminal stream initialized.", "polite");
+          return;
+        }
+
+        if (lower.startsWith("sudo")) {
+          unlockAchievement("terminal-cowboy");
+          playMemeSound("fda-siren");
+          setLogs((prev) => [
+            ...prev,
+            {
+              id: outputId,
+              type: "error",
+              text: "Permission denied: Duck 🐾 is guarding the root filesystem. Nice try, sudoer!",
+            },
+          ]);
+          announce("Sudo command denied by Duck the puppy.", "polite");
+          return;
+        }
+
+        if (
+          lower.includes("git push") &&
+          (lower.includes("-f") || lower.includes("force"))
+        ) {
+          unlockAchievement("friday-survivor");
+          playMemeSound("friday-alarm");
+          setLogs((prev) => [
+            ...prev,
+            {
+              id: outputId,
+              type: "error",
+              text: "🚨 CRITICAL ALERT: Force-pushing to main on a Friday at 4:59 PM!\nremote: Resolving deltas: 100% (42/42), done.\nremote: Error: You bypassed 18 CI invariant checks and broke staging!\nremote: Duck is currently debugging your merge conflict in production.",
+            },
+          ]);
+          announce(
+            "Friday force push disaster simulation triggered!",
+            "polite"
+          );
+          return;
+        }
+
+        if (
+          lower === "secret" ||
+          lower === "meme" ||
+          lower === "vault" ||
+          lower === "chaos"
+        ) {
+          unlockAchievement("terminal-cowboy");
+          setVaultUnlocked(true);
+          playMemeSound("fanfare");
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(new CustomEvent("trigger_retro_chaos"));
+          }
+          setLogs((prev) => [
+            ...prev,
+            {
+              id: outputId,
+              type: "info",
+              text: "🔓 SECRET MEME VAULT UNLOCKED!\nOpening Retro Chaos Mode... Visit /arcade/meme-vault to explore the full soundboard and meme cards!",
+            },
+          ]);
+          announce("Secret Meme Vault unlocked and opened.", "polite");
+          return;
+        }
+
+        if (lower === "418" || lower === "coffee" || lower === "tea") {
+          unlockAchievement("rfc-barista");
+          playMemeSound("teapot-whistle");
+          setLogs((prev) => [
+            ...prev,
+            {
+              id: outputId,
+              type: "error",
+              text: "HTTP 418: I'm a teapot (RFC 2324 / RFC 7168 HTCPCP/1.0).\nCannot brew coffee: Connected device is a clinical database engine, not a kettle.",
+            },
+          ]);
+          announce("HTTP 418 I'm a teapot response received.", "polite");
+          return;
+        }
+
+        const match = activeRegistry[trimmed];
+        if (match) {
+          setLogs((prev) => [
+            ...prev,
+            {
+              id: outputId,
+              type: "output",
+              text: "",
+              jsonPayload: match.payload,
+            },
+          ]);
+          playSuccess();
+          if (trimmed === "imednet studies list") {
+            announce(
+              "Command execution completed. Returned active clinical trials: BRIGHT-01, ONCO-2026, and CARDIO-REF.",
+              "polite"
+            );
+          } else if (trimmed === "imednet subjects get --id 123") {
+            announce(
+              "Command execution completed. Returned clinical records and HIPAA-anonymized demographics for subject 123.",
+              "polite"
+            );
+          } else if (trimmed === "imednet records search --study BRIGHT-01") {
+            announce(
+              "Command execution completed. Returned 3 vital sign records matching study BRIGHT-01.",
+              "polite"
+            );
+          } else {
+            announce(
+              "Command execution completed. Standard JSON payload results rendered.",
+              "polite"
+            );
+          }
         } else {
-          announce("Command execution completed. Standard JSON payload results rendered.", "polite");
+          setLogs((prev) => [
+            ...prev,
+            {
+              id: outputId,
+              type: "error",
+              text: `Command not found: '${trimmed}'. Type 'help' to review supported registry entries or try 'loon', 'cowsay', or 'duck'.`,
+            },
+          ]);
+          announce(
+            `Command execution failed. Unknown command: '${trimmed}'.`,
+            "polite"
+          );
         }
-      } else {
-        setLogs((prev) => [
-          ...prev,
-          {
-            id: outputId,
-            type: "error",
-            text: `Command not found: '${trimmed}'. Type 'help' to review supported registry entries or try 'loon', 'cowsay', or 'duck'.`,
-          },
-        ]);
-        announce(`Command execution failed. Unknown command: '${trimmed}'.`, "polite");
-      }
-    }, 450);
-  }, [setCommandHistory, setHistoryIndex, setIsExecuting, setInput, setLogs, announce, playSuccess, activeRegistry]);
+      }, 450);
+    },
+    [
+      setCommandHistory,
+      setHistoryIndex,
+      setIsExecuting,
+      setInput,
+      setLogs,
+      announce,
+      playSuccess,
+      activeRegistry,
+    ]
+  );
 
   // Unified typing simulation engine
-  const typeAndExecute = React.useCallback((command: string, onComplete?: () => void) => {
-    if (typingTimerRef.current) {
-      clearInterval(typingTimerRef.current);
-      typingTimerRef.current = null;
-    }
-
-    setIsTyping(true);
-    setInput("");
-    inputRef.current?.focus({ preventScroll: true });
-
-    let currentIndex = 0;
-    let currentTyped = "";
-
-    typingTimerRef.current = setInterval(() => {
-      if (currentIndex < command.length) {
-        const char = command[currentIndex];
-        currentTyped += char;
-        setInput(currentTyped);
-        playKeystroke(char.charCodeAt(0));
-
-        // Emulate key events in the DOM
-        const inputEl = inputRef.current;
-        if (inputEl) {
-          const keyEventInit = { key: char, bubbles: true, cancelable: true };
-          inputEl.dispatchEvent(new KeyboardEvent("keydown", keyEventInit));
-          inputEl.dispatchEvent(new KeyboardEvent("keypress", keyEventInit));
-          inputEl.dispatchEvent(new Event("input", { bubbles: true }));
-          inputEl.dispatchEvent(new KeyboardEvent("keyup", keyEventInit));
-        }
-
-        currentIndex++;
-      } else {
-        if (typingTimerRef.current) {
-          clearInterval(typingTimerRef.current);
-          typingTimerRef.current = null;
-        }
-
-        setTimeout(() => {
-          setIsTyping(false);
-          executeCommand(command);
-          onComplete?.();
-        }, 150);
+  const typeAndExecute = React.useCallback(
+    (command: string, onComplete?: () => void) => {
+      if (typingTimerRef.current) {
+        clearInterval(typingTimerRef.current);
+        typingTimerRef.current = null;
       }
-    }, 40); // 40ms realistic physical typing pace
-  }, [executeCommand, playKeystroke]);
+
+      setIsTyping(true);
+      setInput("");
+      inputRef.current?.focus({ preventScroll: true });
+
+      let currentIndex = 0;
+      let currentTyped = "";
+
+      typingTimerRef.current = setInterval(() => {
+        if (currentIndex < command.length) {
+          const char = command[currentIndex];
+          currentTyped += char;
+          setInput(currentTyped);
+          playKeystroke(char.charCodeAt(0));
+
+          // Emulate key events in the DOM
+          const inputEl = inputRef.current;
+          if (inputEl) {
+            const keyEventInit = { key: char, bubbles: true, cancelable: true };
+            inputEl.dispatchEvent(new KeyboardEvent("keydown", keyEventInit));
+            inputEl.dispatchEvent(new KeyboardEvent("keypress", keyEventInit));
+            inputEl.dispatchEvent(new Event("input", { bubbles: true }));
+            inputEl.dispatchEvent(new KeyboardEvent("keyup", keyEventInit));
+          }
+
+          currentIndex++;
+        } else {
+          if (typingTimerRef.current) {
+            clearInterval(typingTimerRef.current);
+            typingTimerRef.current = null;
+          }
+
+          setTimeout(() => {
+            setIsTyping(false);
+            executeCommand(command);
+            onComplete?.();
+          }, 150);
+        }
+      }, 40); // 40ms realistic physical typing pace
+    },
+    [executeCommand, playKeystroke]
+  );
 
   // Automated step playback runner loop
-  const startPlaybackLoop = React.useCallback((targetIdx?: number) => {
-    if (!isPlayingRef.current) return;
+  const startPlaybackLoop = React.useCallback(
+    (targetIdx?: number) => {
+      if (!isPlayingRef.current) return;
 
-    const nextIdx = targetIdx !== undefined ? targetIdx : currentStepIndex + 1;
-    if (nextIdx >= activePlayback.length) {
-      setIsPlaying(false);
-      return;
-    }
-
-    setCurrentStepIndex(nextIdx);
-    const step = activePlayback[nextIdx];
-
-    typeAndExecute(step.command, () => {
-      if (isPlayingRef.current) {
-        playbackTimeoutRef.current = setTimeout(() => {
-          startPlaybackLoopRef.current?.(nextIdx + 1);
-        }, 1500); // 1.5 seconds natural delay before typing next command
+      const nextIdx =
+        targetIdx !== undefined ? targetIdx : currentStepIndex + 1;
+      if (nextIdx >= activePlayback.length) {
+        setIsPlaying(false);
+        return;
       }
-    });
-  }, [currentStepIndex, activePlayback, typeAndExecute]);
+
+      setCurrentStepIndex(nextIdx);
+      const step = activePlayback[nextIdx];
+
+      typeAndExecute(step.command, () => {
+        if (isPlayingRef.current) {
+          playbackTimeoutRef.current = setTimeout(() => {
+            startPlaybackLoopRef.current?.(nextIdx + 1);
+          }, 1500); // 1.5 seconds natural delay before typing next command
+        }
+      });
+    },
+    [currentStepIndex, activePlayback, typeAndExecute]
+  );
 
   // Sync ref to avoid ESLint immutability recursion rule
   useEffect(() => {
@@ -548,7 +619,7 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
     } else {
       setIsPlaying(true);
       isPlayingRef.current = true;
-      
+
       // If we are already at the end, restart from the first command
       if (currentStepIndex >= activePlayback.length - 1) {
         setLogs([
@@ -628,7 +699,11 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
     const updatedLogs = [...initialLogs];
     for (let i = 0; i <= prevIdx; i++) {
       const cmdText = activePlayback[i].command;
-      updatedLogs.push({ id: `rollback-cmd-${i}`, type: "command", text: cmdText });
+      updatedLogs.push({
+        id: `rollback-cmd-${i}`,
+        type: "command",
+        text: cmdText,
+      });
 
       const match = activeRegistry[cmdText];
       if (match) {
@@ -685,44 +760,43 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
     const terminalApi = {
       run: (cmdText: string) => {
         if (typeof cmdText !== "string") {
-          console.error("terminal.run: command must be a string.");
+          logger.error("terminal.run: command must be a string.");
           return;
         }
-        window.dispatchEvent(new CustomEvent("terminal:run", { detail: { command: cmdText } }));
+        window.dispatchEvent(
+          new CustomEvent("terminal:run", { detail: { command: cmdText } })
+        );
       },
       help: () => {
-        console.log(
+        logger.info(
           "Supported API commands:\n" +
-          "  imednet.run('imednet studies list')\n" +
-          "  imednet.run('imednet subjects get --id 123')\n" +
-          "  imednet.run('imednet records search --study BRIGHT-01')\n" +
-          "  imednet.run('help')\n" +
-          "  imednet.run('clear')"
+            "  imednet.run('imednet studies list')\n" +
+            "  imednet.run('imednet subjects get --id 123')\n" +
+            "  imednet.run('imednet records search --study BRIGHT-01')\n" +
+            "  imednet.run('help')\n" +
+            "  imednet.run('clear')"
         );
-      }
+      },
     };
 
     window.terminal = terminalApi;
     window.imednet = terminalApi;
 
     // Interactive custom styled greeting in console
-    console.log(
+    logger.info(
       `%c╔══════════════════════════════════════════════════════════════════════════╗\n` +
-      `║               iMednet SDK Developer Console Sandbox                      ║\n` +
-      `╚══════════════════════════════════════════════════════════════════════════╝\n` +
-      `Welcome, developer! You've unlocked the interactive CLI simulator console API.\n` +
-      `Try programmatically controlling the on-page terminal bento-card from here!\n\n` +
-      `Run this function to query the simulated SDK API directly:\n` +
-      `  %cimednet.run("imednet studies list")%c\n\n` +
-      `Supported Commands:\n` +
-      `  • imednet.run("imednet studies list")\n` +
-      `  • imednet.run("imednet subjects get --id 123")\n` +
-      `  • imednet.run("imednet records search --study BRIGHT-01")\n` +
-      `  • imednet.run("help")\n` +
-      `  • imednet.run("clear")`,
-      "color: #06b6d4; font-weight: bold;",
-      "color: #10b981; font-weight: bold; background: #18181b; padding: 2px 4px; border-radius: 4px;",
-      "color: inherit;"
+        `║               iMednet SDK Developer Console Sandbox                      ║\n` +
+        `╚══════════════════════════════════════════════════════════════════════════╝\n` +
+        `Welcome, developer! You've unlocked the interactive CLI simulator console API.\n` +
+        `Try programmatically controlling the on-page terminal bento-card from here!\n\n` +
+        `Run this function to query the simulated SDK API directly:\n` +
+        `  %cimednet.run("imednet studies list")%c\n\n` +
+        `Supported Commands:\n` +
+        `  • imednet.run("imednet studies list")\n` +
+        `  • imednet.run("imednet subjects get --id 123")\n` +
+        `  • imednet.run("imednet records search --study BRIGHT-01")\n` +
+        `  • imednet.run("help")\n` +
+        `  • imednet.run("clear")`
     );
 
     return () => {
@@ -736,12 +810,15 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
   useEffect(() => {
     const handleRunEvent = (e: Event) => {
       const customEvent = e as CustomEvent<{ command: string }>;
-      if (!customEvent.detail || typeof customEvent.detail.command !== "string") return;
+      if (!customEvent.detail || typeof customEvent.detail.command !== "string")
+        return;
 
       const command = customEvent.detail.command;
 
       if (isExecuting || isTyping) {
-        console.warn("Terminal is currently executing a command or typing. Please wait.");
+        logger.warn(
+          "Terminal is currently executing a command or typing. Please wait."
+        );
         return;
       }
 
@@ -781,10 +858,12 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
         const VALID_COMMANDS = [
           ...Object.keys(activeRegistry),
           "clear",
-          "help"
+          "help",
         ];
 
-        const matched = VALID_COMMANDS.find((c) => c.toLowerCase().startsWith(trimmed));
+        const matched = VALID_COMMANDS.find((c) =>
+          c.toLowerCase().startsWith(trimmed)
+        );
         if (matched) {
           e.preventDefault();
           setInput(matched);
@@ -796,7 +875,10 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       if (commandHistory.length === 0) return;
-      const nextIndex = historyIndex === -1 ? commandHistory.length - 1 : Math.max(0, historyIndex - 1);
+      const nextIndex =
+        historyIndex === -1
+          ? commandHistory.length - 1
+          : Math.max(0, historyIndex - 1);
       setHistoryIndex(nextIndex);
       setInput(commandHistory[nextIndex]);
     } else if (e.key === "ArrowDown") {
@@ -816,7 +898,7 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
   // Beautiful token highlighting for JSON payloads
   const renderJsonPayload = (payload: unknown): React.ReactNode => {
     const str = JSON.stringify(payload, null, 2);
-    
+
     const highlightValue = (valStr: string) => {
       const trimmed = valStr.trim();
       if (trimmed === '"[VERIFY_SECURITY_LOGS]"') {
@@ -855,14 +937,21 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
               const key = keyMatch[2];
               const rest = line.substring(keyMatch[0].length);
               return (
-                <div key={idx} className="hover:bg-zinc-900/40 px-1 rounded transition-colors">
+                <div
+                  key={idx}
+                  className="hover:bg-zinc-900/40 px-1 rounded transition-colors"
+                >
                   {spaces}
                   <span className="text-purple-400">&quot;{key}&quot;</span>:
                   {highlightValue(rest)}
                 </div>
               );
             }
-            return <div key={idx} className="px-1">{line}</div>;
+            return (
+              <div key={idx} className="px-1">
+                {line}
+              </div>
+            );
           })}
         </code>
       </pre>
@@ -870,7 +959,10 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
   };
 
   return (
-    <div className="w-full flex flex-col items-center" data-keyboard-boundary="true">
+    <div
+      className="w-full flex flex-col items-center"
+      data-keyboard-boundary="true"
+    >
       {/* Incident Playback Controller Panel */}
       <div className="w-full bg-zinc-900/20 border border-zinc-900 rounded-2xl p-4 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 select-none">
         <div className="flex flex-col gap-1">
@@ -878,11 +970,9 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
             Incident Playback Controller
           </span>
           <span className="text-[10px] font-mono text-zinc-500">
-            {currentStepIndex === -1 ? (
-              "Ready to start step-by-step diagnostic sequence."
-            ) : (
-              `Step ${currentStepIndex + 1} of ${activePlayback.length}: "${activePlayback[currentStepIndex].command}"`
-            )}
+            {currentStepIndex === -1
+              ? "Ready to start step-by-step diagnostic sequence."
+              : `Step ${currentStepIndex + 1} of ${activePlayback.length}: "${activePlayback[currentStepIndex].command}"`}
           </span>
         </div>
 
@@ -925,7 +1015,11 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
           {/* Step Forward Button */}
           <button
             onClick={stepForward}
-            disabled={isTyping || isExecuting || currentStepIndex >= activePlayback.length - 1}
+            disabled={
+              isTyping ||
+              isExecuting ||
+              currentStepIndex >= activePlayback.length - 1
+            }
             className="p-2 bg-zinc-950 border border-zinc-900 hover:border-brand-cyan/40 text-zinc-400 hover:text-brand-cyan rounded-lg transition-all disabled:opacity-30 disabled:hover:border-zinc-900 disabled:hover:text-zinc-400 cursor-pointer focus:outline-none"
             title="Step Forward"
           >
@@ -963,7 +1057,11 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
         aria-label="Interactive Terminal Sandbox"
         aria-busy={isExecuting || isTyping}
         onClick={handleTerminalClick}
-        style={{ "--term-glow": `0 0 35px ${hexToRgba(designManifest.colors["brand-cyan"], 0.02)}` } as React.CSSProperties}
+        style={
+          {
+            "--term-glow": `0 0 35px ${hexToRgba(designManifest.colors["brand-cyan"], 0.02)}`,
+          } as React.CSSProperties
+        }
         className="w-full border border-zinc-900 focus-within:border-brand-cyan/40 bg-zinc-950/80 rounded-2xl overflow-hidden shadow-[var(--term-glow)] focus-within:shadow-[0_0_40px_rgba(6,182,212,0.08),0_0_80px_rgba(6,182,212,0.02)] relative backdrop-blur-md cursor-text transition-all duration-300"
       >
         {/* Terminal Header */}
@@ -991,8 +1089,12 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
               {log.type === "command" && (
                 <div className="flex items-center gap-2 text-zinc-400 font-bold select-none min-w-0">
                   <span className="text-zinc-600 font-bold shrink-0">~</span>
-                  <span className="text-zinc-400 font-bold shrink-0">imednet-sdk $</span>
-                  <span className="text-zinc-100 font-bold select-text min-w-0 break-all">{log.text}</span>
+                  <span className="text-zinc-400 font-bold shrink-0">
+                    imednet-sdk $
+                  </span>
+                  <span className="text-zinc-100 font-bold select-text min-w-0 break-all">
+                    {log.text}
+                  </span>
                 </div>
               )}
               {log.type === "info" && (
@@ -1008,7 +1110,9 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
               {log.type === "output" && log.jsonPayload !== undefined && (
                 <div className="bg-zinc-950 border border-zinc-900/50 rounded-xl p-3.5 mt-1 min-w-0">
                   <div className="flex items-center justify-between border-b border-zinc-900 pb-2 mb-2 text-[9px] text-zinc-500 select-none min-w-0 gap-2">
-                    <span className="truncate">200 OK // TRANSACTION RETRUSTED</span>
+                    <span className="truncate">
+                      200 OK // TRANSACTION RETRUSTED
+                    </span>
                     <span className="shrink-0">JSON PAYLOAD</span>
                   </div>
                   {renderJsonPayload(log.jsonPayload)}
@@ -1028,8 +1132,12 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
 
         {/* Live Input Field Prompt */}
         <div className="border-t border-zinc-900/60 bg-zinc-950/60 px-5 py-3.5 flex items-center gap-2 min-w-0">
-          <span className="text-zinc-600 font-bold font-mono text-[11px] select-none shrink-0">~</span>
-          <span className="text-zinc-400 font-bold font-mono text-[11px] select-none shrink-0 truncate max-w-[110px] xs:max-w-none">imednet-sdk $</span>
+          <span className="text-zinc-600 font-bold font-mono text-[11px] select-none shrink-0">
+            ~
+          </span>
+          <span className="text-zinc-400 font-bold font-mono text-[11px] select-none shrink-0 truncate max-w-[110px] xs:max-w-none">
+            imednet-sdk $
+          </span>
           <input
             ref={inputRef}
             type="text"

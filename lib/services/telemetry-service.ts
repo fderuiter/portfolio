@@ -5,6 +5,7 @@ import { redis, getScopedRedisKey } from "@/lib/redis";
 import { RateLimitParamsSchema } from "@/lib/schemas";
 import { Ratelimit } from "@upstash/ratelimit";
 import { env } from "@/lib/env";
+import { logger } from "@/lib/logger";
 import {
   generateClientConnectionHash,
   extractClientIp,
@@ -209,7 +210,7 @@ export class TelemetryService {
         return { limited: true, headers };
       }
     } catch (err) {
-      console.error(
+      logger.error(
         "Upstream rate limiting check failed, activating 30s circuit breaker fallback:",
         err
       );
@@ -291,14 +292,14 @@ export class TelemetryService {
       }
 
       if (Number(listLength) > 1000) {
-        console.error(
+        logger.error(
           "ALERT: Secondary telemetry buffer occupancy exceeds threshold."
         );
       }
     } catch (err) {
       // Losing the event here is silent by nature: nothing else holds it.
       Sentry.captureException(err);
-      console.error("Failed to commit telemetry event to Redis buffer:", err);
+      logger.error("Failed to commit telemetry event to Redis buffer:", err);
       return { event: eventData, buffered: false };
     }
 
@@ -402,7 +403,7 @@ export class TelemetryService {
         skipDuplicates: true,
       });
     } catch (dbErr) {
-      console.warn(
+      logger.warn(
         "Primary database write failed during sync. Telemetry event batch remains intact in processing queue.",
         dbErr
       );

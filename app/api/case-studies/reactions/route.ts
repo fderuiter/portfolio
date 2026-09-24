@@ -3,6 +3,7 @@ import { ReactionSubmissionSchema } from "@/lib/schemas";
 import { CaseStudyService } from "@/lib/services/case-study-service";
 import { getConnectionHashFromRequest } from "@/lib/services/privacy-service";
 import { createApiHandler } from "@/lib/route-wrapper";
+import { logger } from "@/lib/logger";
 import * as Sentry from "@sentry/nextjs";
 
 export const dynamic = "force-dynamic";
@@ -27,7 +28,10 @@ export const POST = createApiHandler(
   async (req: NextRequest, { data }) => {
     try {
       const connectionHash = await getConnectionHashFromRequest(req);
-      const result = await CaseStudyService.submitReaction(data, connectionHash);
+      const result = await CaseStudyService.submitReaction(
+        data,
+        connectionHash
+      );
 
       return NextResponse.json(
         {
@@ -40,7 +44,7 @@ export const POST = createApiHandler(
       );
     } catch (err) {
       Sentry.captureException(err);
-      console.error("Failed to process reaction submission:", err);
+      logger.error("Failed to process reaction submission:", err);
       return NextResponse.json(
         { error: "Internal server error processing reaction submission" },
         { status: 500 }
@@ -52,7 +56,11 @@ export const POST = createApiHandler(
     type: "body",
     customJsonError: "Invalid JSON body payload",
     customValidationError: (err) => {
-      const issues = (err as { issues: Array<{ path: Array<string | number>; message: string }> }).issues;
+      const issues = (
+        err as {
+          issues: Array<{ path: Array<string | number>; message: string }>;
+        }
+      ).issues;
       return {
         error: "Validation failed",
         details: issues.map((issue) => ({

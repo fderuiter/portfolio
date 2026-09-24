@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { reportClientError } from "@/lib/client-sentry";
 import { resolveBaseUrl } from "@/lib/domain";
+import { logger } from "@/lib/logger";
 
 export default function CaseStudyError({
   error,
@@ -18,7 +19,7 @@ export default function CaseStudyError({
 
   useEffect(() => {
     reportClientError(error);
-    console.error("Case study route error:", error);
+    logger.error("Case study route error:", error);
     if (typeof window !== "undefined") {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setCanonicalUrl(window.location.href);

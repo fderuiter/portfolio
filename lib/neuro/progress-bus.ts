@@ -4,6 +4,7 @@
  */
 
 import { formatNumber } from "../utils";
+import { logger } from "@/lib/logger";
 
 export interface AssetProgressEvent {
   url: string;
@@ -38,7 +39,7 @@ export class ProgressBus {
       try {
         callback(event);
       } catch (err) {
-        console.error("Error in progress listener subscriber:", err);
+        logger.error("Error in progress listener subscriber:", err);
       }
     });
   }

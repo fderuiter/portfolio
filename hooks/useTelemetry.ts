@@ -1,7 +1,13 @@
 "use client";
 
-import { useSyncExternalStore, useCallback, useEffect, startTransition } from "react";
+import {
+  useSyncExternalStore,
+  useCallback,
+  useEffect,
+  startTransition,
+} from "react";
 import { sanitizeError } from "@/lib/error-sanitization";
+import { logger } from "@/lib/logger";
 import {
   TelemetryOutbox,
   DEFAULT_OUTBOX_CAPACITY,
@@ -78,8 +84,14 @@ interface TelemetryStoreState {
   syncFailed: boolean;
 }
 
-const SERVER_SNAPSHOT: TelemetryStoreState = { telemetry: {}, syncFailed: false };
-let currentStoreState: TelemetryStoreState = { telemetry: {}, syncFailed: false };
+const SERVER_SNAPSHOT: TelemetryStoreState = {
+  telemetry: {},
+  syncFailed: false,
+};
+let currentStoreState: TelemetryStoreState = {
+  telemetry: {},
+  syncFailed: false,
+};
 let lastRawCache: string | null = null;
 const listeners = new Set<() => void>();
 
@@ -89,39 +101,59 @@ function notify() {
   });
 }
 
-function updateStore(updater: (prev: TelemetryStoreState) => TelemetryStoreState) {
+function updateStore(
+  updater: (prev: TelemetryStoreState) => TelemetryStoreState
+) {
   const next = updater(currentStoreState);
-  if (next.telemetry !== currentStoreState.telemetry || next.syncFailed !== currentStoreState.syncFailed) {
+  if (
+    next.telemetry !== currentStoreState.telemetry ||
+    next.syncFailed !== currentStoreState.syncFailed
+  ) {
     currentStoreState = next;
     try {
-      if (typeof window !== "undefined" && typeof window.localStorage?.setItem === "function") {
+      if (
+        typeof window !== "undefined" &&
+        typeof window.localStorage?.setItem === "function"
+      ) {
         const raw = JSON.stringify(currentStoreState.telemetry);
         lastRawCache = raw;
         localStorage.setItem(CACHE_KEY, raw);
         window.dispatchEvent(new CustomEvent(CHANGE_EVENT));
       }
     } catch (e) {
-      console.warn("Failed to write to local storage telemetry cache:", sanitizeError(e));
+      logger.warn(
+        "Failed to write to local storage telemetry cache:",
+        sanitizeError(e)
+      );
     }
     notify();
   }
 }
 
 function syncFromStorage() {
-  if (typeof window !== "undefined" && typeof window.localStorage?.getItem === "function") {
+  if (
+    typeof window !== "undefined" &&
+    typeof window.localStorage?.getItem === "function"
+  ) {
     try {
       const raw = localStorage.getItem(CACHE_KEY);
       if (raw !== lastRawCache) {
         lastRawCache = raw;
         if (raw) {
-          currentStoreState = { ...currentStoreState, telemetry: { ...currentStoreState.telemetry, ...JSON.parse(raw) } };
+          currentStoreState = {
+            ...currentStoreState,
+            telemetry: { ...currentStoreState.telemetry, ...JSON.parse(raw) },
+          };
         } else {
           currentStoreState = { ...currentStoreState, telemetry: {} };
         }
         notify();
       }
     } catch (e) {
-      console.warn("Failed to retrieve local storage telemetry cache:", sanitizeError(e));
+      logger.warn(
+        "Failed to retrieve local storage telemetry cache:",
+        sanitizeError(e)
+      );
     }
   }
 }
@@ -150,18 +182,28 @@ const transport: TelemetryTransport = async (item, options) => {
     const res = await fetch("/api/telemetry", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ projectSlug: item.projectSlug, eventType: item.eventType }),
+      body: JSON.stringify({
+        projectSlug: item.projectSlug,
+        eventType: item.eventType,
+      }),
       keepalive: options?.keepalive ?? false,
     });
     if (!res.ok && res.status !== 429) {
-      console.error(
+      logger.error(
         "Optimistic telemetry sync persistence failed:",
-        sanitizeError(new Error(`Failed to persist telemetry event with status: ${res.status}`))
+        sanitizeError(
+          new Error(
+            `Failed to persist telemetry event with status: ${res.status}`
+          )
+        )
       );
     }
     return res;
   } catch (err) {
-    console.error("Optimistic telemetry sync persistence failed:", sanitizeError(err));
+    logger.error(
+      "Optimistic telemetry sync persistence failed:",
+      sanitizeError(err)
+    );
     throw err;
   }
 };
@@ -177,7 +219,9 @@ export const telemetryOutbox = new TelemetryOutbox({
 let inFlightFetch: Promise<void> | null = null;
 let lastFetchTime = 0;
 
-async function fetchTelemetryAggregates(options?: { force?: boolean }): Promise<void> {
+async function fetchTelemetryAggregates(options?: {
+  force?: boolean;
+}): Promise<void> {
   if (inFlightFetch) return inFlightFetch;
   const now = Date.now();
   if (!options?.force && now - lastFetchTime < 5000) return;
@@ -188,9 +232,15 @@ async function fetchTelemetryAggregates(options?: { force?: boolean }): Promise<
       const res = await fetch("/api/telemetry");
       if (!res.ok) throw new Error("Telemetry sync fetch failure");
       const data = (await res.json()) as TelemetryData;
-      updateStore((prev) => ({ telemetry: { ...prev.telemetry, ...data }, syncFailed: false }));
+      updateStore((prev) => ({
+        telemetry: { ...prev.telemetry, ...data },
+        syncFailed: false,
+      }));
     } catch (err) {
-      console.error("Background telemetry synchronization failed:", sanitizeError(err));
+      logger.error(
+        "Background telemetry synchronization failed:",
+        sanitizeError(err)
+      );
       updateStore((prev) => ({ ...prev, syncFailed: true }));
     } finally {
       inFlightFetch = null;
@@ -199,7 +249,12 @@ async function fetchTelemetryAggregates(options?: { force?: boolean }): Promise<
   return inFlightFetch;
 }
 
-let pendingDeferred: Array<{ id: string; projectSlug: string; eventType: TelemetryEventType; cancel: () => void }> = [];
+let pendingDeferred: Array<{
+  id: string;
+  projectSlug: string;
+  eventType: TelemetryEventType;
+  cancel: () => void;
+}> = [];
 
 /**
  * Schedules a task during browser idle periods with a fallback timeout.
@@ -209,10 +264,16 @@ let pendingDeferred: Array<{ id: string; projectSlug: string; eventType: Telemet
  * @returns Cancellation function.
  */
 export function scheduleIdleTask(task: () => void, timeout = 2000): () => void {
-  if (typeof window !== "undefined" && typeof window.requestIdleCallback === "function") {
+  if (
+    typeof window !== "undefined" &&
+    typeof window.requestIdleCallback === "function"
+  ) {
     const handle = window.requestIdleCallback(() => task(), { timeout });
     return () => {
-      if (typeof window !== "undefined" && typeof window.cancelIdleCallback === "function") {
+      if (
+        typeof window !== "undefined" &&
+        typeof window.cancelIdleCallback === "function"
+      ) {
         window.cancelIdleCallback(handle);
       }
     };
@@ -227,7 +288,11 @@ export function scheduleIdleTask(task: () => void, timeout = 2000): () => void {
  * @returns Array of pending deferred tasks.
  */
 export function getPendingDeferredQueue(): PendingDeferredTask[] {
-  return pendingDeferred.map(({ id, projectSlug, eventType }) => ({ id, projectSlug, eventType }));
+  return pendingDeferred.map(({ id, projectSlug, eventType }) => ({
+    id,
+    projectSlug,
+    eventType,
+  }));
 }
 
 /**
@@ -259,7 +324,10 @@ export function flushPendingDeferredQueue(): void {
       fetch("/api/telemetry", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ projectSlug: t.projectSlug, eventType: t.eventType }),
+        body: JSON.stringify({
+          projectSlug: t.projectSlug,
+          eventType: t.eventType,
+        }),
         keepalive: true,
       }).catch(() => {});
     } catch {
@@ -336,10 +404,16 @@ if (typeof window !== "undefined") {
       lastRawCache = e.newValue;
       if (e.newValue) {
         try {
-          currentStoreState = { ...currentStoreState, telemetry: JSON.parse(e.newValue) };
+          currentStoreState = {
+            ...currentStoreState,
+            telemetry: JSON.parse(e.newValue),
+          };
           notify();
         } catch (err) {
-          console.warn("Failed to parse cross-tab telemetry storage event:", sanitizeError(err));
+          logger.warn(
+            "Failed to parse cross-tab telemetry storage event:",
+            sanitizeError(err)
+          );
         }
       } else {
         currentStoreState = { ...currentStoreState, telemetry: {} };
@@ -350,7 +424,10 @@ if (typeof window !== "undefined") {
   window.addEventListener(CHANGE_EVENT, syncFromStorage);
 
   const handleVisibility = () => {
-    if (typeof document !== "undefined" && document.visibilityState === "visible") {
+    if (
+      typeof document !== "undefined" &&
+      document.visibilityState === "visible"
+    ) {
       syncFromStorage();
     } else {
       flushPendingDeferredQueue();
@@ -364,16 +441,25 @@ if (typeof window !== "undefined") {
   const win = window as unknown as Record<string, EventListener | undefined>;
   if (win.__telemetryHookUnloadListener) {
     window.removeEventListener("pagehide", win.__telemetryHookUnloadListener);
-    window.removeEventListener("beforeunload", win.__telemetryHookUnloadListener);
+    window.removeEventListener(
+      "beforeunload",
+      win.__telemetryHookUnloadListener
+    );
   }
   win.__telemetryHookUnloadListener = handleUnload as EventListener;
   window.addEventListener("pagehide", handleUnload);
   window.addEventListener("beforeunload", handleUnload);
 
   if (typeof document !== "undefined") {
-    const doc = document as unknown as Record<string, EventListener | undefined>;
+    const doc = document as unknown as Record<
+      string,
+      EventListener | undefined
+    >;
     if (doc.__telemetryHookVisibilityListener) {
-      document.removeEventListener("visibilitychange", doc.__telemetryHookVisibilityListener);
+      document.removeEventListener(
+        "visibilitychange",
+        doc.__telemetryHookVisibilityListener
+      );
     }
     doc.__telemetryHookVisibilityListener = handleVisibility as EventListener;
     document.addEventListener("visibilitychange", handleVisibility);
@@ -416,9 +502,16 @@ export function useTelemetry(options?: UseTelemetryOptions) {
   }, []);
 
   const recordEvent = useCallback(
-    async (projectSlug: string, eventType: TelemetryEventType, opts?: RecordEventOptions) => {
+    async (
+      projectSlug: string,
+      eventType: TelemetryEventType,
+      opts?: RecordEventOptions
+    ) => {
       const execute = async () => {
-        const cur = currentStoreState.telemetry[projectSlug] || { views: 0, clicks: 0 };
+        const cur = currentStoreState.telemetry[projectSlug] || {
+          views: 0,
+          clicks: 0,
+        };
         updateStore((prev) => ({
           ...prev,
           telemetry: {
