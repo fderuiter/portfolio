@@ -1864,6 +1864,12 @@ export const ClinicalTrialChaos: React.FC = () => {
     }
   };
 
+  const preventCancelable = (e: React.SyntheticEvent) => {
+    if (e.cancelable) {
+      e.preventDefault();
+    }
+  };
+
   const handleCanvasPointerDown = (
     e: React.PointerEvent<HTMLCanvasElement>
   ) => {
@@ -1883,6 +1889,9 @@ export const ClinicalTrialChaos: React.FC = () => {
     e: React.PointerEvent<HTMLCanvasElement>
   ) => {
     if (isPointerDownRef.current) {
+      const now = Date.now();
+      if (now - lastTouchTimeRef.current < 400) return;
+      lastPointerTimeRef.current = now;
       handleCanvasClickOrTouch(e.clientX, e.clientY);
     }
   };
@@ -1912,9 +1921,7 @@ export const ClinicalTrialChaos: React.FC = () => {
   };
 
   const handleCanvasTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
-    if (e.cancelable) {
-      e.preventDefault();
-    }
+    preventCancelable(e);
     const now = Date.now();
     if (now - lastPointerTimeRef.current < 400) return;
     lastTouchTimeRef.current = now;
@@ -1927,10 +1934,11 @@ export const ClinicalTrialChaos: React.FC = () => {
   };
 
   const handleCanvasTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
-    if (e.cancelable) {
-      e.preventDefault();
-    }
+    preventCancelable(e);
     if (isPointerDownRef.current) {
+      const now = Date.now();
+      if (now - lastPointerTimeRef.current < 400) return;
+      lastTouchTimeRef.current = now;
       const touch = e.touches[0];
       if (touch) {
         handleCanvasClickOrTouch(touch.clientX, touch.clientY);
@@ -1939,17 +1947,14 @@ export const ClinicalTrialChaos: React.FC = () => {
   };
 
   const handleCanvasTouchEnd = (e: React.TouchEvent<HTMLCanvasElement>) => {
-    if (e.cancelable) {
-      e.preventDefault();
-    }
+    preventCancelable(e);
     lastTouchTimeRef.current = Date.now();
     isPointerDownRef.current = false;
   };
 
   const handleCanvasTouchCancel = (e: React.TouchEvent<HTMLCanvasElement>) => {
-    if (e.cancelable) {
-      e.preventDefault();
-    }
+    preventCancelable(e);
+    lastTouchTimeRef.current = Date.now();
     isPointerDownRef.current = false;
   };
 

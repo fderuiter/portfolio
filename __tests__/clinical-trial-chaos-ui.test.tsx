@@ -605,6 +605,14 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
       root.render(<ClinicalTrialChaos />);
     });
 
+    // Start campaign so conveyor subjects are active
+    const startBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Start 3-Phase Campaign")
+    );
+    await act(async () => {
+      startBtn?.click();
+    });
+
     const canvas = container.querySelector("canvas");
     expect(canvas).not.toBeNull();
     expect(canvas?.style.touchAction).toBe("none");
@@ -614,14 +622,28 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
       cancelable: true,
     }) as any;
     touchEventStart.touches = [{ clientX: 100, clientY: 50 }];
-    const preventDefaultSpy = vi.fn();
-    touchEventStart.preventDefault = preventDefaultSpy;
+    const startPreventDefaultSpy = vi.fn();
+    touchEventStart.preventDefault = startPreventDefaultSpy;
 
     await act(async () => {
       canvas?.dispatchEvent(touchEventStart);
     });
 
-    expect(preventDefaultSpy).toHaveBeenCalled();
+    expect(startPreventDefaultSpy).toHaveBeenCalled();
+
+    const touchEventMove = new CustomEvent("touchmove", {
+      bubbles: true,
+      cancelable: true,
+    }) as any;
+    touchEventMove.touches = [{ clientX: 120, clientY: 50 }];
+    const movePreventDefaultSpy = vi.fn();
+    touchEventMove.preventDefault = movePreventDefaultSpy;
+
+    await act(async () => {
+      canvas?.dispatchEvent(touchEventMove);
+    });
+
+    expect(movePreventDefaultSpy).toHaveBeenCalled();
 
     const touchEventCancel = new CustomEvent("touchcancel", {
       bubbles: true,
@@ -635,9 +657,24 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     });
 
     expect(cancelPreventDefaultSpy).toHaveBeenCalled();
+
+    // After cancel, drag state is reset so subsequent touchmove does not trigger selection
+    const postCancelMove = new CustomEvent("touchmove", {
+      bubbles: true,
+      cancelable: true,
+    }) as any;
+    postCancelMove.touches = [{ clientX: 150, clientY: 50 }];
+    const postMovePreventDefaultSpy = vi.fn();
+    postCancelMove.preventDefault = postMovePreventDefaultSpy;
+
+    await act(async () => {
+      canvas?.dispatchEvent(postCancelMove);
+    });
+
+    expect(postMovePreventDefaultSpy).toHaveBeenCalled();
   });
 
-  it("should deduplicate rapid pointer down and touch start events on canvas", async () => {
+  it("should deduplicate rapid pointer down and touch move events on canvas", async () => {
     await act(async () => {
       root.render(<ClinicalTrialChaos />);
     });
@@ -675,6 +712,29 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
 
     await act(async () => {
       canvas?.dispatchEvent(touchEvent);
+    });
+
+    // Trigger pointermove then immediate touchmove during touch drag
+    const pointerMove = new CustomEvent("pointermove", {
+      bubbles: true,
+      cancelable: true,
+    }) as any;
+    pointerMove.clientX = 110;
+    pointerMove.clientY = 60;
+
+    await act(async () => {
+      canvas?.dispatchEvent(pointerMove);
+    });
+
+    const touchMove = new CustomEvent("touchmove", {
+      bubbles: true,
+      cancelable: true,
+    }) as any;
+    touchMove.touches = [{ clientX: 110, clientY: 60 }];
+    touchMove.preventDefault = vi.fn();
+
+    await act(async () => {
+      canvas?.dispatchEvent(touchMove);
     });
 
     // Subject selection state should remain stable without duplicate sound / selection errors
