@@ -13,7 +13,7 @@ export interface ProofTreeNode {
   metadata?: Record<string, unknown>;
 }
 
-export interface ProofTreeProps {
+interface ProofTreeProps {
   rootNode: ProofTreeNode;
   selectedNodeId?: string | null;
   onSelectNode?: (nodeId: string) => void;

@@ -16,7 +16,7 @@ export interface GridTile {
   metadata?: Record<string, unknown>;
 }
 
-export interface GridCanvasProps {
+interface GridCanvasProps {
   tiles?: GridTile[];
   rows?: number;
   cols?: number;
