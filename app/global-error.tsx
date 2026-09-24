@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { reportClientError } from "@/lib/client-sentry";
-import { sanitizeError } from "@/lib/error-sanitization";
 import { resolveBaseUrl } from "@/lib/domain";
 import { logger } from "@/lib/logger";
 
@@ -19,7 +18,9 @@ export default function GlobalError({
 
   useEffect(() => {
     reportClientError(error);
-    logger.error("Global uncaught crash boundary:", sanitizeError(error));
+    logger.error("Global uncaught crash boundary:", error, {
+      skipTelemetry: true,
+    });
     if (typeof window !== "undefined") {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setCanonicalUrl(window.location.href);
