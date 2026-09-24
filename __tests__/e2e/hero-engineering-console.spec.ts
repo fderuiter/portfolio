@@ -29,7 +29,10 @@ test.describe("Hero engineering console", () => {
           const tab = tabs.nth(index);
           await expect(tab).toBeVisible();
           const box = await tab.boundingBox();
-          expect(box, `tab ${index + 1} bounding box must be available`).not.toBeNull();
+          expect(
+            box,
+            `tab ${index + 1} bounding box must be available`
+          ).not.toBeNull();
           expect(
             box?.height ?? 0,
             `tab ${index + 1} must meet the 44px touch target`

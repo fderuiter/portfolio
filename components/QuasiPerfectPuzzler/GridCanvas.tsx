@@ -9,7 +9,14 @@ export interface GridTile {
   col: number;
   label?: string;
   value?: string | number;
-  type?: "goal" | "hypothesis" | "rule" | "empty" | "operator" | "variable" | "default";
+  type?:
+    | "goal"
+    | "hypothesis"
+    | "rule"
+    | "empty"
+    | "operator"
+    | "variable"
+    | "default";
   isSelected?: boolean;
   isDisabled?: boolean;
   status?: "active" | "completed" | "default" | "error";
@@ -37,7 +44,9 @@ export const GridCanvas: React.FC<GridCanvasProps> = ({
   className = "",
   ariaLabel = "Quasi-Perfect Puzzler Grid Canvas",
 }) => {
-  const [internalSelectedTileId, setInternalSelectedTileId] = useState<string | null>(null);
+  const [internalSelectedTileId, setInternalSelectedTileId] = useState<
+    string | null
+  >(null);
 
   const activeSelectedId =
     controlledSelectedTileId !== undefined

@@ -263,8 +263,12 @@ export class SoundEngine {
     if (typeof window === "undefined") return false;
     try {
       const forcedColors = getMatchMediaMatches("(forced-colors: active)");
-      const msHighContrast = getMatchMediaMatches("(-ms-high-contrast: active)");
-      const prefersReducedMotion = getMatchMediaMatches("(prefers-reduced-motion: reduce)");
+      const msHighContrast = getMatchMediaMatches(
+        "(-ms-high-contrast: active)"
+      );
+      const prefersReducedMotion = getMatchMediaMatches(
+        "(prefers-reduced-motion: reduce)"
+      );
       const documentClasses = document.documentElement?.className || "";
       const documentHtmlContrast =
         document.documentElement?.getAttribute("data-contrast") || "";

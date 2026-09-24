@@ -128,8 +128,7 @@ export const Card = ({
       ref={refElement}
       onPointerMove={(event) => {
         if (event.pointerType === "touch") return;
-        if (getMatchMediaMatches("(prefers-reduced-motion: reduce)"))
-          return;
+        if (getMatchMediaMatches("(prefers-reduced-motion: reduce)")) return;
 
         if (!rectRef.current && refElement.current) {
           rectRef.current = refElement.current.getBoundingClientRect();

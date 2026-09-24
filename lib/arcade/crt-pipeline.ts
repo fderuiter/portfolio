@@ -11,7 +11,8 @@ import { CRTThemeConfig } from "@/lib/dungeon/types";
 import { clamp } from "../game-utils";
 import { getMatchMediaMatches } from "@/hooks/useMediaQuery";
 
-export type PhosphorMaskType = "none" | "aperture-grille" | "shadow-mask" | "monochrome-dot";
+export type PhosphorMaskType =
+  "none" | "aperture-grille" | "shadow-mask" | "monochrome-dot";
 
 export type CRTPresetId =
   | "authentic-arcade"
@@ -72,7 +73,8 @@ export const CRT_PRESETS: Record<CRTPresetId, CRTPreset> = {
     id: "authentic-arcade",
     name: "Authentic Arcade CRT",
     badge: "1980s Coin-Op",
-    description: "Staggered triad shadow mask, rich bloom, warm raster scanlines, and deep vignette.",
+    description:
+      "Staggered triad shadow mask, rich bloom, warm raster scanlines, and deep vignette.",
     config: {
       scanlinesEnabled: true,
       scanlineIntensity: 0.32,
@@ -89,7 +91,8 @@ export const CRT_PRESETS: Record<CRTPresetId, CRTPreset> = {
     id: "trinitron-pro",
     name: "Trinitron PVM Pro",
     badge: "1990s Broadcast",
-    description: "Crisp RGB vertical aperture grille stripes, razor-sharp scanlines, and high luminance.",
+    description:
+      "Crisp RGB vertical aperture grille stripes, razor-sharp scanlines, and high luminance.",
     config: {
       scanlinesEnabled: true,
       scanlineIntensity: 0.2,
@@ -106,7 +109,8 @@ export const CRT_PRESETS: Record<CRTPresetId, CRTPreset> = {
     id: "amber-terminal",
     name: "Amber Mainframe Terminal",
     badge: "IBM 3270",
-    description: "Monochrome micro-phosphor dot matrix, high contrast scanlines, and warm amber aura.",
+    description:
+      "Monochrome micro-phosphor dot matrix, high contrast scanlines, and warm amber aura.",
     config: {
       scanlinesEnabled: true,
       scanlineIntensity: 0.4,
@@ -123,7 +127,8 @@ export const CRT_PRESETS: Record<CRTPresetId, CRTPreset> = {
     id: "cyberpunk-neon",
     name: "Cyberpunk Neon Deck",
     badge: "Futuristic HUD",
-    description: "Vibrant aperture grille, high saturation bloom glow, and dynamic phosphor luminance.",
+    description:
+      "Vibrant aperture grille, high saturation bloom glow, and dynamic phosphor luminance.",
     config: {
       scanlinesEnabled: true,
       scanlineIntensity: 0.24,
@@ -140,7 +145,8 @@ export const CRT_PRESETS: Record<CRTPresetId, CRTPreset> = {
     id: "clean-digital",
     name: "Clean Digital / LCD",
     badge: "Flat Modern",
-    description: "Crisp raw pixel art without scanlines, phosphor patterns, or curvature distortion.",
+    description:
+      "Crisp raw pixel art without scanlines, phosphor patterns, or curvature distortion.",
     config: {
       scanlinesEnabled: false,
       scanlineIntensity: 0.0,
@@ -184,9 +190,12 @@ export function loadCRTCalibration(): CRTCalibrationConfig {
         typeof parsed.scanlineDensity === "number"
           ? clamp(Math.round(parsed.scanlineDensity), 1, 4)
           : DEFAULT_CRT_CALIBRATION.scanlineDensity,
-      phosphorMask: ["none", "aperture-grille", "shadow-mask", "monochrome-dot"].includes(
-        parsed.phosphorMask
-      )
+      phosphorMask: [
+        "none",
+        "aperture-grille",
+        "shadow-mask",
+        "monochrome-dot",
+      ].includes(parsed.phosphorMask)
         ? parsed.phosphorMask
         : DEFAULT_CRT_CALIBRATION.phosphorMask,
       phosphorIntensity:
@@ -221,7 +230,10 @@ export function loadCRTCalibration(): CRTCalibrationConfig {
 export function saveCRTCalibration(config: CRTCalibrationConfig): void {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(CRT_CALIBRATION_STORAGE_KEY, JSON.stringify(config));
+    window.localStorage.setItem(
+      CRT_CALIBRATION_STORAGE_KEY,
+      JSON.stringify(config)
+    );
     window.dispatchEvent(new Event("crt-calibration-changed"));
   } catch {
     // Ignore storage errors
@@ -410,7 +422,10 @@ export function renderCRTEffects(
       width * 0.72
     );
     vignette.addColorStop(0, "rgba(0, 0, 0, 0)");
-    vignette.addColorStop(0.7, `rgba(0, 0, 0, ${(maxVignetteAlpha * 0.5).toFixed(3)})`);
+    vignette.addColorStop(
+      0.7,
+      `rgba(0, 0, 0, ${(maxVignetteAlpha * 0.5).toFixed(3)})`
+    );
     vignette.addColorStop(1, `rgba(0, 0, 0, ${maxVignetteAlpha.toFixed(3)})`);
 
     ctx.fillStyle = vignette;

@@ -1,7 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { IconChevronDown, IconChevronRight, IconGitCommit, IconCheck, IconCircleDot } from "@tabler/icons-react";
+import {
+  IconChevronDown,
+  IconChevronRight,
+  IconGitCommit,
+  IconCheck,
+  IconCircleDot,
+} from "@tabler/icons-react";
 
 export interface ProofTreeNode {
   id: string;
@@ -35,7 +41,9 @@ export const ProofTree: React.FC<ProofTreeProps> = ({
   ariaLabel = "Quasi-Perfect Proof Tree",
 }) => {
   // Local state for uncontrolled expansion tracking
-  const [internalExpandedMap, setInternalExpandedMap] = useState<Record<string, boolean>>(() => {
+  const [internalExpandedMap, setInternalExpandedMap] = useState<
+    Record<string, boolean>
+  >(() => {
     const map: Record<string, boolean> = {};
     const traverse = (node: ProofTreeNode) => {
       map[node.id] = node.isExpanded !== undefined ? node.isExpanded : true;
@@ -49,7 +57,7 @@ export const ProofTree: React.FC<ProofTreeProps> = ({
     if (controlledExpandedIds !== undefined) {
       return controlledExpandedIds.includes(node.id);
     }
-    return internalExpandedMap[node.id] ?? (node.isExpanded ?? true);
+    return internalExpandedMap[node.id] ?? node.isExpanded ?? true;
   };
 
   const handleToggleNode = (node: ProofTreeNode, e: React.MouseEvent) => {
@@ -141,7 +149,9 @@ export const ProofTree: React.FC<ProofTreeProps> = ({
               <IconGitCommit className="w-3.5 h-3.5 text-zinc-500" />
             )}
 
-            <span className="font-bold text-sm tracking-wide">{node.label}</span>
+            <span className="font-bold text-sm tracking-wide">
+              {node.label}
+            </span>
 
             {node.rule && (
               <span className="rounded bg-zinc-800/80 px-2 py-0.5 text-[10px] text-zinc-300 border border-zinc-700/60">
@@ -157,7 +167,8 @@ export const ProofTree: React.FC<ProofTreeProps> = ({
               </span>
             ) : (
               <span className="flex items-center gap-1 text-cyan-400">
-                <IconCircleDot className="w-3 h-3 animate-pulse" /> {node.status || "open"}
+                <IconCircleDot className="w-3 h-3 animate-pulse" />{" "}
+                {node.status || "open"}
               </span>
             )}
           </div>
@@ -187,9 +198,7 @@ export const ProofTree: React.FC<ProofTreeProps> = ({
         </span>
       </div>
 
-      <div className="flex flex-col gap-2">
-        {renderNode(rootNode)}
-      </div>
+      <div className="flex flex-col gap-2">{renderNode(rootNode)}</div>
     </div>
   );
 };

@@ -16,7 +16,11 @@ import {
   HintSystem,
   ExpressionTree,
 } from "@/components/QuasiPerfectPuzzler";
-import { ASTNode, LevelScore, PuzzlerLevelDef } from "@/lib/quasi-perfect/types";
+import {
+  ASTNode,
+  LevelScore,
+  PuzzlerLevelDef,
+} from "@/lib/quasi-perfect/types";
 import { tacticDefs } from "@/lib/quasi-perfect/tactics";
 
 // Mock Audio & Announcer hooks to avoid audio errors during vitest run
@@ -51,9 +55,30 @@ describe("Quasi-Perfect Puzzler Subcomponents Test Suite", () => {
     it("mounts GridCanvas and verifies grid tile click events", () => {
       const handleTileClick = vi.fn();
       const customTiles: GridTile[] = [
-        { id: "tile-1", row: 0, col: 0, label: "P → Q", value: "Hypothesis", type: "hypothesis" },
-        { id: "tile-2", row: 0, col: 1, label: "P", value: "Premise", type: "variable" },
-        { id: "tile-3", row: 1, col: 0, label: "Q", value: "Goal", type: "goal" },
+        {
+          id: "tile-1",
+          row: 0,
+          col: 0,
+          label: "P → Q",
+          value: "Hypothesis",
+          type: "hypothesis",
+        },
+        {
+          id: "tile-2",
+          row: 0,
+          col: 1,
+          label: "P",
+          value: "Premise",
+          type: "variable",
+        },
+        {
+          id: "tile-3",
+          row: 1,
+          col: 0,
+          label: "Q",
+          value: "Goal",
+          type: "goal",
+        },
       ];
 
       render(
@@ -108,9 +133,13 @@ describe("Quasi-Perfect Puzzler Subcomponents Test Suite", () => {
         { id: "t-disabled", row: 0, col: 0, label: "Locked", isDisabled: true },
       ];
 
-      render(<GridCanvas tiles={disabledTiles} onTileClick={handleTileClick} />);
+      render(
+        <GridCanvas tiles={disabledTiles} onTileClick={handleTileClick} />
+      );
 
-      const tileBtn = screen.getByRole("button", { name: /Locked/i }) as HTMLButtonElement;
+      const tileBtn = screen.getByRole("button", {
+        name: /Locked/i,
+      }) as HTMLButtonElement;
       expect(tileBtn.disabled).toBe(true);
 
       fireEvent.click(tileBtn);
@@ -189,10 +218,14 @@ describe("Quasi-Perfect Puzzler Subcomponents Test Suite", () => {
       expect(screen.getByText("Premise hQ: Q")).toBeDefined();
 
       // Find expand toggle button on root node
-      const rootNodeEl = screen.getByText("Goal: P ∧ Q").closest("[data-node-id]");
+      const rootNodeEl = screen
+        .getByText("Goal: P ∧ Q")
+        .closest("[data-node-id]");
       expect(rootNodeEl?.getAttribute("data-expanded")).toBe("true");
 
-      const toggleBtn = screen.getByLabelText("Toggle expand for node Goal: P ∧ Q");
+      const toggleBtn = screen.getByLabelText(
+        "Toggle expand for node Goal: P ∧ Q"
+      );
       expect(toggleBtn).toBeDefined();
 
       // Click expand toggle to collapse root
@@ -212,7 +245,9 @@ describe("Quasi-Perfect Puzzler Subcomponents Test Suite", () => {
         <ProofTree rootNode={sampleTree} onSelectNode={handleSelectNode} />
       );
 
-      const nodeEl = screen.getByRole("button", { name: "Select proof tree node Subgoal 1: P" });
+      const nodeEl = screen.getByRole("button", {
+        name: "Select proof tree node Subgoal 1: P",
+      });
       fireEvent.click(nodeEl);
       expect(handleSelectNode).toHaveBeenLastCalledWith("sub-1");
 
@@ -241,12 +276,16 @@ describe("Quasi-Perfect Puzzler Subcomponents Test Suite", () => {
       expect(screen.queryByText("Premise hQ: Q")).toBeNull();
 
       // Click toggle on sub-2 (collapsed in controlled mode) -> should report true (request expand)
-      const sub2ToggleBtn = screen.getByLabelText("Toggle expand for node Subgoal 2: Q");
+      const sub2ToggleBtn = screen.getByLabelText(
+        "Toggle expand for node Subgoal 2: Q"
+      );
       fireEvent.click(sub2ToggleBtn);
       expect(handleToggleExpand).toHaveBeenLastCalledWith("sub-2", true);
 
       // Click toggle on root (expanded in controlled mode) -> should report false (request collapse)
-      const rootToggleBtn = screen.getByLabelText("Toggle expand for node Goal: P ∧ Q");
+      const rootToggleBtn = screen.getByLabelText(
+        "Toggle expand for node Goal: P ∧ Q"
+      );
       fireEvent.click(rootToggleBtn);
       expect(handleToggleExpand).toHaveBeenLastCalledWith("root", false);
     });
@@ -298,9 +337,7 @@ describe("Quasi-Perfect Puzzler Subcomponents Test Suite", () => {
     });
 
     it("renders RAMGauge and reflects memory consumption status", () => {
-      render(
-        <RAMGauge currentRam={12} initialRam={16} />
-      );
+      render(<RAMGauge currentRam={12} initialRam={16} />);
 
       expect(screen.getByText("12.0")).toBeDefined();
       expect(screen.getByText("/ 16 GB")).toBeDefined();
@@ -310,14 +347,26 @@ describe("Quasi-Perfect Puzzler Subcomponents Test Suite", () => {
 
     it("renders TerminalLog and displays compiler outputs", () => {
       const logs = [
-        { id: "1", timestamp: "12:00:00", text: "Compiling Lean 4 theorem...", type: "info" as const },
-        { id: "2", timestamp: "12:00:01", text: "Goal closed successfully Q.E.D.", type: "success" as const },
+        {
+          id: "1",
+          timestamp: "12:00:00",
+          text: "Compiling Lean 4 theorem...",
+          type: "info" as const,
+        },
+        {
+          id: "2",
+          timestamp: "12:00:01",
+          text: "Goal closed successfully Q.E.D.",
+          type: "success" as const,
+        },
       ];
 
       render(<TerminalLog logs={logs} />);
 
       expect(screen.getByText(/Compiling Lean 4 theorem/i)).toBeDefined();
-      expect(screen.getByText(/Goal closed successfully Q.E.D./i)).toBeDefined();
+      expect(
+        screen.getByText(/Goal closed successfully Q.E.D./i)
+      ).toBeDefined();
     });
 
     it("renders VictoryModal upon proof completion", () => {
@@ -342,13 +391,29 @@ describe("Quasi-Perfect Puzzler Subcomponents Test Suite", () => {
         initialRam: 16,
         goldRamTarget: 15,
         silverRamTarget: 10,
-        goal: { id: "g1", type: "Equality", value: "=", children: [{ id: "a1", type: "Variable", value: "a" }, { id: "a2", type: "Variable", value: "a" }] },
+        goal: {
+          id: "g1",
+          type: "Equality",
+          value: "=",
+          children: [
+            { id: "a1", type: "Variable", value: "a" },
+            { id: "a2", type: "Variable", value: "a" },
+          ],
+        },
         hypotheses: [],
         availableTactics: ["rfl"],
-        hints: ["Every object is equal to itself.", "Apply rfl tactic.", "Target root equality."],
+        hints: [
+          "Every object is equal to itself.",
+          "Apply rfl tactic.",
+          "Target root equality.",
+        ],
         leanTheoremName: "identity_crisis",
         leanTypeSignature: "a = a",
-        educationalConcept: { title: "Reflexivity", summary: "Reflexivity axiom", realWorldApplication: "Equality" },
+        educationalConcept: {
+          title: "Reflexivity",
+          summary: "Reflexivity axiom",
+          realWorldApplication: "Equality",
+        },
       };
 
       render(
@@ -416,7 +481,9 @@ describe("Quasi-Perfect Puzzler Subcomponents Test Suite", () => {
       render(<HintSystem hints={hints} />);
 
       expect(screen.getByText(/Interactive Proof Coach/i)).toBeDefined();
-      expect(screen.getByText(/Every object is equal to itself./i)).toBeDefined();
+      expect(
+        screen.getByText(/Every object is equal to itself./i)
+      ).toBeDefined();
     });
 
     it("renders ASTNodeView and ExpressionTree with node interaction", () => {

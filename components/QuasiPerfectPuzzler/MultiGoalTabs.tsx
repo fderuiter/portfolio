@@ -49,7 +49,9 @@ export const MultiGoalTabs: React.FC<MultiGoalTabsProps> = ({
       <div className="flex items-center justify-between gap-2 mb-2">
         <div className="flex items-center gap-2 text-xs font-bold text-purple-300">
           <IconGitBranch className="w-4 h-4 text-purple-400" />
-          <span>Active Proof Branches ({completedCount}/{subgoals.length} closed)</span>
+          <span>
+            Active Proof Branches ({completedCount}/{subgoals.length} closed)
+          </span>
         </div>
         <span className="text-[10px] text-zinc-400">
           Discharge all subgoals to complete theorem
@@ -83,8 +85,8 @@ export const MultiGoalTabs: React.FC<MultiGoalTabsProps> = ({
                 isActive
                   ? "bg-purple-600 text-white shadow-[0_0_12px_rgba(168,85,247,0.5)] border border-purple-400"
                   : isDone
-                  ? "bg-emerald-950/60 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-900/60"
-                  : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:bg-zinc-800 hover:text-zinc-200"
+                    ? "bg-emerald-950/60 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-900/60"
+                    : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:bg-zinc-800 hover:text-zinc-200"
               }`}
             >
               {isDone ? (

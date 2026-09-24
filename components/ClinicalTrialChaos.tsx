@@ -512,7 +512,9 @@ export const ClinicalTrialChaos: React.FC = () => {
       // focus it so hotkeys work: the Start button unmounts on click.
       const board = containerRef.current;
       if (board) {
-        const reduceMotion = getMatchMediaMatches("(prefers-reduced-motion: reduce)");
+        const reduceMotion = getMatchMediaMatches(
+          "(prefers-reduced-motion: reduce)"
+        );
         requestAnimationFrame(() => {
           board.focus({ preventScroll: true });
           if (isFullscreen || typeof window.scrollTo !== "function") return;

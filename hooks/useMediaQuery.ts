@@ -61,10 +61,7 @@ function getQueryStore(query: string, serverSnapshot = false): QueryStore {
  * @param serverSnapshot - Optional initial value during server rendering (default: false).
  * @returns True if the media query matches, false otherwise.
  */
-export function useMediaQuery(
-  query: string,
-  serverSnapshot = false
-): boolean {
+export function useMediaQuery(query: string, serverSnapshot = false): boolean {
   const store = getQueryStore(query, serverSnapshot);
   return useSyncExternalStore(
     store.subscribe,

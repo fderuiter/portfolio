@@ -62,7 +62,9 @@ describe("WAI-ARIA Tab Navigation Standards Across Components", () => {
 
       const tablist = container.querySelector('[role="tablist"]');
       expect(tablist).not.toBeNull();
-      expect(tablist?.getAttribute("aria-label")).toBe("Study Spine Navigation");
+      expect(tablist?.getAttribute("aria-label")).toBe(
+        "Study Spine Navigation"
+      );
     });
 
     it("has tab buttons with role='tab', aria-selected, unique id, and aria-controls", async () => {
@@ -78,15 +80,21 @@ describe("WAI-ARIA Tab Navigation Standards Across Components", () => {
 
       expect(spineTab.id).toBe("study-spine-tab-spine");
       expect(spineTab.getAttribute("aria-selected")).toBe("true");
-      expect(spineTab.getAttribute("aria-controls")).toBe("study-spine-panel-spine");
+      expect(spineTab.getAttribute("aria-controls")).toBe(
+        "study-spine-panel-spine"
+      );
 
       expect(formsTab.id).toBe("study-spine-tab-forms");
       expect(formsTab.getAttribute("aria-selected")).toBe("false");
-      expect(formsTab.getAttribute("aria-controls")).toBe("study-spine-panel-forms");
+      expect(formsTab.getAttribute("aria-controls")).toBe(
+        "study-spine-panel-forms"
+      );
 
       expect(paletteTab.id).toBe("study-spine-tab-palette");
       expect(paletteTab.getAttribute("aria-selected")).toBe("false");
-      expect(paletteTab.getAttribute("aria-controls")).toBe("study-spine-panel-palette");
+      expect(paletteTab.getAttribute("aria-controls")).toBe(
+        "study-spine-panel-palette"
+      );
     });
 
     it("has active tab panel with role='tabpanel', matching id, and aria-labelledby", async () => {
@@ -95,10 +103,12 @@ describe("WAI-ARIA Tab Navigation Standards Across Components", () => {
         root.render(<StudySpine {...defaultProps} activeTab="spine" />);
       });
 
-      const panel = container.querySelector('#study-spine-panel-spine');
+      const panel = container.querySelector("#study-spine-panel-spine");
       expect(panel).not.toBeNull();
       expect(panel?.getAttribute("role")).toBe("tabpanel");
-      expect(panel?.getAttribute("aria-labelledby")).toBe("study-spine-tab-spine");
+      expect(panel?.getAttribute("aria-labelledby")).toBe(
+        "study-spine-tab-spine"
+      );
     });
 
     it("ensures every tab's aria-controls points to an existing panel in the DOM", async () => {
@@ -123,7 +133,9 @@ describe("WAI-ARIA Tab Navigation Standards Across Components", () => {
         root.render(<StudySpine {...defaultProps} activeTab="forms" />);
       });
 
-      const tabs = Array.from(container.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+      const tabs = Array.from(
+        container.querySelectorAll<HTMLButtonElement>('[role="tab"]')
+      );
       const [spineTab, formsTab, paletteTab] = tabs;
 
       expect(spineTab.tabIndex).toBe(-1);
@@ -135,27 +147,41 @@ describe("WAI-ARIA Tab Navigation Standards Across Components", () => {
       const onChangeTab = vi.fn();
       await act(async () => {
         root = createRoot(container);
-        root.render(<StudySpine {...defaultProps} activeTab="spine" onChangeTab={onChangeTab} />);
+        root.render(
+          <StudySpine
+            {...defaultProps}
+            activeTab="spine"
+            onChangeTab={onChangeTab}
+          />
+        );
       });
 
-      const spineTab = container.querySelector<HTMLButtonElement>("#study-spine-tab-spine")!;
+      const spineTab = container.querySelector<HTMLButtonElement>(
+        "#study-spine-tab-spine"
+      )!;
       spineTab.focus();
 
       // ArrowRight -> forms
       await act(async () => {
-        spineTab.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
+        spineTab.dispatchEvent(
+          new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true })
+        );
       });
       expect(onChangeTab).toHaveBeenCalledWith("forms");
 
       // End -> palette
       await act(async () => {
-        spineTab.dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true }));
+        spineTab.dispatchEvent(
+          new KeyboardEvent("keydown", { key: "End", bubbles: true })
+        );
       });
       expect(onChangeTab).toHaveBeenCalledWith("palette");
 
       // Home -> spine
       await act(async () => {
-        spineTab.dispatchEvent(new KeyboardEvent("keydown", { key: "Home", bubbles: true }));
+        spineTab.dispatchEvent(
+          new KeyboardEvent("keydown", { key: "Home", bubbles: true })
+        );
       });
       expect(onChangeTab).toHaveBeenCalledWith("spine");
     });
@@ -201,10 +227,12 @@ describe("WAI-ARIA Tab Navigation Standards Across Components", () => {
         root.render(<ExportImportModal {...defaultProps} />);
       });
 
-      const panel = container.querySelector('#export-panel-universal');
+      const panel = container.querySelector("#export-panel-universal");
       expect(panel).not.toBeNull();
       expect(panel?.getAttribute("role")).toBe("tabpanel");
-      expect(panel?.getAttribute("aria-labelledby")).toBe("export-tab-universal");
+      expect(panel?.getAttribute("aria-labelledby")).toBe(
+        "export-tab-universal"
+      );
     });
 
     it("ensures every tab's aria-controls points to an existing panel in the DOM", async () => {
@@ -231,7 +259,9 @@ describe("WAI-ARIA Tab Navigation Standards Across Components", () => {
         root.render(<ExportImportModal {...defaultProps} />);
       });
 
-      const tabs = Array.from(container.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+      const tabs = Array.from(
+        container.querySelectorAll<HTMLButtonElement>('[role="tab"]')
+      );
       expect(tabs[0].tabIndex).toBe(0); // universal
       expect(tabs[1].tabIndex).toBe(-1); // usdm
       expect(tabs[2].tabIndex).toBe(-1); // odm
@@ -290,11 +320,15 @@ describe("WAI-ARIA Tab Navigation Standards Across Components", () => {
 
       expect(tabs[0].id).toBe("subgoal-tab-goal_0");
       expect(tabs[0].getAttribute("aria-selected")).toBe("true");
-      expect(tabs[0].getAttribute("aria-controls")).toBe("subgoal-panel-goal_0");
+      expect(tabs[0].getAttribute("aria-controls")).toBe(
+        "subgoal-panel-goal_0"
+      );
 
       expect(tabs[1].id).toBe("subgoal-tab-goal_1");
       expect(tabs[1].getAttribute("aria-selected")).toBe("false");
-      expect(tabs[1].getAttribute("aria-controls")).toBe("subgoal-panel-goal_1");
+      expect(tabs[1].getAttribute("aria-controls")).toBe(
+        "subgoal-panel-goal_1"
+      );
     });
   });
 });

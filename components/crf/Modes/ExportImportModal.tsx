@@ -549,14 +549,19 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
                       <td className="p-3 font-bold text-brand-cyan">
                         {form.domain}
                       </td>
-                      <td className="p-3 text-zinc-300 font-sans">{form.name}</td>
+                      <td className="p-3 text-zinc-300 font-sans">
+                        {form.name}
+                      </td>
                       <td className="p-3 font-bold text-white">
                         {field.variableName}
                       </td>
-                      <td className="p-3 text-zinc-300 font-sans">{field.label}</td>
+                      <td className="p-3 text-zinc-300 font-sans">
+                        {field.label}
+                      </td>
                       <td className="p-3 text-zinc-500">{field.dataType}</td>
                       <td className="p-3 text-zinc-400">
-                        {field.cdashMetadata?.core || (field.required ? "R" : "O")}
+                        {field.cdashMetadata?.core ||
+                          (field.required ? "R" : "O")}
                       </td>
                       <td className="p-3 text-sky-400">
                         {field.cdashMetadata?.acrfAnnotation ||

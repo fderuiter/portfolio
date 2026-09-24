@@ -65,7 +65,9 @@ const AudioWaveformVisualizer: React.FC<{
 
   useEffect(() => {
     let animFrame: number;
-    const prefersReduced = getMatchMediaMatches("(prefers-reduced-motion: reduce)");
+    const prefersReduced = getMatchMediaMatches(
+      "(prefers-reduced-motion: reduce)"
+    );
 
     if (prefersReduced) {
       for (let i = 0; i < 24; i++) {

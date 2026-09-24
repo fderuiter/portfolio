@@ -146,7 +146,8 @@ export const AssetDistributionHub: React.FC<AssetDistributionHubProps> = ({
     let currentX = startX;
     return catConfigs.map((cat) => {
       const count = items.filter((i) => i.category === cat.key).length;
-      const proportion = items.length > 0 ? count / total : 1 / catConfigs.length;
+      const proportion =
+        items.length > 0 ? count / total : 1 / catConfigs.length;
       const w = Math.round(proportion * totalAvailWidth);
       const x = currentX;
       currentX += w + gap;
@@ -184,8 +185,7 @@ export const AssetDistributionHub: React.FC<AssetDistributionHubProps> = ({
       const isHovered =
         hoveredCategory === cat.key ||
         (hoveredAsset &&
-          items.find((i) => i.filename === hoveredAsset)?.category ===
-            cat.key);
+          items.find((i) => i.filename === hoveredAsset)?.category === cat.key);
       const isActive = activeCategory === "all" || activeCategory === cat.key;
 
       ctx.fillStyle = isActive || isHovered ? cat.color : "#27272a";
