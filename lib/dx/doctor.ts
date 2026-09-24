@@ -14,6 +14,8 @@ import {
 } from "./benchmark-evidence";
 import { type RemediationAction } from "./cli-parser";
 import { getEnv } from "../env";
+import { FALLBACK_CASE_STUDIES } from "../case-studies-data";
+import { FALLBACK_BLOG_POSTS } from "../fallback-blog-posts";
 
 export interface DiagnosticCheckResult {
   id: string;
@@ -187,24 +189,26 @@ export function checkRouteIndexing(
   };
 }
 
+const PAGE_FILENAMES = ["page.tsx", "page.ts", "page.jsx", "page.js"] as const;
+
+function hasPageFile(dir: string): boolean {
+  return PAGE_FILENAMES.some((f) => fs.existsSync(path.join(dir, f)));
+}
+
 /**
  * Helper to check if a route path exists on disk under appDir (either as a static page or matching dynamic route)
  */
 export function routeExistsOnDisk(routePath: string, appDir: string): boolean {
   if (!fs.existsSync(appDir)) return false;
   if (routePath === "/") {
-    return ["page.tsx", "page.ts", "page.jsx", "page.js"].some((f) =>
-      fs.existsSync(path.join(appDir, f))
-    );
+    return hasPageFile(appDir);
   }
 
   const segments = routePath.split("/").filter(Boolean);
 
   function checkSegments(currentDir: string, segIndex: number): boolean {
     if (segIndex === segments.length) {
-      return ["page.tsx", "page.ts", "page.jsx", "page.js"].some((f) =>
-        fs.existsSync(path.join(currentDir, f))
-      );
+      return hasPageFile(currentDir);
     }
 
     if (!fs.existsSync(currentDir)) return false;
@@ -225,6 +229,34 @@ export function routeExistsOnDisk(routePath: string, appDir: string): boolean {
           entry.name.startsWith("[") &&
           entry.name.endsWith("]")
         ) {
+          const parentDirName = path.basename(currentDir);
+
+          // Verify dynamic case study slugs
+          if (
+            parentDirName === "case-studies" &&
+            (entry.name === "[slug]" || entry.name.includes("slug"))
+          ) {
+            const isValidCaseStudy = FALLBACK_CASE_STUDIES.some(
+              (cs) => cs.slug === target && cs.published !== false
+            );
+            if (!isValidCaseStudy) {
+              continue;
+            }
+          }
+
+          // Verify dynamic blog post slugs
+          if (
+            parentDirName === "blog" &&
+            (entry.name === "[slug]" || entry.name.includes("slug"))
+          ) {
+            const isValidBlogPost = FALLBACK_BLOG_POSTS.some(
+              (post) => post.slug === target && post.published !== false
+            );
+            if (!isValidBlogPost) {
+              continue;
+            }
+          }
+
           if (checkSegments(path.join(currentDir, entry.name), segIndex + 1)) {
             return true;
           }

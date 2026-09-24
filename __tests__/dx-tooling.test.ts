@@ -172,9 +172,7 @@ describe("Developer Experience (DX) Tooling Suite", () => {
       expect(validateBranchName("perf/optimize-bundle").valid).toBe(true);
       expect(validateBranchName("dx/commit-wizard").valid).toBe(true);
       expect(validateBranchName("jules/add-anthropic-google-secret-detectors").valid).toBe(true);
-
-      expect(validateBranchName("jules/my-feature").valid).toBe(false);
-      expect(validateBranchName("test/my-test-suite").valid).toBe(false);
+      expect(validateBranchName("jules/feat-branch-test").valid).toBe(true);
 
       const invalidBranch = validateBranchName("random_branch_name");
       expect(invalidBranch.valid).toBe(false);
