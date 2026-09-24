@@ -51,6 +51,7 @@ import {
   generateEngineId,
   generateCdashVariableName,
 } from "./precision-date";
+import { cloneDeep } from "../utils";
 import { lintForm } from "./ast-evaluator";
 import {
   instantiateSmartBlock,
@@ -347,7 +348,8 @@ export class StudyProtocolEngine {
     const existing = threads.find(
       (thread) => thread.target.fieldId === fieldId
     );
-    if (!found && !existing) throw new Error(`Field '${fieldId}' was not found.`);
+    if (!found && !existing)
+      throw new Error(`Field '${fieldId}' was not found.`);
 
     let target: StudyReviewTarget;
     if (existing) {
@@ -969,7 +971,7 @@ export class StudyProtocolEngine {
     }
 
     // Deep-clone original form so values in copies do not alias the source
-    const cloned: CRFForm = JSON.parse(JSON.stringify(originalForm));
+    const cloned: CRFForm = cloneDeep(originalForm);
 
     // Allocate distinct unique form ID
     cloned.id = generateEngineId(
@@ -1218,7 +1220,7 @@ export class StudyProtocolEngine {
     existingVars.add(newVariableName);
 
     // Deep-clone original field so copy does not alias source
-    const duplicatedField: CRFField = JSON.parse(JSON.stringify(originalField));
+    const duplicatedField: CRFField = cloneDeep(originalField);
     duplicatedField.id = generateEngineId("fld");
     duplicatedField.variableName = newVariableName;
     duplicatedField.label = `${originalField.label} (Copy)`;
@@ -2653,7 +2655,13 @@ export class StudyProtocolEngine {
     return {
       study: removedFields.reduce(
         (nextStudy, field) =>
-          this.recordReviewDeletion(nextStudy, form, field, reviewAuthor, reviewAt),
+          this.recordReviewDeletion(
+            nextStudy,
+            form,
+            field,
+            reviewAuthor,
+            reviewAt
+          ),
         updatedStudy
       ),
       removedSection: targetSection,
@@ -3176,13 +3184,13 @@ export class StudyProtocolEngine {
     if (preset) {
       const info = getStudyPresetsSync().find((p) => p.id === presetId)!;
       return {
-        study: JSON.parse(JSON.stringify(preset)),
+        study: cloneDeep(preset),
         presetInfo: { id: info.id, name: info.name },
       };
     }
     const defaultStudy = getOncologyPresetSync();
     return {
-      study: JSON.parse(JSON.stringify(defaultStudy)),
+      study: cloneDeep(defaultStudy),
       presetInfo: {
         id: "oncology_recist",
         name: "Phase III Immuno-Oncology (RECIST 1.1)",

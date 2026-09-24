@@ -12,6 +12,7 @@ import {
   AstCondition,
 } from "./types";
 import { generateEngineId, generateCdashVariableName } from "./precision-date";
+import { cloneDeep } from "../utils";
 
 export type SlashCommandCategory = "smart_block" | "widget" | "layout";
 
@@ -1722,8 +1723,8 @@ export function instantiateSmartBlock(
   const raw = definition.factory();
 
   // Deep clone to prevent mutating template objects
-  const section: CRFSection = JSON.parse(JSON.stringify(raw.section));
-  const rules: EditCheckRule[] = JSON.parse(JSON.stringify(raw.rules));
+  const section: CRFSection = cloneDeep(raw.section);
+  const rules: EditCheckRule[] = cloneDeep(raw.rules);
 
   const variableMap: Record<string, string> = {};
   const idMap: Record<string, string> = {};

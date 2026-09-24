@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useAnnouncer } from "@/hooks/useAnnouncer";
+import { cloneDeep } from "@/lib/utils";
 import { getMatchMediaMatches } from "@/hooks/useMediaQuery";
 import {
   IconAlertTriangle,
@@ -469,7 +470,7 @@ export const ClinicalTrialChaos: React.FC = () => {
             ),
           ]
         : targetPhase === 1 && mode === "campaign"
-          ? JSON.parse(JSON.stringify(SEEDED_SCENARIOS))
+          ? cloneDeep(SEEDED_SCENARIOS as unknown as ClinicalSubject[])
           : [
               generateClinicalSubject(0.4, false, undefined, activeDomains),
               generateClinicalSubject(0.6, false, undefined, activeDomains),

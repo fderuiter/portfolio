@@ -263,6 +263,7 @@
 - [lib/trial-and-error/scenarios](lib/trial-and-error/scenarios/README.md)
 - [lib/trial-and-error/types](lib/trial-and-error/types/README.md)
 - [lib/utils](lib/utils/README.md)
+- [lib/utils/clone](lib/utils/clone/README.md)
 - [lib/webgl/context-manager](lib/webgl/context-manager/README.md)
 - [lib/working-with-duck-engine](lib/working-with-duck-engine/README.md)
 - [lib/zod-to-openapi](lib/zod-to-openapi/README.md)
