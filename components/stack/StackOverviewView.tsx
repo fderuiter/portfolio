@@ -75,7 +75,7 @@ export const StackOverviewView: React.FC = () => {
           />
           <div className="flex items-center gap-2 text-xs font-mono text-brand-cyan bg-brand-cyan/10 border border-brand-cyan/20 px-3 py-1 rounded-full">
             <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
-            <span>Architecture v0.3.0 • Turbopack Active</span>
+            <span>Architecture v0.4.0 • Turbopack Active</span>
           </div>
         </div>
 

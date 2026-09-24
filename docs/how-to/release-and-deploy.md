@@ -1,7 +1,7 @@
 # Release and Deployment Workflow
 
 Last reconciled: 2026-09-24. Governed by
-[ADR 0048](../../adr/0048-deploy-main-on-green-ci.md), which amends
+[ADR 0049](../../adr/0049-deploy-main-on-green-ci.md), which amends
 [ADR 0038](../../adr/0038-protected-build-once-production-releases.md).
 
 **In one line:** open a PR, let CI go green, squash-merge it. Production

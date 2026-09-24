@@ -3,6 +3,7 @@
 import React, {
   useEffect,
   useEffectEvent,
+  useMemo,
   useReducer,
   useRef,
   useState,
@@ -10,14 +11,16 @@ import React, {
 import { createPortal } from "react-dom";
 import { AnimatePresence, Reorder, motion } from "framer-motion";
 import {
+  ACT_I,
   CPU_COSTS,
-  DEMOGRAPHICS_SCENARIO,
   HAND_NAMES,
-  advanceTable,
-  createTableState,
-  deriveTableView,
+  advanceRun,
+  createRunState,
+  deriveRunView,
+  type Act,
+  type RunAction,
+  type RunState,
   type Scenario,
-  type TableAction,
   type TableCardView,
   type TableState,
 } from "@/lib/trial-and-error";
@@ -47,6 +50,9 @@ import {
 } from "@/components/trial-and-error/useTeSound";
 
 interface CardTableProps {
+  /** The act to play, Small Blind first. Defaults to Act I. */
+  act?: Act;
+  /** Plays a single Blind instead of an act. */
   scenario?: Scenario;
 }
 
@@ -68,6 +74,7 @@ function cardLabel(view: TableCardView): string {
     `${POPULATION_LABEL[card.population]} population`,
     `${card.chips} Chips`,
   ];
+  if (view.debuffed) parts.push("disabled by the boss, scores 0 Chips");
   if (view.unverified) parts.push("unverified");
   if (view.inspected) {
     parts.push(
@@ -83,18 +90,28 @@ function cardLabel(view: TableCardView): string {
 
 /**
  * The Card Table: the game's main screen (T&E-UX-01). A thin adapter over
- * the pure table reducer in `@/lib/trial-and-error`; it renders the derived
- * view, dispatches intents, and never computes a score.
+ * the pure run and table reducers in `@/lib/trial-and-error`; it renders the
+ * derived view, dispatches intents, and never computes a score. It plays an
+ * act's Blinds in order (T&E-02).
  */
-export function CardTable({
-  scenario = DEMOGRAPHICS_SCENARIO,
-}: CardTableProps) {
-  const [state, dispatch] = useReducer(
-    (s: TableState, a: TableAction) => advanceTable(scenario, s, a),
-    scenario,
-    createTableState
+export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
+  const act = useMemo<Act>(
+    () =>
+      actProp ??
+      (single
+        ? { id: single.id, title: single.title, blinds: [single] }
+        : ACT_I),
+    [actProp, single]
   );
-  const view = deriveTableView(scenario, state);
+  const [run, dispatch] = useReducer(
+    (r: RunState, a: RunAction) => advanceRun(act, r, a),
+    act,
+    createRunState
+  );
+  const runView = deriveRunView(act, run);
+  const scenario = runView.blind;
+  const state = run.table;
+  const view = runView.table;
   const { announce } = useAnnouncer();
   const {
     reducedMotion,
@@ -166,7 +183,7 @@ export function CardTable({
     onEscape: () => setDetailId(null),
   });
 
-  const send = (action: TableAction, focus: PendingFocus = null) => {
+  const send = (action: RunAction, focus: PendingFocus = null) => {
     pendingFocus.current = focus;
     dispatch(action);
   };
@@ -408,9 +425,34 @@ export function CardTable({
           aria-label="Blind"
           className="min-w-0 bg-[color:var(--te-surface-1)] p-3 text-xs"
         >
-          <p className="font-bold uppercase tracking-wider text-zinc-300 break-words">
+          <p className="text-[10px] uppercase tracking-wider text-zinc-400 tabular-nums">
+            {act.title} · Blind {runView.blindIndex + 1} of {runView.blindCount}
+          </p>
+          <p
+            className="font-bold uppercase tracking-wider text-zinc-300 break-words"
+            data-testid="blind-name"
+          >
             {scenario.blind.name}
           </p>
+          {scenario.boss && (
+            <p
+              className="mt-2 border border-rose-400/60 p-2 text-rose-200 break-words"
+              data-testid="boss-modifier"
+            >
+              <span className="block font-bold uppercase tracking-wider">
+                Boss: {scenario.boss.name}
+              </span>
+              {scenario.boss.description}
+            </p>
+          )}
+          {runView.showIntro && (
+            <p
+              className="mt-2 border border-zinc-700 p-2 text-zinc-300 break-words"
+              data-testid="blind-intro"
+            >
+              {scenario.intro}
+            </p>
+          )}
           <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 tabular-nums">
             <dt className="text-zinc-400">Target</dt>
             <dd
@@ -656,7 +698,11 @@ export function CardTable({
               <p
                 className={`text-lg font-bold uppercase ${state.status === "CLEARED" ? "text-emerald-300" : "text-rose-300"}`}
               >
-                {state.status === "CLEARED" ? "Blind cleared" : "Blind failed"}
+                {runView.phase === "ACT_COMPLETE"
+                  ? `${act.title} complete`
+                  : runView.phase === "BLIND_CLEARED"
+                    ? "Blind cleared"
+                    : "Blind failed · run over"}
               </p>
               <p className="mt-2 text-sm text-zinc-300 tabular-nums">
                 {state.roundScore} of {view.quota} · {state.handsPlayed} hand
@@ -664,17 +710,39 @@ export function CardTable({
                 discard
                 {state.discards === 1 ? "" : "s"} · {state.cpu.spent} CPU spent
               </p>
-              <button
-                ref={restartRef}
-                type="button"
-                onClick={() => {
-                  setFocusIndex(0);
-                  send({ type: "RESET" }, { kind: "hand", index: 0 });
-                }}
-                className={`${BUTTON_BASE} mt-4 border-amber-500 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20`}
-              >
-                Restart Blind
-              </button>
+              {runView.nextBlind && runView.phase === "BLIND_CLEARED" ? (
+                <>
+                  <p className="mt-2 text-xs text-zinc-400 break-words">
+                    Next: {runView.nextBlind.blind.name} · target{" "}
+                    {runView.nextBlind.blind.quota}
+                  </p>
+                  <button
+                    ref={restartRef}
+                    type="button"
+                    onClick={() => {
+                      setFocusIndex(0);
+                      send({ type: "NEXT_BLIND" }, { kind: "hand", index: 0 });
+                    }}
+                    className={`${BUTTON_BASE} mt-4 border-emerald-500 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20`}
+                  >
+                    Next Blind
+                  </button>
+                </>
+              ) : (
+                <button
+                  ref={restartRef}
+                  type="button"
+                  onClick={() => {
+                    setFocusIndex(0);
+                    send({ type: "RESTART_RUN" }, { kind: "hand", index: 0 });
+                  }}
+                  className={`${BUTTON_BASE} mt-4 border-amber-500 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20`}
+                >
+                  {runView.phase === "ACT_COMPLETE"
+                    ? "Play again"
+                    : "Restart run"}
+                </button>
+              )}
             </div>
           )}
 

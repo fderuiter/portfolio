@@ -178,10 +178,7 @@ export const VirtualGamepad: React.FC<VirtualGamepadProps> = ({
     return null;
   }
 
-  const handleAction = (
-    e: React.SyntheticEvent,
-    callback?: () => void
-  ) => {
+  const handleAction = (e: React.SyntheticEvent, callback?: () => void) => {
     if (e.cancelable) e.preventDefault();
     callback?.();
   };
@@ -236,7 +233,9 @@ export const VirtualGamepad: React.FC<VirtualGamepadProps> = ({
             className="flex flex-col items-center justify-center w-14 h-14 rounded-2xl bg-rose-500/20 active:bg-rose-500/40 border border-rose-500/40 text-rose-300 active:scale-95 transition-transform shadow-lg"
           >
             <IconFlask className="w-5 h-5 mb-0.5" />
-            <span className="text-[9px] font-mono font-bold uppercase">{actionBLabel}</span>
+            <span className="text-[9px] font-mono font-bold uppercase">
+              {actionBLabel}
+            </span>
           </button>
         )}
 
@@ -256,7 +255,9 @@ export const VirtualGamepad: React.FC<VirtualGamepadProps> = ({
             className="flex flex-col items-center justify-center w-16 h-16 rounded-2xl bg-brand-cyan/20 active:bg-brand-cyan/40 border border-brand-cyan/40 text-brand-cyan active:scale-95 transition-transform shadow-lg"
           >
             <IconSword className="w-6 h-6 mb-0.5" />
-            <span className="text-[10px] font-mono font-bold uppercase">{actionALabel}</span>
+            <span className="text-[10px] font-mono font-bold uppercase">
+              {actionALabel}
+            </span>
           </button>
         )}
       </div>

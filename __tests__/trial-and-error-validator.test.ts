@@ -29,7 +29,7 @@ describe("validate: Demographics QC Desk", () => {
     expect(report).toMatchObject({
       tableId: "T-14.1.1-C",
       rulebookId: "SAP-DM-001",
-      populationSnapshotId: "SNAP-DM-v1",
+      populationSnapshotId: "SNAP-P1-v1",
     });
     expect(QcReportSchema.safeParse(report).success).toBe(true);
   });

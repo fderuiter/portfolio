@@ -63,8 +63,9 @@ export function MiniOutput({
 
 /**
  * A card's face, printed from its data: type, suit (in colour and in text),
- * number, title, the live mini-output, the Chips badge, the unverified "?"
- * badge and the stamp slot. Decorative inside the card button, whose
+ * number, title, the live mini-output, the Chips badge (struck to 0 when a
+ * Boss Blind disables the card's suit), the unverified "?" badge and the
+ * stamp slot. Decorative inside the card button, whose
  * accessible name carries the same facts.
  */
 export function CardFace({ view }: { view: TableCardView }) {
@@ -97,9 +98,18 @@ export function CardFace({ view }: { view: TableCardView }) {
         <MiniOutput face={view.face} size="card" />
       </span>
       <span className="mt-auto flex items-center justify-between gap-1 text-[10px]">
-        <span className="border border-[color:var(--te-chips)]/60 px-1 tabular-nums text-[color:var(--te-chips)]">
-          {card.chips} Chips
-        </span>
+        {view.debuffed ? (
+          <span
+            className="border border-rose-400/60 px-1 tabular-nums text-rose-300"
+            data-testid="debuff-badge"
+          >
+            <s>{card.chips}</s> → 0 Chips
+          </span>
+        ) : (
+          <span className="border border-[color:var(--te-chips)]/60 px-1 tabular-nums text-[color:var(--te-chips)]">
+            {card.chips} Chips
+          </span>
+        )}
         {view.inspected && (
           <span
             className={

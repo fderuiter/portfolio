@@ -66,6 +66,9 @@ describe("production deploy workflow", () => {
     expect(smoke).toBeGreaterThan(stage);
     expect(promote).toBeGreaterThan(smoke);
     expect(deployJob).toContain("secrets.VERCEL_AUTOMATION_BYPASS_SECRET");
+    expect(deployJob.indexOf("VERCEL_AUTOMATION_BYPASS_SECRET")).toBeLessThan(
+      deployJob.indexOf("prisma migrate deploy")
+    );
     expect(deployJob).toContain("PLAYWRIGHT_TEST_BASE_URL");
     expect(
       fs.readFileSync(path.join(process.cwd(), "playwright.config.ts"), "utf8")

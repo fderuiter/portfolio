@@ -1,6 +1,6 @@
 name: Deploy Production
 
-# ADR 0048: merging to `main` deploys. This workflow runs once CI Pipeline
+# ADR 0049: merging to `main` deploys. This workflow runs once CI Pipeline
 # has passed on a `main` push and ships exactly the commit CI verified. It
 # never re-runs the CI gates (ADR 0039: no gating job twice per tree); it
 # applies migrations, builds once, stages the artifact without touching the

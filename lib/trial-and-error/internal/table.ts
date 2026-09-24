@@ -1,4 +1,5 @@
 import type {
+  BossBlindModifier,
   HandClassification,
   HandEvaluation,
   QcReport,
@@ -10,6 +11,7 @@ import type {
   CardStamp,
   RedactedCard,
 } from "../types";
+import { POPULATION_LABELS } from "../types";
 import {
   CPU_COSTS,
   canAfford,
@@ -46,7 +48,8 @@ export interface TableEvent {
     | "CORRECTED"
     | "MOVED"
     | "REFUSED"
-    | "RESET";
+    | "RESET"
+    | "BLIND_STARTED";
   message: string;
   /** Increments on every event so repeated messages are still announced. */
   sequence: number;
@@ -110,6 +113,8 @@ export interface TableCardView {
   face: CardFace;
   /** Marks stamped on the face, in display order. */
   stamps: CardStamp[];
+  /** The Boss Blind's debuff cancels this card's Chips. */
+  debuffed: boolean;
 }
 
 /** The open Inspect drawer's content. */
@@ -200,6 +205,37 @@ const refuse = (state: TableState, message: string): TableState => ({
 const handName = (handType: HandClassification["handType"]) =>
   HAND_NAMES[handType];
 
+/** Whether the Boss Blind's debuff disables this card. */
+function isDebuffed(scenario: Scenario, card: TlfCard): boolean {
+  const boss = scenario.boss;
+  return (
+    boss?.debuffType === "DISABLE_POPULATION" &&
+    (boss.disabledPopulations ?? []).includes(card.population)
+  );
+}
+
+/**
+ * The Boss Blind's debuff as one explained rule result: a disabled card's
+ * Chips, and any subject credit its draft earned, are cancelled. Its +Mult
+ * and any zero-score rule still apply.
+ */
+function debuffFor(
+  scenario: Scenario,
+  card: TlfCard,
+  results: readonly RuleCheckResult[]
+): RuleCheckResult | null {
+  if (!isDebuffed(scenario, card)) return null;
+  const boss = scenario.boss as BossBlindModifier;
+  const chips = card.chips + results.reduce((sum, r) => sum + r.chipsDelta, 0);
+  return {
+    ruleId: boss.id,
+    passed: false,
+    chipsDelta: -chips,
+    multDelta: 0,
+    evidence: `${scenario.title} (${boss.name}): ${card.number} is built on the ${POPULATION_LABELS[card.population]} population, so it scores 0 Chips (${chips} cancelled).`,
+  };
+}
+
 /**
  * Rule results for a set of scoring cards. `revealedOnly` limits each card to
  * the findings its inspection has revealed (the preview); otherwise every true
@@ -215,17 +251,22 @@ function scoreCards(
   const ruleResults: RuleCheckResult[] = [];
   for (const card of cards) {
     const draft = draftFor(scenario, card);
-    if (!draft) continue;
-    const report = reportFor(scenario, draft);
     const inspection = inspections[card.id] ?? createInspectionState();
-    ruleResults.push(
-      ...ruleResultsFor(report, scenario.rulebook, {
-        resolvedFindingIds: inspection.resolvedFindingIds,
-        visibleFindingIds: revealedOnly
-          ? visibleFindingIds(report, inspection)
-          : undefined,
-      })
-    );
+    const results: RuleCheckResult[] = [];
+    if (draft) {
+      const report = reportFor(scenario, draft);
+      results.push(
+        ...ruleResultsFor(report, scenario.rulebook, {
+          resolvedFindingIds: inspection.resolvedFindingIds,
+          visibleFindingIds: revealedOnly
+            ? visibleFindingIds(report, inspection)
+            : undefined,
+        })
+      );
+    }
+    ruleResults.push(...results);
+    const debuff = debuffFor(scenario, card, results);
+    if (debuff) ruleResults.push(debuff);
   }
   return evaluateHand({
     handType,
@@ -582,6 +623,7 @@ export function deriveTableView(
       openRedlines,
       face: faceFor(card, draft, review),
       stamps,
+      debuffed: isDebuffed(scenario, card),
     };
   });
 

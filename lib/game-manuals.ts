@@ -669,7 +669,7 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
     accentColor: "from-amber-500/20 via-amber-500/5 to-transparent",
     badgeBg: "bg-amber-500/10 text-amber-300 border-amber-500/30",
     objective:
-      "Play hands of Tables, Listings and Figures against the Small Blind quota of 300. Inspect suspect cards on the QC Desk before you trust them: an uncorrected fatal defect zeroes the whole hand.",
+      "Clear Act I, a Phase I safety study, in three Blinds: Internal QC (300), the Sponsor Safety Review (750) and the Dose Escalation Committee (1,500). Inspect suspect cards on the QC Desk before you trust them: an uncorrected fatal defect zeroes the whole hand, and losing a Blind ends the run.",
     quickSummary:
       "Move across the hand with ← →, select up to five cards with Space, and press Enter to play the best hand they make (2 CPU). D discards the selection (1 CPU). I opens the focused card's QC Desk (1 CPU): inspect cells with Enter or Space, correct with C, and close with Esc.",
     controls: [
@@ -730,6 +730,12 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
     ],
     rules: [
       {
+        title: "Three Blinds, one run",
+        detail:
+          "Each Blind has its own SAP, deck and target, and a fresh 10 CPU. Clearing a Blind moves you to the next; failing one ends the run, and Restart run starts again from the Small Blind.",
+        badge: "Act I",
+      },
+      {
         title: "Scoring pipeline",
         detail:
           "Hand Score = (base hand Chips + output Chips + relic Chips) × (base hand Mult + card and rule +Mult + relic +Mult) × every ×Mult. A High Table is 15 Chips / +1 Mult; the Demographics table adds 30 Chips / +1 Mult, and 12 verified subject records add 12 Chips.",
@@ -747,11 +753,25 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
           "The SAP reports 1 decimal place and rounds ties half-to-even. Correcting a precision slip earns +2 Mult; correcting a rounding slip earns +1. Each open redline you have revealed costs 1 Mult.",
         badge: "SAP-DM-001",
       },
+      {
+        title: "Subjects, not events",
+        detail:
+          "Adverse event incidence counts subjects: a subject with three nervous system events is counted once in that System Organ Class. A draft that counts events is a major redline (−2 Mult); correcting it earns +2.",
+        badge: "MedDRA",
+      },
+      {
+        title: "The committee reads Safety only",
+        detail:
+          "The Dose Escalation Committee's boss debuff disables every population except Safety: an ITT output scores 0 Chips there, however clean. Five System Organ Class tables together make a MedDRA Five of a Kind.",
+        badge: "Boss",
+      },
     ],
     proTips: [
       "The Expected Value only counts findings you have revealed. Unreviewed cells can hide a zero.",
       "Draft A is the messiest draft but also the most valuable once every finding is corrected.",
       "FAS and ITT are different populations here; the Total column is where a denominator slip hides.",
+      "In the safety Blinds, FAS and Per-Protocol drop S-008, the subject who stopped for atrial fibrillation. An N of 5 in the Active column is the tell.",
+      "A Two Pair of the AE overview and the SAE table, each with its listing, is the Big Blind's workhorse.",
     ],
     lore: {
       title: "Why statisticians double-program tables",
@@ -763,6 +783,8 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
         "Independent QC",
         "Banker's Rounding",
         "Analysis Populations",
+        "MedDRA System Organ Classes",
+        "Dose Escalation Committees",
       ],
     },
   },

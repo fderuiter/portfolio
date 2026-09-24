@@ -1,4 +1,4 @@
-# ADR 0048: Deploy Main on Green CI
+# ADR 0049: Deploy Main on Green CI
 
 ## Status
 

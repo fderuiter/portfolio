@@ -4,6 +4,7 @@ import type {
   QcReport,
   Scenario,
   StagedTable,
+  TableShellSpec,
 } from "../types";
 import { CPU_COSTS, canAfford, cpuReducer, type CpuLedger } from "./cpu";
 import { evaluateHand, ruleResultsFor } from "./scoring";
@@ -108,15 +109,14 @@ function scoreHand(
   resolvedFindingIds: readonly string[],
   visibleFindingIds?: readonly string[]
 ): HandEvaluation {
+  // The schema guarantees every draft's shell exists in the scenario.
+  const draft = scenario.drawPile.find((d) => d.id === report.tableId);
+  const shell = scenario.shells.find(
+    (s) => s.id === draft?.shellId
+  ) as TableShellSpec;
   return evaluateHand({
     handType: scenario.handType,
-    cards: [
-      {
-        id: scenario.shell.id,
-        chips: scenario.shell.chips,
-        mult: scenario.shell.mult,
-      },
-    ],
+    cards: [{ id: shell.id, chips: shell.chips, mult: shell.mult }],
     ruleResults: ruleResultsFor(report, scenario.rulebook, {
       resolvedFindingIds,
       visibleFindingIds,
