@@ -4,6 +4,7 @@ import { isCurrentUserAdmin } from "@/lib/auth/admin";
 import { BlogPostService } from "@/lib/services/blog-service";
 import { createApiHandler } from "@/lib/route-wrapper";
 import { sanitizeError } from "@/lib/error-sanitization";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -42,36 +43,39 @@ function getDraftId(params: Record<string, string | string[] | undefined>) {
   return { id: parsed.data.id };
 }
 
-export const GET = createApiHandler(async (_req: NextRequest, { params }) => {
-  if (!(await isCurrentUserAdmin())) {
-    return NextResponse.json(
-      { error: "Administrator access required" },
-      { status: 403 }
-    );
-  }
-
-  const parsed = getDraftId(params);
-  if ("error" in parsed) {
-    return NextResponse.json(parsed.error, { status: 400 });
-  }
-
-  try {
-    const draft = await BlogPostService.getDraftBlogPostById(parsed.id);
-    if (!draft) {
+export const GET = createApiHandler(
+  async (_req: NextRequest, { params }) => {
+    if (!(await isCurrentUserAdmin())) {
       return NextResponse.json(
-        { error: "Blog draft not found" },
-        { status: 404 }
+        { error: "Administrator access required" },
+        { status: 403 }
       );
     }
-    return NextResponse.json({ data: draft });
-  } catch (error) {
-    console.error("API admin blog draft read failed:", sanitizeError(error));
-    return NextResponse.json(
-      { error: "Failed to load blog draft" },
-      { status: 500 }
-    );
-  }
-});
+
+    const parsed = getDraftId(params);
+    if ("error" in parsed) {
+      return NextResponse.json(parsed.error, { status: 400 });
+    }
+
+    try {
+      const draft = await BlogPostService.getDraftBlogPostById(parsed.id);
+      if (!draft) {
+        return NextResponse.json(
+          { error: "Blog draft not found" },
+          { status: 404 }
+        );
+      }
+      return NextResponse.json({ data: draft });
+    } catch (error) {
+      logger.error("API admin blog draft read failed:", sanitizeError(error));
+      return NextResponse.json(
+        { error: "Failed to load blog draft" },
+        { status: 500 }
+      );
+    }
+  },
+  { auth: "clerk_admin" }
+);
 
 export const PATCH = createApiHandler(
   async (_req: NextRequest, { data, params }) => {
@@ -109,7 +113,7 @@ export const PATCH = createApiHandler(
         return NextResponse.json(duplicateSlugResponse(), { status: 409 });
       }
 
-      console.error("API admin blog draft edit failed:", sanitizeError(error));
+      logger.error("API admin blog draft edit failed:", sanitizeError(error));
       return NextResponse.json(
         { error: "Failed to update blog draft" },
         { status: 500 }
@@ -121,6 +125,7 @@ export const PATCH = createApiHandler(
     type: "body",
     customJsonError: "Invalid JSON payload",
     customValidationError: validationError,
+    auth: "clerk_admin",
   }
 );
 
@@ -148,11 +153,12 @@ export const DELETE = createApiHandler(
       }
       return NextResponse.json({ success: true, data: { id: parsed.id } });
     } catch (error) {
-      console.error("API admin blog deletion failed:", sanitizeError(error));
+      logger.error("API admin blog deletion failed:", sanitizeError(error));
       return NextResponse.json(
         { error: "Failed to delete blog post" },
         { status: 500 }
       );
     }
-  }
+  },
+  { auth: "clerk_admin" }
 );

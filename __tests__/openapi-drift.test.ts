@@ -17,17 +17,15 @@ describe("OpenAPI Specification & Route Parity Test Suite", () => {
     expect(routes).toContain("/api/case-studies");
   });
 
-  it("guarantees 100% route coverage in OpenAPI specification (zero missing routes)", () => {
-    const { missingRoutes } = generateOpenApi(workspaceRoot);
+  it("guarantees 100% route coverage and zero security drift in OpenAPI specification", () => {
+    const { missingRoutes, securityMismatches, hasDrift } =
+      generateOpenApi(workspaceRoot);
     expect(missingRoutes).toEqual([]);
-  });
-
-  it("verifies openapi.json is in lockstep with generator script (zero drift)", () => {
-    const { hasDrift } = generateOpenApi(workspaceRoot);
+    expect(securityMismatches).toEqual([]);
     expect(hasDrift).toBe(false);
   });
 
-  it("conforms to valid OpenAPI 3.0.0 structural requirements", () => {
+  it("conforms to valid OpenAPI 3.0.0 structural requirements and security schemes", () => {
     const openApiFilePath = path.join(workspaceRoot, "openapi.json");
     expect(fs.existsSync(openApiFilePath)).toBe(true);
 
@@ -56,5 +54,56 @@ describe("OpenAPI Specification & Route Parity Test Suite", () => {
     expect(spec.components?.schemas).toBeDefined();
     expect(spec.components.schemas.CaseStudySummary).toBeDefined();
     expect(spec.components.schemas.TelemetryEvent).toBeDefined();
+
+    // Verify securitySchemes
+    expect(spec.components?.securitySchemes).toBeDefined();
+    expect(spec.components.securitySchemes.ClerkAuth).toEqual({
+      type: "http",
+      scheme: "bearer",
+      bearerFormat: "JWT",
+      description: "Clerk session token or administrative JWT",
+    });
+    expect(spec.components.securitySchemes.CronSecretAuth).toEqual({
+      type: "http",
+      scheme: "bearer",
+      bearerFormat: "Secret",
+      description: "Cron secret bearer authorization header",
+    });
+
+    // Verify protected endpoints security requirements
+    expect(spec.paths["/api/admin/blog"].get.security).toEqual([
+      { ClerkAuth: [] },
+    ]);
+    expect(spec.paths["/api/admin/blog"].post.security).toEqual([
+      { ClerkAuth: [] },
+    ]);
+    expect(spec.paths["/api/admin/blog/{id}"].get.security).toEqual([
+      { ClerkAuth: [] },
+    ]);
+    expect(spec.paths["/api/admin/blog/{id}"].patch.security).toEqual([
+      { ClerkAuth: [] },
+    ]);
+    expect(spec.paths["/api/admin/blog/{id}"].delete.security).toEqual([
+      { ClerkAuth: [] },
+    ]);
+    expect(
+      spec.paths["/api/admin/projects/{slug}/image"].post.security
+    ).toEqual([{ ClerkAuth: [] }]);
+    expect(
+      spec.paths["/api/admin/projects/{slug}/image"].delete.security
+    ).toEqual([{ ClerkAuth: [] }]);
+    expect(spec.paths["/api/cron/maintenance"].get.security).toEqual([
+      { CronSecretAuth: [] },
+    ]);
+    expect(spec.paths["/api/telemetry/sync"].get.security).toEqual([
+      { CronSecretAuth: [] },
+    ]);
+    expect(spec.paths["/api/case-studies"].post.security).toEqual([
+      { ClerkAuth: [] },
+    ]);
+
+    // Verify public endpoints do not require security
+    expect(spec.paths["/api/case-studies"].get.security).toBeUndefined();
+    expect(spec.paths["/api/telemetry"].get.security).toBeUndefined();
   });
 });

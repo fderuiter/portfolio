@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z, ZodSchema } from "zod";
-import * as Sentry from "@sentry/nextjs";
-import { sanitizeError } from "@/lib/error-sanitization";
 import { applySecurityHeaders } from "@/lib/security-headers";
+import { logger } from "@/lib/logger";
+
+export type ApiAuthRequirement = "clerk_admin" | "cron_secret" | "public";
 
 export interface ApiWrapperOptions<TSchema extends ZodSchema = ZodSchema> {
   schema?: TSchema;
@@ -13,6 +14,7 @@ export interface ApiWrapperOptions<TSchema extends ZodSchema = ZodSchema> {
   ) => { error: string; details?: Array<{ path: string; message: string }> };
   customJsonError?: string;
   defaultStatus?: number;
+  auth?: ApiAuthRequirement;
 }
 
 export type ApiHandler<TData = unknown> = (
@@ -38,6 +40,7 @@ export type ApiRouteHandler = {
       params: Promise<Record<string, string | string[] | undefined>>;
     }
   ): Promise<NextResponse>;
+  auth?: ApiAuthRequirement;
 };
 
 /**
@@ -60,7 +63,7 @@ export function createApiHandler<TSchema extends ZodSchema>(
   handler: ApiHandler<any>,
   options?: ApiWrapperOptions<TSchema>
 ) {
-  return async (
+  const wrapped: ApiRouteHandler = async (
     rawReq?: NextRequest,
     routeParams?: {
       params?:
@@ -142,9 +145,6 @@ export function createApiHandler<TSchema extends ZodSchema>(
 
       return applySecurityHeaders(response, req);
     } catch (err: unknown) {
-      Sentry.captureException(err);
-      const sanitized = sanitizeError(err);
-
       // Check for unique constraint failure (e.g. Prisma P2002)
       const errorObj = err as { code?: string; message?: string };
       if (
@@ -167,7 +167,7 @@ export function createApiHandler<TSchema extends ZodSchema>(
         return applySecurityHeaders(response, req);
       }
 
-      console.error("Unhandled API route exception:", sanitized);
+      logger.error("Unhandled API route exception:", err);
       const response = NextResponse.json(
         { error: "Internal server error" },
         { status: 500 }
@@ -175,6 +175,8 @@ export function createApiHandler<TSchema extends ZodSchema>(
       return applySecurityHeaders(response, req);
     }
   };
+  wrapped.auth = options?.auth || "public";
+  return wrapped;
 }
 
 export const withApiWrapper = createApiHandler;

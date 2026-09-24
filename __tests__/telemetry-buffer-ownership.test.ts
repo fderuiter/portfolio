@@ -175,7 +175,10 @@ describe("Telemetry buffer ownership across concurrent sync and enqueue failure 
       expect(result.event.projectSlug).toBe("/dashboard");
 
       // A dropped event is a reportable production signal, not a debug warning.
-      expect(mockCaptureException).toHaveBeenCalledWith(enqueueError);
+      expect(mockCaptureException).toHaveBeenCalledWith(
+        enqueueError,
+        expect.anything()
+      );
     });
   });
 });

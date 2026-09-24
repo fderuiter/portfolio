@@ -13,6 +13,7 @@ import React, {
 import { createPortal } from "react-dom";
 import { hexToRgba } from "@/lib/utils";
 import { designManifest } from "@/lib/design-manifest";
+import { logger } from "@/lib/logger";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import {
@@ -1705,7 +1706,7 @@ export const CommandPalette: React.FC = () => {
           }
         }
       } catch (err) {
-        console.error("Failed to load search dynamic case studies:", err);
+        logger.error("Failed to load search dynamic case studies:", err);
       }
     };
 

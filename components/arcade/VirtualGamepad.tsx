@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { getMatchMediaMatches } from "@/hooks/useMediaQuery";
 import {
   IconArrowUp,
   IconArrowDown,
@@ -159,11 +160,10 @@ export const VirtualGamepad: React.FC<VirtualGamepadProps> = ({
     const handleTouchStart = () => setIsTouchDevice(true);
     const checkTouch = () => {
       if (typeof window === "undefined") return;
-      const hasMatchMedia = typeof window.matchMedia === "function";
       const hasTouch =
         "ontouchstart" in window ||
         (typeof navigator !== "undefined" && navigator.maxTouchPoints > 0) ||
-        (hasMatchMedia && window.matchMedia("(pointer: coarse)").matches);
+        getMatchMediaMatches("(pointer: coarse)");
       setIsTouchDevice(hasTouch);
     };
 

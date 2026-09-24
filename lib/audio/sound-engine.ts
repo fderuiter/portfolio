@@ -5,6 +5,8 @@
  * master volume scaling, mute governance, and accessibility bypass detection with zero React dependencies.
  */
 
+import { getMatchMediaMatches } from "@/hooks/useMediaQuery";
+
 export type WaveformType = OscillatorType;
 
 export interface SoundEngineOptions {
@@ -260,15 +262,13 @@ export class SoundEngine {
   public isBypassActive(): boolean {
     if (typeof window === "undefined") return false;
     try {
-      const forcedColors = window.matchMedia?.(
-        "(forced-colors: active)"
-      ).matches;
-      const msHighContrast = window.matchMedia?.(
+      const forcedColors = getMatchMediaMatches("(forced-colors: active)");
+      const msHighContrast = getMatchMediaMatches(
         "(-ms-high-contrast: active)"
-      ).matches;
-      const prefersReducedMotion = window.matchMedia?.(
+      );
+      const prefersReducedMotion = getMatchMediaMatches(
         "(prefers-reduced-motion: reduce)"
-      ).matches;
+      );
       const documentClasses = document.documentElement?.className || "";
       const documentHtmlContrast =
         document.documentElement?.getAttribute("data-contrast") || "";

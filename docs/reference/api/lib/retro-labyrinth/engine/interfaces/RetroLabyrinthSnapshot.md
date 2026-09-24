@@ -26,6 +26,12 @@
 
 ***
 
+### exploredCells?
+
+> `optional` **exploredCells?**: `boolean`[][]
+
+***
+
 ### gameMode
 
 > **gameMode**: `"classic"` \| `"roguelike"`
@@ -103,6 +109,12 @@
 ### totalRooms
 
 > **totalRooms**: `number`
+
+***
+
+### visibleCells?
+
+> `optional` **visibleCells?**: `boolean`[][]
 
 ***
 
