@@ -42,6 +42,9 @@ describe("Git Safety Guardrail Interceptor (scripts/git-guardrail.sh)", () => {
   describe("Dangerous Commands Interception (Exit Code 2)", () => {
     const dangerousCommands = [
       "git push --force",
+      "git push --force-with-lease",
+      "git push --force-with-lease=dev origin dev",
+      "git push origin dev --force-with-lease",
       "git push origin --force",
       "git push origin feat/test --force",
       "git push -f",

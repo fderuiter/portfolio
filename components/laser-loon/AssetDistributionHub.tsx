@@ -102,7 +102,7 @@ const ASSET_ITEMS: AssetFormatItem[] = [
   },
 ];
 
-export interface AssetDistributionHubProps {
+interface AssetDistributionHubProps {
   items?: AssetFormatItem[];
 }
 
@@ -242,21 +242,6 @@ export const AssetDistributionHub: React.FC<AssetDistributionHubProps> = ({
     setHoveredCategory(null);
   };
 
-  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / (rect.width || 1);
-    const mouseX = (e.clientX - rect.left) * scaleX;
-
-    const hit = categories.find(
-      (cat) => mouseX >= cat.x && mouseX <= cat.x + cat.w
-    );
-    if (hit) {
-      setActiveCategory((prev) => (prev === hit.key ? "all" : hit.key));
-    }
-  };
-
   const handleShare = async () => {
     const url = typeof window !== "undefined" ? window.location.href : "";
     if (navigator.clipboard) {
@@ -300,7 +285,7 @@ export const AssetDistributionHub: React.FC<AssetDistributionHubProps> = ({
 
           <button
             onClick={handleShare}
-            className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono text-xs font-bold rounded-xl transition-colors cursor-pointer"
+            className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono text-xs font-bold rounded-xl transition-colors active:scale-[0.98] cursor-pointer"
             aria-label="Share case study link"
           >
             {copied ? (
@@ -328,7 +313,7 @@ export const AssetDistributionHub: React.FC<AssetDistributionHubProps> = ({
                   setHoveredCategory(cat === "all" ? null : cat)
                 }
                 onMouseLeave={() => setHoveredCategory(null)}
-                className={`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase transition-all cursor-pointer ${
+                className={`px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase transition-all active:scale-[0.98] cursor-pointer ${
                   activeCategory === cat
                     ? "bg-amber-500/20 text-amber-400 border border-amber-500/40"
                     : "bg-zinc-900/60 text-zinc-400 hover:text-zinc-200 border border-zinc-800"
@@ -346,9 +331,9 @@ export const AssetDistributionHub: React.FC<AssetDistributionHubProps> = ({
           height={80}
           onMouseMove={handleCanvasMouseMove}
           onMouseLeave={handleCanvasMouseLeave}
-          onClick={handleCanvasClick}
-          className="w-full h-20 rounded-xl border border-zinc-800 bg-zinc-950 object-cover cursor-pointer"
-          aria-label="Asset distribution interactive rendering canvas"
+          className="w-full h-20 rounded-xl border border-zinc-800 bg-zinc-950 object-cover"
+          role="img"
+          aria-label="Asset distribution visualization. Use the category filter buttons above to filter artwork by format."
         />
       </div>
 
@@ -463,19 +448,19 @@ function AssetCard({
     <div
       onMouseEnter={() => onHover?.(item.filename)}
       onMouseLeave={() => onHover?.(null)}
-      className={`group flex flex-col justify-between p-4 rounded-2xl border transition-all duration-200 ${
+      className={`group flex min-w-0 flex-col justify-between p-4 rounded-2xl border transition-all duration-200 ${
         isMatch
           ? "bg-zinc-900/40 border-zinc-800/80 hover:border-zinc-700 hover:bg-zinc-900/80 opacity-100"
           : "bg-zinc-950/20 border-zinc-900 opacity-40 hover:opacity-80"
       }`}
     >
       <div>
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center justify-between gap-2 mb-2">
+          <div className="flex min-w-0 items-center gap-2">
             <div className="p-2 rounded-lg bg-black/50 border border-zinc-800">
               {item.icon}
             </div>
-            <span className="font-mono text-sm font-bold text-white group-hover:text-amber-300 transition-colors">
+            <span className="min-w-0 break-words font-mono text-sm font-bold text-white group-hover:text-amber-300 transition-colors">
               {item.filename}
             </span>
           </div>
@@ -495,7 +480,7 @@ function AssetCard({
       <a
         href={item.href}
         download={item.filename}
-        className="inline-flex items-center justify-between w-full px-3 py-2 bg-zinc-800/80 hover:bg-red-500/20 hover:border-red-500/40 border border-zinc-700/60 text-zinc-200 hover:text-red-300 font-mono text-xs font-bold rounded-xl transition-all group/btn"
+        className="inline-flex items-center justify-between w-full px-3 py-2 bg-zinc-800/80 hover:bg-red-500/20 hover:border-red-500/40 border border-zinc-700/60 text-zinc-200 hover:text-red-300 font-mono text-xs font-bold rounded-xl transition-all active:scale-[0.98] group/btn"
       >
         <span>Download {item.ext}</span>
         <IconDownload className="w-3.5 h-3.5 transform group-hover/btn:translate-y-0.5 transition-transform" />

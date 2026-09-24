@@ -15,6 +15,16 @@ import {
   RawGeometryBuffer,
 } from "./types";
 
+/** Message target used to receive generated geometry and its transferable buffers. */
+export interface MeshWorkerTarget extends EventTarget {
+  postMessage(message: MeshWorkerResponse, transfer: Transferable[]): void;
+}
+
+function getDefaultMeshWorkerTarget(): MeshWorkerTarget {
+  const target = typeof self !== "undefined" ? self : globalThis;
+  return target as unknown as MeshWorkerTarget;
+}
+
 /**
  * Core handler processing a single MeshWorkerRequest payload and computing geometry buffers with zero-copy transferables.
  */
@@ -100,13 +110,21 @@ export function processMeshWorkerRequest(req: MeshWorkerRequest): {
  * Event listener callback that handles incoming MessageEvent requests and posts worker responses.
  */
 export function handleMeshWorkerMessage(
-  event: MessageEvent<MeshWorkerRequest>
+  event: MessageEvent<MeshWorkerRequest>,
+  target: EventTarget = getDefaultMeshWorkerTarget()
 ): void {
   if (!event.data || typeof event.data !== "object") return;
   const { response, transferables } = processMeshWorkerRequest(event.data);
-  (self as unknown as Worker).postMessage(
-    response,
-    transferables as unknown as Transferable[]
+  const responseTarget = isMeshWorkerTarget(target)
+    ? target
+    : getDefaultMeshWorkerTarget();
+  responseTarget.postMessage(response, transferables);
+}
+
+function isMeshWorkerTarget(target: EventTarget): target is MeshWorkerTarget {
+  return (
+    typeof (target as EventTarget & { postMessage?: unknown }).postMessage ===
+    "function"
   );
 }
 
@@ -114,10 +132,10 @@ export function handleMeshWorkerMessage(
  * Registers the mesh worker message listener on a target event scope (defaulting to self/globalThis).
  */
 export function registerMeshWorker(
-  target: EventTarget = typeof self !== "undefined" ? self : globalThis
+  target: EventTarget = getDefaultMeshWorkerTarget()
 ): () => void {
   const listener = (event: Event) => {
-    handleMeshWorkerMessage(event as MessageEvent<MeshWorkerRequest>);
+    handleMeshWorkerMessage(event as MessageEvent<MeshWorkerRequest>, target);
   };
   target.addEventListener("message", listener);
   return () => {

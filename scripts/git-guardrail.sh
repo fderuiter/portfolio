@@ -49,7 +49,7 @@ fi
 # `-- .` alternative also matched every precise single-file restore of a dotfile,
 # which is the careful operation rather than the dangerous one.
 GIT_PATTERNS=(
-  "^git[[:space:]]+push.*[[:space:]](--force|-f)([[:space:]]|$)"
+  "^git[[:space:]]+push.*[[:space:]](--force-with-lease(=[^[:space:]]+)?|--force|-f)([[:space:]]|$)"
   "^git[[:space:]]+push.*[[:space:]]([a-zA-Z0-9_-]+[[:space:]]+)?main([[:space:]]|$)"
   "^git[[:space:]]+push.*:main([[:space:]]|$)"
   "^git[[:space:]]+reset[[:space:]]+--hard"

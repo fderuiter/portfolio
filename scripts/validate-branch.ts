@@ -35,10 +35,7 @@ export function formatBranchFailure(branch: string, error: string): string {
 }
 
 function main() {
-  if (
-    process.env.ALLOW_DANGEROUS_GIT === "1" ||
-    (process.env.JULES_SESSION_ID && process.env.ALLOW_DANGEROUS_GIT !== "0")
-  ) {
+  if (process.env.ALLOW_DANGEROUS_GIT === "1") {
     process.exit(0);
   }
 

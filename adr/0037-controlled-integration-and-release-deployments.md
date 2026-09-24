@@ -2,25 +2,24 @@
 
 ## Status
 
-Accepted on 2026-09-12. Its automatic production-deployment decision is
-superseded by ADR 0038; its single-branch integration decision remains active.
-Its context section's claim that private-repository branch protection is
-unavailable on GitHub Free remains accurate. ADR 0039 initially contradicted
-that claim, then corrected itself on 2026-09-18 after the live account and
-protection APIs confirmed GitHub Free and `403` responses. Branch protection
-is not enforceable while this repository remains private on that plan.
+Accepted on 2026-09-12. Its automatic production-deployment decision was
+superseded by ADR 0038. Its single-long-lived-`main` integration model remains
+the steady-state workflow. [ADR 0050](0050-jules-consolidation-release.md)
+records a temporary exception for the current Jules consolidation and does
+not establish `dev` as a permanent integration branch. Production delivery
+remains defined by [ADR 0049](0049-deploy-main-on-green-ci.md).
 
 ## Context
 
-The repository used `dev` as its default integration branch and `main` as
-Vercel production, but CI only ran for pull requests targeting `main`. A
-main-push workflow rebased and force-pushed `dev`, while Vercel built every
-topic-branch and integration-branch commit. On 2026-09-12 this produced 100
-retained READY deployments, 9.68 GB-month of Functions Storage, 87 build
-hours, and branch divergence of eight `main`-only commits versus 74
-`dev`-only commits. GitHub's private Free repository cannot enforce branch
-protection or repository rulesets, so the checked-in workflow must remain
-safe even when server-side protection is unavailable.
+At the time of this decision, the repository used `dev` as its default
+integration branch and `main` as Vercel production, but CI only ran for pull
+requests targeting `main`. A main-push workflow rebased and force-pushed `dev`,
+while Vercel built every topic-branch and integration-branch commit. On
+2026-09-12 this produced 100 retained READY deployments, 9.68 GB-month of
+Functions Storage, 87 build hours, and branch divergence of eight `main`-only
+commits versus 74 `dev`-only commits. The repository's plan and visibility
+have since changed; see #732 for verification of current server-side branch
+rules. Checked-in workflows and hooks remain defense-in-depth.
 
 ## Decision
 
@@ -43,10 +42,12 @@ all Git deployments are now disabled and production uses protected staged
 promotion. Topic pushes still create no Vercel deployment, preventing
 canceled-deployment noise and function-bundle growth.
 
-During reconciliation, CI runs for pull requests into `dev` and `main`; after
-`dev` is retired, only `main` remains relevant. Outdated pull-request runs are
-canceled through GitHub Actions concurrency. Production verification on a
-`main` push is not canceled. CI uses Node.js 24, matching Vercel.
+The current one-time reconciliation is tracked in ADR 0050. Its release PR
+targets `main`, so the existing required pull-request gates run on that PR.
+After the consolidation, only `main` remains an active integration target.
+Outdated pull-request runs are canceled through GitHub Actions concurrency.
+Production verification on a `main` push is not canceled. CI uses Node.js 24,
+matching Vercel.
 
 Production and preview credentials are separate security boundaries. A
 release preview must not share a mutative production database, Redis
@@ -70,6 +71,6 @@ Vercel environment variables are present.
 
 Normal pull requests rely on CI artifacts rather than automatic Vercel
 previews. Releases become one reviewed merge, one production build, and one
-verified tag. Until the repository is public or the account uses GitHub Pro,
-branch rules remain a documented and automated convention rather than an
-enforceable server-side control.
+verified tag. At acceptance, branch rules could not be enforced on the
+repository's then-private Free plan. The repository is now public, but the
+current rules still need dashboard verification tracked by #732.

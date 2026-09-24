@@ -6,7 +6,7 @@
 
 # Function: handleMeshWorkerMessage()
 
-> **handleMeshWorkerMessage**(`event`): `void`
+> **handleMeshWorkerMessage**(`event`, `target?`): `void`
 
 Event listener callback that handles incoming MessageEvent requests and posts worker responses.
 
@@ -15,6 +15,10 @@ Event listener callback that handles incoming MessageEvent requests and posts wo
 ### event
 
 `MessageEvent`\<[`MeshWorkerRequest`](../../types/interfaces/MeshWorkerRequest.md)\>
+
+### target?
+
+`EventTarget` = `...`
 
 ## Returns
 

@@ -7,6 +7,59 @@ export interface FOVResult {
   explored: boolean[][];
 }
 
+function isCompleteStringGrid(value: unknown): value is string[][] {
+  if (!Array.isArray(value) || value.length === 0) return false;
+  if (!Object.prototype.hasOwnProperty.call(value, 0)) return false;
+
+  const firstRow: unknown = value[0];
+  if (!Array.isArray(firstRow) || firstRow.length === 0) return false;
+  const width = firstRow.length;
+
+  for (let y = 0; y < value.length; y++) {
+    if (!Object.prototype.hasOwnProperty.call(value, y)) return false;
+
+    const row: unknown = value[y];
+    if (!Array.isArray(row) || row.length !== width) return false;
+
+    for (let x = 0; x < width; x++) {
+      if (
+        !Object.prototype.hasOwnProperty.call(row, x) ||
+        typeof row[x] !== "string"
+      ) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+function isCompleteBooleanMatrix(
+  value: unknown,
+  height: number,
+  width: number
+): value is boolean[][] {
+  if (!Array.isArray(value) || value.length !== height) return false;
+
+  for (let y = 0; y < height; y++) {
+    if (!Object.prototype.hasOwnProperty.call(value, y)) return false;
+
+    const row: unknown = value[y];
+    if (!Array.isArray(row) || row.length !== width) return false;
+
+    for (let x = 0; x < width; x++) {
+      if (
+        !Object.prototype.hasOwnProperty.call(row, x) ||
+        typeof row[x] !== "boolean"
+      ) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
 /**
  * Creates a clean, unexplored (all-false) fog-of-war matrix for given map dimensions.
  */
@@ -26,7 +79,7 @@ export function calculateFOV(
   radius: number = 6,
   existingExplored?: boolean[][]
 ): FOVResult {
-  if (!grid || grid.length === 0 || !grid[0] || grid[0].length === 0) {
+  if (!isCompleteStringGrid(grid)) {
     return { visible: [], explored: [] };
   }
 
@@ -37,10 +90,11 @@ export function calculateFOV(
     Array(width).fill(false)
   );
 
-  const isMatchingDimensions =
-    existingExplored &&
-    existingExplored.length === height &&
-    existingExplored[0]?.length === width;
+  const isMatchingDimensions = isCompleteBooleanMatrix(
+    existingExplored,
+    height,
+    width
+  );
 
   const explored: boolean[][] = isMatchingDimensions
     ? existingExplored.map((row) => [...row])
@@ -90,9 +144,21 @@ export function hasLineOfSight(
   x1: number,
   y1: number
 ): boolean {
-  if (!grid || grid.length === 0 || !grid[0] || grid[0].length === 0) {
+  if (!isCompleteStringGrid(grid)) {
     return false;
   }
+
+  const height = grid.length;
+  const width = grid[0].length;
+  const isInBounds = (x: number, y: number): boolean =>
+    Number.isInteger(x) &&
+    Number.isInteger(y) &&
+    x >= 0 &&
+    x < width &&
+    y >= 0 &&
+    y < height;
+
+  if (!isInBounds(x0, y0) || !isInBounds(x1, y1)) return false;
 
   const dx = Math.abs(x1 - x0);
   const dy = Math.abs(y1 - y0);
@@ -102,9 +168,6 @@ export function hasLineOfSight(
 
   let cx = x0;
   let cy = y0;
-
-  const height = grid.length;
-  const width = grid[0].length;
 
   while (true) {
     if (cx === x1 && cy === y1) return true;

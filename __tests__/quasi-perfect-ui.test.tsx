@@ -2,7 +2,9 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -94,6 +96,19 @@ describe("QuasiPerfectPuzzler UI Component Suite", () => {
     expect(container.textContent).toContain("Hacker Mode");
   });
 
+  it("does not expose a tab panel when only the default goal is present", async () => {
+    await act(async () => {
+      root = createRoot(container);
+      root.render(<QuasiPerfectPuzzler />);
+    });
+
+    expect(container.querySelector('[role="tablist"]')).toBeNull();
+    expect(container.querySelector('[role="tabpanel"]')).toBeNull();
+    expect(
+      container.querySelector('[aria-labelledby^="subgoal-tab-"]')
+    ).toBeNull();
+  });
+
   it("solves Level 1 by applying the rfl tactic and displaying the victory modal", async () => {
     await act(async () => {
       root = createRoot(container);
@@ -101,7 +116,9 @@ describe("QuasiPerfectPuzzler UI Component Suite", () => {
     });
 
     // Find and click the 'rfl' tactic card
-    const rflCard = container.querySelector('[data-tactic-id="rfl"]') as HTMLElement;
+    const rflCard = container.querySelector(
+      '[data-tactic-id="rfl"]'
+    ) as HTMLElement;
     expect(rflCard).not.toBeNull();
 
     await act(async () => {
@@ -109,7 +126,9 @@ describe("QuasiPerfectPuzzler UI Component Suite", () => {
     });
 
     // Click the root goal node
-    const goalNode = container.querySelector('[data-node-id="eq-lvl1"]') as HTMLElement;
+    const goalNode = container.querySelector(
+      '[data-node-id="eq-lvl1"]'
+    ) as HTMLElement;
     expect(goalNode).not.toBeNull();
 
     await act(async () => {
@@ -128,8 +147,8 @@ describe("QuasiPerfectPuzzler UI Component Suite", () => {
     });
 
     // Open Theory Briefing modal
-    const briefingBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Theory Briefing")
+    const briefingBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Theory Briefing")
     );
     expect(briefingBtn).toBeDefined();
 
@@ -138,13 +157,17 @@ describe("QuasiPerfectPuzzler UI Component Suite", () => {
     });
 
     expect(container.textContent).toContain("1. Mathematical Intuition");
-    expect(container.textContent).toContain("2. Formal Proof Assistant Analogy (Lean 4)");
-    expect(container.textContent).toContain("3. Your Mission & Tactical Objective");
+    expect(container.textContent).toContain(
+      "2. Formal Proof Assistant Analogy (Lean 4)"
+    );
+    expect(container.textContent).toContain(
+      "3. Your Mission & Tactical Objective"
+    );
     expect(container.textContent).toContain("The Reflexivity Axiom (rfl)");
 
     // Close modal via Start Proving button
-    const startBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Start Proving")
+    const startBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Start Proving")
     );
     expect(startBtn).toBeDefined();
 
@@ -166,8 +189,8 @@ describe("QuasiPerfectPuzzler UI Component Suite", () => {
     expect(container.textContent).not.toContain("16.0 / 16 GB");
 
     // Switch to Hacker Mode
-    const hackerBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.trim() === "Hacker Mode"
+    const hackerBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.trim() === "Hacker Mode"
     );
     expect(hackerBtn).toBeDefined();
 
@@ -188,8 +211,8 @@ describe("QuasiPerfectPuzzler UI Component Suite", () => {
     });
 
     // Toggle Hints On
-    const hintsButton = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Hints")
+    const hintsButton = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Hints")
     );
     expect(hintsButton).toBeDefined();
 
@@ -197,13 +220,17 @@ describe("QuasiPerfectPuzzler UI Component Suite", () => {
       hintsButton?.click();
     });
 
-    expect(container.textContent).toContain("Interactive Proof Coach · Progressive Hints");
+    expect(container.textContent).toContain(
+      "Interactive Proof Coach · Progressive Hints"
+    );
     expect(container.textContent).toContain("Tier 1 · Strategy Clue");
-    expect(container.textContent).toContain("Every mathematical object is equal to itself");
+    expect(container.textContent).toContain(
+      "Every mathematical object is equal to itself"
+    );
 
     // Reveal Tier 2 Hint
-    const revealButton = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Reveal Next Hint")
+    const revealButton = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Reveal Next Hint")
     );
     expect(revealButton).toBeDefined();
 
@@ -221,8 +248,8 @@ describe("QuasiPerfectPuzzler UI Component Suite", () => {
     });
 
     // Click Sandbox button
-    const sandboxButton = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Sandbox")
+    const sandboxButton = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Sandbox")
     );
     expect(sandboxButton).toBeDefined();
 
@@ -244,8 +271,8 @@ describe("QuasiPerfectPuzzler UI Component Suite", () => {
     expect(container.textContent).toContain("theorem identity_crisis");
 
     // Switch to Encyclopedia tab
-    const encButton = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Tactic Encyclopedia")
+    const encButton = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Tactic Encyclopedia")
     );
     expect(encButton).toBeDefined();
 
@@ -263,8 +290,8 @@ describe("QuasiPerfectPuzzler UI Component Suite", () => {
       root.render(<QuasiPerfectPuzzler />);
     });
 
-    const ch2Button = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Ch 2: Logic")
+    const ch2Button = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Ch 2: Logic")
     );
     expect(ch2Button).toBeDefined();
 
@@ -281,8 +308,8 @@ describe("QuasiPerfectPuzzler UI Component Suite", () => {
     expect(container.textContent).toContain("L12");
 
     // Switch to Chapter 3
-    const ch3Button = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Ch 3: Quasiperfect")
+    const ch3Button = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Ch 3: Quasiperfect")
     );
     expect(ch3Button).toBeDefined();
 
@@ -318,7 +345,9 @@ describe("QuasiPerfectPuzzler UI Component Suite", () => {
     expect(container.textContent).toContain("Disjunction Splitting");
 
     // 2. Play 'cases' on h_or
-    const casesCard = container.querySelector('[data-tactic-id="cases"]') as HTMLElement;
+    const casesCard = container.querySelector(
+      '[data-tactic-id="cases"]'
+    ) as HTMLElement;
     expect(casesCard).not.toBeNull();
 
     await act(async () => {
@@ -326,7 +355,9 @@ describe("QuasiPerfectPuzzler UI Component Suite", () => {
     });
 
     // Click hypothesis h_or node
-    const hypOrNode = container.querySelector('[data-node-id="hyp-disj-lvl11"]') as HTMLElement;
+    const hypOrNode = container.querySelector(
+      '[data-node-id="hyp-disj-lvl11"]'
+    ) as HTMLElement;
     expect(hypOrNode).not.toBeNull();
 
     await act(async () => {
@@ -338,14 +369,18 @@ describe("QuasiPerfectPuzzler UI Component Suite", () => {
     expect(container.textContent).toContain("Case 2: Q");
 
     // 3. Subgoal 1: select 'right' tactic, then click root goal
-    const rightCard = container.querySelector('[data-tactic-id="right"]') as HTMLElement;
+    const rightCard = container.querySelector(
+      '[data-tactic-id="right"]'
+    ) as HTMLElement;
     expect(rightCard).not.toBeNull();
 
     await act(async () => {
       rightCard.click();
     });
 
-    const goalDisjNode = container.querySelector('[data-node-id="goal-disj-target-lvl11"]') as HTMLElement;
+    const goalDisjNode = container.querySelector(
+      '[data-node-id="goal-disj-target-lvl11"]'
+    ) as HTMLElement;
     expect(goalDisjNode).not.toBeNull();
 
     await act(async () => {
@@ -353,16 +388,18 @@ describe("QuasiPerfectPuzzler UI Component Suite", () => {
     });
 
     // Subgoal 1 now has goal P. Play 'exact h_left'
-    const exactHLeft = Array.from(container.querySelectorAll('[data-tactic-id="exact"]')).find(
-      (el) => el.textContent?.includes("exact h_left")
-    ) as HTMLElement;
+    const exactHLeft = Array.from(
+      container.querySelectorAll('[data-tactic-id="exact"]')
+    ).find((el) => el.textContent?.includes("exact h_left")) as HTMLElement;
     expect(exactHLeft).toBeDefined();
 
     await act(async () => {
       exactHLeft.click();
     });
 
-    const goalPNode = container.querySelector('[data-node-id="var-P-out-lvl11"]') as HTMLElement;
+    const goalPNode = container.querySelector(
+      '[data-node-id="var-P-out-lvl11"]'
+    ) as HTMLElement;
     expect(goalPNode).not.toBeNull();
 
     await act(async () => {
@@ -373,14 +410,18 @@ describe("QuasiPerfectPuzzler UI Component Suite", () => {
     expect(container.textContent).toContain("Case 2: Q");
 
     // 4. Subgoal 2: select 'left' tactic, then click root goal
-    const leftCard = container.querySelector('[data-tactic-id="left"]') as HTMLElement;
+    const leftCard = container.querySelector(
+      '[data-tactic-id="left"]'
+    ) as HTMLElement;
     expect(leftCard).not.toBeNull();
 
     await act(async () => {
       leftCard.click();
     });
 
-    const goalDisjNode2 = container.querySelector('[data-node-id="goal-disj-target-lvl11"]') as HTMLElement;
+    const goalDisjNode2 = container.querySelector(
+      '[data-node-id="goal-disj-target-lvl11"]'
+    ) as HTMLElement;
     expect(goalDisjNode2).not.toBeNull();
 
     await act(async () => {
@@ -388,16 +429,18 @@ describe("QuasiPerfectPuzzler UI Component Suite", () => {
     });
 
     // Subgoal 2 now has goal Q. Play 'exact h_right'
-    const exactHRight = Array.from(container.querySelectorAll('[data-tactic-id="exact"]')).find(
-      (el) => el.textContent?.includes("exact h_right")
-    ) as HTMLElement;
+    const exactHRight = Array.from(
+      container.querySelectorAll('[data-tactic-id="exact"]')
+    ).find((el) => el.textContent?.includes("exact h_right")) as HTMLElement;
     expect(exactHRight).toBeDefined();
 
     await act(async () => {
       exactHRight.click();
     });
 
-    const goalQNode = container.querySelector('[data-node-id="var-Q-out-lvl11"]') as HTMLElement;
+    const goalQNode = container.querySelector(
+      '[data-node-id="var-Q-out-lvl11"]'
+    ) as HTMLElement;
     expect(goalQNode).not.toBeNull();
 
     await act(async () => {

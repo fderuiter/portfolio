@@ -206,7 +206,21 @@ export const DELETE = createApiHandler(
       await CaseStudyService.updateCaseStudyImage(slug, null);
 
       if (priorKey) {
-        await ProjectImageService.deleteMediaAsset(priorKey);
+        try {
+          const deleted = await ProjectImageService.deleteMediaAsset(priorKey);
+          if (!deleted) {
+            logger.warn(
+              "Project image reference was cleared, but media cleanup failed.",
+              { slug }
+            );
+          }
+        } catch (err) {
+          logger.warn(
+            "Project image reference was cleared, but media cleanup failed.",
+            sanitizeError(err),
+            { slug }
+          );
+        }
       }
 
       const res = NextResponse.json(

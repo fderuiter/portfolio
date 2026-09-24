@@ -232,7 +232,7 @@ describe("Laser Loon Subcomponents Test Suite", () => {
       expect(container.textContent).toContain("Link Copied!");
     });
 
-    it("should handle interactive canvas mouse movements, clicks, and category filter interactions", async () => {
+    it("describes the canvas and exposes keyboard-operable category filter buttons", async () => {
       await act(async () => {
         root.render(<AssetDistributionViewer />);
       });
@@ -241,6 +241,10 @@ describe("Laser Loon Subcomponents Test Suite", () => {
         '[data-testid="asset-distribution-canvas"]'
       ) as HTMLCanvasElement;
       expect(canvas).not.toBeNull();
+      expect(canvas.getAttribute("role")).toBe("img");
+      expect(canvas.getAttribute("aria-label")).toContain(
+        "Use the category filter buttons above"
+      );
       const ctx = canvas.getContext("2d") as any;
 
       // Mouse movement over canvas
@@ -257,21 +261,14 @@ describe("Laser Loon Subcomponents Test Suite", () => {
       expect(ctx.quadraticCurveTo).toHaveBeenCalled();
       expect(ctx.measureText).toHaveBeenCalled();
 
-      // Click on canvas to filter category (clientX = 400 lands on Web bar: x=314..500)
-      await act(async () => {
-        canvas.dispatchEvent(
-          new MouseEvent("click", {
-            clientX: 400,
-            clientY: 40,
-            bubbles: true,
-          })
-        );
-      });
-
-      // Filter button updates
+      // Native category buttons are the accessible controls for filtering.
       const webFilterBtn = Array.from(
         container.querySelectorAll("button")
       ).find((b) => b.textContent?.trim() === "web");
+      expect(webFilterBtn?.tagName).toBe("BUTTON");
+      await act(async () => {
+        webFilterBtn?.click();
+      });
       expect(webFilterBtn?.className).toContain("bg-amber-500/20");
 
       // Mouse leave canvas

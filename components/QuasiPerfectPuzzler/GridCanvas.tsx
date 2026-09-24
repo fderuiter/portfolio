@@ -157,13 +157,17 @@ export const GridCanvas: React.FC<GridCanvasProps> = ({
               aria-label={`Tile ${tile.label || tile.id} at row ${tile.row + 1}, column ${tile.col + 1}${
                 isSelected ? ", selected" : ""
               }`}
-              className={`flex flex-col items-center justify-center min-h-[52px] rounded-xl border p-2 text-xs font-mono transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-cyan-400 ${getTileStyling(
+              className={`flex min-w-0 flex-col items-center justify-center min-h-[52px] rounded-xl border p-2 text-xs font-mono transition-all cursor-pointer active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-cyan-400 ${getTileStyling(
                 tile
               )}`}
             >
-              <span className="font-bold text-sm">{tile.label || tile.id}</span>
+              <span className="min-w-0 max-w-full break-words font-bold text-sm">
+                {tile.label || tile.id}
+              </span>
               {tile.value !== undefined && (
-                <span className="text-[10px] opacity-70">{tile.value}</span>
+                <span className="min-w-0 max-w-full break-words text-[10px] opacity-70">
+                  {tile.value}
+                </span>
               )}
             </button>
           );

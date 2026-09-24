@@ -6,6 +6,10 @@
 
 # lib/neuro/mesh-worker
 
+## Interfaces
+
+- [MeshWorkerTarget](interfaces/MeshWorkerTarget.md)
+
 ## Functions
 
 - [handleMeshWorkerMessage](functions/handleMeshWorkerMessage.md)

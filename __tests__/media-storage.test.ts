@@ -389,8 +389,8 @@ describe("Media Storage Provider Test Suite", () => {
     });
   });
 
-  describe("Storage Fallback Logic", () => {
-    it("falls back gracefully from Vercel Blob to Local Storage when cloud credentials are omitted", async () => {
+  describe("Storage Environment Boundaries", () => {
+    it("uses local disk storage in test environments when cloud credentials are omitted", async () => {
       // Simulate environment where BLOB_READ_WRITE_TOKEN is absent
       vi.spyOn(envModule, "getEnv").mockReturnValue({
         ...envModule.getEnv(),
@@ -419,7 +419,7 @@ describe("Media Storage Provider Test Suite", () => {
       );
     });
 
-    it("executes fallback upload to LocalStorageProvider when primary VercelBlobStorageProvider upload fails", async () => {
+    it("rejects cloud upload failures without writing to ephemeral local storage", async () => {
       const cloudToken = "vercel_blob_rw_primary_123";
       const primaryCloudProvider = new VercelBlobStorageProvider(cloudToken);
       setMediaStorageProvider(primaryCloudProvider);
@@ -432,31 +432,117 @@ describe("Media Storage Provider Test Suite", () => {
         })
       );
 
-      // Mock local storage fallback write
-      vi.spyOn(fs, "existsSync").mockReturnValue(true);
       const writeFileSpy = vi
         .spyOn(fs.promises, "writeFile")
         .mockResolvedValue(undefined);
 
-      const consoleWarnSpy = vi
-        .spyOn(console, "warn")
-        .mockImplementation(() => {});
-
       const fileBuffer = Buffer.from("resilient asset content");
-      const url = await ProjectImageService.saveMediaAsset(
-        "resilient-hero.png",
-        fileBuffer,
-        "image/png"
-      );
+      await expect(
+        ProjectImageService.saveMediaAsset(
+          "resilient-hero.png",
+          fileBuffer,
+          "image/png"
+        )
+      ).rejects.toThrow("Vercel Blob upload failed: Internal Server Error");
 
-      expect(url).toBe("/api/media/resilient-hero.png");
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        "Primary cloud storage upload failed, attempting local fallback:",
-        expect.any(Error)
+      expect(writeFileSpy).not.toHaveBeenCalled();
+    });
+
+    it("does not select local disk storage for production deployments without cloud credentials", () => {
+      vi.spyOn(envModule, "getEnv").mockReturnValue({
+        ...envModule.getEnv(),
+        NODE_ENV: "production",
+        VERCEL_ENV: "production",
+        BLOB_READ_WRITE_TOKEN: undefined,
+      });
+
+      expect(() => getMediaStorageProvider()).toThrow(
+        "BLOB_READ_WRITE_TOKEN is required for media storage in production or preview environments"
       );
-      expect(writeFileSpy).toHaveBeenCalledWith(
-        expect.stringContaining("resilient-hero.png"),
-        fileBuffer
+    });
+
+    it("returns no asset for cloud providers without read support instead of reading local disk", async () => {
+      vi.spyOn(envModule, "getEnv").mockReturnValue({
+        ...envModule.getEnv(),
+        NODE_ENV: "production",
+        VERCEL_ENV: "production",
+        BLOB_READ_WRITE_TOKEN: "vercel_blob_rw_cloud_read_123",
+      });
+      const localReadSpy = vi
+        .spyOn(fs.promises, "readFile")
+        .mockResolvedValue(Buffer.from("stale local asset"));
+
+      await expect(
+        ProjectImageService.getMediaAsset("project-laser-loon.png")
+      ).resolves.toBeNull();
+
+      expect(localReadSpy).not.toHaveBeenCalled();
+    });
+
+    it("propagates cloud read errors without retrying against local disk", async () => {
+      vi.spyOn(envModule, "getEnv").mockReturnValue({
+        ...envModule.getEnv(),
+        NODE_ENV: "production",
+        VERCEL_ENV: "production",
+        BLOB_READ_WRITE_TOKEN: "vercel_blob_rw_cloud_read_123",
+      });
+      const readFailure = new Error("Cloud media read failed");
+      const cloudProvider: MediaStorageProvider = {
+        upload: vi.fn(),
+        delete: vi.fn(),
+        getUrl: (key) => `https://cdn.example.com/${key}`,
+        getAsset: vi.fn().mockRejectedValue(readFailure),
+      };
+      setMediaStorageProvider(cloudProvider);
+      const localReadSpy = vi
+        .spyOn(fs.promises, "readFile")
+        .mockResolvedValue(Buffer.from("stale local asset"));
+
+      await expect(
+        ProjectImageService.getMediaAsset("project-laser-loon.png")
+      ).rejects.toBe(readFailure);
+
+      expect(localReadSpy).not.toHaveBeenCalled();
+    });
+
+    it("returns false for production cloud delete failures without deleting from local disk", async () => {
+      vi.spyOn(envModule, "getEnv").mockReturnValue({
+        ...envModule.getEnv(),
+        NODE_ENV: "production",
+        VERCEL_ENV: "production",
+        BLOB_READ_WRITE_TOKEN: "test-blob-token",
+      });
+      vi.spyOn(globalThis, "fetch").mockResolvedValue(
+        new Response(JSON.stringify({ error: "Storage service unavailable" }), {
+          status: 503,
+          statusText: "Service Unavailable",
+        })
+      );
+      const localDeleteSpy = vi
+        .spyOn(fs.promises, "unlink")
+        .mockResolvedValue(undefined);
+
+      await expect(
+        ProjectImageService.deleteMediaAsset(
+          "https://abc.public.blob.vercel-storage.com/project-laser-loon.png"
+        )
+      ).resolves.toBe(false);
+
+      expect(localDeleteSpy).not.toHaveBeenCalled();
+    });
+
+    it("continues to reject production delete when cloud storage credentials are missing", async () => {
+      vi.spyOn(envModule, "getEnv").mockReturnValue({
+        ...envModule.getEnv(),
+        NODE_ENV: "production",
+        VERCEL_ENV: "production",
+        BLOB_READ_WRITE_TOKEN: undefined,
+      });
+
+      await expect(
+        ProjectImageService.deleteMediaAsset("project-laser-loon.png")
+      ).rejects.toThrow(
+        "BLOB_READ_WRITE_TOKEN is required for media storage in production or preview environments"
       );
     });
   });

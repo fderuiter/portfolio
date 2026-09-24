@@ -101,91 +101,90 @@ export const ProofTree: React.FC<ProofTreeProps> = ({
     };
 
     return (
-      <div
+      <li
         key={node.id}
         data-node-id={node.id}
         data-expanded={expanded ? "true" : "false"}
         data-depth={depth}
-        className="flex flex-col gap-2 font-mono"
+        className="flex min-w-0 flex-col gap-2 font-mono"
       >
-        <div
-          role="button"
-          tabIndex={0}
-          aria-label={`Select proof tree node ${node.label}`}
-          aria-pressed={isSelected}
-          data-testid="proof-tree-node"
-          onClick={() => handleNodeClick(node.id)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              handleNodeClick(node.id);
-            }
-          }}
-          className={`group flex items-center justify-between gap-3 rounded-xl border px-3 py-2 text-xs transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-cyan-400 ${getStatusStyle()} ${
-            isSelected
-              ? "ring-2 ring-cyan-400 bg-cyan-900/60 shadow-[0_0_12px_rgba(6,182,212,0.5)]"
-              : "hover:border-zinc-500"
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            {hasChildren ? (
-              <button
-                type="button"
-                data-testid="expand-toggle"
-                aria-label={`Toggle expand for node ${node.label}`}
-                onClick={(e) => handleToggleNode(node, e)}
-                onKeyDown={(e) => {
-                  e.stopPropagation();
-                }}
-                className="p-1 rounded hover:bg-zinc-800/60 text-zinc-400 hover:text-white transition-colors focus:outline-none focus:ring-1 focus:ring-cyan-400"
-              >
-                {expanded ? (
-                  <IconChevronDown className="w-3.5 h-3.5" />
-                ) : (
-                  <IconChevronRight className="w-3.5 h-3.5" />
-                )}
-              </button>
-            ) : (
-              <IconGitCommit className="w-3.5 h-3.5 text-zinc-500" />
-            )}
+        <div className="flex min-w-0 items-center gap-2">
+          {hasChildren ? (
+            <button
+              type="button"
+              disabled={!isInteractive}
+              data-testid="expand-toggle"
+              aria-label={`Toggle expand for node ${node.label}`}
+              aria-expanded={expanded}
+              onClick={(e) => handleToggleNode(node, e)}
+              className="shrink-0 p-1 rounded hover:bg-zinc-800/60 text-zinc-400 hover:text-white transition-colors active:scale-[0.98] focus:outline-none focus:ring-1 focus:ring-cyan-400 disabled:cursor-not-allowed"
+            >
+              {expanded ? (
+                <IconChevronDown className="w-3.5 h-3.5" />
+              ) : (
+                <IconChevronRight className="w-3.5 h-3.5" />
+              )}
+            </button>
+          ) : (
+            <IconGitCommit className="w-3.5 h-3.5 shrink-0 text-zinc-500" />
+          )}
 
-            <span className="font-bold text-sm tracking-wide">
-              {node.label}
+          <button
+            type="button"
+            disabled={!isInteractive}
+            aria-label={`Select proof tree node ${node.label}${
+              node.rule ? ` by ${node.rule}` : ""
+            }, status ${
+              node.status === "closed" || node.status === "proved"
+                ? "Q.E.D."
+                : node.status || "open"
+            }`}
+            aria-pressed={isSelected}
+            data-testid="proof-tree-node"
+            onClick={() => handleNodeClick(node.id)}
+            className={`group flex min-w-0 flex-1 items-center justify-between gap-3 rounded-xl border px-3 py-2 text-xs transition-all cursor-pointer active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-cyan-400 disabled:cursor-not-allowed ${getStatusStyle()} ${
+              isSelected
+                ? "ring-2 ring-cyan-400 bg-cyan-900/60 shadow-[0_0_12px_rgba(6,182,212,0.5)]"
+                : "hover:border-zinc-500"
+            }`}
+          >
+            <span className="flex min-w-0 items-center gap-2">
+              <span className="min-w-0 break-words font-bold text-sm tracking-wide">
+                {node.label}
+              </span>
+              {node.rule && (
+                <span className="min-w-0 break-words rounded bg-zinc-800/80 px-2 py-0.5 text-[10px] text-zinc-300 border border-zinc-700/60">
+                  by {node.rule}
+                </span>
+              )}
             </span>
 
-            {node.rule && (
-              <span className="rounded bg-zinc-800/80 px-2 py-0.5 text-[10px] text-zinc-300 border border-zinc-700/60">
-                by {node.rule}
-              </span>
-            )}
-          </div>
-
-          <div className="flex items-center gap-1 text-[10px]">
-            {node.status === "closed" || node.status === "proved" ? (
-              <span className="flex items-center gap-1 font-bold text-emerald-400">
-                <IconCheck className="w-3 h-3" /> Q.E.D.
-              </span>
-            ) : (
-              <span className="flex items-center gap-1 text-cyan-400">
-                <IconCircleDot className="w-3 h-3 animate-pulse" />{" "}
-                {node.status || "open"}
-              </span>
-            )}
-          </div>
+            <span className="flex shrink-0 items-center gap-1 text-[10px]">
+              {node.status === "closed" || node.status === "proved" ? (
+                <span className="flex items-center gap-1 font-bold text-emerald-400">
+                  <IconCheck className="w-3 h-3" /> Q.E.D.
+                </span>
+              ) : (
+                <span className="flex items-center gap-1 text-cyan-400">
+                  <IconCircleDot className="w-3 h-3 animate-pulse" />{" "}
+                  {node.status || "open"}
+                </span>
+              )}
+            </span>
+          </button>
         </div>
 
         {hasChildren && expanded && (
-          <div className="ml-5 border-l border-zinc-800 pl-4 flex flex-col gap-2 pt-1">
+          <ul className="ml-5 border-l border-zinc-800 pl-4 flex flex-col gap-2 pt-1 list-none">
             {node.children!.map((child) => renderNode(child, depth + 1))}
-          </div>
+          </ul>
         )}
-      </div>
+      </li>
     );
   };
 
   return (
-    <div
-      role="tree"
+    <section
       aria-label={ariaLabel}
       className={`w-full flex flex-col gap-3 rounded-2xl border border-zinc-800 bg-zinc-950/90 p-4 font-mono select-none ${className}`}
     >
@@ -198,8 +197,10 @@ export const ProofTree: React.FC<ProofTreeProps> = ({
         </span>
       </div>
 
-      <div className="flex flex-col gap-2">{renderNode(rootNode)}</div>
-    </div>
+      <ul className="flex flex-col gap-2 list-none p-0 m-0">
+        {renderNode(rootNode)}
+      </ul>
+    </section>
   );
 };
 

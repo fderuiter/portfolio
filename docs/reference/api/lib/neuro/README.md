@@ -266,6 +266,12 @@ Re-exports [MeshWorkerResponse](types/interfaces/MeshWorkerResponse.md)
 
 ***
 
+### MeshWorkerTarget
+
+Re-exports [MeshWorkerTarget](mesh-worker/interfaces/MeshWorkerTarget.md)
+
+***
+
 ### processMeshWorkerRequest
 
 Re-exports [processMeshWorkerRequest](mesh-worker/functions/processMeshWorkerRequest.md)

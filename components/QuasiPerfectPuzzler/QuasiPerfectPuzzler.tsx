@@ -985,9 +985,11 @@ export const QuasiPerfectPuzzler: React.FC = () => {
               <div
                 key={sg.id}
                 id={`subgoal-panel-${sg.id}`}
-                role="tabpanel"
-                aria-labelledby={`subgoal-tab-${sg.id}`}
-                tabIndex={0}
+                role={subgoals.length > 1 ? "tabpanel" : undefined}
+                aria-labelledby={
+                  subgoals.length > 1 ? `subgoal-tab-${sg.id}` : undefined
+                }
+                tabIndex={subgoals.length > 1 ? 0 : undefined}
                 hidden={!isActive}
                 className={isActive ? "mt-4" : "hidden"}
               >

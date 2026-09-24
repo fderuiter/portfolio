@@ -4,6 +4,7 @@ import {
   MeshWorkerResponse,
   processMeshWorkerRequest,
   registerMeshWorker,
+  type MeshWorkerTarget,
 } from "@/lib/neuro";
 
 function assertTransferablesMembership(
@@ -31,7 +32,7 @@ describe("NeuroRecon Web Worker (lib/neuro/mesh-worker.ts) Test Suite", () => {
     postMessageSpy = vi.fn();
     (globalThis as unknown as { postMessage: unknown }).postMessage =
       postMessageSpy;
-    unbindWorker = registerMeshWorker(globalThis);
+    unbindWorker = registerMeshWorker();
   });
 
   afterEach(() => {
@@ -57,6 +58,63 @@ describe("NeuroRecon Web Worker (lib/neuro/mesh-worker.ts) Test Suite", () => {
     expect(response.buffers.length).toBeGreaterThan(0);
 
     assertTransferablesMembership(response, transferables);
+  });
+
+  it("posts worker replies through the registered target", () => {
+    const responses: MeshWorkerResponse[] = [];
+    let receivedTransferables: Transferable[] = [];
+    const target: MeshWorkerTarget = Object.assign(new EventTarget(), {
+      postMessage: (
+        response: MeshWorkerResponse,
+        transferables: Transferable[]
+      ) => {
+        responses.push(response);
+        receivedTransferables = transferables;
+      },
+    });
+    const unbind = registerMeshWorker(target);
+
+    target.dispatchEvent(
+      new MessageEvent("message", {
+        data: {
+          id: "custom-target-aseg",
+          mode: "aseg",
+          hemiFilter: "lh",
+        } satisfies MeshWorkerRequest,
+      })
+    );
+
+    expect(responses).toHaveLength(1);
+    expect(responses[0].id).toBe("custom-target-aseg");
+    expect(receivedTransferables.length).toBeGreaterThan(0);
+    expect(
+      receivedTransferables.every((item) => item instanceof ArrayBuffer)
+    ).toBe(true);
+    expect(postMessageSpy).not.toHaveBeenCalled();
+
+    unbind();
+  });
+
+  it("keeps plain EventTarget registration compatible and replies through the default worker scope", () => {
+    const target: EventTarget = new EventTarget();
+    const unbind = registerMeshWorker(target);
+
+    target.dispatchEvent(
+      new MessageEvent("message", {
+        data: {
+          id: "plain-event-target",
+          mode: "aseg",
+          hemiFilter: "lh",
+        } satisfies MeshWorkerRequest,
+      })
+    );
+
+    expect(postMessageSpy).toHaveBeenCalledTimes(1);
+    expect(postMessageSpy.mock.calls[0][0]).toMatchObject({
+      id: "plain-event-target",
+    });
+
+    unbind();
   });
 
   it("handles subcortical (aseg) mode across both, lh, and rh hemisphere filters", () => {

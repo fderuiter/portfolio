@@ -165,7 +165,7 @@ export class VercelBlobStorageProvider implements MediaStorageProvider {
   }
 
   async delete(key: string): Promise<void> {
-    await fetch("https://blob.vercel-storage.com/delete", {
+    const res = await fetch("https://blob.vercel-storage.com/delete", {
       method: "POST",
       headers: {
         authorization: `Bearer ${this.token}`,
@@ -173,6 +173,10 @@ export class VercelBlobStorageProvider implements MediaStorageProvider {
       },
       body: JSON.stringify({ urls: [key] }),
     });
+
+    if (!res.ok) {
+      throw new Error(`Vercel Blob delete failed: ${res.statusText}`);
+    }
   }
 
   getUrl(key: string): string {
@@ -193,9 +197,19 @@ export function getMediaStorageProvider(): MediaStorageProvider {
     return activeProvider;
   }
 
-  const token = getEnv().BLOB_READ_WRITE_TOKEN;
+  const { BLOB_READ_WRITE_TOKEN: token, NODE_ENV, VERCEL_ENV } = getEnv();
   if (token && token.trim().length > 0) {
     return new VercelBlobStorageProvider(token);
+  }
+
+  if (
+    NODE_ENV === "production" ||
+    VERCEL_ENV === "production" ||
+    VERCEL_ENV === "preview"
+  ) {
+    throw new Error(
+      "BLOB_READ_WRITE_TOKEN is required for media storage in production or preview environments"
+    );
   }
 
   return new LocalStorageProvider();

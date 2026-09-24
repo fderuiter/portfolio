@@ -59,8 +59,24 @@ import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets";
 import { resolveSnippetTerminology } from "@/components/ProjectTeaserGrid";
 import { TelemetryService, _testCache } from "@/lib/services/telemetry-service";
 import { NextRequest } from "next/server";
+import { calculateFOV } from "@/lib/dungeon";
 
 describe("Defect Remediation & Regression Verification Suite (Invariant #11)", () => {
+  describe("Dungeon FOV sparse-matrix fallback", () => {
+    it("rebuilds unexplored state instead of throwing on a sparse outer matrix", () => {
+      const grid = Array.from({ length: 3 }, () => [" ", " ", " "]);
+      const sparseExplored = new Array<boolean[]>(3);
+      sparseExplored[0] = [true, true, true];
+      sparseExplored[2] = [true, true, true];
+
+      expect(calculateFOV(grid, 1, 1, 0, sparseExplored).explored).toEqual([
+        [false, false, false],
+        [false, true, false],
+        [false, false, false],
+      ]);
+    });
+  });
+
   describe("Proof AST Solver Resilience & Deep Recursion Guards", () => {
     it("safely evaluates deep AST trees without call stack overflow", () => {
       // Build a nested NOT chain of depth 150

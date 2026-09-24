@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { calculateFOV, hasLineOfSight, resetFogOfWar } from "@/lib/dungeon/fov";
-import { RetroLabyrinthEngine } from "@/lib/retro-labyrinth/engine";
+import { calculateFOV, hasLineOfSight, resetFogOfWar } from "@/lib/dungeon";
+import { RetroLabyrinthEngine } from "@/lib/retro-labyrinth";
 
 describe("Dungeon Field of View (FOV) & Occlusion Test Suite", () => {
   describe("Obstacle Occlusion & Raycasting Propagation", () => {
@@ -113,6 +113,8 @@ describe("Dungeon Field of View (FOV) & Occlusion Test Suite", () => {
       expect(hasLineOfSight(losGrid, -1, 0, 3, 1)).toBe(false);
       expect(hasLineOfSight(losGrid, 1, 1, -2, 1)).toBe(false);
       expect(hasLineOfSight(losGrid, 1, 1, 10, 10)).toBe(false);
+      expect(hasLineOfSight(losGrid, 4, 2, 5, 2)).toBe(false);
+      expect(hasLineOfSight(losGrid, 1, 0, 1, -1)).toBe(false);
 
       const openBorderGrid = [
         [" ", " ", " "],
@@ -160,6 +162,74 @@ describe("Dungeon Field of View (FOV) & Occlusion Test Suite", () => {
     it("safely handles empty or malformed grid arrays", () => {
       expect(calculateFOV([], 0, 0)).toEqual({ visible: [], explored: [] });
       expect(calculateFOV([[]], 0, 0)).toEqual({ visible: [], explored: [] });
+    });
+
+    it("resets explored state when any row has the wrong width", () => {
+      const openGrid = Array.from({ length: 3 }, () => [" ", " ", " "]);
+      const malformedMatrices = [
+        [
+          [true, true, true],
+          [true, true, true],
+          [true, true],
+        ],
+        [
+          [true, true, true],
+          [true, true, true],
+          [true, true, true, true],
+        ],
+      ];
+
+      for (const malformedExplored of malformedMatrices) {
+        const fov = calculateFOV(openGrid, 1, 1, 0, malformedExplored);
+        expect(fov.explored).toEqual([
+          [false, false, false],
+          [false, true, false],
+          [false, false, false],
+        ]);
+      }
+    });
+
+    it("resets explored state when its outer rows or inner cells are sparse", () => {
+      const openGrid = Array.from({ length: 3 }, () => [" ", " ", " "]);
+      const sparseRows = new Array<boolean[]>(3);
+      sparseRows[0] = [true, true, true];
+      sparseRows[2] = [true, true, true];
+
+      const sparseCells = [
+        [true, true, true],
+        new Array<boolean>(3),
+        [true, true, true],
+      ];
+      sparseCells[1][0] = true;
+      sparseCells[1][2] = true;
+
+      for (const malformedExplored of [sparseRows, sparseCells]) {
+        const fov = calculateFOV(openGrid, 1, 1, 0, malformedExplored);
+        expect(fov.explored).toEqual([
+          [false, false, false],
+          [false, true, false],
+          [false, false, false],
+        ]);
+      }
+    });
+
+    it("returns safe empty results for sparse or ragged map rows", () => {
+      const sparseRows = new Array<string[]>(3);
+      sparseRows[0] = [" ", " ", " "];
+      sparseRows[2] = [" ", " ", " "];
+      const sparseCells = [
+        [" ", " ", " "],
+        new Array<string>(3),
+        [" ", " ", " "],
+      ];
+
+      for (const malformedGrid of [sparseRows, sparseCells]) {
+        expect(calculateFOV(malformedGrid, 1, 1)).toEqual({
+          visible: [],
+          explored: [],
+        });
+        expect(hasLineOfSight(malformedGrid, 0, 0, 1, 1)).toBe(false);
+      }
     });
 
     it("handles 1x1 minimal grid case", () => {

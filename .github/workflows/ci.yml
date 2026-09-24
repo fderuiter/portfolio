@@ -1,13 +1,14 @@
 name: CI Pipeline
 
-# ADR 0039 governs this file: GitHub Free grants 2,000 Actions minutes/month on
-# standard runners for this private repo, with no authorized paid overage.
+# ADR 0039 governs resource use in this file. The repository is currently
+# public, so standard hosted runner minutes are free; bounded jobs, standard
+# runner labels, and no duplicate gating runs remain reliability safeguards.
 # The previous single `rigor-pipeline` job ran the full four-device Playwright
 # matrix on every PR push AND again identically on the post-merge `main` push,
-# which exhausted a month's allowance in one active dev day (see #733). This
-# file splits fast checks from the expensive Playwright/Web-Vitals gate and
-# scopes device-matrix breadth by trigger instead of running the same full
-# suite twice per merge.
+# which exhausted a month's allowance in one active dev day while the repository
+# was private (see #733). This file splits fast checks from the expensive
+# Playwright/Web-Vitals gate and scopes device-matrix breadth by trigger instead
+# of running the same full suite twice per merge.
 #
 # CI-02 (#733 follow-up): the split above originally left `device-gate`'s
 # targeted non-chromium coverage running only after a squash-merge landed on

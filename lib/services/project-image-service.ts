@@ -1,9 +1,10 @@
 import DOMPurify from "isomorphic-dompurify";
 import { CaseStudyService } from "@/lib/services/case-study-service";
 import type { ServiceResult } from "@/lib/services/service-result";
+import { logger } from "@/lib/logger";
+import { sanitizeError } from "@/lib/error-sanitization";
 import {
   getMediaStorageProvider,
-  LocalStorageProvider,
   type MediaAssetRecord,
 } from "@/lib/services/media-storage";
 
@@ -221,8 +222,9 @@ export class ProjectImageService {
   }
 
   /**
-   * Saves a validated media buffer to storage and returns its relative asset URL.
-   * If primary cloud storage upload fails, falls back to local storage.
+   * Saves a validated media buffer to the active storage provider and returns
+   * its asset URL. Upload failures are propagated so callers never persist a
+   * URL for an asset that was not stored durably.
    */
   static async saveMediaAsset(
     key: string,
@@ -230,21 +232,8 @@ export class ProjectImageService {
     contentType: string
   ): Promise<string> {
     const provider = getMediaStorageProvider();
-    try {
-      const result = await provider.upload(buffer, key, contentType);
-      return result.url;
-    } catch (error) {
-      if (!(provider instanceof LocalStorageProvider)) {
-        console.warn(
-          "Primary cloud storage upload failed, attempting local fallback:",
-          error
-        );
-        const fallbackProvider = new LocalStorageProvider();
-        const result = await fallbackProvider.upload(buffer, key, contentType);
-        return result.url;
-      }
-      throw error;
-    }
+    const result = await provider.upload(buffer, key, contentType);
+    return result.url;
   }
 
   /**
@@ -252,30 +241,19 @@ export class ProjectImageService {
    */
   static async getMediaAsset(key: string): Promise<MediaAssetRecord | null> {
     const provider = getMediaStorageProvider();
-    if (provider.getAsset) {
-      const asset = await provider.getAsset(key);
-      if (asset) return asset;
-    }
-    if (!(provider instanceof LocalStorageProvider)) {
-      const fallbackProvider = new LocalStorageProvider();
-      if (fallbackProvider.getAsset) {
-        return await fallbackProvider.getAsset(key);
-      }
-    }
-    return null;
+    if (!provider.getAsset) return null;
+    return await provider.getAsset(key);
   }
 
   /**
-   * Deletes a media asset from storage by key.
+   * Deletes a media asset from the active provider by key.
+   * Returns false when deletion fails. Provider selection/configuration errors
+   * remain exceptions so missing production credentials fail closed.
    */
   static async deleteMediaAsset(key: string): Promise<boolean> {
     const provider = getMediaStorageProvider();
     try {
       await provider.delete(key);
-      if (!(provider instanceof LocalStorageProvider)) {
-        const fallbackProvider = new LocalStorageProvider();
-        await fallbackProvider.delete(key);
-      }
       return true;
     } catch {
       return false;
@@ -320,18 +298,26 @@ export class ProjectImageService {
     );
 
     try {
-      // 5. Atomic database persistence and cache eviction
+      // 5. Persist the new asset reference before cleaning up the prior asset.
       await CaseStudyService.updateCaseStudyImage(slug, assetUrl);
-
-      // 6. Clean up prior media asset if replacing an existing one to prevent storage orphans
-      if (priorKey && priorKey !== key) {
-        await ProjectImageService.deleteMediaAsset(priorKey);
-      }
-
-      return { hero_image_url: assetUrl, key };
     } catch (error) {
-      // 7. On failure: Clean up newly created asset and ensure prior asset is preserved
-      await ProjectImageService.deleteMediaAsset(key);
+      // 6. On persistence failure, clean up the new asset and restore the prior reference.
+      try {
+        const deleted = await ProjectImageService.deleteMediaAsset(key);
+        if (!deleted) {
+          logger.warn(
+            "Project image upload rollback could not clean up the new asset.",
+            { slug }
+          );
+        }
+      } catch (cleanupError) {
+        // Best-effort cleanup must not mask the original persistence failure.
+        logger.warn(
+          "Project image upload rollback could not clean up the new asset.",
+          sanitizeError(cleanupError),
+          { slug }
+        );
+      }
       if (existing) {
         try {
           await CaseStudyService.updateCaseStudyImage(slug, priorAssetUrl);
@@ -341,5 +327,27 @@ export class ProjectImageService {
       }
       throw error;
     }
+
+    // 7. Cleanup is post-commit and best-effort: a provider outage must not
+    // report failure after the new image reference has already been persisted.
+    if (priorKey && priorKey !== key) {
+      try {
+        const deleted = await ProjectImageService.deleteMediaAsset(priorKey);
+        if (!deleted) {
+          logger.warn(
+            "Project image was replaced, but prior asset cleanup failed.",
+            { slug }
+          );
+        }
+      } catch (error) {
+        logger.warn(
+          "Project image was replaced, but prior asset cleanup failed.",
+          sanitizeError(error),
+          { slug }
+        );
+      }
+    }
+
+    return { hero_image_url: assetUrl, key };
   }
 }

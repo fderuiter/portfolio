@@ -1,10 +1,21 @@
 # Public Repository Readiness: GitHub Actions and Secret Exposure
 
-Last verified: 2026-09-22 against current GitHub documentation
+Last verified: 2026-09-22 against GitHub documentation; status amended 2026-09-24
 
-Scope: the operational consequences of changing `fderuiter/portfolio` from
-private to public on GitHub Free. This note does not assert that the repository
-is ready to change visibility; it defines the provider-backed release gate.
+> **Current state (2026-09-24):** The repository became public on
+> 2026-09-23. This document is a pre-publication snapshot, not a current
+> go/no-go decision. Public-repository standard GitHub-hosted runner usage is
+> free, and GitHub Free supports branch protection and repository rulesets for
+> public repositories. The actual branch rules, historical log review, and
+> production configuration still need verification; track those operator
+> checks in [#732](https://github.com/fderuiter/portfolio/issues/732) and
+> release readiness in [#863](https://github.com/fderuiter/portfolio/issues/863).
+> See the [2026-09-24 ADR 0039 amendment](../../adr/0039-github-pro-plan-capabilities-and-actions-minutes-governance.md#amendment-2026-09-24--public-repository-state).
+
+Scope: the operational consequences assessed before changing
+`fderuiter/portfolio` from private to public on GitHub Free. The visibility
+change is complete; the historical gate and evidence below remain useful for
+understanding the decision and the remaining post-publication work.
 
 ## Decision Summary
 
@@ -14,12 +25,16 @@ runners as free and unlimited for public repositories. It does not make all
 Actions usage free: larger runners remain billable, while artifact and cache
 storage retain separate allowances and billing behavior.
 
-The visibility change must remain blocked until the credential concern tracked
-in [#865](https://github.com/fderuiter/portfolio/issues/865) is resolved by
-revocation or rotation and the repository's current files, Git history, GitHub
-discussion surfaces, and historical Actions logs and artifacts have been
-audited. Public secret scanning is a useful backstop after publication, not a
-substitute for that pre-publication review.
+At the time of the 2026-09-22 snapshot, the visibility decision was gated on
+the credential concern tracked in
+[#865](https://github.com/fderuiter/portfolio/issues/865) and review of the
+repository, Git history, GitHub discussion surfaces, and historical Actions
+logs and artifacts. The repository became public on 2026-09-23. Current
+post-publication controls and any remaining operator checks are tracked in
+[#732](https://github.com/fderuiter/portfolio/issues/732) and
+[#863](https://github.com/fderuiter/portfolio/issues/863); public secret
+scanning remains a useful backstop, not proof that every application-specific
+secret pattern is covered.
 
 ## Actions Billing Findings
 
@@ -66,7 +81,11 @@ substitute for that pre-publication review.
   delete the log and rotate the secret. See [Secure use reference](https://docs.github.com/en/actions/reference/security/secure-use#use-secrets-for-sensitive-information)
   and [Using workflow run logs](https://docs.github.com/en/actions/how-tos/monitor-workflows/use-workflow-run-logs#deleting-logs).
 
-## Required Pre-Publication Gate
+## Historical Pre-Publication Gate
+
+The checklist below records the gate defined before the visibility switch; it
+is not a current go/no-go status. The switch was completed on 2026-09-23, and
+the remaining post-publication operator checks are tracked in #732 and #863.
 
 1. Confirm every potentially exposed credential is revoked or rotated; do not
    treat file deletion or history rewriting as credential invalidation.
@@ -86,8 +105,9 @@ substitute for that pre-publication review.
    [Managing protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches)
    and [About rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets).
 
-The visibility switch itself is an operator action after this gate is signed
-off. It is not part of the repository-polish change set.
+At the time of this snapshot, the visibility switch was an operator action
+after this gate was signed off. It was completed on 2026-09-23 and is not part
+of the repository-polish change set.
 
 ## Repository Evidence Recorded Through 2026-09-22
 
@@ -117,16 +137,18 @@ quality evidence is recorded in the
 
 ## Vercel and Production Evidence Recorded 2026-09-22
 
-- The local Vercel project link matches `portfolio`, Node 24, and the expected
-  team, but the global CLI (`41.6.1`) has an invalid token and the connected
-  Vercel app returned `403` for the team. Current private deployment, alias,
-  environment, quota, and runtime-log state is therefore unknown.
+- At the snapshot, the local Vercel project link matched `portfolio`, Node 24,
+  and the expected team, but the global CLI (`41.6.1`) had an invalid token
+  and the connected Vercel app returned `403` for the team. Deployment, alias,
+  environment, quota, and runtime-log state was not verified then; current
+  production configuration remains an operator check in #863.
 - Release workflows dynamically request `vercel@59.16.0`; the npm registry's
   current stable version was `59.25.0`, and no Vercel CLI is locked in
   `package-lock.json`.
 - The last authenticated Vercel capacity snapshot, from 2026-09-12, recorded
-  Functions Storage at 96.8% and Build Time at 87%. It is not a current
-  reading, but release must remain blocked until fresh headroom is known.
+  Functions Storage at 96.8% and Build Time at 87%. It was not a current
+  reading even at the time of the 2026-09-22 audit; refresh capacity before a
+  later production release.
 - Public routing works: the apex returns `200`, and `www` returns `308` to the
   apex. The deployed canonical, OpenGraph, robots, sitemap, and structured-data
   output nevertheless still uses `www`.
@@ -177,10 +199,11 @@ require checking the actual diff for runtime-rendered paths rather than
 relying on the author's stated intent, so the same mismatch is harder to
 reproduce.
 
-## Current Go/No-Go Status
+## Historical Go/No-Go Status (2026-09-22 Snapshot)
 
-The repository is **not ready to become public or release to production** yet.
-Those decisions have related but distinct gates.
+At the time of this audit, the repository was **not ready to become public or
+release to production**. The public-conversion decision has since been made;
+the production release still has separate operator and deployment checks.
 
 ### Public Conversion
 
@@ -207,19 +230,22 @@ Those decisions have related but distinct gates.
 Application source licensing (item 3 in prior verifications) is complete; see
 "Completed Since Last Verification" above.
 
-### Production Release
+### Production Release (Snapshot: 2026-09-22)
 
 The authoritative release checklist remains
 [#863](https://github.com/fderuiter/portfolio/issues/863). In addition to the
 credential and mutation gates above, release remains blocked on the unresolved
 operator work tracked by:
 
-- [#840](https://github.com/fderuiter/portfolio/issues/840), the current GitHub
-  Actions allowance outage and restoration of required checks;
+- [#840](https://github.com/fderuiter/portfolio/issues/840), the historical
+  private-repository Actions allowance outage. The repository became public
+  on 2026-09-23; check current PR run results instead of treating that closed
+  outage as active;
 - [#848](https://github.com/fderuiter/portfolio/issues/848), production cron
   secret configuration and a verified scheduled run;
-- [#851](https://github.com/fderuiter/portfolio/issues/851), the production
-  credential-path remediation;
+- [#851](https://github.com/fderuiter/portfolio/issues/851), the open
+  production credential-path follow-up, whose scope should be reviewed against
+  ADR 0049's Vercel-only deployment path;
 - [#720](https://github.com/fderuiter/portfolio/issues/720), final production
   canonical and routing verification;
 - [#853](https://github.com/fderuiter/portfolio/issues/853), the production

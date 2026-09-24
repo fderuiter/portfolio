@@ -1,25 +1,24 @@
 # Monitor GitHub Actions Minutes
 
-Last verified: 2026-09-22 against GitHub Free (2,000 min/month), repository
-settings, and current workflow-run results.
+Last verified: 2026-09-24 against GitHub repository metadata and current
+workflow configuration. The repository is public; standard hosted-runner
+minutes are free for public repositories.
 
 Governing policy: [ADR 0039](../../adr/0039-github-pro-plan-capabilities-and-actions-minutes-governance.md).
 
 ## Why this exists
 
-GitHub Free's private-repository entitlement is 2,000 Actions minutes/month on
-standard runners, with no authorized paid overage — this repository does not
-purchase additional minutes or raise a spending limit. On 2026-09-13 the
-previous single-job `.github/workflows/ci.yml` design (full four-device
-Playwright matrix on every PR push, repeated identically on the post-merge
-`main` push) exhausted the month's allowance during one active day of
-iteration, and every CI job on the next three PRs failed in 2-4 seconds with
-`0` billable milliseconds. #733 restructured the workflow to reduce that
-cost, but the revised runtime has not yet been measured in GitHub because the
-allowance remains exhausted. This page is the manual habit that catches the
-next regression before minutes hit zero, mirroring
-[monitor-vercel-headroom.md](./monitor-vercel-headroom.md) for a resource
-GitHub itself does not yet expose a scriptable read on.
+The repository is public, so standard GitHub-hosted runner minutes are free.
+Keep using standard runner labels: larger runners are billable, and artifact
+and cache storage have separate limits. Workflow timeouts, bounded device
+coverage, and avoiding duplicate gating runs remain important operational
+controls. On 2026-09-13 the previous single-job `.github/workflows/ci.yml`
+design (full four-device Playwright matrix on every PR push, repeated
+identically on the post-merge `main` push) exhausted the private-repository
+allowance during one active day of iteration. #733 restructured the workflow
+to reduce duplicate and unnecessary work. This page tracks workflow usage,
+storage, and run duration, mirroring
+[monitor-vercel-headroom.md](./monitor-vercel-headroom.md).
 
 **Correction 2026-09-18:** this page previously stated that Actions billing
 usage was not readable through the API and that checking it was a dashboard
@@ -55,25 +54,24 @@ runs, repeated pushes while chasing a flaky test):
 1. Open **Settings → Billing → Actions minutes** for the account owning
    `fderuiter/portfolio` (organization or personal account billing settings,
    whichever holds this repository).
-2. Note the minutes used and the allowance (2,000/month standard Linux
-   runners) and the days remaining until the monthly reset.
-3. If usage is already above ~80% of the allowance for the cycle, prefer
-   `heavy-gate`'s single-device PR run over dispatching
-   `cross-device-matrix`, and avoid re-pushing speculative fixes — validate
-   locally first (`npm run typecheck && npm run lint && npx playwright test
-   --project=chromium <file>`) before spending a CI run on it.
-4. If usage is at or near 100%, CI will fail fast with near-zero billable
-   time on every job (the same signature #733 diagnosed). Stop pushing and
-   wait for the monthly reset; there is no supported way to buy more minutes
-   for this account.
+2. Confirm standard GitHub-hosted runners remain selected. Public-repository
+   runner minutes are free; larger runners and artifact/cache storage may
+   still incur costs or hit separate limits.
+3. Prefer `heavy-gate`'s single-device PR run over dispatching
+   `cross-device-matrix` unless the change specifically needs the full matrix.
+   Validate speculative fixes locally first (`npm run typecheck && npm run
+   lint && npx playwright test --project=chromium <file>`).
+4. Review run duration and storage independently of minutes; the free standard
+   runner allowance does not make an unbounded job or artifact accumulation
+   operationally safe.
 
 ## What changed to reduce cost (ADR 0039 / #733)
 
 - `fast-gate` (typecheck, lint, docs/schema drift, unit tests, property
-  fuzzing) runs on every push and PR — cheap, and gates the expensive jobs
-  below via `needs:`.
-- `security-gate` (vulnerability audit) runs on every push and PR — independent
-  and fast.
+  fuzzing) runs on `main` pushes and pull requests targeting `main` —
+  cheap, and gates the expensive jobs below via `needs:`.
+- `security-gate` (vulnerability audit) runs on `main` pushes and pull requests
+  targeting `main` — independent and fast.
 - `heavy-gate` (build, bundle budget, Playwright, Web Vitals) runs only on
   PR pushes, and only against the `chromium` Playwright project instead of
   all four configured device projects.
@@ -91,9 +89,12 @@ runs, repeated pushes while chasing a flaky test):
 - `cross-device-matrix` (the full four-device matrix against the full suite)
   is `workflow_dispatch`-only, for a release or a device-sensitive change
   that specifically warrants it.
-- The stale `dev` branch trigger was removed; `dev` no longer exists.
+- The current one-time Jules consolidation PR targets `main` and uses the same
+  required pre-merge gates as other changes. After it lands, new feature work
+  continues to target `main`; the temporary `dev` branch is not a CI target
+  (see [ADR 0050](../../adr/0050-jules-consolidation-release.md)).
 
-## CI-02: targeted device coverage now gates the merge, not just `main`
+## CI-02: targeted device coverage gates pull requests to `main`
 
 Before this change, `device-gate` was `post-merge-device-smoke`: it ran only
 on the `push` to `main` after a squash-merge, so a device-engine regression
@@ -109,24 +110,24 @@ per PR) is unchanged, just relocated to before the merge instead of after.
 
 `main`-push confirmation stays deliberately bounded to `fast-gate` and
 `security-gate` — a safety net for a direct push that bypasses PR review.
-That risk remains real while the repository is private on GitHub Free because
-the live branch-protection API returns `403`; server-side protection is not
-active. The bounded push jobs are not a repeat of the build/Playwright work
-the merged PR already did. The full
+Branch protection is available for this public repository, but its current
+dashboard configuration has not been verified; #732 tracks that human check.
+The bounded push jobs are not a repeat of the build/Playwright work the merged
+PR already did. The full
 four-device matrix remains a one-click `workflow_dispatch` job
 (`cross-device-matrix`); nothing here changes when or how often that runs
 automatically (it doesn't).
 
-### Required check contract when branch protection becomes available (#732)
+### Required check contract for branch protection (#732)
 
-`.github/workflows/ci.yml` now exposes one job whose sole purpose is to be
-the required status check: **`Merge Gate (Required Checks Summary)`** (the
-`merge-gate` job's `name:`). The repository cannot require it today: the live
-branch-protection and ruleset APIs return `403` for this private GitHub Free
-repository. After public conversion or a qualifying plan change, require
-exactly that check under Settings →
-Branches → branch protection rule for `main` → "Require status checks to
-pass before merging".
+`.github/workflows/ci.yml` exposes one job whose sole purpose is to be the
+required status check: **`Merge Gate (Required Checks Summary)`** (the
+`merge-gate` job's `name:`). Require exactly that check for `main` under
+Settings → Branches → branch protection → "Require status checks to pass
+before merging". The current rules remain unverified because the connected
+GitHub API integration cannot read branch-protection settings; #732 tracks
+dashboard verification. The `dev` → `main` consolidation PR is gated on the
+same `main` rule.
 
 This replaces the two check names #732 originally listed
 (`Rigor Ecosystem (Logic, Visual, Performance)` and
@@ -196,11 +197,12 @@ event exclusion), and its shell script dispatches explicitly on `github.event_na
 A manual or unrecognized trigger can therefore never produce a "skipped" conclusion
 (satisfied by default) or an accidental "success" for this required check name.
 
-### Implementation evidence, server settings, and deferred cost measurements
+### Implementation evidence, server settings, and runtime measurements
 
-Because GitHub Actions minutes for the account are currently exhausted, this
-guidance separates what is locally verified from unavailable server controls
-and future measured costs:
+The private-repository minutes outage described in older revisions ended as a
+current constraint when the repository became public on 2026-09-23. This
+section records the historical outage separately from controls that still
+need verification:
 
 - **Local implementation evidence**: Workflow YAML topology, step dependencies
   (`needs:`), and the literal bash evaluation logic of `merge-gate` are verified
@@ -209,29 +211,28 @@ and future measured costs:
   These tests extract the exact bash script from `.github/workflows/ci.yml` and
   execute it across simulated event and status permutations (`pull_request`,
   `push`, `workflow_dispatch`, `success`, `failure`, `cancelled`, `skipped`).
-- **Server-side protection is unavailable**: Live API probes on 2026-09-22
-  returned `403` for branch protection and rulesets, and required reviewers
-  are also unavailable for this private GitHub Free repository. Client-side
-  guardrails remain the only enforcement. Since
+- **Server-side protection is available but unverified**: GitHub currently
+  reports this repository as public. The connected API integration returned
+  `403` when asked to read branch-protection settings, so #732 tracks manual
+  confirmation. Client-side guardrails remain defense-in-depth. Since
   [ADR 0049](../../adr/0049-deploy-main-on-green-ci.md), no GitHub workflow or
   environment deploys: Vercel builds and promotes `main` itself.
-- **Future measured Actions costs**: The `timeout-minutes` values on `fast-gate` (20),
+- **Runtime measurements**: The `timeout-minutes` values on `fast-gate` (20),
   `security-gate` (15), `heavy-gate` (40), `device-gate` (25), and `merge-gate` (5)
-  remain provisional estimates. Real runtime and billable minutes consumption
-  cannot be measured until the account's Actions minutes allowance resets in the
-  next monthly billing cycle.
-- **Operating constraint**: September Actions minutes remain exhausted on this
-  account. In strict accordance with ADR 0039's no-paid-overage governance, no
-  additional minutes will be purchased, and no cloud workflows may be dispatched
-  or retried until next month's billing cycle reset (without assuming or inventing
-  an exact calendar reset day). All live validation and timeout tuning remain
-  deferred under #733. On 2026-09-22, current-main, PR #886, and the scheduled
-  synthetic-probe run still failed with zero executed steps, confirming the
-  outage had not cleared.
+  remain upper bounds, not measured runtimes. Review successful GitHub run
+  durations before tightening them; standard public-runner minutes are free,
+  while larger runners and artifact/cache storage have separate billing.
+- **Historical outage**: The private-repository allowance was exhausted in
+  September 2026. On 2026-09-22, the then-current `main`, PR #886, and scheduled
+  synthetic-probe runs failed with zero executed steps. The repository became
+  public on 2026-09-23, so this is no longer a reason to stop or defer GitHub
+  Actions runs. Check current run results after each release update; Vercel
+  preview availability is tracked separately.
 
 ## Refresh this page
 
-After checking the live billing dashboard, or after further restructuring
+After checking workflow runner labels, run durations, artifact/cache usage, or
+after further restructuring
 `.github/workflows/ci.yml`, update this page's "Last verified" line and the
 list above, then run:
 

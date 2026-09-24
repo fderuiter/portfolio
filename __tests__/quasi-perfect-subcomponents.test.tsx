@@ -238,7 +238,32 @@ describe("Quasi-Perfect Puzzler Subcomponents Test Suite", () => {
       expect(screen.queryByText("Subgoal 1: P")).toBeNull();
     });
 
-    it("triggers onSelectNode when node is clicked or activated via keyboard", () => {
+    it("uses nested list semantics and keeps expand controls outside selection buttons", () => {
+      render(<ProofTree rootNode={sampleTree} />);
+
+      expect(screen.queryByRole("tree")).toBeNull();
+      expect(
+        screen.getByRole("region", { name: "Quasi-Perfect Proof Tree" })
+      ).toBeDefined();
+      expect(screen.getAllByRole("listitem")).toHaveLength(4);
+
+      const selectButton = screen.getByRole("button", {
+        name: "Select proof tree node Goal: P ∧ Q by And.intro, status open",
+      });
+      expect(
+        screen.getByRole("button", {
+          name: "Select proof tree node Subgoal 1: P by rfl, status Q.E.D.",
+        })
+      ).toBeDefined();
+      const expandButton = screen.getByRole("button", {
+        name: "Toggle expand for node Goal: P ∧ Q",
+      });
+      expect(selectButton.querySelector("button")).toBeNull();
+      expect(expandButton.parentElement).toBe(selectButton.parentElement);
+      expect(expandButton.getAttribute("aria-expanded")).toBe("true");
+    });
+
+    it("triggers onSelectNode when the native selection button is clicked", () => {
       const handleSelectNode = vi.fn();
 
       render(
@@ -246,15 +271,9 @@ describe("Quasi-Perfect Puzzler Subcomponents Test Suite", () => {
       );
 
       const nodeEl = screen.getByRole("button", {
-        name: "Select proof tree node Subgoal 1: P",
+        name: "Select proof tree node Subgoal 1: P by rfl, status Q.E.D.",
       });
       fireEvent.click(nodeEl);
-      expect(handleSelectNode).toHaveBeenLastCalledWith("sub-1");
-
-      fireEvent.keyDown(nodeEl, { key: "Enter" });
-      expect(handleSelectNode).toHaveBeenLastCalledWith("sub-1");
-
-      fireEvent.keyDown(nodeEl, { key: " " });
       expect(handleSelectNode).toHaveBeenLastCalledWith("sub-1");
     });
 
