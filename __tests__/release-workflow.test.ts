@@ -53,6 +53,32 @@ describe("protected production release workflow", () => {
     expect(tagIndex).toBeGreaterThan(recordIndex);
   });
 
+  it("reaches the protected staged deployment and requires the bypass before migrating", () => {
+    const workflow = fs.readFileSync(workflowPath, "utf8");
+    const releaseJob = workflow.slice(
+      workflow.indexOf("  release-production:")
+    );
+    const validateStep = releaseJob.slice(
+      releaseJob.indexOf("name: Validate protected release configuration"),
+      releaseJob.indexOf("name: Record current production rollback target")
+    );
+    const probeStep = releaseJob.slice(
+      releaseJob.indexOf("name: Verify staged deployment synthetic journeys"),
+      releaseJob.indexOf("name: Promote the verified immutable deployment")
+    );
+    const playwrightConfig = fs.readFileSync(
+      path.join(process.cwd(), "playwright.config.ts"),
+      "utf8"
+    );
+
+    expect(validateStep).toContain("VERCEL_AUTOMATION_BYPASS_SECRET");
+    expect(releaseJob.indexOf("VERCEL_AUTOMATION_BYPASS_SECRET")).toBeLessThan(
+      releaseJob.indexOf("prisma migrate deploy")
+    );
+    expect(probeStep).toContain("secrets.VERCEL_AUTOMATION_BYPASS_SECRET");
+    expect(playwrightConfig).toContain("x-vercel-protection-bypass");
+  });
+
   it("disables automatic Git deployments and provides a no-build rollback drill", () => {
     const vercelConfig = fs.readFileSync(
       path.join(process.cwd(), "vercel.json"),

@@ -7,6 +7,14 @@ import { defineConfig, devices } from "@playwright/test";
  */
 const externalBaseUrl = process.env.PLAYWRIGHT_TEST_BASE_URL;
 
+/**
+ * Staged release deployments are served from `*.vercel.app` URLs behind Vercel
+ * Authentication. With Protection Bypass for Automation enabled, sending the
+ * project's bypass secret lets probes reach them; the cookie header carries the
+ * bypass across same-origin navigations and asset requests.
+ */
+const vercelBypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
+
 export default defineConfig({
   testDir: "./__tests__/e2e",
   fullyParallel: true,
@@ -23,6 +31,12 @@ export default defineConfig({
   use: {
     baseURL: externalBaseUrl || "http://localhost:3000",
     trace: "on-first-retry",
+    extraHTTPHeaders: vercelBypassSecret
+      ? {
+          "x-vercel-protection-bypass": vercelBypassSecret,
+          "x-vercel-set-bypass-cookie": "true",
+        }
+      : undefined,
   },
   expect: {
     timeout: 15000,
