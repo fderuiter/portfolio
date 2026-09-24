@@ -53,6 +53,7 @@ describe("Husky hook wiring", () => {
           GIT_DIR: path.join(repo, ".git"),
           GIT_WORK_TREE: repo,
           ALLOW_DANGEROUS_GIT: "0",
+          JULES_SESSION_ID: "",
         },
       });
     };
