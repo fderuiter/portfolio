@@ -210,10 +210,11 @@ and future measured costs:
   execute it across simulated event and status permutations (`pull_request`,
   `push`, `workflow_dispatch`, `success`, `failure`, `cancelled`, `skipped`).
 - **Server-side protection is unavailable**: Live API probes on 2026-09-22
-  returned `403` for branch protection and rulesets. The
-  `production-release` environment exists without protection rules because
-  required reviewers are also unavailable for this private GitHub Free
-  repository. Client-side guardrails remain the only enforcement.
+  returned `403` for branch protection and rulesets, and required reviewers
+  are also unavailable for this private GitHub Free repository. Client-side
+  guardrails remain the only enforcement. Since
+  [ADR 0049](../../adr/0049-deploy-main-on-green-ci.md), no GitHub workflow or
+  environment deploys: Vercel builds and promotes `main` itself.
 - **Future measured Actions costs**: The `timeout-minutes` values on `fast-gate` (20),
   `security-gate` (15), `heavy-gate` (40), `device-gate` (25), and `merge-gate` (5)
   remain provisional estimates. Real runtime and billable minutes consumption

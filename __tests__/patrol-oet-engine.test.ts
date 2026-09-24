@@ -1,10 +1,21 @@
 import { describe, it, expect, vi } from "vitest";
+import { fromPartial, fromAny } from "@total-typescript/shoehorn";
 import {
   OetDescentEngine,
   createInitialOetDescentState,
   evaluateOETCompliance,
+  calculateInjurySeverity,
+  assignTransportPriority,
+  createOETEngineState,
   type PatrolScenario,
+  type PatientState,
+  type VitalsData,
+  type OetDescentState,
 } from "@/lib/patrol";
+
+interface InternalEngineState {
+  state: OetDescentState;
+}
 
 const dummyScenario: PatrolScenario = {
   id: "pine-ridge-sweep",
@@ -180,9 +191,7 @@ describe("Patrol Shift: Headless OET Descent Engine (M4 / #750)", () => {
     engine.stepSimulation(0.01); // initialize
 
     // Directly steer sled towards first obstacle
-    const engineInternal = engine as unknown as {
-      state: { sled: { x: number; y: number; speedMph: number } };
-    };
+    const engineInternal = fromAny<InternalEngineState, unknown>(engine);
     engineInternal.state.sled.x = firstObs.x;
     engineInternal.state.sled.y = firstObs.y - 10;
     engineInternal.state.sled.speedMph = 10;
@@ -226,9 +235,7 @@ describe("Patrol Shift: Headless OET Descent Engine (M4 / #750)", () => {
     });
     engine.setChainBrake(false);
 
-    const engineInternal = engine as unknown as {
-      state: { sled: { speedMph: number } };
-    };
+    const engineInternal = fromAny<InternalEngineState, unknown>(engine);
     engineInternal.state.sled.speedMph = 18.5; // Above 15 mph limit
 
     const dt = 1 / 60;
@@ -415,25 +422,231 @@ describe("Patrol Shift: Headless OET Descent Engine (M4 / #750)", () => {
 
   it("transitions status to crashed and halts simulation upon reaching 4 collisions", () => {
     const engine = new OetDescentEngine();
-    const engineInternal = engine as unknown as {
-      state: { metrics: { collisions: number }; status: string };
-    };
+    const engineInternal = fromAny<InternalEngineState, unknown>(engine);
 
     // Simulate 3 collisions
     engineInternal.state.metrics.collisions = 3;
 
     // Trigger 4th collision
     const obs = createInitialOetDescentState().obstacles[0];
-    const internalSled = engine as unknown as {
-      state: { sled: { x: number; y: number; speedMph: number } };
-    };
-    internalSled.state.sled.x = obs.x;
-    internalSled.state.sled.y = obs.y - 5;
-    internalSled.state.sled.speedMph = 10;
+    engineInternal.state.sled.x = obs.x;
+    engineInternal.state.sled.y = obs.y - 5;
+    engineInternal.state.sled.speedMph = 10;
 
     engine.update(1 / 60);
 
     expect(engine.createSnapshot().status).toBe("crashed");
     expect(engine.createSnapshot().metrics.collisions).toBe(4);
+  });
+
+  it("handles gate traversals: records cleared gates vs. missed gates", () => {
+    const engine = new OetDescentEngine({ totalDistance: 1000 });
+    engine.setChainBrake(false);
+
+    const clearedSpy = vi.fn();
+    const missedSpy = vi.fn();
+
+    engine.on("gateCleared", clearedSpy);
+    engine.on("gateMissed", missedSpy);
+
+    const internal = fromAny<InternalEngineState, unknown>(engine);
+
+    // Position sled right before gate 1 (y=220) and aligned inside gate x range
+    const gate1 = internal.state.gates[0];
+    internal.state.sled.y = gate1.y - 1;
+    internal.state.sled.x = (gate1.xMin + gate1.xMax) / 2;
+    internal.state.sled.speedMph = 10;
+
+    engine.update(1 / 60);
+    expect(clearedSpy).toHaveBeenCalledWith({ gateId: gate1.id });
+
+    // Position sled right before gate 2 and steer outside gate x range
+    const gate2 = internal.state.gates[1];
+    internal.state.sled.y = gate2.y - 1;
+    internal.state.sled.x = gate2.xMax + 50; // Outside gate
+    internal.state.sled.speedMph = 10;
+
+    engine.update(1 / 60);
+    expect(missedSpy).toHaveBeenCalledWith({ gateId: gate2.id });
+  });
+
+  it("initializes legacy OET state correctly", () => {
+    const state = createOETEngineState();
+    expect(state).toEqual({
+      evaluatedCount: 0,
+      rulesPassed: 0,
+      rulesFailed: 0,
+    });
+  });
+
+  it("calculates injury severity across clinical parameters and mechanisms", () => {
+    // 1. Critical patient with compromised vitals
+    const criticalVitals: VitalsData = {
+      avpu: "U",
+      gcs: 7,
+      spo2: 82,
+      respiration: 8,
+      heartRate: 140,
+      bpSystolic: 80,
+      pms: "absent",
+    };
+    const criticalPatient: Partial<PatientState> = {
+      complaint: "Severe spinal trauma and head injury",
+      mechanism: "High-speed collision with tree impact",
+      vitals: criticalVitals,
+    };
+
+    const criticalResult = calculateInjurySeverity(criticalPatient);
+    expect(criticalResult.level).toBe("critical");
+    expect(criticalResult.score).toBe(100);
+    expect(criticalResult.vitalsCompromised).toBe(true);
+    expect(criticalResult.spinalPrecautionRequired).toBe(true);
+    expect(criticalResult.factors.length).toBeGreaterThan(4);
+
+    // 2. Moderate patient with extremity fracture
+    const moderatePatient: Partial<PatientState> = {
+      complaint: "Isolated closed tibia fracture",
+      mechanism: "Catching an edge on groomed snow",
+      vitals: {
+        avpu: "A",
+        gcs: 15,
+        spo2: 98,
+        respiration: 16,
+        heartRate: 88,
+        bpSystolic: 120,
+        pms: "intact",
+      },
+    };
+    const moderateResult = calculateInjurySeverity(moderatePatient);
+    expect(moderateResult.level).toBe("moderate");
+    expect(moderateResult.vitalsCompromised).toBe(false);
+
+    // 3. Minor patient
+    const minorPatient: Partial<PatientState> = {
+      complaint: "Minor wrist sprain",
+      vitals: { avpu: "A", gcs: 15, spo2: 99, respiration: 14, heartRate: 72 },
+    };
+    const minorResult = calculateInjurySeverity(minorPatient);
+    expect(minorResult.level).toBe("minor");
+    expect(minorResult.score).toBeLessThan(25);
+  });
+
+  it("assigns transport priority ratings (RED, YELLOW, GREEN, BLACK)", () => {
+    // RED Priority
+    const redPriority = assignTransportPriority({
+      complaint: "Unresponsive head injury",
+      mechanism: "High-speed tree impact",
+      vitals: { avpu: "U", gcs: 6, spo2: 80, respiration: 6 },
+    });
+    expect(redPriority.priority).toBe("RED");
+    expect(redPriority.numericPriority).toBe(1);
+    expect(redPriority.tobogganRequired).toBe(true);
+    expect(redPriority.alsInterventionRequired).toBe(true);
+
+    // YELLOW Priority
+    const yellowPriority = assignTransportPriority({
+      complaint: "Femur fracture",
+      mechanism: "Ski twist",
+      vitals: { avpu: "A", gcs: 15, spo2: 98, respiration: 18, heartRate: 110 },
+    });
+    expect(yellowPriority.priority).toBe("YELLOW");
+    expect(yellowPriority.numericPriority).toBe(2);
+    expect(yellowPriority.tobogganRequired).toBe(true);
+
+    // GREEN Priority
+    const greenPriority = assignTransportPriority({
+      complaint: "Thumb sprain",
+      vitals: { avpu: "A", gcs: 15, spo2: 99, respiration: 12, heartRate: 70 },
+    });
+    expect(greenPriority.priority).toBe("GREEN");
+    expect(greenPriority.numericPriority).toBe(3);
+    expect(greenPriority.tobogganRequired).toBe(false);
+
+    // BLACK Priority
+    const blackPriority = assignTransportPriority({
+      complaint: "Unresponsive",
+      vitals: { avpu: "U", gcs: 3, respiration: 0, heartRate: 0 },
+    });
+    expect(blackPriority.priority).toBe("BLACK");
+    expect(blackPriority.numericPriority).toBe(0);
+  });
+
+  it("evaluates patient transport on engine instance via evaluatePatientTransport", () => {
+    const engine = new OetDescentEngine();
+    const evaluation = engine.evaluatePatientTransport(
+      {
+        complaint: "Suspected neck pain after collision",
+        mechanism: "high-speed collision",
+      },
+      { avpu: "A", gcs: 15, spo2: 97, respiration: 18 }
+    );
+
+    expect(evaluation.severity).toBeDefined();
+    expect(evaluation.priority).toBeDefined();
+    expect(evaluation.priority.tobogganRequired).toBe(true);
+    expect(evaluation.severity.spinalPrecautionRequired).toBe(true);
+  });
+
+  it("evaluates patient transport end-to-end assigning BLACK priority for an apneic/pulseless patient", () => {
+    const engine = new OetDescentEngine();
+    const evaluation = engine.evaluatePatientTransport(
+      { complaint: "Unresponsive skier found in tree well" },
+      { avpu: "U", gcs: 3, respiration: 0, heartRate: 0 }
+    );
+
+    expect(evaluation.priority.priority).toBe("BLACK");
+    expect(evaluation.priority.numericPriority).toBe(0);
+    expect(evaluation.priority.rationale).toContain(
+      "Apneic and pulseless patient on scene"
+    );
+  });
+
+  it("provides viewport, input manager, game loop, and rendering without errors", () => {
+    const engine = new OetDescentEngine({
+      conditions: { treeHazards: true, snowCondition: "fresh" },
+    });
+
+    expect(engine.getViewport()).toBeDefined();
+    const inputManager = engine.getInputManager();
+    expect(inputManager).toBeDefined();
+    expect(engine.createGameLoop()).toBeDefined();
+
+    // Test render on mock canvas context
+    const mockCtx = fromPartial<CanvasRenderingContext2D>({
+      save: vi.fn(),
+      restore: vi.fn(),
+      fillStyle: "",
+      strokeStyle: "",
+      lineWidth: 1,
+      setLineDash: vi.fn(),
+      fillRect: vi.fn(),
+      strokeRect: vi.fn(),
+      beginPath: vi.fn(),
+      moveTo: vi.fn(),
+      lineTo: vi.fn(),
+      stroke: vi.fn(),
+      fill: vi.fn(),
+      arc: vi.fn(),
+      roundRect: vi.fn(),
+      ellipse: vi.fn(),
+      translate: vi.fn(),
+      rotate: vi.fn(),
+    });
+
+    // Advance simulation to spawn particles and position elements
+    engine.setChainBrake(false);
+    for (let i = 0; i < 30; i++) {
+      engine.update(1 / 60);
+    }
+
+    // Mark obstacles hit to exercise hit render path
+    fromAny<InternalEngineState, unknown>(engine).state.obstacles[0].hit = true;
+
+    expect(() => engine.render(mockCtx, 1)).not.toThrow();
+
+    // Verify engine re-init and destroy
+    engine.init();
+    expect(engine.createSnapshot().status).toBe("ready");
+    expect(() => engine.destroy()).not.toThrow();
   });
 });
