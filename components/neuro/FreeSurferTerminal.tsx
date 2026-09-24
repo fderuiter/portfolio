@@ -2,7 +2,11 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { TerminalLog } from "@/lib/neuro/types";
-import { IconTerminal, IconCornerDownLeft, IconTrash } from "@tabler/icons-react";
+import {
+  IconTerminal,
+  IconCornerDownLeft,
+  IconTrash,
+} from "@tabler/icons-react";
 
 interface FreeSurferTerminalProps {
   logs: TerminalLog[];
@@ -43,7 +47,8 @@ export const FreeSurferTerminal: React.FC<FreeSurferTerminalProps> = ({
     if (e.key === "ArrowUp") {
       e.preventDefault();
       if (history.length > 0) {
-        const nextIdx = historyIdx === -1 ? history.length - 1 : Math.max(0, historyIdx - 1);
+        const nextIdx =
+          historyIdx === -1 ? history.length - 1 : Math.max(0, historyIdx - 1);
         setHistoryIdx(nextIdx);
         setInput(history[nextIdx] || "");
       }
@@ -111,24 +116,40 @@ export const FreeSurferTerminal: React.FC<FreeSurferTerminalProps> = ({
       {/* Log Output Screen */}
       <div
         ref={logContainerRef}
+        data-testid="terminal-log-container"
         className="flex-1 p-3 overflow-y-auto font-mono text-xs space-y-1.5 scrollbar-thin scrollbar-thumb-zinc-800 min-w-0"
       >
         {logs.map((log) => (
-          <div key={log.id} className="leading-relaxed flex items-start gap-2 min-w-0">
-            <span className="text-zinc-400 select-none shrink-0">[{log.timestamp}]</span>
+          <div
+            key={log.id}
+            className="leading-relaxed flex items-start gap-2 min-w-0"
+          >
+            <span className="text-zinc-400 select-none shrink-0">
+              [{log.timestamp}]
+            </span>
             {log.type === "command" ? (
               <div className="flex items-center gap-1 text-brand-cyan font-bold min-w-0">
-                <span className="text-zinc-400 select-none shrink-0">freesurfer@node-01:~$</span>
+                <span className="text-zinc-400 select-none shrink-0">
+                  freesurfer@node-01:~$
+                </span>
                 <span className="min-w-0 break-all">{log.text}</span>
               </div>
             ) : log.type === "success" ? (
-              <span className="text-emerald-400 min-w-0 break-all">{log.text}</span>
+              <span className="text-emerald-400 min-w-0 break-all">
+                {log.text}
+              </span>
             ) : log.type === "error" ? (
-              <span className="text-rose-400 min-w-0 break-all">{log.text}</span>
+              <span className="text-rose-400 min-w-0 break-all">
+                {log.text}
+              </span>
             ) : log.type === "info" ? (
-              <span className="text-amber-300 min-w-0 break-all">{log.text}</span>
+              <span className="text-amber-300 min-w-0 break-all">
+                {log.text}
+              </span>
             ) : (
-              <span className="text-zinc-300 whitespace-pre-wrap min-w-0 break-all">{log.text}</span>
+              <span className="text-zinc-300 whitespace-pre-wrap min-w-0 break-all">
+                {log.text}
+              </span>
             )}
           </div>
         ))}

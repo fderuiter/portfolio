@@ -30,7 +30,9 @@ export const NeuroMetricsPanel: React.FC<NeuroMetricsPanelProps> = ({
       <div className="bg-zinc-900/80 border border-zinc-800/80 p-3 rounded-2xl flex flex-col justify-between">
         <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
           <span>EULER (χ)</span>
-          <span className="text-[10px] text-zinc-400">TARGET: {scenario.targetEuler}</span>
+          <span className="text-[10px] text-zinc-400">
+            TARGET: {scenario.targetEuler}
+          </span>
         </div>
         <div className="flex items-center gap-2 mt-1">
           <span
@@ -47,7 +49,9 @@ export const NeuroMetricsPanel: React.FC<NeuroMetricsPanelProps> = ({
           )}
         </div>
         <div className="text-[10px] font-mono text-zinc-400 mt-1">
-          {isEulerOk ? "Topological 2-Sphere ($S^2$)" : "Genus $g \\ge 1$ Handle"}
+          {isEulerOk
+            ? "Topological 2-Sphere ($S^2$)"
+            : "Genus $g \\ge 1$ Handle"}
         </div>
       </div>
 
@@ -55,7 +59,9 @@ export const NeuroMetricsPanel: React.FC<NeuroMetricsPanelProps> = ({
       <div className="bg-zinc-900/80 border border-zinc-800/80 p-3 rounded-2xl flex flex-col justify-between">
         <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
           <span>DEFECT VOXELS</span>
-          <span className="text-[10px] text-zinc-400">INITIAL: {scenario.initialDefects}</span>
+          <span className="text-[10px] text-zinc-400">
+            INITIAL: {scenario.initialDefects}
+          </span>
         </div>
         <div className="flex items-center gap-2 mt-1">
           <span
@@ -69,11 +75,13 @@ export const NeuroMetricsPanel: React.FC<NeuroMetricsPanelProps> = ({
         </div>
         <div className="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden mt-1">
           <div
+            data-testid="defect-progress-bar"
             className="bg-brand-cyan h-full w-full origin-left transform-gpu"
             style={{
               transform: `scaleX(${clamp(
                 scenario.initialDefects > 0
-                  ? (scenario.initialDefects - metrics.defectCount) / scenario.initialDefects
+                  ? (scenario.initialDefects - metrics.defectCount) /
+                      scenario.initialDefects
                   : 1,
                 0,
                 1
@@ -89,12 +97,16 @@ export const NeuroMetricsPanel: React.FC<NeuroMetricsPanelProps> = ({
       <div className="bg-zinc-900/80 border border-zinc-800/80 p-3 rounded-2xl flex flex-col justify-between">
         <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
           <span>DICE SCORE</span>
-          <span className="text-[10px] text-zinc-400">GOAL: ≥{(scenario.targetDice * 100).toFixed(0)}%</span>
+          <span className="text-[10px] text-zinc-400">
+            GOAL: ≥{(scenario.targetDice * 100).toFixed(0)}%
+          </span>
         </div>
         <div className="flex items-center gap-1.5 mt-1">
           <span
             className={`text-xl font-mono font-bold ${
-              metrics.diceScore >= scenario.targetDice ? "text-emerald-400" : "text-brand-cyan"
+              metrics.diceScore >= scenario.targetDice
+                ? "text-emerald-400"
+                : "text-brand-cyan"
             }`}
           >
             {(metrics.diceScore * 100).toFixed(1)}%
@@ -154,7 +166,9 @@ export const NeuroMetricsPanel: React.FC<NeuroMetricsPanelProps> = ({
           <span>STATUS</span>
           <IconCircleDot
             className={`w-3.5 h-3.5 ${
-              metrics.isResolved ? "text-emerald-400 animate-ping" : "text-zinc-400"
+              metrics.isResolved
+                ? "text-emerald-400 animate-ping"
+                : "text-zinc-400"
             }`}
           />
         </div>
@@ -168,7 +182,9 @@ export const NeuroMetricsPanel: React.FC<NeuroMetricsPanelProps> = ({
           </span>
         </div>
         <div className="text-[10px] font-mono mt-1">
-          {metrics.isResolved ? "Ready for recon-all stage 3" : "Apply manual edits & re-run"}
+          {metrics.isResolved
+            ? "Ready for recon-all stage 3"
+            : "Apply manual edits & re-run"}
         </div>
       </div>
     </div>
