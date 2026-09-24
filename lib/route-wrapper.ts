@@ -13,6 +13,7 @@ export interface ApiWrapperOptions<TSchema extends ZodSchema = ZodSchema> {
   ) => { error: string; details?: Array<{ path: string; message: string }> };
   customJsonError?: string;
   defaultStatus?: number;
+  auth?: "clerk_admin" | "cron_secret" | "public";
 }
 
 export type ApiHandler<TData = unknown> = (
@@ -38,6 +39,7 @@ export type ApiRouteHandler = {
       params: Promise<Record<string, string | string[] | undefined>>;
     }
   ): Promise<NextResponse>;
+  auth?: "clerk_admin" | "cron_secret" | "public";
 };
 
 /**
@@ -60,7 +62,7 @@ export function createApiHandler<TSchema extends ZodSchema>(
   handler: ApiHandler<any>,
   options?: ApiWrapperOptions<TSchema>
 ) {
-  return async (
+  const wrapped: ApiRouteHandler = async (
     rawReq?: NextRequest,
     routeParams?: {
       params?:
@@ -175,6 +177,8 @@ export function createApiHandler<TSchema extends ZodSchema>(
       return applySecurityHeaders(response, req);
     }
   };
+  wrapped.auth = options?.auth || "public";
+  return wrapped;
 }
 
 export const withApiWrapper = createApiHandler;
