@@ -9,6 +9,7 @@ import { CaseStudyService } from "@/lib/services/case-study-service";
 import { applySecurityHeaders } from "@/lib/security-headers";
 import { sanitizeError } from "@/lib/error-sanitization";
 import { createApiHandler } from "@/lib/route-wrapper";
+import { logger } from "@/lib/logger";
 
 interface FormFileBlob {
   arrayBuffer(): Promise<ArrayBuffer>;
@@ -142,7 +143,7 @@ export const POST = createApiHandler(
         return applySecurityHeaders(res, req);
       }
 
-      console.error("Project image upload failed:", sanitizeError(err));
+      logger.error("Project image upload failed:", sanitizeError(err));
       const res = NextResponse.json(
         { error: "Failed to process and store project image" },
         { status: 500 }
@@ -214,7 +215,7 @@ export const DELETE = createApiHandler(
       );
       return applySecurityHeaders(res, req);
     } catch (err) {
-      console.error("Failed to clear project image:", sanitizeError(err));
+      logger.error("Failed to clear project image:", sanitizeError(err));
       const res = NextResponse.json(
         { error: "Failed to clear project image" },
         { status: 500 }

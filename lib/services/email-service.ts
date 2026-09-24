@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 import crypto from "crypto";
-import * as Sentry from "@sentry/nextjs";
+import { logger } from "@/lib/logger";
 import { env, getEnv } from "@/lib/env";
 import { prisma, SuppressionReason, OutboundEmailStatus } from "@/lib/db";
 
@@ -345,8 +345,7 @@ export class EmailService {
     } catch (err) {
       // Nothing was persisted, so there is no retry and no queue id to hand
       // back. Synthesizing one would read to every caller as a durable entry.
-      Sentry.captureException(err);
-      console.error("Failed to enqueue outbound email to database:", err);
+      logger.error("Failed to enqueue outbound email to database:", err);
       return null;
     }
   }
@@ -607,8 +606,7 @@ export class EmailService {
 
       return { handled: true, suppressed: false };
     } catch (err) {
-      Sentry.captureException(err);
-      console.error("Error processing Resend webhook event:", err);
+      logger.error("Error processing Resend webhook event:", err);
       return { handled: false };
     }
   }
@@ -666,10 +664,10 @@ export class EmailService {
       });
 
       if (error) {
-        Sentry.captureException(
+        logger.error(
+          "Resend API error:",
           new Error(`Resend dispatch error: ${error.message}`)
         );
-        console.error("Resend API error:", error);
 
         if (isRetryableError(error.message) && !options.skipQueue) {
           const queueId = await this.queueOutboundEmail(
@@ -704,10 +702,9 @@ export class EmailService {
         },
       };
     } catch (err) {
-      Sentry.captureException(err);
+      logger.error("EmailService unhandled exception:", err);
       const errorMessage =
         err instanceof Error ? err.message : "Unknown error sending email";
-      console.error("EmailService unhandled exception:", err);
 
       if (isRetryableError(errorMessage) && !options.skipQueue) {
         const queueId = await this.queueOutboundEmail(

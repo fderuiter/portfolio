@@ -6,7 +6,7 @@ import {
 import { SyncParamsSchema } from "@/lib/schemas";
 import { MaintenanceService } from "@/lib/services/maintenance-service";
 import { createApiHandler } from "@/lib/route-wrapper";
-import * as Sentry from "@sentry/nextjs";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -65,8 +65,7 @@ export const GET = createApiHandler(
         maintenance: summary,
       });
     } catch (err) {
-      Sentry.captureException(err);
-      console.error("Failed to sync buffered telemetry events:", err);
+      logger.error("Failed to sync buffered telemetry events:", err);
       return NextResponse.json(
         { error: "Failed to sync events to primary database" },
         { status: 500 }
