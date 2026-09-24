@@ -27,6 +27,8 @@ import { WidgetPalette } from "./WidgetPalette";
 
 export type LeftSidebarTab = "spine" | "forms" | "palette";
 
+const SPINE_TABS: LeftSidebarTab[] = ["spine", "forms", "palette"];
+
 interface StudySpineProps {
   study: StudyProtocol;
   activeVisitId?: string;
@@ -82,6 +84,37 @@ export const StudySpine: React.FC<StudySpineProps> = ({
       onEscape: () => setFormPendingDeletion(null),
     }
   );
+
+  const tabRefs = React.useRef<Record<LeftSidebarTab, HTMLButtonElement | null>>({
+    spine: null,
+    forms: null,
+    palette: null,
+  });
+
+  const handleTabKeyDown = (
+    event: React.KeyboardEvent<HTMLButtonElement>,
+    currentTab: LeftSidebarTab
+  ) => {
+    const currentIndex = SPINE_TABS.indexOf(currentTab);
+    let nextIndex: number | null = null;
+
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      nextIndex = (currentIndex + 1) % SPINE_TABS.length;
+    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      nextIndex = (currentIndex - 1 + SPINE_TABS.length) % SPINE_TABS.length;
+    } else if (event.key === "Home") {
+      nextIndex = 0;
+    } else if (event.key === "End") {
+      nextIndex = SPINE_TABS.length - 1;
+    }
+
+    if (nextIndex === null) return;
+
+    event.preventDefault();
+    const nextTab = SPINE_TABS[nextIndex];
+    onChangeTab(nextTab);
+    tabRefs.current[nextTab]?.focus();
+  };
 
   const formDeletionPreview = useMemo(() => {
     if (!formPendingDeletion) return null;
@@ -222,12 +255,17 @@ export const StudySpine: React.FC<StudySpineProps> = ({
         aria-label="Study Spine Navigation"
       >
         <button
+          ref={(node) => {
+            tabRefs.current.spine = node;
+          }}
           type="button"
           id="study-spine-tab-spine"
           role="tab"
           aria-selected={activeTab === "spine"}
           aria-controls="study-spine-panel-spine"
+          tabIndex={activeTab === "spine" ? 0 : -1}
           onClick={() => onChangeTab("spine")}
+          onKeyDown={(e) => handleTabKeyDown(e, "spine")}
           className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-mono transition-all ${
             activeTab === "spine"
               ? "bg-brand-cyan/20 text-brand-cyan font-bold border border-brand-cyan/40 shadow-sm"
@@ -240,12 +278,17 @@ export const StudySpine: React.FC<StudySpineProps> = ({
         </button>
 
         <button
+          ref={(node) => {
+            tabRefs.current.forms = node;
+          }}
           type="button"
           id="study-spine-tab-forms"
           role="tab"
           aria-selected={activeTab === "forms"}
           aria-controls="study-spine-panel-forms"
+          tabIndex={activeTab === "forms" ? 0 : -1}
           onClick={() => onChangeTab("forms")}
+          onKeyDown={(e) => handleTabKeyDown(e, "forms")}
           className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-mono transition-all ${
             activeTab === "forms"
               ? "bg-brand-cyan/20 text-brand-cyan font-bold border border-brand-cyan/40 shadow-sm"
@@ -258,12 +301,17 @@ export const StudySpine: React.FC<StudySpineProps> = ({
         </button>
 
         <button
+          ref={(node) => {
+            tabRefs.current.palette = node;
+          }}
           type="button"
           id="study-spine-tab-palette"
           role="tab"
           aria-selected={activeTab === "palette"}
           aria-controls="study-spine-panel-palette"
+          tabIndex={activeTab === "palette" ? 0 : -1}
           onClick={() => onChangeTab("palette")}
+          onKeyDown={(e) => handleTabKeyDown(e, "palette")}
           className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-mono transition-all ${
             activeTab === "palette"
               ? "bg-brand-cyan/20 text-brand-cyan font-bold border border-brand-cyan/40 shadow-sm"
@@ -279,13 +327,14 @@ export const StudySpine: React.FC<StudySpineProps> = ({
       {/* Main Tab Content */}
       <div className="flex-1 overflow-y-auto p-2.5 space-y-3">
         {/* TAB 1: STUDY SPINE (Timeline & Epochs) */}
-        {activeTab === "spine" && (
-          <div
-            id="study-spine-panel-spine"
-            role="tabpanel"
-            aria-labelledby="study-spine-tab-spine"
-            className="space-y-3"
-          >
+        <div
+          id="study-spine-panel-spine"
+          role="tabpanel"
+          aria-labelledby="study-spine-tab-spine"
+          tabIndex={0}
+          hidden={activeTab !== "spine"}
+          className={activeTab === "spine" ? "space-y-3" : "hidden"}
+        >
             <div className="flex items-center justify-between px-1">
               <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400 font-semibold flex items-center gap-1.5">
                 <IconTimeline className="w-3.5 h-3.5 text-brand-cyan" />
@@ -511,17 +560,17 @@ export const StudySpine: React.FC<StudySpineProps> = ({
                 );
               })}
             </div>
-          </div>
-        )}
+        </div>
 
         {/* TAB 2: PROTOCOL FORMS & GLOBAL LIBRARY */}
-        {activeTab === "forms" && (
-          <div
-            id="study-spine-panel-forms"
-            role="tabpanel"
-            aria-labelledby="study-spine-tab-forms"
-            className="space-y-4"
-          >
+        <div
+          id="study-spine-panel-forms"
+          role="tabpanel"
+          aria-labelledby="study-spine-tab-forms"
+          tabIndex={0}
+          hidden={activeTab !== "forms"}
+          className={activeTab === "forms" ? "space-y-4" : "hidden"}
+        >
             {/* Active Protocol Forms Section */}
             <div className="space-y-2">
               <div className="flex items-center justify-between px-1">
@@ -717,18 +766,18 @@ export const StudySpine: React.FC<StudySpineProps> = ({
               </div>
             </div>
           </div>
-        )}
 
         {/* TAB 3: WIDGET PALETTE */}
-        {activeTab === "palette" && (
-          <div
-            id="study-spine-panel-palette"
-            role="tabpanel"
-            aria-labelledby="study-spine-tab-palette"
-          >
-            <WidgetPalette onAddField={onAddField} />
-          </div>
-        )}
+        <div
+          id="study-spine-panel-palette"
+          role="tabpanel"
+          aria-labelledby="study-spine-tab-palette"
+          tabIndex={0}
+          hidden={activeTab !== "palette"}
+          className={activeTab === "palette" ? "" : "hidden"}
+        >
+          <WidgetPalette onAddField={onAddField} />
+        </div>
       </div>
 
       {/* Confirmation Dialog Previewing Affected Visits & Arms */}

@@ -95,10 +95,69 @@ describe("WAI-ARIA Tab Navigation Standards Across Components", () => {
         root.render(<StudySpine {...defaultProps} activeTab="spine" />);
       });
 
-      const panel = container.querySelector('[role="tabpanel"]');
+      const panel = container.querySelector('#study-spine-panel-spine');
       expect(panel).not.toBeNull();
-      expect(panel?.id).toBe("study-spine-panel-spine");
+      expect(panel?.getAttribute("role")).toBe("tabpanel");
       expect(panel?.getAttribute("aria-labelledby")).toBe("study-spine-tab-spine");
+    });
+
+    it("ensures every tab's aria-controls points to an existing panel in the DOM", async () => {
+      await act(async () => {
+        root = createRoot(container);
+        root.render(<StudySpine {...defaultProps} activeTab="spine" />);
+      });
+
+      const tabs = Array.from(container.querySelectorAll('[role="tab"]'));
+      tabs.forEach((tab) => {
+        const controlsId = tab.getAttribute("aria-controls");
+        expect(controlsId).toBeTruthy();
+        const targetPanel = container.querySelector(`#${controlsId}`);
+        expect(targetPanel).not.toBeNull();
+        expect(targetPanel?.getAttribute("role")).toBe("tabpanel");
+      });
+    });
+
+    it("implements roving tabIndex (active tab=0, inactive tabs=-1)", async () => {
+      await act(async () => {
+        root = createRoot(container);
+        root.render(<StudySpine {...defaultProps} activeTab="forms" />);
+      });
+
+      const tabs = Array.from(container.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+      const [spineTab, formsTab, paletteTab] = tabs;
+
+      expect(spineTab.tabIndex).toBe(-1);
+      expect(formsTab.tabIndex).toBe(0);
+      expect(paletteTab.tabIndex).toBe(-1);
+    });
+
+    it("supports keyboard navigation with arrow keys, Home, and End", async () => {
+      const onChangeTab = vi.fn();
+      await act(async () => {
+        root = createRoot(container);
+        root.render(<StudySpine {...defaultProps} activeTab="spine" onChangeTab={onChangeTab} />);
+      });
+
+      const spineTab = container.querySelector<HTMLButtonElement>("#study-spine-tab-spine")!;
+      spineTab.focus();
+
+      // ArrowRight -> forms
+      await act(async () => {
+        spineTab.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
+      });
+      expect(onChangeTab).toHaveBeenCalledWith("forms");
+
+      // End -> palette
+      await act(async () => {
+        spineTab.dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true }));
+      });
+      expect(onChangeTab).toHaveBeenCalledWith("palette");
+
+      // Home -> spine
+      await act(async () => {
+        spineTab.dispatchEvent(new KeyboardEvent("keydown", { key: "Home", bubbles: true }));
+      });
+      expect(onChangeTab).toHaveBeenCalledWith("spine");
     });
   });
 
@@ -142,10 +201,40 @@ describe("WAI-ARIA Tab Navigation Standards Across Components", () => {
         root.render(<ExportImportModal {...defaultProps} />);
       });
 
-      const panel = container.querySelector('[role="tabpanel"]');
+      const panel = container.querySelector('#export-panel-universal');
       expect(panel).not.toBeNull();
-      expect(panel?.id).toBe("export-panel-universal");
+      expect(panel?.getAttribute("role")).toBe("tabpanel");
       expect(panel?.getAttribute("aria-labelledby")).toBe("export-tab-universal");
+    });
+
+    it("ensures every tab's aria-controls points to an existing panel in the DOM", async () => {
+      await act(async () => {
+        root = createRoot(container);
+        root.render(<ExportImportModal {...defaultProps} />);
+      });
+
+      const tabs = Array.from(container.querySelectorAll('[role="tab"]'));
+      expect(tabs.length).toBe(8);
+
+      tabs.forEach((tab) => {
+        const controlsId = tab.getAttribute("aria-controls");
+        expect(controlsId).toBeTruthy();
+        const targetPanel = container.querySelector(`#${controlsId}`);
+        expect(targetPanel).not.toBeNull();
+        expect(targetPanel?.getAttribute("role")).toBe("tabpanel");
+      });
+    });
+
+    it("implements roving tabIndex for ExportImportModal tabs", async () => {
+      await act(async () => {
+        root = createRoot(container);
+        root.render(<ExportImportModal {...defaultProps} />);
+      });
+
+      const tabs = Array.from(container.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+      expect(tabs[0].tabIndex).toBe(0); // universal
+      expect(tabs[1].tabIndex).toBe(-1); // usdm
+      expect(tabs[2].tabIndex).toBe(-1); // odm
     });
   });
 
