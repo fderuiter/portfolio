@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { getSoundEngine } from "@/lib/audio/sound-engine";
+import { getMatchMediaMatches } from "@/hooks/useMediaQuery";
 
 export type AudioProfile = "8-bit" | "90s-retro" | "ambient";
 
@@ -223,21 +224,13 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   };
 
   const playHover = (pan?: number) => {
-    if (
-      typeof window !== "undefined" &&
-      window.matchMedia?.("(hover: none)").matches
-    )
-      return;
+    if (getMatchMediaMatches("(hover: none)")) return;
     const freq = profile === "ambient" ? 440.0 : 880.0;
     playNote(freq, 0.02, pan);
   };
 
   const playSkillHover = () => {
-    if (
-      typeof window !== "undefined" &&
-      window.matchMedia?.("(hover: none)").matches
-    )
-      return;
+    if (getMatchMediaMatches("(hover: none)")) return;
     const notes = [261.63, 293.66, 329.63, 392.0, 440.0];
     const randomFreq = notes[Math.floor(Math.random() * notes.length)];
     playNote(randomFreq, 0.1);
