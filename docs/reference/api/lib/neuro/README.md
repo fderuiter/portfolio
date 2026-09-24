@@ -64,7 +64,7 @@ Re-exports [createCorticalSurfaceMeshAsync](engine-loader/functions/createCortic
 
 ### createCorticalSurfaceMeshBuffers
 
-Re-exports [createCorticalSurfaceMeshBuffers](mesh-generator/functions/createCorticalSurfaceMeshBuffers.md)
+Re-exports [createCorticalSurfaceMeshBuffers](internal/mesh-geometry/functions/createCorticalSurfaceMeshBuffers.md)
 
 ***
 
@@ -142,13 +142,13 @@ Re-exports [formatBytes](progress-bus/functions/formatBytes.md)
 
 ### generateHemisphereBuffers
 
-Re-exports [generateHemisphereBuffers](mesh-generator/functions/generateHemisphereBuffers.md)
+Re-exports [generateHemisphereBuffers](internal/mesh-geometry/functions/generateHemisphereBuffers.md)
 
 ***
 
 ### generateSubcorticalBuffers
 
-Re-exports [generateSubcorticalBuffers](mesh-generator/functions/generateSubcorticalBuffers.md)
+Re-exports [generateSubcorticalBuffers](internal/mesh-geometry/functions/generateSubcorticalBuffers.md)
 
 ***
 
@@ -166,7 +166,7 @@ Re-exports [GeometryBundle](types/interfaces/GeometryBundle.md)
 
 ### getAnatomicalParcelAtCoordinate
 
-Re-exports [getAnatomicalParcelAtCoordinate](mesh-generator/functions/getAnatomicalParcelAtCoordinate.md)
+Re-exports [getAnatomicalParcelAtCoordinate](internal/mesh-geometry/functions/getAnatomicalParcelAtCoordinate.md)
 
 ***
 

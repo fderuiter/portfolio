@@ -1,6 +1,7 @@
 import withSerwistInit from "@serwist/next";
 import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
+import { ChunkCycleGuardPlugin } from "./lib/dx/chunk-cycle-guard";
 
 const withSerwist = withSerwistInit({
   swSrc: "app/sw.ts",
@@ -30,6 +31,10 @@ const nextConfig: NextConfig = {
       config.externals = config.externals || [];
       config.externals.push("bufferutil", "utf-8-validate");
     }
+    // Fails the build on a cycle between runtime chunks instead of letting
+    // webpack print a warning (AGENTS.md section 21, #853).
+    config.plugins = config.plugins || [];
+    config.plugins.push(new ChunkCycleGuardPlugin());
     return config;
   },
   experimental: {
