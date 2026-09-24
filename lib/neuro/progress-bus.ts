@@ -62,5 +62,5 @@ export function formatBytes(bytes: number, decimals: number = 1): string {
   const dm = decimals < 0 ? 0 : decimals;
   const sizes = ["B", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${formatNumber(bytes / Math.pow(k, i), { decimals: dm, useGrouping: false })} ${sizes[i]}`;
+  return `${formatNumber(bytes / Math.pow(k, i), { maximumFractionDigits: dm, useGrouping: false })} ${sizes[i]}`;
 }

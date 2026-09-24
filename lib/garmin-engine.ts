@@ -4,7 +4,25 @@
  * thermal overheating, crash reports, and 16-color pixel canvas rendering.
  */
 import { clamp } from "./game-utils";
-import { formatNumber, roundToDecimals } from "./utils";
+
+/** Mathematical precision helper to round numbers cleanly to specified decimal places. */
+function roundToDecimals(value: number, decimals: number = 2): number {
+  if (typeof value !== "number" || isNaN(value)) return 0;
+  const factor = Math.pow(10, decimals);
+  return Math.round((value + Number.EPSILON) * factor) / factor;
+}
+
+/** Standalone number formatter for canvas HUD rendering without external dependencies. */
+function formatNumber(value: number, decimals?: number): string {
+  if (typeof value !== "number" || isNaN(value)) return "0";
+  if (decimals !== undefined) {
+    return new Intl.NumberFormat("en-US", {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    }).format(value);
+  }
+  return new Intl.NumberFormat("en-US").format(value);
+}
 
 export type DeviceTarget = "fenix" | "forerunner" | "edge";
 export type VariableType = "int" | "float" | "string" | "array";

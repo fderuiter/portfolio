@@ -6,7 +6,10 @@ import { render, screen, fireEvent, act } from "@testing-library/react";
 import SchemaFlowWorkspace from "@/components/SchemaFlowWorkspace";
 
 describe("SchemaFlowWorkspace Component Architectural & Logical Validation", () => {
-  const componentPath = path.resolve(__dirname, "../components/SchemaFlowWorkspace.tsx");
+  const componentPath = path.resolve(
+    __dirname,
+    "../components/SchemaFlowWorkspace.tsx"
+  );
   const content = fs.readFileSync(componentPath, "utf-8");
 
   beforeEach(() => {
@@ -54,12 +57,18 @@ describe("SchemaFlowWorkspace Component Architectural & Logical Validation", () 
   });
 
   it("configures SchemaFlowWorkspaceWrapper with high-fidelity loading skeleton fallback to eliminate CLS", () => {
-    const wrapperPath = path.resolve(__dirname, "../components/SchemaFlowWorkspaceWrapper.tsx");
+    const wrapperPath = path.resolve(
+      __dirname,
+      "../components/SchemaFlowWorkspaceWrapper.tsx"
+    );
     const wrapperContent = fs.readFileSync(wrapperPath, "utf-8");
     expect(wrapperContent).toContain("SchemaFlowWorkspaceSkeleton");
     expect(wrapperContent).toContain("loading:");
 
-    const skeletonPath = path.resolve(__dirname, "../components/SchemaFlowWorkspaceSkeleton.tsx");
+    const skeletonPath = path.resolve(
+      __dirname,
+      "../components/SchemaFlowWorkspaceSkeleton.tsx"
+    );
     const skeletonContent = fs.readFileSync(skeletonPath, "utf-8");
     expect(skeletonContent).toContain('data-testid="schemaflow-skeleton"');
     expect(skeletonContent).toContain("min-h-[520px]");
@@ -75,7 +84,8 @@ describe("SchemaFlowWorkspace Component Architectural & Logical Validation", () 
     expect(content).toContain("gaugeContainerRef");
     expect(content).toContain("ramTextRef");
     expect(content).toContain("ramValRef");
-    expect(content).toContain('gaugeContainerRef.current.style.setProperty("--gauge-progress"');
+    expect(content).toContain("gaugeContainerRef.current.style.setProperty");
+    expect(content).toContain('"--gauge-progress"');
     expect(content).toContain("ramTextRef.current.textContent");
   });
 
@@ -95,7 +105,9 @@ describe("SchemaFlowWorkspace Component Architectural & Logical Validation", () 
 
     // Find RAM Telemetry gauge container
     const gaugeHeading = screen.getByText("Solver RAM Telemetry");
-    const gaugeContainer = gaugeHeading.closest(".bg-zinc-900\\/20")?.querySelector("div[style*='--gauge-progress']");
+    const gaugeContainer = gaugeHeading
+      .closest(".bg-zinc-900\\/20")
+      ?.querySelector("div[style*='--gauge-progress']");
     expect(gaugeContainer).not.toBeNull();
 
     // Advance fake timers by 80ms ticks
@@ -112,6 +124,8 @@ describe("SchemaFlowWorkspace Component Architectural & Logical Validation", () 
       fireEvent.click(stopBtn);
     });
 
-    expect(screen.getByRole("button", { name: /Start Solver Loop/i })).toBeDefined();
+    expect(
+      screen.getByRole("button", { name: /Start Solver Loop/i })
+    ).toBeDefined();
   });
 });
