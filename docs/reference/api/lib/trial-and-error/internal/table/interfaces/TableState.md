@@ -30,6 +30,14 @@ Index of the next undealt card in the scenario deck.
 
 ***
 
+### drafts
+
+> **drafts**: `Record`\<`string`, [`StagedTable`](../../../types/type-aliases/StagedTable.md)\>
+
+Cards in hand whose draft was compiled against a later snapshot.
+
+***
+
 ### hand
 
 > **hand**: `string`[]
@@ -60,6 +68,14 @@ Review progress per card, present once the card has been paid to inspect.
 
 ***
 
+### invalidations
+
+> **invalidations**: [`SnapshotInvalidation`](../../snapshots/interfaces/SnapshotInvalidation.md)[]
+
+One record per population transition so far this study.
+
+***
+
 ### lastEvent
 
 > **lastEvent**: [`TableEvent`](TableEvent.md) \| `null`
@@ -69,6 +85,30 @@ Review progress per card, present once the card has been paid to inspect.
 ### lastPlay
 
 > **lastPlay**: [`PlayedHand`](PlayedHand.md) \| `null`
+
+***
+
+### opening
+
+> **opening**: `object`
+
+How much of `snapshots` and `invalidations` predates this Blind.
+
+#### invalidations
+
+> **invalidations**: `number`
+
+#### snapshots
+
+> **snapshots**: `number`
+
+***
+
+### provenance
+
+> **provenance**: `Record`\<`string`, [`SnapshotRef`](../../../types/type-aliases/SnapshotRef.md)\>
+
+The snapshot each card in hand was compiled against.
 
 ***
 
@@ -89,6 +129,30 @@ Review progress per card, present once the card has been paid to inspect.
 > **selected**: `string`[]
 
 Selected card ids, in selection order (at most `maxSelection`).
+
+***
+
+### snapshots
+
+> **snapshots**: `object`[]
+
+Every population snapshot version so far, oldest first. The last is current.
+
+#### capturedAt
+
+> **capturedAt**: `string`
+
+#### id
+
+> **id**: `string` = `identifier`
+
+#### subjects
+
+> **subjects**: `object`[]
+
+#### version
+
+> **version**: `number`
 
 ***
 

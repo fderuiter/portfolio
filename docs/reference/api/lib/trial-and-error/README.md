@@ -56,6 +56,12 @@ Re-exports [AdverseEventSchema](types/variables/AdverseEventSchema.md)
 
 ***
 
+### applyTransition
+
+Re-exports [applyTransition](internal/snapshots/functions/applyTransition.md)
+
+***
+
 ### Arm
 
 Re-exports [Arm](types/type-aliases/Arm.md)
@@ -134,6 +140,12 @@ Re-exports [CardFaceSchema](types/variables/CardFaceSchema.md)
 
 ***
 
+### cardShortName
+
+Re-exports [cardShortName](internal/table/functions/cardShortName.md)
+
+***
+
 ### CardStamp
 
 Re-exports [CardStamp](types/type-aliases/CardStamp.md)
@@ -191,6 +203,12 @@ Re-exports [ColumnArm](types/type-aliases/ColumnArm.md)
 ### ColumnArmSchema
 
 Re-exports [ColumnArmSchema](types/variables/ColumnArmSchema.md)
+
+***
+
+### compileDraft
+
+Re-exports [compileDraft](internal/compile/functions/compileDraft.md)
 
 ***
 
@@ -446,6 +464,12 @@ Re-exports [InspectionView](internal/inspection/interfaces/InspectionView.md)
 
 ***
 
+### membership
+
+Re-exports [membership](internal/snapshots/functions/membership.md)
+
+***
+
 ### PlayedHand
 
 Re-exports [PlayedHand](internal/table/interfaces/PlayedHand.md)
@@ -479,6 +503,18 @@ Re-exports [PopulationSnapshot](types/type-aliases/PopulationSnapshot.md)
 ### PopulationSnapshotSchema
 
 Re-exports [PopulationSnapshotSchema](types/variables/PopulationSnapshotSchema.md)
+
+***
+
+### PopulationTransition
+
+Re-exports [PopulationTransition](types/type-aliases/PopulationTransition.md)
+
+***
+
+### PopulationTransitionSchema
+
+Re-exports [PopulationTransitionSchema](types/variables/PopulationTransitionSchema.md)
 
 ***
 
@@ -632,6 +668,12 @@ Re-exports [RunView](internal/run/interfaces/RunView.md)
 
 ***
 
+### sameMembership
+
+Re-exports [sameMembership](internal/snapshots/functions/sameMembership.md)
+
+***
+
 ### SapRule
 
 Re-exports [SapRule](types/type-aliases/SapRule.md)
@@ -716,6 +758,30 @@ Re-exports [scoreTimeline](internal/timeline/functions/scoreTimeline.md)
 
 ***
 
+### SnapshotInvalidation
+
+Re-exports [SnapshotInvalidation](internal/snapshots/interfaces/SnapshotInvalidation.md)
+
+***
+
+### snapshotRef
+
+Re-exports [snapshotRef](internal/snapshots/functions/snapshotRef.md)
+
+***
+
+### SnapshotRef
+
+Re-exports [SnapshotRef](types/type-aliases/SnapshotRef.md)
+
+***
+
+### SnapshotRefSchema
+
+Re-exports [SnapshotRefSchema](types/variables/SnapshotRefSchema.md)
+
+***
+
 ### SPONSOR\_SAFETY\_SCENARIO
 
 Re-exports [SPONSOR_SAFETY_SCENARIO](scenarios/variables/SPONSOR_SAFETY_SCENARIO.md)
@@ -731,6 +797,36 @@ Re-exports [StagedTable](types/type-aliases/StagedTable.md)
 ### StagedTableSchema
 
 Re-exports [StagedTableSchema](types/variables/StagedTableSchema.md)
+
+***
+
+### STALE\_ALERT
+
+Re-exports [STALE_ALERT](internal/table/variables/STALE_ALERT.md)
+
+***
+
+### StudyEvent
+
+Re-exports [StudyEvent](types/type-aliases/StudyEvent.md)
+
+***
+
+### StudyEventSchema
+
+Re-exports [StudyEventSchema](types/variables/StudyEventSchema.md)
+
+***
+
+### studyHistory
+
+Re-exports [studyHistory](internal/table/functions/studyHistory.md)
+
+***
+
+### StudyHistory
+
+Re-exports [StudyHistory](internal/table/interfaces/StudyHistory.md)
 
 ***
 
@@ -833,6 +929,24 @@ Re-exports [TlfCard](types/type-aliases/TlfCard.md)
 ### TlfCardSchema
 
 Re-exports [TlfCardSchema](types/variables/TlfCardSchema.md)
+
+***
+
+### TransitionOutcome
+
+Re-exports [TransitionOutcome](internal/snapshots/type-aliases/TransitionOutcome.md)
+
+***
+
+### TransitionReason
+
+Re-exports [TransitionReason](types/type-aliases/TransitionReason.md)
+
+***
+
+### TransitionReasonSchema
+
+Re-exports [TransitionReasonSchema](types/variables/TransitionReasonSchema.md)
 
 ***
 

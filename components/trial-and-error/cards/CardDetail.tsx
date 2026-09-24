@@ -47,6 +47,13 @@ export function CardDetail({ view, headingId }: CardDetailProps) {
         <dd className="text-[color:var(--te-plus-mult)]">{card.mult}</dd>
         <dt className="text-zinc-400">Review</dt>
         <dd className="break-words">{status}</dd>
+        <dt className="text-zinc-400">Snapshot</dt>
+        <dd className="break-words" data-testid="snapshot-chip">
+          {view.provenance.id} · v{view.provenance.version}
+          {view.stale && (
+            <span className="text-rose-300"> · stale: recompile required</span>
+          )}
+        </dd>
         {view.stamps.length > 0 && (
           <>
             <dt className="text-zinc-400">Stamps</dt>

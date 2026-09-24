@@ -671,7 +671,7 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
     objective:
       "Clear Act I, a Phase I safety study, in three Blinds: Internal QC (300), the Sponsor Safety Review (750) and the Dose Escalation Committee (1,500). Inspect suspect cards on the QC Desk before you trust them: an uncorrected fatal defect zeroes the whole hand, and losing a Blind ends the run.",
     quickSummary:
-      "Move across the hand with ← →, select up to five cards with Space, and press Enter to play the best hand they make (2 CPU). D discards the selection (1 CPU). I opens the focused card's QC Desk (1 CPU): inspect cells with Enter or Space, correct with C, and close with Esc.",
+      "Move across the hand with ← →, select up to five cards with Space, and press Enter to play the best hand they make (2 CPU). D discards the selection (1 CPU). I opens the focused card's QC Desk (1 CPU): inspect cells with Enter or Space, correct with C, and close with Esc. R recompiles a stale card (2 CPU).",
     controls: [
       {
         action: "Move across the hand",
@@ -727,6 +727,12 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
           "Opens the focused card's QC Desk for 1 CPU (reopening is free). Enter or Space inspects a cell, C corrects a revealed finding, Esc closes.",
         key: "I",
       },
+      {
+        action: "Recompile",
+        description:
+          "Reruns the focused stale card against the current population snapshot for 2 CPU. Cells you corrected stay correct; defects nobody reported come back on the new data, so inspect the rerun again.",
+        key: "R",
+      },
     ],
     rules: [
       {
@@ -760,6 +766,12 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
         badge: "MedDRA",
       },
       {
+        title: "Stale outputs",
+        detail:
+          "Every card records the population snapshot it was compiled against (Read a card shows it). When a subject joins or leaves a population, the snapshot moves to a new version and every card in hand built on that population goes STALE: it scores 0 Chips, a hand holding it cannot be played, and it cannot join a Population Flush. Recompile it (2 CPU) or discard it; new draws compile against the new snapshot, and cards of other populations stay valid.",
+        badge: "Snapshot",
+      },
+      {
         title: "The committee reads Safety only",
         detail:
           "The Dose Escalation Committee's boss debuff disables every population except Safety: an ITT output scores 0 Chips there, however clean. Five System Organ Class tables together make a MedDRA Five of a Kind.",
@@ -772,6 +784,7 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
       "FAS and ITT are different populations here; the Total column is where a denominator slip hides.",
       "In the safety Blinds, FAS and Per-Protocol drop S-008, the subject who stopped for atrial fibrillation. An N of 5 in the Active column is the tell.",
       "A Two Pair of the AE overview and the SAE table, each with its listing, is the Big Blind's workhorse.",
+      "Data keeps moving during the sponsor review. If your Safety drafts go stale, sending them back to programming (discard) is cheaper than recompiling each one, and the reruns at the bottom of the deck arrive current.",
     ],
     lore: {
       title: "Why statisticians double-program tables",

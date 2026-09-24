@@ -184,6 +184,7 @@ export function HandCard({
             : { duration: 0 }
         }
         style={{ rotateX: tiltX, rotateY: tiltY, transformPerspective: 700 }}
+        data-stale={view.stale || undefined}
         className={`block h-[13.5rem] w-full min-w-0 border border-l-4 text-left text-xs touch-manipulation select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${SUIT_BORDER[view.card.population]} ${
           view.selected
             ? "border-amber-400 bg-[#1f1a10]"

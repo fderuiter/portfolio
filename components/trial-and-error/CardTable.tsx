@@ -14,7 +14,9 @@ import {
   ACT_I,
   CPU_COSTS,
   HAND_NAMES,
+  STALE_ALERT,
   advanceRun,
+  cardShortName,
   createRunState,
   deriveRunView,
   type Act,
@@ -75,6 +77,11 @@ function cardLabel(view: TableCardView): string {
     `${card.chips} Chips`,
   ];
   if (view.debuffed) parts.push("disabled by the boss, scores 0 Chips");
+  if (view.stale) {
+    parts.push(
+      `stale, compiled against ${view.provenance.id}, scores 0 Chips until recompiled`
+    );
+  }
   if (view.unverified) parts.push("unverified");
   if (view.inspected) {
     parts.push(
@@ -112,6 +119,13 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
   const scenario = runView.blind;
   const state = run.table;
   const view = runView.table;
+  const numbersOf = (ids: readonly string[]) =>
+    ids
+      .map((id) => {
+        const card = scenario.deck.find((c) => c.id === id);
+        return card ? cardShortName(card) : id;
+      })
+      .join(", ");
   const { announce } = useAnnouncer();
   const {
     reducedMotion,
@@ -198,6 +212,7 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
         DISCARDED: ["discardWhoosh", "cardDeal"],
         PLAYED: ["cardDeal"],
         INSPECT_OPENED: ["cardFlip"],
+        RECOMPILED: ["cardFlip"],
       };
       cues[kind]?.forEach((cue) => sound.play(cue));
       if (kind === "PLAYED" || kind === "DISCARDED") {
@@ -238,6 +253,9 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
     send({ type: "DISCARD" }, { kind: "hand", index: activeIndex });
   const inspect = (cardId: string | undefined) => {
     if (cardId) send({ type: "INSPECT_CARD", cardId });
+  };
+  const recompile = (cardId: string | undefined) => {
+    if (cardId) send({ type: "RECOMPILE", cardId }, { kind: "card", cardId });
   };
 
   const handOrder =
@@ -318,6 +336,9 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
     } else if (key === "i") {
       event.preventDefault();
       inspect(cardId);
+    } else if (key === "r") {
+      event.preventDefault();
+      recompile(cardId);
     } else if (event.key === "?") {
       // On a focused card, ? reads that card; elsewhere it still opens the
       // Field Manual, whose listener sits on window in the bubble phase.
@@ -482,6 +503,13 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
             <dd className="text-right">{view.discardsAffordable}</dd>
             <dt className="text-zinc-400">Deck</dt>
             <dd className="text-right">{view.deckRemaining}</dd>
+            <dt className="text-zinc-400">Snapshot</dt>
+            <dd
+              className="min-w-0 text-right break-words"
+              data-testid="current-snapshot"
+            >
+              {view.snapshot.id}
+            </dd>
           </dl>
           <div className="mt-2 flex flex-wrap gap-0.5" aria-hidden="true">
             {cpuPips.map((on, i) => (
@@ -587,6 +615,26 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
                   ] = {preview.score}
                 </p>
               )}
+              {view.flushBrokenBy.length > 0 && (
+                <p
+                  className="mt-1 text-xs text-rose-300 break-words"
+                  data-testid="flush-broken"
+                >
+                  Population Flush broken: {numbersOf(view.flushBrokenBy)}{" "}
+                  {view.flushBrokenBy.length === 1 ? "is" : "are"} stale.
+                </p>
+              )}
+              {view.playBlockedReason && (
+                <p
+                  className="mt-1 text-xs text-rose-300 break-words"
+                  data-testid="stale-alert"
+                >
+                  {view.playBlockedReason}
+                  {/* The flush line above already names the stale cards. */}
+                  {view.flushBrokenBy.length === 0 &&
+                    ` Stale: ${numbersOf(view.staleSelected)}.`}
+                </p>
+              )}
               {view.previewUnverified && (
                 <p
                   className="mt-1 text-xs text-amber-300"
@@ -648,7 +696,7 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
                 values={handOrder}
                 onReorder={setDragOrder}
                 role="group"
-                aria-label={`Hand of ${view.hand.length}. Arrow keys move, Space selects, Enter plays, D discards, I inspects, question mark reads the card, Alt with arrows reorders.`}
+                aria-label={`Hand of ${view.hand.length}. Arrow keys move, Space selects, Enter plays, D discards, I inspects, R recompiles a stale card, question mark reads the card, Alt with arrows reorders.`}
                 className="-mx-3 mt-1 flex overflow-x-auto px-3 pb-3 pt-7 [scrollbar-width:thin]"
                 data-testid="hand"
               >
@@ -661,7 +709,9 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
                 )}
               </Reorder.Group>
 
-              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <div
+                className={`mt-3 grid grid-cols-1 gap-2 ${focusedCard?.stale ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-3"}`}
+              >
                 <button
                   type="button"
                   onClick={play}
@@ -691,6 +741,17 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
                   {focusedCard?.inspected ? "open" : `${CPU_COSTS.INSPECT} CPU`}{" "}
                   [I]
                 </button>
+                {focusedCard?.stale && (
+                  <button
+                    type="button"
+                    onClick={() => recompile(focusedCard.card.id)}
+                    disabled={!view.canRecompile}
+                    className={`${BUTTON_BASE} border-rose-400 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20`}
+                  >
+                    Recompile {focusedCard.card.number} · {CPU_COSTS.RECOMPILE}{" "}
+                    CPU [R]
+                  </button>
+                )}
               </div>
             </div>
           ) : (
@@ -786,6 +847,17 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
               className="max-h-[90dvh] w-full max-w-5xl overflow-y-auto border border-zinc-700 bg-[color:var(--te-surface-0)]"
               data-testid="inspect-drawer"
             >
+              <p
+                className="border-b border-zinc-800 px-4 py-2 font-mono text-xs text-zinc-300 break-words"
+                data-testid="snapshot-chip"
+              >
+                Compiled against {view.inspection.provenance.id} · v
+                {view.inspection.provenance.version} · captured{" "}
+                {view.inspection.provenance.capturedAt.slice(0, 10)}
+                {view.inspection.stale && (
+                  <span className="text-rose-300"> · stale: {STALE_ALERT}</span>
+                )}
+              </p>
               <QcDesk
                 card={view.inspection.card}
                 table={view.inspection.table}

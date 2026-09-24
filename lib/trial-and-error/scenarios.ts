@@ -1,9 +1,10 @@
 /**
  * Scenario presets for Trial & Error: Biostat Ops.
  *
- * Act I is a Phase I safety study played as three Blinds against one locked
- * population snapshot: Internal QC, the sponsor's safety review, then the
- * Dose Escalation Committee (ADR 0046). All subjects, events, values and
+ * Act I is a Phase I safety study played as three Blinds: Internal QC, the
+ * sponsor's safety review, then the Dose Escalation Committee (ADR 0046).
+ * The study opens on one population snapshot; a scripted data change during
+ * the sponsor review moves it to a second version. All subjects, events, values and
  * rules are fictional teaching material. They supply game context only and
  * are not clinical or regulatory advice.
  */
@@ -63,7 +64,7 @@ const subject = (
 });
 
 /**
- * The study's one locked snapshot. Safety = ITT = 12 (6/6); FAS 11 (6/5);
+ * The study's opening snapshot. Safety = ITT = 12 (6/6); FAS 11 (6/5);
  * Per-Protocol 9 (5/4). Eight subjects report 13 treatment-emergent events,
  * so counting events instead of subjects is always a visible mistake.
  */
@@ -875,12 +876,26 @@ const SPONSOR = safetyDrafts(SPONSOR_RULEBOOK.id, [
     label: "Draft A (v0.1)",
     defects: { "1:1": "2 (33.3)" },
   },
+  // Reruns at the bottom of the deck. After S-004 leaves the Safety set,
+  // they are what sending stale drafts back to programming brings in.
+  { output: "sae", version: "C", label: "Draft C (v0.3)" },
+  {
+    output: "overview",
+    version: "C",
+    label: "Draft C (v0.3)",
+    defects: { "2:2": "3 (25.00)" },
+  },
+  { output: "skin", version: "B", label: "Draft B (v0.2)" },
 ]);
 
 /**
  * Big Blind. The sponsor's safety physician reviews the AE overview, the SAE
  * table and SOC tables under SAP-AE-001. The traps are the FAS denominator,
  * which silently drops S-008, and counting events instead of subjects.
+ *
+ * After the first hand, S-004 is found never to have been dosed and leaves
+ * the Safety population (SNAP-P1-v2). The Safety drafts still in hand go
+ * stale; ITT outputs stay valid; the Dose Escalation Committee inherits v2.
  */
 export const SPONSOR_SAFETY_SCENARIO: Scenario = {
   id: "sponsor-safety-big-blind",
@@ -910,11 +925,29 @@ export const SPONSOR_SAFETY_SCENARIO: Scenario = {
     pick(SPONSOR.cards, "sae-B"),
     DM_LISTING,
     pick(SPONSOR.cards, "gi-A"),
+    pick(SPONSOR.cards, "sae-C"),
+    pick(SPONSOR.cards, "overview-C"),
+    pick(SPONSOR.cards, "skin-B"),
   ],
   rulebook: SPONSOR_RULEBOOK,
   populationSnapshot: POPULATION_SNAPSHOT,
   shells: SPONSOR.shells,
   drawPile: SPONSOR.drawPile,
+  events: [
+    {
+      afterHands: 1,
+      transition: {
+        id: "EV-P1-S004-UNDOSED",
+        subjectId: "S-004",
+        reason: "DROPOUT",
+        change: "LEAVE",
+        populations: ["SAFETY"],
+        effectiveAt: "2026-02-02T09:00:00Z",
+        description:
+          "Site query resolved: S-004 withdrew consent before the first dose and was never dosed. S-004 stays randomized (ITT) but leaves the Safety population.",
+      },
+    },
+  ],
 };
 
 // ---------------------------------------------------------------------------

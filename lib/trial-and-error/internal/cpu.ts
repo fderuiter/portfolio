@@ -3,6 +3,8 @@ export const CPU_COSTS = Object.freeze({
   PLAY_HAND: 2,
   DISCARD: 1,
   INSPECT: 1,
+  /** Rerun a stale output against the current population snapshot. */
+  RECOMPILE: 2,
 });
 
 /** An action that consumes CPU. */

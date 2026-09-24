@@ -252,6 +252,55 @@ export const PopulationSnapshotSchema = z.object({
 /** An immutable population snapshot. */
 export type PopulationSnapshot = z.infer<typeof PopulationSnapshotSchema>;
 
+/**
+ * Which snapshot an output was compiled against: its id, version and capture
+ * time. Every dealt card carries one, so its denominators have provenance.
+ */
+export const SnapshotRefSchema = z.object({
+  id: identifier,
+  version: z.number().int().positive(),
+  capturedAt: z.iso.datetime(),
+});
+/** A reference to one population snapshot version. */
+export type SnapshotRef = z.infer<typeof SnapshotRefSchema>;
+
+/** Why a subject's population membership changed. */
+export const TransitionReasonSchema = z.enum([
+  "DROPOUT",
+  "PROTOCOL_AMENDMENT",
+  "SCREEN_FAILURE",
+  "PROTOCOL_DEVIATION",
+]);
+/** Why a subject's population membership changed. */
+export type TransitionReason = z.infer<typeof TransitionReasonSchema>;
+
+/**
+ * One subject joining or leaving analysis populations. Applying it to a
+ * snapshot produces the next version; `effectiveAt` becomes that version's
+ * `capturedAt`, so no clock is read.
+ */
+export const PopulationTransitionSchema = z.object({
+  id: identifier,
+  subjectId: identifier,
+  reason: TransitionReasonSchema,
+  change: z.enum(["JOIN", "LEAVE"]),
+  populations: z.array(PopulationTypeSchema).min(1),
+  effectiveAt: z.iso.datetime(),
+  /** What happened, in the study's words. */
+  description: z.string().min(1).max(280),
+});
+/** One subject joining or leaving analysis populations. */
+export type PopulationTransition = z.infer<typeof PopulationTransitionSchema>;
+
+/** A scripted study event: a transition applied after a given hand. */
+export const StudyEventSchema = z.object({
+  /** Fires once the Blind's hands played reaches this count. */
+  afterHands: z.number().int().positive(),
+  transition: PopulationTransitionSchema,
+});
+/** A scripted study event. */
+export type StudyEvent = z.infer<typeof StudyEventSchema>;
+
 /** Which subjects a column summarises. */
 export const ColumnArmSchema = z.enum(["PLACEBO", "ACTIVE", "TOTAL"]);
 /** A column's arm filter. */
@@ -689,8 +738,22 @@ export const ScenarioSchema = z
     drawPile: z.array(StagedTableSchema).min(1),
     table: TableRulesSchema,
     deck: z.array(TlfCardSchema).min(1),
+    /** Scripted population changes during this Blind, in hand order. */
+    events: z.array(StudyEventSchema).optional(),
   })
   .superRefine((scenario, ctx) => {
+    const subjectIds = new Set(
+      scenario.populationSnapshot.subjects.map((s) => s.id)
+    );
+    (scenario.events ?? []).forEach((event, index) => {
+      if (!subjectIds.has(event.transition.subjectId)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["events", index, "transition", "subjectId"],
+          message: "A study event must name a subject in the snapshot",
+        });
+      }
+    });
     if (
       (scenario.boss !== undefined) !==
       (scenario.blind.tier === "BOSS_BLIND")
@@ -779,7 +842,8 @@ export type Scenario = z.infer<typeof ScenarioSchema>;
 
 /**
  * One act of a run: a single study whose Blinds are played in order, Small
- * to Boss. Every Blind reads the study's one population snapshot.
+ * to Boss. Every Blind declares the study's opening population snapshot; the
+ * run carries any later versions from one Blind into the next.
  */
 export const ActSchema = z
   .object({

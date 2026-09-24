@@ -13,7 +13,7 @@ const STAMP_STYLE: Record<CardStamp, string> = {
   REDLINE: "border-[color:var(--te-redline)] text-[color:var(--te-redline)]",
   QC_PASS:
     "border-[color:var(--te-validated)] text-[color:var(--te-validated)]",
-  STALE: "border-amber-300 text-amber-300",
+  STALE: "border-rose-400 text-rose-300",
   SEALED: "border-slate-300 text-slate-300",
   BLINDED: "border-zinc-300 text-zinc-300",
 };

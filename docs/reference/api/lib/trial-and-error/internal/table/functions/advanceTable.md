@@ -74,6 +74,12 @@ Present only on a Boss Blind.
 
 `object`[] = `...`
 
+#### events?
+
+`object`[] = `...`
+
+Scripted population changes during this Blind, in hand order.
+
 #### handType
 
 `"HIGH_TABLE"` \| `"TLF_PAIR"` \| `"TLF_TWO_PAIR"` \| `"POPULATION_FLUSH"` \| `"CSR_STRAIGHT"` \| `"EFFICACY_FULL_HOUSE"` \| `"MEDDRA_FIVE_OF_A_KIND"` = `HandTypeSchema`

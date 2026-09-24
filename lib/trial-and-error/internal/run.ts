@@ -3,6 +3,8 @@ import {
   advanceTable,
   createTableState,
   deriveTableView,
+  studyHistory,
+  type StudyHistory,
   type TableAction,
   type TableEvent,
   type TableState,
@@ -51,12 +53,13 @@ export interface RunView {
 /** A fresh table for a Blind, announcing it with a sequence that follows `after`. */
 function startBlind(
   scenario: Scenario,
+  history: StudyHistory | undefined,
   after: TableEvent | null,
   kind: TableEvent["kind"],
   message: string
 ): TableState {
   return {
-    ...createTableState(scenario),
+    ...createTableState(scenario, history),
     lastEvent: { kind, message, sequence: (after?.sequence ?? 0) + 1 },
   };
 }
@@ -99,8 +102,10 @@ export function advanceRun(
       return {
         actId: act.id,
         blindIndex: 0,
+        // A new run is a new study: its population history starts over.
         table: startBlind(
           first,
+          undefined,
           run.table.lastEvent,
           "RESET",
           `Run restarted. ${first.blind.name}.`
@@ -119,8 +124,10 @@ export function advanceRun(
       return {
         ...run,
         blindIndex: index,
+        // The study goes on: later Blinds see every snapshot change so far.
         table: startBlind(
           next,
+          studyHistory(run.table),
           run.table.lastEvent,
           "BLIND_STARTED",
           `${next.blind.name}. Target ${next.blind.quota}.`

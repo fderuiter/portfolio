@@ -6,6 +6,14 @@
 
 # Type Alias: ClassifiableCard
 
-> **ClassifiableCard** = `Pick`\<[`TlfCard`](../../../types/type-aliases/TlfCard.md), `"id"` \| `"cardType"` \| `"population"` \| `"chips"` \| `"topic"` \| `"csrStage"` \| `"soc"`\>
+> **ClassifiableCard** = `Pick`\<[`TlfCard`](../../../types/type-aliases/TlfCard.md), `"id"` \| `"cardType"` \| `"population"` \| `"chips"` \| `"topic"` \| `"csrStage"` \| `"soc"`\> & `object`
 
-The card fields hand detection reads.
+The card fields hand detection reads. `stale` marks an output compiled
+against a population snapshot that has since changed; it cannot make a
+Population Flush.
+
+## Type Declaration
+
+### stale?
+
+> `optional` **stale?**: `boolean`
