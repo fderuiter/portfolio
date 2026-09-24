@@ -10,7 +10,7 @@
 
 ### category
 
-> **category**: `"weather"` \| `"avalanche"` \| `"hazard"` \| `"operational"` \| `"guest_assist"`
+> **category**: `"weather"` \| `"hazard"` \| `"operational"` \| `"guest_assist"`
 
 ***
 

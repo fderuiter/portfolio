@@ -748,12 +748,17 @@ export class OetDescentEngine extends ArcadeEngine<
     severity: InjurySeverityResult;
     priority: TransportPriorityAssignment;
   } {
+    const combinedVitals = vitals ?? patient?.vitals;
+    const combinedPatient: Partial<PatientState> = {
+      ...patient,
+      vitals: combinedVitals,
+    };
     const severity = calculateInjurySeverity(
-      patient,
-      vitals,
+      combinedPatient,
+      combinedVitals,
       environment ?? this.state.conditions
     );
-    const priority = assignTransportPriority(severity);
+    const priority = assignTransportPriority(combinedPatient, combinedVitals);
     return { severity, priority };
   }
 
@@ -1206,6 +1211,16 @@ export interface TransportPriorityAssignment {
 /**
  * Calculates injury severity score (0-100), level, and physiological factors
  * based on patient complaint, mechanism of injury, vitals, and environment.
+ *
+ * Authoritative Clinical Sources:
+ * - AVPU / GCS: National Ski Patrol (NSP) Outdoor Emergency Care (OEC) 6th Ed., Ch. 6 "Patient Assessment";
+ *   Glasgow Coma Scale (Teasdale & Jennett, 1974, Lancet 304(7884):81-84).
+ * - SpO2 (hypoxia < 92%, severe < 85%): NSP OEC 6th Ed., Ch. 6 "Vital Signs" & Ch. 12 "Respiratory Emergencies".
+ * - Respiration (< 10 or > 30 bpm) & Heart Rate (> 130 or < 40 bpm): START Triage Protocol (Super & Benson, 1983);
+ *   NSP OEC 6th Ed., Ch. 6.
+ * - BP Systolic (< 90 mmHg hypotension/shock): NSP OEC 6th Ed., Ch. 9 "Shock".
+ * - Neurovascular PMS (Pulse, Motor, Sensory): NSP OEC 6th Ed., Ch. 20 "Musculoskeletal Trauma".
+ * - High-energy Mechanism & Trauma Suspicions: CDC Field Triage Guidelines for Injured Patients; NSP OEC 6th Ed., Ch. 15.
  */
 export function calculateInjurySeverity(
   patient?: Partial<PatientState>,
@@ -1387,20 +1402,25 @@ export function calculateInjurySeverity(
 /**
  * Assigns transport triage priority (RED, YELLOW, GREEN, BLACK) based on
  * injury severity assessment or patient state.
+ *
+ * Authoritative Triage Framework:
+ * - START Triage System Protocol (Simple Triage and Rapid Treatment - Super & Benson, 1983)
+ * - National Ski Patrol Outdoor Emergency Care (OEC) 6th Ed., Ch. 35 "Multiple-Casualty Incidents"
  */
 export function assignTransportPriority(
-  input: InjurySeverityResult | Partial<PatientState>
+  input: InjurySeverityResult | Partial<PatientState>,
+  vitalsOverride?: VitalsData
 ): TransportPriorityAssignment {
   let severityResult: InjurySeverityResult;
+  let vitals: VitalsData | undefined = vitalsOverride;
 
   if ("level" in input && typeof input.score === "number") {
     severityResult = input as InjurySeverityResult;
   } else {
-    severityResult = calculateInjurySeverity(input as Partial<PatientState>);
+    const patientInput = input as Partial<PatientState>;
+    vitals = vitals ?? patientInput.vitals;
+    severityResult = calculateInjurySeverity(patientInput, vitals);
   }
-
-  const vitals =
-    "vitals" in input ? (input as Partial<PatientState>).vitals : undefined;
 
   if (
     vitals?.respiration === 0 &&
