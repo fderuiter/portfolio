@@ -105,7 +105,7 @@ describe("launchChromiumWithFallback", () => {
   });
 
   it("re-throws initial launch error when fallback binary does not exist on disk", async () => {
-    const browsersDir = "/tmp/playwright-browsers";
+    const browsersDir = path.join(process.cwd(), "tmp", "playwright-browsers");
     process.env.PLAYWRIGHT_BROWSERS_PATH = browsersDir;
 
     const expectedFallbackExecutable = path.join(browsersDir, "chromium");
@@ -126,7 +126,7 @@ describe("launchChromiumWithFallback", () => {
   });
 
   it("retries launch with fallback executable path when initial launch fails and fallback exists", async () => {
-    const browsersDir = "/tmp/playwright-browsers";
+    const browsersDir = path.join(process.cwd(), "tmp", "playwright-browsers");
     process.env.PLAYWRIGHT_BROWSERS_PATH = browsersDir;
 
     const expectedFallbackExecutable = path.join(browsersDir, "chromium");
@@ -152,7 +152,7 @@ describe("launchChromiumWithFallback", () => {
   });
 
   it("propagates error thrown during fallback launch attempt when fallback fails", async () => {
-    const browsersDir = "/tmp/playwright-browsers";
+    const browsersDir = path.join(process.cwd(), "tmp", "playwright-browsers");
     process.env.PLAYWRIGHT_BROWSERS_PATH = browsersDir;
 
     const expectedFallbackExecutable = path.join(browsersDir, "chromium");
