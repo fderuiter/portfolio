@@ -51,7 +51,7 @@ import {
   generateEngineId,
   generateCdashVariableName,
 } from "./precision-date";
-import { cloneDeep } from "../utils/clone";
+import { cloneDeep } from "../utils";
 import { lintForm } from "./ast-evaluator";
 import {
   instantiateSmartBlock,

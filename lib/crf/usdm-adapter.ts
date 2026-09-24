@@ -23,7 +23,7 @@ import {
   getUniversalCrfSchemaUrl,
   validateUniversalCrf,
 } from "./universal-schema";
-import { cloneDeep } from "../utils/clone";
+import { cloneDeep } from "../utils";
 import { STANDARD_CODELISTS } from "./cdisc-controlled-terminology";
 
 export interface UsdmBiomedicalConceptProperty {

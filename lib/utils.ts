@@ -95,7 +95,10 @@ export function getAnonymousDeviceHash(
  */
 export function generateId(prefix?: string): string {
   let randomPart = "";
-  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.randomUUID === "function"
+  ) {
     try {
       randomPart = crypto.randomUUID().replace(/-/g, "").slice(0, 9);
     } catch {
@@ -118,7 +121,8 @@ export const generateRandomId = generateId;
  */
 export function isValidIsoDate(dateString?: string | null): boolean {
   if (!dateString || typeof dateString !== "string") return false;
-  const isoRegex = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d{1,3})?(Z|[+-]\d{2}:?\d{2})?)?$/;
+  const isoRegex =
+    /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d{1,3})?(Z|[+-]\d{2}:?\d{2})?)?$/;
   if (!isoRegex.test(dateString.trim())) return false;
 
   const timestamp = Date.parse(dateString);
@@ -167,7 +171,9 @@ export function formatDisplayDate(
 /**
  * Formats a date relative to now (e.g. 'Just now', '5m ago', '2h ago', '3d ago').
  */
-export function formatRelativeTime(date?: Date | string | number | null): string {
+export function formatRelativeTime(
+  date?: Date | string | number | null
+): string {
   if (!date) return "";
   try {
     const d = date instanceof Date ? date : new Date(date);
@@ -195,3 +201,5 @@ export function formatRelativeTime(date?: Date | string | number | null): string
     return "";
   }
 }
+
+export { cloneDeep } from "./utils/clone";

@@ -25,7 +25,7 @@ import {
   CDASH_DOMAIN_CATALOG,
 } from "@/lib/crf/study-engine";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
-import { cloneDeep } from "@/lib/utils/clone";
+import { cloneDeep } from "@/lib/utils";
 
 interface WorkflowWizardModalProps {
   isOpen: boolean;

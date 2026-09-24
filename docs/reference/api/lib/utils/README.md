@@ -29,6 +29,12 @@
 
 ## References
 
+### cloneDeep
+
+Re-exports [cloneDeep](clone/functions/cloneDeep.md)
+
+***
+
 ### RequestOrHeaders
 
 Re-exports [RequestOrHeaders](../services/privacy-service/type-aliases/RequestOrHeaders.md)

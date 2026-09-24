@@ -5,7 +5,7 @@ import {
   deterministicStringify,
 } from "./study-draft-storage";
 import { generateEngineId } from "./precision-date";
-import { cloneDeep } from "../utils/clone";
+import { cloneDeep } from "../utils";
 
 /**
  * localStorage key holding the author's immutable, version-tagged study baseline snapshots.

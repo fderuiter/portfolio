@@ -9,7 +9,7 @@ import {
   STANDARD_CODELISTS,
 } from "@/lib/crf/cdisc-cdash-library";
 import { lintFormula, FormulaLintResult } from "@/lib/crf/formula-linter";
-import { cloneDeep } from "@/lib/utils/clone";
+import { cloneDeep } from "@/lib/utils";
 
 /**
  * Diagnostic finding tier categorization.

@@ -12,7 +12,7 @@ import Link from "next/link";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useAnnouncer } from "@/hooks/useAnnouncer";
-import { cloneDeep } from "@/lib/utils/clone";
+import { cloneDeep } from "@/lib/utils";
 import {
   IconAlertTriangle,
   IconCheck,

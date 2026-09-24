@@ -12,7 +12,7 @@ import {
   AstCondition,
 } from "./types";
 import { generateEngineId, generateCdashVariableName } from "./precision-date";
-import { cloneDeep } from "../utils/clone";
+import { cloneDeep } from "../utils";
 
 export type SlashCommandCategory = "smart_block" | "widget" | "layout";
 
