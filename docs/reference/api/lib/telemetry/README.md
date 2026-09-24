@@ -38,9 +38,39 @@ Re-exports [DEFAULT_STORAGE_KEY](outbox/variables/DEFAULT_STORAGE_KEY.md)
 
 ***
 
+### LogEntry
+
+Re-exports [LogEntry](../logger/interfaces/LogEntry.md)
+
+***
+
+### logger
+
+Re-exports [logger](../logger/variables/logger.md)
+
+***
+
+### LoggerOptions
+
+Re-exports [LoggerOptions](../logger/interfaces/LoggerOptions.md)
+
+***
+
+### LogLevel
+
+Re-exports [LogLevel](../logger/type-aliases/LogLevel.md)
+
+***
+
 ### RollbackReason
 
 Re-exports [RollbackReason](outbox/type-aliases/RollbackReason.md)
+
+***
+
+### StructuredLogger
+
+Re-exports [StructuredLogger](../logger/classes/StructuredLogger.md)
 
 ***
 

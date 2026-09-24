@@ -11,3 +11,5 @@ export * from "./LeanIdeInspector";
 export * from "./DiagnosticDrawers";
 export * from "./HintSystem";
 export * from "./SandboxMode";
+export * from "./GridCanvas";
+export * from "./ProofTree";

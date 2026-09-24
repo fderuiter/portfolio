@@ -15,3 +15,15 @@
 ## Functions
 
 - [getScenarioById](functions/getScenarioById.md)
+
+## References
+
+### INITIAL\_PATROL\_SCENARIOS
+
+Re-exports [INITIAL_PATROL_SCENARIOS](../scenarios/catalog/variables/INITIAL_PATROL_SCENARIOS.md)
+
+***
+
+### OEC\_SAMPLE\_SCENARIO
+
+Re-exports [OEC_SAMPLE_SCENARIO](../scenarios/catalog/variables/OEC_SAMPLE_SCENARIO.md)

@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useAnnouncer } from "@/hooks/useAnnouncer";
+import { getMatchMediaMatches } from "@/hooks/useMediaQuery";
 import {
   IconAlertTriangle,
   IconCheck,
@@ -325,6 +326,7 @@ export const ClinicalTrialChaos: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const lastPointerTimeRef = useRef(0);
+  const lastTouchTimeRef = useRef(0);
   const isPointerDownRef = useRef(false);
   const { isFullscreen, toggleFullscreen } = useFullscreen(containerRef);
   const animFrameIdRef = useRef<number | null>(null);
@@ -511,9 +513,9 @@ export const ClinicalTrialChaos: React.FC = () => {
       // focus it so hotkeys work: the Start button unmounts on click.
       const board = containerRef.current;
       if (board) {
-        const reduceMotion =
-          typeof window.matchMedia === "function" &&
-          window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const reduceMotion = getMatchMediaMatches(
+          "(prefers-reduced-motion: reduce)"
+        );
         requestAnimationFrame(() => {
           board.focus({ preventScroll: true });
           if (isFullscreen || typeof window.scrollTo !== "function") return;
@@ -1863,10 +1865,18 @@ export const ClinicalTrialChaos: React.FC = () => {
     }
   };
 
+  const preventCancelable = (e: React.SyntheticEvent) => {
+    if (e.cancelable) {
+      e.preventDefault();
+    }
+  };
+
   const handleCanvasPointerDown = (
     e: React.PointerEvent<HTMLCanvasElement>
   ) => {
-    lastPointerTimeRef.current = Date.now();
+    const now = Date.now();
+    if (now - lastTouchTimeRef.current < 100) return;
+    lastPointerTimeRef.current = now;
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch {
@@ -1880,6 +1890,9 @@ export const ClinicalTrialChaos: React.FC = () => {
     e: React.PointerEvent<HTMLCanvasElement>
   ) => {
     if (isPointerDownRef.current) {
+      const now = Date.now();
+      if (now - lastTouchTimeRef.current < 100) return;
+      lastPointerTimeRef.current = now;
       handleCanvasClickOrTouch(e.clientX, e.clientY);
     }
   };
@@ -1906,6 +1919,53 @@ export const ClinicalTrialChaos: React.FC = () => {
       }
     }
     isPointerDownRef.current = false;
+  };
+
+  const handleCanvasTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    preventCancelable(e);
+    const now = Date.now();
+    if (now - lastPointerTimeRef.current < 100) return;
+    lastTouchTimeRef.current = now;
+    isPointerDownRef.current = true;
+
+    const touch = e.touches[0];
+    if (touch) {
+      handleCanvasClickOrTouch(touch.clientX, touch.clientY);
+    }
+  };
+
+  const handleCanvasTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    preventCancelable(e);
+    if (isPointerDownRef.current) {
+      const now = Date.now();
+      if (now - lastPointerTimeRef.current < 100) return;
+      lastTouchTimeRef.current = now;
+      const touch = e.touches[0];
+      if (touch) {
+        handleCanvasClickOrTouch(touch.clientX, touch.clientY);
+      }
+    }
+  };
+
+  const handleCanvasTouchEnd = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    preventCancelable(e);
+    isPointerDownRef.current = false;
+  };
+
+  const handleCanvasTouchCancel = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    preventCancelable(e);
+    isPointerDownRef.current = false;
+  };
+
+  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const now = Date.now();
+    if (
+      now - lastPointerTimeRef.current < 400 ||
+      now - lastTouchTimeRef.current < 400
+    ) {
+      return;
+    }
+    handleCanvasClickOrTouch(e.clientX, e.clientY);
   };
 
   const sortedStations = [...stations].sort(
@@ -1985,7 +2045,7 @@ export const ClinicalTrialChaos: React.FC = () => {
               key={choice.label}
               type="button"
               onClick={() => handleSponsorChoice(idx)}
-              className="min-h-[40px] min-w-0 rounded-lg border border-zinc-700 bg-[#0d0e11] px-3 py-2 text-left text-[11px] font-bold text-zinc-200 break-words transition hover:border-amber-500/60 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60"
+              className="min-h-[44px] min-w-0 rounded-lg border border-zinc-700 bg-[#0d0e11] px-3 py-2 text-left text-[11px] font-bold text-zinc-200 break-words transition hover:border-amber-500/60 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60"
             >
               {choice.label}
             </button>
@@ -2024,7 +2084,7 @@ export const ClinicalTrialChaos: React.FC = () => {
         Clinical Trial Chaos: CDISC Compliance
       </h2>
       <div className="flex flex-wrap items-center gap-2 border-b border-zinc-800 pb-3 text-xs">
-        <div className="relative flex min-h-[40px] items-center gap-2 rounded-lg border border-zinc-800 bg-[#13151a] px-2.5 sm:px-3">
+        <div className="relative flex min-h-[44px] items-center gap-2 rounded-lg border border-zinc-800 bg-[#13151a] px-2.5 sm:px-3">
           <IconTrophy className="h-4 w-4 text-amber-400" aria-hidden="true" />
           <span className="sr-only text-[10px] uppercase text-zinc-400 sm:not-sr-only">
             Score:
@@ -2049,7 +2109,7 @@ export const ClinicalTrialChaos: React.FC = () => {
         </div>
 
         <div
-          className="flex min-h-[40px] items-center gap-1.5 rounded-lg border border-zinc-800 bg-[#13151a] px-2.5 sm:px-3"
+          className="flex min-h-[44px] items-center gap-1.5 rounded-lg border border-zinc-800 bg-[#13151a] px-2.5 sm:px-3"
           title="Lock CRFs back-to-back to build a combo. Every 3 in a row raises the multiplier."
         >
           <IconFlame
@@ -2075,7 +2135,7 @@ export const ClinicalTrialChaos: React.FC = () => {
           </span>
         </div>
 
-        <div className="flex min-h-[40px] min-w-0 items-center gap-2 rounded-lg border border-zinc-800 bg-[#13151a] px-2.5 sm:px-3">
+        <div className="flex min-h-[44px] min-w-0 items-center gap-2 rounded-lg border border-zinc-800 bg-[#13151a] px-2.5 sm:px-3">
           <span className="text-[10px] uppercase text-zinc-400">
             {gameMode === "campaign" ? `Phase ${phase}/3` : "Endless"}
           </span>
@@ -2112,7 +2172,7 @@ export const ClinicalTrialChaos: React.FC = () => {
             aria-pressed={bgmEnabled}
             aria-label="Background music"
             title="Toggle 8-bit background music"
-            className={`flex h-10 w-10 items-center justify-center rounded-lg border transition ${
+            className={`flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border transition ${
               bgmEnabled
                 ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-300"
                 : "border-zinc-800 bg-[#13151a] text-zinc-400 hover:text-zinc-300"
@@ -2126,7 +2186,7 @@ export const ClinicalTrialChaos: React.FC = () => {
             aria-pressed={soundEnabled}
             aria-label="Sound effects"
             title={soundEnabled ? "Mute sound effects" : "Unmute sound effects"}
-            className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-800 bg-[#13151a] text-zinc-400 transition hover:text-white"
+            className="flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-zinc-800 bg-[#13151a] text-zinc-400 transition hover:text-white"
           >
             {soundEnabled ? (
               <IconVolume className="h-4 w-4 text-brand-cyan" />
@@ -2175,7 +2235,7 @@ export const ClinicalTrialChaos: React.FC = () => {
               type="button"
               onClick={() => setActiveTab(tab.id)}
               aria-pressed={activeTab === tab.id}
-              className={`flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg px-3 text-xs font-bold transition ${
+              className={`flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg px-3 text-xs font-bold transition ${
                 activeTab === tab.id
                   ? "border border-zinc-700 bg-zinc-800 text-zinc-100"
                   : "border border-transparent text-zinc-400 hover:text-zinc-200"
@@ -2217,7 +2277,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                   "INFO"
                 );
               }}
-              className="min-h-[32px] rounded-lg border border-zinc-700 px-2 text-zinc-300 hover:bg-zinc-800"
+              className="min-h-[44px] rounded-lg border border-zinc-700 px-2 text-zinc-300 hover:bg-zinc-800"
             >
               Use Built-in Presets
             </button>
@@ -2410,19 +2470,11 @@ export const ClinicalTrialChaos: React.FC = () => {
               onPointerMove={handleCanvasPointerMove}
               onPointerUp={handleCanvasPointerUp}
               onPointerCancel={handleCanvasPointerCancel}
-              onClick={(e) => {
-                if (Date.now() - lastPointerTimeRef.current < 100) return;
-                handleCanvasClickOrTouch(e.clientX, e.clientY);
-              }}
-              onTouchStart={(e) => {
-                if (Date.now() - lastPointerTimeRef.current < 100) return;
-                const touch = e.touches[0];
-                if (touch)
-                  handleCanvasClickOrTouch(touch.clientX, touch.clientY);
-              }}
-              onTouchCancel={() => {
-                isPointerDownRef.current = false;
-              }}
+              onTouchStart={handleCanvasTouchStart}
+              onTouchMove={handleCanvasTouchMove}
+              onTouchEnd={handleCanvasTouchEnd}
+              onTouchCancel={handleCanvasTouchCancel}
+              onClick={handleCanvasClick}
               style={{ touchAction: "none" }}
               role="application"
               aria-label="Clinical Trial Chaos Simulation Canvas. Use Tab to navigate accessible controls, or space/enter to interact with subjects."
@@ -2803,7 +2855,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                               key={domain}
                               type="button"
                               onClick={() => handleInitiateSubmission(domain)}
-                              className="flex min-h-[40px] items-center gap-2 rounded-lg bg-emerald-500 px-3 text-xs font-bold text-black transition hover:bg-emerald-400 active:scale-[0.98]"
+                              className="flex min-h-[44px] items-center gap-2 rounded-lg bg-emerald-500 px-3 text-xs font-bold text-black transition hover:bg-emerald-400 active:scale-[0.98]"
                             >
                               <kbd className="rounded bg-black/15 px-1 text-[10px]">
                                 {stationHotkey(domain)}
@@ -2827,7 +2879,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                               obs,
                             })
                           }
-                          className={`cursor-pointer min-w-0 rounded-lg border p-3 text-left transition active:scale-[0.99] ${
+                          className={`cursor-pointer min-h-[44px] min-w-0 rounded-lg border p-3 text-left transition active:scale-[0.99] ${
                             !obs.isResolved
                               ? "border-amber-500/50 bg-amber-500/5 hover:border-amber-400"
                               : "border-zinc-800 bg-[#0d0e11] hover:border-zinc-700"
@@ -2920,7 +2972,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                           key={station.id}
                           type="button"
                           onClick={() => handleInitiateSubmission(station.id)}
-                          className={`group min-w-0 rounded-lg border p-2.5 text-left transition active:scale-[0.98] ${
+                          className={`group min-h-[44px] min-w-0 rounded-lg border p-2.5 text-left transition active:scale-[0.98] ${
                             isFlashing
                               ? "border-emerald-400 bg-emerald-500/20"
                               : accepts
@@ -3089,7 +3141,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                         type="button"
                         onClick={() => setGameMode(mode)}
                         aria-pressed={gameMode === mode}
-                        className={`min-h-[40px] rounded-md px-3 text-xs font-bold transition ${
+                        className={`min-h-[44px] rounded-md px-3 text-xs font-bold transition ${
                           gameMode === mode
                             ? "bg-zinc-800 text-zinc-100"
                             : "text-zinc-400 hover:text-zinc-300"
@@ -3245,7 +3297,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                         setOfficeId(o.id);
                         announce(`Office set to ${o.name}`, "polite");
                       }}
-                      className={`min-w-0 rounded-lg border p-3 text-left transition active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 ${
+                      className={`min-h-[44px] min-w-0 rounded-lg border p-3 text-left transition active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 ${
                         isSelected
                           ? "border-amber-500/70 bg-amber-500/5"
                           : "border-zinc-800 bg-[#0d0e11] hover:border-zinc-600"
@@ -3309,7 +3361,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                         selectOutfit(o.id);
                         announce(`Outfit set to ${o.name}`, "polite");
                       }}
-                      className={`flex min-w-0 items-center gap-3 rounded-lg border p-2.5 text-left transition active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 ${
+                      className={`flex min-h-[44px] min-w-0 items-center gap-3 rounded-lg border p-2.5 text-left transition active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/60 ${
                         isSelected
                           ? "border-amber-500/70 bg-amber-500/5"
                           : "border-zinc-800 bg-[#0d0e11] hover:border-zinc-600"
@@ -3364,7 +3416,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                         "WARN"
                       );
                     }}
-                    className="min-h-[40px] rounded-lg border border-zinc-700 px-3 font-bold text-zinc-300 transition hover:bg-zinc-800"
+                    className="min-h-[44px] rounded-lg border border-zinc-700 px-3 font-bold text-zinc-300 transition hover:bg-zinc-800"
                   >
                     Load Authored Protocol
                   </button>
@@ -3532,7 +3584,7 @@ export const ClinicalTrialChaos: React.FC = () => {
               <button
                 onClick={downloadODMXML}
                 disabled={submittedHistory.length === 0}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-brand-cyan/40 bg-brand-cyan/10 text-cyan-300 text-xs font-bold hover:bg-brand-cyan/20 disabled:opacity-40"
+                className="flex min-h-[44px] items-center gap-1.5 px-3 py-1.5 rounded-lg border border-brand-cyan/40 bg-brand-cyan/10 text-cyan-300 text-xs font-bold hover:bg-brand-cyan/20 disabled:opacity-40"
               >
                 <IconDownload className="h-3.5 w-3.5" />
                 <span>Export CDISC ODM XML</span>
@@ -3541,7 +3593,7 @@ export const ClinicalTrialChaos: React.FC = () => {
               <button
                 onClick={downloadSDTMCSV}
                 disabled={sdtmDataset.length === 0}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 text-xs font-bold hover:bg-emerald-500/20 disabled:opacity-40"
+                className="flex min-h-[44px] items-center gap-1.5 px-3 py-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 text-xs font-bold hover:bg-emerald-500/20 disabled:opacity-40"
               >
                 <IconTable className="h-3.5 w-3.5" />
                 <span>Export SDTM CSV</span>
@@ -3559,7 +3611,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                 <button
                   key={dom}
                   onClick={() => setSdtmFilterDomain(dom)}
-                  className={`px-2.5 py-1 rounded-md text-xs font-bold shrink-0 border transition ${
+                  className={`flex items-center justify-center min-h-[44px] min-w-[44px] px-2.5 py-1 rounded-md text-xs font-bold shrink-0 border transition ${
                     sdtmFilterDomain === dom
                       ? "border-emerald-500 bg-emerald-950/60 text-emerald-300"
                       : "border-zinc-800 bg-zinc-950 text-zinc-400 hover:border-zinc-700"
@@ -3708,7 +3760,7 @@ export const ClinicalTrialChaos: React.FC = () => {
               </div>
               <button
                 onClick={() => setValidatingObs(null)}
-                className="text-zinc-400 hover:text-white text-xs font-mono"
+                className="text-zinc-400 hover:text-white text-xs font-mono min-h-[44px] min-w-[44px] flex items-center justify-center p-2"
               >
                 ✕ ESC
               </button>
@@ -3758,7 +3810,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                     <button
                       key={opt}
                       onClick={() => handleSelectChoice(opt)}
-                      className={`p-2.5 rounded-xl border text-left font-mono text-xs transition ${
+                      className={`p-2.5 min-h-[44px] rounded-xl border text-left font-mono text-xs transition ${
                         validatingObs.selectedChoice === opt
                           ? validatingObs.feedback?.isValid
                             ? "border-emerald-500 bg-emerald-950/60 text-emerald-300 font-bold"
@@ -3798,7 +3850,7 @@ export const ClinicalTrialChaos: React.FC = () => {
             <div className="mt-5 flex items-center justify-end">
               <button
                 onClick={() => setValidatingObs(null)}
-                className="px-4 py-2 rounded-xl border border-zinc-800 bg-zinc-900 text-xs text-zinc-400 hover:text-white"
+                className="px-4 py-2.5 min-h-[44px] rounded-xl border border-zinc-800 bg-zinc-900 text-xs text-zinc-400 hover:text-white"
               >
                 Close (Esc)
               </button>
@@ -3867,7 +3919,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                           selectedReason: r,
                         }))
                       }
-                      className={`p-2 rounded-lg text-left text-[11px] border transition ${
+                      className={`p-2 min-h-[44px] rounded-lg text-left text-[11px] border transition ${
                         signatureModal.selectedReason === r
                           ? "border-brand-cyan bg-cyan-950/60 text-cyan-300 font-bold"
                           : "border-zinc-800 bg-zinc-900 text-zinc-400 hover:border-zinc-700"
@@ -3896,7 +3948,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                       passwordInput: e.target.value,
                     }))
                   }
-                  className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-zinc-200 focus:border-brand-cyan focus:outline-none"
+                  className="w-full min-h-[44px] rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-zinc-200 focus:border-brand-cyan focus:outline-none"
                 />
               </div>
 
@@ -3916,13 +3968,13 @@ export const ClinicalTrialChaos: React.FC = () => {
                     subject: null,
                   }))
                 }
-                className="px-4 py-2.5 rounded-xl border border-zinc-800 bg-zinc-900 text-xs text-zinc-400 hover:text-white"
+                className="px-4 py-2.5 min-h-[44px] rounded-xl border border-zinc-800 bg-zinc-900 text-xs text-zinc-400 hover:text-white"
               >
                 Cancel (Esc)
               </button>
               <button
                 onClick={handleConfirmSignature}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold text-xs uppercase tracking-wider hover:opacity-90 transition shadow-lg shadow-cyan-500/20"
+                className="flex min-h-[44px] items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold text-xs uppercase tracking-wider hover:opacity-90 transition shadow-lg shadow-cyan-500/20"
               >
                 <IconShieldCheck className="h-4 w-4" /> Sign &amp; Lock CRF
                 (Enter)
@@ -4063,20 +4115,20 @@ export const ClinicalTrialChaos: React.FC = () => {
               <div className="flex gap-2">
                 <button
                   onClick={downloadODMXML}
-                  className="flex items-center gap-1 px-3 py-2 rounded-xl border border-zinc-800 bg-zinc-900 text-xs text-zinc-300 hover:text-white"
+                  className="flex min-h-[44px] items-center gap-1 px-3 py-2 rounded-xl border border-zinc-800 bg-zinc-900 text-xs text-zinc-300 hover:text-white"
                 >
                   <IconDownload className="h-3.5 w-3.5" /> ODM XML
                 </button>
                 <button
                   onClick={downloadSDTMCSV}
-                  className="flex items-center gap-1 px-3 py-2 rounded-xl border border-zinc-800 bg-zinc-900 text-xs text-zinc-300 hover:text-white"
+                  className="flex min-h-[44px] items-center gap-1 px-3 py-2 rounded-xl border border-zinc-800 bg-zinc-900 text-xs text-zinc-300 hover:text-white"
                 >
                   <IconTable className="h-3.5 w-3.5" /> SDTM CSV
                 </button>
               </div>
               <button
                 onClick={() => setBimoReport(null)}
-                className="px-5 py-2 rounded-xl bg-emerald-500 text-black font-bold text-xs uppercase tracking-wider hover:bg-emerald-400 transition"
+                className="min-h-[44px] px-5 py-2 rounded-xl bg-emerald-500 text-black font-bold text-xs uppercase tracking-wider hover:bg-emerald-400 transition"
               >
                 Close Report
               </button>
@@ -4101,7 +4153,7 @@ export const ClinicalTrialChaos: React.FC = () => {
 
           <Link
             href="/case-studies/imednet-python-sdk"
-            className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-brand-blue/40 bg-brand-blue/15 text-xs font-bold text-brand-cyan hover:bg-brand-blue/25 transition shadow-sm"
+            className="shrink-0 inline-flex min-h-[44px] items-center gap-1.5 px-4 py-2 rounded-lg border border-brand-blue/40 bg-brand-blue/15 text-xs font-bold text-brand-cyan hover:bg-brand-blue/25 transition shadow-sm"
           >
             <span>Read SDK Case Study</span>
             <IconExternalLink className="h-3.5 w-3.5" />
