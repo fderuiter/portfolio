@@ -53,6 +53,13 @@ Face data. Draft cards derive their face from the draft table instead.
 
 `"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"` = `PopulationTypeSchema`
 
+#### shellId?
+
+`string` = `...`
+
+A blank shell: a planned output with no cohort data allocated yet. It
+compiles only once the player allocates one of the shell's analysis sets.
+
 #### soc?
 
 `string` = `...`

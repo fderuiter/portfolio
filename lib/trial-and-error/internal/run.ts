@@ -1,9 +1,11 @@
 import type { Act, Scenario } from "../types";
 import {
   advanceTable,
+  carriedInventory,
   createTableState,
   deriveTableView,
   studyHistory,
+  type Inventory,
   type StudyHistory,
   type TableAction,
   type TableEvent,
@@ -54,12 +56,13 @@ export interface RunView {
 function startBlind(
   scenario: Scenario,
   history: StudyHistory | undefined,
+  inventory: Inventory | undefined,
   after: TableEvent | null,
   kind: TableEvent["kind"],
   message: string
 ): TableState {
   return {
-    ...createTableState(scenario, history),
+    ...createTableState(scenario, history, inventory),
     lastEvent: { kind, message, sequence: (after?.sequence ?? 0) + 1 },
   };
 }
@@ -102,9 +105,11 @@ export function advanceRun(
       return {
         actId: act.id,
         blindIndex: 0,
-        // A new run is a new study: its population history starts over.
+        // A new run is a new study: its population history starts over, and
+        // the tray and budget are empty again.
         table: startBlind(
           first,
+          undefined,
           undefined,
           run.table.lastEvent,
           "RESET",
@@ -124,10 +129,12 @@ export function advanceRun(
       return {
         ...run,
         blindIndex: index,
-        // The study goes on: later Blinds see every snapshot change so far.
+        // The study goes on: later Blinds see every snapshot change so far,
+        // and the tray and budget come along.
         table: startBlind(
           next,
           studyHistory(run.table),
+          carriedInventory(run.table),
           run.table.lastEvent,
           "BLIND_STARTED",
           `${next.blind.name}. Target ${next.blind.quota}.`

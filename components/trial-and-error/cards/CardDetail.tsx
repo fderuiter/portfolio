@@ -19,13 +19,15 @@ interface CardDetailProps {
  */
 export function CardDetail({ view, headingId }: CardDetailProps) {
   const { card } = view;
-  const status = view.unverified
-    ? "Unverified: not yet inspected"
-    : view.inspected
-      ? view.openRedlines > 0
-        ? `${view.openRedlines} open redline${view.openRedlines === 1 ? "" : "s"}`
-        : "Inspected"
-      : "No reviewable cells in this slice";
+  const status = view.blank
+    ? `Empty shell: allocate ${view.compatiblePopulations.map((p) => POPULATION_LABEL[p]).join(" or ")} data to compile it`
+    : view.unverified
+      ? "Unverified: not yet inspected"
+      : view.inspected
+        ? view.openRedlines > 0
+          ? `${view.openRedlines} open redline${view.openRedlines === 1 ? "" : "s"}`
+          : "Inspected"
+        : "No reviewable cells in this slice";
   return (
     <div className="p-4">
       <p className="text-[10px] uppercase tracking-wider text-zinc-400">
@@ -33,9 +35,13 @@ export function CardDetail({ view, headingId }: CardDetailProps) {
           ? "Subject token"
           : card.cardType.toLowerCase()}{" "}
         ·{" "}
-        <span className={SUIT_TEXT[card.population]}>
-          {POPULATION_LABEL[card.population]} population
-        </span>
+        {view.blank ? (
+          <span>blank shell</span>
+        ) : (
+          <span className={SUIT_TEXT[card.population]}>
+            {POPULATION_LABEL[card.population]} population
+          </span>
+        )}
       </p>
       <h3 id={headingId} className="mt-1 text-base font-bold break-words">
         {card.number} · {card.title}
@@ -49,11 +55,29 @@ export function CardDetail({ view, headingId }: CardDetailProps) {
         <dd className="break-words">{status}</dd>
         <dt className="text-zinc-400">Snapshot</dt>
         <dd className="break-words" data-testid="snapshot-chip">
-          {view.provenance.id} · v{view.provenance.version}
-          {view.stale && (
-            <span className="text-rose-300"> · stale: recompile required</span>
+          {view.blank ? (
+            "Not compiled yet"
+          ) : (
+            <>
+              {view.provenance.id} · v{view.provenance.version}
+              {view.stale && (
+                <span className="text-rose-300">
+                  {" "}
+                  · stale: recompile required
+                </span>
+              )}
+            </>
           )}
         </dd>
+        {view.footnoteSlots > 0 && (
+          <>
+            <dt className="text-zinc-400">Footnotes</dt>
+            <dd>
+              {view.seals.length} of {view.footnoteSlots} slot
+              {view.footnoteSlots === 1 ? "" : "s"} used
+            </dd>
+          </>
+        )}
         {view.stamps.length > 0 && (
           <>
             <dt className="text-zinc-400">Stamps</dt>
@@ -71,6 +95,20 @@ export function CardDetail({ view, headingId }: CardDetailProps) {
           caption={`${card.number}: ${card.title}`}
         />
       </div>
+      {view.seals.length > 0 && (
+        <ol
+          className="mt-2 list-none space-y-1 text-xs text-zinc-300"
+          aria-label="Footnotes"
+          data-testid="card-footnotes"
+        >
+          {view.seals.map((seal, i) => (
+            <li key={`${seal.id}-${i}`} className="break-words">
+              <sup className="text-amber-300">{i + 1}</sup> {seal.footnote}{" "}
+              <span className="text-zinc-400">({seal.name})</span>
+            </li>
+          ))}
+        </ol>
+      )}
     </div>
   );
 }

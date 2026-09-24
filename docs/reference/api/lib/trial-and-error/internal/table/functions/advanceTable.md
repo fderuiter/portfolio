@@ -66,6 +66,12 @@ Present only on a Boss Blind.
 
 `string` = `...`
 
+#### consumables?
+
+`object`[] = `...`
+
+Footnote seals granted to the consumable tray when the Blind starts.
+
 #### deck
 
 `object`[] = `...`

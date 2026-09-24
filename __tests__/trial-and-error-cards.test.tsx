@@ -193,6 +193,10 @@ const deckView = (): TableCardView[] =>
           debuffed: false,
           stale: false,
           provenance: snapshotRef(DEMOGRAPHICS_SCENARIO.populationSnapshot),
+          blank: false,
+          compatiblePopulations: [],
+          seals: [],
+          footnoteSlots: 0,
         },
       ];
     }
@@ -486,13 +490,14 @@ describe("hand physicality on the Card Table", () => {
 
   it("shows face-down draw pile and spent stack counts", () => {
     render(<CardTable />);
-    expect(screen.getByTestId("draw-pile").textContent).toContain("Deck 2");
+    expect(screen.getByTestId("draw-pile").textContent).toContain("Deck 3");
     expect(screen.getByTestId("discard-stack").textContent).toContain(
       "Spent 0"
     );
+    // Only the top three face-down slots are drawn.
     expect(
       screen.getByTestId("draw-pile").querySelectorAll("[data-slot]")
-    ).toHaveLength(2);
+    ).toHaveLength(3);
     fireEvent.click(card("C-T14.1.2"));
     fireEvent.click(screen.getByRole("button", { name: /Discard/ }));
     expect(screen.getByTestId("discard-stack").textContent).toContain(

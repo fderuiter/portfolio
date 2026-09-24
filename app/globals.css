@@ -515,6 +515,50 @@ body {
   }
 }
 
+/* Footnote seal press (T&E-04): the wax badge lands with a small flash when
+ * it is affixed. Loud cabinets only, transform and opacity only. */
+@keyframes te-seal-press {
+  0% {
+    opacity: 0;
+    transform: scale(1.9) rotate(-20deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.9) rotate(4deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+[data-te-cabinet][data-te-loud="on"] .te-loud-seal {
+  animation: te-seal-press 260ms ease-out 1 both;
+}
+
+/* CPU pips (T&E-04): a spent pip pops off its slot. Under reduced motion
+ * the pip simply empties. */
+@keyframes te-pip-pop {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-6px) scale(1.8);
+  }
+}
+
+[data-te-cabinet] .te-pip-burst {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-te-cabinet] .te-pip-burst {
+    animation: te-pip-pop 320ms ease-out 1 both;
+  }
+}
+
 [data-te-cabinet][data-te-loud="on"] .te-loud-glow {
   text-shadow: 0 0 12px var(--te-fire);
 }

@@ -2,14 +2,16 @@
 
 ***
 
-[fderuiter-portfolio](../../../../../modules.md) / [lib/trial-and-error/internal/desk](../README.md) / advanceDesk
+[fderuiter-portfolio](../../../../../modules.md) / [lib/trial-and-error/internal/table](../README.md) / previewAllocation
 
-# Function: advanceDesk()
+# Function: previewAllocation()
 
-> **advanceDesk**(`scenario`, `state`, `action`): [`DeskState`](../interfaces/DeskState.md)
+> **previewAllocation**(`scenario`, `state`, `cardId`): [`AllocationOption`](../interfaces/AllocationOption.md)[]
 
-Pure QC Desk reducer. Validation and scoring never consult randomness, so
-the same scenario and action sequence always yields the same state.
+Previews every analysis set a blank shell in hand could be compiled on:
+the snapshot it would read, its N, and the hand the selection would make
+with it, scored from revealed findings only. The shell joins the selection
+when there is room. Pure; nothing is committed. Empty for any other card.
 
 ## Parameters
 
@@ -189,12 +191,12 @@ The short intro card shown when the Blind starts.
 
 ### state
 
-[`DeskState`](../interfaces/DeskState.md)
+[`TableState`](../interfaces/TableState.md)
 
-### action
+### cardId
 
-[`DeskAction`](../type-aliases/DeskAction.md)
+`string`
 
 ## Returns
 
-[`DeskState`](../interfaces/DeskState.md)
+[`AllocationOption`](../interfaces/AllocationOption.md)[]

@@ -44,7 +44,9 @@ describe("card faces", () => {
     }
     expect(dealt).toHaveLength(8);
     for (const card of scenario.deck) {
-      expect(card.face !== undefined || card.draftId !== undefined).toBe(true);
+      expect(
+        [card.face, card.draftId, card.shellId].filter((x) => x !== undefined)
+      ).toHaveLength(1);
     }
   });
 

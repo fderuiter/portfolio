@@ -92,22 +92,6 @@ export const HandBaseScoreSchema = z.object({
 /** Base Chips and +Mult for one hand type. */
 export type HandBaseScore = z.infer<typeof HandBaseScoreSchema>;
 
-/** A planned output (Table, Listing or Figure) and its scoring weight. */
-export const TableShellSpecSchema = z.object({
-  id: identifier,
-  tableNumber: z.string().min(1),
-  title: z.string().min(1),
-  cardType: CardTypeSchema,
-  targetPopulation: PopulationTypeSchema,
-  chips: nonNegativeInt,
-  mult: nonNegativeInt,
-  requiredRulebookId: identifier,
-  allowedFootnoteSlots: nonNegativeInt,
-  isBlinded: z.boolean().optional(),
-});
-/** A table shell card specification. */
-export type TableShellSpec = z.infer<typeof TableShellSpecSchema>;
-
 /** A zero-based grid coordinate inside a staged output. */
 export const CellCoordinatesSchema = z.object({
   row: nonNegativeInt,
@@ -158,6 +142,12 @@ export const SapRuleSchema = z.object({
   correctionMultBonus: nonNegativeInt,
   /** +Mult lost (as a positive number) while a non-fatal discrepancy stands. */
   redlineMultPenalty: nonNegativeInt,
+  /**
+   * Footnote seals the SAP accepts as a documented exception to this rule.
+   * Only a rule that names a seal here can be waived by it, and a fatal rule
+   * never can.
+   */
+  waivableBy: z.array(identifier).optional(),
 });
 /** One SAP rule. */
 export type SapRule = z.infer<typeof SapRuleSchema>;
@@ -195,6 +185,15 @@ export const SapRulebookSchema = z
         });
       }
     }
+    rulebook.rules.forEach((rule, index) => {
+      if (rule.severity === "FATAL" && (rule.waivableBy ?? []).length > 0) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["rules", index, "waivableBy"],
+          message: "A fatal rule cannot be waived by a footnote",
+        });
+      }
+    });
     for (const [index, alias] of rulebook.populationAliases.entries()) {
       if (alias.population === alias.equals) {
         ctx.addIssue({
@@ -332,6 +331,50 @@ export const RowStatisticSchema = z.discriminatedUnion("kind", [
 /** A row statistic definition. */
 export type RowStatistic = z.infer<typeof RowStatisticSchema>;
 
+/** One column of a staged output: which arm it summarises. */
+const StagedColumnSchema = z.object({
+  id: identifier,
+  label: z.string().min(1),
+  arm: ColumnArmSchema,
+});
+
+/** One row of a staged output: the statistic it reports. */
+const StagedRowSchema = z.object({
+  id: identifier,
+  label: z.string().min(1),
+  statistic: RowStatisticSchema,
+});
+
+/**
+ * A planned output (Table, Listing or Figure) and its scoring weight.
+ *
+ * `compatiblePopulations` lists the analysis sets the SAP allows this shell
+ * to be run on; without it, only `targetPopulation`. `layout` is the shell's
+ * columns and row statistics, which a blank shell needs so it can be
+ * compiled once the player allocates an analysis set to it.
+ */
+export const TableShellSpecSchema = z.object({
+  id: identifier,
+  tableNumber: z.string().min(1),
+  title: z.string().min(1),
+  cardType: CardTypeSchema,
+  targetPopulation: PopulationTypeSchema,
+  chips: nonNegativeInt,
+  mult: nonNegativeInt,
+  requiredRulebookId: identifier,
+  allowedFootnoteSlots: nonNegativeInt,
+  isBlinded: z.boolean().optional(),
+  compatiblePopulations: z.array(PopulationTypeSchema).min(1).optional(),
+  layout: z
+    .object({
+      columns: z.array(StagedColumnSchema).min(1),
+      rows: z.array(StagedRowSchema).min(1),
+    })
+    .optional(),
+});
+/** A table shell card specification. */
+export type TableShellSpec = z.infer<typeof TableShellSpecSchema>;
+
 /** A staged output card: the displayed cells a reviewer checks. */
 export const StagedTableSchema = z
   .object({
@@ -339,24 +382,8 @@ export const StagedTableSchema = z
     shellId: identifier,
     draftLabel: z.string().min(1),
     populationSnapshotId: identifier,
-    columns: z
-      .array(
-        z.object({
-          id: identifier,
-          label: z.string().min(1),
-          arm: ColumnArmSchema,
-        })
-      )
-      .min(1),
-    rows: z
-      .array(
-        z.object({
-          id: identifier,
-          label: z.string().min(1),
-          statistic: RowStatisticSchema,
-        })
-      )
-      .min(1),
+    columns: z.array(StagedColumnSchema).min(1),
+    rows: z.array(StagedRowSchema).min(1),
     cells: z.array(z.array(z.string())),
   })
   .superRefine((table, ctx) => {
@@ -695,9 +722,56 @@ export const TlfCardSchema = z.object({
   draftId: identifier.optional(),
   /** Face data. Draft cards derive their face from the draft table instead. */
   face: CardFaceSchema.optional(),
+  /**
+   * A blank shell: a planned output with no cohort data allocated yet. It
+   * compiles only once the player allocates one of the shell's analysis sets.
+   */
+  shellId: identifier.optional(),
 });
 /** A TLF card on the Card Table. */
 export type TlfCard = z.infer<typeof TlfCardSchema>;
+
+/** What a footnote seal does to the output it is affixed to. */
+export const SealEffectSchema = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.literal("PLUS_CHIPS"),
+    value: z.number().int().positive(),
+  }),
+  z.object({
+    kind: z.literal("PLUS_MULT"),
+    value: z.number().int().positive(),
+  }),
+  /**
+   * Waives the redline of every SAP rule that names this seal in its
+   * `waivableBy`. It never touches a rule that does not.
+   */
+  z.object({ kind: z.literal("WAIVE") }),
+]);
+/** What a footnote seal does. */
+export type SealEffect = z.infer<typeof SealEffectSchema>;
+
+/**
+ * A footnote seal: a single-use consumable that affixes a real table
+ * footnote to an output, legitimising a presentation choice. Its effect is
+ * recorded as its own rule result, so it is always traceable.
+ */
+export const FootnoteSealSchema = z.object({
+  id: identifier,
+  name: z.string().min(1).max(32),
+  /** The footnote as it prints under the output. */
+  footnote: z.string().min(1).max(200),
+  effect: SealEffectSchema,
+  /** Outputs the seal may be affixed to. An absent list allows any. */
+  eligible: z.object({
+    cardTypes: z.array(CardTypeSchema).min(1).optional(),
+    populations: z.array(PopulationTypeSchema).min(1).optional(),
+    topics: z.array(identifier).min(1).optional(),
+  }),
+  /** What selling it adds to the study budget. */
+  sellValue: nonNegativeInt,
+});
+/** A footnote seal. */
+export type FootnoteSeal = z.infer<typeof FootnoteSealSchema>;
 
 /** The best hand a selection makes, and the cards that actually score. */
 export const HandClassificationSchema = z.object({
@@ -740,6 +814,8 @@ export const ScenarioSchema = z
     deck: z.array(TlfCardSchema).min(1),
     /** Scripted population changes during this Blind, in hand order. */
     events: z.array(StudyEventSchema).optional(),
+    /** Footnote seals granted to the consumable tray when the Blind starts. */
+    consumables: z.array(FootnoteSealSchema).optional(),
   })
   .superRefine((scenario, ctx) => {
     const subjectIds = new Set(
@@ -818,12 +894,38 @@ export const ScenarioSchema = z
           message: "A card's draft must exist in the draw pile",
         });
       }
-      if ((card.face === undefined) === (card.draftId === undefined)) {
+      const sources = [card.face, card.draftId, card.shellId].filter(
+        (source) => source !== undefined
+      );
+      if (sources.length !== 1) {
         ctx.addIssue({
           code: "custom",
           path: ["deck", index, "face"],
-          message: "A card needs exactly one of face data or a draft",
+          message:
+            "A card needs exactly one of face data, a draft or a blank shell",
         });
+      }
+      if (card.shellId !== undefined) {
+        const shell = scenario.shells.find((s) => s.id === card.shellId);
+        if (!shell?.layout) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["deck", index, "shellId"],
+            message: "A blank shell must name a scenario shell with a layout",
+          });
+        } else if (
+          card.cardType !== "TABLE" ||
+          !(shell.compatiblePopulations ?? [shell.targetPopulation]).includes(
+            card.population
+          )
+        ) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["deck", index, "population"],
+            message:
+              "A blank shell is a Table whose suit is one of its shell's analysis sets",
+          });
+        }
       }
       if (
         card.face !== undefined &&

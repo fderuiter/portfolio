@@ -6,6 +6,8 @@ export const LOUD_PRESETS = {
   scorePlate: "te-loud-fire",
   /** A cleared Blind glows. */
   clearedBlind: "te-loud-glow",
+  /** A footnote seal presses onto a card. */
+  sealPress: "te-loud-seal",
 } as const;
 
 /** Screen-shake amplitude is capped so no intensity can exceed it. */

@@ -101,9 +101,11 @@ hand as it truly is, so an undiscovered fatal error still zeroes it.
 
 ### CPU
 
-`cpuReducer` charges 2 CPU to play a hand and 1 CPU to discard. An
-unaffordable spend returns the same ledger. T&E-04 extends this reducer
-(replenishment, footnote seals) rather than replacing it.
+`cpuReducer` charges 2 CPU to play a hand, 1 CPU to discard or inspect and
+2 CPU to recompile. An unaffordable spend returns the same ledger. T&E-04
+adds a `REPLENISH` event rather than replacing the reducer: each Blind's
+ledger is refilled once, deterministically, when the Blind starts. See
+[Shell planning, CPU and footnote seals (T&E-04)](#shell-planning-cpu-and-footnote-seals-te-04).
 
 ### Blinding lives in state, not CSS
 
@@ -552,3 +554,49 @@ under the outputs. The design readings are in
   reduced motion), and its Chips badge strikes through to 0. The event is
   announced politely. The HUD shows the current snapshot, and Read a card
   and the Inspect drawer show the card's snapshot id and version.
+
+### Shell planning, CPU and footnote seals (T&E-04)
+
+T&E-04 (#913) adds planning decisions that sit before scoring. Fred's
+comment on #913 pins two readings: CPU refreshes deterministically at the
+start of each Blind, and footnote seals are finite, traceable in the
+compiled output's metadata, and cannot silently override core SAP rules.
+
+- **Blank shells.** A card may name a scenario shell (`shellId`) instead of
+  carrying face data or a draft; the contract requires exactly one of the
+  three. The shell declares its `compatiblePopulations` and a cell `layout`.
+  A blank shell cannot be played, inspected or sealed, and Play Hand is
+  refused while one is selected ("An empty shell cannot compile: allocate an
+  analysis set to it first."). `ALLOCATE` is free and final: it compiles the
+  shell with `compileShell` against the current snapshot, using a rulebook
+  whose population is the allocated set, and the card takes that set as its
+  suit. `previewAllocation` simulates the allocation for each compatible set
+  so the table can show N, the snapshot and the best hand it would make,
+  whose estimate stays "unverified" until the output is inspected.
+- **CPU.** `cpuReducer` gains `REPLENISH`, and `createTableState` uses it to
+  set the Blind's allocation. CPU never carries between Blinds.
+- **Footnote seals.** A `FootnoteSeal` is a real table footnote with one
+  effect: `PLUS_CHIPS`, `PLUS_MULT` or `WAIVE`. Each Blind may grant seals
+  into a two-slot consumable tray (`CONSUMABLE_SLOTS`); the tray carries to
+  the next Blind and `RESTART_RUN` empties it. `APPLY_SEAL` affixes a seal to
+  an eligible card (by card type, population and topic) with a free
+  footnote slot on its shell, and the seal prints as a numbered footnote in
+  Read a card. A bonus seal adds its own `SEAL-<id>` rule result, so the
+  score explains it. A waiver applies only to a rule whose `waivableBy`
+  names that seal, and its result is kept, marked passed with the evidence
+  "Waived by footnote seal …", rather than removed. The rulebook refuses a
+  fatal rule that lists any waiver, so a footnote can never lift a ×0.
+  `SELL_CONSUMABLE` removes a seal from the tray and adds its sell value to
+  the study budget.
+- **Act I content.** The Small Blind deals a blank Table 14.1.3
+  (Demographics, compatible with ITT and Safety) and grants the Sponsor
+  rounding standard (waives SAP-DM-03) and Adjudicated Endpoint (+3 Mult on
+  a Safety table). The Big Blind grants AE Not Mutually Exclusive (+20 Chips
+  on a Safety AE table), and the committee's deck deals the blank shell
+  again, where only a Safety allocation scores.
+- **Presentation.** A blank card has a dashed border, a SHELL badge and its
+  compatible sets; the A key jumps to the allocation choices. Seals are
+  picked up from the tray by click or keyboard and pressed onto a card with
+  Enter or Space, or dragged onto it; Escape puts one back. A seal press is
+  a loud moment scoped to the cabinet. CPU shows as pips, and a note
+  explains which action the remaining CPU cannot pay for.

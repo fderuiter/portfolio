@@ -10,6 +10,12 @@ Everything the Card Table renders, derived purely from scenario and state.
 
 ## Properties
 
+### budget
+
+> **budget**: `number`
+
+***
+
 ### canDiscard
 
 > **canDiscard**: `boolean`
@@ -40,6 +46,20 @@ Everything the Card Table renders, derived purely from scenario and state.
 
 ***
 
+### consumables
+
+> **consumables**: [`Consumable`](Consumable.md)[]
+
+The consumable tray.
+
+***
+
+### consumableSlots
+
+> **consumableSlots**: `number`
+
+***
+
 ### deckRemaining
 
 > **deckRemaining**: `number`
@@ -65,6 +85,14 @@ The undealt deck, face down: opaque slots that carry no card data.
 #### slot
 
 > **slot**: `string` = `identifier`
+
+***
+
+### emptySelected
+
+> **emptySelected**: `string`[]
+
+Selected blank shells with no analysis set allocated, in selection order.
 
 ***
 
