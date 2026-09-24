@@ -9,6 +9,7 @@ import React, {
 } from "react";
 import Link from "next/link";
 import { clamp } from "@/lib/game-utils";
+import { formatNumber } from "@/lib/utils";
 import Image from "next/image";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
@@ -3045,7 +3046,7 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
                 : currentSprint.title.split(":")[0]}
             </span>
             <span className="text-teal-400 font-bold shrink-0 ml-1">
-              {uiState.multiplier.toFixed(1)}× Speed
+              {formatNumber(uiState.multiplier, 1)}× Speed
             </span>
           </div>
         </div>

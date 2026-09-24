@@ -4,6 +4,7 @@
  * thermal overheating, crash reports, and 16-color pixel canvas rendering.
  */
 import { clamp } from "./game-utils";
+import { formatNumber, roundToDecimals } from "./utils";
 
 export type DeviceTarget = "fenix" | "forerunner" | "edge";
 export type VariableType = "int" | "float" | "string" | "array";
@@ -205,8 +206,9 @@ export function createInitialState(
     flashVars.length > 0
       ? flashVars
       : [{ id: 1, name: "sys_log.dat", sizeKb: 4.0, allocatedAt: 0 }];
-  const allocatedFlashKb = Number(
-    defaultFlashVars.reduce((acc, v) => acc + v.sizeKb, 0).toFixed(2)
+  const allocatedFlashKb = roundToDecimals(
+    defaultFlashVars.reduce((acc, v) => acc + v.sizeKb, 0),
+    2
   );
 
   return {
@@ -276,7 +278,7 @@ export function jettisonOldestVariable(state: GameEngineState): {
     state: {
       ...state,
       variables: rest,
-      allocatedRamKb: Number(newRam.toFixed(2)),
+      allocatedRamKb: roundToDecimals(newRam, 2),
       score: state.score + 5,
     },
     popped,
@@ -296,7 +298,7 @@ export function triggerGarbageCollection(state: GameEngineState): {
   }
 
   // Calculate garbage memory to free (2.0 to 4.0 KB, capped by current non-essential variables)
-  const targetFreedKb = Number((2.0 + Math.random() * 2.0).toFixed(2));
+  const targetFreedKb = roundToDecimals(2.0 + Math.random() * 2.0, 2);
   let accumulatedFreed = 0;
   const remainingVars: MemoryVariable[] = [];
 
@@ -315,7 +317,7 @@ export function triggerGarbageCollection(state: GameEngineState): {
 
   const newRam = Math.max(
     0.4,
-    Number((state.allocatedRamKb - accumulatedFreed).toFixed(2))
+    roundToDecimals(state.allocatedRamKb - accumulatedFreed, 2)
   );
 
   return {
@@ -340,7 +342,7 @@ export function allocateVariable(
   name?: string
 ): { state: GameEngineState; crashed: boolean } {
   const sizeKb = VARIABLE_RAM_COSTS[type];
-  const newRam = Number((state.allocatedRamKb + sizeKb).toFixed(2));
+  const newRam = roundToDecimals(state.allocatedRamKb + sizeKb, 2);
   const ramLimit = DEVICE_PROFILES[state.device].ramLimitKb;
 
   const newVar: MemoryVariable = {
@@ -396,7 +398,7 @@ export function allocateFlashVariable(
   sizeKb = 4.0,
   name?: string
 ): { state: GameEngineState; crashed: boolean } {
-  const newFlash = Number((state.allocatedFlashKb + sizeKb).toFixed(2));
+  const newFlash = roundToDecimals(state.allocatedFlashKb + sizeKb, 2);
   const flashLimit = DEVICE_PROFILES[state.device].flashLimitKb;
 
   const newVar: FlashVariable = {
@@ -610,22 +612,22 @@ export function updateGameSimulation(
     if (remainingGc <= 0) {
       return {
         ...state,
-        battery: Number(nextBattery.toFixed(2)),
+        battery: roundToDecimals(nextBattery, 2),
         isLightOn: nextLight,
         lightActiveDurationMs: lightDuration,
-        thermalStress: Number(nextThermalStress.toFixed(3)),
-        fogLevel: Number(nextFogLevel.toFixed(3)),
+        thermalStress: roundToDecimals(nextThermalStress, 3),
+        fogLevel: roundToDecimals(nextFogLevel, 3),
         isGcActive: false,
         gcTimerMs: 0,
       };
     }
     return {
       ...state,
-      battery: Number(nextBattery.toFixed(2)),
+      battery: roundToDecimals(nextBattery, 2),
       isLightOn: nextLight,
       lightActiveDurationMs: lightDuration,
-      thermalStress: Number(nextThermalStress.toFixed(3)),
-      fogLevel: Number(nextFogLevel.toFixed(3)),
+      thermalStress: roundToDecimals(nextThermalStress, 3),
+      fogLevel: roundToDecimals(nextFogLevel, 3),
       gcTimerMs: remainingGc,
     };
   }
@@ -744,12 +746,12 @@ export function updateGameSimulation(
     playerY: nextPlayerY,
     playerVy: nextPlayerVy,
     isGrounded,
-    battery: Number(nextBattery.toFixed(2)),
+    battery: roundToDecimals(nextBattery, 2),
     isLightOn: nextLight,
     lightActiveDurationMs: lightDuration,
-    thermalStress: Number(nextThermalStress.toFixed(3)),
-    fogLevel: Number(nextFogLevel.toFixed(3)),
-    distanceMeters: Number(nextDistance.toFixed(1)),
+    thermalStress: roundToDecimals(nextThermalStress, 3),
+    fogLevel: roundToDecimals(nextFogLevel, 3),
+    distanceMeters: roundToDecimals(nextDistance, 1),
     score: nextScore,
     highScore: nextHighScore,
     heartRate: nextHeartRate,
@@ -1114,7 +1116,7 @@ function drawHud(ctx: CanvasRenderingContext2D, state: GameEngineState) {
         ? CIQ_PALETTE.yellow
         : CIQ_PALETTE.brightCyan;
   ctx.fillText(
-    `RAM: ${state.allocatedRamKb.toFixed(1)} / ${ramLimit.toFixed(0)} KB`,
+    `RAM: ${formatNumber(state.allocatedRamKb, 1)} / ${formatNumber(ramLimit, 0)} KB`,
     ramBarX,
     ramY - 3
   );
@@ -1140,7 +1142,7 @@ function drawHud(ctx: CanvasRenderingContext2D, state: GameEngineState) {
         ? CIQ_PALETTE.yellow
         : CIQ_PALETTE.orange;
   ctx.fillText(
-    `FLASH: ${state.allocatedFlashKb.toFixed(1)} / ${flashLimit.toFixed(0)} KB`,
+    `FLASH: ${formatNumber(state.allocatedFlashKb, 1)} / ${formatNumber(flashLimit, 0)} KB`,
     ramBarX,
     flashY - 2
   );
@@ -1161,7 +1163,7 @@ function drawHud(ctx: CanvasRenderingContext2D, state: GameEngineState) {
   ctx.font = "6.5px monospace";
   ctx.fillStyle = CIQ_PALETTE.lightGray;
   ctx.fillText(
-    `NV FILES: ${state.flashVariables.length} saved (${state.allocatedFlashKb.toFixed(1)}KB)`,
+    `NV FILES: ${state.flashVariables.length} saved (${formatNumber(state.allocatedFlashKb, 1)}KB)`,
     ramBarX,
     flashY + 13
   );
@@ -1419,13 +1421,13 @@ function renderCrashScreen(
     const limit =
       report.flashLimitKb ?? DEVICE_PROFILES[state.device].flashLimitKb;
     ctx.fillText(
-      `FLASH: ${used.toFixed(1)} / ${limit.toFixed(1)} KB`,
+      `FLASH: ${formatNumber(used, 1)} / ${formatNumber(limit, 1)} KB`,
       CANVAS_SIZE / 2,
       175
     );
   } else {
     ctx.fillText(
-      `PEAK RAM: ${report.heapUsedKb.toFixed(1)} / ${report.heapLimitKb.toFixed(1)} KB`,
+      `PEAK RAM: ${formatNumber(report.heapUsedKb, 1)} / ${formatNumber(report.heapLimitKb, 1)} KB`,
       CANVAS_SIZE / 2,
       175
     );

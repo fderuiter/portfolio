@@ -3,6 +3,8 @@
  * Pub/Sub Event Bus for real-time external 3D asset download progress streaming.
  */
 
+import { formatNumber } from "../utils";
+
 export interface AssetProgressEvent {
   url: string;
   loaded: number;
@@ -60,5 +62,5 @@ export function formatBytes(bytes: number, decimals: number = 1): string {
   const dm = decimals < 0 ? 0 : decimals;
   const sizes = ["B", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+  return `${formatNumber(bytes / Math.pow(k, i), { decimals: dm, useGrouping: false })} ${sizes[i]}`;
 }

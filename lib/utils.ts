@@ -95,7 +95,10 @@ export function getAnonymousDeviceHash(
  */
 export function generateId(prefix?: string): string {
   let randomPart = "";
-  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.randomUUID === "function"
+  ) {
     try {
       randomPart = crypto.randomUUID().replace(/-/g, "").slice(0, 9);
     } catch {
@@ -118,7 +121,8 @@ export const generateRandomId = generateId;
  */
 export function isValidIsoDate(dateString?: string | null): boolean {
   if (!dateString || typeof dateString !== "string") return false;
-  const isoRegex = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d{1,3})?(Z|[+-]\d{2}:?\d{2})?)?$/;
+  const isoRegex =
+    /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d{1,3})?(Z|[+-]\d{2}:?\d{2})?)?$/;
   if (!isoRegex.test(dateString.trim())) return false;
 
   const timestamp = Date.parse(dateString);
@@ -167,7 +171,9 @@ export function formatDisplayDate(
 /**
  * Formats a date relative to now (e.g. 'Just now', '5m ago', '2h ago', '3d ago').
  */
-export function formatRelativeTime(date?: Date | string | number | null): string {
+export function formatRelativeTime(
+  date?: Date | string | number | null
+): string {
   if (!date) return "";
   try {
     const d = date instanceof Date ? date : new Date(date);
@@ -194,4 +200,224 @@ export function formatRelativeTime(date?: Date | string | number | null): string
   } catch {
     return "";
   }
+}
+
+export interface FormatNumberOptions extends Intl.NumberFormatOptions {
+  locale?: string;
+  decimals?: number;
+}
+
+export interface FormatPercentOptions extends Intl.NumberFormatOptions {
+  locale?: string;
+  decimals?: number;
+  isRatio?: boolean;
+}
+
+export interface FormatCurrencyOptions extends FormatNumberOptions {
+  currency?: string;
+}
+
+/**
+ * Standardized i18n number formatting primitive.
+ * @param value Numeric value to format.
+ * @param decimalsOrOptions Fixed decimal fraction digits, or full format options.
+ */
+export function formatNumber(
+  value: number | null | undefined,
+  decimalsOrOptions?: number | FormatNumberOptions
+): string {
+  if (
+    value === null ||
+    value === undefined ||
+    typeof value !== "number" ||
+    isNaN(value)
+  ) {
+    return "";
+  }
+
+  let options: FormatNumberOptions = {};
+  if (typeof decimalsOrOptions === "number") {
+    options = {
+      minimumFractionDigits: decimalsOrOptions,
+      maximumFractionDigits: decimalsOrOptions,
+    };
+  } else if (decimalsOrOptions) {
+    options = { ...decimalsOrOptions };
+  }
+
+  const { decimals, locale = "en-US", ...intlOptions } = options;
+
+  if (
+    decimals !== undefined &&
+    intlOptions.minimumFractionDigits === undefined
+  ) {
+    intlOptions.minimumFractionDigits = decimals;
+  }
+  if (
+    decimals !== undefined &&
+    intlOptions.maximumFractionDigits === undefined
+  ) {
+    intlOptions.maximumFractionDigits = decimals;
+  }
+
+  return new Intl.NumberFormat(locale, intlOptions).format(value);
+}
+
+/**
+ * Standardized i18n percentage formatting primitive.
+ * @param value Value to format as percentage (0.85 = 85%).
+ * @param decimalsOrOptions Fixed fraction digits or full percent format options.
+ */
+export function formatPercent(
+  value: number | null | undefined,
+  decimalsOrOptions?: number | FormatPercentOptions
+): string {
+  if (
+    value === null ||
+    value === undefined ||
+    typeof value !== "number" ||
+    isNaN(value)
+  ) {
+    return "";
+  }
+
+  let options: FormatPercentOptions = {};
+  if (typeof decimalsOrOptions === "number") {
+    options = {
+      minimumFractionDigits: decimalsOrOptions,
+      maximumFractionDigits: decimalsOrOptions,
+    };
+  } else if (decimalsOrOptions) {
+    options = { ...decimalsOrOptions };
+  }
+
+  const isRatio =
+    options.isRatio !== undefined ? options.isRatio : Math.abs(value) <= 1;
+
+  const ratioValue = isRatio ? value : value / 100;
+
+  const { decimals, isRatio: _, locale = "en-US", ...intlOptions } = options;
+
+  if (
+    decimals !== undefined &&
+    intlOptions.minimumFractionDigits === undefined
+  ) {
+    intlOptions.minimumFractionDigits = decimals;
+  }
+  if (
+    decimals !== undefined &&
+    intlOptions.maximumFractionDigits === undefined
+  ) {
+    intlOptions.maximumFractionDigits = decimals;
+  }
+
+  intlOptions.style = "percent";
+
+  return new Intl.NumberFormat(locale, intlOptions).format(ratioValue);
+}
+
+/**
+ * Standardized i18n currency formatting primitive.
+ * @param value Amount to format.
+ * @param currencyOrOptions ISO currency code string (e.g. 'USD') or full currency options.
+ */
+export function formatCurrency(
+  value: number | null | undefined,
+  currencyOrOptions?: string | FormatCurrencyOptions
+): string {
+  if (
+    value === null ||
+    value === undefined ||
+    typeof value !== "number" ||
+    isNaN(value)
+  ) {
+    return "";
+  }
+
+  let options: FormatCurrencyOptions = {};
+  if (typeof currencyOrOptions === "string") {
+    options = { currency: currencyOrOptions };
+  } else if (currencyOrOptions) {
+    options = { ...currencyOrOptions };
+  }
+
+  const { currency = "USD", locale = "en-US", decimals, ...rest } = options;
+
+  const intlOptions: Intl.NumberFormatOptions = {
+    ...rest,
+    style: "currency",
+    currency,
+  };
+
+  if (
+    decimals !== undefined &&
+    intlOptions.minimumFractionDigits === undefined
+  ) {
+    intlOptions.minimumFractionDigits = decimals;
+  }
+  if (
+    decimals !== undefined &&
+    intlOptions.maximumFractionDigits === undefined
+  ) {
+    intlOptions.maximumFractionDigits = decimals;
+  }
+
+  return new Intl.NumberFormat(locale, intlOptions).format(value);
+}
+
+/**
+ * Standardized i18n compact number formatting primitive (e.g., 1.2K, 10M).
+ * @param value Numeric value to format.
+ * @param decimalsOrOptions Fixed fraction digits or format options.
+ */
+export function formatCompactNumber(
+  value: number | null | undefined,
+  decimalsOrOptions?: number | FormatNumberOptions
+): string {
+  if (
+    value === null ||
+    value === undefined ||
+    typeof value !== "number" ||
+    isNaN(value)
+  ) {
+    return "";
+  }
+
+  let options: FormatNumberOptions = {};
+  if (typeof decimalsOrOptions === "number") {
+    options = {
+      minimumFractionDigits: decimalsOrOptions,
+      maximumFractionDigits: decimalsOrOptions,
+    };
+  } else if (decimalsOrOptions) {
+    options = { ...decimalsOrOptions };
+  }
+
+  const { decimals, locale = "en-US", ...intlOptions } = options;
+
+  if (
+    decimals !== undefined &&
+    intlOptions.minimumFractionDigits === undefined
+  ) {
+    intlOptions.minimumFractionDigits = decimals;
+  }
+  if (
+    decimals !== undefined &&
+    intlOptions.maximumFractionDigits === undefined
+  ) {
+    intlOptions.maximumFractionDigits = decimals;
+  }
+
+  intlOptions.notation = "compact";
+
+  return new Intl.NumberFormat(locale, intlOptions).format(value);
+}
+
+/**
+ * Mathematical precision helper to round numbers cleanly to specified decimal places.
+ */
+export function roundToDecimals(value: number, decimals: number = 2): number {
+  if (typeof value !== "number" || isNaN(value)) return 0;
+  const factor = Math.pow(10, decimals);
+  return Math.round((value + Number.EPSILON) * factor) / factor;
 }

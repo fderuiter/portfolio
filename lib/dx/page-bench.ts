@@ -6,6 +6,7 @@
 import type { Browser, Page } from "@playwright/test";
 import { launchChromiumWithFallback } from "./browser-launch";
 import { colors, formatHeader, formatSection, renderTable } from "./utils";
+import { formatPercent } from "@/lib/utils";
 import {
   PUBLIC_ROUTE_REGISTRY,
   type PublicRouteDefinition,
@@ -541,7 +542,7 @@ export function generateMarkdownReport(
 
   md += `\n## Aggregate Metrics\n\n`;
   md += `- **Total Routes Tested**: ${summaries.length}\n`;
-  md += `- **Routes Passing Budget**: ${passCount} / ${summaries.length} (${summaries.length > 0 ? ((passCount / summaries.length) * 100).toFixed(0) : 0}%)\n`;
+  md += `- **Routes Passing Budget**: ${passCount} / ${summaries.length} (${summaries.length > 0 ? formatPercent(passCount / summaries.length, 0) : "0%"})\n`;
   md += `- **Fleet Average TTFB**: ${avgTtfb}ms\n`;
   md += `- **Fleet Average LCP**: ${avgLcp}ms\n`;
   md += `- **Fleet Average Load Duration**: ${avgLoad}ms\n\n`;

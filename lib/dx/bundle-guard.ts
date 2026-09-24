@@ -3,6 +3,7 @@ import path from "path";
 import zlib from "zlib";
 import type { DiagnosticCheckResult } from "./doctor";
 import { colors, formatHeader } from "./utils";
+import { formatNumber } from "@/lib/utils";
 
 export interface ChunkInfo {
   name: string;
@@ -118,7 +119,7 @@ export function inspectBundleChunks(
 
       if (gzipBytes > DEFAULT_BUDGETS.maxSingleChunkGzip) {
         violations.push(
-          `Chunk '${path.basename(file)}' (${(gzipBytes / 1024).toFixed(1)} kB gzip) exceeds maximum chunk budget of ${(DEFAULT_BUDGETS.maxSingleChunkGzip / 1024).toFixed(0)} kB.`
+          `Chunk '${path.basename(file)}' (${formatNumber(gzipBytes / 1024, 1)} kB gzip) exceeds maximum chunk budget of ${formatNumber(DEFAULT_BUDGETS.maxSingleChunkGzip / 1024, 0)} kB.`
         );
       }
 
@@ -127,7 +128,7 @@ export function inspectBundleChunks(
 
     if (initialSharedGzip > DEFAULT_BUDGETS.maxInitialSharedGzip) {
       violations.push(
-        `Initial shared bundle (${(initialSharedGzip / 1024).toFixed(1)} kB gzip) exceeds maximum initial budget of ${(DEFAULT_BUDGETS.maxInitialSharedGzip / 1024).toFixed(0)} kB.`
+        `Initial shared bundle (${formatNumber(initialSharedGzip / 1024, 1)} kB gzip) exceeds maximum initial budget of ${formatNumber(DEFAULT_BUDGETS.maxInitialSharedGzip / 1024, 0)} kB.`
       );
     }
 
@@ -242,7 +243,7 @@ export function checkBundleBudgets(root: string): DiagnosticCheckResult {
     name: "Production Bundle & Chunk Performance Budgets",
     category: "quality",
     status: "pass",
-    message: `All ${report.totalChunks} production chunks comply with performance budgets (Total Gzip: ${(report.totalGzipBytes / 1024).toFixed(1)} kB).`,
+    message: `All ${report.totalChunks} production chunks comply with performance budgets (Total Gzip: ${formatNumber(report.totalGzipBytes / 1024, 1)} kB).`,
   };
 }
 
@@ -270,16 +271,17 @@ export function printBundleReport(
   }
 
   console.log(
-    `### Production Chunk Inventory · ${report.totalChunks} chunks · ${(report.totalGzipBytes / 1024).toFixed(1)} kB total gzip\n`
+    `### Production Chunk Inventory · ${report.totalChunks} chunks · ${formatNumber(report.totalGzipBytes / 1024, 1)} kB total gzip\n`
   );
 
   for (const chunk of report.chunks) {
     const nameCol =
       chunk.name.length > 40 ? chunk.name.slice(0, 37) + "..." : chunk.name;
-    const rawKb = `${(chunk.rawBytes / 1024).toFixed(1)} kB raw`.padStart(13);
-    const gzipKb = `${(chunk.gzipBytes / 1024).toFixed(1)} kB gzip`.padStart(
-      15
+    const rawKb = `${formatNumber(chunk.rawBytes / 1024, 1)} kB raw`.padStart(
+      13
     );
+    const gzipKb =
+      `${formatNumber(chunk.gzipBytes / 1024, 1)} kB gzip`.padStart(15);
     const initBadge = chunk.isInitial
       ? `${colors.magenta}initial${colors.reset}`
       : `${colors.gray}async${colors.reset}`;
@@ -310,13 +312,13 @@ export function printBundleReport(
   } else {
     console.log(`### All Performance Budgets Satisfied\n`);
     console.log(
-      `Initial shared bundle (${(report.initialSharedGzipBytes / 1024).toFixed(1)} kB) is within ${(DEFAULT_BUDGETS.maxInitialSharedGzip / 1024).toFixed(0)} kB budget.`
+      `Initial shared bundle (${formatNumber(report.initialSharedGzipBytes / 1024, 1)} kB) is within ${formatNumber(DEFAULT_BUDGETS.maxInitialSharedGzip / 1024, 0)} kB budget.`
     );
     console.log(`All individual chunk sizes comply with production SLAs.\n`);
   }
 
   console.log(`##### Metadata`);
   console.log(
-    `*Initial Shared Gzip: ${(report.initialSharedGzipBytes / 1024).toFixed(1)} kB · Max Chunk Budget: ${(DEFAULT_BUDGETS.maxSingleChunkGzip / 1024).toFixed(0)} kB*`
+    `*Initial Shared Gzip: ${formatNumber(report.initialSharedGzipBytes / 1024, 1)} kB · Max Chunk Budget: ${formatNumber(DEFAULT_BUDGETS.maxSingleChunkGzip / 1024, 0)} kB*`
   );
 }

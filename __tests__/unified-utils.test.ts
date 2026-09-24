@@ -10,6 +10,11 @@ import {
   formatIsoDate,
   formatDisplayDate,
   formatRelativeTime,
+  formatNumber,
+  formatPercent,
+  formatCurrency,
+  formatCompactNumber,
+  roundToDecimals,
 } from "../lib/utils";
 
 describe("Unified Shared Utility Suite (lib/utils.ts)", () => {
@@ -17,13 +22,17 @@ describe("Unified Shared Utility Suite (lib/utils.ts)", () => {
     it("escapes standard XML entities with default single quote &apos;", () => {
       const input = "AT&T <500> \"quote\" 'single'";
       const output = escapeXml(input);
-      expect(output).toBe("AT&amp;T &lt;500&gt; &quot;quote&quot; &apos;single&apos;");
+      expect(output).toBe(
+        "AT&amp;T &lt;500&gt; &quot;quote&quot; &apos;single&apos;"
+      );
     });
 
     it("supports parameterized single quote entity &#39; via options object", () => {
       const input = "Term with 'single quotes' & 'ampersands'";
       const output = escapeXml(input, { singleQuoteEntity: "&#39;" });
-      expect(output).toBe("Term with &#39;single quotes&#39; &amp; &#39;ampersands&#39;");
+      expect(output).toBe(
+        "Term with &#39;single quotes&#39; &amp; &#39;ampersands&#39;"
+      );
     });
 
     it("supports parameterized single quote entity &#39; via boolean true parameter", () => {
@@ -67,8 +76,13 @@ describe("Unified Shared Utility Suite (lib/utils.ts)", () => {
         "user-agent": "Mozilla/5.0 (X11; Linux x86_64)",
       };
 
-      const req1 = new NextRequest("http://localhost/api/telemetry", { headers: headersInit });
-      const req2 = new NextRequest("http://localhost/api/case-studies/feedback", { headers: headersInit });
+      const req1 = new NextRequest("http://localhost/api/telemetry", {
+        headers: headersInit,
+      });
+      const req2 = new NextRequest(
+        "http://localhost/api/case-studies/feedback",
+        { headers: headersInit }
+      );
       const plainHeaders = new Headers(headersInit);
 
       const hash1 = getAnonymousDeviceHash(req1);
@@ -91,8 +105,12 @@ describe("Unified Shared Utility Suite (lib/utils.ts)", () => {
         headers: { "x-forwarded-for": "192.0.2.1", "user-agent": "AgentB" },
       });
 
-      expect(getAnonymousDeviceHash(reqA)).not.toBe(getAnonymousDeviceHash(reqB));
-      expect(getAnonymousDeviceHash(reqA)).not.toBe(getAnonymousDeviceHash(reqC));
+      expect(getAnonymousDeviceHash(reqA)).not.toBe(
+        getAnonymousDeviceHash(reqB)
+      );
+      expect(getAnonymousDeviceHash(reqA)).not.toBe(
+        getAnonymousDeviceHash(reqC)
+      );
     });
   });
 
@@ -137,7 +155,9 @@ describe("Unified Shared Utility Suite (lib/utils.ts)", () => {
     it("formats dates to clinical ISO-8601 UTC strings", () => {
       const now = new Date("2026-08-18T12:00:00.000Z");
       expect(formatIsoDate(now)).toBe("2026-08-18T12:00:00.000Z");
-      expect(formatIsoDate("2026-08-18T12:00:00.000Z")).toBe("2026-08-18T12:00:00.000Z");
+      expect(formatIsoDate("2026-08-18T12:00:00.000Z")).toBe(
+        "2026-08-18T12:00:00.000Z"
+      );
       expect(formatIsoDate(now.getTime())).toBe("2026-08-18T12:00:00.000Z");
       expect(formatIsoDate(null)).toBe("");
       expect(formatIsoDate("invalid")).toBe("");
@@ -155,10 +175,26 @@ describe("Unified Shared Utility Suite (lib/utils.ts)", () => {
       const now = Date.now();
       expect(formatRelativeTime(new Date(now - 10 * 1000))).toBe("Just now");
       expect(formatRelativeTime(new Date(now - 45 * 1000))).toBe("45s ago");
-      expect(formatRelativeTime(new Date(now - 15 * 60 * 1000))).toBe("15m ago");
-      expect(formatRelativeTime(new Date(now - 3 * 3600 * 1000))).toBe("3h ago");
-      expect(formatRelativeTime(new Date(now - 5 * 86400 * 1000))).toBe("5d ago");
+      expect(formatRelativeTime(new Date(now - 15 * 60 * 1000))).toBe(
+        "15m ago"
+      );
+      expect(formatRelativeTime(new Date(now - 3 * 3600 * 1000))).toBe(
+        "3h ago"
+      );
+      expect(formatRelativeTime(new Date(now - 5 * 86400 * 1000))).toBe(
+        "5d ago"
+      );
       expect(formatRelativeTime(null)).toBe("");
+    });
+  });
+
+  describe("5. Centralized i18n Number Formatting Utilities", () => {
+    it("formats numbers and percentages consistently", () => {
+      expect(formatNumber(1234.56, 1)).toBe("1,234.6");
+      expect(formatPercent(0.85, 1)).toBe("85.0%");
+      expect(formatCurrency(13500)).toBe("$13,500.00");
+      expect(formatCompactNumber(1200)).toBe("1.2K");
+      expect(roundToDecimals(12.345, 2)).toBe(12.35);
     });
   });
 });

@@ -2,6 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
+import { formatNumber } from "@/lib/utils";
 import { CopyButton } from "@/components/ui/CopyButton";
 import { LevelScore, PuzzlerLevelDef } from "@/lib/quasi-perfect/types";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
@@ -89,7 +90,7 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
           <div className="flex flex-col">
             <span className="text-zinc-500">Remaining RAM</span>
             <span className="font-bold text-brand-cyan text-sm">
-              {score.remainingRam.toFixed(1)} GB
+              {formatNumber(score.remainingRam, 1)} GB
             </span>
           </div>
           <div className="flex flex-col">

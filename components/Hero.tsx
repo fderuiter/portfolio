@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { cn, formatNumber, formatPercent } from "@/lib/utils";
 import { usePretextLayout } from "@/hooks/usePretextLayout";
 import { AnimatedGridPattern } from "@/components/AnimatedGridPattern";
 import { designManifest } from "@/lib/design-manifest";
@@ -620,8 +620,8 @@ const InteractiveEngineeringConsole: React.FC = () => {
                   <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[11px]">
                     <span className="text-zinc-400">Simulated RAM Used:</span>
                     <span className="text-amber-300 font-bold">
-                      {garminHeapAlloc.toFixed(1)} KB / 32.0 KB (
-                      {Math.round((garminHeapAlloc / 32) * 100)}%)
+                      {formatNumber(garminHeapAlloc, 1)} KB / 32.0 KB (
+                      {formatPercent(garminHeapAlloc / 32, 0)})
                     </span>
                   </div>
                   {/* Visual memory bar */}

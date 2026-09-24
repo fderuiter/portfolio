@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { formatPercent } from "@/lib/utils";
 import { useClipboard } from "@/hooks/useClipboard";
 import {
   ControlPoint,
@@ -571,7 +572,7 @@ export const NeuroReconClient: React.FC = () => {
           {
             id: `log-res-succ-${Date.now()}`,
             type: "success",
-            text: `[PASSED] ${currentScenario.successMessage} Euler χ = ${metrics.eulerCharacteristic}, Dice = ${(metrics.diceScore * 100).toFixed(1)}%. +500 PTS`,
+            text: `[PASSED] ${currentScenario.successMessage} Euler χ = ${metrics.eulerCharacteristic}, Dice = ${formatPercent(metrics.diceScore, 1)}. +500 PTS`,
             timestamp: new Date().toLocaleTimeString(),
           },
         ]);
@@ -632,7 +633,7 @@ export const NeuroReconClient: React.FC = () => {
           {
             id: `out-stats-${Date.now()}`,
             type: "output",
-            text: `Morphometric Stats (aseg.stats / aparc.stats):\n  Total Intracranial Volume (eTIV): 1,482,910 mm³\n  Total Gray Matter Volume: 712,450 mm³\n  Total White Matter Volume: 489,120 mm³\n  Mean Cortical Thickness: ${qaMetrics.meanCorticalThicknessMm} mm\n  Dice Ground Truth Similarity: ${(qaMetrics.diceScore * 100).toFixed(1)}%\n  Topological Defect Count: ${qaMetrics.defectCount}`,
+            text: `Morphometric Stats (aseg.stats / aparc.stats):\n  Total Intracranial Volume (eTIV): 1,482,910 mm³\n  Total Gray Matter Volume: 712,450 mm³\n  Total White Matter Volume: 489,120 mm³\n  Mean Cortical Thickness: ${qaMetrics.meanCorticalThicknessMm} mm\n  Dice Ground Truth Similarity: ${formatPercent(qaMetrics.diceScore, 1)}\n  Topological Defect Count: ${qaMetrics.defectCount}`,
             timestamp,
           },
         ]);
@@ -1154,7 +1155,7 @@ export const NeuroReconClient: React.FC = () => {
                 <div>
                   <div className="text-zinc-400">DICE</div>
                   <div className="font-bold text-brand-cyan">
-                    {(qaMetrics.diceScore * 100).toFixed(1)}%
+                    {formatPercent(qaMetrics.diceScore, 1)}
                   </div>
                 </div>
                 <div>

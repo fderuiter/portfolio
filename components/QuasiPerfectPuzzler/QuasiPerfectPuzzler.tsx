@@ -9,6 +9,7 @@ import React, {
 } from "react";
 import { PanInfo } from "framer-motion";
 import { useAudio } from "@/components/providers/AudioProvider";
+import { formatNumber } from "@/lib/utils";
 import { useAnnouncer } from "@/hooks/useAnnouncer";
 import { puzzleLevels } from "@/lib/quasi-perfect/levels";
 import { tacticDefs } from "@/lib/quasi-perfect/tactics";
@@ -287,7 +288,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
         tactic.id !== "sorry"
       ) {
         addLog(
-          `FATAL ERROR: Insufficient RAM for tactic '${tactic.name}'. Required: ${tactic.baseRamCost} GB, Available: ${currentRam.toFixed(1)} GB.`,
+          `FATAL ERROR: Insufficient RAM for tactic '${tactic.name}'. Required: ${tactic.baseRamCost} GB, Available: ${formatNumber(currentRam, 1)} GB.`,
           "error"
         );
         playNote(130.81, 0.2); // Error buzz
@@ -435,7 +436,9 @@ export const QuasiPerfectPuzzler: React.FC = () => {
             );
             addLog(
               `✔ Q.E.D. All goals closed! Theorem verified${
-                gameMode === "hacker" ? ` in ${nextRam.toFixed(1)} GB.` : "!"
+                gameMode === "hacker"
+                  ? ` in ${formatNumber(nextRam, 1)} GB.`
+                  : "!"
               }`,
               "success"
             );
@@ -1019,7 +1022,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
                   Active Goal: {activeSubgoal.label}
                 </output>
                 <output htmlFor="quasi-ram">
-                  RAM Memory: {currentRam.toFixed(1)} GB
+                  RAM Memory: {formatNumber(currentRam, 1)} GB
                 </output>
                 <output htmlFor="quasi-status">
                   Proof Status:{" "}

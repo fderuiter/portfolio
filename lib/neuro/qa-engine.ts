@@ -6,6 +6,7 @@
 
 import { ControlPoint, QAMetrics, ScenarioConfig, VoxelEdit } from "./types";
 import { SyntheticVolume } from "./volume-generator";
+import { roundToDecimals } from "../utils";
 
 /**
  * Evaluate the live QA status of the current workspace state.
@@ -95,7 +96,10 @@ export function evaluateQAMetrics(
   }
 
   const remainingDefects = Math.max(0, initialDefects - correctedDefects);
-  const completionRatio = initialDefects > 0 ? (initialDefects - remainingDefects) / initialDefects : 1.0;
+  const completionRatio =
+    initialDefects > 0
+      ? (initialDefects - remainingDefects) / initialDefects
+      : 1.0;
 
   // Compute live Euler Characteristic χ
   // S2 sphere = 2; genus g handle: χ = 2 - 2g
@@ -103,24 +107,33 @@ export function evaluateQAMetrics(
   if (completionRatio >= 0.85) {
     liveEuler = scenario.targetEuler;
   } else if (completionRatio > 0.4) {
-    liveEuler = Math.round(scenario.initialEuler + (scenario.targetEuler - scenario.initialEuler) * 0.5);
+    liveEuler = Math.round(
+      scenario.initialEuler +
+        (scenario.targetEuler - scenario.initialEuler) * 0.5
+    );
   }
 
   // Compute live Dice Similarity
   const baseDice = scenario.id === "sandbox" ? 0.98 : 0.88;
-  const liveDice = Number((baseDice + (scenario.targetDice - baseDice) * completionRatio).toFixed(3));
+  const liveDice = roundToDecimals(
+    baseDice + (scenario.targetDice - baseDice) * completionRatio,
+    3
+  );
 
   // Compute Mean Cortical Thickness (mm)
   let thickness = 2.45;
   if (scenario.id === "dura_inclusion") {
     // Inflated by dura until fixed
-    thickness = Number((3.82 - 1.37 * completionRatio).toFixed(2));
+    thickness = roundToDecimals(3.82 - 1.37 * completionRatio, 2);
   } else if (scenario.id === "skull_strip_erosion") {
     // Truncated until restored
-    thickness = Number((1.65 + 0.8 * completionRatio).toFixed(2));
+    thickness = roundToDecimals(1.65 + 0.8 * completionRatio, 2);
   }
 
-  const isResolved = remainingDefects <= 2 && liveDice >= scenario.targetDice && liveEuler === scenario.targetEuler;
+  const isResolved =
+    remainingDefects <= 2 &&
+    liveDice >= scenario.targetDice &&
+    liveEuler === scenario.targetEuler;
   const accuracyScore = Math.round(completionRatio * 100);
 
   return {

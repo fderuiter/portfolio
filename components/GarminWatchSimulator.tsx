@@ -23,6 +23,7 @@ import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useResponsiveCanvas } from "@/hooks/useResponsiveCanvas";
 import { useAnnouncer } from "@/hooks/useAnnouncer";
+import { formatNumber, formatPercent } from "@/lib/utils";
 import { useGarminService } from "@/hooks/useGarminService";
 import { triggerHaptic } from "@/lib/haptics";
 import { BezelClusterDock } from "@/components/arcade/ControlDocks";
@@ -470,7 +471,7 @@ export const GarminWatchSimulator: React.FC<GarminWatchSimulatorProps> = ({
       gameState.gameState === "playing"
     ) {
       hasAlertedMemoryRef.current = true;
-      const msg = `Warning: High memory pressure. RAM usage at ${Math.round((ramUsage / ramLimit) * 100)}% (${ramUsage.toFixed(1)} KB of ${ramLimit} KB).`;
+      const msg = `Warning: High memory pressure. RAM usage at ${formatPercent(ramUsage / ramLimit, 0)} (${formatNumber(ramUsage, 1)} KB of ${ramLimit} KB).`;
       setAlertMessage(msg);
       announce(msg, "assertive");
       triggerHaptic([30, 20, 30]);
@@ -840,7 +841,8 @@ export const GarminWatchSimulator: React.FC<GarminWatchSimulatorProps> = ({
             role="img"
             aria-label={`Smartwatch display simulator. Status: ${gameState.gameState}. Score: ${
               gameState.score
-            }, High Score: ${effectiveHighScore}. Memory: ${gameState.allocatedRamKb.toFixed(
+            }, High Score: ${effectiveHighScore}. Memory: ${formatNumber(
+              gameState.allocatedRamKb,
               1
             )} of ${currentProfile.ramLimitKb} KB. Battery: ${Math.round(
               gameState.battery
@@ -951,7 +953,7 @@ export const GarminWatchSimulator: React.FC<GarminWatchSimulatorProps> = ({
           <span>
             RAM:{" "}
             <strong className="text-white">
-              {gameState.allocatedRamKb.toFixed(1)} /{" "}
+              {formatNumber(gameState.allocatedRamKb, 1)} /{" "}
               {currentProfile.ramLimitKb} KB
             </strong>
           </span>
@@ -961,7 +963,7 @@ export const GarminWatchSimulator: React.FC<GarminWatchSimulatorProps> = ({
           <span>
             FLASH:{" "}
             <strong className="text-white">
-              {gameState.allocatedFlashKb.toFixed(1)} /{" "}
+              {formatNumber(gameState.allocatedFlashKb, 1)} /{" "}
               {currentProfile.flashLimitKb} KB
             </strong>
           </span>
@@ -1071,7 +1073,7 @@ export const GarminWatchSimulator: React.FC<GarminWatchSimulatorProps> = ({
               Device Target: {currentProfile.name}
             </output>
             <output htmlFor="garmin-ram">
-              RAM Memory: {gameState.allocatedRamKb.toFixed(1)} /{" "}
+              RAM Memory: {formatNumber(gameState.allocatedRamKb, 1)} /{" "}
               {currentProfile.ramLimitKb} KB
             </output>
             <output htmlFor="garmin-battery">
@@ -1202,7 +1204,8 @@ export const GarminWatchSimulator: React.FC<GarminWatchSimulatorProps> = ({
 
       {/* Off-screen Live Regions for Screen Reader Telemetry & Assertive Alerts */}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
-        {`Garmin Simulator Telemetry. Status: ${gameState.gameState}. Memory: ${gameState.allocatedRamKb.toFixed(
+        {`Garmin Simulator Telemetry. Status: ${gameState.gameState}. Memory: ${formatNumber(
+          gameState.allocatedRamKb,
           1
         )} / ${currentProfile.ramLimitKb} KB. Battery: ${Math.round(
           gameState.battery
