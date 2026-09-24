@@ -1,4 +1,18 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+
+// Six arcade games show a desktop-only notice on phones and portrait tablets
+// (ADR 0048). These specs exercise the touch controls behind it, so they take
+// the notice's "Try it anyway" path first. On a device the gate does not
+// match, the button is hidden and this is a no-op.
+async function passDesktopOnlyGate(page: Page) {
+  const tryAnyway = page.getByRole("button", { name: /Try it anyway/i });
+  if (await tryAnyway.isVisible()) {
+    await expect(async () => {
+      await tryAnyway.click();
+      await expect(tryAnyway).toBeHidden({ timeout: 3000 });
+    }).toPass({ timeout: 15000 });
+  }
+}
 
 test.describe("Mobile & Tablet Touch Interactions Suite", () => {
   test.beforeEach(async ({ page }) => {
@@ -109,19 +123,29 @@ test.describe("Mobile & Tablet Touch Interactions Suite", () => {
     isMobile,
   }) => {
     await page.goto("/proof");
-    await page.waitForTimeout(400);
 
     if (isMobile) {
-      // Verify mobile segmented tab switcher
-      const ledgerTab = page.getByRole("button", { name: /ledger/i }).first();
-      const fallacyTab = page.getByRole("button", { name: /fallacy/i }).first();
-      const canvasTab = page.getByRole("button", { name: /canvas/i }).first();
+      // Verify mobile segmented tab switcher. Names are exact because a
+      // /canvas/i pattern first matches "Open Field Manual for Logical Proof
+      // Canvas", which never switches back to the canvas view (#928).
+      const ledgerTab = page
+        .getByRole("button", { name: "Ledger", exact: true })
+        .first();
+      const fallacyTab = page
+        .getByRole("button", { name: "Fallacy", exact: true })
+        .first();
+      const canvasTab = page.getByRole("button", {
+        name: "Canvas",
+        exact: true,
+      });
 
       await expect(canvasTab).toBeVisible();
-      await ledgerTab.click();
-      await expect(
-        page.getByText(/Formal Fitch Deduction Ledger/i)
-      ).toBeVisible();
+      await expect(async () => {
+        await ledgerTab.click();
+        await expect(
+          page.getByText(/Formal Fitch Deduction Ledger/i)
+        ).toBeVisible({ timeout: 3000 });
+      }).toPass({ timeout: 15000 });
 
       await fallacyTab.click();
       await expect(
@@ -178,6 +202,7 @@ test.describe("Mobile & Tablet Touch Interactions Suite", () => {
   }) => {
     await page.goto("/arcade/retro-labyrinth");
     await page.waitForLoadState("networkidle");
+    await passDesktopOnlyGate(page);
 
     const launchCabinetBtn = page.getByRole("button", {
       name: /Launch Cabinet/i,
@@ -220,6 +245,7 @@ test.describe("Mobile & Tablet Touch Interactions Suite", () => {
   }) => {
     await page.goto("/arcade/laser-loon");
     await page.waitForLoadState("networkidle");
+    await passDesktopOnlyGate(page);
 
     const launchCabinetBtn = page.getByRole("button", {
       name: /Launch Cabinet/i,
@@ -256,6 +282,7 @@ test.describe("Mobile & Tablet Touch Interactions Suite", () => {
   }) => {
     await page.goto("/arcade/clinical-chaos");
     await page.waitForLoadState("networkidle");
+    await passDesktopOnlyGate(page);
 
     const launchCabinetBtn = page.getByRole("button", {
       name: /Launch Cabinet/i,
@@ -318,6 +345,7 @@ test.describe("Real rendered touch-target dimensions (48px minimum, ADR-0003/ADR
   }) => {
     await page.goto("/arcade/retro-labyrinth");
     await page.waitForLoadState("networkidle");
+    await passDesktopOnlyGate(page);
 
     const launchCabinetBtn = page.getByRole("button", {
       name: /Launch Cabinet/i,
@@ -378,6 +406,7 @@ test.describe("Real rendered touch-target dimensions (48px minimum, ADR-0003/ADR
   }) => {
     await page.goto("/arcade/laser-loon");
     await page.waitForLoadState("networkidle");
+    await passDesktopOnlyGate(page);
 
     const launchCabinetBtn = page.getByRole("button", {
       name: /Launch Cabinet/i,

@@ -35,19 +35,21 @@ export const CRTCalibrationModal: React.FC<CRTCalibrationModalProps> = ({
   onChange,
   themePrimaryColor: _themePrimaryColor = "#10b981",
 }) => {
-  const [activePreset, setActivePreset] = useState<CRTPresetId | "custom">(() => {
-    // Check if initial config matches any preset
-    const match = Object.values(CRT_PRESETS).find((preset) => {
-      const p = preset.config;
-      return (
-        p.scanlinesEnabled === config.scanlinesEnabled &&
-        p.phosphorMask === config.phosphorMask &&
-        Math.abs(p.scanlineIntensity - config.scanlineIntensity) < 0.05 &&
-        Math.abs(p.phosphorIntensity - config.phosphorIntensity) < 0.05
-      );
-    });
-    return match ? match.id : "custom";
-  });
+  const [activePreset, setActivePreset] = useState<CRTPresetId | "custom">(
+    () => {
+      // Check if initial config matches any preset
+      const match = Object.values(CRT_PRESETS).find((preset) => {
+        const p = preset.config;
+        return (
+          p.scanlinesEnabled === config.scanlinesEnabled &&
+          p.phosphorMask === config.phosphorMask &&
+          Math.abs(p.scanlineIntensity - config.scanlineIntensity) < 0.05 &&
+          Math.abs(p.phosphorIntensity - config.phosphorIntensity) < 0.05
+        );
+      });
+      return match ? match.id : "custom";
+    }
+  );
 
   const trapRef = useFocusTrap<HTMLDivElement>(isOpen, {
     onEscape: onClose,
@@ -67,7 +69,10 @@ export const CRTCalibrationModal: React.FC<CRTCalibrationModalProps> = ({
   );
 
   const handleConfigChange = useCallback(
-    <K extends keyof CRTCalibrationConfig>(key: K, value: CRTCalibrationConfig[K]) => {
+    <K extends keyof CRTCalibrationConfig>(
+      key: K,
+      value: CRTCalibrationConfig[K]
+    ) => {
       setActivePreset("custom");
       const newConfig = { ...config, [key]: value };
       onChange(newConfig);
@@ -101,14 +106,18 @@ export const CRTCalibrationModal: React.FC<CRTCalibrationModalProps> = ({
               <IconDeviceTv className="w-6 h-6" />
             </div>
             <div>
-              <h2 id="crt-calibration-title" className="text-lg font-bold text-white flex items-center gap-2">
+              <h2
+                id="crt-calibration-title"
+                className="text-lg font-bold text-white flex items-center gap-2"
+              >
                 CRT Display Calibration
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300 font-normal">
                   Post-Processing Shader
                 </span>
               </h2>
               <p id="crt-calibration-desc" className="text-xs text-zinc-400">
-                Calibrate RGB subpixel phosphor mask emulation, bloom glow, and scanline rasters.
+                Calibrate RGB subpixel phosphor mask emulation, bloom glow, and
+                scanline rasters.
               </p>
             </div>
           </div>
@@ -143,9 +152,13 @@ export const CRTCalibrationModal: React.FC<CRTCalibrationModalProps> = ({
                 >
                   <div className="flex items-center justify-between w-full mb-1">
                     <span className="font-bold truncate">{preset.name}</span>
-                    {isSelected && <IconCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />}
+                    {isSelected && (
+                      <IconCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    )}
                   </div>
-                  <span className="text-[10px] text-zinc-400 font-mono">{preset.badge}</span>
+                  <span className="text-[10px] text-zinc-400 font-mono">
+                    {preset.badge}
+                  </span>
                 </button>
               );
             })}
@@ -169,18 +182,25 @@ export const CRTCalibrationModal: React.FC<CRTCalibrationModalProps> = ({
           {/* Scanline Master Toggle & Opacity */}
           <div className="bg-zinc-900/50 p-4 rounded-xl border border-zinc-800/80 space-y-3">
             <div className="flex items-center justify-between">
-              <label htmlFor="crt-scanline-toggle" className="text-xs font-bold text-zinc-200 cursor-pointer flex items-center gap-2">
+              <label
+                htmlFor="crt-scanline-toggle"
+                className="text-xs font-bold text-zinc-200 cursor-pointer flex items-center gap-2"
+              >
                 <input
                   id="crt-scanline-toggle"
                   type="checkbox"
                   checked={config.scanlinesEnabled}
-                  onChange={(e) => handleConfigChange("scanlinesEnabled", e.target.checked)}
+                  onChange={(e) =>
+                    handleConfigChange("scanlinesEnabled", e.target.checked)
+                  }
                   className="rounded bg-zinc-800 border-zinc-700 text-emerald-500 focus:ring-emerald-400 w-4 h-4 cursor-pointer"
                 />
                 CRT Scanline Rasters
               </label>
               <span className="text-xs font-mono text-zinc-400">
-                {config.scanlinesEnabled ? `${Math.round(config.scanlineIntensity * 100)}%` : "Disabled"}
+                {config.scanlinesEnabled
+                  ? `${Math.round(config.scanlineIntensity * 100)}%`
+                  : "Disabled"}
               </span>
             </div>
 
@@ -197,7 +217,12 @@ export const CRTCalibrationModal: React.FC<CRTCalibrationModalProps> = ({
                     max="1"
                     step="0.02"
                     value={config.scanlineIntensity}
-                    onChange={(e) => handleConfigChange("scanlineIntensity", parseFloat(e.target.value))}
+                    onChange={(e) =>
+                      handleConfigChange(
+                        "scanlineIntensity",
+                        parseFloat(e.target.value)
+                      )
+                    }
                     aria-label="Scanline Darkness Intensity"
                     className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-emerald-400"
                   />
@@ -206,20 +231,32 @@ export const CRTCalibrationModal: React.FC<CRTCalibrationModalProps> = ({
                 <div>
                   <div className="flex justify-between text-[11px] text-zinc-400 mb-1">
                     <span>Raster Pitch / Density</span>
-                    <span>{config.scanlineDensity === 2 ? "Fine (2px)" : config.scanlineDensity === 3 ? "Standard (3px)" : "Thick (4px)"}</span>
+                    <span>
+                      {config.scanlineDensity === 2
+                        ? "Fine (2px)"
+                        : config.scanlineDensity === 3
+                          ? "Standard (3px)"
+                          : "Thick (4px)"}
+                    </span>
                   </div>
                   <div className="grid grid-cols-3 gap-2">
                     {[2, 3, 4].map((pitch) => (
                       <button
                         key={pitch}
-                        onClick={() => handleConfigChange("scanlineDensity", pitch)}
+                        onClick={() =>
+                          handleConfigChange("scanlineDensity", pitch)
+                        }
                         className={`py-1 text-[10px] rounded border transition-colors cursor-pointer ${
                           config.scanlineDensity === pitch
                             ? "bg-emerald-500/20 border-emerald-500 text-emerald-300"
                             : "bg-zinc-800 border-zinc-700 text-zinc-400 hover:text-white"
                         }`}
                       >
-                        {pitch === 2 ? "Fine (2px)" : pitch === 3 ? "Standard (3px)" : "Thick (4px)"}
+                        {pitch === 2
+                          ? "Fine (2px)"
+                          : pitch === 3
+                            ? "Standard (3px)"
+                            : "Thick (4px)"}
                       </button>
                     ))}
                   </div>
@@ -236,7 +273,9 @@ export const CRTCalibrationModal: React.FC<CRTCalibrationModalProps> = ({
                 RGB Subpixel Phosphor Mask
               </span>
               <span className="text-xs font-mono text-zinc-400">
-                {config.phosphorMask === "none" ? "Off" : `${Math.round(config.phosphorIntensity * 100)}%`}
+                {config.phosphorMask === "none"
+                  ? "Off"
+                  : `${Math.round(config.phosphorIntensity * 100)}%`}
               </span>
             </div>
 
@@ -251,7 +290,12 @@ export const CRTCalibrationModal: React.FC<CRTCalibrationModalProps> = ({
               ).map((mask) => (
                 <button
                   key={mask.id}
-                  onClick={() => handleConfigChange("phosphorMask", mask.id as PhosphorMaskType)}
+                  onClick={() =>
+                    handleConfigChange(
+                      "phosphorMask",
+                      mask.id as PhosphorMaskType
+                    )
+                  }
                   className={`py-1.5 px-2 rounded-lg border text-center transition-colors cursor-pointer ${
                     config.phosphorMask === mask.id
                       ? "bg-rose-500/20 border-rose-500 text-rose-300 font-bold"
@@ -275,7 +319,12 @@ export const CRTCalibrationModal: React.FC<CRTCalibrationModalProps> = ({
                   max="1"
                   step="0.02"
                   value={config.phosphorIntensity}
-                  onChange={(e) => handleConfigChange("phosphorIntensity", parseFloat(e.target.value))}
+                  onChange={(e) =>
+                    handleConfigChange(
+                      "phosphorIntensity",
+                      parseFloat(e.target.value)
+                    )
+                  }
                   aria-label="Phosphor Mask Opacity"
                   className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-rose-400"
                 />
@@ -291,7 +340,9 @@ export const CRTCalibrationModal: React.FC<CRTCalibrationModalProps> = ({
                   <IconSun className="w-3.5 h-3.5 text-amber-400" />
                   Phosphor Bloom Glow
                 </span>
-                <span className="text-zinc-400">{Math.round(config.bloomIntensity * 100)}%</span>
+                <span className="text-zinc-400">
+                  {Math.round(config.bloomIntensity * 100)}%
+                </span>
               </div>
               <input
                 type="range"
@@ -299,7 +350,12 @@ export const CRTCalibrationModal: React.FC<CRTCalibrationModalProps> = ({
                 max="1"
                 step="0.02"
                 value={config.bloomIntensity}
-                onChange={(e) => handleConfigChange("bloomIntensity", parseFloat(e.target.value))}
+                onChange={(e) =>
+                  handleConfigChange(
+                    "bloomIntensity",
+                    parseFloat(e.target.value)
+                  )
+                }
                 aria-label="Phosphor Bloom Glow Intensity"
                 className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-amber-400"
               />
@@ -308,7 +364,9 @@ export const CRTCalibrationModal: React.FC<CRTCalibrationModalProps> = ({
             <div>
               <div className="flex justify-between text-xs font-bold text-zinc-200 mb-1">
                 <span>Tube Vignette Falloff</span>
-                <span className="text-zinc-400">{Math.round(config.vignetteIntensity * 100)}%</span>
+                <span className="text-zinc-400">
+                  {Math.round(config.vignetteIntensity * 100)}%
+                </span>
               </div>
               <input
                 type="range"
@@ -316,7 +374,12 @@ export const CRTCalibrationModal: React.FC<CRTCalibrationModalProps> = ({
                 max="1"
                 step="0.02"
                 value={config.vignetteIntensity}
-                onChange={(e) => handleConfigChange("vignetteIntensity", parseFloat(e.target.value))}
+                onChange={(e) =>
+                  handleConfigChange(
+                    "vignetteIntensity",
+                    parseFloat(e.target.value)
+                  )
+                }
                 aria-label="Tube Vignette Falloff Intensity"
                 className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-zinc-400"
               />
@@ -325,7 +388,9 @@ export const CRTCalibrationModal: React.FC<CRTCalibrationModalProps> = ({
             <div>
               <div className="flex justify-between text-xs font-bold text-zinc-200 mb-1">
                 <span>Barrel Curvature</span>
-                <span className="text-zinc-400">{Math.round(config.curvature * 100)}%</span>
+                <span className="text-zinc-400">
+                  {Math.round(config.curvature * 100)}%
+                </span>
               </div>
               <input
                 type="range"
@@ -333,19 +398,26 @@ export const CRTCalibrationModal: React.FC<CRTCalibrationModalProps> = ({
                 max="0.5"
                 step="0.02"
                 value={config.curvature}
-                onChange={(e) => handleConfigChange("curvature", parseFloat(e.target.value))}
+                onChange={(e) =>
+                  handleConfigChange("curvature", parseFloat(e.target.value))
+                }
                 aria-label="Barrel Curvature Factor"
                 className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-purple-400"
               />
             </div>
 
             <div className="flex items-center justify-between pt-4">
-              <label htmlFor="crt-shimmer-toggle" className="text-xs font-bold text-zinc-200 cursor-pointer flex items-center gap-2">
+              <label
+                htmlFor="crt-shimmer-toggle"
+                className="text-xs font-bold text-zinc-200 cursor-pointer flex items-center gap-2"
+              >
                 <input
                   id="crt-shimmer-toggle"
                   type="checkbox"
                   checked={config.flickerShimmer}
-                  onChange={(e) => handleConfigChange("flickerShimmer", e.target.checked)}
+                  onChange={(e) =>
+                    handleConfigChange("flickerShimmer", e.target.checked)
+                  }
                   className="rounded bg-zinc-800 border-zinc-700 text-emerald-500 focus:ring-emerald-400 w-4 h-4 cursor-pointer"
                 />
                 Phosphor Micro-Shimmer

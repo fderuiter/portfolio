@@ -106,10 +106,17 @@ test.describe("Trial & Error: Biostat Ops Card Table", () => {
     );
     await expect(page.getByTestId("blind-result")).toContainText("828 of 300");
     await expect(
-      page.getByRole("button", { name: "Restart Blind" })
+      page.getByRole("button", { name: "Next Blind" })
     ).toBeFocused();
     await page.keyboard.press("Enter");
-    await expect(card(page, DRAFT_A)).toBeFocused();
+    await expect(page.getByTestId("blind-name")).toHaveText(
+      "Big Blind: Sponsor Safety Review"
+    );
+    await expect(card(page, "C-T14.3.1-A")).toBeFocused();
+    await expect(page.getByTestId("blind-intro")).toContainText(
+      "safety physician"
+    );
+    await expectNoBlockingViolations(page, "Big Blind start");
   });
 
   test("an uninspected card still zeroes the hand, and D discards for 1 CPU", async ({
@@ -201,6 +208,28 @@ test.describe("Trial & Error: Biostat Ops Card Table", () => {
       await expect(drawer(page)).toBeVisible();
       await gridCell(page, 2, 1).click();
       await expectNoHorizontalOverflow(page);
+    });
+  }
+
+  for (const width of [320, 375, 768]) {
+    test(`reviews every Inspect cell by click at ${width}px (#956)`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 800 });
+      await launch(page);
+      await card(page, DRAFT_A).focus();
+      await page.keyboard.press("i");
+      await expect(drawer(page)).toBeVisible();
+      for (let row = 0; row < 5; row++) {
+        for (let col = 0; col < 3; col++) {
+          const cell = gridCell(page, row, col);
+          await cell.click();
+          await expect(cell).not.toHaveAttribute("data-status", "UNREVIEWED");
+        }
+      }
+      await expect(drawer(page).getByTestId("reviewed-count")).toHaveText(
+        "15/15"
+      );
     });
   }
 
@@ -433,8 +462,8 @@ test.describe("Trial & Error: Biostat Ops Card Table", () => {
         card(page, "C-L16.2.4").locator('[data-face-kind="LISTING"]')
       ).toContainText("S-001");
       await expect(
-        card(page, "C-F14.2.1").locator('[data-face-kind="FIGURE"] path')
-      ).toHaveCount(2);
+        card(page, "C-T14.3.1").locator('[data-face-kind="TABLE"]')
+      ).toContainText("Any TEAE");
     });
 
     test("reads a card with ? and reorders with Alt+arrows, axe clean", async ({

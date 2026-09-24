@@ -30,6 +30,40 @@ Derives everything the Card Table renders. Pure; safe on every render.
 
 `"SMALL_BLIND"` \| `"BIG_BLIND"` \| `"BOSS_BLIND"` = `BlindTierSchema`
 
+#### boss?
+
+\{ `debuffType`: `"DISABLE_POPULATION"` \| `"HAND_LIMIT"` \| `"DISCARD_PENALTY"` \| `"BLIND_FIREWALL"`; `description`: `string`; `disabledPopulations?`: (`"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`)[]; `discardCpuPenalty?`: `number`; `id`: `string`; `maxHandsAllowed?`: `number`; `name`: `string`; \} = `...`
+
+Present only on a Boss Blind.
+
+#### boss.debuffType
+
+`"DISABLE_POPULATION"` \| `"HAND_LIMIT"` \| `"DISCARD_PENALTY"` \| `"BLIND_FIREWALL"` = `BossDebuffTypeSchema`
+
+#### boss.description
+
+`string` = `...`
+
+#### boss.disabledPopulations?
+
+(`"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`)[] = `...`
+
+#### boss.discardCpuPenalty?
+
+`number` = `...`
+
+#### boss.id
+
+`string` = `identifier`
+
+#### boss.maxHandsAllowed?
+
+`number` = `...`
+
+#### boss.name
+
+`string` = `...`
+
 #### deck
 
 `object`[] = `...`
@@ -45,6 +79,12 @@ Derives everything the Card Table renders. Pure; safe on every render.
 #### id
 
 `string` = `identifier`
+
+#### intro
+
+`string` = `...`
+
+The short intro card shown when the Blind starts.
 
 #### populationSnapshot
 
@@ -102,49 +142,9 @@ Derives everything the Card Table renders. Pure; safe on every render.
 
 `string` = `...`
 
-#### shell
+#### shells
 
-\{ `allowedFootnoteSlots`: `number`; `cardType`: `"TABLE"` \| `"LISTING"` \| `"FIGURE"` \| `"SUBJECT_TOKEN"`; `chips`: `number`; `id`: `string`; `isBlinded?`: `boolean`; `mult`: `number`; `requiredRulebookId`: `string`; `tableNumber`: `string`; `targetPopulation`: `"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`; `title`: `string`; \} = `TableShellSpecSchema`
-
-#### shell.allowedFootnoteSlots
-
-`number` = `nonNegativeInt`
-
-#### shell.cardType
-
-`"TABLE"` \| `"LISTING"` \| `"FIGURE"` \| `"SUBJECT_TOKEN"` = `CardTypeSchema`
-
-#### shell.chips
-
-`number` = `nonNegativeInt`
-
-#### shell.id
-
-`string` = `identifier`
-
-#### shell.isBlinded?
-
-`boolean` = `...`
-
-#### shell.mult
-
-`number` = `nonNegativeInt`
-
-#### shell.requiredRulebookId
-
-`string` = `identifier`
-
-#### shell.tableNumber
-
-`string` = `...`
-
-#### shell.targetPopulation
-
-`"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"` = `PopulationTypeSchema`
-
-#### shell.title
-
-`string` = `...`
+`object`[] = `...`
 
 #### startingCpu
 

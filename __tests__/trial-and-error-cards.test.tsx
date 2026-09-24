@@ -17,6 +17,7 @@ import {
   type CardStamp,
   type RedactedCard,
   type TableCardView,
+  type TlfCard,
 } from "@/lib/trial-and-error";
 import { CardTable } from "@/components/trial-and-error/CardTable";
 import { CardBack } from "@/components/trial-and-error/cards/CardBack";
@@ -59,29 +60,140 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
+// Act I has no efficacy outputs or Figures (#911), so the efficacy Table and
+// both Figure faces are covered by these fixtures, as Act II will deal them.
+const FIXTURE_CARDS: TlfCard[] = [
+  {
+    id: "C-T14.2.1",
+    cardType: "TABLE",
+    number: "Table 14.2.1",
+    title: "Primary Endpoint (ANCOVA)",
+    population: "FAS",
+    chips: 40,
+    mult: 1,
+    topic: "EFF",
+    csrStage: "EFFICACY",
+    face: {
+      kind: "TABLE",
+      columns: ["Placebo", "Active", "Diff"],
+      rows: [
+        { label: "N", values: ["6", "5", "—"] },
+        { label: "LS mean", values: ["-1.2", "-4.8", "-3.6"] },
+        { label: "95% CI", values: ["—", "—", "(-6.9, -0.3)"] },
+        { label: "p-value", values: ["—", "—", "0.034"] },
+      ],
+    },
+  },
+  {
+    id: "C-F14.2.1",
+    cardType: "FIGURE",
+    number: "Figure 14.2.1",
+    title: "Kaplan-Meier: Time to Response",
+    population: "FAS",
+    chips: 35,
+    mult: 0,
+    topic: "EFF",
+    face: {
+      kind: "FIGURE",
+      plot: {
+        type: "KM",
+        series: [
+          {
+            label: "Placebo",
+            points: [
+              [0, 1],
+              [2, 1],
+              [4, 0.83],
+              [8, 0.67],
+              [12, 0.5],
+            ],
+          },
+          {
+            label: "Active",
+            points: [
+              [0, 1],
+              [2, 0.8],
+              [4, 0.6],
+              [8, 0.4],
+              [12, 0.2],
+            ],
+          },
+        ],
+      },
+    },
+  },
+  {
+    id: "C-T14.2.2",
+    cardType: "TABLE",
+    number: "Table 14.2.2",
+    title: "Key Secondary Endpoint",
+    population: "FAS",
+    chips: 35,
+    mult: 1,
+    topic: "EFF",
+    csrStage: "EFFICACY",
+    face: {
+      kind: "TABLE",
+      columns: ["Placebo", "Active", "Diff"],
+      rows: [
+        { label: "N", values: ["6", "5", "—"] },
+        { label: "Responders", values: ["2 (33.3)", "4 (80.0)", "—"] },
+        { label: "Odds ratio", values: ["—", "—", "8.0"] },
+        { label: "p-value", values: ["—", "—", "0.24"] },
+      ],
+    },
+  },
+  {
+    id: "C-F14.2.2",
+    cardType: "FIGURE",
+    number: "Figure 14.2.2",
+    title: "Forest Plot by Subgroup",
+    population: "FAS",
+    chips: 30,
+    mult: 0,
+    topic: "EFF",
+    face: {
+      kind: "FIGURE",
+      plot: {
+        type: "FOREST",
+        reference: 0,
+        intervals: [
+          { label: "Overall", estimate: -3.6, lower: -6.9, upper: -0.3 },
+          { label: "Age < 65", estimate: -4.1, lower: -8, upper: -0.2 },
+          { label: "Age ≥ 65", estimate: -2.2, lower: -7.5, upper: 3.1 },
+          { label: "Female", estimate: -4.4, lower: -8.6, upper: -0.2 },
+        ],
+      },
+    },
+  },
+];
+
 // Every dealt card, plus every undealt card that carries its own face data
 // (undealt drafts derive their face from the draft, covered by the domain tests).
 const deckView = (): TableCardView[] =>
-  DEMOGRAPHICS_SCENARIO.deck.flatMap((card): TableCardView[] => {
-    const dealt = deriveTableView(
-      DEMOGRAPHICS_SCENARIO,
-      createTableState(DEMOGRAPHICS_SCENARIO)
-    ).hand.find((h) => h.card.id === card.id);
-    if (dealt) return [dealt];
-    if (!card.face) return [];
-    return [
-      {
-        card,
-        selected: false,
-        inspectable: false,
-        inspected: false,
-        unverified: false,
-        openRedlines: 0,
-        face: card.face,
-        stamps: [],
-      },
-    ];
-  });
+  [...DEMOGRAPHICS_SCENARIO.deck, ...FIXTURE_CARDS].flatMap(
+    (card): TableCardView[] => {
+      const dealt = deriveTableView(
+        DEMOGRAPHICS_SCENARIO,
+        createTableState(DEMOGRAPHICS_SCENARIO)
+      ).hand.find((h) => h.card.id === card.id);
+      if (dealt) return [dealt];
+      if (!card.face) return [];
+      return [
+        {
+          card,
+          selected: false,
+          inspectable: false,
+          inspected: false,
+          unverified: false,
+          openRedlines: 0,
+          face: card.face,
+          stamps: [],
+          debuffed: false,
+        },
+      ];
+    }
+  );
 const viewOf = (id: string) => deckView().find((v) => v.card.id === id)!;
 
 describe("card faces", () => {
@@ -338,7 +450,7 @@ describe("hand physicality on the Card Table", () => {
   it("opens detail on a long press without also toggling selection", () => {
     vi.useFakeTimers();
     render(<CardTable />);
-    const id = "C-T14.2.1";
+    const id = "C-T14.3.1";
     fireEvent.pointerDown(card(id), {
       pointerType: "mouse",
       clientX: 5,
@@ -354,7 +466,7 @@ describe("hand physicality on the Card Table", () => {
   it("cancels a long press when the pointer moves", () => {
     vi.useFakeTimers();
     render(<CardTable />);
-    const id = "C-T14.2.1";
+    const id = "C-T14.3.1";
     fireEvent.pointerDown(card(id), {
       pointerType: "mouse",
       clientX: 5,
@@ -371,13 +483,13 @@ describe("hand physicality on the Card Table", () => {
 
   it("shows face-down draw pile and spent stack counts", () => {
     render(<CardTable />);
-    expect(screen.getByTestId("draw-pile").textContent).toContain("Deck 6");
+    expect(screen.getByTestId("draw-pile").textContent).toContain("Deck 2");
     expect(screen.getByTestId("discard-stack").textContent).toContain(
       "Spent 0"
     );
     expect(
       screen.getByTestId("draw-pile").querySelectorAll("[data-slot]")
-    ).toHaveLength(3);
+    ).toHaveLength(2);
     fireEvent.click(card("C-T14.1.2"));
     fireEvent.click(screen.getByRole("button", { name: /Discard/ }));
     expect(screen.getByTestId("discard-stack").textContent).toContain(
