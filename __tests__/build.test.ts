@@ -2,6 +2,20 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import child_process from "child_process";
 
+// Everything the production preflight (scripts/vercel-production-preflight.js)
+// requires, with fake values, so production-path tests reach the steps they
+// exercise. The preflight's own cases live in vercel-production-preflight.test.ts.
+function setProductionConfig() {
+  process.env.VERCEL = "1";
+  process.env.VERCEL_ENV = "production";
+  process.env.DATABASE_URL = "postgresql://pooled.neon.test/db";
+  process.env.DATABASE_URL_UNPOOLED = "postgresql://unpooled.neon.test/db";
+  process.env.CRON_SECRET = "cron-fake";
+  process.env.UPSTASH_REDIS_REST_URL = "https://cache.upstash.test";
+  process.env.UPSTASH_REDIS_REST_TOKEN = "tok-fake";
+  process.env.NODE_OPTIONS = "--experimental-require-module";
+}
+
 describe("build.js script execution", () => {
   let originalEnv: NodeJS.ProcessEnv;
   let exitMock: any;
@@ -123,10 +137,7 @@ describe("build.js script execution", () => {
   });
 
   it("applies migrations on Vercel production builds, through the unpooled endpoint, before next build", () => {
-    process.env.VERCEL = "1";
-    process.env.VERCEL_ENV = "production";
-    process.env.DATABASE_URL = "postgresql://pooled.example/db";
-    process.env.DATABASE_URL_UNPOOLED = "postgresql://unpooled.example/db";
+    setProductionConfig();
 
     try {
       require("../scripts/build.js");
@@ -145,7 +156,7 @@ describe("build.js script execution", () => {
       migrateIndex
     );
     expect(spawnSpy.mock.calls[migrateIndex][2].env.DIRECT_URL).toBe(
-      "postgresql://unpooled.example/db"
+      "postgresql://unpooled.neon.test/db"
     );
     expect(exitMock).toHaveBeenCalledWith(0);
   });
@@ -168,9 +179,32 @@ describe("build.js script execution", () => {
     );
   });
 
+  it("stops a Vercel production build whose configuration fails the preflight before any step runs", () => {
+    setProductionConfig();
+    delete (process.env as any).CRON_SECRET;
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+
+    try {
+      require("../scripts/build.js");
+    } catch (err: any) {
+      expect(err.message).toBe("Process exited with code 1");
+    }
+
+    expect(exitMock).toHaveBeenCalledWith(1);
+    // Nothing ran: no client generation, no migration, no compile, and the
+    // offline dummy CRON_SECRET was never substituted for the missing one.
+    expect(spawnSpy).not.toHaveBeenCalled();
+    expect(process.env.CRON_SECRET).toBeUndefined();
+    expect(errorSpy.mock.calls.flat().join("\n")).toContain(
+      "CRON_SECRET is not set"
+    );
+    errorSpy.mockRestore();
+    logSpy.mockRestore();
+  });
+
   it("fails a Vercel production build that has no unpooled endpoint", () => {
-    process.env.VERCEL = "1";
-    process.env.VERCEL_ENV = "production";
+    setProductionConfig();
     delete (process.env as any).DATABASE_URL_UNPOOLED;
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 

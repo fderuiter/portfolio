@@ -37,6 +37,19 @@ try {
   }
 }
 
+// 0.5. Production Configuration Preflight (#989)
+//
+// Only on Vercel's production build, and before step 1: the dummy
+// DATABASE_URL and CRON_SECRET below would otherwise hide a missing value and
+// ship a build that fails at request time. Local, CI and preview builds skip
+// it. It reports variable names, never values.
+const {
+  runVercelProductionPreflight,
+} = require("./vercel-production-preflight");
+if (!runVercelProductionPreflight(process.env)) {
+  process.exit(1);
+}
+
 // 1. Connection String & Secret Fallback for Offline/Local Compilation
 if (!process.env.DATABASE_URL) {
   console.warn(
