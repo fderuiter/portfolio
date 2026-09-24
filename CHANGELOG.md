@@ -36,9 +36,9 @@ previously deployed application:
   a field manual and an optional audio layer (#827, #831–#833, #837, #838).
 - Trial & Error: Biostat Ops foundations: the SAP-defined Demographics QC Desk,
   the Card Table with the QC Desk as the Inspect view, the score timeline and
-  scoring player, live card faces, the synth audio and loud-moment layers, and
-  the ADR 0046 card-table and narrative-frame amendments (#941, #953, #955,
-  #962).
+  scoring player, live card faces, the synth audio and loud-moment layers, an
+  Act I of three progressive review Blinds, and the ADR 0046 card-table and
+  narrative-frame amendments (#941, #953, #955, #962, #965).
 - CRF Studio: runtime show, hide and require sentence rules, versioned
   personal clinical blocks, an in-builder simulator dock, named test scenarios
   with expected outcomes, and durable field review threads (#842–#845, #938).
@@ -46,6 +46,7 @@ previously deployed application:
   redesign (#908).
 - A 44px minimum touch target and active feedback across arcade HUD controls
   (#820).
+- A desktop-only notice for six arcade games on phones (#972).
 
 ### Changed
 
@@ -81,6 +82,12 @@ previously deployed application:
 - Local development no longer spends the Sentry error budget (#883).
 - The OpenAPI doctor check normalizes bracketed Next.js route parameters
   (#818).
+- QC Desk cell taps are no longer lost at narrow widths (#963).
+- The docs-drift gate ignores TypeDoc's literal-union reordering (#966), the
+  doctor's file scans skip agent worktrees and Stryker sandboxes (#967), and
+  the full doctor diagnostic test runs against a fixture workspace (#973).
+- Four failing Playwright specs were fixed and the Linux home baselines were
+  regenerated (#970).
 
 ### Security
 
