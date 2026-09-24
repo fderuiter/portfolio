@@ -9,6 +9,7 @@ import React, {
   useSyncExternalStore,
 } from "react";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import { logger } from "@/lib/logger";
 import { useAnnouncer } from "@/hooks/useAnnouncer";
 import { clamp } from "@/lib/game-utils";
 import { useAudio } from "@/components/providers/AudioProvider";
@@ -664,7 +665,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({
           saveCyberdeckProfile(updatedProf);
 
           recordEvent("labyrinth_solved", "project_click").catch((err) => {
-            console.error(
+            logger.error(
               "Failed to record telemetry for labyrinth solution:",
               err
             );

@@ -20,6 +20,8 @@ import type {
   OetDescentSnapshot,
   OetDescentEngineOptions,
   DebriefRule,
+  VitalsData,
+  PatientState,
 } from "./types";
 
 /**
@@ -736,6 +738,31 @@ export class OetDescentEngine extends ArcadeEngine<
   }
 
   /**
+   * Evaluates patient injury severity and transport triage priority for OET response.
+   */
+  public evaluatePatientTransport(
+    patient?: Partial<PatientState>,
+    vitals?: VitalsData,
+    environment?: BriefingState
+  ): {
+    severity: InjurySeverityResult;
+    priority: TransportPriorityAssignment;
+  } {
+    const combinedVitals = vitals ?? patient?.vitals;
+    const combinedPatient: Partial<PatientState> = {
+      ...patient,
+      vitals: combinedVitals,
+    };
+    const severity = calculateInjurySeverity(
+      combinedPatient,
+      combinedVitals,
+      environment ?? this.state.conditions
+    );
+    const priority = assignTransportPriority(combinedPatient, combinedVitals);
+    return { severity, priority };
+  }
+
+  /**
    * Compiles an immutable PatrolEvent snapshot documenting OET judgment metrics
    * for debrief and telemetry ingestion (M7).
    */
@@ -1160,5 +1187,305 @@ export function evaluateOETCompliance(
     passedCount: evaluatedPassed.length,
     failedCount: rawRules.length - evaluatedPassed.length,
     evaluatedRules: rawRules,
+  };
+}
+
+export interface InjurySeverityResult {
+  score: number;
+  level: "minor" | "moderate" | "severe" | "critical";
+  factors: string[];
+  vitalsCompromised: boolean;
+  spinalPrecautionRequired: boolean;
+}
+
+export interface TransportPriorityAssignment {
+  priority: "RED" | "YELLOW" | "GREEN" | "BLACK";
+  numericPriority: number;
+  title: string;
+  tobogganRequired: boolean;
+  alsInterventionRequired: boolean;
+  estimatedTransportTimeMinutes: number;
+  rationale: string[];
+}
+
+/**
+ * Calculates injury severity score (0-100), level, and physiological factors
+ * based on patient complaint, mechanism of injury, vitals, and environment.
+ *
+ * Authoritative Clinical Sources:
+ * - AVPU / GCS: National Ski Patrol (NSP) Outdoor Emergency Care (OEC) 6th Ed., Ch. 6 "Patient Assessment";
+ *   Glasgow Coma Scale (Teasdale & Jennett, 1974, Lancet 304(7884):81-84).
+ * - SpO2 (hypoxia < 92%, severe < 85%): NSP OEC 6th Ed., Ch. 6 "Vital Signs" & Ch. 12 "Respiratory Emergencies".
+ * - Respiration (< 10 or > 30 bpm) & Heart Rate (> 130 or < 40 bpm): START Triage Protocol (Super & Benson, 1983);
+ *   NSP OEC 6th Ed., Ch. 6.
+ * - BP Systolic (< 90 mmHg hypotension/shock): NSP OEC 6th Ed., Ch. 9 "Shock".
+ * - Neurovascular PMS (Pulse, Motor, Sensory): NSP OEC 6th Ed., Ch. 20 "Musculoskeletal Trauma".
+ * - High-energy Mechanism & Trauma Suspicions: CDC Field Triage Guidelines for Injured Patients; NSP OEC 6th Ed., Ch. 15.
+ */
+export function calculateInjurySeverity(
+  patient?: Partial<PatientState>,
+  vitals?: VitalsData,
+  environment?: BriefingState
+): InjurySeverityResult {
+  let score = 10;
+  const factors: string[] = [];
+  let vitalsCompromised = false;
+  let spinalPrecautionRequired = false;
+
+  const currentVitals = vitals ?? patient?.vitals;
+
+  if (currentVitals) {
+    if (currentVitals.avpu === "U") {
+      score += 40;
+      vitalsCompromised = true;
+      factors.push("Unresponsive patient (AVPU U)");
+    } else if (currentVitals.avpu === "P") {
+      score += 30;
+      vitalsCompromised = true;
+      factors.push("Responds only to pain (AVPU P)");
+    } else if (currentVitals.avpu === "V") {
+      score += 15;
+      factors.push("Altered mental status (AVPU V)");
+    }
+
+    if (typeof currentVitals.gcs === "number") {
+      if (currentVitals.gcs <= 8) {
+        score += 35;
+        vitalsCompromised = true;
+        factors.push(`Severe GCS impairment (${currentVitals.gcs})`);
+      } else if (currentVitals.gcs <= 12) {
+        score += 25;
+        factors.push(`Moderate GCS impairment (${currentVitals.gcs})`);
+      } else if (currentVitals.gcs <= 14) {
+        score += 10;
+        factors.push(`Mild GCS impairment (${currentVitals.gcs})`);
+      }
+    }
+
+    if (typeof currentVitals.spo2 === "number") {
+      if (currentVitals.spo2 < 85) {
+        score += 30;
+        vitalsCompromised = true;
+        factors.push(`Critical hypoxia (SpO2 ${currentVitals.spo2}%)`);
+      } else if (currentVitals.spo2 < 92) {
+        score += 15;
+        factors.push(`Hypoxia (SpO2 ${currentVitals.spo2}%)`);
+      }
+    }
+
+    if (typeof currentVitals.respiration === "number") {
+      if (currentVitals.respiration < 10 || currentVitals.respiration > 30) {
+        score += 25;
+        vitalsCompromised = true;
+        factors.push(`Abnormal respiration (${currentVitals.respiration} bpm)`);
+      } else if (currentVitals.respiration > 22) {
+        score += 10;
+        factors.push(`Tachypnea (${currentVitals.respiration} bpm)`);
+      }
+    }
+
+    if (typeof currentVitals.heartRate === "number") {
+      if (currentVitals.heartRate > 130 || currentVitals.heartRate < 40) {
+        score += 20;
+        vitalsCompromised = true;
+        factors.push(`Critical heart rate (${currentVitals.heartRate} bpm)`);
+      } else if (currentVitals.heartRate > 100) {
+        score += 10;
+        factors.push(`Tachycardia (${currentVitals.heartRate} bpm)`);
+      }
+    }
+
+    if (typeof currentVitals.bpSystolic === "number") {
+      if (currentVitals.bpSystolic < 90) {
+        score += 25;
+        vitalsCompromised = true;
+        factors.push(
+          `Decompensated shock / Hypotension (BP ${currentVitals.bpSystolic} mmHg)`
+        );
+      }
+    }
+
+    if (currentVitals.pms === "absent") {
+      score += 30;
+      vitalsCompromised = true;
+      factors.push("Absent distal pulse/motor/sensory deficit");
+    } else if (currentVitals.pms === "compromised") {
+      score += 15;
+      factors.push("Compromised neurovascular status");
+    }
+  }
+
+  const mechanism = (patient?.mechanism || "").toLowerCase();
+  const complaint = (patient?.complaint || "").toLowerCase();
+
+  if (
+    mechanism.includes("high-speed") ||
+    mechanism.includes("collision") ||
+    mechanism.includes("tree impact") ||
+    mechanism.includes("fall > 15ft")
+  ) {
+    score += 25;
+    spinalPrecautionRequired = true;
+    factors.push("High-energy mechanism of injury");
+  }
+
+  if (
+    complaint.includes("spinal") ||
+    complaint.includes("neck") ||
+    complaint.includes("back") ||
+    complaint.includes("head") ||
+    complaint.includes("loss of consciousness")
+  ) {
+    score += 25;
+    spinalPrecautionRequired = true;
+    factors.push("Suspected head or spinal injury");
+  }
+
+  if (
+    complaint.includes("femur") ||
+    complaint.includes("pelvis") ||
+    complaint.includes("open fracture")
+  ) {
+    score += 25;
+    factors.push("Major long-bone or pelvic fracture");
+  } else if (
+    complaint.includes("fracture") ||
+    complaint.includes("dislocation") ||
+    complaint.includes("deformity") ||
+    complaint.includes("tibia")
+  ) {
+    score += 15;
+    factors.push("Extremity fracture or dislocation");
+  }
+
+  if (
+    complaint.includes("chest") ||
+    complaint.includes("bleeding") ||
+    complaint.includes("hemorrhage")
+  ) {
+    score += 20;
+    factors.push("Severe bleeding or chest trauma");
+  }
+
+  if (environment) {
+    if (
+      typeof environment.temperatureFahrenheit === "number" &&
+      environment.temperatureFahrenheit < 10
+    ) {
+      score += 10;
+      factors.push(
+        `Severe environmental cold stress (${environment.temperatureFahrenheit}°F)`
+      );
+    }
+  }
+
+  const finalScore = Math.max(0, Math.min(100, score));
+
+  let level: "minor" | "moderate" | "severe" | "critical" = "minor";
+  if (finalScore >= 70 || vitalsCompromised) {
+    level = "critical";
+  } else if (finalScore >= 45) {
+    level = "severe";
+  } else if (finalScore >= 25 || spinalPrecautionRequired) {
+    level = "moderate";
+  }
+
+  return {
+    score: finalScore,
+    level,
+    factors: factors.length > 0 ? factors : ["Minor localized discomfort"],
+    vitalsCompromised,
+    spinalPrecautionRequired,
+  };
+}
+
+/**
+ * Assigns transport triage priority (RED, YELLOW, GREEN, BLACK) based on
+ * injury severity assessment or patient state.
+ *
+ * Authoritative Triage Framework:
+ * - START Triage System Protocol (Simple Triage and Rapid Treatment - Super & Benson, 1983)
+ * - National Ski Patrol Outdoor Emergency Care (OEC) 6th Ed., Ch. 35 "Multiple-Casualty Incidents"
+ */
+export function assignTransportPriority(
+  input: InjurySeverityResult | Partial<PatientState>,
+  vitalsOverride?: VitalsData
+): TransportPriorityAssignment {
+  let severityResult: InjurySeverityResult;
+  let vitals: VitalsData | undefined = vitalsOverride;
+
+  if ("level" in input && typeof input.score === "number") {
+    severityResult = input as InjurySeverityResult;
+  } else {
+    const patientInput = input as Partial<PatientState>;
+    vitals = vitals ?? patientInput.vitals;
+    severityResult = calculateInjurySeverity(patientInput, vitals);
+  }
+
+  if (
+    vitals?.respiration === 0 &&
+    (vitals?.heartRate === 0 || (vitals?.avpu === "U" && vitals?.gcs === 3))
+  ) {
+    return {
+      priority: "BLACK",
+      numericPriority: 0,
+      title: "Expectant / BLACK Priority",
+      tobogganRequired: true,
+      alsInterventionRequired: true,
+      estimatedTransportTimeMinutes: 0,
+      rationale: ["Apneic and pulseless patient on scene"],
+    };
+  }
+
+  if (
+    severityResult.level === "critical" ||
+    severityResult.vitalsCompromised ||
+    severityResult.score >= 65
+  ) {
+    return {
+      priority: "RED",
+      numericPriority: 1,
+      title: "Immediate / RED Priority Transport",
+      tobogganRequired: true,
+      alsInterventionRequired: true,
+      estimatedTransportTimeMinutes: 10,
+      rationale: [
+        "Physiological vitals compromise or critical trauma score",
+        ...severityResult.factors,
+      ],
+    };
+  }
+
+  if (
+    severityResult.level === "severe" ||
+    severityResult.level === "moderate" ||
+    severityResult.spinalPrecautionRequired ||
+    severityResult.score >= 25
+  ) {
+    return {
+      priority: "YELLOW",
+      numericPriority: 2,
+      title: "Delayed / YELLOW Priority Transport",
+      tobogganRequired: true,
+      alsInterventionRequired: severityResult.score >= 50,
+      estimatedTransportTimeMinutes: 20,
+      rationale: [
+        "Inability to ambulate or spinal immobilization required",
+        ...severityResult.factors,
+      ],
+    };
+  }
+
+  return {
+    priority: "GREEN",
+    numericPriority: 3,
+    title: "Minimal / GREEN Priority Walking Assist",
+    tobogganRequired: false,
+    alsInterventionRequired: false,
+    estimatedTransportTimeMinutes: 30,
+    rationale: [
+      "Walking wounded with stable vitals",
+      ...severityResult.factors,
+    ],
   };
 }
