@@ -41,15 +41,6 @@ function main() {
     args.find((arg) => !arg.startsWith("--")) || getCurrentBranch();
   const result = validateBranchName(branch);
 
-  if (branch.startsWith("jules/") && process.env.JULES_SESSION_ID) {
-    if (!warnOnly) {
-      console.log(
-        `${colors.yellow}[Jules Agent Session] Allowing runner branch '${branch}'.${colors.reset}`
-      );
-    }
-    process.exit(0);
-  }
-
   if (result.valid) {
     if (!warnOnly) {
       console.log(

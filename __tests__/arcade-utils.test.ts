@@ -136,9 +136,11 @@ describe("Arcade Game Utilities (lib/arcade/utils.ts)", () => {
     });
 
     it("handles zero-width or zero-height bounding boxes", () => {
-      const boxA = { x: 0, y: 0, width: 0, height: 10 };
+      const zeroWidthBox = { x: 0, y: 0, width: 0, height: 10 };
+      const zeroHeightBox = { x: 0, y: 0, width: 10, height: 0 };
       const boxB = { x: 0, y: 0, width: 10, height: 10 };
-      expect(boundingBoxOverlap(boxA, boxB)).toBe(false);
+      expect(boundingBoxOverlap(zeroWidthBox, boxB)).toBe(false);
+      expect(boundingBoxOverlap(zeroHeightBox, boxB)).toBe(false);
     });
 
     it("handles negative coordinates and extreme dimensions", () => {
