@@ -1,30 +1,88 @@
-name: Protected Production Release
+name: Deploy Production
+
+# ADR 0049: merging to `main` deploys. This workflow runs once CI Pipeline
+# has passed on a `main` push and ships exactly the commit CI verified. It
+# never re-runs the CI gates (ADR 0039: no gating job twice per tree); it
+# applies migrations, builds once, stages the artifact without touching the
+# production domains, smoke-tests it, and only then promotes it (ADR 0038).
+#
+# Rollback is Vercel's Instant Rollback in the dashboard. Never use Redeploy
+# to ship: it rebuilds the commit that is already live, not `main`.
 
 on:
+  workflow_run:
+    workflows: ["CI Pipeline"]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
-    inputs:
-      release_version:
-        description: "SemVer from package.json, without the v prefix"
-        required: true
-        type: string
 
+# One production deploy at a time. A newer merge queues behind a running
+# deploy instead of cancelling it mid-migration.
 concurrency:
   group: production-release
   cancel-in-progress: false
 
 permissions:
-  contents: write
+  contents: read
 
 env:
-  VERCEL_CLI_VERSION: "59.16.0"
+  VERCEL_CLI_VERSION: "59.26.0"
+  CANONICAL_ORIGIN: "https://deruiter.dev"
 
 jobs:
-  verify-release:
-    name: Verify immutable release candidate
+  candidate:
+    name: Pick the commit to deploy
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 5
     permissions:
+      actions: read
       contents: read
+    outputs:
+      deploy: ${{ steps.pick.outputs.deploy }}
+      sha: ${{ steps.pick.outputs.sha }}
+    steps:
+      - name: Confirm the candidate is the main tip and passed CI
+        id: pick
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" && "$GITHUB_REF" != "refs/heads/main" ]]; then
+            echo "Production deploys run from main only" >&2
+            exit 1
+          fi
+          main_tip="$(gh api "repos/${GITHUB_REPOSITORY}/commits/main" --jq '.sha')"
+          if [[ "$CANDIDATE_SHA" != "$main_tip" ]]; then
+            # A newer merge landed; its own CI run triggers its own deploy.
+            echo "::notice::Skipping ${CANDIDATE_SHA}: main has moved on to ${main_tip}"
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+            conclusion="$(gh api \
+              "repos/${GITHUB_REPOSITORY}/actions/workflows/ci.yml/runs?head_sha=${CANDIDATE_SHA}&event=push&status=completed&per_page=1" \
+              --jq '.workflow_runs[0].conclusion // "missing"')"
+            if [[ "$conclusion" != "success" ]]; then
+              echo "CI Pipeline has not passed on ${CANDIDATE_SHA} (${conclusion})" >&2
+              exit 1
+            fi
+          fi
+          echo "sha=${CANDIDATE_SHA}" >> "$GITHUB_OUTPUT"
+          echo "deploy=true" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    name: Migrate, stage, verify, and promote
+    needs: candidate
+    if: needs.candidate.outputs.deploy == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: production-release
+      url: ${{ steps.stage.outputs.url }}
     services:
       postgres:
         image: postgres:17
@@ -40,10 +98,25 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - name: Checkout exact candidate
+      - name: Checkout the commit CI verified
         uses: actions/checkout@v5
         with:
-          fetch-depth: 0
+          ref: ${{ needs.candidate.outputs.sha }}
+
+      - name: Check required secrets
+        env:
+          PRODUCTION_MIGRATION_DATABASE_URL: ${{ secrets.PRODUCTION_MIGRATION_DATABASE_URL }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          for variable in PRODUCTION_MIGRATION_DATABASE_URL VERCEL_AUTOMATION_BYPASS_SECRET VERCEL_ORG_ID VERCEL_PROJECT_ID VERCEL_TOKEN; do
+            if [[ -z "${!variable}" ]]; then
+              echo "Required production-release secret ${variable} is missing" >&2
+              exit 1
+            fi
+          done
 
       - name: Setup Node.js
         uses: actions/setup-node@v5
@@ -51,36 +124,10 @@ jobs:
           node-version: 24
           cache: "npm"
 
-      - name: Validate source and release version
-        env:
-          RELEASE_VERSION: ${{ inputs.release_version }}
-        run: |
-          if [[ ! "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "release_version must be a stable SemVer without a v prefix" >&2
-            exit 1
-          fi
-          if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then
-            echo "Production releases must be dispatched from main" >&2
-            exit 1
-          fi
-          git fetch --no-tags origin main
-          if [[ "$GITHUB_SHA" != "$(git rev-parse origin/main)" ]]; then
-            echo "The dispatched commit is not the current origin/main tip" >&2
-            exit 1
-          fi
-          if [[ "$RELEASE_VERSION" != "$(node -p "require('./package.json').version")" ]]; then
-            echo "release_version does not match package.json" >&2
-            exit 1
-          fi
-          if git ls-remote --exit-code --tags origin "refs/tags/v${RELEASE_VERSION}" >/dev/null 2>&1; then
-            echo "Tag v${RELEASE_VERSION} already exists" >&2
-            exit 1
-          fi
-
       - name: Install dependencies
         run: npm ci
 
-      - name: Prove complete migration replay on disposable PostgreSQL
+      - name: Replay every migration on disposable PostgreSQL
         env:
           REPLAY_DB_HOST: localhost
           REPLAY_DB_NAME: portfolio_release_replay
@@ -93,80 +140,7 @@ jobs:
           export MIGRATION_REPLAY_URL="${database_scheme}://${REPLAY_DB_USER}:${REPLAY_DB_PASSWORD}@${REPLAY_DB_HOST}:${REPLAY_DB_PORT}/${REPLAY_DB_NAME}?schema=${REPLAY_DB_SCHEMA}"
           npm run migration:replay
 
-      - name: Re-run complete release quality gates
-        env:
-          CRON_SECRET: release_candidate_placeholder
-          QUALITY_DB_HOST: localhost
-          QUALITY_DB_NAME: portfolio_release_replay
-          QUALITY_DB_PASSWORD: postgres
-          QUALITY_DB_PORT: "5432"
-          QUALITY_DB_SCHEMA: replay
-          QUALITY_DB_USER: postgres
-        run: |
-          database_scheme="postgresql"
-          export DATABASE_URL="${database_scheme}://${QUALITY_DB_USER}:${QUALITY_DB_PASSWORD}@${QUALITY_DB_HOST}:${QUALITY_DB_PORT}/${QUALITY_DB_NAME}?schema=${QUALITY_DB_SCHEMA}"
-          npm run quality
-          npm test
-
-  release-production:
-    name: Migrate, stage, verify, and promote
-    needs: verify-release
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    environment:
-      name: production-release
-      url: ${{ steps.stage.outputs.url }}
-    steps:
-      - name: Checkout verified candidate
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v5
-        with:
-          node-version: 24
-          cache: "npm"
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Validate protected release configuration
-        env:
-          PRODUCTION_MIGRATION_DATABASE_URL: ${{ secrets.PRODUCTION_MIGRATION_DATABASE_URL }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
-        run: |
-          for variable in PRODUCTION_MIGRATION_DATABASE_URL VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID VERCEL_AUTOMATION_BYPASS_SECRET; do
-            if [[ -z "${!variable}" ]]; then
-              echo "Required production-release secret ${variable} is missing" >&2
-              exit 1
-            fi
-          done
-
-      - name: Record current production rollback target
-        id: previous
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: |
-          response="$(curl --fail --silent --show-error --get \
-            --header "Authorization: Bearer ${VERCEL_TOKEN}" \
-            --data-urlencode "projectId=${VERCEL_PROJECT_ID}" \
-            --data-urlencode "teamId=${VERCEL_ORG_ID}" \
-            --data-urlencode "target=production" \
-            --data-urlencode "state=READY" \
-            --data-urlencode "limit=1" \
-            "https://api.vercel.com/v6/deployments")"
-          previous_id="$(printf '%s' "$response" | jq -er '.deployments[0].uid // .deployments[0].id')"
-          previous_url="$(printf '%s' "$response" | jq -er '.deployments[0].url')"
-          echo "id=${previous_id}" >> "$GITHUB_OUTPUT"
-          echo "url=https://${previous_url}" >> "$GITHUB_OUTPUT"
-
-      - name: Apply production migrations exactly once and verify zero drift
+      - name: Apply production migrations and verify zero drift
         env:
           DATABASE_URL: ${{ secrets.PRODUCTION_MIGRATION_DATABASE_URL }}
           DIRECT_URL: ${{ secrets.PRODUCTION_MIGRATION_DATABASE_URL }}
@@ -176,121 +150,86 @@ jobs:
           npm run check:migrations:drift
           npx prisma migrate status
 
-      - name: Pull production build configuration
+      - name: Build the production artifact once
         env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: >-
-          npx --yes "vercel@${VERCEL_CLI_VERSION}" pull --yes
-          --environment=production --token="$VERCEL_TOKEN"
-
-      - name: Build production artifact once
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: >-
+        run: |
+          npx --yes "vercel@${VERCEL_CLI_VERSION}" pull --yes --environment=production
           npx --yes "vercel@${VERCEL_CLI_VERSION}" build --prod
-          --token="$VERCEL_TOKEN"
 
-      - name: Stage immutable production deployment without assigning domains
+      - name: Stage the artifact without assigning production domains
         id: stage
         env:
-          RELEASE_VERSION: ${{ inputs.release_version }}
+          CANDIDATE_SHA: ${{ needs.candidate.outputs.sha }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           deployment_url="$(npx --yes "vercel@${VERCEL_CLI_VERSION}" deploy \
             --prebuilt --prod --skip-domain --yes \
-            --meta "releaseVersion=${RELEASE_VERSION}" \
-            --meta "gitCommitSha=${GITHUB_SHA}" \
-            --token="$VERCEL_TOKEN")"
+            --meta "gitCommitSha=${CANDIDATE_SHA}")"
           deployment_url="$(printf '%s\n' "$deployment_url" | tail -n 1)"
           if [[ ! "$deployment_url" =~ ^https:// ]]; then
             echo "Vercel did not return a deployment URL" >&2
             exit 1
           fi
+          npx --yes "vercel@${VERCEL_CLI_VERSION}" inspect "$deployment_url" --wait --timeout=10m
           echo "url=${deployment_url}" >> "$GITHUB_OUTPUT"
 
-      - name: Resolve staged deployment ID
-        id: deployment
-        env:
-          DEPLOYMENT_URL: ${{ steps.stage.outputs.url }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-        run: |
-          deployment_host="${DEPLOYMENT_URL#https://}"
-          response="$(curl --fail --silent --show-error --get \
-            --header "Authorization: Bearer ${VERCEL_TOKEN}" \
-            --data-urlencode "teamId=${VERCEL_ORG_ID}" \
-            "https://api.vercel.com/v13/deployments/${deployment_host}")"
-          deployment_id="$(printf '%s' "$response" | jq -er '.id // .uid')"
-          echo "id=${deployment_id}" >> "$GITHUB_OUTPUT"
-
-      - name: Wait for staged deployment readiness
-        env:
-          DEPLOYMENT_URL: ${{ steps.stage.outputs.url }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: >-
-          npx --yes "vercel@${VERCEL_CLI_VERSION}" inspect "$DEPLOYMENT_URL"
-          --wait --timeout=10m --token="$VERCEL_TOKEN"
-
-      - name: Install Chromium for staged verification
+      - name: Install Chromium for the smoke test
         run: npx playwright install chromium --with-deps
 
-      - name: Verify staged deployment synthetic journeys
+      # Staged *.vercel.app URLs sit behind Vercel Authentication; the bypass
+      # secret lets the probes through without opening the deployment up.
+      - name: Smoke-test the staged deployment
         env:
           PLAYWRIGHT_TEST_BASE_URL: ${{ steps.stage.outputs.url }}
-          # Staged *.vercel.app URLs sit behind Vercel Authentication; the
-          # probes reach them through Protection Bypass for Automation.
           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
         run: npm run probe:synthetic -- --project=chromium
 
-      - name: Promote the verified immutable deployment
-        id: promote
+      - name: Promote the verified deployment
         env:
           DEPLOYMENT_URL: ${{ steps.stage.outputs.url }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: >-
           npx --yes "vercel@${VERCEL_CLI_VERSION}" promote "$DEPLOYMENT_URL"
-          --yes --timeout=10m --token="$VERCEL_TOKEN"
+          --yes --timeout=10m
 
-      - name: Verify canonical production after promotion
-        run: curl --fail --location --silent --show-error https://www.deruiter.dev/ --output /dev/null
-
-      - name: Record release evidence
+      - name: Verify the canonical domain serves the promoted deployment
         env:
-          DEPLOYMENT_ID: ${{ steps.deployment.outputs.id }}
           DEPLOYMENT_URL: ${{ steps.stage.outputs.url }}
-          PREVIOUS_DEPLOYMENT_ID: ${{ steps.previous.outputs.id }}
-          PREVIOUS_DEPLOYMENT_URL: ${{ steps.previous.outputs.url }}
-          RELEASE_VERSION: ${{ inputs.release_version }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          jq -n \
-            --arg version "$RELEASE_VERSION" \
-            --arg commitSha "$GITHUB_SHA" \
-            --arg deploymentId "$DEPLOYMENT_ID" \
-            --arg deploymentUrl "$DEPLOYMENT_URL" \
-            --arg previousDeploymentId "$PREVIOUS_DEPLOYMENT_ID" \
-            --arg previousDeploymentUrl "$PREVIOUS_DEPLOYMENT_URL" \
-            --arg promotedAt "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-            '{version: $version, commitSha: $commitSha, deploymentId: $deploymentId, deploymentUrl: $deploymentUrl, previousDeploymentId: $previousDeploymentId, previousDeploymentUrl: $previousDeploymentUrl, promotedAt: $promotedAt, databaseRecovery: "expand/contract roll-forward"}' \
-            > release-evidence.json
-          printf '### Release v%s\n\n- Commit: `%s`\n- Deployment: `%s`\n- Previous rollback target: `%s`\n' \
-            "$RELEASE_VERSION" "$GITHUB_SHA" "$DEPLOYMENT_ID" "$PREVIOUS_DEPLOYMENT_ID" \
-            >> "$GITHUB_STEP_SUMMARY"
+          api="https://api.vercel.com"
+          auth="Authorization: Bearer ${VERCEL_TOKEN}"
+          expected="$(curl --fail --silent --show-error --header "$auth" \
+            "${api}/v13/deployments/${DEPLOYMENT_URL#https://}?teamId=${VERCEL_ORG_ID}" | jq -er '.id')"
+          actual="$(curl --fail --silent --show-error --header "$auth" \
+            "${api}/v4/aliases/${CANONICAL_ORIGIN#https://}?teamId=${VERCEL_ORG_ID}" | jq -er '.deploymentId')"
+          if [[ "$expected" != "$actual" ]]; then
+            echo "${CANONICAL_ORIGIN} points at ${actual}, expected ${expected}" >&2
+            exit 1
+          fi
+          status="$(curl --silent --output /dev/null --write-out '%{http_code}' "${CANONICAL_ORIGIN}/")"
+          if [[ "$status" != "200" ]]; then
+            echo "${CANONICAL_ORIGIN}/ returned ${status}" >&2
+            exit 1
+          fi
+          location="$(curl --silent --output /dev/null --write-out '%{http_code} %{redirect_url}' "https://www.${CANONICAL_ORIGIN#https://}/")"
+          if [[ "$location" != "308 ${CANONICAL_ORIGIN}/" ]]; then
+            echo "www did not 308 to the apex (got: ${location})" >&2
+            exit 1
+          fi
 
-      - name: Upload immutable release evidence
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-evidence-v${{ inputs.release_version }}
-          path: release-evidence.json
-          if-no-files-found: error
-          retention-days: 90
-
-      - name: Create tag and GitHub release
+      - name: Summarize the deploy
         env:
-          GH_TOKEN: ${{ github.token }}
-          RELEASE_VERSION: ${{ inputs.release_version }}
+          CANDIDATE_SHA: ${{ needs.candidate.outputs.sha }}
+          DEPLOYMENT_URL: ${{ steps.stage.outputs.url }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag -a "v${RELEASE_VERSION}" "$GITHUB_SHA" -m "v${RELEASE_VERSION}"
-          git push origin "v${RELEASE_VERSION}"
-          gh release create "v${RELEASE_VERSION}" --verify-tag --target "$GITHUB_SHA" --title "v${RELEASE_VERSION}" --generate-notes
+          printf '### Deployed to %s\n\n- Commit: `%s`\n- Deployment: %s\n- Roll back with Instant Rollback in the Vercel dashboard.\n' \
+            "$CANONICAL_ORIGIN" "$CANDIDATE_SHA" "$DEPLOYMENT_URL" >> "$GITHUB_STEP_SUMMARY"
