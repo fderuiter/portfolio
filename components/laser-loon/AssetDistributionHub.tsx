@@ -104,6 +104,38 @@ const ASSET_ITEMS: AssetFormatItem[] = [
 
 export const AssetDistributionHub: React.FC = () => {
   const [copied, setCopied] = React.useState(false);
+  const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
+
+  React.useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#09090b";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.strokeStyle = "#27272a";
+    ctx.lineWidth = 1;
+    for (let x = 0; x < canvas.width; x += 40) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, canvas.height);
+      ctx.stroke();
+    }
+
+    const categories = [
+      { color: "#f59e0b", x: 20, w: 180, label: "Vector Print" },
+      { color: "#22d3ee", x: 220, w: 180, label: "Web & UI" },
+      { color: "#60a5fa", x: 420, w: 180, label: "Raster Edit" },
+    ];
+
+    categories.forEach((cat) => {
+      ctx.fillStyle = cat.color;
+      ctx.fillRect(cat.x, 25, cat.w, 30);
+    });
+  }, []);
 
   const handleShare = async () => {
     const url = typeof window !== "undefined" ? window.location.href : "";
@@ -159,6 +191,26 @@ export const AssetDistributionHub: React.FC = () => {
             <span>{copied ? "Link Copied!" : "Share Assets"}</span>
           </button>
         </div>
+      </div>
+
+      {/* Asset Distribution Canvas Preview */}
+      <div className="mb-8 relative z-10 p-4 rounded-2xl bg-zinc-900/40 border border-zinc-800/80">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">
+            Asset Distribution Canvas Preview
+          </span>
+          <span className="text-[10px] font-mono text-zinc-500">
+            Canvas 2D Matrix Rendering
+          </span>
+        </div>
+        <canvas
+          ref={canvasRef}
+          data-testid="asset-distribution-canvas"
+          width={720}
+          height={80}
+          className="w-full h-20 rounded-xl border border-zinc-800 bg-zinc-950 object-cover"
+          aria-label="Asset distribution rendering canvas"
+        />
       </div>
 
       {/* Asset Categories Grid */}
@@ -279,3 +331,5 @@ function AssetCard({ item }: { item: AssetFormatItem }) {
     </div>
   );
 }
+
+export const AssetDistributionViewer = AssetDistributionHub;
