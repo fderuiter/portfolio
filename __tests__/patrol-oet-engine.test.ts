@@ -587,6 +587,20 @@ describe("Patrol Shift: Headless OET Descent Engine (M4 / #750)", () => {
     expect(evaluation.severity.spinalPrecautionRequired).toBe(true);
   });
 
+  it("evaluates patient transport end-to-end assigning BLACK priority for an apneic/pulseless patient", () => {
+    const engine = new OetDescentEngine();
+    const evaluation = engine.evaluatePatientTransport(
+      { complaint: "Unresponsive skier found in tree well" },
+      { avpu: "U", gcs: 3, respiration: 0, heartRate: 0 }
+    );
+
+    expect(evaluation.priority.priority).toBe("BLACK");
+    expect(evaluation.priority.numericPriority).toBe(0);
+    expect(evaluation.priority.rationale).toContain(
+      "Apneic and pulseless patient on scene"
+    );
+  });
+
   it("provides viewport, input manager, game loop, and rendering without errors", () => {
     const engine = new OetDescentEngine({
       conditions: { treeHazards: true, snowCondition: "fresh" },

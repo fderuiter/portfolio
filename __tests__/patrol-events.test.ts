@@ -2,7 +2,6 @@ import { describe, it, expect } from "vitest";
 import {
   createEvent,
   generateWeatherEvent,
-  generateAvalancheTriggerEvent,
   generateAmbientEvent,
   filterEventsBySeverity,
   filterEventsByType,
@@ -104,56 +103,6 @@ describe("Patrol Shift: Ambient Events and Weather/Avalanche Generators", () => 
       });
       expect(mild.severity).toBe("info");
       expect(mild.title).toBe("Heavy Snowfall Accumulation");
-    });
-  });
-
-  describe("generateAvalancheTriggerEvent", () => {
-    it("assigns critical severity for danger level >= 4 or dangerous slab triggers", () => {
-      const highDanger = generateAvalancheTriggerEvent({
-        triggerType: "skier",
-        dangerLevel: 4,
-      });
-      expect(highDanger.severity).toBe("critical");
-      expect(highDanger.context?.closureRecommended).toBe(true);
-
-      const level3SteepSkier = generateAvalancheTriggerEvent({
-        triggerType: "skier",
-        dangerLevel: 3,
-        slopeAngleDegrees: 38,
-      });
-      expect(level3SteepSkier.severity).toBe("critical");
-
-      const deepPersistent = generateAvalancheTriggerEvent({
-        triggerType: "natural",
-        dangerLevel: 3,
-        slopeAngleDegrees: 40,
-        snowpackType: "deep_persistent",
-      });
-      expect(deepPersistent.severity).toBe("critical");
-    });
-
-    it("assigns warning severity for danger level 2/3 or steep slopes", () => {
-      const modDanger = generateAvalancheTriggerEvent({
-        triggerType: "explosive",
-        dangerLevel: 2,
-      });
-      expect(modDanger.severity).toBe("warning");
-
-      const corniceFall = generateAvalancheTriggerEvent({
-        triggerType: "cornice_fall",
-        dangerLevel: 2,
-      });
-      expect(corniceFall.severity).toBe("warning");
-    });
-
-    it("assigns info severity for low danger level 1 on gentle slopes", () => {
-      const lowDanger = generateAvalancheTriggerEvent({
-        triggerType: "natural",
-        dangerLevel: 1,
-        slopeAngleDegrees: 20,
-      });
-      expect(lowDanger.severity).toBe("info");
-      expect(lowDanger.title).toContain("Low Danger");
     });
   });
 

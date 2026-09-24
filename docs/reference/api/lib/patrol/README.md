@@ -50,18 +50,6 @@ Re-exports [assignTransportPriority](oet-engine/functions/assignTransportPriorit
 
 ***
 
-### AvalancheEventOptions
-
-Re-exports [AvalancheEventOptions](events/interfaces/AvalancheEventOptions.md)
-
-***
-
-### AvalancheTriggerType
-
-Re-exports [AvalancheTriggerType](events/type-aliases/AvalancheTriggerType.md)
-
-***
-
 ### BASE\_ELEVATION\_FT
 
 Re-exports [BASE_ELEVATION_FT](welch-data/variables/BASE_ELEVATION_FT.md)
@@ -299,12 +287,6 @@ Re-exports [formatEventLog](events/functions/formatEventLog.md)
 ### generateAmbientEvent
 
 Re-exports [generateAmbientEvent](events/functions/generateAmbientEvent.md)
-
-***
-
-### generateAvalancheTriggerEvent
-
-Re-exports [generateAvalancheTriggerEvent](events/functions/generateAvalancheTriggerEvent.md)
 
 ***
 
@@ -605,12 +587,6 @@ Re-exports [ShiftPlayfulStats](types/interfaces/ShiftPlayfulStats.md)
 ### ShiftState
 
 Re-exports [ShiftState](types/interfaces/ShiftState.md)
-
-***
-
-### SnowpackType
-
-Re-exports [SnowpackType](events/type-aliases/SnowpackType.md)
 
 ***
 
