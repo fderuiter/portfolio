@@ -1,4 +1,4 @@
-import * as Sentry from "@sentry/nextjs";
+import { logger } from "@/lib/logger";
 import { CaseStudyService } from "@/lib/services/case-study-service";
 import { BlogPostService } from "@/lib/services/blog-service";
 import { EmailService } from "@/lib/services/email-service";
@@ -73,8 +73,9 @@ async function runBoundedPhase(
     };
   } catch (error) {
     const timedOut = clock() >= deadlineAt - RESPONSE_RESERVE_MS;
-    Sentry.captureException(error, { tags: { maintenancePhase: name } });
-    console.warn(`[maintenance:${name}]`, errorMessage(error));
+    logger.warn(`[maintenance:${name}] ${errorMessage(error)}`, error, {
+      maintenancePhase: name,
+    });
     return {
       status: timedOut ? "timed_out" : "failed",
       durationMs: Math.max(0, clock() - startedAt),
@@ -191,7 +192,7 @@ export class MaintenanceService {
       phases,
     };
 
-    console.info("[maintenance:summary]", JSON.stringify(summary));
+    logger.info(`[maintenance:summary] ${JSON.stringify(summary)}`);
     return summary;
   }
 }

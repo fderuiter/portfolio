@@ -155,6 +155,7 @@
 - [lib/laser-loon/engine](lib/laser-loon/engine/README.md)
 - [lib/laser-loon/types](lib/laser-loon/types/README.md)
 - [lib/layout-config](lib/layout-config/README.md)
+- [lib/logger](lib/logger/README.md)
 - [lib/masonry](lib/masonry/README.md)
 - [lib/meme-audio](lib/meme-audio/README.md)
 - [lib/meme-data](lib/meme-data/README.md)

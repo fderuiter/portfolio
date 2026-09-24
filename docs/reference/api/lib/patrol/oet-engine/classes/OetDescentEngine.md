@@ -161,6 +161,40 @@ Emits a typed event to registered listeners.
 
 ***
 
+### evaluatePatientTransport()
+
+> **evaluatePatientTransport**(`patient?`, `vitals?`, `environment?`): `object`
+
+Evaluates patient injury severity and transport triage priority for OET response.
+
+#### Parameters
+
+##### patient?
+
+`Partial`\<[`PatientState`](../../types/interfaces/PatientState.md)\>
+
+##### vitals?
+
+[`VitalsData`](../../types/interfaces/VitalsData.md)
+
+##### environment?
+
+[`BriefingState`](../../types/interfaces/BriefingState.md)
+
+#### Returns
+
+`object`
+
+##### priority
+
+> **priority**: [`TransportPriorityAssignment`](../interfaces/TransportPriorityAssignment.md)
+
+##### severity
+
+> **severity**: [`InjurySeverityResult`](../interfaces/InjurySeverityResult.md)
+
+***
+
 ### getInputManager()
 
 > **getInputManager**(): [`ArcadeInputManager`](../../../arcade/core/input/classes/ArcadeInputManager.md)

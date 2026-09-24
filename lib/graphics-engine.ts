@@ -1,4 +1,5 @@
 import { designManifest } from "./design-manifest";
+import { logger } from "@/lib/logger";
 import { prepare, layout, type PreparedText } from "@chenglou/pretext";
 import {
   type PreparedRichInline,
@@ -127,7 +128,7 @@ export function resolveCodeChipExtraWidth(): number {
     cssPropertyCache.set(cacheKey, String(result));
     return result;
   } catch (err) {
-    console.error("Failed resolving code chip extra width:", err);
+    logger.error("Failed resolving code chip extra width:", err);
     return 12; // Fallback
   }
 }
@@ -271,7 +272,7 @@ export function validateLayoutHeight(
     }
     const deviation = Math.abs(calculated - actual);
     if (deviation > 2) {
-      console.warn(
+      logger.warn(
         `[Layout Validation Warning] Layout drift detected! Calculated height is ${calculated}px, but actual DOM height is ${actual}px (deviation: ${deviation.toFixed(2)}px). ${contextMessage || ""}`
       );
     }
