@@ -197,6 +197,100 @@ npm run verify
 npm test
 ```
 
+---
+
+## 7. API Documentation & Drift Verification Workflow
+
+When introducing or modifying public interfaces (`lib/`, `hooks/`, `types/`) or HTTP API routes (`app/api/`), contributors must ensure documentation and specifications remain synchronized to prevent pre-commit blocks and CI build failures:
+
+1. **Compile API Documentation**
+   After changing public functions, hooks, or types, manually recompile the TypeDoc reference documentation:
+
+   ```bash
+   npm run compile-docs
+   ```
+
+2. **Verify Local Documentation Drift**
+   Execute the local documentation drift check before committing changes:
+
+   ```bash
+   npm run check-docs-drift
+   ```
+
+3. **Resolve Drift & Stage Documentation**
+   If documentation drift is detected, run `npm run compile-docs` (or `npm run doctor:fix` to auto-remediate) and stage updated markdown files in `docs/` alongside code changes before committing:
+   ```bash
+   git add docs/ openapi.json
+   ```
+
+---
+
+## 8. Local Verification & Continuous Integration (CI) Mapping
+
+To prevent pull request build failures and maintain zero-drift quality standards, local verification commands map directly to automated continuous integration quality gates executed in GitHub Actions workflows (`.github/workflows/ci.yml` and `.github/workflows/synthetic-probes.yml`).
+
+Before submitting a pull request, run the relevant local quality commands or execute the full pre-submission quality gate:
+
+```bash
+# Complete pre-submission CI quality gate
+npm run quality
+```
+
+### CI Quality Gate Mapping
+
+| Local Quality Command                | Continuous Integration Job / Step                                | Verification Scope & Purpose                                                                          |
+| ------------------------------------ | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `npm run doctor`                     | `heavy-gate` / Verify ADR Invariants & Doctor Health Diagnostics | Diagnostic audit of architectural and testing invariants (routes, layout, WCAG a11y, hydration)       |
+| `npm run doctor:fix`                 | Local Auto-remediation                                           | Auto-remediates fixable architectural invariants and updates OpenAPI & TypeDoc contracts              |
+| `npm run env:check`                  | Local environment preflight                                      | Validates `.env.local` schema definitions against `lib/env.ts` and `.env.example`                     |
+| `npm run check`                      | `fast-gate` / Type Check & Lint                                  | Static TypeScript checking, ESLint, and dependency-boundary enforcement                               |
+| `npm run lint:docs`                  | `fast-gate` / Lint Documentation                                 | Markdown formatting and structure linting via `markdownlint-cli`                                      |
+| `npm run check-docs-drift`           | `fast-gate` / Check Documentation Drift                          | Verifies lockstep synchronization for TypeDoc API docs, OpenAPI schemas, and onboarding guides        |
+| `npm run release:gate`               | `fast-gate` / Execute Pipeline Release Gate                      | Pre-deployment release gate validating security audits and migration integrity                        |
+| `npm run check:migrations:drift`     | `fast-gate` / Check Schema Drift                                 | Verifies Prisma database schema against active migrations and checks for drift                        |
+| `npm test` / `npm run test:ci`       | `fast-gate` / Run Logic Tests (Vitest)                           | Comprehensive unit, logic, and state-engine tests with optional coverage                              |
+| `npm run test:fuzz`                  | `fast-gate` / Run Shift-Left Property Fuzz Testing Gate          | Fast-check property-based testing and generative invariant verification                               |
+| `npm run test:mutation`              | `fast-gate` / Run Stryker Mutation Gate                          | Mutation testing of critical deterministic and security modules                                       |
+| `npx playwright test`                | `heavy-gate` and `device-gate` browser suites                    | Visual regression, interaction, responsive-device, and Playwright-Axe accessibility checks            |
+| `npm run analyze:bundle -- --strict` | `heavy-gate` / Verify Bundle Performance Budgets                 | Enforces JavaScript chunk-size limits and initial shared-bundle gzip budgets                          |
+| `npm run bench:pages -- --assert`    | `heavy-gate` / Run Real-Browser Sub-Route Web Vitals             | Production-server Core Web Vitals assertions (LCP <= 2500ms, TTFB <= 800ms, CLS <= 0.1)               |
+| `npm run audit:security`             | `security-gate` / `Execute Security Audit Gate`                  | Dependency security vulnerability auditing and policy compliance                                      |
+| `npm run audit:secrets`              | `security-gate` / Scan Reachable Git History for Secrets         | Redacted scan of all reachable Git history for high-confidence credential patterns                    |
+| `npm run probe:synthetic`            | `synthetic-probes.yml` / `Headless Synthetic Probe Matrix`       | Playwright synthetic user probes verifying critical user journeys and API telemetry                   |
+| `npm run quality`                    | CI Pipeline Composite Pre-Flight Gate                            | Runs static checks, docs gates, secret-history audit, page benchmarks, and architectural verification |
+
+---
+
+## 9. Asset Generation & Design System Commands
+
+The repository provides standardized CLI commands for generating multi-resolution brand assets and compiling design system tokens:
+
+### Brand Icon Generation
+
+- **Command:** `npm run build:icons` (or `npm run generate:icons` / `npx tsx scripts/dx.ts build:icons`)
+- **Input Source Location:** Vector SVG artwork at `public/favicon.svg` (or `app/icon.svg`).
+- **Generated Output Asset Targets:**
+  - `app/icon.svg` & `public/favicon.svg`: Vector SVG favicons
+  - `app/favicon.ico` & `public/favicon.ico`: Multi-resolution Windows ICO container enclosing 16x16, 32x32, and 48x48 PNG buffers
+  - `public/apple-touch-icon.png`: 180x180 high-DPI iOS touch icon
+  - `public/icon-192.png` & `public/icon-512.png`: Standard PWA web app manifest icons
+
+### Design System Token Compilation
+
+- **Command:** `npm run build:theme` (or `npm run generate:theme` / `npx tsx scripts/dx.ts build:theme`)
+- **Input Source Location:** CSS custom properties declared in `app/globals.css` (within the `:root` selector block).
+- **Generated Output Asset Target:** `lib/design-manifest.ts` (strongly-typed runtime TypeScript constants exported as `designManifest`).
+
+---
+
+## 10. Database Changes
+
+Schema changes must include a checked-in Prisma migration. See
+[DATABASE_MIGRATIONS.md](DATABASE_MIGRATIONS.md) for the development workflow,
+production rollout order, and the one-time production baseline procedure.
+
+---
+
 Thank you for contributing to Portfolio Hub!
 
 ---
