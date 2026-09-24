@@ -121,4 +121,24 @@ export const SECRET_DETECTOR_FIXTURES: Record<
     positive: ["PGPASSWORD=npg_FixtureOnly0000", "npg_AbCdEfGh1234"],
     negative: ["npg_short", "Npgsql connection pooling"],
   },
+  "anthropic-api-key": {
+    positive: [
+      "sk-ant-api03-ABCDEFGHIJKLMNOPQRSTUVWXYZ012345",
+      "sk-ant-admin01-ABCDEFGHIJKLMNOPQRSTUVWXYZ012345",
+    ],
+    negative: [
+      "sk-ant-short",
+      "sk-inc-api03-ABCDEFGHIJKLMNOPQRSTUVWXYZ012345",
+    ],
+  },
+  "google-api-key": {
+    positive: [
+      "AIzaSyABCDEFGHIJKLMNOPQRSTUVWXYZ0123456",
+      "AIzaZaABCDEFGHIJKLMNOPQRSTUVWXYZ0123456",
+    ],
+    negative: [
+      "AIzaSyShort",
+      "AIzaSyABCDEFGHIJKLMNOPQRSTUVWXYZ012345",
+    ],
+  },
 };

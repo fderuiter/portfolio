@@ -142,4 +142,18 @@ export const SECRET_DETECTORS = [
     gitPattern: "npg_[A-Za-z0-9]{12,}",
     appliesTo: ["contentGuard", "historyAudit"],
   },
+  {
+    id: "anthropic-api-key",
+    description: "Anthropic API key (sk-ant- prefix)",
+    regex: /sk-ant-[A-Za-z0-9_-]{20,}/g,
+    gitPattern: "sk-ant-[A-Za-z0-9_-]{20,}",
+    appliesTo: ["contentGuard", "historyAudit"],
+  },
+  {
+    id: "google-api-key",
+    description: "Google Cloud or Gemini API key (AIza prefix)",
+    regex: /AIza[0-9A-Za-z_-]{35}/g,
+    gitPattern: "AIza[0-9A-Za-z_-]{35}",
+    appliesTo: ["contentGuard", "historyAudit"],
+  },
 ] as const satisfies readonly SecretDetector[];
