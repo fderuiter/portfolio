@@ -137,8 +137,9 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
         run: |
-          for variable in PRODUCTION_MIGRATION_DATABASE_URL VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID; do
+          for variable in PRODUCTION_MIGRATION_DATABASE_URL VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID VERCEL_AUTOMATION_BYPASS_SECRET; do
             if [[ -z "${!variable}" ]]; then
               echo "Required production-release secret ${variable} is missing" >&2
               exit 1
@@ -236,6 +237,9 @@ jobs:
       - name: Verify staged deployment synthetic journeys
         env:
           PLAYWRIGHT_TEST_BASE_URL: ${{ steps.stage.outputs.url }}
+          # Staged *.vercel.app URLs sit behind Vercel Authentication; the
+          # probes reach them through Protection Bypass for Automation.
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
         run: npm run probe:synthetic -- --project=chromium
 
       - name: Promote the verified immutable deployment

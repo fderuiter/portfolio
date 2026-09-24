@@ -69,6 +69,7 @@ available:
 | `VERCEL_TOKEN` | Token restricted to deployments for this Vercel account or team |
 | `VERCEL_ORG_ID` | Vercel team or account identifier |
 | `VERCEL_PROJECT_ID` | Portfolio Vercel project identifier |
+| `VERCEL_AUTOMATION_BYPASS_SECRET` | The project's Protection Bypass for Automation secret. Staged `*.vercel.app` deployments sit behind Vercel Authentication, so the synthetic journeys send it as `x-vercel-protection-bypass` (`playwright.config.ts`). The workflow checks for it before any migration runs |
 
 Do not duplicate the production migration credential in repository secrets,
 Actions variables, Vercel build variables, Preview variables, or `.env` files.
