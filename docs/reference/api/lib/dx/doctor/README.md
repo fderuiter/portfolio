@@ -29,6 +29,7 @@
 - [checkPackageLockfile](functions/checkPackageLockfile.md)
 - [checkPageTopPadding](functions/checkPageTopPadding.md)
 - [checkProactiveDefectInterception](functions/checkProactiveDefectInterception.md)
+- [checkPublicRouteRegistryDrift](functions/checkPublicRouteRegistryDrift.md)
 - [checkRouteIndexing](functions/checkRouteIndexing.md)
 - [checkSecretLeaks](functions/checkSecretLeaks.md)
 - [checkSectionStructures](functions/checkSectionStructures.md)
@@ -39,4 +40,5 @@
 - [checkTouchTargetDimensions](functions/checkTouchTargetDimensions.md)
 - [checkWorkspaceIdeConfig](functions/checkWorkspaceIdeConfig.md)
 - [printDoctorReport](functions/printDoctorReport.md)
+- [routeExistsOnDisk](functions/routeExistsOnDisk.md)
 - [runDiagnostics](functions/runDiagnostics.md)
