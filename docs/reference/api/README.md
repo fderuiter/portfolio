@@ -4,239 +4,90 @@
 
 # Portfolio Hub
 
-![Node.js](https://img.shields.io/badge/Node.js-%3E%3D22.0.0-339933?logo=nodedotjs&logoColor=white)
-![npm](https://img.shields.io/badge/npm-%3E%3D10.0.0-CB3837?logo=npm&logoColor=white)
-![Next.js](https://img.shields.io/badge/Next.js-16.3.4-000000?logo=nextdotjs&logoColor=white)
-![React](https://img.shields.io/badge/React-19.2.4-61DAFB?logo=react&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-v5-3178C6?logo=typescript&logoColor=white)
-![Prisma](https://img.shields.io/badge/Prisma-v7-2D3748?logo=prisma&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?logo=tailwindcss&logoColor=white)
+**Live at [deruiter.dev](https://deruiter.dev)** · [Architecture](_media/ARCHITECTURE.md) · [Decision records](https://github.com/fderuiter/portfolio/tree/main/adr) · [Contributing](_media/CONTRIBUTING.md)
 
-An interactive engineering portfolio built with Next.js, React, and TypeScript.
-It combines long-form case studies with browser-based studios for formal logic,
-clinical data design, scientific visualization, and systems simulations.
+The source for Frederick de Ruiter's interactive engineering portfolio. Instead
+of describing the work, most of the site lets you try it: a logic proof
+workspace, a clinical form designer, an MRI reconstruction studio, a handful of
+decision simulators, and an arcade of browser games built around clinical data
+and formal methods.
 
----
+![The deruiter.dev home page: "Hi, I'm Fred. I make complicated things usable." beside an interactive logic-proof demo](_media/readme-hero.png)
 
-## Project Goals
+## What's inside
 
-The core objective of this project is to create an interactive showcase that dynamically pulls real codebase statistics and updates from GitHub, while presenting rich editorial narratives and architectural breakdowns. It serves as a unified hub for all professional software engineering work.
+| Area                            | What you can do                                                                                                              | Try it                                                                                  |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| **Logical Proof Workspace**     | Build a proof one step at a time, apply inference rules, and see where an argument breaks.                                   | [/proof](https://deruiter.dev/proof)                                                    |
+| **CRF Studio**                  | Design clinical research forms, add validation rules, and test them against sample data.                                     | [/crf](https://deruiter.dev/crf)                                                        |
+| **NeuroRecon Studio**           | Explore brain surfaces and MRI slices, place control points, and work through simulated reconstruction problems.             | [/neuro](https://deruiter.dev/neuro)                                                    |
+| **Incident Decision Simulator** | Work through engineering decisions, from interface priorities to an outage, and compare what your choices emphasize.         | [/simulator](https://deruiter.dev/simulator)                                            |
+| **Ski Patrol Shift Studio**     | A Midwest ski-patrol judgment simulation driven by deterministic state machines.                                             | [/patrol](https://deruiter.dev/patrol)                                                  |
+| **Arcade**                      | Trial & Error: Biostat Ops, Clinical Trial Chaos, Laser Loon, Retro Labyrinth, Monkey C Mayhem, Working With Duck, and more. | [/arcade](https://deruiter.dev/arcade)                                                  |
+| **Case studies and blog**       | Write-ups of clinical data engineering, formal verification, accessibility, and browser graphics projects.                   | [/case-studies](https://deruiter.dev/case-studies) · [/blog](https://deruiter.dev/blog) |
+| **Under the Hood**              | How the site itself works: text layout, browser audio, the stack, and the checks behind it.                                  | [/stack](https://deruiter.dev/stack)                                                    |
 
-## Tech Stack & Features
+## Built with
 
-- **Framework:** Next.js 16 (App Router + Turbopack), React 19, TypeScript
-- **Styling:** Tailwind CSS v4 (CSS-first configuration — no `tailwind.config.js`)
-- **Visual Ecosystem:** Aceternity UI, Magic UI, Framer Motion
-- **CMS:** Prisma ORM with Neon Serverless PostgreSQL
-- **Layout Engine:** `@chenglou/pretext` — 15KB zero-dependency pure JS/TS library for high-performance DOM-free text measurement
-- **Rich Text:** `@chenglou/pretext/rich-inline` — Inline Markdown tokenizer rendering **bold**, _italic_, and `code` chips with pixel-perfect canvas-measured heights
-- **Masonry Layout:** Parent-level zero-whitespace masonry Bento Grid using a greedy LPT column scheduler with ResizeObserver-driven sub-millisecond recalculations
-- **Performance:** DOM-free layout calculations maintaining 60FPS during complex animations
+- **App:** Next.js 16 (App Router, Turbopack), React 19, TypeScript, Tailwind CSS v4
+- **Rendering:** Canvas 2D and Three.js for the studios and games, [`@chenglou/pretext`](https://github.com/chenglou/pretext) for DOM-free text layout, Framer Motion for transitions
+- **Data:** Prisma 7 on Neon serverless Postgres, Upstash Redis for caching and rate limits, Zod contracts for every API route ([`openapi.json`](https://github.com/fderuiter/portfolio/blob/main/openapi.json))
+- **Services:** Clerk (admin auth), Resend (email), Sentry (errors and tracing), Vercel (hosting)
+- **Quality:** Vitest, fast-check property tests, Stryker mutation testing, Playwright visual, accessibility and synthetic probes, and a custom architecture linter (`npm run doctor`)
 
-## Featured Case Studies
+The whole stack is designed to run inside free-tier provider limits; see
+[ADR 0036](https://github.com/fderuiter/portfolio/blob/main/adr/0036-free-tier-offloading-and-provider-quota-governance.md).
 
-### InBody QR Data Decoder & Analyzer
+## Run it locally
 
-- **Stack:** Python 3.8+, Poetry, Flask, BeautifulSoup4, jsQR, Pillow, Pytest
-- **Domain:** Reverse Engineering, Biomedical Data, Monorepo Architecture, Data Parsing
-- **GitHub Topics:** `reverse-engineering`, `inbody`, `qr-decoder`, `biometrics`, `data-extraction`, `monorepo`, `python`
-- **Description:** Reverse-engineers the fixed-width binary serialization protocol of InBody BIA hardware query strings (`IBData`). Features an automated Differential Mutation Oracle ("Delta Testing Engine") that isolates contiguous byte slices and programmatically derives field boundaries without official schemas.
+You need **Node.js 22 or newer** (CI uses Node 24) and **npm 10 or newer**.
+npm is the only supported package manager.
 
-## Visual & System Architecture
-
-The portfolio utilizes a "Design Engineering" approach, combining lightweight libraries like Aceternity UI and Magic UI with Framer Motion. For complete architectural documentation—including the App Router route tree (`app/work/laser-loon/page.tsx`) and UI component hierarchy (`components/ui/CaseStudyBentoCard.tsx`)—refer to [**`ARCHITECTURE.md`**](_media/ARCHITECTURE.md). The Sortify Python backend core utilities (`app/core/crypto.py`, `app/core/resilient_file_ops.py`, `app/core/analyzer_strategies.py`) belong to the separate Sortify repository, not this one, and are documented in [**`docs/CASE_STUDY.md`**](_media/CASE_STUDY.md).
-
-## Deployment & Synthetic Monitoring
-
-Operational workflows for production releases—including Automated Canary Analysis (ACA) commands, service-level agreement (SLA) threshold gates, automated rollback webhooks, and step-by-step synthetic probe failure triage runbooks—are detailed in [**`DEPLOYMENT.md`**](_media/DEPLOYMENT.md).
-
-## Project Roadmap
-
-Current portfolio work is planned on the
-[Portfolio Iterative Development](https://github.com/users/fderuiter/projects/19)
-board. It is the cross-repository view for active initiatives, priorities,
-workstreams, and delivery status. Release-specific risks and human-gated
-operational work are tracked on the focused
-[Portfolio Hub: Release Readiness](https://github.com/users/fderuiter/projects/18)
-board. GitHub issues and project items are the source of truth; completed epics
-are kept in GitHub history instead of copied into a static status table here.
-
-Architectural decisions are recorded in
-[`adr/`](https://github.com/fderuiter/portfolio/tree/main/adr), and repository
-invariants are listed in
-[`AGENTS.md`](https://github.com/fderuiter/portfolio/blob/main/AGENTS.md).
-
-## Prerequisites
-
-To work on this repository, you will need:
-
-- **Node.js**: >=22.0.0 (per the `engines` field in `package.json`); CI and the scheduled workflows run Node 24
-- **npm**: >=10.0.0 (sole supported package manager; bun, yarn, and pnpm are unsupported)
-
-## Setup Instructions
-
-Automated Interactive Setup:
-You can run the interactive setup command to configure your environment, check dependencies, push database schema, and seed initial data:
+The quickest path is the interactive setup, which checks your toolchain,
+creates `.env.local`, pushes the schema, and seeds sample data:
 
 ```bash
+npm install
 npm run setup
+npm run dev
 ```
 
-Or follow manual setup steps:
-
-1. **Install Dependencies**
-
-   ```bash
-   npm install
-   ```
-
-2. **Configure Environment**
-   Copy `.env.example` to `.env.local` and set your `DATABASE_URL` (Neon Postgres connection string) and optionally `GITHUB_TOKEN` to avoid API rate limits.
-
-   Verify your environment variable configuration:
-
-   ```bash
-   npm run env:check
-   ```
-
-   This command validates all required server and client environment key declarations against `lib/env.ts`, warning of any missing or invalid keys to confirm setup is complete.
-
-   To configure Clerk authentication and author access allowlists interactively:
-
-   ```bash
-   npm run setup:clerk
-   ```
-
-3. **Initialize Database & Prisma Client**
-   `npm install` already generates the Prisma client automatically via a `postinstall` hook, so `npx tsc --noEmit` and other direct type-checks work right after install with no extra step. Push the schema to your database:
-
-   ```bash
-   npx prisma db push
-   ```
-
-   (Re-running `npx prisma generate` here is harmless if the schema changed since install.)
-
-4. **Seed Database**
-   Populate the database with clinical trials and schema engine case studies (with inline Markdown formatting):
-
-   ```bash
-   npx prisma db seed
-   ```
-
-5. **Verify Local Health & Architectural Invariants**
-   Immediately after environment setup and database initialization, run the local health diagnostic command to confirm local environment readiness and invariant health before writing code:
-
-   ```bash
-   # Run local architectural invariant diagnostic checks
-   npm run doctor
-
-   # Or execute the complete invariant verification suite
-   npm run verify
-   ```
-
-6. **Start the Development Server**
-   Launch Next.js 16 with Turbopack and concurrent TypeScript watcher:
-   ```bash
-   npm run dev
-   ```
-   Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-### API Documentation & Drift Verification Workflow
-
-When introducing or modifying public interfaces (`lib/`, `hooks/`, `types/`) or HTTP API routes (`app/api/`), contributors must ensure documentation and specifications remain synchronized to prevent pre-commit blocks and CI build failures:
-
-1. **Compile API Documentation**
-   After changing public functions, hooks, or types, manually recompile the TypeDoc reference documentation:
-
-   ```bash
-   npm run compile-docs
-   ```
-
-2. **Verify Local Documentation Drift**
-   Execute the local documentation drift check before committing changes:
-
-   ```bash
-   npm run check-docs-drift
-   ```
-
-3. **Resolve Drift & Stage Documentation**
-   If documentation drift is detected, run `npm run compile-docs` (or `npm run doctor:fix` to auto-remediate) and stage updated markdown files in `docs/` alongside code changes before committing:
-   ```bash
-   git add docs/ openapi.json
-   ```
-
-## Local Verification & Continuous Integration (CI) Mapping
-
-To prevent pull request build failures and maintain zero-drift quality standards, local verification commands map directly to automated continuous integration quality gates executed in GitHub Actions workflows (`.github/workflows/ci.yml` and `.github/workflows/synthetic-probes.yml`).
-
-Before submitting a pull request, run the relevant local quality commands or execute the full pre-submission quality gate:
+Or step by step:
 
 ```bash
-# Complete pre-submission CI quality gate
-npm run quality
+npm install
+cp .env.example .env.local   # then set DATABASE_URL to a Postgres connection string
+npx prisma db push           # create the schema
+npx prisma db seed           # load sample case studies
+npm run dev                  # http://localhost:3000
 ```
 
-### CI Quality Gate Mapping
+`GITHUB_TOKEN` is optional and only avoids GitHub API rate limits. Clerk,
+Resend, Upstash and Sentry are optional for local work; `npm run env:check`
+reports what is missing. The full walkthrough is in the
+[onboarding tutorial](_media/01-local-development-and-onboarding.md).
 
-| Local Quality Command                | Continuous Integration Job / Step                                | Verification Scope & Purpose                                                                          |
-| ------------------------------------ | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `npm run doctor`                     | `heavy-gate` / Verify ADR Invariants & Doctor Health Diagnostics | Diagnostic audit of architectural and testing invariants (routes, layout, WCAG a11y, hydration)       |
-| `npm run doctor:fix`                 | Local Auto-remediation                                           | Auto-remediates fixable architectural invariants and updates OpenAPI & TypeDoc contracts              |
-| `npm run env:check`                  | Local environment preflight                                      | Validates `.env.local` schema definitions against `lib/env.ts` and `.env.example`                     |
-| `npm run check`                      | `fast-gate` / Type Check & Lint                                  | Static TypeScript checking, ESLint, and dependency-boundary enforcement                               |
-| `npm run lint:docs`                  | `fast-gate` / Lint Documentation                                 | Markdown formatting and structure linting via `markdownlint-cli`                                      |
-| `npm run check-docs-drift`           | `fast-gate` / Check Documentation Drift                          | Verifies lockstep synchronization for TypeDoc API docs, OpenAPI schemas, and onboarding guides        |
-| `npm run release:gate`               | `fast-gate` / Execute Pipeline Release Gate                      | Pre-deployment release gate validating security audits and migration integrity                        |
-| `npm run check:migrations:drift`     | `fast-gate` / Check Schema Drift                                 | Verifies Prisma database schema against active migrations and checks for drift                        |
-| `npm test` / `npm run test:ci`       | `fast-gate` / Run Logic Tests (Vitest)                           | Comprehensive unit, logic, and state-engine tests with optional coverage                              |
-| `npm run test:fuzz`                  | `fast-gate` / Run Shift-Left Property Fuzz Testing Gate          | Fast-check property-based testing and generative invariant verification                               |
-| `npm run test:mutation`              | `fast-gate` / Run Stryker Mutation Gate                          | Mutation testing of critical deterministic and security modules                                       |
-| `npx playwright test`                | `heavy-gate` and `device-gate` browser suites                    | Visual regression, interaction, responsive-device, and Playwright-Axe accessibility checks            |
-| `npm run analyze:bundle -- --strict` | `heavy-gate` / Verify Bundle Performance Budgets                 | Enforces JavaScript chunk-size limits and initial shared-bundle gzip budgets                          |
-| `npm run bench:pages -- --assert`    | `heavy-gate` / Run Real-Browser Sub-Route Web Vitals             | Production-server Core Web Vitals assertions (LCP <= 2500ms, TTFB <= 800ms, CLS <= 0.1)               |
-| `npm run audit:security`             | `security-gate` / `Execute Security Audit Gate`                  | Dependency security vulnerability auditing and policy compliance                                      |
-| `npm run audit:secrets`              | `security-gate` / Scan Reachable Git History for Secrets         | Redacted scan of all reachable Git history for high-confidence credential patterns                    |
-| `npm run probe:synthetic`            | `synthetic-probes.yml` / `Headless Synthetic Probe Matrix`       | Playwright synthetic user probes verifying critical user journeys and API telemetry                   |
-| `npm run quality`                    | CI Pipeline Composite Pre-Flight Gate                            | Runs static checks, docs gates, secret-history audit, page benchmarks, and architectural verification |
+## Documentation
 
-## Asset Generation & Design System Commands
+- [`ARCHITECTURE.md`](_media/ARCHITECTURE.md): route tree, component hierarchy, and data flow
+- [`adr/`](https://github.com/fderuiter/portfolio/tree/main/adr): architecture decision records, one per significant design choice
+- [`docs/`](_media/README.md): tutorials, how-to guides, reference (including the TypeDoc API reference), and explanation
+- [`DEPLOYMENT.md`](_media/DEPLOYMENT.md) and [`DATABASE_MIGRATIONS.md`](_media/DATABASE_MIGRATIONS.md): release and schema-change runbooks
+- [`CHANGELOG.md`](_media/CHANGELOG.md): release history
 
-The repository provides standardized CLI commands for generating multi-resolution brand assets and compiling design system tokens:
+## Contributing
 
-### Brand Icon Generation
-
-- **Command:** `npm run build:icons` (or `npm run generate:icons` / `npx tsx scripts/dx.ts build:icons`)
-- **Input Source Location:** Vector SVG artwork at `public/favicon.svg` (or `app/icon.svg`).
-- **Generated Output Asset Targets:**
-  - `app/icon.svg` & `public/favicon.svg`: Vector SVG favicons
-  - `app/favicon.ico` & `public/favicon.ico`: Multi-resolution Windows ICO container enclosing 16x16, 32x32, and 48x48 PNG buffers
-  - `public/apple-touch-icon.png`: 180x180 high-DPI iOS touch icon
-  - `public/icon-192.png` & `public/icon-512.png`: Standard PWA web app manifest icons
-
-### Design System Token Compilation
-
-- **Command:** `npm run build:theme` (or `npm run generate:theme` / `npx tsx scripts/dx.ts build:theme`)
-- **Input Source Location:** CSS custom properties declared in `app/globals.css` (within the `:root` selector block).
-- **Generated Output Asset Target:** `lib/design-manifest.ts` (strongly-typed runtime TypeScript constants exported as `designManifest`).
-
-## Database changes
-
-Schema changes must include a checked-in Prisma migration. See
-[DATABASE_MIGRATIONS.md](_media/DATABASE_MIGRATIONS.md) for the development workflow,
-production rollout order, and the one-time production baseline procedure.
-
-## Contributing Guidelines
-
-For full details on developer onboarding, architectural invariants, conventional commits, and interactive CLI feature scaffolding (`npm run scaffold`), please refer to the [**`CONTRIBUTING.md`**](_media/CONTRIBUTING.md) guide.
+Issues and pull requests are welcome. [`CONTRIBUTING.md`](_media/CONTRIBUTING.md)
+covers the scaffolding CLI, the quality gates CI runs, and how local commands
+map to them. Please report security issues privately as described in
+[`SECURITY.md`](_media/SECURITY.md).
 
 ## License
 
 The application source is licensed under the [Apache License 2.0](_media/LICENSE). The repository ships three kinds of material under three different terms, and [`NOTICE`](_media/NOTICE) is the authoritative scope statement:
 
-- **Application source** — Apache-2.0. `app/`, `components/`, `hooks/`, `lib/`, `types/`, `prisma/`, `scripts/`, `__tests__/`, root configuration, and the generated `docs/` and `openapi.json`.
-- **Laser Loon brand artwork** (`public/files/`) — [CC BY 4.0](_media/LICENSE.txt), unchanged.
-- **Editorial content, biography, resume data, photography, and the `Frederick de Ruiter` / `deruiter.dev` marks** — all rights reserved.
+- **Application source**: Apache-2.0. `app/`, `components/`, `hooks/`, `lib/`, `types/`, `prisma/`, `scripts/`, `__tests__/`, root configuration, and the generated `docs/` and `openapi.json`.
+- **Laser Loon brand artwork** (`public/files/`): [CC BY 4.0](_media/LICENSE.txt), unchanged.
+- **Editorial content, biography, resume data, photography, and the `Frederick de Ruiter` / `deruiter.dev` marks**: all rights reserved.
 
-Apache-2.0 was chosen over MIT for its express patent grant and its section 6 trademark reservation: this repository is a personal-brand deployment, so the permission to reuse the engineering must not read as permission to reuse the identity. Fork the engineering freely; replace the writing and the branding before you deploy.
-
-Contributions are accepted under the same Apache-2.0 terms as the project (inbound = outbound), per [`CONTRIBUTING.md`](_media/CONTRIBUTING.md).
+Fork the engineering freely; replace the writing and the branding before you deploy.
