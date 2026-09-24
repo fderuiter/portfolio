@@ -6,9 +6,6 @@
 
 # Interface: AssetProgressEvent
 
-NeuroRecon Event-Driven Progress Bus
-Pub/Sub Event Bus for real-time external 3D asset download progress streaming.
-
 ## Properties
 
 ### error?

@@ -5,7 +5,7 @@ import { getConnectionHashFromRequest } from "@/lib/services/privacy-service";
 import { createApiHandler } from "@/lib/route-wrapper";
 import { checkSubmissionAttemptRateLimit } from "@/lib/moderation";
 import { isRedisConfigured, redis, getScopedRedisKey } from "@/lib/redis";
-import * as Sentry from "@sentry/nextjs";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -97,8 +97,7 @@ export const POST = createApiHandler(
         { status: 200 }
       );
     } catch (err) {
-      Sentry.captureException(err);
-      console.error("Failed to process blog post reaction submission:", err);
+      logger.error("Failed to process blog post reaction submission:", err);
       return NextResponse.json(
         {
           error:
