@@ -124,71 +124,75 @@ HTMLCanvasElement.prototype.getContext = function (
   ...args: unknown[]
 ): RenderingContext | null {
   if (contextId === "2d") {
-    return {
-      canvas: this,
-      font: "16px sans-serif",
-      fillStyle: "#ffffff",
-      strokeStyle: "#000000",
-      lineWidth: 1,
-      globalAlpha: 1,
-      fillRect: vi.fn(),
-      strokeRect: vi.fn(),
-      clearRect: vi.fn(),
-      setLineDash: vi.fn(),
-      getLineDash: vi.fn(() => []),
-      clip: vi.fn(),
-      ellipse: vi.fn(),
-      createLinearGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
-      createRadialGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
-      createPattern: vi.fn(),
-      getImageData: vi.fn(
-        (_sx?: number, _sy?: number, sw?: number, sh?: number) => {
-          const width = typeof sw === "number" && sw > 0 ? sw : 256;
-          const height = typeof sh === "number" && sh > 0 ? sh : 256;
+    const el = this as HTMLCanvasElement & { _ctx2d?: RenderingContext };
+    if (!el._ctx2d) {
+      el._ctx2d = {
+        canvas: this,
+        font: "16px sans-serif",
+        fillStyle: "#ffffff",
+        strokeStyle: "#000000",
+        lineWidth: 1,
+        globalAlpha: 1,
+        fillRect: vi.fn(),
+        strokeRect: vi.fn(),
+        clearRect: vi.fn(),
+        setLineDash: vi.fn(),
+        getLineDash: vi.fn(() => []),
+        clip: vi.fn(),
+        ellipse: vi.fn(),
+        createLinearGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
+        createRadialGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
+        createPattern: vi.fn(),
+        getImageData: vi.fn(
+          (_sx?: number, _sy?: number, sw?: number, sh?: number) => {
+            const width = typeof sw === "number" && sw > 0 ? sw : 256;
+            const height = typeof sh === "number" && sh > 0 ? sh : 256;
+            return {
+              width,
+              height,
+              data: new Uint8ClampedArray(width * height * 4),
+            };
+          }
+        ),
+        putImageData: vi.fn(),
+        createImageData: vi.fn((w?: number | ImageData, h?: number) => {
+          const width = typeof w === "number" && w > 0 ? w : 256;
+          const height = typeof h === "number" && h > 0 ? h : 256;
           return {
             width,
             height,
             data: new Uint8ClampedArray(width * height * 4),
           };
-        }
-      ),
-      putImageData: vi.fn(),
-      createImageData: vi.fn((w?: number | ImageData, h?: number) => {
-        const width = typeof w === "number" && w > 0 ? w : 256;
-        const height = typeof h === "number" && h > 0 ? h : 256;
-        return {
-          width,
-          height,
-          data: new Uint8ClampedArray(width * height * 4),
-        };
-      }),
-      drawImage: vi.fn(),
-      save: vi.fn(),
-      fillText: vi.fn(),
-      strokeText: vi.fn(),
-      restore: vi.fn(),
-      beginPath: vi.fn(),
-      moveTo: vi.fn(),
-      lineTo: vi.fn(),
-      closePath: vi.fn(),
-      stroke: vi.fn(),
-      translate: vi.fn(),
-      scale: vi.fn(),
-      rotate: vi.fn(),
-      arc: vi.fn(),
-      arcTo: vi.fn(),
-      fill: vi.fn(),
-      rect: vi.fn(),
-      quadraticCurveTo: vi.fn(),
-      bezierCurveTo: vi.fn(),
-      roundRect: vi.fn(),
-      measureText: vi.fn((text: string) => ({
-        width: (text || "").length * 8,
-        height: 16,
-      })),
-      transform: vi.fn(),
-      resetTransform: vi.fn(),
-    } as unknown as RenderingContext;
+        }),
+        drawImage: vi.fn(),
+        save: vi.fn(),
+        fillText: vi.fn(),
+        strokeText: vi.fn(),
+        restore: vi.fn(),
+        beginPath: vi.fn(),
+        moveTo: vi.fn(),
+        lineTo: vi.fn(),
+        closePath: vi.fn(),
+        stroke: vi.fn(),
+        translate: vi.fn(),
+        scale: vi.fn(),
+        rotate: vi.fn(),
+        arc: vi.fn(),
+        arcTo: vi.fn(),
+        fill: vi.fn(),
+        rect: vi.fn(),
+        quadraticCurveTo: vi.fn(),
+        bezierCurveTo: vi.fn(),
+        roundRect: vi.fn(),
+        measureText: vi.fn((text: string) => ({
+          width: (text || "").length * 8,
+          height: 16,
+        })),
+        transform: vi.fn(),
+        resetTransform: vi.fn(),
+      } as unknown as RenderingContext;
+    }
+    return el._ctx2d;
   }
 
   if (
