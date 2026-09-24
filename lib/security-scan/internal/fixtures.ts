@@ -117,4 +117,8 @@ export const SECRET_DETECTOR_FIXTURES: Record<
       "UPSTASH_REDIS_REST_TOKEN=short",
     ],
   },
+  "neon-role-password": {
+    positive: ["PGPASSWORD=npg_FixtureOnly0000", "npg_AbCdEfGh1234"],
+    negative: ["npg_short", "Npgsql connection pooling"],
+  },
 };

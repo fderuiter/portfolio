@@ -13,7 +13,11 @@ import {
   generateEnvExampleContent,
   checkEnvironmentVariables,
 } from "../lib/dx/env-guard";
-import { extractExports, scanDeadCode, checkDeadCode } from "../lib/dx/dead-code";
+import {
+  extractExports,
+  scanDeadCode,
+  checkDeadCode,
+} from "../lib/dx/dead-code";
 import * as bundleGuard from "../lib/dx/bundle-guard";
 import { handleAnalyzeCommand } from "../scripts/dx";
 import { checkWorkspaceIdeConfig } from "../lib/dx/doctor";
@@ -32,7 +36,9 @@ describe("Developer Experience (DX) Tooling Suite", () => {
 
       const result = validateEnv(validMockEnv);
       expect(result.success).toBe(true);
-      expect(result.data.DATABASE_URL).toBe("postgresql://user:pass@localhost:5432/db");
+      expect(result.data.DATABASE_URL).toBe(
+        "postgresql://user:pass@localhost:5432/db"
+      );
       expect(result.data.NEXT_PUBLIC_APP_URL).toBe("http://localhost:3000");
     });
 
@@ -79,7 +85,7 @@ describe("Developer Experience (DX) Tooling Suite", () => {
       const generated = generateEnvExampleContent();
       expect(generated).toContain("DATABASE_URL=");
       expect(generated).toContain("UPSTASH_REDIS_REST_URL=");
-      expect(generated).not.toContain("npg_mN8oCAGrRM0E"); // Must never contain production passwords
+      expect(generated).not.toMatch(/npg_[A-Za-z0-9]{12,}/); // Must never contain a Neon role password
     });
 
     it("passes checkEnvironmentVariables diagnostic check", () => {
@@ -132,8 +138,12 @@ describe("Developer Experience (DX) Tooling Suite", () => {
     });
 
     it("allows standard git merge and release commits", () => {
-      expect(validateCommitMessage("Merge branch 'main' into feat/dx").valid).toBe(true);
-      expect(validateCommitMessage("Revert \"feat: something broken\"").valid).toBe(true);
+      expect(
+        validateCommitMessage("Merge branch 'main' into feat/dx").valid
+      ).toBe(true);
+      expect(
+        validateCommitMessage('Revert "feat: something broken"').valid
+      ).toBe(true);
       expect(validateCommitMessage("v1.0.0").valid).toBe(true);
     });
 
@@ -142,7 +152,7 @@ describe("Developer Experience (DX) Tooling Suite", () => {
         "fix(dx): support `code_symbol` in commit header",
         "feat(a11y): prevent $(rm -rf /) subshell evaluation",
         "chore(deps): update package; echo injected",
-        'refactor(crf): handling "double quotes" and \'single quotes\'',
+        "refactor(crf): handling \"double quotes\" and 'single quotes'",
       ];
 
       for (const msg of metacharacterMessages) {
@@ -229,27 +239,33 @@ describe("Developer Experience (DX) Tooling Suite", () => {
     });
 
     it("runs handleAnalyzeCommand without strict flag and does not exit on violations", () => {
-      const spyInspect = vi.spyOn(bundleGuard, "inspectBundleChunks").mockReturnValue({
-        isBuilt: true,
-        totalChunks: 1,
-        totalRawBytes: 500000,
-        totalGzipBytes: 400000,
-        initialSharedGzipBytes: 400000,
-        chunks: [
-          {
-            name: "oversized-chunk.js",
-            relativePath: "static/chunks/oversized-chunk.js",
-            rawBytes: 500000,
-            gzipBytes: 400000,
-            isInitial: true,
-          },
-        ],
-        violations: ["Chunk 'oversized-chunk.js' (400.0 kB gzip) exceeds maximum chunk budget of 350 kB."],
-      });
+      const spyInspect = vi
+        .spyOn(bundleGuard, "inspectBundleChunks")
+        .mockReturnValue({
+          isBuilt: true,
+          totalChunks: 1,
+          totalRawBytes: 500000,
+          totalGzipBytes: 400000,
+          initialSharedGzipBytes: 400000,
+          chunks: [
+            {
+              name: "oversized-chunk.js",
+              relativePath: "static/chunks/oversized-chunk.js",
+              rawBytes: 500000,
+              gzipBytes: 400000,
+              isInitial: true,
+            },
+          ],
+          violations: [
+            "Chunk 'oversized-chunk.js' (400.0 kB gzip) exceeds maximum chunk budget of 350 kB.",
+          ],
+        });
 
-      const spyExit = vi.spyOn(process, "exit").mockImplementation((code?: string | number | null | undefined) => {
-        throw new Error(`process.exit(${code})`);
-      });
+      const spyExit = vi
+        .spyOn(process, "exit")
+        .mockImplementation((code?: string | number | null | undefined) => {
+          throw new Error(`process.exit(${code})`);
+        });
 
       expect(() => handleAnalyzeCommand([])).not.toThrow();
 
@@ -258,56 +274,68 @@ describe("Developer Experience (DX) Tooling Suite", () => {
     });
 
     it("runs handleAnalyzeCommand with strict flag and exits with code 1 on violations", () => {
-      const spyInspect = vi.spyOn(bundleGuard, "inspectBundleChunks").mockReturnValue({
-        isBuilt: true,
-        totalChunks: 1,
-        totalRawBytes: 500000,
-        totalGzipBytes: 400000,
-        initialSharedGzipBytes: 400000,
-        chunks: [
-          {
-            name: "oversized-chunk.js",
-            relativePath: "static/chunks/oversized-chunk.js",
-            rawBytes: 500000,
-            gzipBytes: 400000,
-            isInitial: true,
-          },
-        ],
-        violations: ["Chunk 'oversized-chunk.js' (400.0 kB gzip) exceeds maximum chunk budget of 350 kB."],
-      });
+      const spyInspect = vi
+        .spyOn(bundleGuard, "inspectBundleChunks")
+        .mockReturnValue({
+          isBuilt: true,
+          totalChunks: 1,
+          totalRawBytes: 500000,
+          totalGzipBytes: 400000,
+          initialSharedGzipBytes: 400000,
+          chunks: [
+            {
+              name: "oversized-chunk.js",
+              relativePath: "static/chunks/oversized-chunk.js",
+              rawBytes: 500000,
+              gzipBytes: 400000,
+              isInitial: true,
+            },
+          ],
+          violations: [
+            "Chunk 'oversized-chunk.js' (400.0 kB gzip) exceeds maximum chunk budget of 350 kB.",
+          ],
+        });
 
-      const spyExit = vi.spyOn(process, "exit").mockImplementation((code?: string | number | null | undefined) => {
-        throw new Error(`process.exit(${code})`);
-      });
+      const spyExit = vi
+        .spyOn(process, "exit")
+        .mockImplementation((code?: string | number | null | undefined) => {
+          throw new Error(`process.exit(${code})`);
+        });
 
-      expect(() => handleAnalyzeCommand(["--strict"])).toThrow("process.exit(1)");
+      expect(() => handleAnalyzeCommand(["--strict"])).toThrow(
+        "process.exit(1)"
+      );
 
       spyInspect.mockRestore();
       spyExit.mockRestore();
     });
 
     it("runs handleAnalyzeCommand with strict flag and passes cleanly when no violations exist", () => {
-      const spyInspect = vi.spyOn(bundleGuard, "inspectBundleChunks").mockReturnValue({
-        isBuilt: true,
-        totalChunks: 1,
-        totalRawBytes: 10000,
-        totalGzipBytes: 5000,
-        initialSharedGzipBytes: 5000,
-        chunks: [
-          {
-            name: "small-chunk.js",
-            relativePath: "static/chunks/small-chunk.js",
-            rawBytes: 10000,
-            gzipBytes: 5000,
-            isInitial: true,
-          },
-        ],
-        violations: [],
-      });
+      const spyInspect = vi
+        .spyOn(bundleGuard, "inspectBundleChunks")
+        .mockReturnValue({
+          isBuilt: true,
+          totalChunks: 1,
+          totalRawBytes: 10000,
+          totalGzipBytes: 5000,
+          initialSharedGzipBytes: 5000,
+          chunks: [
+            {
+              name: "small-chunk.js",
+              relativePath: "static/chunks/small-chunk.js",
+              rawBytes: 10000,
+              gzipBytes: 5000,
+              isInitial: true,
+            },
+          ],
+          violations: [],
+        });
 
-      const spyExit = vi.spyOn(process, "exit").mockImplementation((code?: string | number | null | undefined) => {
-        throw new Error(`process.exit(${code})`);
-      });
+      const spyExit = vi
+        .spyOn(process, "exit")
+        .mockImplementation((code?: string | number | null | undefined) => {
+          throw new Error(`process.exit(${code})`);
+        });
 
       expect(() => handleAnalyzeCommand(["--strict"])).not.toThrow();
 
@@ -319,10 +347,18 @@ describe("Developer Experience (DX) Tooling Suite", () => {
   describe("5. IDE & Workspace Configuration Integrity", () => {
     it("verifies that all .vscode files and .editorconfig exist", () => {
       expect(fs.existsSync(path.join(root, ".editorconfig"))).toBe(true);
-      expect(fs.existsSync(path.join(root, ".vscode", "settings.json"))).toBe(true);
-      expect(fs.existsSync(path.join(root, ".vscode", "extensions.json"))).toBe(true);
-      expect(fs.existsSync(path.join(root, ".vscode", "launch.json"))).toBe(true);
-      expect(fs.existsSync(path.join(root, ".vscode", "tasks.json"))).toBe(true);
+      expect(fs.existsSync(path.join(root, ".vscode", "settings.json"))).toBe(
+        true
+      );
+      expect(fs.existsSync(path.join(root, ".vscode", "extensions.json"))).toBe(
+        true
+      );
+      expect(fs.existsSync(path.join(root, ".vscode", "launch.json"))).toBe(
+        true
+      );
+      expect(fs.existsSync(path.join(root, ".vscode", "tasks.json"))).toBe(
+        true
+      );
     });
 
     it("passes checkWorkspaceIdeConfig diagnostic check", () => {

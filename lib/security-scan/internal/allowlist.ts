@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import { SECRET_DETECTORS } from "./catalog";
 import { SECRET_DETECTOR_FIXTURES } from "./fixtures";
 
@@ -88,6 +90,32 @@ const SAFE_FILE_VALUES = new Map<string, Set<string>>([
 ]);
 
 /**
+ * Credentials that were committed, then revoked, and that history still
+ * holds. They are keyed by SHA-256 fingerprint rather than by value so the
+ * plaintext never re-enters the tree, and scoped to the one file that held
+ * each. A fingerprint belongs here only after the credential has been
+ * rotated at its provider.
+ *
+ * - `__tests__/dx-tooling.test.ts`: a Neon role password embedded in a
+ *   `.env.example` assertion from 2026-08-16 until 2026-09-24. The role's
+ *   password was reset on 2026-09-24.
+ */
+const ROTATED_CREDENTIAL_FINGERPRINTS = new Map<string, ReadonlySet<string>>([
+  [
+    "__tests__/dx-tooling.test.ts",
+    new Set([
+      "71a564baa010cb4cb8ab1c6503c326d2e8bb1cf9b6d2c5c3d70bbc8fe2fc4925",
+    ]),
+  ],
+]);
+
+function isRotatedCredential(value: string, file: string): boolean {
+  const fingerprints = ROTATED_CREDENTIAL_FINGERPRINTS.get(file);
+  if (!fingerprints) return false;
+  return fingerprints.has(createHash("sha256").update(value).digest("hex"));
+}
+
+/**
  * Whether a detected candidate value is a known-safe fixture/example rather
  * than a real secret, given the (repo-relative, forward-slash) file it was
  * found in.
@@ -97,6 +125,7 @@ export function isAllowlistedSecretValue(value: string, file = ""): boolean {
 
   const normalizedFile = file.replaceAll("\\", "/");
   if (SAFE_FILE_VALUES.get(normalizedFile)?.has(value)) return true;
+  if (isRotatedCredential(value, normalizedFile)) return true;
 
   try {
     const host = new URL(value).hostname;

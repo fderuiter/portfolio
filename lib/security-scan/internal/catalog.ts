@@ -134,4 +134,12 @@ export const SECRET_DETECTORS = [
       "UPSTASH_[A-Z0-9_]*TOKEN[[:space:]]*[:=][[:space:]]*(['\"`][A-Za-z0-9_-]{16,}['\"`]|[A-Za-z0-9_-]{16,})",
     appliesTo: ["contentGuard"],
   },
+  {
+    id: "neon-role-password",
+    description:
+      "Neon Postgres role password (npg_ prefix), on its own rather than inside a connection URL",
+    regex: /npg_[A-Za-z0-9]{12,}/g,
+    gitPattern: "npg_[A-Za-z0-9]{12,}",
+    appliesTo: ["contentGuard", "historyAudit"],
+  },
 ] as const satisfies readonly SecretDetector[];
