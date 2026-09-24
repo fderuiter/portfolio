@@ -178,6 +178,25 @@ describe("CardTable", () => {
     );
   });
 
+  it("focuses a clicked cell without scrolling, so narrow-width taps land (#956)", async () => {
+    render(<CardTable />);
+    await openInspect(DRAFT_A);
+    const target = gridCell(1, 2);
+    const focusSpy = vi.spyOn(target, "focus");
+
+    // A pointer press is swallowed so focus can't scroll the grid before pointerup.
+    expect(fireEvent.mouseDown(target)).toBe(false);
+    fireEvent.click(target);
+    expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
+    expect(target.getAttribute("data-status")).not.toBe("UNREVIEWED");
+
+    // Keyboard moves still scroll the newly focused cell into view.
+    const left = gridCell(1, 1);
+    const leftSpy = vi.spyOn(left, "focus");
+    fireEvent.keyDown(target, { key: "ArrowLeft" });
+    expect(leftSpy).toHaveBeenCalledWith(undefined);
+  });
+
   it("clears the Blind by inspecting, correcting and playing, then restarts", async () => {
     render(<CardTable />);
     await openInspect(DRAFT_A);
