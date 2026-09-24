@@ -12,6 +12,7 @@
 
 ## Type Aliases
 
+- [ApiAuthRequirement](type-aliases/ApiAuthRequirement.md)
 - [ApiHandler](type-aliases/ApiHandler.md)
 - [ApiRouteHandler](type-aliases/ApiRouteHandler.md)
 

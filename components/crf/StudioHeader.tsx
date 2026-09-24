@@ -112,6 +112,34 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
     (p) => p.study.protocolNumber === study.protocolNumber
   );
 
+  const tabRefs = React.useRef<Record<string, HTMLButtonElement | null>>({});
+
+  const handleModeKeyDown = (
+    event: React.KeyboardEvent<HTMLButtonElement>,
+    currentMode: StudioMode
+  ) => {
+    const modesList = MODES.map((m) => m.mode);
+    const currentIndex = modesList.indexOf(currentMode);
+    let nextIndex: number | null = null;
+
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      nextIndex = (currentIndex + 1) % modesList.length;
+    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      nextIndex = (currentIndex - 1 + modesList.length) % modesList.length;
+    } else if (event.key === "Home") {
+      nextIndex = 0;
+    } else if (event.key === "End") {
+      nextIndex = modesList.length - 1;
+    }
+
+    if (nextIndex === null) return;
+
+    event.preventDefault();
+    const nextMode = modesList[nextIndex];
+    onChangeMode(nextMode);
+    tabRefs.current[nextMode]?.focus();
+  };
+
   const MODES: {
     mode: StudioMode;
     label: string;
@@ -573,10 +601,15 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
             const isActive = activeMode === item.mode;
             return (
               <button
+                ref={(node) => {
+                  tabRefs.current[item.mode] = node;
+                }}
                 key={item.mode}
                 role="tab"
                 aria-selected={isActive}
+                tabIndex={isActive ? 0 : -1}
                 onClick={() => onChangeMode(item.mode)}
+                onKeyDown={(e) => handleModeKeyDown(e, item.mode)}
                 className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono font-semibold transition-all rounded-lg whitespace-nowrap outline-none shrink-0 ${
                   isActive
                     ? "bg-brand-cyan/15 text-brand-cyan font-bold border border-brand-cyan/30 shadow-xs"

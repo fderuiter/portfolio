@@ -2,6 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 import { useIsMobileViewport } from "@/hooks/useIsMobileViewport";
+import { usePrefersReducedMotion } from "@/hooks/useMediaQuery";
 
 /** Playback speeds for the scoring spectacle (ADR 0046 amendment). */
 type TeGameSpeed = 1 | 2 | 4;
@@ -21,24 +22,7 @@ interface TeMotion {
 
 const SPEED_STORAGE_KEY = "te:game-speed";
 const SPEED_CHANGE_EVENT = "te:game-speed-change";
-const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 const SPEEDS: readonly TeGameSpeed[] = [1, 2, 4];
-
-function subscribeReducedMotion(callback: () => void): () => void {
-  if (typeof window === "undefined" || !window.matchMedia) return () => {};
-  const mql = window.matchMedia(REDUCED_MOTION_QUERY);
-  mql.addEventListener?.("change", callback);
-  return () => mql.removeEventListener?.("change", callback);
-}
-
-function getReducedMotion(): boolean {
-  if (typeof window === "undefined" || !window.matchMedia) return false;
-  return window.matchMedia(REDUCED_MOTION_QUERY).matches;
-}
-
-// Assume reduced motion until the client knows otherwise, so a server-rendered
-// frame can never contain a loud moment.
-const getServerReducedMotion = () => true;
 
 function readSpeed(): TeGameSpeed {
   try {
@@ -93,11 +77,7 @@ function setSpeed(speed: TeGameSpeed): void {
  * hydration-safe (`useSyncExternalStore`), per AGENTS.md §4.
  */
 export function useTeMotion(): TeMotion {
-  const reducedMotion = useSyncExternalStore(
-    subscribeReducedMotion,
-    getReducedMotion,
-    getServerReducedMotion
-  );
+  const reducedMotion = usePrefersReducedMotion();
   const speed = useSyncExternalStore(subscribeSpeed, readSpeed, getServerSpeed);
   const isCompactViewport = useIsMobileViewport();
   return {
