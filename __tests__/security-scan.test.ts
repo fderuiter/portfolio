@@ -152,12 +152,7 @@ describe("historyAudit surface: gitPattern is a real, working git-log -G pickaxe
   let repoDir: string;
 
   function git(args: string[]): string {
-    const env = { ...process.env };
-    delete env.GIT_DIR;
-    delete env.GIT_INDEX_FILE;
-    delete env.GIT_WORK_TREE;
-    delete env.GIT_PREFIX;
-    return execFileSync("git", args, { cwd: repoDir, env, encoding: "utf8" });
+    return execFileSync("git", args, { cwd: repoDir, encoding: "utf8" });
   }
 
   beforeAll(() => {

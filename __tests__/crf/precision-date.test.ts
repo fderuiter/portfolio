@@ -506,6 +506,14 @@ describe("lib/crf/precision-date.ts", () => {
   });
 
   describe("generateCdashVariableName", () => {
+    function createExhaustedNumericSet(stem: string = "T"): Set<string> {
+      const set = new Set<string>();
+      for (let i = 2; i < 1000; i++) {
+        set.add(`${stem}_${i}`);
+      }
+      return set;
+    }
+
     it("cleans baseName and ensures valid CDASH variable format", () => {
       expect(generateCdashVariableName("test", [])).toBe("TEST_2");
       expect(generateCdashVariableName("123test", [])).toBe("V_TEST_2");
@@ -545,10 +553,7 @@ describe("lib/crf/precision-date.ts", () => {
 
     it("falls back to letter suffixes (_A, _B, ...) when numeric counters reach limit", () => {
       // Mock existing names set where all numeric counters _2 through _999 exist for stem "T"
-      const existing = new Set<string>();
-      for (let i = 2; i < 1000; i++) {
-        existing.add(`T_${i}`);
-      }
+      const existing = createExhaustedNumericSet("T");
       const generated = generateCdashVariableName("T", existing);
       expect(generated).toBe("T_A");
 
@@ -563,10 +568,7 @@ describe("lib/crf/precision-date.ts", () => {
     });
 
     it("handles random candidate collision during ultimate fallback loop", () => {
-      const existing = new Set<string>();
-      for (let i = 2; i < 1000; i++) {
-        existing.add(`T_${i}`);
-      }
+      const existing = createExhaustedNumericSet("T");
       for (let code = 65; code <= 90; code++) {
         existing.add(`T_${String.fromCharCode(code)}`);
       }
@@ -592,10 +594,14 @@ describe("lib/crf/precision-date.ts", () => {
       }
     });
 
-    it("is case-insensitive regarding existing variable names", () => {
-      const existing = ["vstest_2"];
-      const generated = generateCdashVariableName("VSTEST", existing);
-      expect(generated).toBe("VSTEST_3");
+    it("is case-insensitive regarding existing variable names across Array and Set inputs", () => {
+      const existingArray = ["vstest_2"];
+      expect(generateCdashVariableName("VSTEST", existingArray)).toBe(
+        "VSTEST_3"
+      );
+
+      const existingSet = new Set(["vstest_2"]);
+      expect(generateCdashVariableName("VSTEST", existingSet)).toBe("VSTEST_3");
     });
   });
 });
