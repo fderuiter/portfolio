@@ -3,8 +3,9 @@ import {
   euclideanDist,
   computeShortestTour,
   updateTSPMovingWalls,
-} from "@/lib/dungeon/tsp";
-import { TSPNode, TSPMovingWall } from "@/lib/dungeon/types";
+  TSPNode,
+  TSPMovingWall,
+} from "@/lib/dungeon";
 
 describe("Dungeon TSP Pathfinding Engine", () => {
   describe("euclideanDist", () => {
