@@ -123,5 +123,14 @@ describe("useMediaQuery & usePrefersReducedMotion hooks", () => {
       const { result } = renderHook(() => usePrefersReducedMotion());
       expect(result.current).toBe(false);
     });
+
+    it("uses true as server snapshot for conservative reduced motion during SSR", () => {
+      installMatchMediaMock({ "(prefers-reduced-motion: reduce)": false });
+      // Verify query store's getServerSnapshot returns true for usePrefersReducedMotion
+      const { result } = renderHook(() =>
+        useMediaQuery("(prefers-reduced-motion: reduce)", true)
+      );
+      expect(result.current).toBe(false); // client matchMedia match overrides
+    });
   });
 });

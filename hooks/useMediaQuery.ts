@@ -79,5 +79,5 @@ export function useMediaQuery(
  * @returns True if `(prefers-reduced-motion: reduce)` matches.
  */
 export function usePrefersReducedMotion(): boolean {
-  return useMediaQuery("(prefers-reduced-motion: reduce)");
+  return useMediaQuery("(prefers-reduced-motion: reduce)", true);
 }
