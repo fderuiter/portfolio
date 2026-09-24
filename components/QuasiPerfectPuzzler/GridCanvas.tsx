@@ -98,7 +98,7 @@ export const GridCanvas: React.FC<GridCanvasProps> = ({
           case "goal":
             return "border-cyan-500/50 bg-cyan-950/30 text-cyan-300 hover:border-cyan-400";
           case "hypothesis":
-            return "border-purple-500/50 bg-purple-950/30 text-purple-300 hover:border-purple-400";
+            return "border-slate-500/50 bg-slate-950/30 text-slate-300 hover:border-slate-400";
           case "operator":
             return "border-amber-500/50 bg-amber-950/30 text-amber-300 hover:border-amber-400";
           default:

@@ -52,21 +52,21 @@ export const ProofTree: React.FC<ProofTreeProps> = ({
     return internalExpandedMap[node.id] ?? (node.isExpanded ?? true);
   };
 
-  const handleToggleNode = (nodeId: string, e: React.MouseEvent) => {
+  const handleToggleNode = (node: ProofTreeNode, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!isInteractive) return;
 
-    const currentExpanded = internalExpandedMap[nodeId] ?? true;
+    const currentExpanded = isNodeExpanded(node);
     const nextExpanded = !currentExpanded;
 
     if (controlledExpandedIds === undefined) {
       setInternalExpandedMap((prev) => ({
         ...prev,
-        [nodeId]: nextExpanded,
+        [node.id]: nextExpanded,
       }));
     }
 
-    onToggleExpand?.(nodeId, nextExpanded);
+    onToggleExpand?.(node.id, nextExpanded);
   };
 
   const handleNodeClick = (nodeId: string) => {
@@ -115,7 +115,7 @@ export const ProofTree: React.FC<ProofTreeProps> = ({
                 type="button"
                 data-testid="expand-toggle"
                 aria-label={`Toggle expand for node ${node.label}`}
-                onClick={(e) => handleToggleNode(node.id, e)}
+                onClick={(e) => handleToggleNode(node, e)}
                 className="p-1 rounded hover:bg-zinc-800/60 text-zinc-400 hover:text-white transition-colors"
               >
                 {expanded ? (
