@@ -25,6 +25,7 @@ interface DetailCheckResult {
 
 interface OpenApiCheckResult {
   missingRoutes: string[];
+  securityMismatches?: string[];
   hasDrift: boolean;
 }
 
@@ -155,7 +156,11 @@ export function checkDrift(
   console.log(
     "Checking OpenAPI contract synchronization and route coverage..."
   );
-  const { missingRoutes, hasDrift: openApiDrift } = dependencies.checkOpenApi();
+  const {
+    missingRoutes,
+    securityMismatches = [],
+    hasDrift: openApiDrift,
+  } = dependencies.checkOpenApi();
   if (missingRoutes.length > 0) {
     docsDrift = true;
     categories.push("openapi");
@@ -164,7 +169,19 @@ export function checkDrift(
       missingRoutes.map((route) => `  - ${route}`).join("\n") +
       "\n";
   }
-  if (openApiDrift) {
+  if (securityMismatches.length > 0) {
+    docsDrift = true;
+    categories.push("openapi");
+    driftSummary +=
+      `• Security scheme or operation security drift detected (${securityMismatches.length}):\n` +
+      securityMismatches.map((mismatch) => `  - ${mismatch}`).join("\n") +
+      "\n";
+  }
+  if (
+    openApiDrift &&
+    missingRoutes.length === 0 &&
+    securityMismatches.length === 0
+  ) {
     docsDrift = true;
     categories.push("openapi");
     driftSummary +=
