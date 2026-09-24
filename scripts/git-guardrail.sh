@@ -59,9 +59,9 @@ GIT_PATTERNS=(
   "^git[[:space:]]+restore[[:space:]]+(\.[[:space:]]*$|--staged[[:space:]]+\.[[:space:]]*$)"
 )
 
-# Deploy guards are skipped under CI so release.yml's build-once-promote-same-artifact
-# path (ADR 0038), which uses --prebuilt deliberately and with verification around it,
-# runs unimpeded.
+# Deploy guards are skipped under CI, where automation that deploys deliberately
+# carries its own verification. Production itself ships only through Vercel's
+# build of `main` (ADR 0049), which never runs these commands.
 DEPLOY_PATTERNS=()
 DEPLOY_REASONS=()
 if [ "${CI:-}" != "true" ]; then
@@ -69,7 +69,7 @@ if [ "${CI:-}" != "true" ]; then
   DEPLOY_REASONS+=("--prebuilt ships a locally built artifact without rebuilding. A build whose data source was unreachable still exits 0 and bakes fallback content into every page, so this flag is how a silent build failure becomes a silent production incident. Run a remote build instead: npx vercel deploy --prod")
 
   DEPLOY_PATTERNS+=("^vercel[[:space:]]+.*deploy.*[[:space:]]--prod([[:space:]]|$)")
-  DEPLOY_REASONS+=("Deploying straight to production from a developer machine bypasses the release.yml governance entirely (migrations, verification, rollback). Sometimes necessary, but it should be deliberate.")
+  DEPLOY_REASONS+=("Deploying straight to production from a developer machine bypasses the merge-to-main release path (ADR 0049), where Vercel migrates, builds and waits for CI before going live. Sometimes necessary, but it should be deliberate.")
 
   DEPLOY_PATTERNS+=("^vercel[[:space:]]+env[[:space:]]+rm([[:space:]]|$)")
   DEPLOY_REASONS+=("Removing a Vercel environment variable is hard to undo and can break production at the next cold start.")

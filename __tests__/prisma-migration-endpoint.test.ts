@@ -30,7 +30,8 @@ describe("prisma migration datasource precedence", () => {
   });
 
   it("still lets an explicit DIRECT_URL win, which is what CI sets", () => {
-    // .github/workflows/release.yml sets DIRECT_URL from the release secret.
+    // scripts/build.js sets DIRECT_URL from DATABASE_URL_UNPOOLED on Vercel
+    // production builds, and migration replays set it explicitly.
     expect(indexOfVar("DIRECT_URL")).toBeLessThan(
       indexOfVar("DATABASE_URL_UNPOOLED")
     );

@@ -64,7 +64,8 @@ describe("build.js script execution", () => {
     expect(exitMock).toHaveBeenCalledWith(0);
   });
 
-  it("never executes prisma migrate deploy even if VERCEL_ENV is production", () => {
+  it("never executes prisma migrate deploy off Vercel, even if VERCEL_ENV is production", () => {
+    delete (process.env as any).VERCEL;
     process.env.VERCEL_ENV = "production";
     process.env.DATABASE_URL = "postgresql://db:5432";
 
@@ -119,6 +120,73 @@ describe("build.js script execution", () => {
 
     // It should exit with 0
     expect(exitMock).toHaveBeenCalledWith(0);
+  });
+
+  it("applies migrations on Vercel production builds, through the unpooled endpoint, before next build", () => {
+    process.env.VERCEL = "1";
+    process.env.VERCEL_ENV = "production";
+    process.env.DATABASE_URL = "postgresql://pooled.example/db";
+    process.env.DATABASE_URL_UNPOOLED = "postgresql://unpooled.example/db";
+
+    try {
+      require("../scripts/build.js");
+    } catch (err: any) {
+      expect(err.message).toBe("Process exited with code 0");
+    }
+
+    const calls = spawnSpy.mock.calls.map(
+      (c: any[]) => `${c[0]} ${c[1].join(" ")}`
+    );
+    const migrateIndex = calls.indexOf("npx prisma migrate deploy");
+    expect(migrateIndex).toBeGreaterThan(
+      calls.indexOf("npm run check:migrations")
+    );
+    expect(calls.indexOf("npx next build --webpack")).toBeGreaterThan(
+      migrateIndex
+    );
+    expect(spawnSpy.mock.calls[migrateIndex][2].env.DIRECT_URL).toBe(
+      "postgresql://unpooled.example/db"
+    );
+    expect(exitMock).toHaveBeenCalledWith(0);
+  });
+
+  it("does not migrate from a Vercel preview build", () => {
+    process.env.VERCEL = "1";
+    process.env.VERCEL_ENV = "preview";
+    process.env.DATABASE_URL_UNPOOLED = "postgresql://unpooled.example/db";
+
+    try {
+      require("../scripts/build.js");
+    } catch (err: any) {
+      expect(err.message).toBe("Process exited with code 0");
+    }
+
+    expect(spawnSpy).not.toHaveBeenCalledWith(
+      "npx",
+      ["prisma", "migrate", "deploy"],
+      expect.any(Object)
+    );
+  });
+
+  it("fails a Vercel production build that has no unpooled endpoint", () => {
+    process.env.VERCEL = "1";
+    process.env.VERCEL_ENV = "production";
+    delete (process.env as any).DATABASE_URL_UNPOOLED;
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    try {
+      require("../scripts/build.js");
+    } catch (err: any) {
+      expect(err.message).toBe("Process exited with code 1");
+    }
+
+    expect(exitMock).toHaveBeenCalledWith(1);
+    expect(spawnSpy).not.toHaveBeenCalledWith(
+      "npx",
+      ["next", "build", "--webpack"],
+      expect.any(Object)
+    );
+    errorSpy.mockRestore();
   });
 
   it("sets dummy DATABASE_URL and DIRECT_URL if none are provided", () => {

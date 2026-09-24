@@ -1,72 +1,77 @@
-# ADR 0049: Deploy Main on Green CI
+# ADR 0049: Deploy Main Through Vercel
 
 ## Status
 
-Accepted on 2026-09-24. Amends
-[ADR 0038](0038-protected-build-once-production-releases.md): the build-once,
-stage, verify, and promote sequence stays; the manual SemVer dispatch, the
-repeated quality gates, and the rollback-drill workflow are removed.
+Accepted on 2026-09-24. Supersedes
+[ADR 0038](0038-protected-build-once-production-releases.md) and, for
+production builds only, the migration placement in
+[ADR 0001](0001-pre-build-database-migrations.md).
+
+The first version of this ADR, accepted earlier the same day, kept a GitHub
+Actions workflow that migrated, built, staged, smoke-tested and promoted each
+green `main` commit. Its first real run is recorded under Context; this
+version replaces it.
 
 ## Context
 
-ADR 0038 made production change only through a manually dispatched release
-that required a new SemVer in `package.json`, re-ran `npm run quality` and
-`npm test` on a commit CI had already verified, and then staged and promoted
-one artifact. By 2026-09-24 that workflow had never run. Production had served
-the 2026-09-13 commit for eleven days, and the only production deploys in that
-period were dashboard **Redeploy** actions, which rebuild the commit already
-live rather than `main`.
+ADR 0038 made production change only through a manually dispatched GitHub
+release that required a new SemVer in `package.json`. By 2026-09-24 it had
+never run. Production had served the 2026-09-13 commit for eleven days, and
+the only production deploys in that period were dashboard **Redeploy**
+actions, which rebuild the commit already live rather than `main`.
 
-Three properties of the old design caused the drift:
+The first version of this ADR ran automatically when CI passed on `main`.
+Its first run applied migrations and then failed to build, because building
+on a GitHub runner depends on `vercel pull`, which cannot download Vercel's
+Sensitive environment variables. It wrote the placeholder `[SENSITIVE]` for
+31 of them, including every database and cache credential, and
+`failBuildOnDataSourceError()` correctly refused to publish. Building outside
+Vercel therefore means mirroring every Sensitive value into GitHub and
+rotating each secret in two places.
 
-- Releasing required remembering a separate step and preparing a version bump,
-  so merged work accumulated unreleased.
-- Re-running the full gates made each release cost up to 90 minutes and ran
-  the same gating work twice against one tree, contrary to ADR 0039.
-- The staged smoke test targeted a `*.vercel.app` URL protected by Vercel
-  Authentication without a bypass secret, so a first run would have failed
-  after migrations had already applied.
-
-The repository is now public, so Actions minutes are free and branch rulesets
-are available.
+Everything production needs, including the unpooled Neon endpoint the Neon
+integration provisions as `DATABASE_URL_UNPOOLED`, already lives in Vercel.
 
 ## Decision
 
-Merging to `main` deploys. `.github/workflows/release.yml` runs when the
-`CI Pipeline` workflow completes successfully on a `main` push, and on manual
-dispatch as a re-run button.
+Vercel is the only deploy path. GitHub Actions runs CI and nothing that
+deploys.
 
-- A small first job picks the commit. It deploys only the commit CI verified,
-  and only while that commit is still the tip of `main`; an older run steps
-  aside because the newer merge triggers its own deploy. A manual dispatch
-  must target `main` and the tip must have a successful `CI Pipeline` push run.
-- The production job keeps ADR 0038's order: replay every migration on
-  disposable PostgreSQL, apply production migrations once with the
-  environment-scoped credential and verify zero drift, build once, deploy the
-  prebuilt artifact with `--skip-domain`, run the synthetic journeys against
-  it through `VERCEL_AUTOMATION_BYPASS_SECRET`, promote the same deployment,
-  and prove the apex alias points at it, the apex returns 200 and `www`
-  returns 308 to the apex.
-- Deploys share one non-cancelling concurrency group, so a merge never
-  interrupts a deploy mid-migration.
-- Vercel Git deployments stay disabled, so this workflow is the only path to
-  production and migrations always precede the build (ADR 0001).
-- Application rollback is Vercel's Instant Rollback. The rollback-drill
-  workflow is removed.
-- Deploys are recorded by commit SHA in the workflow summary and in Vercel.
-  SemVer tags and GitHub releases become optional milestones cut by hand, not
-  a precondition for shipping.
+- `vercel.json` enables Vercel's Git integration for `main` only
+  (`"*": false, "main": true`). Every other branch still builds nothing.
+- `scripts/build.js` runs `prisma migrate deploy` before `next build` when,
+  and only when, the build runs on Vercel for the production environment
+  (`VERCEL=1` and `VERCEL_ENV=production`). It migrates through
+  `DATABASE_URL_UNPOOLED`, because Prisma's advisory lock needs a session
+  that the pooled endpoint does not keep. CI, local and preview builds never
+  migrate, and a production build without the unpooled endpoint fails.
+- Vercel's Deployment Checks hold the production domains until the GitHub
+  `Merge Gate (Required Checks Summary)` check passes on the deployed commit.
+  This is a project setting in the Vercel dashboard, not repository code.
+- The Hobby plan runs one build at a time, so two merges never migrate
+  concurrently, and Prisma's migration lock guards the rare overlap.
+- Rollback is Vercel's Instant Rollback. The GitHub `production-release`
+  environment, its secrets and `.github/workflows/release.yml` are removed.
 
 ## Consequences
 
-- Production tracks `main` within one CI run plus about fifteen minutes, and
-  nobody has to remember to release.
-- A red CI run on `main` blocks deploys until fixed. A merge that must not
-  ship yet has to stay unmerged or behind a flag.
-- Every migration reaches production on merge, so expand/contract discipline
-  is mandatory at review time rather than at release time.
-- The dashboard **Redeploy** button is not a release path; it only rebuilds
-  the live commit.
-- The `main` branch should require the `Merge Gate (Required Checks Summary)` check through a ruleset,
-  now that the public repository allows one, so CI cannot be skipped on the
-  way to a deploy.
+- One place holds production configuration and secrets. A rotation happens
+  once, in Vercel.
+- Production tracks `main` within one build of a merge, and nobody has to
+  remember to release.
+- Migrations run before the build that depends on them. A failed migration
+  or build publishes nothing, and a build that cannot reach its data sources
+  still fails rather than baking fallback content.
+- Migrations apply at build time, before the Deployment Check passes. A
+  commit whose CI then fails leaves its migration applied but its code
+  unpromoted, so expand/contract discipline is mandatory at review time:
+  the live app must keep working against the migrated schema.
+- The pre-promotion smoke test against a staged URL is gone. The scheduled
+  synthetic probes keep exercising production, and PR CI runs Playwright
+  against a production build before merge.
+- The build credential can now change the schema. ADR 0001 kept write
+  credentials away from compilation, but production builds already held the
+  same Neon owner role through `DATABASE_URL` to read content.
+- The dashboard **Redeploy** button rebuilds the commit already live, and
+  re-running migrations there is a no-op. It is a way to retry a failed
+  build, not a way to ship `main`.
