@@ -322,6 +322,16 @@ describe("documentation and generated-file false-positive avoidance", () => {
     expect(scanText(line, "docs/leak.md")).not.toEqual([]);
   });
 
+  it("flags a bare Neon role password, including a new one in the file that once held a rotated value", () => {
+    // Joined so this file never holds a contiguous npg_ literal itself.
+    const line = `expect(generated).not.toContain("${["npg_", "AbCdEfGh5678"].join("")}");`;
+    for (const file of ["docs/leak.md", "__tests__/dx-tooling.test.ts"]) {
+      expect(scanText(line, file).map((f) => f.detectorId)).toEqual([
+        "neon-role-password",
+      ]);
+    }
+  });
+
   it("does not flag TypeDoc-generated markdown that only names env vars, never values", () => {
     const generated =
       "`CLERK_SECRET_KEY`: `ZodOptional`\\<`ZodString`\\>; `UPSTASH_REDIS_REST_TOKEN`: `ZodOptional`\\<`ZodString`\\>";
