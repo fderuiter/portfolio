@@ -109,19 +109,29 @@ test.describe("Mobile & Tablet Touch Interactions Suite", () => {
     isMobile,
   }) => {
     await page.goto("/proof");
-    await page.waitForTimeout(400);
 
     if (isMobile) {
-      // Verify mobile segmented tab switcher
-      const ledgerTab = page.getByRole("button", { name: /ledger/i }).first();
-      const fallacyTab = page.getByRole("button", { name: /fallacy/i }).first();
-      const canvasTab = page.getByRole("button", { name: /canvas/i }).first();
+      // Verify mobile segmented tab switcher. Names are exact because a
+      // /canvas/i pattern first matches "Open Field Manual for Logical Proof
+      // Canvas", which never switches back to the canvas view (#928).
+      const ledgerTab = page
+        .getByRole("button", { name: "Ledger", exact: true })
+        .first();
+      const fallacyTab = page
+        .getByRole("button", { name: "Fallacy", exact: true })
+        .first();
+      const canvasTab = page.getByRole("button", {
+        name: "Canvas",
+        exact: true,
+      });
 
       await expect(canvasTab).toBeVisible();
-      await ledgerTab.click();
-      await expect(
-        page.getByText(/Formal Fitch Deduction Ledger/i)
-      ).toBeVisible();
+      await expect(async () => {
+        await ledgerTab.click();
+        await expect(
+          page.getByText(/Formal Fitch Deduction Ledger/i)
+        ).toBeVisible({ timeout: 3000 });
+      }).toPass({ timeout: 15000 });
 
       await fallacyTab.click();
       await expect(

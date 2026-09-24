@@ -78,9 +78,9 @@ export function QcDesk({
     (f) => f.cell.row === cursor.row && f.cell.col === cursor.col
   );
 
-  const moveTo = (row: number, col: number) => {
+  const moveTo = (row: number, col: number, options?: FocusOptions) => {
     setCursor({ row, col });
-    cellRefs.current.get(`${row}:${col}`)?.focus();
+    cellRefs.current.get(`${row}:${col}`)?.focus(options);
   };
 
   const correct = () => {
@@ -246,8 +246,14 @@ export function QcDesk({
                           aria-selected={isActive}
                           aria-label={`${r.label}, ${table.columns[cell.col].label}: ${cell.display}, ${STATUS_LABELS[cell.status]}`}
                           data-status={cell.status}
+                          // #956: a pointer press must not focus (and so
+                          // scroll) the cell before pointerup, or at narrow
+                          // widths the grid shifts under the pointer and the
+                          // click never fires. Focus without scrolling on
+                          // click instead; keyboard moves still scroll.
+                          onMouseDown={(e) => e.preventDefault()}
                           onClick={() => {
-                            moveTo(cell.row, cell.col);
+                            moveTo(cell.row, cell.col, { preventScroll: true });
                             onInspectCell(cell.row, cell.col);
                           }}
                           onFocus={() => {
