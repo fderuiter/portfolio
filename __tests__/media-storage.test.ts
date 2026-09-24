@@ -9,6 +9,7 @@ import {
   getMimeTypeForExtension,
   type MediaStorageProvider,
 } from "@/lib/services/media-storage";
+import { ProjectImageService } from "@/lib/services/project-image-service";
 import * as envModule from "@/lib/env";
 
 describe("Media Storage Provider Test Suite", () => {
@@ -55,7 +56,7 @@ describe("Media Storage Provider Test Suite", () => {
   });
 
   describe("LocalStorageProvider", () => {
-    const mockDir = path.resolve("/mock/media-storage");
+    const mockDir = path.resolve(process.cwd(), ".mock-media-storage");
 
     it("uses default directory when no baseDir is passed", () => {
       const provider = new LocalStorageProvider();
@@ -421,7 +422,7 @@ describe("Media Storage Provider Test Suite", () => {
     it("executes fallback upload to LocalStorageProvider when primary VercelBlobStorageProvider upload fails", async () => {
       const cloudToken = "vercel_blob_rw_primary_123";
       const primaryCloudProvider = new VercelBlobStorageProvider(cloudToken);
-      const fallbackLocalProvider = new LocalStorageProvider();
+      setMediaStorageProvider(primaryCloudProvider);
 
       // Mock cloud upload failure (e.g. 500 internal server error or network failure)
       vi.spyOn(globalThis, "fetch").mockResolvedValue(
@@ -433,45 +434,29 @@ describe("Media Storage Provider Test Suite", () => {
 
       // Mock local storage fallback write
       vi.spyOn(fs, "existsSync").mockReturnValue(true);
-      vi.spyOn(fs.promises, "writeFile").mockResolvedValue(undefined);
+      const writeFileSpy = vi
+        .spyOn(fs.promises, "writeFile")
+        .mockResolvedValue(undefined);
 
       const consoleWarnSpy = vi
         .spyOn(console, "warn")
         .mockImplementation(() => {});
 
-      // Resilient upload pattern executing cloud upload with fallback to local storage
-      const uploadWithFallback = async (
-        file: Buffer,
-        filename: string,
-        contentType: string
-      ) => {
-        try {
-          return await primaryCloudProvider.upload(file, filename, contentType);
-        } catch (cloudError) {
-          console.warn(
-            "Primary cloud storage upload failed, attempting local fallback:",
-            cloudError
-          );
-          return await fallbackLocalProvider.upload(
-            file,
-            filename,
-            contentType
-          );
-        }
-      };
-
       const fileBuffer = Buffer.from("resilient asset content");
-      const result = await uploadWithFallback(
-        fileBuffer,
+      const url = await ProjectImageService.saveMediaAsset(
         "resilient-hero.png",
+        fileBuffer,
         "image/png"
       );
 
-      expect(result.url).toBe("/api/media/resilient-hero.png");
-      expect(result.key).toBe("resilient-hero.png");
+      expect(url).toBe("/api/media/resilient-hero.png");
       expect(consoleWarnSpy).toHaveBeenCalledWith(
         "Primary cloud storage upload failed, attempting local fallback:",
         expect.any(Error)
+      );
+      expect(writeFileSpy).toHaveBeenCalledWith(
+        expect.stringContaining("resilient-hero.png"),
+        fileBuffer
       );
     });
   });
