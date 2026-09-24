@@ -43,12 +43,24 @@ export interface DoctorOptions {
 }
 
 /**
+ * Second copies of the source tree that no tree walk should enter: agent
+ * worktrees under `.claude/` (#863) and Stryker sandboxes (#964).
+ */
+const DUPLICATE_TREE_DIRS = [".claude", ".stryker-tmp"];
+
+/**
  * Helper to recursively find files
  */
 function findFiles(
   dir: string,
   pattern: RegExp,
-  ignoreDirs: string[] = ["node_modules", ".git", ".next", "dist"]
+  ignoreDirs: string[] = [
+    "node_modules",
+    ".git",
+    ".next",
+    "dist",
+    ...DUPLICATE_TREE_DIRS,
+  ]
 ): string[] {
   if (!fs.existsSync(dir)) return [];
   const results: string[] = [];
@@ -408,6 +420,7 @@ export function checkSecretLeaks(root: string): DiagnosticCheckResult {
       "coverage",
       "__tests__",
       ".husky",
+      ...DUPLICATE_TREE_DIRS,
     ]
   );
 
