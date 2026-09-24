@@ -978,28 +978,45 @@ export const QuasiPerfectPuzzler: React.FC = () => {
             </div>
           )}
 
-          {/* Main Proof Expression Tree Canvas */}
-          <div className="mt-4">
-            <ExpressionTree
-              goalAST={goalAST}
-              hypotheses={activeHypotheses}
-              selectedTargetId={selectedTargetId}
-              hoveredTargetId={hoveredTargetId}
-              onSelectTarget={(nodeId) => {
-                playNote(440, 0.05);
-                if (selectedTacticIndex !== null) {
-                  executeTacticOnNode(selectedTacticIndex, nodeId);
-                } else {
-                  setSelectedTargetId((prev) =>
-                    prev === nodeId ? null : nodeId
-                  );
+          {/* Main Proof Expression Tree Canvas Panels */}
+          {subgoals.map((sg, idx) => {
+            const isActive = idx === activeGoalIndex;
+            return (
+              <div
+                key={sg.id}
+                id={`subgoal-panel-${sg.id}`}
+                role={subgoals.length > 1 ? "tabpanel" : undefined}
+                aria-labelledby={
+                  subgoals.length > 1 ? `subgoal-tab-${sg.id}` : undefined
                 }
-              }}
-              onHoverTarget={setHoveredTargetId}
-              isProofComplete={levelSolved || activeSubgoal.isCompleted}
-              isTacticActive={selectedTacticIndex !== null}
-            />
-          </div>
+                tabIndex={subgoals.length > 1 ? 0 : undefined}
+                hidden={!isActive}
+                className={isActive ? "mt-4" : "hidden"}
+              >
+                {isActive && (
+                  <ExpressionTree
+                    goalAST={goalAST}
+                    hypotheses={activeHypotheses}
+                    selectedTargetId={selectedTargetId}
+                    hoveredTargetId={hoveredTargetId}
+                    onSelectTarget={(nodeId) => {
+                      playNote(440, 0.05);
+                      if (selectedTacticIndex !== null) {
+                        executeTacticOnNode(selectedTacticIndex, nodeId);
+                      } else {
+                        setSelectedTargetId((prev) =>
+                          prev === nodeId ? null : nodeId
+                        );
+                      }
+                    }}
+                    onHoverTarget={setHoveredTargetId}
+                    isProofComplete={levelSolved || activeSubgoal.isCompleted}
+                    isTacticActive={selectedTacticIndex !== null}
+                  />
+                )}
+              </div>
+            );
+          })}
 
           {/* Off-screen Accessible DOM Fallback Subtree */}
           <div

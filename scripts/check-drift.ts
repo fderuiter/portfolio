@@ -15,6 +15,7 @@ import {
 import {
   checkOnboardingDocsDrift,
   checkDirectoryTopology,
+  checkPublicRouteRegistryDrift,
 } from "../lib/dx/doctor";
 
 interface DetailCheckResult {
@@ -24,6 +25,7 @@ interface DetailCheckResult {
 
 interface OpenApiCheckResult {
   missingRoutes: string[];
+  securityMismatches?: string[];
   hasDrift: boolean;
 }
 
@@ -33,6 +35,7 @@ export interface DriftCheckDependencies {
   checkOnboarding: () => DetailCheckResult;
   checkTopology: () => DetailCheckResult;
   checkMarkdownLinks: () => MarkdownLinkCheckResult;
+  checkPublicRoutes: () => DetailCheckResult;
 }
 
 function defaultDependencies(workspaceRoot: string): DriftCheckDependencies {
@@ -49,6 +52,7 @@ function defaultDependencies(workspaceRoot: string): DriftCheckDependencies {
     checkOnboarding: () => checkOnboardingDocsDrift(workspaceRoot),
     checkTopology: () => checkDirectoryTopology(workspaceRoot),
     checkMarkdownLinks: () => checkMarkdownLinkIntegrity(workspaceRoot),
+    checkPublicRoutes: () => checkPublicRouteRegistryDrift(workspaceRoot),
   };
 }
 
@@ -59,7 +63,8 @@ export type DriftCategory =
   | "openapi"
   | "onboarding"
   | "topology"
-  | "markdown-links";
+  | "markdown-links"
+  | "public-routes";
 
 const REMEDIES: Record<DriftCategory, { title: string; steps: string[] }> = {
   "generated-docs": {
@@ -89,6 +94,11 @@ const REMEDIES: Record<DriftCategory, { title: string; steps: string[] }> = {
       "# Fix the reported link targets by hand",
       "npm run check-docs-drift",
     ],
+  },
+  "public-routes": {
+    title:
+      "Public route registry drift (a route in app/ is missing from lib/public-routes.ts or stale)",
+    steps: ["npm run doctor:fix", "git add lib/public-routes.ts"],
   },
 };
 
@@ -146,7 +156,11 @@ export function checkDrift(
   console.log(
     "Checking OpenAPI contract synchronization and route coverage..."
   );
-  const { missingRoutes, hasDrift: openApiDrift } = dependencies.checkOpenApi();
+  const {
+    missingRoutes,
+    securityMismatches = [],
+    hasDrift: openApiDrift,
+  } = dependencies.checkOpenApi();
   if (missingRoutes.length > 0) {
     docsDrift = true;
     categories.push("openapi");
@@ -155,7 +169,19 @@ export function checkDrift(
       missingRoutes.map((route) => `  - ${route}`).join("\n") +
       "\n";
   }
-  if (openApiDrift) {
+  if (securityMismatches.length > 0) {
+    docsDrift = true;
+    categories.push("openapi");
+    driftSummary +=
+      `• Security scheme or operation security drift detected (${securityMismatches.length}):\n` +
+      securityMismatches.map((mismatch) => `  - ${mismatch}`).join("\n") +
+      "\n";
+  }
+  if (
+    openApiDrift &&
+    missingRoutes.length === 0 &&
+    securityMismatches.length === 0
+  ) {
     docsDrift = true;
     categories.push("openapi");
     driftSummary +=
@@ -196,6 +222,19 @@ export function checkDrift(
     driftSummary +=
       "• Broken documentation markdown links detected:\n" +
       markdownLinkResult.details.map((detail) => `  - ${detail}`).join("\n") +
+      "\n";
+  }
+
+  console.log("Checking public route registry synchronization...");
+  const publicRoutesResult = dependencies.checkPublicRoutes();
+  if (publicRoutesResult.status === "fail") {
+    docsDrift = true;
+    categories.push("public-routes");
+    driftSummary +=
+      "• Public route registry drift detected:\n" +
+      (publicRoutesResult.details || [])
+        .map((detail) => `  - ${detail}`)
+        .join("\n") +
       "\n";
   }
 

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
 import { fromPartial } from "@total-typescript/shoehorn";
 import { isCurrentUserAdmin } from "@/lib/auth/admin";
@@ -10,6 +10,7 @@ import {
   MAX_PROJECT_IMAGE_SIZE_BYTES,
 } from "@/lib/services/project-image-service";
 import { CaseStudyService } from "@/lib/services/case-study-service";
+import { logger } from "@/lib/logger";
 
 vi.mock("@/lib/auth/admin", () => ({
   isCurrentUserAdmin: vi.fn(),
@@ -117,6 +118,10 @@ describe("API Admin Project Image Upload Route", () => {
         updated_at: new Date(),
       })
     );
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("returns 401 Unauthorized when request is unauthenticated (no userId)", async () => {
@@ -359,6 +364,47 @@ describe("API Admin Project Image Upload Route", () => {
     );
   });
 
+  it("keeps a successfully replaced image when prior-asset cleanup fails", async () => {
+    const newAssetUrl =
+      "https://abc.public.blob.vercel-storage.com/project-laser-loon-new.png";
+    vi.spyOn(ProjectImageService, "saveMediaAsset").mockResolvedValue(
+      newAssetUrl
+    );
+    const deleteSpy = vi
+      .spyOn(ProjectImageService, "deleteMediaAsset")
+      .mockResolvedValue(false);
+    const warningSpy = vi.spyOn(logger, "warn");
+
+    const req = createMultipartRequest(
+      "http://localhost:3000/api/admin/projects/laser-loon/image",
+      {
+        file: {
+          buffer: VALID_PNG_BUFFER,
+          filename: "hero.png",
+          contentType: "image/png",
+        },
+      }
+    );
+
+    const res = await POST(req, {
+      params: Promise.resolve({ slug: "laser-loon" }),
+    });
+
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.data.hero_image_url).toBe(newAssetUrl);
+    expect(CaseStudyService.updateCaseStudyImage).toHaveBeenCalledTimes(1);
+    expect(CaseStudyService.updateCaseStudyImage).toHaveBeenCalledWith(
+      "laser-loon",
+      newAssetUrl
+    );
+    expect(deleteSpy).toHaveBeenCalledWith("project-laser-loon-old.png");
+    expect(warningSpy).toHaveBeenCalledWith(
+      "Project image was replaced, but prior asset cleanup failed.",
+      { slug: "laser-loon" }
+    );
+  });
+
   it("clears project hero image on DELETE request from authorized admin and deletes prior asset", async () => {
     const deleteSpy = vi.spyOn(ProjectImageService, "deleteMediaAsset");
 
@@ -382,6 +428,48 @@ describe("API Admin Project Image Upload Route", () => {
       null
     );
     expect(deleteSpy).toHaveBeenCalledWith("project-laser-loon-old.png");
+  });
+
+  it("keeps a cleared project image successful when blob cleanup fails", async () => {
+    vi.spyOn(ProjectImageService, "deleteMediaAsset").mockRejectedValue(
+      new Error("Blob cleanup unavailable")
+    );
+    const req = new NextRequest(
+      "http://localhost:3000/api/admin/projects/laser-loon/image",
+      { method: "DELETE" }
+    );
+
+    const res = await DELETE(req, {
+      params: Promise.resolve({ slug: "laser-loon" }),
+    });
+
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.success).toBe(true);
+    expect(data.data.hero_image_url).toBeNull();
+    expect(CaseStudyService.updateCaseStudyImage).toHaveBeenCalledWith(
+      "laser-loon",
+      null
+    );
+  });
+
+  it("warns when clearing succeeds but media deletion returns false", async () => {
+    vi.spyOn(ProjectImageService, "deleteMediaAsset").mockResolvedValue(false);
+    const warningSpy = vi.spyOn(logger, "warn");
+    const req = new NextRequest(
+      "http://localhost:3000/api/admin/projects/laser-loon/image",
+      { method: "DELETE" }
+    );
+
+    const res = await DELETE(req, {
+      params: Promise.resolve({ slug: "laser-loon" }),
+    });
+
+    expect(res.status).toBe(200);
+    expect(warningSpy).toHaveBeenCalledWith(
+      "Project image reference was cleared, but media cleanup failed.",
+      { slug: "laser-loon" }
+    );
   });
 
   it("returns 404 on DELETE request when case study slug does not exist", async () => {

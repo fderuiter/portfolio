@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
 import { copyToClipboard } from "@/lib/clipboard";
+import { logger } from "@/lib/logger";
 import {
   IconShieldLock,
   IconCopy,
@@ -22,7 +23,6 @@ interface AdminAccessDeniedProps {
   primaryEmail: string;
   displayName?: string;
 }
-
 
 export function AdminAccessDenied({
   userId,
@@ -42,7 +42,7 @@ export function AdminAccessDenied({
       setCopiedKey(key);
       setTimeout(() => setCopiedKey(null), 2500);
     } catch (err) {
-      console.error("Failed to copy configuration snippet:", err);
+      logger.error("Failed to copy configuration snippet:", err);
     }
   };
 
@@ -53,7 +53,10 @@ export function AdminAccessDenied({
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto flex flex-col gap-6" data-testid="admin-access-denied-console">
+    <div
+      className="w-full max-w-2xl mx-auto flex flex-col gap-6"
+      data-testid="admin-access-denied-console"
+    >
       {/* Security Status Header */}
       <div className="p-6 rounded-xl border border-amber-500/20 bg-[#13151a] flex flex-col gap-4 shadow-xl">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-white/10">
@@ -73,7 +76,9 @@ export function AdminAccessDenied({
           </div>
 
           <div className="flex items-center gap-3 self-start sm:self-auto">
-            <span className="text-xs font-mono text-zinc-400 hidden sm:inline">Account:</span>
+            <span className="text-xs font-mono text-zinc-400 hidden sm:inline">
+              Account:
+            </span>
             <UserButton
               appearance={{
                 elements: {
@@ -85,8 +90,9 @@ export function AdminAccessDenied({
         </div>
 
         <p className="text-xs text-zinc-300 leading-relaxed">
-          You are successfully authenticated with Clerk, but your account is not registered in the system&apos;s
-          server-side administrative allowlist (<code className="font-mono text-amber-300">ADMIN_EMAILS</code> or{" "}
+          You are successfully authenticated with Clerk, but your account is not
+          registered in the system&apos;s server-side administrative allowlist (
+          <code className="font-mono text-amber-300">ADMIN_EMAILS</code> or{" "}
           <code className="font-mono text-amber-300">ADMIN_USER_IDS</code>).
         </p>
 
@@ -97,7 +103,10 @@ export function AdminAccessDenied({
               <IconUser className="w-3 h-3 text-zinc-400" aria-hidden="true" />
               Identity
             </span>
-            <span className="text-zinc-200 font-medium truncate" title={displayName}>
+            <span
+              className="text-zinc-200 font-medium truncate"
+              title={displayName}
+            >
               {displayName}
             </span>
           </div>
@@ -107,7 +116,10 @@ export function AdminAccessDenied({
               <IconMail className="w-3 h-3 text-zinc-400" aria-hidden="true" />
               Primary Email
             </span>
-            <span className="text-zinc-200 font-medium truncate" title={primaryEmail}>
+            <span
+              className="text-zinc-200 font-medium truncate"
+              title={primaryEmail}
+            >
               {primaryEmail}
             </span>
           </div>
@@ -127,19 +139,27 @@ export function AdminAccessDenied({
       {/* Configuration Helpers Card */}
       <div className="p-6 rounded-xl border border-white/10 bg-[#0d0e11] flex flex-col gap-4 shadow-lg">
         <div>
-          <h2 className="text-sm font-semibold text-zinc-100 font-mono">Grant Administrator Privileges</h2>
+          <h2 className="text-sm font-semibold text-zinc-100 font-mono">
+            Grant Administrator Privileges
+          </h2>
           <p className="text-xs text-zinc-400 mt-1">
-            To authorize this identity, append either your email or Clerk UID to your environment configuration
-            (<code className="font-mono text-zinc-300">.env.local</code> for local development or Vercel Environment Variables for production).
+            To authorize this identity, append either your email or Clerk UID to
+            your environment configuration (
+            <code className="font-mono text-zinc-300">.env.local</code> for
+            local development or Vercel Environment Variables for production).
           </p>
         </div>
 
         <div className="flex flex-col gap-3">
           {/* Email Snippet */}
           <div className="flex flex-col gap-1.5">
-            <span className="text-[11px] font-mono text-zinc-400">Option A: Authorize by Email</span>
+            <span className="text-[11px] font-mono text-zinc-400">
+              Option A: Authorize by Email
+            </span>
             <div className="flex items-center justify-between gap-2 p-3 rounded bg-zinc-900/90 border border-white/10 font-mono text-xs">
-              <code className="text-emerald-400 select-all overflow-x-auto whitespace-nowrap">{emailSnippet}</code>
+              <code className="text-emerald-400 select-all overflow-x-auto whitespace-nowrap">
+                {emailSnippet}
+              </code>
               <button
                 type="button"
                 onClick={() => handleCopy("email", emailSnippet)}
@@ -148,12 +168,18 @@ export function AdminAccessDenied({
               >
                 {copiedKey === "email" ? (
                   <>
-                    <IconCheck className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
+                    <IconCheck
+                      className="w-3.5 h-3.5 text-emerald-400"
+                      aria-hidden="true"
+                    />
                     <span className="text-emerald-400">Copied</span>
                   </>
                 ) : (
                   <>
-                    <IconCopy className="w-3.5 h-3.5 text-zinc-400" aria-hidden="true" />
+                    <IconCopy
+                      className="w-3.5 h-3.5 text-zinc-400"
+                      aria-hidden="true"
+                    />
                     <span>Copy</span>
                   </>
                 )}
@@ -163,9 +189,13 @@ export function AdminAccessDenied({
 
           {/* UID Snippet */}
           <div className="flex flex-col gap-1.5">
-            <span className="text-[11px] font-mono text-zinc-400">Option B: Authorize by Clerk UID</span>
+            <span className="text-[11px] font-mono text-zinc-400">
+              Option B: Authorize by Clerk UID
+            </span>
             <div className="flex items-center justify-between gap-2 p-3 rounded bg-zinc-900/90 border border-white/10 font-mono text-xs">
-              <code className="text-emerald-400 select-all overflow-x-auto whitespace-nowrap">{uidSnippet}</code>
+              <code className="text-emerald-400 select-all overflow-x-auto whitespace-nowrap">
+                {uidSnippet}
+              </code>
               <button
                 type="button"
                 onClick={() => handleCopy("uid", uidSnippet)}
@@ -174,12 +204,18 @@ export function AdminAccessDenied({
               >
                 {copiedKey === "uid" ? (
                   <>
-                    <IconCheck className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
+                    <IconCheck
+                      className="w-3.5 h-3.5 text-emerald-400"
+                      aria-hidden="true"
+                    />
                     <span className="text-emerald-400">Copied</span>
                   </>
                 ) : (
                   <>
-                    <IconCopy className="w-3.5 h-3.5 text-zinc-400" aria-hidden="true" />
+                    <IconCopy
+                      className="w-3.5 h-3.5 text-zinc-400"
+                      aria-hidden="true"
+                    />
                     <span>Copy</span>
                   </>
                 )}
@@ -209,8 +245,15 @@ export function AdminAccessDenied({
             disabled={isRefreshing}
             className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs font-mono transition-colors disabled:opacity-50 cursor-pointer shadow-md"
           >
-            <IconRefresh className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} aria-hidden="true" />
-            <span>{isRefreshing ? "Checking Permissions..." : "Re-verify Authorization"}</span>
+            <IconRefresh
+              className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`}
+              aria-hidden="true"
+            />
+            <span>
+              {isRefreshing
+                ? "Checking Permissions..."
+                : "Re-verify Authorization"}
+            </span>
           </button>
         </div>
       </div>

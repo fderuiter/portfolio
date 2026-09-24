@@ -3,6 +3,9 @@ import fs from "node:fs";
 import path from "node:path";
 import {
   PATROL_SCENARIOS,
+  INITIAL_PATROL_SCENARIOS,
+  OEC_SAMPLE_SCENARIO,
+  ALL_PATROL_SCENARIOS,
   checkActionPreconditions,
   getAvailableActions,
   type ScenarioAction,
@@ -205,5 +208,97 @@ describe("Patrol Shift — M6 Scenario Content Package Invariants (Issue #752)",
     expect(busyScene?.actions.some((a) => a.category === "communication")).toBe(
       true
     );
+  });
+
+  describe("Scenario Catalog Integrity & Structural Validity (lib/patrol/scenarios/catalog.ts)", () => {
+    const catalogScenarios = [...INITIAL_PATROL_SCENARIOS, OEC_SAMPLE_SCENARIO];
+
+    it("exports valid initial scenarios and OEC sample scenario with non-empty IDs", () => {
+      expect(INITIAL_PATROL_SCENARIOS.length).toBeGreaterThan(0);
+      expect(OEC_SAMPLE_SCENARIO).toBeDefined();
+
+      for (const scenario of catalogScenarios) {
+        expect(typeof scenario.id).toBe("string");
+        expect(scenario.id.trim().length).toBeGreaterThan(0);
+      }
+    });
+
+    it("ensures all scenarios across the catalog have unique, non-empty IDs", () => {
+      const allIds = ALL_PATROL_SCENARIOS.map((s) => s.id);
+      expect(allIds.length).toBeGreaterThan(0);
+
+      for (const id of allIds) {
+        expect(typeof id).toBe("string");
+        expect(id.trim().length).toBeGreaterThan(0);
+      }
+
+      const uniqueIds = new Set(allIds);
+      expect(uniqueIds.size).toBe(allIds.length);
+    });
+
+    for (const scenario of catalogScenarios) {
+      describe(`Catalog Scenario: ${scenario.title} (${scenario.id})`, () => {
+        it("asserts structural validity for scenario metadata", () => {
+          expect(scenario.id.trim().length).toBeGreaterThan(0);
+          expect(scenario.title.trim().length).toBeGreaterThan(0);
+          expect(scenario.description).toBeDefined();
+          expect(typeof scenario.description).toBe("string");
+          expect(scenario.description!.trim().length).toBeGreaterThan(0);
+
+          if (scenario.estimatedMinutes !== undefined) {
+            expect(scenario.estimatedMinutes).toBeGreaterThan(0);
+          }
+
+          if (scenario.coordinates) {
+            expect(typeof scenario.coordinates.x).toBe("number");
+            expect(typeof scenario.coordinates.y).toBe("number");
+          }
+        });
+
+        it("asserts structural validity for scenario actions", () => {
+          expect(scenario.actions.length).toBeGreaterThan(0);
+          const actionIds = new Set<string>();
+
+          for (const action of scenario.actions) {
+            expect(typeof action.id).toBe("string");
+            expect(action.id.trim().length).toBeGreaterThan(0);
+            expect(typeof action.label).toBe("string");
+            expect(action.label.trim().length).toBeGreaterThan(0);
+
+            if (action.description) {
+              expect(typeof action.description).toBe("string");
+            }
+
+            if (action.costMinutes !== undefined) {
+              expect(action.costMinutes).toBeGreaterThanOrEqual(0);
+            }
+
+            expect(actionIds.has(action.id)).toBe(false);
+            actionIds.add(action.id);
+          }
+        });
+
+        it("asserts structural validity for debrief rules", () => {
+          expect(scenario.debriefRules.length).toBeGreaterThan(0);
+          const ruleIds = new Set<string>();
+
+          for (const rule of scenario.debriefRules) {
+            expect(typeof rule.id).toBe("string");
+            expect(rule.id.trim().length).toBeGreaterThan(0);
+            expect(typeof rule.title).toBe("string");
+            expect(rule.title.trim().length).toBeGreaterThan(0);
+            expect(typeof rule.category).toBe("string");
+            expect(rule.category.trim().length).toBeGreaterThan(0);
+            expect(typeof rule.score).toBe("number");
+            expect(rule.score).toBeGreaterThanOrEqual(0);
+            expect(typeof rule.feedback).toBe("string");
+            expect(rule.feedback.trim().length).toBeGreaterThan(0);
+
+            expect(ruleIds.has(rule.id)).toBe(false);
+            ruleIds.add(rule.id);
+          }
+        });
+      });
+    }
   });
 });

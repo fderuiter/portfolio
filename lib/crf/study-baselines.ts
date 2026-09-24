@@ -5,6 +5,7 @@ import {
   deterministicStringify,
 } from "./study-draft-storage";
 import { generateEngineId } from "./precision-date";
+import { cloneDeep } from "../utils";
 
 /**
  * localStorage key holding the author's immutable, version-tagged study baseline snapshots.
@@ -206,7 +207,7 @@ export function saveStudyBaseline(
   }
 
   // Deep clone the study to guarantee complete reference isolation and immutability
-  const clonedStudy: StudyProtocol = JSON.parse(JSON.stringify(study));
+  const clonedStudy: StudyProtocol = cloneDeep(study);
   const checksum = computeStudyChecksum(clonedStudy);
   const createdAt = new Date().toISOString();
 
@@ -299,7 +300,7 @@ export function restoreBaselineAsDraft(
   }
 
   // Deep clone the baseline study so mutations to the new draft never affect the baseline
-  const draftStudy: StudyProtocol = JSON.parse(JSON.stringify(baseline.study));
+  const draftStudy: StudyProtocol = cloneDeep(baseline.study);
 
   const restoredAt = new Date().toISOString();
   const actorName = options?.actorName?.trim() || baseline.actor.name;

@@ -10,6 +10,13 @@
 - **Human Gate**: A ticket requiring human authorization, protected credentials, destructive cloud action, production promotion, or subjective real-device validation. Human gates are prepared with reproducible evidence before being handed to a person.
 - **Completion Evidence**: The commit, pull request, automated results, deployment observation, or human sign-off demonstrating that every acceptance criterion of a ticket is satisfied.
 
+## Release Branches
+
+- **`main`**: The sole long-lived integration and stable release branch, and the only Vercel production source.
+- **`dev`**: A temporary consolidation branch for recovering and reviewing the combined Jules PR work in the current `dev` → `main` release (ADR 0050). It is not the steady-state target for new work.
+- **Release PR (`dev` → `main`)**: The one-time reviewed handoff of the consolidated work to production.
+- **Topic Branch**: A short-lived branch cut from `main` for one change and merged into `main` after its pull request gates pass.
+
 ## Logical Proof Workspace
 
 ### Deductive Inference Rules
@@ -392,7 +399,7 @@ Formal inference rules used to derive logical steps from valid premises:
 - **Unified Maintenance Pipeline**: A consolidated, time-budgeted scheduled execution model consolidating disparate recurring tasks (telemetry rollups, outbound retry queue processing, and retention data pruning) into a single secured invocation satisfying Vercel Hobby's strict limitation of one daily scheduled job.
 - **Two-Tier Cache Shield**: The tiered caching strategy pairing Vercel Edge Incremental Static Regeneration (ISR) for static long-lived page rendering with Upstash Redis for volatile interactive counters and write-buffering, eliminating database read compute while providing real-time UI interactivity.
 - **Sub-Daily Event-Driven Dispatch**: The execution pattern using external free-tier webhooks or schedulers (such as Upstash QStash) to dispatch time-sensitive background retries with exponential backoff, overcoming Vercel Hobby's single daily cron restriction without requiring paid infrastructure upgrades.
-- **GitHub Actions Minutes Governance**: The operating discipline of treating the private repository's GitHub Free Actions allowance (2,000 minutes/month, standard runners, no purchased overage) as a hard budget rather than an elastic resource — bounding every required job's `timeout-minutes`, avoiding duplicate execution of any gating job across a PR check and its post-merge push, and reducing device-matrix breadth where it does not add real coverage.
+- **GitHub Actions Resource Governance**: The operating discipline of using standard hosted runners and bounded jobs, avoiding duplicate gating runs, and tracking artifact/cache storage separately; this repository currently receives free standard-runner minutes as a public repository.
 - **Zero-Neon-Wake Read Boundary**: The architectural invariant ensuring that public unauthenticated reads (such as blog reaction counts, post views, or public metadata) read exclusively from Upstash Redis or static ISR and never wake sleeping Neon database compute when cache keys are cold or uninitialized.
 - **MediaStorageProvider**: A pluggable, typed storage abstraction (`lib/services/media-storage.ts`) decoupling application media operations from serverless ephemeral runtimes, directing assets to Vercel Blob (or S3/Cloudflare R2) in production while falling back to deterministic local disk persistence (`.media-storage/`) during development and testing.
 - **SVG Defense-in-Depth**: A multi-layered sanitization and transport security standard for user-uploaded vector assets, combining strict server-side DOMPurify tag/attribute scrubbing (eliminating `<script>`, inline event handlers, and foreign objects) with transport-level isolation headers (`Content-Security-Policy: default-src 'none'`).

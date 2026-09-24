@@ -35,6 +35,8 @@ export const ALL_PATROL_SCENARIOS: PatrolScenario[] = [
   OEC_SAMPLE_SCENARIO,
 ];
 
+export { INITIAL_PATROL_SCENARIOS, OEC_SAMPLE_SCENARIO };
+
 export function getScenarioById(id: string): PatrolScenario | undefined {
   return ALL_PATROL_SCENARIOS.find((s) => s.id === id);
 }

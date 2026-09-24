@@ -55,6 +55,18 @@ const assertPinnedContent = (file: string): void => {
 };
 
 describe("public repository readiness contracts", () => {
+  it("distinguishes current public status from the historical pre-publication audit", () => {
+    const readiness = read("docs/reference/public-repository-readiness.md");
+
+    expect(readiness).toContain("The repository became public on");
+    expect(readiness).toContain("This document is a pre-publication snapshot");
+    expect(readiness).toContain(
+      "Historical Go/No-Go Status (2026-09-22 Snapshot)"
+    );
+    expect(readiness).toContain("issues/732");
+    expect(readiness).toContain("issues/863");
+  });
+
   it("keeps public documentation on the main-only workflow", () => {
     const readme = read("README.md");
     const security = read("SECURITY.md");
