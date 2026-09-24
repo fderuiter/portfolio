@@ -8,4 +8,14 @@
 
 ## Variables
 
+- [NCI\_CODE\_REGEX](variables/NCI_CODE_REGEX.md)
 - [STANDARD\_CODELISTS](variables/STANDARD_CODELISTS.md)
+
+## Functions
+
+- [findCodelistById](functions/findCodelistById.md)
+- [findCodelistByNciCode](functions/findCodelistByNciCode.md)
+- [findOptionByCode](functions/findOptionByCode.md)
+- [findOptionByNciCode](functions/findOptionByNciCode.md)
+- [matchTermByLabel](functions/matchTermByLabel.md)
+- [validateCodelists](functions/validateCodelists.md)

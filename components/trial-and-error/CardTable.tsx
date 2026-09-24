@@ -9,7 +9,7 @@ import React, {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
-import { AnimatePresence, Reorder, motion } from "framer-motion";
+import { AnimatePresence, Reorder } from "framer-motion";
 import {
   ACT_I,
   CPU_COSTS,
@@ -1161,13 +1161,7 @@ export function CardTable({
           )}
 
           {state.lastPlay && !playing && (
-            <motion.p
-              key={state.handsPlayed}
-              // One opacity fade, which reduced motion also allows: under
-              // it this is the only motion a played hand gets.
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.2 }}
+            <p
               className="mt-3 text-xs text-zinc-300 tabular-nums break-words"
               data-testid="last-hand"
             >
@@ -1177,7 +1171,7 @@ export function CardTable({
               {state.lastPlay.evaluation.score}
               {state.lastPlay.evaluation.zeroRule.triggered &&
                 " (zero-score rule)"}
-            </motion.p>
+            </p>
           )}
           {timeline && !playing && <ScoreBreakdown steps={timeline} />}
         </div>

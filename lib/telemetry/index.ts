@@ -12,3 +12,10 @@ export {
   type TelemetryStorage,
   type TelemetryOutboxConfig,
 } from "./outbox";
+export {
+  logger,
+  StructuredLogger,
+  type LogLevel,
+  type LogEntry,
+  type LoggerOptions,
+} from "@/lib/logger";

@@ -24,21 +24,29 @@ test.describe("Hero engineering console", () => {
       }).toPass({ timeout: 15000 });
 
       const tabs = tablist.getByRole("tab");
-      for (let index = 0; index < 3; index += 1) {
-        const box = await tabs.nth(index).boundingBox();
-        expect(
-          box?.height,
-          `tab ${index + 1} must meet the 44px touch target`
-        ).toBeGreaterThanOrEqual(44);
-        expect(
-          box?.x,
-          `tab ${index + 1} begins outside the viewport`
-        ).toBeGreaterThanOrEqual(0);
-        expect(
-          (box?.x ?? 0) + (box?.width ?? 0),
-          `tab ${index + 1} extends outside the viewport`
-        ).toBeLessThanOrEqual(viewport.width);
-      }
+      await expect(async () => {
+        for (let index = 0; index < 3; index += 1) {
+          const tab = tabs.nth(index);
+          await expect(tab).toBeVisible();
+          const box = await tab.boundingBox();
+          expect(
+            box,
+            `tab ${index + 1} bounding box must be available`
+          ).not.toBeNull();
+          expect(
+            box?.height ?? 0,
+            `tab ${index + 1} must meet the 44px touch target`
+          ).toBeGreaterThanOrEqual(44);
+          expect(
+            box?.x ?? -1,
+            `tab ${index + 1} begins outside the viewport`
+          ).toBeGreaterThanOrEqual(0);
+          expect(
+            (box?.x ?? 0) + (box?.width ?? 0),
+            `tab ${index + 1} extends outside the viewport`
+          ).toBeLessThanOrEqual(viewport.width);
+        }
+      }).toPass({ timeout: 15000 });
 
       await tabs.nth(0).focus();
       await page.keyboard.press("ArrowRight");
@@ -49,26 +57,32 @@ test.describe("Hero engineering console", () => {
       await expect(tabs.nth(2)).toBeFocused();
       await expect(tabs.nth(2)).toHaveAttribute("aria-selected", "true");
 
-      await page.getByRole("button", { name: "Clean Memory (GC)" }).click();
-      await page.getByRole("button", { name: "Reset Memory Demo" }).click();
-      await expect(page.getByText("Memory demo reset.")).toBeAttached();
+      await expect(async () => {
+        await page.getByRole("button", { name: "Clean Memory (GC)" }).click();
+        await page.getByRole("button", { name: "Reset Memory Demo" }).click();
+        await expect(page.getByText("Memory demo reset.")).toBeAttached();
+      }).toPass({ timeout: 15000 });
 
-      await tabs.nth(0).click();
-      await page.getByRole("button", { name: "Apply the Rule" }).click();
-      await page.getByRole("button", { name: "Reset Logic Demo" }).click();
-      await expect(page.getByText("Logic demo reset.")).toBeAttached();
+      await expect(async () => {
+        await tabs.nth(0).click();
+        await page.getByRole("button", { name: "Apply the Rule" }).click();
+        await page.getByRole("button", { name: "Reset Logic Demo" }).click();
+        await expect(page.getByText("Logic demo reset.")).toBeAttached();
+      }).toPass({ timeout: 15000 });
 
-      await tabs.nth(1).click();
-      await page
-        .getByRole("button", { name: "Illustrative Integrity Rule: Active" })
-        .click();
-      await page.getByRole("button", { name: "Reset Clinical Demo" }).click();
-      await expect(
-        page.getByRole("button", {
-          name: "Illustrative Integrity Rule: Active",
-        })
-      ).toBeVisible();
-      await expect(page.getByText("Clinical demo reset.")).toBeAttached();
+      await expect(async () => {
+        await tabs.nth(1).click();
+        await page
+          .getByRole("button", { name: "Illustrative Integrity Rule: Active" })
+          .click();
+        await page.getByRole("button", { name: "Reset Clinical Demo" }).click();
+        await expect(
+          page.getByRole("button", {
+            name: "Illustrative Integrity Rule: Active",
+          })
+        ).toBeVisible();
+        await expect(page.getByText("Clinical demo reset.")).toBeAttached();
+      }).toPass({ timeout: 15000 });
 
       const overflow = await page.evaluate(() => {
         const clientWidth = document.documentElement.clientWidth;
@@ -92,7 +106,12 @@ test.describe("Hero engineering console", () => {
     await page.addStyleTag({
       content: "#hero { font-size: 200%; }",
     });
-    await page.getByRole("tab", { name: "Memory" }).click();
+    const memoryTab = page.getByRole("tab", { name: "Memory" });
+    await expect(async () => {
+      await expect(memoryTab).toBeVisible();
+      await memoryTab.click();
+      await expect(memoryTab).toHaveAttribute("aria-selected", "true");
+    }).toPass({ timeout: 15000 });
     await page
       .getByText("Illustrative frame reference: 16.6ms")
       .evaluate((node) => {

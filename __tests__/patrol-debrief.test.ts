@@ -5,6 +5,7 @@ import {
   compileShiftSummary,
   derivePlayfulStats,
   createPatrolShiftEngine,
+  calculateDebriefScore,
   DEBRIEF_DIMENSION_ORDER,
   type PatrolEvent,
   type OetMetrics,
@@ -583,6 +584,130 @@ describe("Patrol Shift — M7 Contextual Debrief Engine (Issue #753)", () => {
           (o) => o.relatedEventAction === "hazard_alert"
         )
       ).toBe(false);
+    });
+  });
+
+  describe("8. calculateDebriefScore with various performance inputs", () => {
+    it("returns expected percentage and grade outputs for raw numeric scores", () => {
+      const scoreA = calculateDebriefScore(95);
+      expect(scoreA.percentage).toBe(95);
+      expect(scoreA.grade).toBe("A");
+      expect(scoreA.rating).toBe("exemplary");
+
+      const scoreB = calculateDebriefScore(85);
+      expect(scoreB.percentage).toBe(85);
+      expect(scoreB.grade).toBe("B");
+      expect(scoreB.rating).toBe("proficient");
+
+      const scoreC = calculateDebriefScore(75);
+      expect(scoreC.percentage).toBe(75);
+      expect(scoreC.grade).toBe("C");
+      expect(scoreC.rating).toBe("developing");
+
+      const scoreD = calculateDebriefScore(62);
+      expect(scoreD.percentage).toBe(62);
+      expect(scoreD.grade).toBe("D");
+      expect(scoreD.rating).toBe("developing");
+
+      const scoreF = calculateDebriefScore(45);
+      expect(scoreF.percentage).toBe(45);
+      expect(scoreF.grade).toBe("F");
+      expect(scoreF.rating).toBe("needs-attention");
+    });
+
+    it("calculates percentage and grade from passed vs total rule counts", () => {
+      expect(calculateDebriefScore(10, 10)).toEqual({
+        score: 100,
+        percentage: 100,
+        grade: "A",
+        rating: "exemplary",
+        summary: "Exemplary Field Performance",
+      });
+
+      expect(calculateDebriefScore(8, 10)).toEqual({
+        score: 80,
+        percentage: 80,
+        grade: "B",
+        rating: "proficient",
+        summary: "Proficient Patrol Response",
+      });
+
+      expect(calculateDebriefScore(7, 10)).toEqual({
+        score: 70,
+        percentage: 70,
+        grade: "C",
+        rating: "developing",
+        summary: "Developing Judgment — On Track",
+      });
+
+      expect(calculateDebriefScore(4, 10)).toEqual({
+        score: 40,
+        percentage: 40,
+        grade: "F",
+        rating: "needs-attention",
+        summary: "Needs Attention Before Next Call",
+      });
+    });
+
+    it("evaluates debrief score from an options object input", () => {
+      const objScore = calculateDebriefScore({
+        passedRules: 9,
+        totalRules: 10,
+      });
+      expect(objScore.percentage).toBe(90);
+      expect(objScore.grade).toBe("A");
+
+      const rawObjScore = calculateDebriefScore({ rawScore: 82 });
+      expect(rawObjScore.percentage).toBe(82);
+      expect(rawObjScore.grade).toBe("B");
+    });
+
+    it("evaluates debrief score from PatrolEvent[] history inputs", () => {
+      const exemplaryEvents: PatrolEvent[] = [
+        {
+          timestamp: 1,
+          scenarioId: "test-scenario",
+          action: "assess-scene-safety",
+          context: { label: "Assess Scene Safety", category: "assessment" },
+        },
+        {
+          timestamp: 2,
+          scenarioId: "test-scenario",
+          action: "secondary-assessment",
+          context: { label: "PMS Check", category: "assessment" },
+        },
+        {
+          timestamp: 3,
+          scenarioId: "test-scenario",
+          action: "splint-wrist",
+          context: { label: "Splint & Re-verify PMS", category: "treatment" },
+        },
+      ];
+
+      const scoreResult = calculateDebriefScore(
+        exemplaryEvents,
+        SMOOTH_OET_METRICS
+      );
+      expect(scoreResult.percentage).toBeGreaterThanOrEqual(80);
+      expect(["A", "B"]).toContain(scoreResult.grade);
+      expect(scoreResult.summary).toBeTruthy();
+    });
+
+    it("handles boundary, empty, and out-of-range inputs defensively", () => {
+      expect(calculateDebriefScore(undefined)).toMatchObject({
+        percentage: 50,
+        grade: "F",
+      });
+
+      expect(calculateDebriefScore(-20)).toMatchObject({
+        percentage: 0,
+        grade: "F",
+      });
+
+      expect(calculateDebriefScore(150)).toMatchObject({
+        percentage: 100,
+        grade: "A",
+      });
     });
   });
 });

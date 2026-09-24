@@ -4,6 +4,7 @@
 import { cn } from "@/lib/utils";
 import React, { useRef, useEffect } from "react";
 import { clamp } from "@/lib/game-utils";
+import { getMatchMediaMatches } from "@/hooks/useMediaQuery";
 
 export const BentoGrid = ({
   className,
@@ -127,11 +128,7 @@ export const Card = ({
       ref={refElement}
       onPointerMove={(event) => {
         if (event.pointerType === "touch") return;
-        if (
-          typeof window !== "undefined" &&
-          window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches
-        )
-          return;
+        if (getMatchMediaMatches("(prefers-reduced-motion: reduce)")) return;
 
         if (!rectRef.current && refElement.current) {
           rectRef.current = refElement.current.getBoundingClientRect();
