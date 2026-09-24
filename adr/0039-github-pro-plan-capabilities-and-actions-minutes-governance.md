@@ -80,11 +80,18 @@ Performance)` reflected the pre-#775 monolithic pipeline. When the workflow
 Checks Summary)`** (job ID `merge-gate`). See the 2026-09-14 update below and
 > [docs/how-to/monitor-github-actions-minutes.md](../docs/how-to/monitor-github-actions-minutes.md).
 
-Configure the `production-release` GitHub Environment (used by
-`.github/workflows/release.yml`) with required reviewers, which Free-plan
-private repositories cannot do but Pro can. This closes the gap ADR 0038
-left open: the protected-release job currently has no server-side approval
-gate, only the convention that a human must click "Run workflow."
+This decision also covered the GitHub release environment:
+
+> [!NOTE]
+> **Superseded (2026-09-24):** [ADR 0049](0049-deploy-main-on-green-ci.md)
+> removed the GitHub release workflow and its environment; Vercel's Git
+> integration now builds and promotes `main`. The original text follows.
+>
+> Configure the `production-release` GitHub Environment (used by
+> `.github/workflows/release.yml`) with required reviewers, which Free-plan
+> private repositories cannot do but Pro can. This closes the gap ADR 0038
+> left open: the protected-release job currently has no server-side approval
+> gate, only the convention that a human must click "Run workflow."
 
 ### 2. GitHub Actions minutes are a governed quota, tracked the same way as every other provider in ADR 0036
 
@@ -174,10 +181,14 @@ Ecosystem` check. The full four-device matrix remains available on demand via
    by offline unit and shell execution test suites
    (`__tests__/ci-execution-policy.test.ts` and `__tests__/ci-gate-ordering.test.ts`).
 2. **Unverified Server-Side Protection**: While branch protection rules on `main`
-   (requiring `Merge Gate (Required Checks Summary)`) and environment protection
-   rules on `production-release` (requiring reviewers) constitute required repository policy,
+   (requiring `Merge Gate (Required Checks Summary)`) constitute required repository policy,
    their enforcement on GitHub's servers remains an unverified administrative configuration
    pending manual confirmation in repository settings.
+
+   > **Superseded (2026-09-24):** this item also required environment protection
+   > rules on `production-release` (requiring reviewers).
+   > [ADR 0049](0049-deploy-main-on-green-ci.md) removed that environment.
+
 3. **Future Measured Actions Costs**: Job `timeout-minutes` caps (`fast-gate`: 20,
    `security-gate`: 15, `heavy-gate`: 40, `device-gate`: 25, `merge-gate`: 5) remain
    provisional estimates rather than verified runtime measurements. September

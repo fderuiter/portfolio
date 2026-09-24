@@ -43,7 +43,6 @@ export default defineConfig({
         "hooks/usePretextLayout.tsx",
         "lib/utils.ts",
         "components/providers/SearchProvider.tsx",
-        "lib/accessibility-utils.ts",
         "hooks/useResizeObserver.ts",
         "app/generated/**",
         "vitest.setup.ts",
