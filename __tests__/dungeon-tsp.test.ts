@@ -156,21 +156,22 @@ describe("Dungeon TSP Pathfinding Engine", () => {
         { x: 1, y: 1, baseX: 1, baseY: 1, active: true },
       ];
 
-      // moveCount = 0, wallIndex = 0 => (0 + 0) % 4 = 0 < 2 => shift is true => nextY = baseY = 1
+      // moveCount = 2, wallIndex = 0 => (2 + 0) % 4 = 2 >= 2 => shift is false => nextY = clamp(1 + 1, 1, 3) = 2
       const { updatedGrid, updatedWalls } = updateTSPMovingWalls(
         grid,
         walls,
-        0
+        2
       );
 
       expect(updatedWalls[0]).toEqual({
         x: 1,
-        y: 1,
+        y: 2,
         baseX: 1,
         baseY: 1,
         active: true,
       });
-      expect(updatedGrid[1][1]).toBe("W");
+      expect(updatedGrid[1][1]).toBe(" ");
+      expect(updatedGrid[2][1]).toBe("W");
     });
 
     it("should handle old wall clearing when tile is NOT 'W' (false branch for clearing)", () => {
