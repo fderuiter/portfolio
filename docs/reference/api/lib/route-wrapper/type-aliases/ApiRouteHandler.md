@@ -52,4 +52,4 @@
 
 ### auth?
 
-> `optional` **auth?**: `"clerk_admin"` \| `"cron_secret"` \| `"public"`
+> `optional` **auth?**: [`ApiAuthRequirement`](ApiAuthRequirement.md)
