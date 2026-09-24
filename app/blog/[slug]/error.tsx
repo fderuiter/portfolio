@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { reportClientError } from "@/lib/client-sentry";
 import { resolveBaseUrl } from "@/lib/domain";
+import { logger } from "@/lib/logger";
 
 export default function BlogPostError({
   error,
@@ -18,7 +19,7 @@ export default function BlogPostError({
 
   useEffect(() => {
     reportClientError(error);
-    console.error("Blog post route error:", error);
+    logger.error("Blog post route error:", error, { skipTelemetry: true });
     if (typeof window !== "undefined") {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setCanonicalUrl(window.location.href);
