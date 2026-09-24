@@ -27,6 +27,7 @@ function passingDependencies(): DriftCheckDependencies {
     checkOnboarding: () => ({ status: "pass" }),
     checkTopology: () => ({ status: "pass" }),
     checkMarkdownLinks: () => ({ status: "pass", details: [] }),
+    checkPublicRoutes: () => ({ status: "pass", details: [] }),
   };
 }
 

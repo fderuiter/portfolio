@@ -7,6 +7,7 @@
  */
 
 import { clamp } from "../game-utils";
+import { logger } from "@/lib/logger";
 import {
   AnatomicalParcel,
   DESIKAN_KILLIANY_PARCELS,
@@ -556,7 +557,7 @@ function getMeshWorker(): Worker | null {
         }
       };
       workerInstance.onerror = (err) => {
-        console.warn("Mesh generator Web Worker error:", err);
+        logger.warn("Mesh generator Web Worker error:", err);
         pendingRequests.clear();
       };
     } catch {

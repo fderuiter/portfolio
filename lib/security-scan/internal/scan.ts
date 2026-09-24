@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { logger } from "@/lib/logger";
 import { SECRET_DETECTORS } from "./catalog";
 import { isAllowlistedSecretValue } from "./allowlist";
 import type {
@@ -77,7 +78,7 @@ export function scanFile(
     const content = fs.readFileSync(filePath, "utf-8");
     return scanText(content, reportedFile);
   } catch (error) {
-    console.error(`Error scanning file ${filePath}:`, error);
+    logger.error(`Error scanning file ${filePath}:`, error);
     return [];
   }
 }

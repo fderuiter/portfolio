@@ -3,6 +3,7 @@ import { CaseStudyService } from "@/lib/services/case-study-service";
 import type { ServiceResult } from "@/lib/services/service-result";
 import {
   getMediaStorageProvider,
+  LocalStorageProvider,
   type MediaAssetRecord,
 } from "@/lib/services/media-storage";
 
@@ -221,6 +222,7 @@ export class ProjectImageService {
 
   /**
    * Saves a validated media buffer to storage and returns its relative asset URL.
+   * If primary cloud storage upload fails, falls back to local storage.
    */
   static async saveMediaAsset(
     key: string,
@@ -228,8 +230,21 @@ export class ProjectImageService {
     contentType: string
   ): Promise<string> {
     const provider = getMediaStorageProvider();
-    const result = await provider.upload(buffer, key, contentType);
-    return result.url;
+    try {
+      const result = await provider.upload(buffer, key, contentType);
+      return result.url;
+    } catch (error) {
+      if (!(provider instanceof LocalStorageProvider)) {
+        console.warn(
+          "Primary cloud storage upload failed, attempting local fallback:",
+          error
+        );
+        const fallbackProvider = new LocalStorageProvider();
+        const result = await fallbackProvider.upload(buffer, key, contentType);
+        return result.url;
+      }
+      throw error;
+    }
   }
 
   /**
@@ -238,7 +253,14 @@ export class ProjectImageService {
   static async getMediaAsset(key: string): Promise<MediaAssetRecord | null> {
     const provider = getMediaStorageProvider();
     if (provider.getAsset) {
-      return await provider.getAsset(key);
+      const asset = await provider.getAsset(key);
+      if (asset) return asset;
+    }
+    if (!(provider instanceof LocalStorageProvider)) {
+      const fallbackProvider = new LocalStorageProvider();
+      if (fallbackProvider.getAsset) {
+        return await fallbackProvider.getAsset(key);
+      }
     }
     return null;
   }
@@ -250,6 +272,10 @@ export class ProjectImageService {
     const provider = getMediaStorageProvider();
     try {
       await provider.delete(key);
+      if (!(provider instanceof LocalStorageProvider)) {
+        const fallbackProvider = new LocalStorageProvider();
+        await fallbackProvider.delete(key);
+      }
       return true;
     } catch {
       return false;
