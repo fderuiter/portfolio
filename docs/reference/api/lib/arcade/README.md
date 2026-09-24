@@ -38,6 +38,36 @@ Re-exports [ArcadeViewport](core/viewport/classes/ArcadeViewport.md)
 
 ***
 
+### BoundingBox
+
+Re-exports [BoundingBox](utils/type-aliases/BoundingBox.md)
+
+***
+
+### boundingBoxOverlap
+
+Re-exports [boundingBoxOverlap](utils/functions/boundingBoxOverlap.md)
+
+***
+
+### calculateScoreMultiplier
+
+Re-exports [calculateScoreMultiplier](utils/functions/calculateScoreMultiplier.md)
+
+***
+
+### clamp
+
+Re-exports [clamp](utils/functions/clamp.md)
+
+***
+
+### createSeededRandom
+
+Re-exports [createSeededRandom](utils/functions/createSeededRandom.md)
+
+***
+
 ### CRT\_CALIBRATION\_STORAGE\_KEY
 
 Re-exports [CRT_CALIBRATION_STORAGE_KEY](crt-pipeline/variables/CRT_CALIBRATION_STORAGE_KEY.md)
@@ -98,9 +128,21 @@ Re-exports [isReducedMotionPreferred](crt-pipeline/functions/isReducedMotionPref
 
 ***
 
+### lerp
+
+Re-exports [lerp](utils/functions/lerp.md)
+
+***
+
 ### loadCRTCalibration
 
 Re-exports [loadCRTCalibration](crt-pipeline/functions/loadCRTCalibration.md)
+
+***
+
+### MultiplierOptions
+
+Re-exports [MultiplierOptions](utils/interfaces/MultiplierOptions.md)
 
 ***
 
@@ -134,6 +176,18 @@ Re-exports [PrimaryPointerState](core/input/interfaces/PrimaryPointerState.md)
 
 ***
 
+### Rect
+
+Re-exports [Rect](utils/interfaces/Rect.md)
+
+***
+
+### rectanglesOverlap
+
+Re-exports [rectanglesOverlap](utils/variables/rectanglesOverlap.md)
+
+***
+
 ### renderCRTEffects
 
 Re-exports [renderCRTEffects](crt-pipeline/functions/renderCRTEffects.md)
@@ -143,6 +197,12 @@ Re-exports [renderCRTEffects](crt-pipeline/functions/renderCRTEffects.md)
 ### saveCRTCalibration
 
 Re-exports [saveCRTCalibration](crt-pipeline/functions/saveCRTCalibration.md)
+
+***
+
+### scaleScoreWithMultiplier
+
+Re-exports [scaleScoreWithMultiplier](utils/functions/scaleScoreWithMultiplier.md)
 
 ***
 
