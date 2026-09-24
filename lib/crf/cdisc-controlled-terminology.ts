@@ -646,6 +646,26 @@ function resolveCodelist(
 }
 
 /**
+ * Helper function to look up an option in a codelist by matching a normalized property value.
+ */
+function findOptionByProperty(
+  codelistInput: CodelistDefinition | string,
+  searchValue: string,
+  propKey: "code" | "nciCode",
+  codelists: CodelistDefinition[] = STANDARD_CODELISTS
+): import("./types").CodelistOption | undefined {
+  if (!searchValue) return undefined;
+  const cl = resolveCodelist(codelistInput, codelists);
+  if (!cl || !Array.isArray(cl.options)) return undefined;
+
+  const normalized = searchValue.trim().toUpperCase();
+  return cl.options.find((opt) => {
+    const val = opt[propKey];
+    return val !== undefined && val.trim().toUpperCase() === normalized;
+  });
+}
+
+/**
  * Finds an option within a codelist by its submission code (e.g. "Y", "M", "GRADE 1 - MILD").
  */
 export function findOptionByCode(
@@ -653,14 +673,7 @@ export function findOptionByCode(
   code: string,
   codelists: CodelistDefinition[] = STANDARD_CODELISTS
 ): import("./types").CodelistOption | undefined {
-  if (!code) return undefined;
-  const cl = resolveCodelist(codelist, codelists);
-  if (!cl || !Array.isArray(cl.options)) return undefined;
-
-  const normalizedCode = code.trim().toUpperCase();
-  return cl.options.find(
-    (opt) => opt.code && opt.code.trim().toUpperCase() === normalizedCode
-  );
+  return findOptionByProperty(codelist, code, "code", codelists);
 }
 
 /**
@@ -671,14 +684,7 @@ export function findOptionByNciCode(
   nciCode: string,
   codelists: CodelistDefinition[] = STANDARD_CODELISTS
 ): import("./types").CodelistOption | undefined {
-  if (!nciCode) return undefined;
-  const cl = resolveCodelist(codelist, codelists);
-  if (!cl || !Array.isArray(cl.options)) return undefined;
-
-  const normalizedNci = nciCode.trim().toUpperCase();
-  return cl.options.find(
-    (opt) => opt.nciCode && opt.nciCode.trim().toUpperCase() === normalizedNci
-  );
+  return findOptionByProperty(codelist, nciCode, "nciCode", codelists);
 }
 
 /**
