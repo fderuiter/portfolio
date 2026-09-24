@@ -159,9 +159,11 @@ describe("cloneDeep utility", () => {
     };
     const clonedWithDate = cloneDeep(protocolWithDate);
     expect(clonedWithDate.effectiveDate).toBeInstanceOf(Date);
-    expect((clonedWithDate.effectiveDate as unknown as Date).getTime()).toBe(
-      protocolDate.getTime()
-    );
+    if (clonedWithDate.effectiveDate instanceof Date) {
+      expect(clonedWithDate.effectiveDate.getTime()).toBe(
+        protocolDate.getTime()
+      );
+    }
 
     // Verify undefined properties remain intact
     expect("description" in clonedProtocol.forms[0].sections[0].fields[0]).toBe(
