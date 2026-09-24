@@ -222,32 +222,38 @@ test.describe("Continuous Accessibility (a11y) & WCAG 2.1 AA Audit Suite", () =>
   test("Audit: Command Palette Focus Restoration", async ({
     page,
   }, testInfo) => {
-    await page.goto("/this-is-not-found");
-    await page.waitForLoadState("networkidle");
+    // The 404 page never reaches "networkidle": background telemetry keeps
+    // requests in flight (#928). Wait on the DOM and on hydration instead.
+    await page.goto("/this-is-not-found", { waitUntil: "domcontentloaded" });
+    await page.waitForFunction(
+      () => typeof window.__openSearch === "function",
+      { timeout: 15000 }
+    );
 
-    const searchBtn = page.locator('button:has-text("Search Site")');
-    if (await searchBtn.isVisible()) {
+    const searchBtn = page.getByRole("button", { name: "Search Site" });
+    await expect(searchBtn).toBeVisible();
+
+    const combobox = page.locator('[role="combobox"]');
+    await expect(async () => {
       await searchBtn.focus();
       await expect(searchBtn).toBeFocused();
       await searchBtn.click();
+      await expect(combobox).toBeVisible({ timeout: 3000 });
+    }).toPass({ timeout: 15000 });
+    await expect(combobox).toBeFocused();
 
-      const combobox = page.locator('[role="combobox"]');
-      await expect(combobox).toBeVisible();
-      await expect(combobox).toBeFocused();
+    await auditAndAssert(page, testInfo, "Command Palette Focus State");
 
-      await auditAndAssert(page, testInfo, "Command Palette Focus State");
+    await page.keyboard.press("Escape");
+    await expect(combobox).not.toBeVisible();
 
-      await page.keyboard.press("Escape");
-      await expect(combobox).not.toBeVisible();
-
-      const isFocused = await searchBtn.evaluate(
-        (el) => document.activeElement === el
-      );
-      expect(
-        isFocused,
-        "Keyboard focus did not return to the calling button when the modal closed"
-      ).toBe(true);
-    }
+    const isFocused = await searchBtn.evaluate(
+      (el) => document.activeElement === el
+    );
+    expect(
+      isFocused,
+      "Keyboard focus did not return to the calling button when the modal closed"
+    ).toBe(true);
   });
 
   test("Audit: Mobile Navigation Focus Trap", async ({ page }, testInfo) => {
