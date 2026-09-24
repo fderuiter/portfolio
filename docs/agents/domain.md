@@ -5,7 +5,7 @@ How the engineering skills consume this repo's domain documentation when explori
 ## Before exploring, read these
 
 - **`CONTEXT.md`** at the repo root: authoritative glossary of domain terminology (Logical Proof, CRF Studio, CDISC standards, AST Evaluator, Mobile Stack, SEO, etc.).
-- **`adr/`**: architectural decision records (`adr/0001-*.md` through `adr/0021-*.md`) capturing immutable structural patterns and invariants.
+- **Relevant ADRs in `adr/`** at the repo root: architectural decisions that apply to the area being explored.
 
 If any of these files don't exist, proceed silently. The `/domain-modeling` skill (reached via `/grill-with-docs` and `/improve-codebase-architecture`) creates or updates them when terms or decisions get resolved.
 
