@@ -217,30 +217,19 @@ export interface FormatCurrencyOptions extends FormatNumberOptions {
   currency?: string;
 }
 
-/**
- * Standardized i18n number formatting primitive.
- * @param value Numeric value to format.
- * @param decimalsOrOptions Fixed decimal fraction digits, or full format options.
- */
-export function formatNumber(
-  value: number | null | undefined,
-  decimalsOrOptions?: number | FormatNumberOptions
-): string {
-  if (
-    value === null ||
-    value === undefined ||
-    typeof value !== "number" ||
-    isNaN(value)
-  ) {
-    return "";
-  }
+function isValidNumber(value: unknown): value is number {
+  return typeof value === "number" && !isNaN(value);
+}
 
-  let options: FormatNumberOptions = {};
+function parseNumberFormatOptions<T extends FormatNumberOptions>(
+  decimalsOrOptions?: number | T
+): { locale: string; intlOptions: Intl.NumberFormatOptions; options: T } {
+  let options: T = {} as T;
   if (typeof decimalsOrOptions === "number") {
     options = {
       minimumFractionDigits: decimalsOrOptions,
       maximumFractionDigits: decimalsOrOptions,
-    };
+    } as T;
   } else if (decimalsOrOptions) {
     options = { ...decimalsOrOptions };
   }
@@ -260,6 +249,24 @@ export function formatNumber(
     intlOptions.maximumFractionDigits = decimals;
   }
 
+  return { locale, intlOptions, options };
+}
+
+/**
+ * Standardized i18n number formatting primitive.
+ * @param value Numeric value to format.
+ * @param decimalsOrOptions Fixed decimal fraction digits, or full format options.
+ */
+export function formatNumber(
+  value: number | null | undefined,
+  decimalsOrOptions?: number | FormatNumberOptions
+): string {
+  if (!isValidNumber(value)) {
+    return "";
+  }
+
+  const { locale, intlOptions } = parseNumberFormatOptions(decimalsOrOptions);
+
   return new Intl.NumberFormat(locale, intlOptions).format(value);
 }
 
@@ -272,45 +279,19 @@ export function formatPercent(
   value: number | null | undefined,
   decimalsOrOptions?: number | FormatPercentOptions
 ): string {
-  if (
-    value === null ||
-    value === undefined ||
-    typeof value !== "number" ||
-    isNaN(value)
-  ) {
+  if (!isValidNumber(value)) {
     return "";
   }
 
-  let options: FormatPercentOptions = {};
-  if (typeof decimalsOrOptions === "number") {
-    options = {
-      minimumFractionDigits: decimalsOrOptions,
-      maximumFractionDigits: decimalsOrOptions,
-    };
-  } else if (decimalsOrOptions) {
-    options = { ...decimalsOrOptions };
-  }
+  const { locale, intlOptions, options } =
+    parseNumberFormatOptions(decimalsOrOptions);
 
   const isRatio =
     options.isRatio !== undefined ? options.isRatio : Math.abs(value) <= 1;
 
   const ratioValue = isRatio ? value : value / 100;
 
-  const { decimals, isRatio: _, locale = "en-US", ...intlOptions } = options;
-
-  if (
-    decimals !== undefined &&
-    intlOptions.minimumFractionDigits === undefined
-  ) {
-    intlOptions.minimumFractionDigits = decimals;
-  }
-  if (
-    decimals !== undefined &&
-    intlOptions.maximumFractionDigits === undefined
-  ) {
-    intlOptions.maximumFractionDigits = decimals;
-  }
-
+  delete (intlOptions as Record<string, unknown>).isRatio;
   intlOptions.style = "percent";
 
   return new Intl.NumberFormat(locale, intlOptions).format(ratioValue);
@@ -325,42 +306,21 @@ export function formatCurrency(
   value: number | null | undefined,
   currencyOrOptions?: string | FormatCurrencyOptions
 ): string {
-  if (
-    value === null ||
-    value === undefined ||
-    typeof value !== "number" ||
-    isNaN(value)
-  ) {
+  if (!isValidNumber(value)) {
     return "";
   }
 
-  let options: FormatCurrencyOptions = {};
-  if (typeof currencyOrOptions === "string") {
-    options = { currency: currencyOrOptions };
-  } else if (currencyOrOptions) {
-    options = { ...currencyOrOptions };
-  }
+  const optionsInput: FormatCurrencyOptions =
+    typeof currencyOrOptions === "string"
+      ? { currency: currencyOrOptions }
+      : currencyOrOptions || {};
 
-  const { currency = "USD", locale = "en-US", decimals, ...rest } = options;
+  const { locale, intlOptions, options } =
+    parseNumberFormatOptions(optionsInput);
+  const { currency = "USD" } = options;
 
-  const intlOptions: Intl.NumberFormatOptions = {
-    ...rest,
-    style: "currency",
-    currency,
-  };
-
-  if (
-    decimals !== undefined &&
-    intlOptions.minimumFractionDigits === undefined
-  ) {
-    intlOptions.minimumFractionDigits = decimals;
-  }
-  if (
-    decimals !== undefined &&
-    intlOptions.maximumFractionDigits === undefined
-  ) {
-    intlOptions.maximumFractionDigits = decimals;
-  }
+  intlOptions.style = "currency";
+  intlOptions.currency = currency;
 
   return new Intl.NumberFormat(locale, intlOptions).format(value);
 }
@@ -374,39 +334,11 @@ export function formatCompactNumber(
   value: number | null | undefined,
   decimalsOrOptions?: number | FormatNumberOptions
 ): string {
-  if (
-    value === null ||
-    value === undefined ||
-    typeof value !== "number" ||
-    isNaN(value)
-  ) {
+  if (!isValidNumber(value)) {
     return "";
   }
 
-  let options: FormatNumberOptions = {};
-  if (typeof decimalsOrOptions === "number") {
-    options = {
-      minimumFractionDigits: decimalsOrOptions,
-      maximumFractionDigits: decimalsOrOptions,
-    };
-  } else if (decimalsOrOptions) {
-    options = { ...decimalsOrOptions };
-  }
-
-  const { decimals, locale = "en-US", ...intlOptions } = options;
-
-  if (
-    decimals !== undefined &&
-    intlOptions.minimumFractionDigits === undefined
-  ) {
-    intlOptions.minimumFractionDigits = decimals;
-  }
-  if (
-    decimals !== undefined &&
-    intlOptions.maximumFractionDigits === undefined
-  ) {
-    intlOptions.maximumFractionDigits = decimals;
-  }
+  const { locale, intlOptions } = parseNumberFormatOptions(decimalsOrOptions);
 
   intlOptions.notation = "compact";
 
