@@ -5,6 +5,95 @@ All notable changes to this project are documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-09-24
+
+The first release since the repository became public and adopted the Apache-2.0
+license. It ships the technical blog, the Patrol shift simulator, the first
+playable Trial & Error slices, the CRF testing workflow, and the build and
+release-integrity fixes found during the 2026-09-18/19 release-readiness work
+([#863](https://github.com/fderuiter/portfolio/issues/863)).
+
+### Database
+
+Three additive migrations ship with this release. All three were already
+applied to production on 2026-09-19 and are backward compatible with the
+previously deployed application:
+
+- `20261018000000_add_blog_post`: adds the `BlogPost` table.
+- `20261019000000_add_blog_post_reaction`: adds `BlogPostReaction` and its
+  indexes.
+- `20261020000000_add_case_study_hero_image`: adds the nullable
+  `CaseStudy.hero_image_url` column.
+
+### Added
+
+- Technical blog at `/blog`, with authorized draft reading, editing and a
+  sanitized draft collection API, and posts across all six ADR 0041 content
+  pillars (#795, #797, #876).
+- Patrol shift simulator: a headless shift state machine, OET mini-game, OEC
+  scene interaction, three scenario packages with interpersonal dialogue, a
+  rule-based debrief engine, ambient mini-events, the Welch Village trail map,
+  a field manual and an optional audio layer (#827, #831–#833, #837, #838).
+- Trial & Error: Biostat Ops foundations: the SAP-defined Demographics QC Desk,
+  the Card Table with the QC Desk as the Inspect view, the score timeline and
+  scoring player, live card faces, the synth audio and loud-moment layers, an
+  Act I of three progressive review Blinds, and the ADR 0046 card-table and
+  narrative-frame amendments (#941, #953, #955, #962, #965).
+- CRF Studio: runtime show, hide and require sentence rules, versioned
+  personal clinical blocks, an in-builder simulator dock, named test scenarios
+  with expected outcomes, and durable field review threads (#842–#845, #938).
+- Clinical Trial Chaos offices, sponsor inbox, outfits and a guided board
+  redesign (#908).
+- A 44px minimum touch target and active feedback across arcade HUD controls
+  (#820).
+- A desktop-only notice for six arcade games on phones (#972).
+
+### Changed
+
+- Licensed the source under Apache-2.0 and hardened public-repository
+  readiness (#886).
+- Canonicalized on the apex `https://deruiter.dev`, so canonical, OpenGraph,
+  sitemap and robots URLs match the serving host (#846).
+- Superseded redundant `main`-push CI runs (#847).
+- Unified secret scanning into `lib/security-scan` (#888), centralized sound
+  engine delegation (#824) and moved `CopyButton` to `components/ui` (#819).
+- Ran migrations on the direct Neon endpoint by default (#860).
+- Tightened the pre-commit guardrail, branch, docs-drift and test-scope checks
+  (#884), and added a direct Stryker CLI runner (#825).
+
+### Fixed
+
+- A production build now fails when a data source is unreachable instead of
+  shipping fallback-only content (#858), and local production builds load
+  `.env.local` before falling back to a dummy connection (#862).
+- Fallback logging is gated on runtime rather than on production alone, so
+  builds no longer flood stderr (#857, #861).
+- Build output and agent worktrees are no longer uploaded to Vercel (#856), and
+  ESLint no longer traverses agent worktrees (#855).
+- Seeding upserts by slug instead of wiping tables, and two orphaned case
+  studies were recovered (#873).
+- Case-study `editorial_content` renders as Markdown with de-duplicated ids,
+  and case-study Mermaid diagrams render (#798, #877).
+- Hero text stays an opaque LCP candidate, and production layout reflow was
+  removed (#839).
+- Code blocks no longer clip, duplicate titles were removed, and missing page
+  headings were added (#881); `/crf` has a stable heading, titles are bounded,
+  and mobile blur is gated (#885).
+- Local development no longer spends the Sentry error budget (#883).
+- The OpenAPI doctor check normalizes bracketed Next.js route parameters
+  (#818).
+- QC Desk cell taps are no longer lost at narrow widths (#963).
+- The docs-drift gate ignores TypeDoc's literal-union reordering (#966), the
+  doctor's file scans skip agent worktrees and Stryker sandboxes (#967), and
+  the full doctor diagnostic test runs against a fixture workspace (#973).
+- Four failing Playwright specs were fixed and the Linux home baselines were
+  regenerated (#970).
+
+### Security
+
+- Added `@upstash/qstash` and bumped `@upstash/redis` (#878).
+- Stated the `.env*.local` ignore rule explicitly (#872).
+
 ## [0.3.0] - 2026-09-13
 
 First release cut under [ADR 0037](adr/0037-controlled-integration-and-release-deployments.md),
@@ -112,7 +201,7 @@ application.
 - Two Playwright suites no longer point at a port nothing serves, and the CI
   worker count was raised so the suite can finish inside its job timeout.
 - The telemetry synthetic probe asserts the status codes `POST
-  /api/telemetry` actually returns (201/202), not a 200 it never sends.
+/api/telemetry` actually returns (201/202), not a 200 it never sends.
 - Eliminated `any` from production code paths.
 
 ### Removed
@@ -127,4 +216,5 @@ application.
 - Added owner and follow-up requirements for any future time-bounded audit
   exception.
 
+[0.4.0]: https://github.com/fderuiter/portfolio/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/fderuiter/portfolio/compare/v0.1.0...v0.3.0
