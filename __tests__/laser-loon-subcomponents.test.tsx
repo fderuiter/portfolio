@@ -35,19 +35,53 @@ describe("Laser Loon Subcomponents Test Suite", () => {
       moveTo: vi.fn(),
       lineTo: vi.fn(),
       arc: vi.fn(),
+      arcTo: vi.fn(),
       ellipse: vi.fn(),
       roundRect: vi.fn(),
       rect: vi.fn(),
       fill: vi.fn(),
       stroke: vi.fn(),
       fillText: vi.fn(),
+      strokeText: vi.fn(),
+      quadraticCurveTo: vi.fn(),
+      bezierCurveTo: vi.fn(),
+      clip: vi.fn(),
+      setLineDash: vi.fn(),
+      getLineDash: vi.fn(() => []),
+      measureText: vi.fn((text: string) => ({
+        width: (text || "").length * 8,
+        height: 16,
+      })),
+      createImageData: vi.fn((w?: number | ImageData, h?: number) => {
+        const width = typeof w === "number" && w > 0 ? w : 256;
+        const height = typeof h === "number" && h > 0 ? h : 256;
+        return {
+          width,
+          height,
+          data: new Uint8ClampedArray(width * height * 4),
+        };
+      }),
+      getImageData: vi.fn(
+        (_sx?: number, _sy?: number, sw?: number, sh?: number) => {
+          const width = typeof sw === "number" && sw > 0 ? sw : 256;
+          const height = typeof sh === "number" && sh > 0 ? sh : 256;
+          return {
+            width,
+            height,
+            data: new Uint8ClampedArray(width * height * 4),
+          };
+        }
+      ),
+      putImageData: vi.fn(),
+      drawImage: vi.fn(),
+      transform: vi.fn(),
+      resetTransform: vi.fn(),
       createRadialGradient: vi.fn(() => ({
         addColorStop: vi.fn(),
       })),
       createLinearGradient: vi.fn(() => ({
         addColorStop: vi.fn(),
       })),
-      setLineDash: vi.fn(),
     };
 
     HTMLCanvasElement.prototype.getContext = vi.fn((contextId: string) => {
@@ -154,6 +188,53 @@ describe("Laser Loon Subcomponents Test Suite", () => {
 
       expect(writeTextMock).toHaveBeenCalled();
       expect(container.textContent).toContain("Link Copied!");
+    });
+
+    it("should handle interactive canvas mouse movements, clicks, and category filter interactions", async () => {
+      await act(async () => {
+        root.render(<AssetDistributionViewer />);
+      });
+
+      const canvas = container.querySelector(
+        '[data-testid="asset-distribution-canvas"]'
+      ) as HTMLCanvasElement;
+      expect(canvas).not.toBeNull();
+
+      // Mouse movement over canvas
+      await act(async () => {
+        canvas.dispatchEvent(
+          new MouseEvent("mousemove", {
+            clientX: 100,
+            clientY: 40,
+            bubbles: true,
+          })
+        );
+      });
+
+      expect(mockCtx.quadraticCurveTo).toHaveBeenCalled();
+      expect(mockCtx.measureText).toHaveBeenCalled();
+
+      // Click on canvas to filter category
+      await act(async () => {
+        canvas.dispatchEvent(
+          new MouseEvent("click", {
+            clientX: 300,
+            clientY: 40,
+            bubbles: true,
+          })
+        );
+      });
+
+      // Filter button updates
+      const webFilterBtn = Array.from(
+        container.querySelectorAll("button")
+      ).find((b) => b.textContent?.trim() === "web");
+      expect(webFilterBtn?.className).toContain("bg-amber-500/20");
+
+      // Mouse leave canvas
+      await act(async () => {
+        canvas.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+      });
     });
   });
 
