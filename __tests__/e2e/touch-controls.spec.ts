@@ -1,4 +1,18 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+
+// Six arcade games show a desktop-only notice on phones and portrait tablets
+// (ADR 0048). These specs exercise the touch controls behind it, so they take
+// the notice's "Try it anyway" path first. On a device the gate does not
+// match, the button is hidden and this is a no-op.
+async function passDesktopOnlyGate(page: Page) {
+  const tryAnyway = page.getByRole("button", { name: /Try it anyway/i });
+  if (await tryAnyway.isVisible()) {
+    await expect(async () => {
+      await tryAnyway.click();
+      await expect(tryAnyway).toBeHidden({ timeout: 3000 });
+    }).toPass({ timeout: 15000 });
+  }
+}
 
 test.describe("Mobile & Tablet Touch Interactions Suite", () => {
   test.beforeEach(async ({ page }) => {
@@ -178,6 +192,7 @@ test.describe("Mobile & Tablet Touch Interactions Suite", () => {
   }) => {
     await page.goto("/arcade/retro-labyrinth");
     await page.waitForLoadState("networkidle");
+    await passDesktopOnlyGate(page);
 
     const launchCabinetBtn = page.getByRole("button", {
       name: /Launch Cabinet/i,
@@ -220,6 +235,7 @@ test.describe("Mobile & Tablet Touch Interactions Suite", () => {
   }) => {
     await page.goto("/arcade/laser-loon");
     await page.waitForLoadState("networkidle");
+    await passDesktopOnlyGate(page);
 
     const launchCabinetBtn = page.getByRole("button", {
       name: /Launch Cabinet/i,
@@ -256,6 +272,7 @@ test.describe("Mobile & Tablet Touch Interactions Suite", () => {
   }) => {
     await page.goto("/arcade/clinical-chaos");
     await page.waitForLoadState("networkidle");
+    await passDesktopOnlyGate(page);
 
     const launchCabinetBtn = page.getByRole("button", {
       name: /Launch Cabinet/i,
@@ -318,6 +335,7 @@ test.describe("Real rendered touch-target dimensions (48px minimum, ADR-0003/ADR
   }) => {
     await page.goto("/arcade/retro-labyrinth");
     await page.waitForLoadState("networkidle");
+    await passDesktopOnlyGate(page);
 
     const launchCabinetBtn = page.getByRole("button", {
       name: /Launch Cabinet/i,
@@ -378,6 +396,7 @@ test.describe("Real rendered touch-target dimensions (48px minimum, ADR-0003/ADR
   }) => {
     await page.goto("/arcade/laser-loon");
     await page.waitForLoadState("networkidle");
+    await passDesktopOnlyGate(page);
 
     const launchCabinetBtn = page.getByRole("button", {
       name: /Launch Cabinet/i,
