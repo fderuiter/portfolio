@@ -56,6 +56,12 @@ Re-exports [calculateAverageGrade](welch-data/functions/calculateAverageGrade.md
 
 ***
 
+### calculateDebriefScore
+
+Re-exports [calculateDebriefScore](debrief/functions/calculateDebriefScore.md)
+
+***
+
 ### calculateElevationAt
 
 Re-exports [calculateElevationAt](welch-data/functions/calculateElevationAt.md)
@@ -149,6 +155,18 @@ Re-exports [DebriefReport](types/interfaces/DebriefReport.md)
 ### DebriefRule
 
 Re-exports [DebriefRule](types/interfaces/DebriefRule.md)
+
+***
+
+### DebriefScoreInput
+
+Re-exports [DebriefScoreInput](debrief/interfaces/DebriefScoreInput.md)
+
+***
+
+### DebriefScoreResult
+
+Re-exports [DebriefScoreResult](debrief/interfaces/DebriefScoreResult.md)
 
 ***
 
@@ -302,6 +320,12 @@ Re-exports [IncidentSeverity](types/type-aliases/IncidentSeverity.md)
 
 ***
 
+### INITIAL\_PATROL\_SCENARIOS
+
+Re-exports [INITIAL_PATROL_SCENARIOS](scenarios/catalog/variables/INITIAL_PATROL_SCENARIOS.md)
+
+***
+
 ### interpolateSkierPosition
 
 Re-exports [interpolateSkierPosition](welch-data/functions/interpolateSkierPosition.md)
@@ -317,6 +341,12 @@ Re-exports [isSceneSafetySecured](engine/functions/isSceneSafetySecured.md)
 ### LegacyShiftPhase
 
 Re-exports [LegacyShiftPhase](types/type-aliases/LegacyShiftPhase.md)
+
+***
+
+### OEC\_SAMPLE\_SCENARIO
+
+Re-exports [OEC_SAMPLE_SCENARIO](scenarios/catalog/variables/OEC_SAMPLE_SCENARIO.md)
 
 ***
 

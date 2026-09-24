@@ -597,6 +597,114 @@ function emptyDeltas(): Record<DebriefDimension, number> {
   };
 }
 
+export interface DebriefScoreInput {
+  events?: PatrolEvent[];
+  oetMetrics?: OetMetrics;
+  passedRules?: number;
+  totalRules?: number;
+  rawScore?: number;
+}
+
+export interface DebriefScoreResult {
+  score: number;
+  percentage: number;
+  grade: "A" | "B" | "C" | "D" | "F";
+  rating: "exemplary" | "proficient" | "developing" | "needs-attention";
+  summary: string;
+}
+
+/**
+ * Calculates a debrief score percentage, letter grade, and performance rating from various performance inputs.
+ */
+export function calculateDebriefScore(
+  input?: PatrolEvent[] | DebriefScoreInput | number,
+  secondaryInput?: OetMetrics | number
+): DebriefScoreResult {
+  let percentage = 50;
+
+  if (typeof input === "number") {
+    if (typeof secondaryInput === "number" && secondaryInput > 0) {
+      percentage = Math.round((Math.max(0, input) / secondaryInput) * 100);
+    } else {
+      percentage = Math.round(input);
+    }
+  } else if (Array.isArray(input)) {
+    const oetMetrics =
+      secondaryInput && typeof secondaryInput === "object"
+        ? (secondaryInput as OetMetrics)
+        : undefined;
+    const result = evaluateIncidentDebrief("incident", input, oetMetrics);
+    const dimensionScores = DIMENSION_ORDER.map(
+      (dim) => result.dimensions[dim].score
+    );
+    const avgScore =
+      dimensionScores.reduce((sum, s) => sum + s, 0) /
+      (dimensionScores.length || 1);
+    percentage = Math.round(avgScore * 10);
+  } else if (input && typeof input === "object") {
+    if (typeof input.rawScore === "number" && Number.isFinite(input.rawScore)) {
+      percentage = Math.round(input.rawScore);
+    } else if (
+      typeof input.passedRules === "number" &&
+      typeof input.totalRules === "number" &&
+      input.totalRules > 0
+    ) {
+      percentage = Math.round(
+        (Math.max(0, input.passedRules) / input.totalRules) * 100
+      );
+    } else if (Array.isArray(input.events)) {
+      const result = evaluateIncidentDebrief(
+        "incident",
+        input.events,
+        input.oetMetrics
+      );
+      const dimensionScores = DIMENSION_ORDER.map(
+        (dim) => result.dimensions[dim].score
+      );
+      const avgScore =
+        dimensionScores.reduce((sum, s) => sum + s, 0) /
+        (dimensionScores.length || 1);
+      percentage = Math.round(avgScore * 10);
+    }
+  }
+
+  percentage = Math.max(0, Math.min(100, safeNumber(percentage, 50)));
+
+  let grade: "A" | "B" | "C" | "D" | "F";
+  let rating: "exemplary" | "proficient" | "developing" | "needs-attention";
+  let summary: string;
+
+  if (percentage >= 90) {
+    grade = "A";
+    rating = "exemplary";
+    summary = OVERALL_RATING_LABEL.exemplary;
+  } else if (percentage >= 80) {
+    grade = "B";
+    rating = "proficient";
+    summary = OVERALL_RATING_LABEL.proficient;
+  } else if (percentage >= 70) {
+    grade = "C";
+    rating = "developing";
+    summary = OVERALL_RATING_LABEL.developing;
+  } else if (percentage >= 60) {
+    grade = "D";
+    rating = "developing";
+    summary = OVERALL_RATING_LABEL.developing;
+  } else {
+    grade = "F";
+    rating = "needs-attention";
+    summary = OVERALL_RATING_LABEL["needs-attention"];
+  }
+
+  return {
+    score: percentage,
+    percentage,
+    grade,
+    rating,
+    summary,
+  };
+}
+
 /**
  * Evaluates a single incident's contextual debrief from its `PatrolEvent[]`
  * slice and optional live OET descent metrics.
