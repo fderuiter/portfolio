@@ -11,8 +11,9 @@ reserved for the narrative-design work in #927.
 
 ADR 0003 committed every arcade game to "full-fidelity usability" on phones:
 virtual gamepads, orientation hints and a zero-overflow invariant. The games
-meet the letter of that and still play badly. Measured on an emulated iPhone
-at 375px wide, with each cabinet launched:
+meet the letter of that and still play badly. Each game was launched and
+played on an emulated iPhone 12, in portrait and in landscape with the
+cabinet in fullscreen. Portrait at 375px wide:
 
 | Game                  | What a phone visitor gets                            |
 | --------------------- | ---------------------------------------------------- |
@@ -22,6 +23,11 @@ at 375px wide, with each cabinet launched:
 | Monkey C Mayhem       | The watch fits, but its side buttons are clipped     |
 | Clinical Trial Chaos  | The conveyor is 269×71 inside a 3,400px-tall cabinet |
 | Retro Labyrinth       | The map is 240×144 with the d-pad below the fold     |
+
+Landscape fullscreen does not rescue them. The play area stays at 13–30% of
+the screen for five of the six, and the controls still read as keyboard hints
+("Press (4)", "Space to fire", "Tab to cycle"). Clinical Trial Chaos gets its
+conveyor to half the screen, but its queue and routing panels sit below it.
 
 A visitor who opens one of these from a shared link on a phone forms their
 impression of the whole portfolio from it. Telling them plainly that the game
@@ -44,12 +50,23 @@ single implementation; each game opts in by wrapping its `PlayCabinet`.
 - **The page stays.** Heading, description, breadcrumbs, controls reference,
   metadata and structured data all render as before. Only the play area is
   replaced, so links, previews and search results still describe the game.
+- **Somewhere to go.** The notice is not a dead end. It shows a still of the
+  game being played on a desktop (`public/images/arcade/previews/<slug>.webp`,
+  800×500, lazy-loaded so desktops never fetch it). Its primary action saves
+  the link for later through the phone's share sheet, falling back to copying
+  it. It then points at parts of the site that do work on a phone: the Meme
+  Vault and the blog.
+- **The hub says so first.** On the same devices, the Arcade hub marks each
+  gated card "Desktop only" and says, above the cards, that the Meme Vault
+  works on a phone. That way visitors learn it before they tap through.
 - **An escape hatch.** "Try it anyway" reveals the cabinet for that page view.
   The existing touch controls stay in place behind it; nothing is deleted.
 
-Trial & Error and the Meme Vault are not gated. Trial & Error's card table is
-cramped but usable, and ADR 0046 promises phone play with active work on
-narrow-screen taps. The Meme Vault is a soundboard that fits a phone cleanly.
+The Meme Vault is not gated: it is a soundboard that fits a phone cleanly.
+Trial & Error is not gated either. It is not linked from the Arcade hub yet,
+and ADR 0046 promises phone play, with narrow-screen tap work in progress. On
+a phone its hand currently sits below a tall status panel, so whether to gate
+it too is left to its own ADR.
 
 ## Consequences
 
@@ -57,6 +74,8 @@ narrow-screen taps. The Meme Vault is a soundboard that fits a phone cleanly.
 - ADR 0003's touch work (virtual gamepads, orientation hints, overflow checks)
   stays in the code but is now reached only through "Try it anyway". The
   Playwright Mobile Safari, Mobile Chrome and Tablet Safari projects that
-  launch these six cabinets need to account for the notice. CI runs only the
-  desktop `chromium` project, which never matches the gate.
+  launch these six cabinets pass the notice through "Try it anyway". The
+  desktop `chromium` project never matches the gate.
+- The preview stills go stale when a game's look changes. Retake them from a
+  desktop fullscreen cabinet when that happens.
 - Gating or un-gating a game is a one-line change in its `*Client.tsx`.

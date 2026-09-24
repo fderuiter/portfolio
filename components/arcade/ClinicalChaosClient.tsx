@@ -80,7 +80,10 @@ export const ClinicalChaosClient: React.FC = () => {
 
         {/* Game Container */}
         <div className="rounded-3xl border border-zinc-800 bg-zinc-950/90 p-1.5 sm:p-6 shadow-[0_0_50px_rgba(16,185,129,0.1)]">
-          <DesktopOnlyGate gameTitle="Clinical Trial Chaos">
+          <DesktopOnlyGate
+            gameId="clinical-chaos"
+            gameTitle="Clinical Trial Chaos"
+          >
             <PlayCabinet
               gameId="clinical-chaos"
               title="Clinical Trial Chaos: CDISC Compliance"

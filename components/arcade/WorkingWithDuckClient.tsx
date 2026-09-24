@@ -76,7 +76,10 @@ export const WorkingWithDuckClient: React.FC = () => {
 
         {/* Game Container */}
         <div className="rounded-3xl border border-zinc-800 bg-zinc-950/90 p-4 sm:p-6 shadow-[0_0_50px_rgba(251,191,36,0.08)]">
-          <DesktopOnlyGate gameTitle="Working With Duck">
+          <DesktopOnlyGate
+            gameId="working-with-duck"
+            gameTitle="Working With Duck"
+          >
             <PlayCabinet
               gameId="working-with-duck"
               title="Working With Duck"

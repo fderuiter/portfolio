@@ -81,7 +81,7 @@ export const GarminWatchClient: React.FC = () => {
 
         {/* Game Container */}
         <div className="rounded-3xl border border-zinc-800 bg-zinc-950/90 p-4 sm:p-6 shadow-[0_0_50px_rgba(245,158,11,0.1)] flex flex-col items-center">
-          <DesktopOnlyGate gameTitle="Monkey C Mayhem">
+          <DesktopOnlyGate gameId="garmin-watch" gameTitle="Monkey C Mayhem">
             <PlayCabinet
               gameId="garmin-watch"
               title="Monkey C Mayhem: Garmin Schvitz App"

@@ -1,19 +1,28 @@
 // @vitest-environment jsdom
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
 import React from "react";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import { DesktopOnlyGate } from "../components/arcade/DesktopOnlyGate";
+
+const mockCopy = vi.fn(async (text: string) => {
+  void text;
+});
+
+vi.mock("@/lib/clipboard", () => ({
+  copyToClipboard: (text: string) => mockCopy(text),
+}));
 
 const GATE_QUERY = "[@media(pointer:coarse)_and_(max-width:1023px)]";
 
 describe("DesktopOnlyGate", () => {
   afterEach(() => {
     cleanup();
+    mockCopy.mockClear();
   });
 
   it("server-renders both the cabinet and the notice, split by the touch media query", () => {
     render(
-      <DesktopOnlyGate gameTitle="Laser Loon">
+      <DesktopOnlyGate gameId="laser-loon" gameTitle="Laser Loon">
         <div data-testid="cabinet">cabinet</div>
       </DesktopOnlyGate>
     );
@@ -24,28 +33,42 @@ describe("DesktopOnlyGate", () => {
     const notice = screen.getByTestId("desktop-only-notice");
     expect(notice.className).toContain("hidden");
     expect(notice.className).toContain(`${GATE_QUERY}:block`);
-    expect(notice.textContent).toContain(
-      "Laser Loon is a desktop game for now"
-    );
+    expect(notice.textContent).toContain("Laser Loon needs a bigger screen");
   });
 
-  it("links back to the arcade hub", () => {
+  it("points at parts of the site that work on a phone", () => {
     render(
-      <DesktopOnlyGate gameTitle="Retro Labyrinth">
+      <DesktopOnlyGate gameId="retro-labyrinth" gameTitle="Retro Labyrinth">
         <div />
       </DesktopOnlyGate>
     );
 
+    const hrefs = screen
+      .getAllByRole("link")
+      .map((link) => link.getAttribute("href"));
+    expect(hrefs).toEqual(["/arcade/meme-vault", "/blog"]);
+  });
+
+  it("copies the page link when the share sheet is unavailable", async () => {
+    render(
+      <DesktopOnlyGate gameId="garmin-watch" gameTitle="Monkey C Mayhem">
+        <div />
+      </DesktopOnlyGate>
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Save link for later" })
+    );
+
     expect(
-      screen
-        .getByRole("link", { name: "Back to the Arcade" })
-        .getAttribute("href")
-    ).toBe("/arcade");
+      await screen.findByRole("button", { name: "Link copied" })
+    ).toBeTruthy();
+    expect(mockCopy).toHaveBeenCalledWith(window.location.href);
   });
 
   it("reveals only the cabinet after Try it anyway", () => {
     render(
-      <DesktopOnlyGate gameTitle="Working With Duck">
+      <DesktopOnlyGate gameId="working-with-duck" gameTitle="Working With Duck">
         <div data-testid="cabinet">cabinet</div>
       </DesktopOnlyGate>
     );

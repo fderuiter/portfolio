@@ -21,7 +21,9 @@ export const TabletOrientationHint: React.FC<TabletOrientationHintProps> = ({
         "ontouchstart" in window ||
         (typeof navigator !== "undefined" && navigator.maxTouchPoints > 0) ||
         (hasMatchMedia && window.matchMedia("(pointer: coarse)").matches);
-      const isPortrait = hasMatchMedia ? window.matchMedia("(orientation: portrait)").matches : false;
+      const isPortrait = hasMatchMedia
+        ? window.matchMedia("(orientation: portrait)").matches
+        : false;
       const isTabletOrSmall = window.innerWidth <= 1024;
 
       setIsPortraitTouch(isTouch && isPortrait && isTabletOrSmall);
@@ -48,7 +50,9 @@ export const TabletOrientationHint: React.FC<TabletOrientationHintProps> = ({
     >
       <div className="flex items-center gap-2">
         <IconDeviceMobileRotated className="w-4 h-4 text-amber-400 shrink-0 animate-pulse" />
-        <span>Rotate to landscape for the best arcade experience & touch controls.</span>
+        <span>
+          Rotate to landscape for the best arcade experience & touch controls.
+        </span>
       </div>
       <button
         type="button"

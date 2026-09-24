@@ -35,6 +35,34 @@ test.describe("Desktop-only arcade gate", () => {
       });
     }
 
+    test("the notice offers a preview, a saved link and phone-friendly picks", async ({
+      page,
+      browserName,
+    }) => {
+      test.skip(browserName === "firefox", "isMobile is unsupported");
+      await page.goto("/arcade/garmin-watch");
+      const notice = page.getByTestId("desktop-only-notice");
+      await expect(notice.getByRole("img")).toBeVisible();
+      await expect(
+        notice.getByRole("button", { name: /Save link for later/i })
+      ).toBeVisible();
+      await expect(
+        notice.getByRole("link", { name: /Meme Vault/i })
+      ).toHaveAttribute("href", "/arcade/meme-vault");
+    });
+
+    test("the arcade hub marks desktop-only games", async ({
+      page,
+      browserName,
+    }) => {
+      test.skip(browserName === "firefox", "isMobile is unsupported");
+      await page.goto("/arcade");
+      await expect(page.getByText("Desktop only").first()).toBeVisible();
+      await expect(
+        page.getByText(/On a phone\? These games need a desktop/)
+      ).toBeVisible();
+    });
+
     test("Try it anyway reveals the cabinet", async ({ page, browserName }) => {
       test.skip(browserName === "firefox", "isMobile is unsupported");
       await page.goto("/arcade/laser-loon");
@@ -69,6 +97,11 @@ test.describe("Desktop-only arcade gate", () => {
         page.getByRole("button", { name: /Launch Cabinet/i })
       ).toBeVisible();
       await expect(page.getByTestId("desktop-only-notice")).toBeHidden();
+    });
+
+    test("the arcade hub shows no desktop-only markers", async ({ page }) => {
+      await page.goto("/arcade");
+      await expect(page.getByText("Desktop only").first()).toBeHidden();
     });
   });
 });
