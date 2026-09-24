@@ -9,6 +9,7 @@
 
 import { CRTThemeConfig } from "@/lib/dungeon/types";
 import { clamp } from "../game-utils";
+import { getMatchMediaMatches } from "@/hooks/useMediaQuery";
 
 export type PhosphorMaskType = "none" | "aperture-grille" | "shadow-mask" | "monochrome-dot";
 
@@ -309,12 +310,7 @@ export function getOrCreatePhosphorPattern(
  * Checks whether user has requested reduced motion in their OS/browser settings.
  */
 export function isReducedMotionPreferred(): boolean {
-  if (typeof window === "undefined" || !window.matchMedia) return false;
-  try {
-    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  } catch {
-    return false;
-  }
+  return getMatchMediaMatches("(prefers-reduced-motion: reduce)");
 }
 
 /**

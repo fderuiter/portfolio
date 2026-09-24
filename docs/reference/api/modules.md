@@ -19,6 +19,7 @@
 - [hooks/useIsMobileViewport](hooks/useIsMobileViewport/README.md)
 - [hooks/useKonamiCode](hooks/useKonamiCode/README.md)
 - [hooks/useMasonryLayout](hooks/useMasonryLayout/README.md)
+- [hooks/useMediaQuery](hooks/useMediaQuery/README.md)
 - [hooks/useOfflineQueue](hooks/useOfflineQueue/README.md)
 - [hooks/usePersistentState](hooks/usePersistentState/README.md)
 - [hooks/usePretextLayout](hooks/usePretextLayout/README.md)
