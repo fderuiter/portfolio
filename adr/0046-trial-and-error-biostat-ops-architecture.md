@@ -467,3 +467,39 @@ Recorded by [#946](https://github.com/fderuiter/portfolio/issues/946).
   renders nothing, so nothing animates. Screen shake takes its amplitude
   from `--te-shake-amp`, set by `shakeAmplitude(intensity)` and capped at
   `MAX_SHAKE_PX` (6). `LOUD_PRESETS` names the flame and glow classes.
+
+### Act I implementation (T&E-02)
+
+T&E-02 (#911) turns the single Blind into Act I, a Phase I safety study
+played as three Blinds, following the narrative frame proposed in #962.
+
+- **One study, one snapshot.** `ACT_I` holds `DEMOGRAPHICS_SCENARIO`
+  (Internal QC, 300), `SPONSOR_SAFETY_SCENARIO` (Sponsor Safety Review, 750)
+  and `DOSE_ESCALATION_SCENARIO` (Dose Escalation Committee, 1,500). All
+  three read `SNAP-P1-v1`, whose twelve subjects now carry MedDRA-coded
+  adverse events. `ActSchema` rejects Blinds that do not escalate or that
+  read different snapshots. Act I deals no efficacy outputs or Figures.
+- **Shells.** A scenario declares `shells` rather than one `shell`, so a
+  Blind can stage drafts of several outputs (the AE overview, the SAE table
+  and one table per System Organ Class). Each draft names its shell.
+- **Subjects, not events.** The `AE_SUBJECT_COUNT_PCT` row statistic counts
+  subjects with at least one matching event, filtered by SOC, preferred term,
+  seriousness, minimum grade or discontinuation. When a displayed n equals
+  the event count, the VALUE finding says so. This is Act I's cross-table
+  reconciliation: an SOC row must agree with its preferred terms, and Any
+  TEAE with the SOC tables. Tracing a cell into its Listing is #915.
+- **Boss debuff.** `BossBlindModifier.disabledPopulations` lists the suits a
+  `DISABLE_POPULATION` boss switches off. The Card Table cancels a disabled
+  card's Chips, and any subject credit its draft earned, with one explained
+  rule result whose `ruleId` is the boss id; its +Mult still counts. The
+  view marks the card `debuffed`. The other debuff types are declared for
+  later bosses and have no effect yet.
+- **Run layer.** `advanceRun` wraps the table reducer. `NEXT_BLIND` is
+  accepted only once the Blind is cleared and deals the next Blind with a
+  fresh CPU allocation. A lost Blind ends the run: table `RESET` is not a
+  run action, and `RESTART_RUN` returns to the Small Blind. `deriveRunView`
+  reports the phase (playing, Blind cleared, run failed, act complete) and
+  whether the Blind's intro card shows.
+- **Determinism.** Draw piles are fixed per Blind and nothing in the run
+  consults randomness, so a replayed action sequence reproduces every state.
+  Seeded randomness remains reserved for the crisis deck and the shop.

@@ -86,10 +86,10 @@ describe("Trial & Error runtime schemas", () => {
 
   it("validates table shell specs, including chips and mult", () => {
     expect(
-      TableShellSpecSchema.safeParse(DEMOGRAPHICS_SCENARIO.shell).success
+      TableShellSpecSchema.safeParse(DEMOGRAPHICS_SCENARIO.shells[0]).success
     ).toBe(true);
     const bad = TableShellSpecSchema.safeParse({
-      ...DEMOGRAPHICS_SCENARIO.shell,
+      ...DEMOGRAPHICS_SCENARIO.shells[0],
       chips: 1.5,
       targetPopulation: "EVERYONE",
     });
@@ -170,10 +170,13 @@ describe("Trial & Error runtime schemas", () => {
     }
     const crossWired = ScenarioSchema.safeParse({
       ...DEMOGRAPHICS_SCENARIO,
-      shell: {
-        ...DEMOGRAPHICS_SCENARIO.shell,
-        requiredRulebookId: "SAP-OTHER",
-      },
+      shells: [
+        {
+          ...DEMOGRAPHICS_SCENARIO.shells[0],
+          requiredRulebookId: "SAP-OTHER",
+        },
+        DEMOGRAPHICS_SCENARIO.shells[0],
+      ],
       drawPile: [
         {
           ...DEMOGRAPHICS_SCENARIO.drawPile[0],
@@ -185,7 +188,8 @@ describe("Trial & Error runtime schemas", () => {
     expect(crossWired.success).toBe(false);
     expect(crossWired.error?.issues.map((i) => i.path.join("."))).toEqual(
       expect.arrayContaining([
-        "shell.requiredRulebookId",
+        "shells.0.requiredRulebookId",
+        "shells.1.id",
         "drawPile.0.shellId",
         "drawPile.0.populationSnapshotId",
       ])

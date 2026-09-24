@@ -23,6 +23,16 @@ export const PopulationTypeSchema = z.enum([
 /** An analysis population (card suit). */
 export type PopulationType = z.infer<typeof PopulationTypeSchema>;
 
+/** Display names for each analysis population. */
+export const POPULATION_LABELS: Readonly<Record<PopulationType, string>> =
+  Object.freeze({
+    SCREENED: "Screened",
+    ITT: "ITT",
+    SAFETY: "Safety",
+    PER_PROTOCOL: "Per-Protocol",
+    FAS: "FAS",
+  });
+
 /** The kinds of card a hand can contain. */
 export const CardTypeSchema = z.enum([
   "TABLE",
@@ -203,6 +213,22 @@ export const ArmSchema = z.enum(["PLACEBO", "ACTIVE"]);
 /** A treatment arm. */
 export type Arm = z.infer<typeof ArmSchema>;
 
+/**
+ * One treatment-emergent adverse event, coded to a MedDRA System Organ Class
+ * and preferred term. Fictional teaching data.
+ */
+export const AdverseEventSchema = z.object({
+  soc: z.string().min(1).max(64),
+  term: z.string().min(1).max(64),
+  /** CTCAE grade, 1 (mild) to 5 (death). */
+  grade: z.number().int().min(1).max(5),
+  serious: z.boolean(),
+  /** The event led to permanent discontinuation of study drug. */
+  ledToDiscontinuation: z.boolean(),
+});
+/** A coded adverse event. */
+export type AdverseEvent = z.infer<typeof AdverseEventSchema>;
+
 /** A fictional subject data token and the populations it belongs to. */
 export const SubjectSchema = z.object({
   id: identifier,
@@ -210,6 +236,8 @@ export const SubjectSchema = z.object({
   age: z.number().int().min(0).max(120),
   sex: z.enum(["F", "M"]),
   populations: z.array(PopulationTypeSchema),
+  /** Treatment-emergent adverse events. Absent means none were reported. */
+  adverseEvents: z.array(AdverseEventSchema).optional(),
 });
 /** A fictional subject data token. */
 export type Subject = z.infer<typeof SubjectSchema>;
@@ -237,6 +265,19 @@ export const RowStatisticSchema = z.discriminatedUnion("kind", [
   z.object({
     kind: z.literal("AGE_AT_LEAST_COUNT_PCT"),
     minAge: z.number().int().min(0),
+  }),
+  /**
+   * Subjects with at least one adverse event matching every given filter,
+   * as "n (%)". A subject counts once however many events match (MedDRA
+   * incidence is by subject, not by event).
+   */
+  z.object({
+    kind: z.literal("AE_SUBJECT_COUNT_PCT"),
+    soc: z.string().min(1).max(64).optional(),
+    term: z.string().min(1).max(64).optional(),
+    serious: z.literal(true).optional(),
+    minGrade: z.number().int().min(1).max(5).optional(),
+    ledToDiscontinuation: z.literal(true).optional(),
   }),
 ]);
 /** A row statistic definition. */
@@ -396,6 +437,46 @@ export const HandEvaluationSchema = z.object({
 });
 /** The full, explainable result of scoring a hand. */
 export type HandEvaluation = z.infer<typeof HandEvaluationSchema>;
+
+/** The debuffs a Boss Blind can impose. */
+export const BossDebuffTypeSchema = z.enum([
+  "DISABLE_POPULATION",
+  "HAND_LIMIT",
+  "DISCARD_PENALTY",
+  "BLIND_FIREWALL",
+]);
+/** A Boss Blind debuff type. */
+export type BossDebuffType = z.infer<typeof BossDebuffTypeSchema>;
+
+/**
+ * A Boss Blind's rule twist. `DISABLE_POPULATION` scores every output built
+ * on one of `disabledPopulations` at 0 Chips. The other debuff types are
+ * declared for later bosses and have no effect yet.
+ */
+export const BossBlindModifierSchema = z
+  .object({
+    id: identifier,
+    name: z.string().min(1),
+    description: z.string().min(1),
+    debuffType: BossDebuffTypeSchema,
+    disabledPopulations: z.array(PopulationTypeSchema).optional(),
+    maxHandsAllowed: z.number().int().positive().optional(),
+    discardCpuPenalty: nonNegativeInt.optional(),
+  })
+  .superRefine((modifier, ctx) => {
+    if (
+      modifier.debuffType === "DISABLE_POPULATION" &&
+      (modifier.disabledPopulations ?? []).length === 0
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["disabledPopulations"],
+        message: "DISABLE_POPULATION must name at least one population",
+      });
+    }
+  });
+/** A Boss Blind's rule twist. */
+export type BossBlindModifier = z.infer<typeof BossBlindModifierSchema>;
 
 /** A milestone quota the player must reach. */
 export const BlindSchema = z.object({
@@ -586,36 +667,66 @@ export const TableRulesSchema = z.object({
 /** Card Table rules for a scenario. */
 export type TableRules = z.infer<typeof TableRulesSchema>;
 
-/** A playable scenario: SAP, snapshot, shell, and a fixed draw pile. */
+/**
+ * A playable scenario (one Blind): SAP, snapshot, the shells its drafts are
+ * compiled from, and a fixed draw pile.
+ */
 export const ScenarioSchema = z
   .object({
     id: identifier,
     title: z.string().min(1),
     summary: z.string().min(1),
+    /** The short intro card shown when the Blind starts. */
+    intro: z.string().min(1).max(280),
     blind: BlindSchema,
+    /** Present only on a Boss Blind. */
+    boss: BossBlindModifierSchema.optional(),
     handType: HandTypeSchema,
     startingCpu: nonNegativeInt,
     rulebook: SapRulebookSchema,
     populationSnapshot: PopulationSnapshotSchema,
-    shell: TableShellSpecSchema,
+    shells: z.array(TableShellSpecSchema).min(1),
     drawPile: z.array(StagedTableSchema).min(1),
     table: TableRulesSchema,
     deck: z.array(TlfCardSchema).min(1),
   })
   .superRefine((scenario, ctx) => {
-    if (scenario.shell.requiredRulebookId !== scenario.rulebook.id) {
+    if (
+      (scenario.boss !== undefined) !==
+      (scenario.blind.tier === "BOSS_BLIND")
+    ) {
       ctx.addIssue({
         code: "custom",
-        path: ["shell", "requiredRulebookId"],
-        message: "Shell must require the scenario's rulebook",
+        path: ["boss"],
+        message:
+          "A Boss Blind needs exactly one boss modifier; other Blinds none",
       });
     }
+    const shellIds = new Set<string>();
+    scenario.shells.forEach((shell, index) => {
+      if (shellIds.has(shell.id)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["shells", index, "id"],
+          message: "Shell ids must be unique",
+        });
+      }
+      shellIds.add(shell.id);
+      if (shell.requiredRulebookId !== scenario.rulebook.id) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["shells", index, "requiredRulebookId"],
+          message: "Shell must require the scenario's rulebook",
+        });
+      }
+    });
     scenario.drawPile.forEach((table, index) => {
-      if (table.shellId !== scenario.shell.id) {
+      if (!shellIds.has(table.shellId)) {
         ctx.addIssue({
           code: "custom",
           path: ["drawPile", index, "shellId"],
-          message: "Every draft must be compiled from the scenario's shell",
+          message:
+            "Every draft must be compiled from one of the scenario's shells",
         });
       }
       if (table.populationSnapshotId !== scenario.populationSnapshot.id) {
@@ -665,3 +776,39 @@ export const ScenarioSchema = z
   });
 /** A playable scenario. */
 export type Scenario = z.infer<typeof ScenarioSchema>;
+
+/**
+ * One act of a run: a single study whose Blinds are played in order, Small
+ * to Boss. Every Blind reads the study's one population snapshot.
+ */
+export const ActSchema = z
+  .object({
+    id: identifier,
+    title: z.string().min(1),
+    blinds: z.array(ScenarioSchema).min(1).max(3),
+  })
+  .superRefine((act, ctx) => {
+    const tiers = BlindTierSchema.options;
+    act.blinds.forEach((blind, index) => {
+      if (index === 0) return;
+      const previous = act.blinds[index - 1];
+      if (
+        tiers.indexOf(blind.blind.tier) <= tiers.indexOf(previous.blind.tier)
+      ) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["blinds", index, "blind", "tier"],
+          message: "Blinds must escalate: Small, then Big, then Boss",
+        });
+      }
+      if (blind.populationSnapshot.id !== previous.populationSnapshot.id) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["blinds", index, "populationSnapshot", "id"],
+          message: "Every Blind in an act reads the study's one snapshot",
+        });
+      }
+    });
+  });
+/** One act of a run. */
+export type Act = z.infer<typeof ActSchema>;

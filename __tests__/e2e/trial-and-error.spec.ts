@@ -106,10 +106,17 @@ test.describe("Trial & Error: Biostat Ops Card Table", () => {
     );
     await expect(page.getByTestId("blind-result")).toContainText("828 of 300");
     await expect(
-      page.getByRole("button", { name: "Restart Blind" })
+      page.getByRole("button", { name: "Next Blind" })
     ).toBeFocused();
     await page.keyboard.press("Enter");
-    await expect(card(page, DRAFT_A)).toBeFocused();
+    await expect(page.getByTestId("blind-name")).toHaveText(
+      "Big Blind: Sponsor Safety Review"
+    );
+    await expect(card(page, "C-T14.3.1-A")).toBeFocused();
+    await expect(page.getByTestId("blind-intro")).toContainText(
+      "safety physician"
+    );
+    await expectNoBlockingViolations(page, "Big Blind start");
   });
 
   test("an uninspected card still zeroes the hand, and D discards for 1 CPU", async ({
@@ -455,8 +462,8 @@ test.describe("Trial & Error: Biostat Ops Card Table", () => {
         card(page, "C-L16.2.4").locator('[data-face-kind="LISTING"]')
       ).toContainText("S-001");
       await expect(
-        card(page, "C-F14.2.1").locator('[data-face-kind="FIGURE"] path')
-      ).toHaveCount(2);
+        card(page, "C-T14.3.1").locator('[data-face-kind="TABLE"]')
+      ).toContainText("Any TEAE");
     });
 
     test("reads a card with ? and reorders with Alt+arrows, axe clean", async ({

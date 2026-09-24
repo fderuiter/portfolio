@@ -11,6 +11,10 @@ import {
   within,
 } from "@testing-library/react";
 import { CardTable } from "@/components/trial-and-error/CardTable";
+import {
+  DEMOGRAPHICS_SCENARIO,
+  DOSE_ESCALATION_SCENARIO,
+} from "@/lib/trial-and-error";
 
 const announce = vi.fn();
 vi.mock("@/hooks/useAnnouncer", () => ({
@@ -197,8 +201,11 @@ describe("CardTable", () => {
     expect(leftSpy).toHaveBeenCalledWith(undefined);
   });
 
-  it("clears the Blind by inspecting, correcting and playing, then restarts", async () => {
+  it("clears the Blind by inspecting, correcting and playing, then moves to the next Blind", async () => {
     render(<CardTable />);
+    expect(screen.getByTestId("blind-intro").textContent).toContain(
+      "Phase I, first data review."
+    );
     await openInspect(DRAFT_A);
     for (let row = 0; row < 5; row++) {
       for (let col = 0; col < 3; col++) {
@@ -215,15 +222,80 @@ describe("CardTable", () => {
     // Draft A is inspected and corrected, so the preview is fully verified.
     expect(screen.queryByTestId("unverified-flag")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: /Play Hand/ }));
+    expect(screen.queryByTestId("blind-intro")).toBeNull();
 
     const result = screen.getByTestId("blind-result");
     expect(result.textContent).toContain("Blind cleared");
     expect(result.textContent).toContain("828 of 300");
-    const restart = screen.getByRole("button", { name: "Restart Blind" });
+    expect(result.textContent).toContain(
+      "Next: Big Blind: Sponsor Safety Review · target 750"
+    );
+    const next = screen.getByRole("button", { name: "Next Blind" });
+    expect(document.activeElement).toBe(next);
+    fireEvent.click(next);
+    expect(screen.getByTestId("blind-name").textContent).toBe(
+      "Big Blind: Sponsor Safety Review"
+    );
+    expect(screen.getByTestId("round-target").textContent).toBe("750");
+    expect(screen.getByTestId("round-score").textContent?.trim()).toBe("0");
+    expect(screen.getByTestId("cpu-counter").textContent).toBe("10/10");
+    expect(screen.getByTestId("blind-intro").textContent).toContain(
+      "safety physician"
+    );
+    expect(lastAnnouncement()).toBe(
+      "Big Blind: Sponsor Safety Review. Target 750."
+    );
+    await waitFor(() =>
+      expect(document.activeElement).toBe(card("C-T14.3.1-A"))
+    );
+  });
+
+  it("shows the boss debuff on disabled cards and ends the run on a loss", () => {
+    render(<CardTable scenario={DOSE_ESCALATION_SCENARIO} />);
+    expect(screen.getByTestId("boss-modifier").textContent).toContain(
+      "Boss: Safety Set Only"
+    );
+    const disabled = card("C-T14.1.2");
+    expect(disabled.getAttribute("aria-label")).toContain(
+      "disabled by the boss, scores 0 Chips"
+    );
+    expect(within(disabled).getByTestId("debuff-badge").textContent).toBe(
+      "25 → 0 Chips"
+    );
+    expect(
+      within(card("C-T14.3.2.1-B")).queryByTestId("debuff-badge")
+    ).toBeNull();
+
+    // Discard one card at a time until no hand can be played.
+    for (let i = 0; i < 9; i++) {
+      const first = cards()[0];
+      if (!first) break;
+      fireEvent.click(first);
+      fireEvent.click(screen.getByRole("button", { name: /Discard/ }));
+    }
+    const result = screen.getByTestId("blind-result");
+    expect(result.textContent).toContain("Blind failed · run over");
+    const restart = screen.getByRole("button", { name: "Restart run" });
     expect(document.activeElement).toBe(restart);
     fireEvent.click(restart);
     expect(screen.getByTestId("round-score").textContent?.trim()).toBe("0");
-    await waitFor(() => expect(document.activeElement).toBe(card(DRAFT_A)));
+    expect(screen.getByTestId("blind-intro")).toBeTruthy();
+  });
+
+  it("offers Play again once the final Blind of the act is cleared", () => {
+    const quick = {
+      ...DEMOGRAPHICS_SCENARIO,
+      blind: { ...DEMOGRAPHICS_SCENARIO.blind, quota: 1 },
+    };
+    render(<CardTable scenario={quick} />);
+    fireEvent.click(card("C-T14.1.1-C"));
+    fireEvent.click(screen.getByRole("button", { name: /Play Hand/ }));
+    expect(screen.getByTestId("blind-result").textContent).toContain(
+      "Demographics QC Desk complete"
+    );
+    expect(screen.queryByRole("button", { name: "Next Blind" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Play again" }));
+    expect(screen.getByTestId("round-score").textContent?.trim()).toBe("0");
   });
 
   it("uses the Inspect button for the focused card and labels it as reopenable", async () => {

@@ -6,7 +6,13 @@
  * thin adapters over it. Internals under `internal/` are private (ADR 0046).
  */
 export * from "./types";
-export { DEMOGRAPHICS_SCENARIO, SCENARIOS } from "./scenarios";
+export {
+  ACT_I,
+  DEMOGRAPHICS_SCENARIO,
+  DOSE_ESCALATION_SCENARIO,
+  SCENARIOS,
+  SPONSOR_SAFETY_SCENARIO,
+} from "./scenarios";
 export { roundRatio, decimalPlaces } from "./internal/rounding";
 export {
   HAND_BASE_SCORES,
@@ -63,3 +69,12 @@ export {
   type TimelineRunning,
   type TimelineStep,
 } from "./internal/timeline";
+export {
+  createRunState,
+  advanceRun,
+  deriveRunView,
+  type RunAction,
+  type RunPhase,
+  type RunState,
+  type RunView,
+} from "./internal/run";

@@ -12,7 +12,11 @@ import type {
   StagedTable,
   Subject,
 } from "../types";
-import { PopulationTypeSchema, RoundingModeSchema } from "../types";
+import {
+  POPULATION_LABELS,
+  PopulationTypeSchema,
+  RoundingModeSchema,
+} from "../types";
 import { decimalPlaces, roundRatio } from "./rounding";
 
 const NOT_ESTIMABLE = "—";
@@ -25,14 +29,6 @@ const CATEGORY_ORDER: Readonly<Record<QcCategory, number>> = {
   VALUE: 1,
   PRECISION: 2,
   ROUNDING: 3,
-};
-
-const POPULATION_LABELS: Readonly<Record<PopulationType, string>> = {
-  SCREENED: "Screened",
-  ITT: "ITT",
-  SAFETY: "Safety",
-  PER_PROTOCOL: "Per-Protocol",
-  FAS: "FAS",
 };
 
 const MODE_LABELS = {
@@ -125,9 +121,31 @@ function ratioFor(
           subjects.filter((s) => s.age >= statistic.minAge).length * 100,
         denominator: subjects.length,
       };
+    case "AE_SUBJECT_COUNT_PCT":
+      return {
+        numerator:
+          subjects.filter((s) => matchingEvents(statistic, s).length > 0)
+            .length * 100,
+        denominator: subjects.length,
+      };
     case "POPULATION_N":
       return { numerator: subjects.length, denominator: 1 };
   }
+}
+
+type AeStatistic = Extract<RowStatistic, { kind: "AE_SUBJECT_COUNT_PCT" }>;
+
+/** A subject's adverse events that match every filter on the row. */
+function matchingEvents(statistic: AeStatistic, subject: Subject) {
+  return (subject.adverseEvents ?? []).filter(
+    (event) =>
+      (statistic.soc === undefined || event.soc === statistic.soc) &&
+      (statistic.term === undefined || event.term === statistic.term) &&
+      (statistic.serious === undefined || event.serious) &&
+      (statistic.minGrade === undefined || event.grade >= statistic.minGrade) &&
+      (statistic.ledToDiscontinuation === undefined ||
+        event.ledToDiscontinuation)
+  );
 }
 
 /**
@@ -349,12 +367,21 @@ function checkCell(ctx: CellContext, statistic: RowStatistic): QcFinding[] {
     ];
   }
   if (Number(match[1]) !== count) {
+    const events =
+      statistic.kind === "AE_SUBJECT_COUNT_PCT"
+        ? suitSubjects.reduce(
+            (sum, s) => sum + matchingEvents(statistic, s).length,
+            0
+          )
+        : count;
     return [
       finding(
         ctx,
         "VALUE",
         expectedCell,
-        `n=${match[1]} does not match the snapshot, which has ${count} qualifying subjects.`
+        Number(match[1]) === events
+          ? `n=${match[1]} counts events, not subjects. ${events} events belong to ${count} subject${count === 1 ? "" : "s"}, and a subject is counted once however many events they have.`
+          : `n=${match[1]} does not match the snapshot, which has ${count} qualifying subjects.`
       ),
     ];
   }

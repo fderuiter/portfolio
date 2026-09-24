@@ -153,7 +153,7 @@ describe("ScorePlayer on the Card Table", () => {
       "Blind cleared"
     );
     expect(document.activeElement).toBe(
-      screen.getByRole("button", { name: "Restart Blind" })
+      screen.getByRole("button", { name: "Next Blind" })
     );
   });
 
