@@ -84,8 +84,8 @@ runs, repeated pushes while chasing a flaky test):
   full suite a second time on identical code.
 - `merge-gate` is a required-checks summary job: it `needs:` every job above
   and fails deliberately unless each one that is supposed to run for the
-  triggering event actually reported success. See "Required check contract
-  when branch protection becomes available (#732)" below.
+  triggering event actually reported success. See the [required check
+  contract](#required-check-contract-for-branch-protection-732) below.
 - `cross-device-matrix` (the full four-device matrix against the full suite)
   is `workflow_dispatch`-only, for a release or a device-sensitive change
   that specifically warrants it.

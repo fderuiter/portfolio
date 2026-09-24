@@ -32,9 +32,10 @@ Conventional Commit title. GitHub deletes merged head branches.
 The transition is deliberately non-destructive. A one-time reconciliation PR
 must preserve the intended net tree from both divergent histories, pass the
 full quality suite, and merge into `main` without force-pushing either branch.
-After production is verified, GitHub's default branch changes to `main` and
-`dev` is deleted. The force-rebase synchronization workflow is removed before
-the reconciliation so it cannot rewrite either history.
+After production is verified, GitHub's default branch changes to `main`. For
+the one-time Jules consolidation, ADR 0050 defers deleting `dev` to a
+separately reviewed operator task. The force-rebase synchronization workflow
+is removed before the reconciliation so it cannot rewrite either history.
 
 Vercel Git deployments were originally allowlisted in `vercel.json` so only
 `main` deployed automatically. ADR 0038 supersedes that part of this decision:

@@ -139,11 +139,11 @@ after minutes reset, not on guessing further from a starved account.
   immediately; this ADR removes the plan-decision blocker ADR 0037/0038 and
   the 2026-09-12 audit left open. #732 is corrected to reflect this rather
   than presenting it as a cost/upgrade decision still to be made.
-- No further CI runs are possible on this repository until the Actions
-  minutes allowance resets for the current billing cycle, or until the
-  redesign in the follow-up issue reduces per-run cost enough that the
-  remaining allowance covers verification of the changes already
-  queued (#729, #730, #731, and this ADR's own follow-up work).
+- **Historical at the 2026-09-12 private-repository outage:** no further CI
+  runs were possible until the Actions-minutes allowance reset or the
+  follow-up redesign reduced per-run cost. The repository became public on
+  2026-09-23; the 2026-09-24 amendment below records the current public-runner
+  policy and supersedes that temporary outage state (#729, #730, #731).
 - Every future workflow change must state its expected cost impact (jobs ×
   matrix size × expected duration) the same way a database migration states
   its lock behavior — cost is now a reviewed property of CI changes, not an
