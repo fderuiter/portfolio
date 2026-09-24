@@ -9,7 +9,7 @@ Last reconciled: 2026-09-24. Governed by
 ## The Flow
 
 1. Branch from `main` with an allowed prefix (`feat/`, `fix/`, `chore/`,
-   `docs/`, `dx/`, `refactor/`, `perf/`, `test/`), commit with Conventional
+   `docs/`, `dx/`, `refactor/`, `perf/`), commit with Conventional
    Commits, and open a pull request into `main`.
 2. CI (`.github/workflows/ci.yml`) runs on the PR. Merge only when
    **Merge Gate (Required Checks Summary)** is green.
