@@ -156,6 +156,8 @@ branches must follow conventional prefixes:
 - `refactor/*` - Code refactoring without behavior changes
 - `perf/*` - Performance optimizations
 - `chore/*` - Dependencies and repository maintenance
+- `test/*` - Test additions without behavior changes
+- `jules/*` - Reserved for branches opened by the Jules agent
 
 Open pull requests against `main` and squash-merge them using a Conventional
 Commit PR title. Vercel deploys the merged `main` commit to production;

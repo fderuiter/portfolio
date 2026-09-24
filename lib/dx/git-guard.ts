@@ -118,7 +118,7 @@ export function validateCommitMessage(message: string): CommitValidationResult {
 }
 
 /**
- * Validates branch names against team convention: feat/*, fix/*, chore/*, refactor/*, docs/*, perf/*, dx/*, main, master.
+ * Validates branch names against team convention: feat/*, fix/*, chore/*, refactor/*, docs/*, perf/*, dx/*, test/*, dev/*, jules/* (branches opened by the Jules agent), main, master.
  */
 export function validateBranchName(branch: string): {
   valid: boolean;
@@ -137,6 +137,9 @@ export function validateBranchName(branch: string): {
     "docs/",
     "perf/",
     "dx/",
+    "test/",
+    "dev/",
+    "jules/",
   ];
   const hasValidPrefix = validPrefixes.some((p) => cleanBranch.startsWith(p));
 

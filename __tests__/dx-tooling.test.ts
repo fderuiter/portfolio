@@ -173,12 +173,28 @@ describe("Developer Experience (DX) Tooling Suite", () => {
       expect(validateBranchName("perf/optimize-render").valid).toBe(true);
       expect(validateBranchName("dx/commit-wizard").valid).toBe(true);
 
-      expect(validateBranchName("jules/my-feature").valid).toBe(false);
-      expect(validateBranchName("test/my-test-suite").valid).toBe(false);
-
       const invalidBranch = validateBranchName("random_branch_name");
       expect(invalidBranch.valid).toBe(false);
       expect(invalidBranch.error).toContain("Expected prefixes");
+    });
+
+    it("accepts test/, dev/ and Jules agent branches, and still rejects near-misses", () => {
+      expect(validateBranchName("test/crf-autosave").valid).toBe(true);
+      expect(validateBranchName("dev/scratch-spike").valid).toBe(true);
+      expect(
+        validateBranchName(
+          "jules/test-dungeon-tsp-jm1-18c22370-cdca-4c40-9ea9-0770e0597b82"
+        ).valid
+      ).toBe(true);
+      expect(
+        validateBranchName(
+          "jules/feat/public-route-drift-checks-jm1-a48796dc-f2e1-4304-8c10-7d53506719e2"
+        ).valid
+      ).toBe(true);
+
+      expect(validateBranchName("jules-cleanup").valid).toBe(false);
+      expect(validateBranchName("Jules/Uppercase").valid).toBe(false);
+      expect(validateBranchName("jules/Uppercase").valid).toBe(false);
     });
 
     it("passes checkGitHygieneConfig diagnostic check", () => {
