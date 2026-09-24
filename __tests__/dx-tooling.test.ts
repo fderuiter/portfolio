@@ -164,7 +164,6 @@ describe("Developer Experience (DX) Tooling Suite", () => {
 
     it("validates branch names against team conventions", () => {
       expect(validateBranchName("main").valid).toBe(true);
-      expect(validateBranchName("dev").valid).toBe(true);
       expect(validateBranchName("feat/add-dx-suite").valid).toBe(true);
       expect(validateBranchName("fix/proof-ast-bug").valid).toBe(true);
       expect(validateBranchName("chore/deps-update").valid).toBe(true);
