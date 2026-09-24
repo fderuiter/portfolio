@@ -796,6 +796,12 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
         badge: "Footnote",
       },
       {
+        title: "Crisis cards",
+        detail:
+          "Every Blind after the first opens on a crisis: an audit, an amendment, a database migration or an early review. Answer it before you play. Each choice says what it costs, one is always free, and some add a rule for the Blind, such as a hand limit or a surcharge on discards. The run's seed decides the crisis, so the same seed deals the same run.",
+        badge: "Crisis",
+      },
+      {
         title: "The committee reads Safety only",
         detail:
           "The Dose Escalation Committee's boss debuff disables every population except Safety: an ITT output scores 0 Chips there, however clean. Five System Organ Class tables together make a MedDRA Five of a Kind.",

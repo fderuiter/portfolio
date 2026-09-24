@@ -1,5 +1,7 @@
 import type {
   BossBlindModifier,
+  CrisisCard,
+  CrisisChoice,
   FootnoteSeal,
   HandClassification,
   HandEvaluation,
@@ -12,6 +14,7 @@ import type {
   Scenario,
   SnapshotRef,
   StagedTable,
+  PopulationTransition,
   StudyEvent,
   TlfCard,
   CardFace,
@@ -23,6 +26,7 @@ import { compileDraft, compileShell } from "./compile";
 import {
   CPU_COSTS,
   canAfford,
+  costOf,
   cpuReducer,
   type CpuAction,
   type CpuLedger,
@@ -68,7 +72,8 @@ export interface TableEvent {
     | "RECOMPILED"
     | "ALLOCATED"
     | "SEALED"
-    | "SOLD";
+    | "SOLD"
+    | "CRISIS_RESOLVED";
   message: string;
   /** Increments on every event so repeated messages are still announced. */
   sequence: number;
@@ -154,11 +159,23 @@ export interface TableState {
   consumables: Consumable[];
   /** The study budget: the shop's money. */
   budget: number;
+  /** The crisis drawn for this Blind, until the player answers it. */
+  crisis: CrisisCard | null;
+  /** How this Blind's crisis was answered, once it has been. */
+  crisisResolution: { crisisId: string; choiceId: string } | null;
+  /** Modifiers crisis choices imposed on this Blind, besides its boss. */
+  modifiers: BossBlindModifier[];
   /**
-   * How much of `snapshots` and `invalidations` predates this Blind, and the
-   * inventory it started with, so a restart returns to exactly that.
+   * How much of `snapshots` and `invalidations` predates this Blind, the
+   * inventory it started with, and its crisis, so a restart returns to
+   * exactly that.
    */
-  opening: { snapshots: number; invalidations: number; inventory: Inventory };
+  opening: {
+    snapshots: number;
+    invalidations: number;
+    inventory: Inventory;
+    crisis: CrisisCard | null;
+  };
 }
 
 /** Player intents the Card Table reducer accepts. */
@@ -180,6 +197,8 @@ export type TableAction =
   | { type: "APPLY_SEAL"; consumableId: string; cardId: string }
   /** Sells a tray consumable for its sell value. */
   | { type: "SELL_CONSUMABLE"; consumableId: string }
+  /** Answers the Blind's crisis with one of its choices. */
+  | { type: "RESOLVE_CRISIS"; choiceId: string }
   | { type: "RESET" };
 
 /** One card in hand as the table should render it. */
@@ -212,6 +231,19 @@ export interface TableCardView {
   seals: FootnoteSeal[];
   /** How many footnote seals this output takes: its shell's slots. */
   footnoteSlots: number;
+}
+
+/** One crisis choice as the table renders it. */
+export interface CrisisChoiceView {
+  choice: CrisisChoice;
+  /** Why this choice cannot be taken now, or null. */
+  refusal: string | null;
+}
+
+/** The Blind's unanswered crisis. */
+export interface CrisisView {
+  crisis: CrisisCard;
+  choices: CrisisChoiceView[];
 }
 
 /** The open Inspect drawer's content. */
@@ -269,6 +301,16 @@ export interface TableView {
   consumables: Consumable[];
   consumableSlots: number;
   budget: number;
+  /** The crisis to answer before the Blind can be played, if any. */
+  crisis: CrisisView | null;
+  /** Every modifier in force: the boss's, then any a crisis imposed. */
+  modifiers: BossBlindModifier[];
+  /** Hands left under a hand limit, or null when there is none. */
+  handsLeft: number | null;
+  /** What one discard costs, with any penalty. */
+  discardCost: number;
+  /** Treatment-arm values are face down (a DMC firewall). */
+  firewall: boolean;
 }
 
 /** One analysis set a blank shell could be compiled on, previewed before committing. */
@@ -469,34 +511,110 @@ const refuse = (state: TableState, message: string): TableState => ({
 const handName = (handType: HandClassification["handType"]) =>
   HAND_NAMES[handType];
 
-/** Whether the Boss Blind's debuff disables this card. */
-function isDebuffed(scenario: Scenario, card: TlfCard): boolean {
-  const boss = scenario.boss;
-  return (
-    boss?.debuffType === "DISABLE_POPULATION" &&
-    (boss.disabledPopulations ?? []).includes(card.population)
+/** Every modifier in force this Blind: the boss's, then any a crisis imposed. */
+const activeModifiers = (
+  scenario: Scenario,
+  state: TableState
+): BossBlindModifier[] =>
+  scenario.boss ? [scenario.boss, ...state.modifiers] : [...state.modifiers];
+
+/** The modifier that disables this card's population, if any. */
+function disablingModifier(
+  scenario: Scenario,
+  state: TableState,
+  card: TlfCard
+): BossBlindModifier | undefined {
+  return activeModifiers(scenario, state).find(
+    (m) =>
+      m.debuffType === "DISABLE_POPULATION" &&
+      (m.disabledPopulations ?? []).includes(card.population)
   );
 }
 
+/** The tightest hand limit in force, or null. */
+function handLimit(scenario: Scenario, state: TableState): number | null {
+  const limits = activeModifiers(scenario, state)
+    .filter((m) => m.debuffType === "HAND_LIMIT")
+    .map((m) => m.maxHandsAllowed as number);
+  return limits.length > 0 ? Math.min(...limits) : null;
+}
+
+/** The extra CPU every discard costs this Blind. */
+const discardSurcharge = (scenario: Scenario, state: TableState): number =>
+  activeModifiers(scenario, state)
+    .filter((m) => m.debuffType === "DISCARD_PENALTY")
+    .reduce((sum, m) => sum + (m.discardCpuPenalty ?? 0), 0);
+
+/** Whether a DMC firewall turns treatment-arm values face down. */
+const firewallUp = (scenario: Scenario, state: TableState): boolean =>
+  activeModifiers(scenario, state).some(
+    (m) => m.debuffType === "BLIND_FIREWALL"
+  );
+
+/** The alert shown while a crisis waits for an answer. */
+const crisisAlert = (crisis: CrisisCard) =>
+  `${crisis.name}: answer the crisis first.`;
+
+/** A face-down cell under a DMC firewall. */
+export const FIREWALL_CELL = "■";
+
+const ARM_LABELS = new Set(["placebo", "active", "arm", "pbo", "act"]);
+
 /**
- * The Boss Blind's debuff as one explained rule result: a disabled card's
+ * A face with every treatment-arm value turned face down: arm columns of a
+ * table, and the arm column of a listing. Totals stay readable.
+ */
+function firewalled(face: CardFace, draft: StagedTable | undefined): CardFace {
+  const isArm = (label: string, c: number) =>
+    draft
+      ? draft.columns[c]?.arm !== "TOTAL"
+      : ARM_LABELS.has(label.trim().toLowerCase());
+  if (face.kind === "TABLE") {
+    return {
+      ...face,
+      rows: face.rows.map((row) => ({
+        ...row,
+        values: row.values.map((v, c) =>
+          isArm(face.columns[c], c) ? FIREWALL_CELL : v
+        ),
+      })),
+    };
+  }
+  if (face.kind === "LISTING") {
+    return {
+      ...face,
+      rows: face.rows.map((row) =>
+        row.map((v, c) =>
+          ARM_LABELS.has(face.columns[c].trim().toLowerCase())
+            ? FIREWALL_CELL
+            : v
+        )
+      ),
+    };
+  }
+  return face;
+}
+
+/**
+ * A disabling modifier as one explained rule result: a disabled card's
  * Chips, and any subject credit its draft earned, are cancelled. Its +Mult
  * and any zero-score rule still apply.
  */
 function debuffFor(
   scenario: Scenario,
+  state: TableState,
   card: TlfCard,
   results: readonly RuleCheckResult[]
 ): RuleCheckResult | null {
-  if (!isDebuffed(scenario, card)) return null;
-  const boss = scenario.boss as BossBlindModifier;
+  const modifier = disablingModifier(scenario, state, card);
+  if (!modifier) return null;
   const chips = card.chips + results.reduce((sum, r) => sum + r.chipsDelta, 0);
   return {
-    ruleId: boss.id,
+    ruleId: modifier.id,
     passed: false,
     chipsDelta: -chips,
     multDelta: 0,
-    evidence: `${scenario.title} (${boss.name}): ${card.number} is built on the ${POPULATION_LABELS[card.population]} population, so it scores 0 Chips (${chips} cancelled).`,
+    evidence: `${scenario.title} (${modifier.name}): ${card.number} is built on the ${POPULATION_LABELS[card.population]} population, so it scores 0 Chips (${chips} cancelled).`,
   };
 }
 
@@ -680,7 +798,7 @@ function scoreCards(
     ruleResults.push(...results);
     const cancelled =
       staleFor(scenario, state, card, results) ??
-      debuffFor(scenario, card, results);
+      debuffFor(scenario, state, card, results);
     if (cancelled) ruleResults.push(cancelled);
   }
   return evaluateHand({
@@ -768,7 +886,8 @@ export function createTableState(
     snapshots: [scenario.populationSnapshot],
     invalidations: [],
   },
-  inventory: Inventory = EMPTY_INVENTORY
+  inventory: Inventory = EMPTY_INVENTORY,
+  crisis: CrisisCard | null = null
 ): TableState {
   const consumables = [...inventory.consumables];
   for (const seal of scenario.consumables ?? []) {
@@ -801,10 +920,14 @@ export function createTableState(
     seals: {},
     consumables,
     budget: inventory.budget,
+    crisis,
+    crisisResolution: null,
+    modifiers: [],
     opening: {
       snapshots: history.snapshots.length,
       invalidations: history.invalidations.length,
       inventory,
+      crisis,
     },
   });
 }
@@ -820,7 +943,11 @@ export function carriedInventory(state: TableState): Inventory {
 }
 
 /** Removes the selected cards and pays for the action. Does not refill. */
-function spendSelection(state: TableState, action: CpuAction): TableState {
+function spendSelection(
+  state: TableState,
+  action: CpuAction,
+  surcharge = 0
+): TableState {
   const removed = new Set(state.selected);
   const keep = <T>(record: Record<string, T>) =>
     Object.fromEntries(
@@ -828,7 +955,7 @@ function spendSelection(state: TableState, action: CpuAction): TableState {
     );
   return {
     ...state,
-    cpu: cpuReducer(state.cpu, { type: "SPEND", action }),
+    cpu: cpuReducer(state.cpu, { type: "SPEND", action, surcharge }),
     hand: state.hand.filter((id) => !removed.has(id)),
     selected: [],
     inspections: keep(state.inspections),
@@ -854,48 +981,67 @@ function applyStudyEvents(
   let next = state;
   const messages: string[] = [];
   for (const { transition } of due) {
-    const from = currentSnapshot(next);
-    const outcome = applyTransition(from, transition);
-    if (!outcome.ok) continue;
-    next = { ...next, snapshots: [...next.snapshots, outcome.snapshot] };
-    const staleCardIds = next.hand.filter((id) => {
-      const card = cardById(scenario, next, id) as TlfCard;
-      return (
-        outcome.changed.includes(card.population) &&
-        isStale(scenario, next, card)
-      );
-    });
-    next = {
-      ...next,
-      invalidations: [
-        ...next.invalidations,
-        {
-          transitionId: transition.id,
-          subjectId: transition.subjectId,
-          reason: transition.reason,
-          change: transition.change,
-          populations: outcome.changed,
-          from: snapshotRef(from),
-          to: snapshotRef(outcome.snapshot),
-          staleCardIds,
-        },
-      ],
-    };
-    const names = staleCardIds.map((id) =>
-      cardShortName(cardById(scenario, next, id) as TlfCard)
-    );
-    const populations = outcome.changed
-      .map((p) => POPULATION_LABELS[p])
-      .join(", ");
-    messages.push(
-      `${transition.description} ${populations} population now ${outcome.snapshot.id}. ${
-        names.length === 0
-          ? "No output in hand is stale."
-          : `Stale: ${names.join(", ")}.`
-      }`
-    );
+    const applied = transitionTable(scenario, next, transition);
+    if (!applied) continue;
+    next = applied.state;
+    messages.push(applied.message);
   }
   return { state: next, message: messages.join(" ") };
+}
+
+/**
+ * Applies one population transition to the table: a new snapshot version,
+ * and a record of which cards in hand it staled. Null when the transition
+ * changes no membership.
+ */
+function transitionTable(
+  scenario: Scenario,
+  state: TableState,
+  transition: PopulationTransition
+): { state: TableState; message: string } | null {
+  const from = currentSnapshot(state);
+  const outcome = applyTransition(from, transition);
+  if (!outcome.ok) return null;
+  let next: TableState = {
+    ...state,
+    snapshots: [...state.snapshots, outcome.snapshot],
+  };
+  const staleCardIds = next.hand.filter((id) => {
+    const card = cardById(scenario, next, id) as TlfCard;
+    return (
+      outcome.changed.includes(card.population) && isStale(scenario, next, card)
+    );
+  });
+  next = {
+    ...next,
+    invalidations: [
+      ...next.invalidations,
+      {
+        transitionId: transition.id,
+        subjectId: transition.subjectId,
+        reason: transition.reason,
+        change: transition.change,
+        populations: outcome.changed,
+        from: snapshotRef(from),
+        to: snapshotRef(outcome.snapshot),
+        staleCardIds,
+      },
+    ],
+  };
+  const names = staleCardIds.map((id) =>
+    cardShortName(cardById(scenario, next, id) as TlfCard)
+  );
+  const populations = outcome.changed
+    .map((p) => POPULATION_LABELS[p])
+    .join(", ");
+  return {
+    state: next,
+    message: `${transition.description} ${populations} population now ${outcome.snapshot.id}. ${
+      names.length === 0
+        ? "No output in hand is stale."
+        : `Stale: ${names.join(", ")}.`
+    }`,
+  };
 }
 
 function settle(
@@ -908,6 +1054,13 @@ function settle(
       outcome: `${scenario.blind.name} cleared.`,
     };
   }
+  const limit = handLimit(scenario, state);
+  if (limit !== null && state.handsPlayed >= limit) {
+    return {
+      state: { ...state, status: "FAILED" },
+      outcome: `${scenario.blind.name} failed: the ${limit}-hand limit is used up.`,
+    };
+  }
   if (!canAfford(state.cpu, "PLAY_HAND") || state.hand.length === 0) {
     return {
       state: { ...state, status: "FAILED" },
@@ -915,6 +1068,103 @@ function settle(
     };
   }
   return { state, outcome: "" };
+}
+
+/** Actions still allowed while a crisis waits for an answer: none play the Blind. */
+const CRISIS_SAFE_ACTIONS = new Set<TableAction["type"]>([
+  "TOGGLE_SELECT",
+  "MOVE_CARD",
+  "SELL_CONSUMABLE",
+  "CLOSE_INSPECT",
+]);
+
+/** The alert shown when Inspect meets a DMC firewall. */
+export const FIREWALL_ALERT =
+  "The DMC firewall hides treatment assignments: no output can be inspected this Blind.";
+
+/** Why a crisis choice cannot be taken now, or null. */
+function choiceRefusal(state: TableState, choice: CrisisChoice): string | null {
+  const { cpu = 0, budget = 0, spendSeal } = choice.effect;
+  if (cpu < 0 && state.cpu.available < -cpu) {
+    return `Needs ${-cpu} CPU; ${state.cpu.available} left.`;
+  }
+  if (budget < 0 && state.budget < -budget) {
+    return `Needs $${-budget}k study budget; $${state.budget}k left.`;
+  }
+  if (spendSeal && state.consumables.length === 0) {
+    return "Needs a footnote seal in the tray.";
+  }
+  return null;
+}
+
+/**
+ * Answers the Blind's crisis. Every effect is deterministic: CPU and budget
+ * change, a seal is granted or spent, a transition moves the snapshot (and
+ * stales the matching outputs in hand), and a modifier joins the Blind's.
+ */
+function resolveCrisis(
+  scenario: Scenario,
+  state: TableState,
+  choiceId: string
+): TableState {
+  const crisis = state.crisis;
+  if (!crisis) return refuse(state, "There is no crisis to answer.");
+  const choice = crisis.choices.find((c) => c.id === choiceId);
+  if (!choice) {
+    return refuse(state, `${crisis.name} has no such choice.`);
+  }
+  const why = choiceRefusal(state, choice);
+  if (why) return refuse(state, `${choice.label}: ${why}`);
+  const { effect } = choice;
+  const notes: string[] = [];
+  let next: TableState = {
+    ...state,
+    crisis: null,
+    crisisResolution: { crisisId: crisis.id, choiceId: choice.id },
+  };
+  if (effect.cpu) {
+    next = {
+      ...next,
+      cpu: cpuReducer(next.cpu, { type: "ADJUST", delta: effect.cpu }),
+    };
+  }
+  if (effect.budget) next = { ...next, budget: next.budget + effect.budget };
+  if (effect.spendSeal) {
+    const [spent, ...rest] = next.consumables;
+    next = { ...next, consumables: rest };
+    notes.push(`${spent.seal.name} spent.`);
+  }
+  if (effect.grantSeal) {
+    const id = `${effect.grantSeal.id}@${crisis.id}`;
+    if (next.consumables.length < CONSUMABLE_SLOTS) {
+      next = {
+        ...next,
+        consumables: [...next.consumables, { id, seal: effect.grantSeal }],
+      };
+      notes.push(`${effect.grantSeal.name} added to the tray.`);
+    } else {
+      notes.push(`The tray is full, so ${effect.grantSeal.name} is lost.`);
+    }
+  }
+  if (effect.modifier) {
+    next = { ...next, modifiers: [...next.modifiers, effect.modifier] };
+    notes.push(`${effect.modifier.name}: ${effect.modifier.description}`);
+  }
+  if (effect.transition) {
+    const applied = transitionTable(scenario, next, effect.transition);
+    if (applied) {
+      next = applied.state;
+      notes.push(applied.message);
+    }
+  }
+  return {
+    ...next,
+    lastEvent: nextEvent(
+      state,
+      "CRISIS_RESOLVED",
+      `${crisis.name}: ${choice.label}. ${choice.consequence}${notes.length ? ` ${notes.join(" ")}` : ""}`
+    ),
+  };
 }
 
 /**
@@ -938,13 +1188,20 @@ export function advanceTable(
             state.opening.invalidations
           ),
         },
-        state.opening.inventory
+        state.opening.inventory,
+        state.opening.crisis
       ),
       lastEvent: nextEvent(state, "RESET", `${scenario.blind.name} restarted.`),
     };
   }
   if (state.status !== "REVIEWING") {
     return refuse(state, "The Blind is over. Restart to play again.");
+  }
+  if (action.type === "RESOLVE_CRISIS") {
+    return resolveCrisis(scenario, state, action.choiceId);
+  }
+  if (state.crisis && !CRISIS_SAFE_ACTIONS.has(action.type)) {
+    return refuse(state, crisisAlert(state.crisis));
   }
 
   switch (action.type) {
@@ -1089,15 +1346,23 @@ export function advanceTable(
       if (state.selected.length === 0) {
         return refuse(state, "Select at least one card to discard.");
       }
-      if (!canAfford(state.cpu, "DISCARD")) {
-        return refuse(state, `Discard needs ${CPU_COSTS.DISCARD} CPU.`);
+      const surcharge = discardSurcharge(scenario, state);
+      if (!canAfford(state.cpu, "DISCARD", surcharge)) {
+        return refuse(
+          state,
+          `Discard needs ${costOf("DISCARD", surcharge)} CPU.`
+        );
       }
       const count = state.selected.length;
       const { state: settled, outcome } = settle(
         scenario,
         refill(
           scenario,
-          spendSelection({ ...state, discards: state.discards + 1 }, "DISCARD")
+          spendSelection(
+            { ...state, discards: state.discards + 1 },
+            "DISCARD",
+            surcharge
+          )
         )
       );
       return {
@@ -1114,6 +1379,9 @@ export function advanceTable(
       const card = cardById(scenario, state, action.cardId);
       if (!card || !state.hand.includes(card.id)) {
         return refuse(state, "That card is not in your hand.");
+      }
+      if (firewallUp(scenario, state)) {
+        return refuse(state, FIREWALL_ALERT);
       }
       if (isBlank(state, card)) {
         return refuse(
@@ -1342,6 +1610,7 @@ export function deriveTableView(
   state: TableState
 ): TableView {
   const selected = new Set(state.selected);
+  const firewall = firewallUp(scenario, state);
   const hand = state.hand.map((id): TableCardView => {
     const card = cardById(scenario, state, id) as TlfCard;
     const draft = draftFor(scenario, state, card);
@@ -1365,16 +1634,22 @@ export function deriveTableView(
     if (review && review.reviewedCells === review.totalCells && !openRedlines) {
       stamps.push("QC_PASS");
     }
+    const face = faceFor(card, draft, review, shell);
     return {
-      card,
+      // Under a firewall the arm values are absent from the view itself,
+      // including the card's own authored face.
+      card:
+        firewall && card.face
+          ? { ...card, face: firewalled(card.face, undefined) }
+          : card,
       selected: selected.has(id),
       inspectable: draft !== undefined,
       inspected: inspection !== undefined,
       unverified: draft !== undefined && inspection === undefined,
       openRedlines,
-      face: faceFor(card, draft, review, shell),
+      face: firewall ? firewalled(face, draft) : face,
       stamps,
-      debuffed: isDebuffed(scenario, card),
+      debuffed: disablingModifier(scenario, state, card) !== undefined,
       stale,
       provenance: provenanceOf(state, card),
       blank: isBlank(state, card),
@@ -1450,7 +1725,13 @@ export function deriveTableView(
     };
   }
 
-  const reviewing = state.status === "REVIEWING";
+  const reviewing = state.status === "REVIEWING" && state.crisis === null;
+  const limit = handLimit(scenario, state);
+  const handsLeft =
+    limit === null ? null : Math.max(0, limit - state.handsPlayed);
+  const surcharge = discardSurcharge(scenario, state);
+  const discardCost = costOf("DISCARD", surcharge);
+  const cpuHands = Math.floor(state.cpu.available / CPU_COSTS.PLAY_HAND);
   const lastTimeline = state.lastPlay
     ? scoreTimeline(state.lastPlay.evaluation, {
         roundScoreBefore: state.roundScore - state.lastPlay.evaluation.score,
@@ -1481,8 +1762,9 @@ export function deriveTableView(
         faceDown: true,
       })
     ),
-    handsAffordable: Math.floor(state.cpu.available / CPU_COSTS.PLAY_HAND),
-    discardsAffordable: Math.floor(state.cpu.available / CPU_COSTS.DISCARD),
+    handsAffordable:
+      handsLeft === null ? cpuHands : Math.min(cpuHands, handsLeft),
+    discardsAffordable: Math.floor(state.cpu.available / discardCost),
     canPlay:
       reviewing &&
       state.selected.length > 0 &&
@@ -1490,8 +1772,10 @@ export function deriveTableView(
       emptySelected.length === 0 &&
       canAfford(state.cpu, "PLAY_HAND"),
     canDiscard:
-      reviewing && state.selected.length > 0 && canAfford(state.cpu, "DISCARD"),
-    canInspect: reviewing && canAfford(state.cpu, "INSPECT"),
+      reviewing &&
+      state.selected.length > 0 &&
+      canAfford(state.cpu, "DISCARD", surcharge),
+    canInspect: reviewing && !firewall && canAfford(state.cpu, "INSPECT"),
     inspection,
     lastTimeline,
     snapshot: snapshotRef(currentSnapshot(state)),
@@ -1509,6 +1793,19 @@ export function deriveTableView(
     consumables: state.consumables,
     consumableSlots: CONSUMABLE_SLOTS,
     budget: state.budget,
+    crisis: state.crisis
+      ? {
+          crisis: state.crisis,
+          choices: state.crisis.choices.map((choice) => ({
+            choice,
+            refusal: choiceRefusal(state, choice),
+          })),
+        }
+      : null,
+    modifiers: activeModifiers(scenario, state),
+    handsLeft,
+    discardCost,
+    firewall,
   };
 }
 

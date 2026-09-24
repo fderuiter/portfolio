@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   ACT_I,
+  SCENARIOS,
   CONSUMABLE_SLOTS,
   CPU_COSTS,
   DEMOGRAPHICS_SCENARIO,
@@ -138,7 +139,7 @@ describe("T&E-04 contracts", () => {
   });
 
   it("gives every Act I Blind a valid scenario", () => {
-    for (const blind of ACT_I.blinds) {
+    for (const blind of Object.values(SCENARIOS)) {
       expect(ScenarioSchema.safeParse(blind).success).toBe(true);
     }
   });
@@ -213,9 +214,11 @@ describe("CPU replenishment and costs", () => {
 
   it("starts every Blind at full CPU, whatever the last one spent", () => {
     expect(createTableState(SMALL).cpu).toEqual({ available: 10, spent: 0 });
-    let r: RunState = createRunState(ACT_I);
+    // No crisis deck: these flows test the carry alone.
+    const act = { ...ACT_I, crisisDeck: undefined };
+    let r: RunState = createRunState(act);
     const go = (...actions: RunAction[]) => {
-      r = actions.reduce((s, a) => advanceRun(ACT_I, s, a), r);
+      r = actions.reduce((s, a) => advanceRun(act, s, a), r);
     };
     go(
       ...(select(DRAFT_C, DM_LISTING) as RunAction[]),
@@ -806,9 +809,11 @@ describe("Footnote seals", () => {
   });
 
   it("carries the tray and budget to the next Blind and clears them on restart", () => {
-    let r: RunState = createRunState(ACT_I);
+    // No crisis deck: these flows test the carry alone.
+    const act = { ...ACT_I, crisisDeck: undefined };
+    let r: RunState = createRunState(act);
     const go = (...actions: RunAction[]) => {
-      r = actions.reduce((s, a) => advanceRun(ACT_I, s, a), r);
+      r = actions.reduce((s, a) => advanceRun(act, s, a), r);
     };
     go(
       { type: "SELL_CONSUMABLE", consumableId: ROUNDING },

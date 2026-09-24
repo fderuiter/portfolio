@@ -20,6 +20,12 @@ Re-exports [ACT_I](scenarios/variables/ACT_I.md)
 
 ***
 
+### ACT\_I\_CRISES
+
+Re-exports [ACT_I_CRISES](scenarios/variables/ACT_I_CRISES.md)
+
+***
+
 ### ActSchema
 
 Re-exports [ActSchema](types/variables/ActSchema.md)
@@ -242,6 +248,12 @@ Re-exports [CONSUMABLE_SLOTS](internal/table/variables/CONSUMABLE_SLOTS.md)
 
 ***
 
+### costOf
+
+Re-exports [costOf](internal/cpu/functions/costOf.md)
+
+***
+
 ### CPU\_COSTS
 
 Re-exports [CPU_COSTS](internal/cpu/variables/CPU_COSTS.md)
@@ -296,6 +308,54 @@ Re-exports [createTableState](internal/table/functions/createTableState.md)
 
 ***
 
+### CrisisCard
+
+Re-exports [CrisisCard](types/type-aliases/CrisisCard.md)
+
+***
+
+### CrisisCardSchema
+
+Re-exports [CrisisCardSchema](types/variables/CrisisCardSchema.md)
+
+***
+
+### CrisisChoice
+
+Re-exports [CrisisChoice](types/type-aliases/CrisisChoice.md)
+
+***
+
+### CrisisChoiceSchema
+
+Re-exports [CrisisChoiceSchema](types/variables/CrisisChoiceSchema.md)
+
+***
+
+### CrisisChoiceView
+
+Re-exports [CrisisChoiceView](internal/table/interfaces/CrisisChoiceView.md)
+
+***
+
+### CrisisEffect
+
+Re-exports [CrisisEffect](types/type-aliases/CrisisEffect.md)
+
+***
+
+### CrisisEffectSchema
+
+Re-exports [CrisisEffectSchema](types/variables/CrisisEffectSchema.md)
+
+***
+
+### CrisisView
+
+Re-exports [CrisisView](internal/table/interfaces/CrisisView.md)
+
+***
+
 ### CsrStage
 
 Re-exports [CsrStage](types/type-aliases/CsrStage.md)
@@ -311,6 +371,12 @@ Re-exports [CsrStageSchema](types/variables/CsrStageSchema.md)
 ### decimalPlaces
 
 Re-exports [decimalPlaces](internal/rounding/functions/decimalPlaces.md)
+
+***
+
+### DEFAULT\_SEED
+
+Re-exports [DEFAULT_SEED](internal/run/variables/DEFAULT_SEED.md)
 
 ***
 
@@ -386,6 +452,12 @@ Re-exports [DOSE_ESCALATION_SCENARIO](scenarios/variables/DOSE_ESCALATION_SCENAR
 
 ***
 
+### drawInt
+
+Re-exports [drawInt](internal/rng/functions/drawInt.md)
+
+***
+
 ### EMPTY\_SHELL\_ALERT
 
 Re-exports [EMPTY_SHELL_ALERT](internal/table/variables/EMPTY_SHELL_ALERT.md)
@@ -413,6 +485,18 @@ Re-exports [FigurePlot](types/type-aliases/FigurePlot.md)
 ### FigurePlotSchema
 
 Re-exports [FigurePlotSchema](types/variables/FigurePlotSchema.md)
+
+***
+
+### FIREWALL\_ALERT
+
+Re-exports [FIREWALL_ALERT](internal/table/variables/FIREWALL_ALERT.md)
+
+***
+
+### FIREWALL\_CELL
+
+Re-exports [FIREWALL_CELL](internal/table/variables/FIREWALL_CELL.md)
 
 ***
 
@@ -515,6 +599,12 @@ Re-exports [InspectionView](internal/inspection/interfaces/InspectionView.md)
 ### Inventory
 
 Re-exports [Inventory](internal/table/interfaces/Inventory.md)
+
+***
+
+### isFreeCrisisChoice
+
+Re-exports [isFreeCrisisChoice](types/functions/isFreeCrisisChoice.md)
 
 ***
 
@@ -707,6 +797,18 @@ Re-exports [ruleResultsFor](internal/scoring/functions/ruleResultsFor.md)
 ### RunAction
 
 Re-exports [RunAction](internal/run/type-aliases/RunAction.md)
+
+***
+
+### runBlinds
+
+Re-exports [runBlinds](internal/run/functions/runBlinds.md)
+
+***
+
+### RunDraw
+
+Re-exports [RunDraw](internal/run/interfaces/RunDraw.md)
 
 ***
 
@@ -1019,6 +1121,12 @@ Re-exports [TransitionReason](types/type-aliases/TransitionReason.md)
 ### TransitionReasonSchema
 
 Re-exports [TransitionReasonSchema](types/variables/TransitionReasonSchema.md)
+
+***
+
+### uniformAt
+
+Re-exports [uniformAt](internal/rng/functions/uniformAt.md)
 
 ***
 

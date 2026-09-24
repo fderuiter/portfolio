@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   ACT_I,
+  SCENARIOS,
   DEMOGRAPHICS_SCENARIO,
   DOSE_ESCALATION_SCENARIO,
   PopulationTransitionSchema,
@@ -188,7 +189,7 @@ describe("applyTransition", () => {
 
 describe("compileDraft", () => {
   it("reproduces every authored draft exactly on its own snapshot", () => {
-    for (const scenario of ACT_I.blinds) {
+    for (const scenario of Object.values(SCENARIOS)) {
       for (const draft of scenario.drawPile) {
         expect(compileDraft(draft, V1, V1, scenario.rulebook).cells).toEqual(
           draft.cells
@@ -679,12 +680,15 @@ describe("a stale card cannot make a Population Flush", () => {
 
 describe("the run carries the study's snapshots between Blinds", () => {
   it("deals the committee against v2 and restarts the run on v1", () => {
+    const easy = <T extends Scenario>(b: T): T => ({
+      ...b,
+      blind: { ...b.blind, quota: 1 },
+    });
     const quick = {
       ...ACT_I,
-      blinds: ACT_I.blinds.map((b) => ({
-        ...b,
-        blind: { ...b.blind, quota: 1 },
-      })),
+      crisisDeck: undefined,
+      blinds: ACT_I.blinds.map(easy),
+      bossPool: (ACT_I.bossPool ?? []).map(easy),
     };
     const go = (run: ReturnType<typeof createRunState>, ...a: RunAction[]) =>
       a.reduce((r, action) => advanceRun(quick, r, action), run);
@@ -711,7 +715,7 @@ describe("the run carries the study's snapshots between Blinds", () => {
     expect(nervous.cells[0]).toEqual(["5", "6", "11"]);
 
     // The Blind's own RESET keeps the history it opened with.
-    const reset = advanceTable(quick.blinds[2], run.table, { type: "RESET" });
+    const reset = advanceTable(quick.bossPool[0], run.table, { type: "RESET" });
     expect(reset.snapshots).toHaveLength(2);
 
     run = go(run, { type: "RESTART_RUN" });

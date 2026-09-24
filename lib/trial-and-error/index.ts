@@ -8,6 +8,7 @@
 export * from "./types";
 export {
   ACT_I,
+  ACT_I_CRISES,
   DEMOGRAPHICS_SCENARIO,
   DOSE_ESCALATION_SCENARIO,
   SCENARIOS,
@@ -29,6 +30,7 @@ export {
 export {
   CPU_COSTS,
   canAfford,
+  costOf,
   cpuReducer,
   type CpuAction,
   type CpuEvent,
@@ -69,8 +71,12 @@ export {
   carriedInventory,
   previewAllocation,
   studyHistory,
+  FIREWALL_ALERT,
+  FIREWALL_CELL,
   type AllocationOption,
   type Consumable,
+  type CrisisChoiceView,
+  type CrisisView,
   type Inventory,
   type StudyHistory,
 } from "./internal/table";
@@ -83,6 +89,7 @@ export {
   type TransitionOutcome,
 } from "./internal/snapshots";
 export { compileDraft, compileShell } from "./internal/compile";
+export { drawInt, uniformAt } from "./internal/rng";
 export {
   scoreTimeline,
   type TimelineContext,
@@ -93,7 +100,10 @@ export {
   createRunState,
   advanceRun,
   deriveRunView,
+  runBlinds,
+  DEFAULT_SEED,
   type RunAction,
+  type RunDraw,
   type RunPhase,
   type RunState,
   type RunView,

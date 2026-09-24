@@ -22,4 +22,5 @@
 ## Functions
 
 - [canAfford](functions/canAfford.md)
+- [costOf](functions/costOf.md)
 - [cpuReducer](functions/cpuReducer.md)

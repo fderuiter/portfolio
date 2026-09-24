@@ -16,8 +16,8 @@ import {
   HAND_NAMES,
   STALE_ALERT,
   advanceRun,
-  canAfford,
   cardShortName,
+  costOf,
   createRunState,
   deriveRunView,
   previewAllocation,
@@ -34,6 +34,7 @@ import { useAnnouncer } from "@/hooks/useAnnouncer";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { FieldManualButton } from "@/components/FieldManualButton";
 import { QcDesk } from "@/components/trial-and-error/QcDesk";
+import { CrisisPanel } from "@/components/trial-and-error/CrisisPanel";
 import { CardBack } from "@/components/trial-and-error/cards/CardBack";
 import { CardDetail } from "@/components/trial-and-error/cards/CardDetail";
 import { POPULATION_LABEL } from "@/components/trial-and-error/cards/CardFace";
@@ -63,6 +64,31 @@ interface CardTableProps {
   act?: Act;
   /** Plays a single Blind instead of an act. */
   scenario?: Scenario;
+  /**
+   * The run seed. Without it the table replays the page's `?seed=`
+   * parameter, or starts a fresh random seed.
+   */
+  seed?: string;
+}
+
+const SEED_PATTERN = /^[A-Za-z0-9-]{1,32}$/;
+
+/** A fresh random run seed, drawn in the browser (the domain never draws one). */
+function freshSeed(): string {
+  const bytes = new Uint32Array(2);
+  globalThis.crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => b.toString(36)).join("-");
+}
+
+/** The page's `?seed=` parameter when it is a valid seed, else a fresh one. */
+function initialSeed(): string {
+  try {
+    const param = new URLSearchParams(window.location.search).get("seed");
+    if (param && SEED_PATTERN.test(param)) return param;
+  } catch {
+    // No location (a test harness): fall through to a fresh seed.
+  }
+  return freshSeed();
 }
 
 type PendingFocus =
@@ -86,6 +112,10 @@ function sealSummary({ seal }: Consumable): string {
       return "Waiver";
   }
 }
+
+/** An action's CPU cost this Blind: a discard may carry a modifier's penalty. */
+const costFor = (action: CpuAction, discardCost: number): number =>
+  action === "DISCARD" ? discardCost : costOf(action);
 
 const COST_NAMES: Record<CpuAction, string> = {
   PLAY_HAND: "Play Hand",
@@ -130,7 +160,11 @@ function cardLabel(view: TableCardView): string {
  * derived view, dispatches intents, and never computes a score. It plays an
  * act's Blinds in order (T&E-02).
  */
-export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
+export function CardTable({
+  act: actProp,
+  scenario: single,
+  seed,
+}: CardTableProps) {
   const act = useMemo<Act>(
     () =>
       actProp ??
@@ -142,7 +176,7 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
   const [run, dispatch] = useReducer(
     (r: RunState, a: RunAction) => advanceRun(act, r, a),
     act,
-    createRunState
+    (a: Act) => createRunState(a, seed ?? initialSeed())
   );
   const runView = deriveRunView(act, run);
   const scenario = runView.blind;
@@ -208,6 +242,7 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
 
   const cardRefs = useRef(new Map<string, HTMLButtonElement>());
   const allocateRef = useRef<HTMLButtonElement>(null);
+  const crisisRef = useRef<HTMLButtonElement>(null);
   const restartRef = useRef<HTMLButtonElement>(null);
   const skipRef = useRef<HTMLButtonElement>(null);
   const deskFocusRef = useRef<HTMLElement | null>(null);
@@ -249,6 +284,7 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
         ALLOCATED: ["cardFlip"],
         SEALED: ["multThunk"],
         SOLD: ["sell"],
+        CRISIS_RESOLVED: ["cardFlip"],
       };
       cues[kind]?.forEach((cue) => sound.play(cue));
       if (kind === "PLAYED" || kind === "DISCARDED") {
@@ -276,12 +312,23 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
     const target = pendingFocus.current;
     if (!target) return;
     pendingFocus.current = null;
+    // A crisis must be answered first, so focus goes to its first choice.
+    if (state.crisis) {
+      crisisRef.current?.focus();
+      return;
+    }
     const cardId =
       target.kind === "card"
         ? target.cardId
         : state.hand[Math.min(target.index, state.hand.length - 1)];
     if (cardId) cardRefs.current.get(cardId)?.focus();
-  }, [state.lastEvent?.sequence, state.status, state.hand, playing]);
+  }, [
+    state.lastEvent?.sequence,
+    state.status,
+    state.hand,
+    state.crisis,
+    playing,
+  ]);
 
   const play = () =>
     send({ type: "PLAY_HAND" }, { kind: "hand", index: activeIndex });
@@ -466,10 +513,13 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
       ["RECOMPILE", focusedCard?.stale],
     ] as const
   )
-    .filter(([action, wanted]) => wanted && !canAfford(state.cpu, action))
+    .filter(
+      ([action, wanted]) =>
+        wanted && state.cpu.available < costFor(action, view.discardCost)
+    )
     .map(
       ([action]) =>
-        `${COST_NAMES[action]} needs ${CPU_COSTS[action]} CPU; ${state.cpu.available} left.`
+        `${COST_NAMES[action]} needs ${costFor(action, view.discardCost)} CPU; ${state.cpu.available} left.`
     );
   const costDescribedBy = costNotes.length > 0 ? "cpu-note" : undefined;
 
@@ -545,17 +595,27 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
           >
             {scenario.blind.name}
           </p>
-          {scenario.boss && (
-            <p
-              className="mt-2 border border-rose-400/60 p-2 text-rose-200 break-words"
-              data-testid="boss-modifier"
-            >
-              <span className="block font-bold uppercase tracking-wider">
-                Boss: {scenario.boss.name}
-              </span>
-              {scenario.boss.description}
-            </p>
-          )}
+          <p className="mt-1 text-[10px] text-zinc-400 break-words">
+            Seed{" "}
+            <span className="text-zinc-300" data-testid="run-seed">
+              {runView.seed}
+            </span>
+          </p>
+          {view.modifiers.map((modifier) => {
+            const isBoss = modifier.id === scenario.boss?.id;
+            return (
+              <p
+                key={modifier.id}
+                className={`mt-2 border p-2 break-words ${isBoss ? "border-rose-400/60 text-rose-200" : "border-amber-400/60 text-amber-200"}`}
+                data-testid={isBoss ? "boss-modifier" : "blind-modifier"}
+              >
+                <span className="block font-bold uppercase tracking-wider">
+                  {isBoss ? "Boss" : "Crisis"}: {modifier.name}
+                </span>
+                {modifier.description}
+              </p>
+            );
+          })}
           {runView.showIntro && (
             <p
               className="mt-2 border border-zinc-700 p-2 text-zinc-300 break-words"
@@ -589,6 +649,14 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
             <dd className="text-right" data-testid="hands-affordable">
               {view.handsAffordable}
             </dd>
+            {view.handsLeft !== null && (
+              <>
+                <dt className="text-zinc-400">Hand limit</dt>
+                <dd className="text-right" data-testid="hand-limit">
+                  {view.handsLeft} left
+                </dd>
+              </>
+            )}
             <dt className="text-zinc-400">Discards</dt>
             <dd className="text-right">{view.discardsAffordable}</dd>
             <dt className="text-zinc-400">Deck</dt>
@@ -833,6 +901,21 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
 
           {state.status === "REVIEWING" || playing ? (
             <div inert={playing}>
+              {view.crisis && (
+                <CrisisPanel
+                  key={view.crisis.crisis.id}
+                  view={view.crisis}
+                  animate={animateCards}
+                  loud={loudEffectsEnabled}
+                  firstChoiceRef={crisisRef}
+                  onChoose={(choiceId) =>
+                    send(
+                      { type: "RESOLVE_CRISIS", choiceId },
+                      { kind: "hand", index: activeIndex }
+                    )
+                  }
+                />
+              )}
               <div className="mt-3 flex items-end justify-between gap-2 text-[10px] uppercase tracking-wider text-zinc-400">
                 <div
                   className="flex items-center gap-2"
@@ -913,7 +996,7 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
                   aria-describedby={costDescribedBy}
                   className={`${BUTTON_BASE} border-slate-400 text-slate-300 hover:bg-slate-400/10`}
                 >
-                  Discard · {CPU_COSTS.DISCARD} CPU [D]
+                  Discard · {view.discardCost} CPU [D]
                 </button>
                 <button
                   type="button"
@@ -1062,7 +1145,10 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
                   type="button"
                   onClick={() => {
                     setFocusIndex(0);
-                    send({ type: "RESTART_RUN" }, { kind: "hand", index: 0 });
+                    send(
+                      { type: "RESTART_RUN", seed: freshSeed() },
+                      { kind: "hand", index: 0 }
+                    );
                   }}
                   className={`${BUTTON_BASE} mt-4 border-amber-500 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20`}
                 >

@@ -6,9 +6,9 @@
 
 # Function: canAfford()
 
-> **canAfford**(`ledger`, `action`): `boolean`
+> **canAfford**(`ledger`, `action`, `surcharge?`): `boolean`
 
-Whether the ledger can pay for an action.
+Whether the ledger can pay for an action and its surcharge.
 
 ## Parameters
 
@@ -19,6 +19,10 @@ Whether the ledger can pay for an action.
 ### action
 
 `"PLAY_HAND"` \| `"DISCARD"` \| `"INSPECT"` \| `"RECOMPILE"`
+
+### surcharge?
+
+`number` = `0`
 
 ## Returns
 

@@ -18,6 +18,14 @@ Derives everything a run renders. Pure; safe to call on every render.
 
 `object`[] = `...`
 
+#### bossPool?
+
+`object`[] = `...`
+
+#### crisisDeck?
+
+`object`[] = `...`
+
 #### id
 
 `string` = `identifier`

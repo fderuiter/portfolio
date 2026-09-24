@@ -20,6 +20,9 @@
 - [CardType](type-aliases/CardType.md)
 - [CellCoordinates](type-aliases/CellCoordinates.md)
 - [ColumnArm](type-aliases/ColumnArm.md)
+- [CrisisCard](type-aliases/CrisisCard.md)
+- [CrisisChoice](type-aliases/CrisisChoice.md)
+- [CrisisEffect](type-aliases/CrisisEffect.md)
 - [CsrStage](type-aliases/CsrStage.md)
 - [FigurePlot](type-aliases/FigurePlot.md)
 - [FootnoteSeal](type-aliases/FootnoteSeal.md)
@@ -70,6 +73,9 @@
 - [CardTypeSchema](variables/CardTypeSchema.md)
 - [CellCoordinatesSchema](variables/CellCoordinatesSchema.md)
 - [ColumnArmSchema](variables/ColumnArmSchema.md)
+- [CrisisCardSchema](variables/CrisisCardSchema.md)
+- [CrisisChoiceSchema](variables/CrisisChoiceSchema.md)
+- [CrisisEffectSchema](variables/CrisisEffectSchema.md)
 - [CsrStageSchema](variables/CsrStageSchema.md)
 - [FACE\_KIND\_BY\_CARD\_TYPE](variables/FACE_KIND_BY_CARD_TYPE.md)
 - [FigurePlotSchema](variables/FigurePlotSchema.md)
@@ -108,3 +114,7 @@
 - [TableShellSpecSchema](variables/TableShellSpecSchema.md)
 - [TlfCardSchema](variables/TlfCardSchema.md)
 - [TransitionReasonSchema](variables/TransitionReasonSchema.md)
+
+## Functions
+
+- [isFreeCrisisChoice](functions/isFreeCrisisChoice.md)

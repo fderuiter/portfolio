@@ -60,9 +60,25 @@ The consumable tray.
 
 ***
 
+### crisis
+
+> **crisis**: [`CrisisView`](CrisisView.md) \| `null`
+
+The crisis to answer before the Blind can be played, if any.
+
+***
+
 ### deckRemaining
 
 > **deckRemaining**: `number`
+
+***
+
+### discardCost
+
+> **discardCost**: `number`
+
+What one discard costs, with any penalty.
 
 ***
 
@@ -96,6 +112,14 @@ Selected blank shells with no analysis set allocated, in selection order.
 
 ***
 
+### firewall
+
+> **firewall**: `boolean`
+
+Treatment-arm values are face down (a DMC firewall).
+
+***
+
 ### flushBrokenBy
 
 > **flushBrokenBy**: `string`[]
@@ -114,6 +138,14 @@ without them it would be one. Empty otherwise.
 ### handsAffordable
 
 > **handsAffordable**: `number`
+
+***
+
+### handsLeft
+
+> **handsLeft**: `number` \| `null`
+
+Hands left under a hand limit, or null when there is none.
 
 ***
 
@@ -136,6 +168,42 @@ Every population transition so far this study, oldest first.
 > **lastTimeline**: [`TimelineStep`](../../timeline/type-aliases/TimelineStep.md)[] \| `null`
 
 The last played hand as an ordered scoring timeline, for playback.
+
+***
+
+### modifiers
+
+> **modifiers**: `object`[]
+
+Every modifier in force: the boss's, then any a crisis imposed.
+
+#### debuffType
+
+> **debuffType**: `"DISABLE_POPULATION"` \| `"HAND_LIMIT"` \| `"DISCARD_PENALTY"` \| `"BLIND_FIREWALL"` = `BossDebuffTypeSchema`
+
+#### description
+
+> **description**: `string`
+
+#### disabledPopulations?
+
+> `optional` **disabledPopulations?**: (`"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`)[]
+
+#### discardCpuPenalty?
+
+> `optional` **discardCpuPenalty?**: `number`
+
+#### id
+
+> **id**: `string` = `identifier`
+
+#### maxHandsAllowed?
+
+> `optional` **maxHandsAllowed?**: `number`
+
+#### name
+
+> **name**: `string`
 
 ***
 

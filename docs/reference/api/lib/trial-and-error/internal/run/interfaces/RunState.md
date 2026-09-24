@@ -6,8 +6,9 @@
 
 # Interface: RunState
 
-Serializable run state: which Blind of the act is being played, and that
-Blind's Card Table. Contains no derived or browser data.
+Serializable run state: the seed and draw log that make the run
+replayable, which Blind of the act is being played, and that Blind's Card
+Table. Contains no derived or browser data.
 
 ## Properties
 
@@ -21,7 +22,39 @@ Blind's Card Table. Contains no derived or browser data.
 
 > **blindIndex**: `number`
 
-Index into the act's Blinds, Small first.
+Index into the run's Blinds, Small first.
+
+***
+
+### bossId
+
+> **bossId**: `string` \| `null`
+
+The Boss this run faces: drawn from the act's pool, or its fixed Boss.
+
+***
+
+### drawIndex
+
+> **drawIndex**: `number`
+
+The next unused draw index.
+
+***
+
+### draws
+
+> **draws**: [`RunDraw`](RunDraw.md)[]
+
+Every seeded draw so far, in order.
+
+***
+
+### seed
+
+> **seed**: `string`
+
+The run seed. The same seed and the same moves replay identically.
 
 ***
 

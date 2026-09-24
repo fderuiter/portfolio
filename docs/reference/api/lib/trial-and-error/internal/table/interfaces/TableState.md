@@ -40,6 +40,22 @@ The consumable tray, at most `CONSUMABLE_SLOTS`.
 
 ***
 
+### crisis
+
+> **crisis**: \{ `choices`: `object`[]; `description`: `string`; `id`: `string`; `name`: `string`; \} \| `null`
+
+The crisis drawn for this Blind, until the player answers it.
+
+***
+
+### crisisResolution
+
+> **crisisResolution**: \{ `choiceId`: `string`; `crisisId`: `string`; \} \| `null`
+
+How this Blind's crisis was answered, once it has been.
+
+***
+
 ### deckIndex
 
 > **deckIndex**: `number`
@@ -112,12 +128,53 @@ One record per population transition so far this study.
 
 ***
 
+### modifiers
+
+> **modifiers**: `object`[]
+
+Modifiers crisis choices imposed on this Blind, besides its boss.
+
+#### debuffType
+
+> **debuffType**: `"DISABLE_POPULATION"` \| `"HAND_LIMIT"` \| `"DISCARD_PENALTY"` \| `"BLIND_FIREWALL"` = `BossDebuffTypeSchema`
+
+#### description
+
+> **description**: `string`
+
+#### disabledPopulations?
+
+> `optional` **disabledPopulations?**: (`"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`)[]
+
+#### discardCpuPenalty?
+
+> `optional` **discardCpuPenalty?**: `number`
+
+#### id
+
+> **id**: `string` = `identifier`
+
+#### maxHandsAllowed?
+
+> `optional` **maxHandsAllowed?**: `number`
+
+#### name
+
+> **name**: `string`
+
+***
+
 ### opening
 
 > **opening**: `object`
 
-How much of `snapshots` and `invalidations` predates this Blind, and the
-inventory it started with, so a restart returns to exactly that.
+How much of `snapshots` and `invalidations` predates this Blind, the
+inventory it started with, and its crisis, so a restart returns to
+exactly that.
+
+#### crisis
+
+> **crisis**: \{ `choices`: `object`[]; `description`: `string`; `id`: `string`; `name`: `string`; \} \| `null`
 
 #### invalidations
 

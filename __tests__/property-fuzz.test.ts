@@ -43,8 +43,12 @@ import {
   type VitalsData,
 } from "@/lib/patrol";
 import {
+  ACT_I,
+  ACT_I_CRISES,
   DEMOGRAPHICS_SCENARIO,
   advanceDesk,
+  advanceRun,
+  createRunState,
   advanceTable,
   deriveTableView,
   createDeskState,
@@ -53,6 +57,7 @@ import {
   roundRatio,
   scoreTimeline,
   type DeskAction,
+  type RunAction,
   type TableAction,
   type RoundingMode,
 } from "@/lib/trial-and-error";
@@ -1164,6 +1169,59 @@ describe("Shift-Left Fuzz & Property-Based Verification", () => {
             DEMOGRAPHICS_SCENARIO.deck.length
           );
         })
+      );
+    });
+
+    it("replays any seeded run, crisis draws included, identically", () => {
+      const cardIds = [
+        ...new Set(
+          [...ACT_I.blinds, ...(ACT_I.bossPool ?? [])].flatMap((b) =>
+            b.deck.map((c) => c.id)
+          )
+        ),
+      ];
+      const choiceIds = [
+        ...new Set(ACT_I_CRISES.flatMap((c) => c.choices.map((x) => x.id))),
+      ];
+      const runAction: fc.Arbitrary<RunAction> = fc.oneof(
+        fc.record({
+          type: fc.constant("TOGGLE_SELECT" as const),
+          cardId: fc.constantFrom(...cardIds),
+        }),
+        fc.record({
+          type: fc.constant("RESOLVE_CRISIS" as const),
+          choiceId: fc.constantFrom(...choiceIds),
+        }),
+        fc.constant<RunAction>({ type: "PLAY_HAND" }),
+        fc.constant<RunAction>({ type: "DISCARD" }),
+        fc.constant<RunAction>({ type: "NEXT_BLIND" })
+      );
+      fc.assert(
+        fc.property(
+          fc.stringMatching(/^[A-Za-z0-9-]{1,32}$/),
+          fc.array(runAction, { maxLength: 80 }),
+          (seed, actions) => {
+            const replay = () =>
+              actions.reduce(
+                (run, action) => advanceRun(ACT_I, run, action),
+                createRunState(ACT_I, seed)
+              );
+            const first = replay();
+            expect(replay()).toEqual(first);
+            expect(first.seed).toBe(seed);
+            // Draw indices are consumed in order, and the deck deals each
+            // crisis at most once per run.
+            expect(first.draws.map((d) => d.drawIndex)).toEqual(
+              first.draws.map((_, i) => i)
+            );
+            const crises = first.draws
+              .filter((d) => d.kind === "CRISIS")
+              .map((d) => d.id);
+            expect(new Set(crises).size).toBe(crises.length);
+            expect(first.table.cpu.available).toBeGreaterThanOrEqual(0);
+          }
+        ),
+        { numRuns: 60 }
       );
     });
 

@@ -65,12 +65,15 @@ integer arithmetic (`roundRatio`), so a tie such as `543 / 12 = 45.25` is
 detected exactly and resolved by the scenario's declared mode (half-even,
 half-away-from-zero, or truncate). There is no universal N+1 or N+2 rule.
 
-Randomness is allowed in exactly two places: the crisis/event deck (T&E-05)
-and shop inventory (T&E-12). Both will draw from one seeded PRNG kept in
-`internal/`, and run state will record the seed and draw index so that the
-same seed plus the same moves replays identically. T&E-01 needs no
-randomness: its draw pile is a fixed, scenario-ordered list, and desk state
-records the `drawIndex`.
+Randomness is allowed in exactly three places: the crisis deck and the
+Boss pool (T&E-05) and shop inventory (T&E-12). All of them draw from one
+counter-based PRNG in `internal/rng.ts`: the value at a draw index is a pure
+function of the run seed and that index (FNV-1a over `seed#index`, mixed by
+Mulberry32), so there is no generator state to carry. `RunState` records the
+seed, the next draw index and a log of every draw, and the same seed plus
+the same moves replays identically. Draw piles stay fixed, scenario-ordered
+lists, and table state records the `deckIndex`. See
+[Crisis cards, Boss pools and the seeded draw (T&E-05)](#crisis-cards-boss-pools-and-the-seeded-draw-te-05).
 
 ### Scoring pipeline
 
@@ -106,6 +109,8 @@ hand as it truly is, so an undiscovered fatal error still zeroes it.
 adds a `REPLENISH` event rather than replacing the reducer: each Blind's
 ledger is refilled once, deterministically, when the Blind starts. See
 [Shell planning, CPU and footnote seals (T&E-04)](#shell-planning-cpu-and-footnote-seals-te-04).
+T&E-05 adds an `ADJUST` event for crisis costs, which clamps at zero, and an
+optional surcharge on `SPEND` for a Blind's discard penalty.
 
 ### Blinding lives in state, not CSS
 
@@ -540,9 +545,9 @@ under the outputs. The design readings are in
   mechanism that explains it on the old snapshot (population, precision,
   rounding, events counted as subjects); a value nothing explains is kept as
   typed. The rerun is a new output, so its inspection starts over.
-- **Study events.** Crisis cards (T&E-05) and Site Activation Packs (UX-06)
-  will call `applyTransition`. Until then a scenario may declare scripted
-  `events`, each firing once after a given hand, between the hand being
+- **Study events.** Crisis cards (T&E-05) apply transitions through the
+  same path, and Site Activation Packs (UX-06) will too. A scenario may also
+  declare scripted `events`, each firing once after a given hand, between the hand being
   submitted and the hand refilling. Act I's Sponsor Safety Review has one:
   after its first hand, S-004 is found never to have been dosed and leaves
   the Safety population. `advanceRun` carries the history into the next
@@ -600,3 +605,45 @@ compiled output's metadata, and cannot silently override core SAP rules.
   Enter or Space, or dragged onto it; Escape puts one back. A seal press is
   a loud moment scoped to the cabinet. CPU shows as pips, and a note
   explains which action the remaining CPU cannot pay for.
+
+### Crisis cards, Boss pools and the seeded draw (T&E-05)
+
+T&E-05 (#914) makes each run different without making it unfair. The
+narrative amendment decides what a crisis may cost: CPU, footnote seals,
+study budget and snapshot changes are the only resources.
+
+- **Seeded draw.** `drawInt(seed, drawIndex, bound)` is the one source of
+  randomness. A run starts from a seed (`DEFAULT_SEED` in tests and replays;
+  the table takes `?seed=` or makes a fresh one) and `RESTART_RUN` may carry
+  a new seed. Every draw is logged as a `RunDraw` with its kind, the card it
+  chose and the Blind it served, and the run view exposes the seed and log.
+- **Boss pools.** An act may declare a `bossPool` of Boss Blinds; its last
+  Blind is then drawn from the pool when the run starts. A pool of one is
+  fixed and consumes no draw. `runBlinds` resolves the act into the run's
+  Blinds. Act I's pool holds the Dose Escalation Committee.
+- **Crisis cards.** A `CrisisCard` has two or three choices, each with a
+  label, a stated consequence and a deterministic effect: a CPU adjustment,
+  a budget change, spending or granting a footnote seal, a population
+  transition, or a Blind modifier. The contract requires one free choice,
+  so a crisis can never end a run by itself, and a transition must name a
+  subject in the snapshot. Every Blind after the first draws one crisis
+  from the act's `crisisDeck`, without replacement; a spent deck draws
+  nothing and consumes no index.
+- **Answering.** While a crisis is pending, the table refuses everything
+  but selection, reordering, selling a seal and closing Inspect.
+  `RESOLVE_CRISIS` refuses a choice the run cannot afford and says why, then
+  applies the effect in one step. A transition goes through the same code as
+  scripted study events, so matching outputs in hand go stale. `RESET`
+  restores the Blind's crisis.
+- **Blind modifiers.** A Blind's modifiers are its Boss debuff plus any a
+  crisis imposed. `HAND_LIMIT` fails the Blind once the limit is used short
+  of the target, `DISCARD_PENALTY` surcharges every discard, and
+  `BLIND_FIREWALL` masks arm columns on every face and refuses Inspect.
+- **Act I content.** Site Audit, Protocol Amendment 2, Database Migration
+  and Emergency Review. Freezing the database grants a Data cutoff seal
+  (+10 Chips on a table) with a three-hand limit.
+- **Presentation.** The crisis deals face down and turns up above the hand;
+  in the cabinet it slams down as a loud moment. Focus moves to the first
+  choice the run can afford, each choice shows its consequence and any
+  refusal, and the table lists the Blind's modifiers, the seed and any hand
+  limit.

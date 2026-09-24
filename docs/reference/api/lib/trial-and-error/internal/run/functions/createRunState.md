@@ -6,15 +6,25 @@
 
 # Function: createRunState()
 
-> **createRunState**(`act`): [`RunState`](../interfaces/RunState.md)
+> **createRunState**(`act`, `seed?`): [`RunState`](../interfaces/RunState.md)
 
-A fresh run: the act's first Blind dealt, full CPU.
+A fresh run for `seed`: the Boss drawn from the act's pool (a pool of one
+is fixed and consumes no draw), and the first Blind dealt with full CPU.
+The first Blind draws no crisis.
 
 ## Parameters
 
 ### act
 
 #### blinds
+
+`object`[] = `...`
+
+#### bossPool?
+
+`object`[] = `...`
+
+#### crisisDeck?
 
 `object`[] = `...`
 
@@ -25,6 +35,10 @@ A fresh run: the act's first Blind dealt, full CPU.
 #### title
 
 `string` = `...`
+
+### seed?
+
+`string` = `DEFAULT_SEED`
 
 ## Returns
 

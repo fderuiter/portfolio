@@ -12,9 +12,14 @@ import {
 } from "@testing-library/react";
 import { CardTable } from "@/components/trial-and-error/CardTable";
 import {
+  ACT_I,
+  ACT_I_CRISES,
   DEMOGRAPHICS_SCENARIO,
   DOSE_ESCALATION_SCENARIO,
+  FIREWALL_CELL,
   SPONSOR_SAFETY_SCENARIO,
+  type Act,
+  type CrisisCard,
 } from "@/lib/trial-and-error";
 
 const announce = vi.fn();
@@ -53,6 +58,32 @@ const gridCell = (row: number, col: number) =>
   within(drawer()!)
     .getAllByRole("row")
     [row + 1].querySelectorAll<HTMLElement>('[role="gridcell"]')[col];
+
+/**
+ * Act I with a one-point Small Blind and a one-card crisis deck, so the Big
+ * Blind opens on `crisis` whatever the seed.
+ */
+const crisisAct = (crisis: CrisisCard): Act => ({
+  ...ACT_I,
+  blinds: [
+    {
+      ...DEMOGRAPHICS_SCENARIO,
+      blind: { ...DEMOGRAPHICS_SCENARIO.blind, quota: 1 },
+    },
+    SPONSOR_SAFETY_SCENARIO,
+  ],
+  crisisDeck: [crisis],
+});
+
+/** Clears the one-point Small Blind and deals the Big Blind. */
+function reachBigBlind() {
+  fireEvent.click(card("C-T14.1.1-C"));
+  fireEvent.click(screen.getByRole("button", { name: /Play Hand/ }));
+  fireEvent.click(screen.getByRole("button", { name: "Next Blind" }));
+  expect(screen.getByTestId("blind-name").textContent).toBe(
+    "Big Blind: Sponsor Safety Review"
+  );
+}
 
 async function openInspect(id: string) {
   act(() => card(id).focus());
@@ -203,7 +234,9 @@ describe("CardTable", () => {
   });
 
   it("clears the Blind by inspecting, correcting and playing, then moves to the next Blind", async () => {
-    render(<CardTable />);
+    // Seed "early" draws the Site Audit for the Big Blind.
+    render(<CardTable seed="early" />);
+    expect(screen.getByTestId("run-seed").textContent).toBe("early");
     expect(screen.getByTestId("blind-intro").textContent).toContain(
       "Phase I, first data review."
     );
@@ -243,9 +276,38 @@ describe("CardTable", () => {
     expect(screen.getByTestId("blind-intro").textContent).toContain(
       "safety physician"
     );
-    expect(lastAnnouncement()).toBe(
-      "Big Blind: Sponsor Safety Review. Target 750."
+    expect(lastAnnouncement()).toContain(
+      "Big Blind: Sponsor Safety Review. Target 750. Crisis: Site Audit."
     );
+    // The crisis must be answered first, so focus goes to its first choice.
+    const crisis = screen.getByTestId("crisis");
+    expect(within(crisis).getByRole("heading").textContent).toBe(
+      "Crisis: Site Audit"
+    );
+    const host = within(crisis).getByRole("button", {
+      name: /Host the auditors/,
+    });
+    await waitFor(() => expect(document.activeElement).toBe(host));
+    expect(screen.getByRole("button", { name: /Play Hand/ })).toHaveProperty(
+      "disabled",
+      true
+    );
+    // Remote audit costs budget the study does not have.
+    const remote = within(crisis).getByRole("button", {
+      name: /Pay for a remote audit/,
+    });
+    expect(remote).toHaveProperty("disabled", true);
+    expect(remote.textContent).toContain("Needs $2k study budget; $0k left.");
+
+    fireEvent.click(host);
+    expect(screen.queryByTestId("crisis")).toBeNull();
+    expect(screen.getByTestId("blind-modifier").textContent).toContain(
+      "Crisis: Site Audit"
+    );
+    expect(
+      screen.getByRole("button", { name: /Discard · 2 CPU/ })
+    ).toBeTruthy();
+    expect(lastAnnouncement()).toContain("Site Audit: Host the auditors.");
     await waitFor(() =>
       expect(document.activeElement).toBe(card("C-T14.3.1-A"))
     );
@@ -281,6 +343,81 @@ describe("CardTable", () => {
     fireEvent.click(restart);
     expect(screen.getByTestId("round-score").textContent?.trim()).toBe("0");
     expect(screen.getByTestId("blind-intro")).toBeTruthy();
+  });
+
+  it("enforces a crisis hand limit on the Blind panel and ends the Blind when it runs out", () => {
+    const emergency = ACT_I_CRISES.find((c) => c.id === "CR-EMERGENCY-REVIEW")!;
+    render(<CardTable act={crisisAct(emergency)} seed="ui-limit" />);
+    reachBigBlind();
+    expect(screen.queryByTestId("hand-limit")).toBeNull();
+    fireEvent.click(
+      within(screen.getByTestId("crisis")).getByRole("button", {
+        name: /Accept the early deadline/,
+      })
+    );
+    expect(screen.getByTestId("blind-modifier").textContent).toContain(
+      "Crisis: Emergency Review"
+    );
+    expect(screen.getByTestId("hand-limit").textContent).toBe("2 left");
+    expect(screen.getByTestId("hands-affordable").textContent).toBe("2");
+
+    // Two single uninspected cards score far short of 750. A card the first
+    // hand's snapshot change staled, or an empty shell, cannot be played.
+    for (const left of ["1 left", "0 left"]) {
+      const playable = cards().find(
+        (c) => !/stale|empty shell/.test(c.getAttribute("aria-label") ?? "")
+      )!;
+      fireEvent.click(playable);
+      fireEvent.click(screen.getByRole("button", { name: /Play Hand/ }));
+      expect(screen.getByTestId("hand-limit").textContent).toBe(left);
+    }
+    const result = screen.getByTestId("blind-result");
+    expect(result.textContent).toContain("Blind failed");
+    expect(lastAnnouncement()).toContain("the 2-hand limit is used up");
+  });
+
+  it("turns treatment-arm values face down under a DMC firewall and refuses Inspect", () => {
+    const firewall: CrisisCard = {
+      id: "CR-UI-FIREWALL",
+      name: "Closed Session",
+      description: "The DMC meets behind closed doors.",
+      choices: [
+        {
+          id: "wait",
+          label: "Wait outside",
+          consequence: "Treatment arms are face down this Blind.",
+          effect: {
+            modifier: {
+              id: "CR-UI-FIREWALL-MOD",
+              name: "DMC Firewall",
+              description: "Arms stay blinded.",
+              debuffType: "BLIND_FIREWALL",
+            },
+          },
+        },
+        {
+          id: "leave",
+          label: "Leave",
+          consequence: "Nothing changes.",
+          effect: {},
+        },
+      ],
+    };
+    render(<CardTable act={crisisAct(firewall)} seed="ui-firewall" />);
+    reachBigBlind();
+    const target = "C-T14.3.1-A";
+    expect(card(target).textContent).not.toContain(FIREWALL_CELL);
+    fireEvent.click(screen.getByRole("button", { name: /Wait outside/ }));
+    expect(screen.getByTestId("blind-modifier").textContent).toContain(
+      "Crisis: DMC Firewall"
+    );
+    expect(card(target).textContent).toContain(FIREWALL_CELL);
+    act(() => card(target).focus());
+    expect(
+      screen.getByRole("button", { name: /^Inspect .*\[I\]$/ })
+    ).toHaveProperty("disabled", true);
+    fireEvent.keyDown(card(target), { key: "i" });
+    expect(drawer()).toBeNull();
   });
 
   it("offers Play again once the final Blind of the act is cleared", () => {
