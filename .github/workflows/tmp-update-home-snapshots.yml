@@ -1,0 +1,67 @@
+# TEMPORARY (#928): regenerates the Linux `home` baselines of visual.spec.ts
+# in the same ubuntu-latest image the Heavy and Device gates use, and uploads
+# them as an artifact to commit. Removed from this branch before review.
+name: Regenerate Linux home snapshots (temporary)
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/tmp-update-home-snapshots.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  update-snapshots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: "npm"
+
+      - run: npm ci
+
+      - run: npx playwright install chromium webkit --with-deps
+
+      - name: Pre-build steps
+        run: |
+          npx tsx scripts/generate-theme.ts
+          npx prisma generate
+
+      - name: Build Production
+        run: npm run build
+        env:
+          DATABASE_URL: "postgresql://dummy:dummy@127.0.0.1:59999/dummy"
+
+      - name: Regenerate home baselines
+        run: |
+          npx playwright test __tests__/e2e/visual.spec.ts \
+            -g "Case Study components snapshot" \
+            --project=chromium --project="Tablet Safari" \
+            --project="Mobile Safari" --project="Mobile Chrome" \
+            --update-snapshots=all --retries=0
+        env:
+          DATABASE_URL: "postgresql://dummy:dummy@127.0.0.1:59999/dummy"
+          CRON_SECRET: "ci_placeholder_cron_secret"
+
+      - name: Verify baselines are stable on a second run
+        run: |
+          npx playwright test __tests__/e2e/visual.spec.ts \
+            -g "Case Study components snapshot" \
+            --project=chromium --project="Tablet Safari" \
+            --project="Mobile Safari" --project="Mobile Chrome" --retries=0
+        env:
+          DATABASE_URL: "postgresql://dummy:dummy@127.0.0.1:59999/dummy"
+          CRON_SECRET: "ci_placeholder_cron_secret"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: home-linux-snapshots
+          path: __tests__/e2e/visual.spec.ts-snapshots/*-linux.png
+          if-no-files-found: error
