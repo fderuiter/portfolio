@@ -1,19 +1,53 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { MeshWorkerRequest, MeshWorkerResponse } from "@/lib/neuro/types";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import {
+  MeshWorkerRequest,
+  MeshWorkerResponse,
+  processMeshWorkerRequest,
+  registerMeshWorker,
+} from "@/lib/neuro";
 
 describe("NeuroRecon Web Worker (lib/neuro/mesh-worker.ts) Test Suite", () => {
   let postMessageSpy: ReturnType<typeof vi.fn>;
+  let unbindWorker: (() => void) | null = null;
 
   beforeEach(() => {
     postMessageSpy = vi.fn();
     (globalThis as unknown as { postMessage: unknown }).postMessage =
       postMessageSpy;
+    unbindWorker = registerMeshWorker(globalThis);
   });
 
-  // Import worker to register the "message" event listener on self/globalThis
-  it("registers message event listener and processes subcortical (aseg) mode for both hemispheres", async () => {
-    await import("@/lib/neuro/mesh-worker");
+  afterEach(() => {
+    if (unbindWorker) {
+      unbindWorker();
+      unbindWorker = null;
+    }
+  });
 
+  it("processes subcortical (aseg) mode request directly via public worker seam", () => {
+    const req: MeshWorkerRequest = {
+      id: "test_aseg_direct",
+      mode: "aseg",
+      hemiFilter: "both",
+      wireframe: false,
+    };
+
+    const { response, transferables } = processMeshWorkerRequest(req);
+
+    expect(response.id).toBe("test_aseg_direct");
+    expect(response.mode).toBe("aseg");
+    expect(response.isSubcortical).toBe(true);
+    expect(response.buffers.length).toBeGreaterThan(0);
+
+    for (const buf of response.buffers) {
+      expect(transferables).toContain(buf.positions.buffer);
+      expect(transferables).toContain(buf.indices.buffer);
+      if (buf.normals) expect(transferables).toContain(buf.normals.buffer);
+      if (buf.colors) expect(transferables).toContain(buf.colors.buffer);
+    }
+  });
+
+  it("registers message event listener and processes subcortical (aseg) mode for both hemispheres", () => {
     const req: MeshWorkerRequest = {
       id: "test_aseg_both",
       mode: "aseg",
@@ -51,15 +85,21 @@ describe("NeuroRecon Web Worker (lib/neuro/mesh-worker.ts) Test Suite", () => {
       expect(buf.indices.length).toBeGreaterThan(0);
     }
 
-    // Verify ArrayBuffer transferables list
+    // Verify ArrayBuffer transferables list and backing-buffer membership
     expect(Array.isArray(transferables)).toBe(true);
     expect(transferables.length).toBeGreaterThan(0);
     for (const item of transferables) {
       expect(item).toBeInstanceOf(ArrayBuffer);
     }
+    for (const buf of response.buffers) {
+      expect(transferables).toContain(buf.positions.buffer);
+      expect(transferables).toContain(buf.indices.buffer);
+      if (buf.normals) expect(transferables).toContain(buf.normals.buffer);
+      if (buf.colors) expect(transferables).toContain(buf.colors.buffer);
+    }
   });
 
-  it("handles subcortical (aseg) mode with hemisphere filter (lh)", async () => {
+  it("handles subcortical (aseg) mode with hemisphere filter (lh)", () => {
     const req: MeshWorkerRequest = {
       id: "test_aseg_lh",
       mode: "aseg",
@@ -83,9 +123,15 @@ describe("NeuroRecon Web Worker (lib/neuro/mesh-worker.ts) Test Suite", () => {
 
     expect(response.buffers.length).toBeGreaterThan(0);
     expect(transferables.length).toBeGreaterThan(0);
+    for (const buf of response.buffers) {
+      expect(transferables).toContain(buf.positions.buffer);
+      expect(transferables).toContain(buf.indices.buffer);
+      if (buf.normals) expect(transferables).toContain(buf.normals.buffer);
+      if (buf.colors) expect(transferables).toContain(buf.colors.buffer);
+    }
   });
 
-  it("handles cortical surface mode (pial) for both hemispheres and validates positions, normals, colors", async () => {
+  it("handles cortical surface mode (pial) for both hemispheres and validates positions, normals, colors", () => {
     const req: MeshWorkerRequest = {
       id: "test_pial_both",
       mode: "pial",
@@ -143,7 +189,7 @@ describe("NeuroRecon Web Worker (lib/neuro/mesh-worker.ts) Test Suite", () => {
     }
   });
 
-  it("handles cortical surface mode (white) with left-hemisphere filter (lh)", async () => {
+  it("handles cortical surface mode (white) with left-hemisphere filter (lh)", () => {
     const req: MeshWorkerRequest = {
       id: "test_white_lh",
       mode: "white",
@@ -172,9 +218,15 @@ describe("NeuroRecon Web Worker (lib/neuro/mesh-worker.ts) Test Suite", () => {
     expect(response.buffers[0].normals).toBeInstanceOf(Float32Array);
 
     expect(transferables.length).toBe(4);
+    for (const buf of response.buffers) {
+      expect(transferables).toContain(buf.positions.buffer);
+      expect(transferables).toContain(buf.indices.buffer);
+      if (buf.normals) expect(transferables).toContain(buf.normals.buffer);
+      if (buf.colors) expect(transferables).toContain(buf.colors.buffer);
+    }
   });
 
-  it("handles cortical surface mode (inflated) with right-hemisphere filter (rh)", async () => {
+  it("handles cortical surface mode (inflated) with right-hemisphere filter (rh)", () => {
     const req: MeshWorkerRequest = {
       id: "test_inflated_rh",
       mode: "inflated",
@@ -202,9 +254,15 @@ describe("NeuroRecon Web Worker (lib/neuro/mesh-worker.ts) Test Suite", () => {
     expect(response.buffers[0].normals).toBeInstanceOf(Float32Array);
 
     expect(transferables.length).toBe(4);
+    for (const buf of response.buffers) {
+      expect(transferables).toContain(buf.positions.buffer);
+      expect(transferables).toContain(buf.indices.buffer);
+      if (buf.normals) expect(transferables).toContain(buf.normals.buffer);
+      if (buf.colors) expect(transferables).toContain(buf.colors.buffer);
+    }
   });
 
-  it("handles Desikan-Killiany atlas parcellation mode (aparc) for both hemispheres", async () => {
+  it("handles Desikan-Killiany atlas parcellation mode (aparc) for both hemispheres", () => {
     const req: MeshWorkerRequest = {
       id: "test_aparc_both",
       mode: "aparc",
@@ -232,6 +290,11 @@ describe("NeuroRecon Web Worker (lib/neuro/mesh-worker.ts) Test Suite", () => {
       expect(buf.positions).toBeInstanceOf(Float32Array);
       expect(buf.colors).toBeInstanceOf(Float32Array);
       expect(buf.colors!.length).toBe(buf.positions.length);
+
+      expect(transferables).toContain(buf.positions.buffer);
+      expect(transferables).toContain(buf.indices.buffer);
+      if (buf.normals) expect(transferables).toContain(buf.normals.buffer);
+      if (buf.colors) expect(transferables).toContain(buf.colors.buffer);
     }
   });
 });
