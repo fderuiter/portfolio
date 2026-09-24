@@ -167,6 +167,23 @@ describe("DX Invariant Doctor Engine", () => {
       expect(result.status).toBe("fail");
     });
 
+    it("skips agent worktrees and Stryker sandboxes, which copy the source tree (#964)", () => {
+      const leak =
+        'const key = "' + "ghp_" + '123456789012345678901234567890123456";';
+      for (const dir of [
+        path.join(".claude", "worktrees", "agent-x", "lib"),
+        path.join(".stryker-tmp", "sandbox-1", "lib"),
+      ]) {
+        fs.mkdirSync(path.join(tempDir, dir), { recursive: true });
+        fs.writeFileSync(path.join(tempDir, dir, "allowlist.ts"), leak);
+      }
+      expect(checkSecretLeaks(tempDir).status).toBe("pass");
+
+      // The same content in the real tree is still caught.
+      fs.writeFileSync(path.join(tempDir, "leaked.ts"), leak);
+      expect(checkSecretLeaks(tempDir).status).toBe("fail");
+    });
+
     it("still ignores known-safe placeholder values from .env.example / env-guard.ts", () => {
       fs.writeFileSync(
         path.join(tempDir, ".env.example"),
@@ -727,25 +744,92 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   });
 
   describe("Full Workspace Health Diagnostic", () => {
-    it("runs diagnostic across active workspace cleanly and prints reports", async () => {
-      const workspaceRoot = path.resolve(__dirname, "..");
+    // Runs against a small fixture workspace rather than the repository
+    // (#937). A whole-repo run spawned depcruise over every source directory
+    // and walked ignored build and benchmark artifacts, so it took ~20s under
+    // load and its result depended on what happened to be on disk locally.
+    const writeFixture = (relative: string, contents: string) => {
+      const file = path.join(tempDir, relative);
+      fs.mkdirSync(path.dirname(file), { recursive: true });
+      fs.writeFileSync(file, contents);
+    };
+
+    const snapshotTree = (dir: string): Record<string, string> => {
+      const tree: Record<string, string> = {};
+      const walk = (current: string) => {
+        for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+          const full = path.join(current, entry.name);
+          if (entry.isDirectory()) walk(full);
+          else tree[path.relative(dir, full)] = fs.readFileSync(full, "utf-8");
+        }
+      };
+      walk(dir);
+      return tree;
+    };
+
+    beforeEach(() => {
+      writeFixture(
+        "package.json",
+        JSON.stringify({ name: "doctor-fixture", private: true }, null, 2)
+      );
+      writeFixture(
+        "app/page.tsx",
+        'export default function Home() {\n  return <main className="min-h-dvh pt-24">Home</main>;\n}\n'
+      );
+      writeFixture(
+        "__tests__/example.test.ts",
+        'import path from "path";\nexport const root = path.resolve(__dirname, "..");\n'
+      );
+      writeFixture(".env.example", "DATABASE_URL=\n");
+    });
+
+    it("runs every check against a workspace and reports a consistent summary", async () => {
+      const before = snapshotTree(tempDir);
+      const startedAt = performance.now();
+
       const summary = await runDiagnostics({
-        workspaceRoot,
+        workspaceRoot: tempDir,
         fix: false,
         ci: true,
       });
-      expect(summary.results.length).toBeGreaterThan(0);
+
+      // Bounded well under the default timeout so a slow check that creeps
+      // back in (a spawned tool, a whole-tree walk) fails here, not as a flake.
+      expect(performance.now() - startedAt).toBeLessThan(5000);
+
+      const ids = summary.results.map((result) => result.id);
+      expect(summary.results.length).toBeGreaterThan(20);
+      expect(new Set(ids).size).toBe(ids.length);
+      for (const result of summary.results) {
+        expect(result.name.length).toBeGreaterThan(0);
+        expect(["pass", "fail", "warn", "fixed"]).toContain(result.status);
+      }
+
+      const count = (status: string) =>
+        summary.results.filter((result) => result.status === status).length;
+      expect(summary.totalPassed).toBe(count("pass"));
+      expect(summary.totalFailed).toBe(count("fail"));
+      expect(summary.totalWarned).toBe(count("warn"));
+      expect(summary.totalFixed).toBe(count("fixed"));
       expect(summary.totalPassed).toBeGreaterThan(0);
+      expect(summary.hasFailures).toBe(summary.totalFailed > 0);
+      expect(summary.hasWarnings).toBe(summary.totalWarned > 0);
+
+      // Every failing auto-fixable check points at the fix command.
+      for (const result of summary.results) {
+        if (result.status === "fail" && result.fixable) {
+          expect(result.remediation?.command).toBe("npm run doctor:fix");
+        }
+      }
+
+      // A read-only run never writes to the workspace.
+      expect(snapshotTree(tempDir)).toEqual(before);
 
       expect(() => printDoctorReport(summary, true)).not.toThrow();
+    });
 
-      // Test report with fake failures and fixes
-      const mockSummary = {
-        ...summary,
-        totalFixed: 1,
-        totalWarned: 1,
-        totalFailed: 1,
-        hasFailures: true,
+    it("prints a report containing failures and fixes", () => {
+      const summary = {
         results: [
           {
             id: "fake-check",
@@ -756,8 +840,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             details: ["/mock/path"],
           },
         ],
+        hasFailures: true,
+        hasWarnings: true,
+        totalPassed: 0,
+        totalFailed: 1,
+        totalWarned: 1,
+        totalFixed: 1,
+        remediations: [],
       };
-      expect(() => printDoctorReport(mockSummary, false)).not.toThrow();
-    }, 20000);
+      expect(() => printDoctorReport(summary, false)).not.toThrow();
+    });
   });
 });
