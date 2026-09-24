@@ -16,6 +16,7 @@ import {
 } from "@tabler/icons-react";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { triggerHaptic } from "@/lib/haptics";
+import { getMatchMediaMatches } from "@/hooks/useMediaQuery";
 
 function useIsTouchDevice(): boolean {
   const [isTouch, setIsTouch] = useState<boolean>(false);
@@ -23,11 +24,10 @@ function useIsTouchDevice(): boolean {
   useEffect(() => {
     const checkTouch = () => {
       if (typeof window === "undefined") return;
-      const hasMatchMedia = typeof window.matchMedia === "function";
       const touchDetected =
         "ontouchstart" in window ||
         (typeof navigator !== "undefined" && navigator.maxTouchPoints > 0) ||
-        (hasMatchMedia && window.matchMedia("(pointer: coarse)").matches);
+        getMatchMediaMatches("(pointer: coarse)");
       setIsTouch(touchDetected);
     };
 

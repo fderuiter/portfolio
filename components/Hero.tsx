@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { usePretextLayout } from "@/hooks/usePretextLayout";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { AnimatedGridPattern } from "@/components/AnimatedGridPattern";
 import { designManifest } from "@/lib/design-manifest";
 import { useAudio } from "@/components/providers/AudioProvider";
@@ -20,33 +21,13 @@ import {
   IconAtom,
 } from "@tabler/icons-react";
 
-function subscribeMobile(callback: () => void) {
-  if (typeof window === "undefined" || !window.matchMedia) return () => {};
-  const mql = window.matchMedia("(max-width: 767px)");
-  mql.addEventListener("change", callback);
-  return () => mql.removeEventListener("change", callback);
-}
-
-function getMobileSnapshot(): boolean {
-  if (typeof window === "undefined" || !window.matchMedia) return false;
-  return window.matchMedia("(max-width: 767px)").matches;
-}
-
-function getMobileServerSnapshot(): boolean {
-  return false;
-}
-
 interface HeroHeadlineProps {
   text: string;
 }
 
 export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
   const shouldReduceMotion = useReducedMotion();
-  const isMobile = React.useSyncExternalStore(
-    subscribeMobile,
-    getMobileSnapshot,
-    getMobileServerSnapshot
-  );
+  const isMobile = useMediaQuery("(max-width: 767px)");
   const { ref, height, isReady } = usePretextLayout({
     text,
     fontSize: 54,
@@ -143,11 +124,7 @@ interface HeroTextProps {
 
 export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
   const shouldReduceMotion = useReducedMotion();
-  const isMobile = React.useSyncExternalStore(
-    subscribeMobile,
-    getMobileSnapshot,
-    getMobileServerSnapshot
-  );
+  const isMobile = useMediaQuery("(max-width: 767px)");
   const { ref, height, isReady } = usePretextLayout({
     text,
     fontSize: 16,
