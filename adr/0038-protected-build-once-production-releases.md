@@ -2,6 +2,11 @@
 
 ## Status
 
+**Amended by [ADR 0048](0048-deploy-main-on-green-ci.md) on 2026-09-24:**
+production now deploys automatically when CI passes on `main`. The stage,
+verify, and promote sequence below still applies; the manual SemVer dispatch,
+the repeated quality gates, and the rollback drill do not.
+
 Accepted on 2026-09-13. Supersedes ADR 0037 only where that decision allowed
 Vercel to deploy every merge to `main` automatically.
 
