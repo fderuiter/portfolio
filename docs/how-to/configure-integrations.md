@@ -86,10 +86,10 @@ never grants access, regardless of whether the string matches.
 
 ### Setup
 
-Set `SENTRY_DSN` (or leave unset locally), plus `SENTRY_ORG`/`SENTRY_PROJECT`
-if you use Sentry's build-time source-map upload. `NEXT_PUBLIC_SENTRY_DSN` is
-the client-side counterpart read by
-[`instrumentation-client.ts`](../../instrumentation-client.ts).
+Set `NEXT_PUBLIC_SENTRY_DSN` (or leave it unset locally). All three init
+points below read that one variable; a DSN only permits sending events, so it
+is safe in the browser bundle. Add `SENTRY_ORG`, `SENTRY_PROJECT` and
+`SENTRY_AUTH_TOKEN` only if you use Sentry's build-time source-map upload.
 
 There are three separate Sentry init points, matching the three Next.js
 runtimes:
@@ -104,7 +104,7 @@ runtimes:
 
 ### Verification
 
-- With `SENTRY_DSN`/`NEXT_PUBLIC_SENTRY_DSN` unset, both server configs fall
+- With `NEXT_PUBLIC_SENTRY_DSN` unset, both server configs fall
   back to a dummy DSN (`https://dummy@o0.ingest.sentry.io/0`) — Sentry's SDK
   accepts this and silently drops every event rather than throwing, so a
   missing DSN never breaks a request. This means "no errors show up in
@@ -118,8 +118,8 @@ runtimes:
 ### Troubleshooting & recovery
 
 - **Real errors not appearing in the Sentry dashboard**: confirm
-  `SENTRY_DSN`/`NEXT_PUBLIC_SENTRY_DSN` are set in the deployment's actual
-  environment variables (not just locally), and that they aren't still
+  `NEXT_PUBLIC_SENTRY_DSN` is set in the deployment's actual
+  environment variables (not just locally), and that it isn't still
   pointing at the dummy fallback value.
 - **No recovery action needed for a Sentry outage**: every call site uses
   `Sentry.captureException` as a side effect alongside its own
