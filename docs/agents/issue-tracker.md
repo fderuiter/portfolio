@@ -1,6 +1,6 @@
 # Issue tracker: GitHub
 
-Issues and specs for this repo live as GitHub issues. Use the `gh` CLI for all operations.
+GitHub Issues are the primary home for issues and specs in this repo. Use the `gh` CLI for tracker operations. Some context-bounded work also has local companion files under `.scratch/issues/`; GitHub Issues remain authoritative.
 
 ## Conventions
 
