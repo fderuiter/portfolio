@@ -32,9 +32,21 @@ Re-exports [AmbientEvent](types/interfaces/AmbientEvent.md)
 
 ***
 
+### AmbientEventGeneratorOptions
+
+Re-exports [AmbientEventGeneratorOptions](events/interfaces/AmbientEventGeneratorOptions.md)
+
+***
+
 ### AmbientEventOption
 
 Re-exports [AmbientEventOption](types/interfaces/AmbientEventOption.md)
+
+***
+
+### assignTransportPriority
+
+Re-exports [assignTransportPriority](oet-engine/functions/assignTransportPriority.md)
 
 ***
 
@@ -65,6 +77,12 @@ Re-exports [calculateDebriefScore](debrief/functions/calculateDebriefScore.md)
 ### calculateElevationAt
 
 Re-exports [calculateElevationAt](welch-data/functions/calculateElevationAt.md)
+
+***
+
+### calculateInjurySeverity
+
+Re-exports [calculateInjurySeverity](oet-engine/functions/calculateInjurySeverity.md)
 
 ***
 
@@ -248,9 +266,27 @@ Re-exports [evaluateOETCompliance](oet-engine/functions/evaluateOETCompliance.md
 
 ***
 
+### EventQueue
+
+Re-exports [EventQueue](events/classes/EventQueue.md)
+
+***
+
 ### extractOetMetrics
 
 Re-exports [extractOetMetrics](debrief/functions/extractOetMetrics.md)
+
+***
+
+### filterEventsBySeverity
+
+Re-exports [filterEventsBySeverity](events/functions/filterEventsBySeverity.md)
+
+***
+
+### filterEventsByType
+
+Re-exports [filterEventsByType](events/functions/filterEventsByType.md)
 
 ***
 
@@ -260,9 +296,27 @@ Re-exports [findDialogueOption](dialogue/functions/findDialogueOption.md)
 
 ***
 
+### formatEventLog
+
+Re-exports [formatEventLog](events/functions/formatEventLog.md)
+
+***
+
+### generateAmbientEvent
+
+Re-exports [generateAmbientEvent](events/functions/generateAmbientEvent.md)
+
+***
+
 ### generateDebriefReport
 
 Re-exports [generateDebriefReport](debrief/functions/generateDebriefReport.md)
+
+***
+
+### generateWeatherEvent
+
+Re-exports [generateWeatherEvent](events/functions/generateWeatherEvent.md)
 
 ***
 
@@ -323,6 +377,12 @@ Re-exports [IncidentSeverity](types/type-aliases/IncidentSeverity.md)
 ### INITIAL\_PATROL\_SCENARIOS
 
 Re-exports [INITIAL_PATROL_SCENARIOS](scenarios/catalog/variables/INITIAL_PATROL_SCENARIOS.md)
+
+***
+
+### InjurySeverityResult
+
+Re-exports [InjurySeverityResult](oet-engine/interfaces/InjurySeverityResult.md)
 
 ***
 
@@ -566,6 +626,12 @@ Re-exports [SnowSprayParticle](types/interfaces/SnowSprayParticle.md)
 
 ***
 
+### sortEventsByTimestamp
+
+Re-exports [sortEventsByTimestamp](events/functions/sortEventsByTimestamp.md)
+
+***
+
 ### SUMMIT\_ELEVATION\_FT
 
 Re-exports [SUMMIT_ELEVATION_FT](welch-data/variables/SUMMIT_ELEVATION_FT.md)
@@ -578,6 +644,12 @@ Re-exports [transitionShiftPhase](engine/functions/transitionShiftPhase.md)
 
 ***
 
+### TransportPriorityAssignment
+
+Re-exports [TransportPriorityAssignment](oet-engine/interfaces/TransportPriorityAssignment.md)
+
+***
+
 ### VERTICAL\_DROP\_FT
 
 Re-exports [VERTICAL_DROP_FT](welch-data/variables/VERTICAL_DROP_FT.md)
@@ -587,6 +659,18 @@ Re-exports [VERTICAL_DROP_FT](welch-data/variables/VERTICAL_DROP_FT.md)
 ### VitalsData
 
 Re-exports [VitalsData](types/interfaces/VitalsData.md)
+
+***
+
+### WeatherEventOptions
+
+Re-exports [WeatherEventOptions](events/interfaces/WeatherEventOptions.md)
+
+***
+
+### WeatherType
+
+Re-exports [WeatherType](events/type-aliases/WeatherType.md)
 
 ***
 

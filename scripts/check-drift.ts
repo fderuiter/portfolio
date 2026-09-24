@@ -15,6 +15,7 @@ import {
 import {
   checkOnboardingDocsDrift,
   checkDirectoryTopology,
+  checkPublicRouteRegistryDrift,
 } from "../lib/dx/doctor";
 
 interface DetailCheckResult {
@@ -33,6 +34,7 @@ export interface DriftCheckDependencies {
   checkOnboarding: () => DetailCheckResult;
   checkTopology: () => DetailCheckResult;
   checkMarkdownLinks: () => MarkdownLinkCheckResult;
+  checkPublicRoutes: () => DetailCheckResult;
 }
 
 function defaultDependencies(workspaceRoot: string): DriftCheckDependencies {
@@ -49,6 +51,7 @@ function defaultDependencies(workspaceRoot: string): DriftCheckDependencies {
     checkOnboarding: () => checkOnboardingDocsDrift(workspaceRoot),
     checkTopology: () => checkDirectoryTopology(workspaceRoot),
     checkMarkdownLinks: () => checkMarkdownLinkIntegrity(workspaceRoot),
+    checkPublicRoutes: () => checkPublicRouteRegistryDrift(workspaceRoot),
   };
 }
 
@@ -59,7 +62,8 @@ export type DriftCategory =
   | "openapi"
   | "onboarding"
   | "topology"
-  | "markdown-links";
+  | "markdown-links"
+  | "public-routes";
 
 const REMEDIES: Record<DriftCategory, { title: string; steps: string[] }> = {
   "generated-docs": {
@@ -89,6 +93,11 @@ const REMEDIES: Record<DriftCategory, { title: string; steps: string[] }> = {
       "# Fix the reported link targets by hand",
       "npm run check-docs-drift",
     ],
+  },
+  "public-routes": {
+    title:
+      "Public route registry drift (a route in app/ is missing from lib/public-routes.ts or stale)",
+    steps: ["npm run doctor:fix", "git add lib/public-routes.ts"],
   },
 };
 
@@ -196,6 +205,19 @@ export function checkDrift(
     driftSummary +=
       "• Broken documentation markdown links detected:\n" +
       markdownLinkResult.details.map((detail) => `  - ${detail}`).join("\n") +
+      "\n";
+  }
+
+  console.log("Checking public route registry synchronization...");
+  const publicRoutesResult = dependencies.checkPublicRoutes();
+  if (publicRoutesResult.status === "fail") {
+    docsDrift = true;
+    categories.push("public-routes");
+    driftSummary +=
+      "• Public route registry drift detected:\n" +
+      (publicRoutesResult.details || [])
+        .map((detail) => `  - ${detail}`)
+        .join("\n") +
       "\n";
   }
 
