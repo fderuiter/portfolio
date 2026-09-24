@@ -14,6 +14,12 @@
 
 ## Properties
 
+### auth?
+
+> `optional` **auth?**: `"clerk_admin"` \| `"cron_secret"` \| `"public"`
+
+***
+
 ### customJsonError?
 
 > `optional` **customJsonError?**: `string`

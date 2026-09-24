@@ -4,13 +4,13 @@
 
 [fderuiter-portfolio](../../../modules.md) / [lib/route-wrapper](../README.md) / ApiRouteHandler
 
-# Type Alias: ApiRouteHandler
+# Type Alias: ApiRouteHandler()
 
-> **ApiRouteHandler** = \{(`req?`, `routeParams?`): `Promise`\<`NextResponse`\<`unknown`\>\>; (`req`, `routeContext`): `Promise`\<`NextResponse`\<`unknown`\>\>; \}
+> **ApiRouteHandler** = `Promise`\<`NextResponse`\<`unknown`\>\>
 
 ## Call Signature
 
-> (`req?`, `routeParams?`): `Promise`\<`NextResponse`\<`unknown`\>\>
+> **ApiRouteHandler**(`req?`, `routeParams?`): `Promise`\<`NextResponse`\<`unknown`\>\>
 
 ### Parameters
 
@@ -30,7 +30,7 @@
 
 ## Call Signature
 
-> (`req`, `routeContext`): `Promise`\<`NextResponse`\<`unknown`\>\>
+> **ApiRouteHandler**(`req`, `routeContext`): `Promise`\<`NextResponse`\<`unknown`\>\>
 
 ### Parameters
 
@@ -47,3 +47,9 @@
 ### Returns
 
 `Promise`\<`NextResponse`\<`unknown`\>\>
+
+## Properties
+
+### auth?
+
+> `optional` **auth?**: `"clerk_admin"` \| `"cron_secret"` \| `"public"`

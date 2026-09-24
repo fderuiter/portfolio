@@ -39,6 +39,11 @@
       "post": {
         "summary": "Submit draft technical post-mortem case study",
         "description": "Submits a new technical case study or prototype post-mortem as an unpublished draft record.",
+        "security": [
+          {
+            "ClerkAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -527,6 +532,11 @@
       "get": {
         "summary": "Run the unified daily maintenance pipeline",
         "description": "Authenticated Vercel Hobby cron route that drains telemetry and reaction buffers, processes a bounded email retry batch, and rolls raw telemetry older than 30 days into daily aggregates before pruning it. Returns isolated per-phase outcomes under an eight-second overall deadline.",
+        "security": [
+          {
+            "CronSecretAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "Authorization",
@@ -571,6 +581,11 @@
       "get": {
         "summary": "Cron synchronization of buffered events",
         "description": "Backward-compatible alias for the unified daily maintenance pass. Pulls buffered telemetry events from the secondary Redis cache and flushes them to the primary datastore in batches, then drains the case-study reaction write-buffer into Postgres.",
+        "security": [
+          {
+            "CronSecretAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "Authorization",
@@ -809,6 +824,11 @@
       "get": {
         "summary": "List unpublished blog drafts",
         "description": "Returns persisted unpublished BlogPost rows for authorized administrators only. Public fallback content is never used for this inventory.",
+        "security": [
+          {
+            "ClerkAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "page",
@@ -879,6 +899,11 @@
       "post": {
         "summary": "Create an unpublished sanitized blog draft",
         "description": "Creates a persisted BlogPost in server-owned unpublished state for an authorized administrator. Publication, identity, and timestamp fields are rejected.",
+        "security": [
+          {
+            "ClerkAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -947,6 +972,11 @@
       "get": {
         "summary": "Read an unpublished blog draft",
         "description": "Returns one persisted unpublished BlogPost row for an authorized administrator. Published records and public fallback content are not available through this endpoint.",
+        "security": [
+          {
+            "ClerkAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -1015,6 +1045,11 @@
       "patch": {
         "summary": "Edit an unpublished sanitized blog draft",
         "description": "Partially updates a persisted BlogPost only while it remains unpublished. Publication, identity, and timestamp fields are rejected, changed HTML is sanitized, and old and new slug caches are invalidated only after persistence succeeds.",
+        "security": [
+          {
+            "ClerkAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -1103,6 +1138,11 @@
       "delete": {
         "summary": "Delete a blog post or draft",
         "description": "Deletes a persisted BlogPost or draft record by ID and evicts associated caches.",
+        "security": [
+          {
+            "ClerkAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -1186,6 +1226,11 @@
       "post": {
         "summary": "Upload and link project hero image",
         "description": "Stores a validated media asset and updates the target case study hero image URL for authorized administrators.",
+        "security": [
+          {
+            "ClerkAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "slug",
@@ -1283,6 +1328,11 @@
       "delete": {
         "summary": "Clear project hero image",
         "description": "Clears the hero image URL associated with a project for authorized administrators.",
+        "security": [
+          {
+            "ClerkAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "slug",
@@ -1402,6 +1452,20 @@
     }
   },
   "components": {
+    "securitySchemes": {
+      "ClerkAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Clerk session token or administrative JWT"
+      },
+      "CronSecretAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "Secret",
+        "description": "Cron secret bearer authorization header"
+      }
+    },
     "schemas": {
       "MaintenanceSummary": {
         "type": "object",

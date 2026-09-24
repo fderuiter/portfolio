@@ -21,5 +21,5 @@ export const GET = createApiHandler(
     const summary = await MaintenanceService.run({ batchSize: data.batch });
     return NextResponse.json(summary, { status: 200 });
   },
-  { schema: SyncParamsSchema, type: "query" }
+  { schema: SyncParamsSchema, type: "query", auth: "cron_secret" }
 );

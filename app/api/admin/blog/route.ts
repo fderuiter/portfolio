@@ -52,6 +52,7 @@ export const GET = createApiHandler(
     schema: BlogDraftPaginationSchema,
     type: "query",
     customValidationError: validationError,
+    auth: "clerk_admin",
   }
 );
 
@@ -106,5 +107,6 @@ export const POST = createApiHandler(
     type: "body",
     customJsonError: "Invalid JSON payload",
     customValidationError: validationError,
+    auth: "clerk_admin",
   }
 );
