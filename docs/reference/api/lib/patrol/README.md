@@ -32,9 +32,33 @@ Re-exports [AmbientEvent](types/interfaces/AmbientEvent.md)
 
 ***
 
+### AmbientEventGeneratorOptions
+
+Re-exports [AmbientEventGeneratorOptions](events/interfaces/AmbientEventGeneratorOptions.md)
+
+***
+
 ### AmbientEventOption
 
 Re-exports [AmbientEventOption](types/interfaces/AmbientEventOption.md)
+
+***
+
+### assignTransportPriority
+
+Re-exports [assignTransportPriority](oet-engine/functions/assignTransportPriority.md)
+
+***
+
+### AvalancheEventOptions
+
+Re-exports [AvalancheEventOptions](events/interfaces/AvalancheEventOptions.md)
+
+***
+
+### AvalancheTriggerType
+
+Re-exports [AvalancheTriggerType](events/type-aliases/AvalancheTriggerType.md)
 
 ***
 
@@ -59,6 +83,12 @@ Re-exports [calculateAverageGrade](welch-data/functions/calculateAverageGrade.md
 ### calculateElevationAt
 
 Re-exports [calculateElevationAt](welch-data/functions/calculateElevationAt.md)
+
+***
+
+### calculateInjurySeverity
+
+Re-exports [calculateInjurySeverity](oet-engine/functions/calculateInjurySeverity.md)
 
 ***
 
@@ -230,9 +260,27 @@ Re-exports [evaluateOETCompliance](oet-engine/functions/evaluateOETCompliance.md
 
 ***
 
+### EventQueue
+
+Re-exports [EventQueue](events/classes/EventQueue.md)
+
+***
+
 ### extractOetMetrics
 
 Re-exports [extractOetMetrics](debrief/functions/extractOetMetrics.md)
+
+***
+
+### filterEventsBySeverity
+
+Re-exports [filterEventsBySeverity](events/functions/filterEventsBySeverity.md)
+
+***
+
+### filterEventsByType
+
+Re-exports [filterEventsByType](events/functions/filterEventsByType.md)
 
 ***
 
@@ -242,9 +290,33 @@ Re-exports [findDialogueOption](dialogue/functions/findDialogueOption.md)
 
 ***
 
+### formatEventLog
+
+Re-exports [formatEventLog](events/functions/formatEventLog.md)
+
+***
+
+### generateAmbientEvent
+
+Re-exports [generateAmbientEvent](events/functions/generateAmbientEvent.md)
+
+***
+
+### generateAvalancheTriggerEvent
+
+Re-exports [generateAvalancheTriggerEvent](events/functions/generateAvalancheTriggerEvent.md)
+
+***
+
 ### generateDebriefReport
 
 Re-exports [generateDebriefReport](debrief/functions/generateDebriefReport.md)
+
+***
+
+### generateWeatherEvent
+
+Re-exports [generateWeatherEvent](events/functions/generateWeatherEvent.md)
 
 ***
 
@@ -299,6 +371,12 @@ Re-exports [IncidentDebriefResult](types/interfaces/IncidentDebriefResult.md)
 ### IncidentSeverity
 
 Re-exports [IncidentSeverity](types/type-aliases/IncidentSeverity.md)
+
+***
+
+### InjurySeverityResult
+
+Re-exports [InjurySeverityResult](oet-engine/interfaces/InjurySeverityResult.md)
 
 ***
 
@@ -530,9 +608,21 @@ Re-exports [ShiftState](types/interfaces/ShiftState.md)
 
 ***
 
+### SnowpackType
+
+Re-exports [SnowpackType](events/type-aliases/SnowpackType.md)
+
+***
+
 ### SnowSprayParticle
 
 Re-exports [SnowSprayParticle](types/interfaces/SnowSprayParticle.md)
+
+***
+
+### sortEventsByTimestamp
+
+Re-exports [sortEventsByTimestamp](events/functions/sortEventsByTimestamp.md)
 
 ***
 
@@ -548,6 +638,12 @@ Re-exports [transitionShiftPhase](engine/functions/transitionShiftPhase.md)
 
 ***
 
+### TransportPriorityAssignment
+
+Re-exports [TransportPriorityAssignment](oet-engine/interfaces/TransportPriorityAssignment.md)
+
+***
+
 ### VERTICAL\_DROP\_FT
 
 Re-exports [VERTICAL_DROP_FT](welch-data/variables/VERTICAL_DROP_FT.md)
@@ -557,6 +653,18 @@ Re-exports [VERTICAL_DROP_FT](welch-data/variables/VERTICAL_DROP_FT.md)
 ### VitalsData
 
 Re-exports [VitalsData](types/interfaces/VitalsData.md)
+
+***
+
+### WeatherEventOptions
+
+Re-exports [WeatherEventOptions](events/interfaces/WeatherEventOptions.md)
+
+***
+
+### WeatherType
+
+Re-exports [WeatherType](events/type-aliases/WeatherType.md)
 
 ***
 
