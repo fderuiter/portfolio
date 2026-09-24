@@ -9,6 +9,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { ClinicalTrialChaos } from "@/components/ClinicalTrialChaos";
+import { ClinicalChaosClient } from "@/components/arcade/ClinicalChaosClient";
 
 class LocalStorageMock {
   private store: Record<string, string> = {};
@@ -92,19 +93,52 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
       moveTo: vi.fn(),
       lineTo: vi.fn(),
       arc: vi.fn(),
+      arcTo: vi.fn(),
       ellipse: vi.fn(),
       roundRect: vi.fn(),
       rect: vi.fn(),
+      quadraticCurveTo: vi.fn(),
+      bezierCurveTo: vi.fn(),
       fill: vi.fn(),
       stroke: vi.fn(),
       fillText: vi.fn(),
+      strokeText: vi.fn(),
+      measureText: vi.fn((text: string) => ({
+        width: (text || "").length * 8,
+        height: 16,
+      })),
       createLinearGradient: vi.fn(() => ({
         addColorStop: vi.fn(),
       })),
       createRadialGradient: vi.fn(() => ({
         addColorStop: vi.fn(),
       })),
+      createPattern: vi.fn(),
+      getImageData: vi.fn(
+        (_sx?: number, _sy?: number, sw?: number, sh?: number) => {
+          const width = typeof sw === "number" && sw > 0 ? sw : 256;
+          const height = typeof sh === "number" && sh > 0 ? sh : 256;
+          return {
+            width,
+            height,
+            data: new Uint8ClampedArray(width * height * 4),
+          };
+        }
+      ),
+      putImageData: vi.fn(),
+      createImageData: vi.fn((w?: number | ImageData, h?: number) => {
+        const width = typeof w === "number" && w > 0 ? w : 256;
+        const height = typeof h === "number" && h > 0 ? h : 256;
+        return {
+          width,
+          height,
+          data: new Uint8ClampedArray(width * height * 4),
+        };
+      }),
+      drawImage: vi.fn(),
       setLineDash: vi.fn(),
+      getLineDash: vi.fn(() => []),
+      clip: vi.fn(),
     };
 
     HTMLCanvasElement.prototype.getContext = vi.fn(() => mockCtx as any);
@@ -798,5 +832,112 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     expect(container.textContent).toContain("SUBJ-1002");
 
     vi.restoreAllMocks();
+  });
+
+  describe("ClinicalChaosClient Wrapper Suite", () => {
+    it("renders ClinicalChaosClient standby page layout with controls and navigation", async () => {
+      await act(async () => {
+        root.render(<ClinicalChaosClient />);
+      });
+
+      expect(container.textContent).toContain(
+        "Clinical Trial Chaos: CDISC Compliance"
+      );
+      expect(container.textContent).toContain("Back to Arcade Hub");
+      expect(container.textContent).toContain(
+        "CDISC SDTM / 21 CFR Part 11 Arcade"
+      );
+      expect(container.textContent).toContain("Standardize CDISC Data");
+      expect(container.textContent).toContain("21 CFR Electronic Signatures");
+      expect(container.textContent).toContain("FDA Auditor & Form 483");
+      expect(container.textContent).toContain("Launch Cabinet");
+    });
+
+    it("launches cabinet from ClinicalChaosClient and handles conveyor pause and drawer interlocks", async () => {
+      vi.useFakeTimers();
+
+      await act(async () => {
+        root.render(<ClinicalChaosClient />);
+      });
+
+      // Click Launch Cabinet
+      const launchBtn = Array.from(container.querySelectorAll("button")).find(
+        (b) => b.textContent?.includes("Launch Cabinet")
+      );
+      expect(launchBtn).toBeDefined();
+
+      await act(async () => {
+        launchBtn?.click();
+      });
+
+      // Advance timers for boot sequence warm-up
+      for (let i = 0; i < 20; i++) {
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(200);
+        });
+      }
+
+      // Verify cabinet launched and shows shift briefing
+      expect(container.textContent).toContain("Shift briefing");
+
+      // Start campaign inside cabinet
+      const startBtn = Array.from(container.querySelectorAll("button")).find(
+        (b) => b.textContent?.includes("Start 3-Phase Campaign")
+      );
+      expect(startBtn).toBeDefined();
+
+      await act(async () => {
+        startBtn?.click();
+      });
+
+      expect(container.textContent).toContain("SUBJ-1001");
+
+      // Helper to tick fake timers in small steps
+      const tickGame = async (totalMs: number, stepMs = 250) => {
+        for (let elapsed = 0; elapsed < totalMs; elapsed += stepMs) {
+          await act(async () => {
+            await vi.advanceTimersByTimeAsync(stepMs);
+          });
+        }
+      };
+
+      // Let 2.5s pass
+      await tickGame(2500, 100);
+      expect(container.textContent).toContain("38s");
+
+      // Open drawer (interlock)
+      const validateChoiceEl = Array.from(
+        container.querySelectorAll("span")
+      ).find((s) => s.textContent?.includes("Validate Choice"));
+      const obsCard = validateChoiceEl?.closest(
+        ".cursor-pointer"
+      ) as HTMLElement;
+
+      await act(async () => {
+        obsCard.click();
+      });
+
+      expect(container.textContent).toContain(
+        "CDISC Controlled Terminology Validation"
+      );
+
+      // Verify timer is frozen during drawer interlock pause
+      await tickGame(3000, 100);
+      expect(container.textContent).toContain("38s");
+
+      // Close drawer
+      const closeBtn = Array.from(container.querySelectorAll("button")).find(
+        (b) => b.textContent?.includes("Close")
+      );
+      await act(async () => {
+        closeBtn?.click();
+      });
+
+      // Timer resumes after closing drawer
+      await tickGame(2000, 100);
+      expect(container.textContent).toContain("36s");
+
+      vi.useRealTimers();
+    }, 15000);
   });
 });

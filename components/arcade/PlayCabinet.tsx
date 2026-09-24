@@ -16,6 +16,7 @@ import {
   getSavedSetupConfig,
   GameSetupConfig,
 } from "@/components/arcade/PreGameSetupWizard";
+import { logger } from "@/lib/logger";
 
 interface ControlItem {
   key: string;
@@ -163,7 +164,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
           setIsLoaded(true);
         })
         .catch((err) => {
-          console.error("Prefetch failed:", err);
+          logger.error("Prefetch failed:", err);
           setIsPrefetched(false);
         });
     }

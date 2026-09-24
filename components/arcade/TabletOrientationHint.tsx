@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { IconDeviceMobileRotated, IconX } from "@tabler/icons-react";
+import { getMatchMediaMatches } from "@/hooks/useMediaQuery";
 
 export interface TabletOrientationHintProps {
   className?: string;
@@ -16,14 +17,11 @@ export const TabletOrientationHint: React.FC<TabletOrientationHintProps> = ({
   useEffect(() => {
     const checkOrientation = () => {
       if (typeof window === "undefined") return;
-      const hasMatchMedia = typeof window.matchMedia === "function";
       const isTouch =
         "ontouchstart" in window ||
         (typeof navigator !== "undefined" && navigator.maxTouchPoints > 0) ||
-        (hasMatchMedia && window.matchMedia("(pointer: coarse)").matches);
-      const isPortrait = hasMatchMedia
-        ? window.matchMedia("(orientation: portrait)").matches
-        : false;
+        getMatchMediaMatches("(pointer: coarse)");
+      const isPortrait = getMatchMediaMatches("(orientation: portrait)");
       const isTabletOrSmall = window.innerWidth <= 1024;
 
       setIsPortraitTouch(isTouch && isPortrait && isTabletOrSmall);
