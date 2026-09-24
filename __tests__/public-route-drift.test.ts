@@ -121,6 +121,9 @@ describe("routeExistsOnDisk helper", () => {
     expect(
       routeExistsOnDisk("/case-studies/clinical-data-mapper", appDir)
     ).toBe(true);
+    expect(
+      routeExistsOnDisk("/case-studies/nonexistent-case-study", appDir)
+    ).toBe(false);
     expect(routeExistsOnDisk("/arcade/nonexistent", appDir)).toBe(false);
     expect(routeExistsOnDisk("/nonexistent-page", appDir)).toBe(false);
   });
