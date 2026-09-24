@@ -174,6 +174,11 @@ above is `.optional()` in the schema, so an empty `.env.local` still passes
 schema validation — the individual services fall back to the degraded modes
 described above rather than the preflight blocking on missing secrets).
 
+Vercel production builds add a stricter, production-only check on top:
+[`scripts/vercel-production-preflight.js`](../../scripts/vercel-production-preflight.js)
+fails the build when required configuration is missing or unsafe. See
+[Production Configuration Preflight](../how-to/release-and-deploy.md#production-configuration-preflight).
+
 `npm run doctor` / `npm run doctor:fix` run this check alongside the other
 architectural invariants; see
 [ADR 0027](../../adr/0027-agent-first-cli-ergonomics-and-machine-readable-dx-architecture.md)

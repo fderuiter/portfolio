@@ -196,6 +196,51 @@ The QStash integration provisions `QSTASH_*`. No code reads them yet.
   branch except `main` to protect build-hour and storage quota. Preview builds
   never migrate even if one is started by hand.
 
+## Production Configuration Preflight
+
+A Vercel production build checks its own configuration before it does
+anything else. `scripts/build.js` runs
+[`scripts/vercel-production-preflight.js`](../../scripts/vercel-production-preflight.js)
+only when `VERCEL=1` and `VERCEL_ENV=production`. Local, CI and preview builds
+skip it. It runs before the build substitutes offline dummy values and before
+migrations, so a missing variable can't be masked by a fallback or leave a
+half-migrated schema.
+
+**Checks that fail the build:**
+
+- **Always required:** `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `CRON_SECRET`,
+  `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` and `NODE_OPTIONS`.
+- **Required once a feature is configured:**
+  - Setting `ADMIN_USER_IDS`, `ADMIN_EMAILS` or either Clerk key turns on the
+    admin area, which then needs both Clerk keys.
+  - Setting any of `SENTRY_ORG`, `SENTRY_PROJECT` or `SENTRY_AUTH_TOKEN` turns
+    on source-map upload, which then needs all three.
+- **Unsafe values:**
+  - A database URL that isn't `postgres://` or points at localhost.
+  - An Upstash URL that isn't `https://`.
+  - `NODE_OPTIONS` without `--experimental-require-module`.
+  - A Clerk `sk_test_` or `pk_test_` key.
+  - A `NEXT_PUBLIC_APP_URL` other than `https://deruiter.dev`. Unset is fine.
+  - A value containing a placeholder marker such as `dummy`, `example` or
+    `placeholder`.
+
+**Optional:** an unset `RESEND_API_KEY`, `RESEND_WEBHOOK_SECRET`,
+`NEXT_PUBLIC_SENTRY_DSN` or `BLOB_READ_WRITE_TOKEN` prints a note naming the
+degraded feature. It doesn't fail the build.
+
+The preflight prints variable names and reasons, never values.
+
+**When it fails:** the build log lists every problem at once, as
+`- NAME reason.` The live deployment keeps serving. To fix it:
+
+1. In Vercel, open **Settings, Environment Variables** and correct each named
+   variable for **Production**.
+2. Open the newest failed `main` deployment and press **Redeploy**. It
+   rebuilds that commit with the corrected variables. Use it only when that
+   commit is still the tip of `main`; otherwise merge the next PR.
+3. If the preflight itself is wrong, fix it with a `fix/` PR. It has no
+   override variable.
+
 ## Capacity
 
 Vercel Hobby limits build hours and Functions storage. The last readings
