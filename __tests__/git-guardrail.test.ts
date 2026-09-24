@@ -14,7 +14,7 @@ function runGuardrail(
     const result = spawnSync("bash", [guardrailScript], {
       input: commandOrJson,
       encoding: "utf-8",
-      env: { ...process.env, CI: "", ...env },
+      env: { ...process.env, ALLOW_DANGEROUS_GIT: "0", CI: "", ...env },
     });
     return {
       exitCode: result.status,
@@ -28,7 +28,7 @@ function runGuardrail(
     [guardrailScript, ...commandOrJson.split(" ")],
     {
       encoding: "utf-8",
-      env: { ...process.env, CI: "", ...env },
+      env: { ...process.env, ALLOW_DANGEROUS_GIT: "0", CI: "", ...env },
     }
   );
   return {
