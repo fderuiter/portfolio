@@ -10,6 +10,7 @@ import React, {
 } from "react"
 import { motion, useReducedMotion } from "framer-motion"
 import { useResizeObserver } from "@/hooks/useResizeObserver"
+import { useMediaQuery } from "@/hooks/useMediaQuery"
 
 import { cn } from "@/lib/utils"
 
@@ -31,22 +32,6 @@ type Square = {
   iteration: number
 }
 
-function subscribeMobile(callback: () => void) {
-  if (typeof window === "undefined" || !window.matchMedia) return () => {};
-  const mql = window.matchMedia("(max-width: 767px)");
-  mql.addEventListener("change", callback);
-  return () => mql.removeEventListener("change", callback);
-}
-
-function getMobileSnapshot(): boolean {
-  if (typeof window === "undefined" || !window.matchMedia) return false;
-  return window.matchMedia("(max-width: 767px)").matches;
-}
-
-function getMobileServerSnapshot(): boolean {
-  return false;
-}
-
 export function AnimatedGridPattern({
   width = 40,
   height = 40,
@@ -62,7 +47,7 @@ export function AnimatedGridPattern({
 }: AnimatedGridPatternProps) {
   const id = useId()
   const shouldReduceMotion = useReducedMotion()
-  const isMobile = React.useSyncExternalStore(subscribeMobile, getMobileSnapshot, getMobileServerSnapshot)
+  const isMobile = useMediaQuery("(max-width: 767px)")
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
   const containerRef = useResizeObserver<SVGSVGElement>((entry) => {
     setDimensions((currentDimensions) => {
