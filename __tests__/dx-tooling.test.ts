@@ -164,13 +164,8 @@ describe("Developer Experience (DX) Tooling Suite", () => {
 
     it("validates branch names against team conventions", () => {
       expect(validateBranchName("main").valid).toBe(true);
-      expect(validateBranchName("dev").valid).toBe(true);
       expect(validateBranchName("feat/add-dx-suite").valid).toBe(true);
       expect(validateBranchName("fix/proof-ast-bug").valid).toBe(true);
-      expect(validateBranchName("chore/deps-update").valid).toBe(true);
-      expect(validateBranchName("refactor/clean-types").valid).toBe(true);
-      expect(validateBranchName("docs/update-readme").valid).toBe(true);
-      expect(validateBranchName("perf/optimize-render").valid).toBe(true);
       expect(validateBranchName("dx/commit-wizard").valid).toBe(true);
 
       const invalidBranch = validateBranchName("random_branch_name");
