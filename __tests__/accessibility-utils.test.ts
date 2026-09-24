@@ -14,21 +14,23 @@ describe("Accessibility Utilities", () => {
   });
 
   describe("PDFEngine", () => {
-    it("returns a valid PDF/UA Buffer payload when taxData is provided", () => {
+    it("returns a placeholder Buffer containing the 1099 export string when taxData is provided", () => {
       const taxData = { recipient: "John Doe", amount: 5000, taxYear: 2026 };
       const result = PDFEngine.generate1099(taxData);
 
       expect(Buffer.isBuffer(result)).toBe(true);
-      expect(result.toString("utf-8")).toContain(
+      expect(result.toString("utf-8")).toBe(
         "PDF/UA (ISO 14289) Valid Document: 1099 Export"
       );
     });
 
-    it("handles empty taxData payloads without error", () => {
+    it("returns the placeholder Buffer for empty taxData payloads", () => {
       const result = PDFEngine.generate1099({});
 
       expect(Buffer.isBuffer(result)).toBe(true);
-      expect(result.toString("utf-8")).toContain("PDF/UA (ISO 14289)");
+      expect(result.toString("utf-8")).toBe(
+        "PDF/UA (ISO 14289) Valid Document: 1099 Export"
+      );
     });
   });
 
