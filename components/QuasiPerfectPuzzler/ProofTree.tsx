@@ -101,9 +101,19 @@ export const ProofTree: React.FC<ProofTreeProps> = ({
         className="flex flex-col gap-2 font-mono"
       >
         <div
+          role="button"
+          tabIndex={0}
+          aria-label={`Select proof tree node ${node.label}`}
+          aria-pressed={isSelected}
           data-testid="proof-tree-node"
           onClick={() => handleNodeClick(node.id)}
-          className={`group flex items-center justify-between gap-3 rounded-xl border px-3 py-2 text-xs transition-all cursor-pointer ${getStatusStyle()} ${
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              handleNodeClick(node.id);
+            }
+          }}
+          className={`group flex items-center justify-between gap-3 rounded-xl border px-3 py-2 text-xs transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-cyan-400 ${getStatusStyle()} ${
             isSelected
               ? "ring-2 ring-cyan-400 bg-cyan-900/60 shadow-[0_0_12px_rgba(6,182,212,0.5)]"
               : "hover:border-zinc-500"
@@ -116,7 +126,10 @@ export const ProofTree: React.FC<ProofTreeProps> = ({
                 data-testid="expand-toggle"
                 aria-label={`Toggle expand for node ${node.label}`}
                 onClick={(e) => handleToggleNode(node, e)}
-                className="p-1 rounded hover:bg-zinc-800/60 text-zinc-400 hover:text-white transition-colors"
+                onKeyDown={(e) => {
+                  e.stopPropagation();
+                }}
+                className="p-1 rounded hover:bg-zinc-800/60 text-zinc-400 hover:text-white transition-colors focus:outline-none focus:ring-1 focus:ring-cyan-400"
               >
                 {expanded ? (
                   <IconChevronDown className="w-3.5 h-3.5" />

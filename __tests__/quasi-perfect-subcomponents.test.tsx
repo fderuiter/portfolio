@@ -205,20 +205,25 @@ describe("Quasi-Perfect Puzzler Subcomponents Test Suite", () => {
       expect(screen.queryByText("Subgoal 1: P")).toBeNull();
     });
 
-    it("triggers onSelectNode when node is clicked", () => {
+    it("triggers onSelectNode when node is clicked or activated via keyboard", () => {
       const handleSelectNode = vi.fn();
 
       render(
         <ProofTree rootNode={sampleTree} onSelectNode={handleSelectNode} />
       );
 
-      const nodeEl = screen.getByText("Subgoal 1: P");
+      const nodeEl = screen.getByRole("button", { name: "Select proof tree node Subgoal 1: P" });
       fireEvent.click(nodeEl);
+      expect(handleSelectNode).toHaveBeenLastCalledWith("sub-1");
 
-      expect(handleSelectNode).toHaveBeenCalledWith("sub-1");
+      fireEvent.keyDown(nodeEl, { key: "Enter" });
+      expect(handleSelectNode).toHaveBeenLastCalledWith("sub-1");
+
+      fireEvent.keyDown(nodeEl, { key: " " });
+      expect(handleSelectNode).toHaveBeenLastCalledWith("sub-1");
     });
 
-    it("respects controlled expandedNodeIds prop and requests expansion on click", () => {
+    it("respects controlled expandedNodeIds prop and requests toggle state correctly", () => {
       const handleToggleExpand = vi.fn();
       render(
         <ProofTree
@@ -235,11 +240,15 @@ describe("Quasi-Perfect Puzzler Subcomponents Test Suite", () => {
       // sub-2 is NOT in expandedNodeIds -> sub-2-1 should be hidden
       expect(screen.queryByText("Premise hQ: Q")).toBeNull();
 
-      // Click toggle on sub-2 (collapsed in controlled mode) -> should report true
+      // Click toggle on sub-2 (collapsed in controlled mode) -> should report true (request expand)
       const sub2ToggleBtn = screen.getByLabelText("Toggle expand for node Subgoal 2: Q");
       fireEvent.click(sub2ToggleBtn);
+      expect(handleToggleExpand).toHaveBeenLastCalledWith("sub-2", true);
 
-      expect(handleToggleExpand).toHaveBeenCalledWith("sub-2", true);
+      // Click toggle on root (expanded in controlled mode) -> should report false (request collapse)
+      const rootToggleBtn = screen.getByLabelText("Toggle expand for node Goal: P ∧ Q");
+      fireEvent.click(rootToggleBtn);
+      expect(handleToggleExpand).toHaveBeenLastCalledWith("root", false);
     });
   });
 
