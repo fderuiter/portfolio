@@ -91,9 +91,12 @@ test.describe("Case-study architecture diagrams", () => {
     const requestedUrls: string[] = [];
     page.on("request", (request) => requestedUrls.push(request.url()));
 
-    await page.goto("/case-studies/imednet-python-sdk", {
-      waitUntil: "networkidle",
+    // Every case study now carries an architecture diagram (#928), so this
+    // uses a blog dispatch: the same RichNarrative renderer, no Mermaid source.
+    await page.goto("/blog/the-cost-of-being-wrong-quietly", {
+      waitUntil: "load",
     });
+    await expect(page.locator("article").first()).toBeVisible();
 
     await expect(page.locator("[data-mermaid-diagram]")).toHaveCount(0);
     await expect(page.locator("[data-mermaid-error]")).toHaveCount(0);
