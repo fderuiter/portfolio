@@ -65,11 +65,15 @@ export const HAND_NAMES: Readonly<Record<HandType, string>> = Object.freeze({
   MEDDRA_FIVE_OF_A_KIND: "MedDRA Five of a Kind",
 });
 
-/** The card fields hand detection reads. */
+/**
+ * The card fields hand detection reads. `stale` marks an output compiled
+ * against a population snapshot that has since changed; it cannot make a
+ * Population Flush.
+ */
 export type ClassifiableCard = Pick<
   TlfCard,
   "id" | "cardType" | "population" | "chips" | "topic" | "csrStage" | "soc"
->;
+> & { stale?: boolean };
 
 const MAX_HAND = 5;
 
@@ -112,7 +116,9 @@ const MATCHERS: Readonly<
     cards.length === 5 &&
     cards.every(
       (c) =>
-        c.cardType !== "SUBJECT_TOKEN" && c.population === cards[0].population
+        c.cardType !== "SUBJECT_TOKEN" &&
+        !c.stale &&
+        c.population === cards[0].population
     ),
   TLF_TWO_PAIR: (cards) => {
     if (cards.length !== 4) return false;

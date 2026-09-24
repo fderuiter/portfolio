@@ -6,9 +6,11 @@
 
 # Function: createTableState()
 
-> **createTableState**(`scenario`): [`TableState`](../interfaces/TableState.md)
+> **createTableState**(`scenario`, `history?`): [`TableState`](../interfaces/TableState.md)
 
-Fresh Card Table state: the first hand dealt, full CPU.
+Fresh Card Table state: the first hand dealt against the study's current
+snapshot, full CPU. `history` carries earlier Blinds' snapshot versions;
+without it the study starts at the scenario's own snapshot.
 
 ## Parameters
 
@@ -71,6 +73,12 @@ Present only on a Boss Blind.
 #### drawPile
 
 `object`[] = `...`
+
+#### events?
+
+`object`[] = `...`
+
+Scripted population changes during this Blind, in hand order.
 
 #### handType
 
@@ -173,6 +181,10 @@ The short intro card shown when the Blind starts.
 #### title
 
 `string` = `...`
+
+### history?
+
+[`StudyHistory`](../interfaces/StudyHistory.md) = `...`
 
 ## Returns
 

@@ -19,10 +19,11 @@ import {
 } from "../types";
 import { decimalPlaces, roundRatio } from "./rounding";
 
-const NOT_ESTIMABLE = "—";
+/** Shown where a column has no subjects in the SAP population. */
+export const NOT_ESTIMABLE = "—";
 const INTEGER_PATTERN = /^\d+$/;
 const DECIMAL_PATTERN = /^-?\d+(?:\.\d+)?$/;
-const COUNT_PCT_PATTERN = /^(\d+) \((-?\d+(?:\.\d+)?)\)$/;
+export const COUNT_PCT_PATTERN = /^(\d+) \((-?\d+(?:\.\d+)?)\)$/;
 
 const CATEGORY_ORDER: Readonly<Record<QcCategory, number>> = {
   DENOMINATOR: 0,
@@ -47,7 +48,7 @@ interface CellContext {
 }
 
 /** Subjects belonging to `population`, restricted to a column's arm. */
-function members(
+export function members(
   subjects: readonly Subject[],
   population: PopulationType,
   arm: ColumnArm
@@ -63,7 +64,9 @@ function members(
  * Populations that could plausibly have been used by mistake: every
  * population except the suit itself and any the SAP declares equal to it.
  */
-function alternativePopulations(rulebook: SapRulebook): PopulationType[] {
+export function alternativePopulations(
+  rulebook: SapRulebook
+): PopulationType[] {
   const suit = rulebook.populationSuit;
   const equivalent = new Set<PopulationType>([suit]);
   for (const alias of rulebook.populationAliases) {
@@ -100,7 +103,7 @@ function finding(
 }
 
 /** Numerator and denominator of a row statistic for a set of subjects. */
-function ratioFor(
+export function ratioFor(
   statistic: RowStatistic,
   subjects: readonly Subject[]
 ): { numerator: number; denominator: number } {
@@ -133,10 +136,13 @@ function ratioFor(
   }
 }
 
-type AeStatistic = Extract<RowStatistic, { kind: "AE_SUBJECT_COUNT_PCT" }>;
+export type AeStatistic = Extract<
+  RowStatistic,
+  { kind: "AE_SUBJECT_COUNT_PCT" }
+>;
 
 /** A subject's adverse events that match every filter on the row. */
-function matchingEvents(statistic: AeStatistic, subject: Subject) {
+export function matchingEvents(statistic: AeStatistic, subject: Subject) {
   return (subject.adverseEvents ?? []).filter(
     (event) =>
       (statistic.soc === undefined || event.soc === statistic.soc) &&

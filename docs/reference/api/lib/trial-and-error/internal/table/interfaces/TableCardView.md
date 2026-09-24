@@ -106,9 +106,37 @@ Revealed findings still uncorrected.
 
 ***
 
+### provenance
+
+> **provenance**: `object`
+
+The snapshot this card was compiled against.
+
+#### capturedAt
+
+> **capturedAt**: `string`
+
+#### id
+
+> **id**: `string` = `identifier`
+
+#### version
+
+> **version**: `number`
+
+***
+
 ### selected
 
 > **selected**: `boolean`
+
+***
+
+### stale
+
+> **stale**: `boolean`
+
+Compiled against a snapshot whose membership of this card's suit has since changed.
 
 ***
 

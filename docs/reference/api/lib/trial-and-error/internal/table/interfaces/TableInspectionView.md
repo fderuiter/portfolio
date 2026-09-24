@@ -258,6 +258,26 @@ Stable identifier: `<ruleId>@r<row>c<col>`.
 
 ***
 
+### provenance
+
+> **provenance**: `object`
+
+The snapshot the inspected output was compiled against.
+
+#### capturedAt
+
+> **capturedAt**: `string`
+
+#### id
+
+> **id**: `string` = `identifier`
+
+#### version
+
+> **version**: `number`
+
+***
+
 ### reviewedCells
 
 > **reviewedCells**: `number`
@@ -265,6 +285,12 @@ Stable identifier: `<ruleId>@r<row>c<col>`.
 #### Inherited from
 
 [`InspectionView`](../../inspection/interfaces/InspectionView.md).[`reviewedCells`](../../inspection/interfaces/InspectionView.md#reviewedcells)
+
+***
+
+### stale
+
+> **stale**: `boolean`
 
 ***
 

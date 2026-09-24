@@ -62,7 +62,20 @@ export {
   type TableInspectionView,
   type TableState,
   type TableView,
+  STALE_ALERT,
+  cardShortName,
+  studyHistory,
+  type StudyHistory,
 } from "./internal/table";
+export {
+  applyTransition,
+  membership,
+  sameMembership,
+  snapshotRef,
+  type SnapshotInvalidation,
+  type TransitionOutcome,
+} from "./internal/snapshots";
+export { compileDraft } from "./internal/compile";
 export {
   scoreTimeline,
   type TimelineContext,

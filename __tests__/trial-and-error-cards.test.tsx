@@ -13,6 +13,7 @@ import {
   DEMOGRAPHICS_SCENARIO,
   createTableState,
   deriveTableView,
+  snapshotRef,
   type CardFace as CardFaceData,
   type CardStamp,
   type RedactedCard,
@@ -190,6 +191,8 @@ const deckView = (): TableCardView[] =>
           face: card.face,
           stamps: [],
           debuffed: false,
+          stale: false,
+          provenance: snapshotRef(DEMOGRAPHICS_SCENARIO.populationSnapshot),
         },
       ];
     }

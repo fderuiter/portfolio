@@ -64,15 +64,18 @@ export function MiniOutput({
 /**
  * A card's face, printed from its data: type, suit (in colour and in text),
  * number, title, the live mini-output, the Chips badge (struck to 0 when a
- * Boss Blind disables the card's suit), the unverified "?" badge and the
- * stamp slot. Decorative inside the card button, whose
+ * Boss Blind disables the card's suit or the card is stale), the unverified
+ * "?" badge and the stamp slot. Decorative inside the card button, whose
  * accessible name carries the same facts.
  */
 export function CardFace({ view }: { view: TableCardView }) {
   const { card } = view;
+  const dim = view.stale ? " te-stale-dim" : "";
   return (
     <span aria-hidden="true" className="relative flex h-full flex-col gap-1">
-      <span className="flex items-center justify-between gap-1 text-[10px] uppercase tracking-wider text-zinc-400">
+      <span
+        className={`flex items-center justify-between gap-1 text-[10px] uppercase tracking-wider text-zinc-400${dim}`}
+      >
         <span className="flex items-center gap-1">
           {card.cardType === "SUBJECT_TOKEN" ? "Token" : card.cardType}
           {view.unverified && (
@@ -88,20 +91,22 @@ export function CardFace({ view }: { view: TableCardView }) {
           {POPULATION_LABEL[card.population]}
         </span>
       </span>
-      <span className="block font-bold leading-tight break-words">
+      <span className={`block font-bold leading-tight break-words${dim}`}>
         {card.number}
       </span>
-      <span className="block truncate text-[10px] text-zinc-300">
+      <span className={`block truncate text-[10px] text-zinc-300${dim}`}>
         {card.title}
       </span>
-      <span className="flex h-[4.75rem] min-w-0 items-start overflow-hidden border border-zinc-800 bg-[color:var(--te-surface-0)] p-0.5">
+      <span
+        className={`flex h-[4.75rem] min-w-0 items-start overflow-hidden border border-zinc-800 bg-[color:var(--te-surface-0)] p-0.5${dim}`}
+      >
         <MiniOutput face={view.face} size="card" />
       </span>
       <span className="mt-auto flex items-center justify-between gap-1 text-[10px]">
-        {view.debuffed ? (
+        {view.debuffed || view.stale ? (
           <span
             className="border border-rose-400/60 px-1 tabular-nums text-rose-300"
-            data-testid="debuff-badge"
+            data-testid={view.stale ? "stale-badge" : "debuff-badge"}
           >
             <s>{card.chips}</s> → 0 Chips
           </span>

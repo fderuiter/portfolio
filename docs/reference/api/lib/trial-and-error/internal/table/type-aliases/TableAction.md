@@ -6,7 +6,7 @@
 
 # Type Alias: TableAction
 
-> **TableAction** = \{ `cardId`: `string`; `type`: `"TOGGLE_SELECT"`; \} \| \{ `type`: `"PLAY_HAND"`; \} \| \{ `type`: `"DISCARD"`; \} \| \{ `cardId`: `string`; `type`: `"INSPECT_CARD"`; \} \| \{ `type`: `"CLOSE_INSPECT"`; \} \| \{ `col`: `number`; `row`: `number`; `type`: `"INSPECT_CELL"`; \} \| \{ `findingId`: `string`; `type`: `"CORRECT_FINDING"`; \} \| \{ `cardId`: `string`; `toIndex`: `number`; `type`: `"MOVE_CARD"`; \} \| \{ `type`: `"RESET"`; \}
+> **TableAction** = \{ `cardId`: `string`; `type`: `"TOGGLE_SELECT"`; \} \| \{ `type`: `"PLAY_HAND"`; \} \| \{ `type`: `"DISCARD"`; \} \| \{ `cardId`: `string`; `type`: `"INSPECT_CARD"`; \} \| \{ `type`: `"CLOSE_INSPECT"`; \} \| \{ `col`: `number`; `row`: `number`; `type`: `"INSPECT_CELL"`; \} \| \{ `findingId`: `string`; `type`: `"CORRECT_FINDING"`; \} \| \{ `cardId`: `string`; `toIndex`: `number`; `type`: `"MOVE_CARD"`; \} \| \{ `cardId`: `string`; `type`: `"RECOMPILE"`; \} \| \{ `type`: `"RESET"`; \}
 
 Player intents the Card Table reducer accepts.
 
@@ -59,6 +59,14 @@ Player intents the Card Table reducer accepts.
 \{ `cardId`: `string`; `toIndex`: `number`; `type`: `"MOVE_CARD"`; \}
 
 Cosmetic: moves a card within the hand. Costs nothing.
+
+***
+
+### Type Literal
+
+\{ `cardId`: `string`; `type`: `"RECOMPILE"`; \}
+
+Reruns a stale output against the current snapshot.
 
 ***
 

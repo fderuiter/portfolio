@@ -14,6 +14,7 @@ import { CardTable } from "@/components/trial-and-error/CardTable";
 import {
   DEMOGRAPHICS_SCENARIO,
   DOSE_ESCALATION_SCENARIO,
+  SPONSOR_SAFETY_SCENARIO,
 } from "@/lib/trial-and-error";
 
 const announce = vi.fn();
@@ -318,5 +319,125 @@ describe("CardTable", () => {
         }) as HTMLButtonElement
       ).disabled
     ).toBe(true);
+  });
+});
+
+describe("CardTable population snapshots (T&E-03)", () => {
+  const NERVOUS_A = "C-T14.3.2.5-A";
+  const STALE_SAFETY = [
+    "C-T14.3.1-A",
+    "C-L16.2.7",
+    "C-T14.3.3-A",
+    "C-L16.2.8",
+    NERVOUS_A,
+  ];
+
+  /** The sponsor review after its first hand: S-004 has left the Safety set. */
+  function renderAfterDataChange() {
+    render(<CardTable scenario={SPONSOR_SAFETY_SCENARIO} />);
+    expect(screen.getByTestId("current-snapshot").textContent).toBe(
+      "SNAP-P1-v1"
+    );
+    fireEvent.click(card("C-T14.1.2"));
+    fireEvent.click(screen.getByRole("button", { name: /Play Hand/ }));
+  }
+
+  it("expires the Safety outputs in hand and announces why", () => {
+    renderAfterDataChange();
+    expect(lastAnnouncement()).toContain(
+      "S-004 stays randomized (ITT) but leaves the Safety population. Safety population now SNAP-P1-v2. Stale: Table 14.3.1 (Draft A)"
+    );
+    expect(screen.getByTestId("current-snapshot").textContent).toBe(
+      "SNAP-P1-v2"
+    );
+    const stale = card(NERVOUS_A);
+    expect(stale.getAttribute("aria-label")).toContain(
+      "stale, compiled against SNAP-P1-v1, scores 0 Chips until recompiled"
+    );
+    expect(stale.getAttribute("aria-label")).toContain("stale stamp");
+    expect(stale.dataset.stale).toBe("true");
+    expect(within(stale).getByTestId("stale-badge").textContent).toBe(
+      "25 → 0 Chips"
+    );
+    expect(stale.querySelector('[data-stamp="STALE"]')).not.toBeNull();
+    // ITT outputs are unrelated to the change.
+    const itt = card("C-L16.1.1");
+    expect(itt.dataset.stale).toBeUndefined();
+    expect(within(itt).queryByTestId("stale-badge")).toBeNull();
+  });
+
+  it("blocks Play Hand on a stale card and recompiles it with R", () => {
+    renderAfterDataChange();
+    fireEvent.click(card(NERVOUS_A));
+    expect(screen.getByTestId("stale-alert").textContent).toBe(
+      "Output compiled against obsolete population snapshot; recompile required (2 CPU). Stale: Table 14.3.2.5 (Draft A)."
+    );
+    expect(
+      (screen.getByRole("button", { name: /Play Hand/ }) as HTMLButtonElement)
+        .disabled
+    ).toBe(true);
+    fireEvent.keyDown(card(NERVOUS_A), { key: "Enter" });
+    expect(lastAnnouncement()).toContain(
+      "Output compiled against obsolete population snapshot"
+    );
+
+    act(() => card(NERVOUS_A).focus());
+    expect(
+      screen.getByRole("button", {
+        name: "Recompile Table 14.3.2.5 · 2 CPU [R]",
+      })
+    ).toBeTruthy();
+    fireEvent.keyDown(card(NERVOUS_A), { key: "r" });
+    expect(screen.getByTestId("cpu-counter").textContent).toBe("6/10");
+    expect(lastAnnouncement()).toContain("against SNAP-P1-v2 for 2 CPU");
+    expect(within(card(NERVOUS_A)).queryByTestId("stale-badge")).toBeNull();
+    expect(screen.queryByTestId("stale-alert")).toBeNull();
+    expect(screen.queryByRole("button", { name: /Recompile/ })).toBeNull();
+    expect(document.activeElement).toBe(card(NERVOUS_A));
+  });
+
+  it("recompiles from the button, and names the stale cards that break a flush", () => {
+    renderAfterDataChange();
+    for (const id of STALE_SAFETY) fireEvent.click(card(id));
+    expect(screen.getByTestId("hand-preview").textContent).toContain(
+      "TLF Two Pair"
+    );
+    expect(screen.getByTestId("flush-broken").textContent).toBe(
+      "Population Flush broken: Table 14.3.1 (Draft A), Listing 16.2.7, Table 14.3.3 (Draft A), Listing 16.2.8, Table 14.3.2.5 (Draft A) are stale."
+    );
+    expect(screen.getByTestId("stale-alert").textContent).toBe(
+      "Output compiled against obsolete population snapshot; recompile required (2 CPU)."
+    );
+    act(() => card("C-L16.2.7").focus());
+    fireEvent.click(
+      screen.getByRole("button", { name: /Recompile Listing 16.2.7/ })
+    );
+    expect(screen.getByTestId("cpu-counter").textContent).toBe("6/10");
+    expect(screen.getByTestId("flush-broken").textContent).toContain(
+      "Table 14.3.2.5 (Draft A) are stale."
+    );
+  });
+
+  it("shows each card's snapshot in its detail and its Inspect drawer", async () => {
+    renderAfterDataChange();
+    act(() => card(NERVOUS_A).focus());
+    fireEvent.keyDown(card(NERVOUS_A), { key: "?" });
+    const detail = screen.getByTestId("card-detail");
+    expect(within(detail).getByTestId("snapshot-chip").textContent).toBe(
+      "SNAP-P1-v1 · v1 · stale: recompile required"
+    );
+    fireEvent.click(within(detail).getByRole("button", { name: /Close/ }));
+
+    await openInspect(NERVOUS_A);
+    expect(within(drawer()!).getByTestId("snapshot-chip").textContent).toBe(
+      "Compiled against SNAP-P1-v1 · v1 · captured 2026-01-15 · stale: Output compiled against obsolete population snapshot; recompile required (2 CPU)."
+    );
+    fireEvent.click(screen.getByRole("button", { name: /Close Inspect/ }));
+    await waitFor(() => expect(drawer()).toBeNull());
+
+    await openInspect("C-T14.3.2.1-A");
+    expect(within(drawer()!).getByTestId("snapshot-chip").textContent).toBe(
+      "Compiled against SNAP-P1-v2 · v2 · captured 2026-02-02"
+    );
   });
 });

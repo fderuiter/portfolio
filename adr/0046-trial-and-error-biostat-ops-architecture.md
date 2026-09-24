@@ -473,12 +473,13 @@ Recorded by [#946](https://github.com/fderuiter/portfolio/issues/946).
 T&E-02 (#911) turns the single Blind into Act I, a Phase I safety study
 played as three Blinds, following the narrative frame proposed in #962.
 
-- **One study, one snapshot.** `ACT_I` holds `DEMOGRAPHICS_SCENARIO`
+- **One study, one opening snapshot.** `ACT_I` holds `DEMOGRAPHICS_SCENARIO`
   (Internal QC, 300), `SPONSOR_SAFETY_SCENARIO` (Sponsor Safety Review, 750)
   and `DOSE_ESCALATION_SCENARIO` (Dose Escalation Committee, 1,500). All
-  three read `SNAP-P1-v1`, whose twelve subjects now carry MedDRA-coded
+  three open on `SNAP-P1-v1`, whose twelve subjects now carry MedDRA-coded
   adverse events. `ActSchema` rejects Blinds that do not escalate or that
-  read different snapshots. Act I deals no efficacy outputs or Figures.
+  declare different snapshots. (T&E-03 later lets the snapshot move within
+  the act; see below.) Act I deals no efficacy outputs or Figures.
 - **Shells.** A scenario declares `shells` rather than one `shell`, so a
   Blind can stage drafts of several outputs (the AE overview, the SAE table
   and one table per System Organ Class). Each draft names its shell.
@@ -503,3 +504,51 @@ played as three Blinds, following the narrative frame proposed in #962.
 - **Determinism.** Draw piles are fixed per Blind and nothing in the run
   consults randomness, so a replayed action sequence reproduces every state.
   Seeded randomness remains reserved for the crisis deck and the shop.
+
+### Population snapshots and stale outputs (T&E-03)
+
+T&E-03 (#912) makes the snapshot a versioned history, so the data can move
+under the outputs. The design readings are in
+[this comment on #912](https://github.com/fderuiter/portfolio/issues/912#issuecomment-5813704616).
+
+- **Versions.** `applyTransition(snapshot, transition)` applies one
+  `PopulationTransition`: a subject joins or leaves named populations for a
+  reason (dropout, protocol amendment, screen failure, protocol deviation).
+  It returns the next version (`SNAP-P1-v1` becomes `SNAP-P1-v2`) with
+  `capturedAt` set to the transition's authored `effectiveAt`, and never
+  modifies the input. A transition that changes no membership is refused.
+  The table state keeps every version in `snapshots`, oldest first, and one
+  `SnapshotInvalidation` per transition: the transition, the subject, the
+  populations whose membership changed, both snapshot references and the
+  stale card ids.
+- **Provenance.** Every dealt card records the `SnapshotRef` it was compiled
+  against. Drawing is compiling: a draft dealt after a transition is
+  compiled against the current snapshot by `compileDraft`.
+- **Stale is per population.** A card is stale when its suit's membership
+  differs between its snapshot and the current one, so a Safety-only change
+  leaves ITT outputs valid. A stale card's Chips, and its subject credit,
+  are cancelled by one explained `STALE-SNAPSHOT` rule result; Play Hand is
+  refused while one is selected, with the alert "Output compiled against
+  obsolete population snapshot; recompile required (2 CPU)."; and it cannot
+  make a Population Flush. `flushBrokenBy` names the stale cards when they
+  alone break one. Discard still works.
+- **Recompile.** `RECOMPILE` (2 CPU, `CPU_COSTS.RECOMPILE`) reruns a stale
+  card against the current snapshot. `compileDraft` recomputes correct cells
+  and cells the reviewer corrected, and reproduces every other defect by the
+  mechanism that explains it on the old snapshot (population, precision,
+  rounding, events counted as subjects); a value nothing explains is kept as
+  typed. The rerun is a new output, so its inspection starts over.
+- **Study events.** Crisis cards (T&E-05) and Site Activation Packs (UX-06)
+  will call `applyTransition`. Until then a scenario may declare scripted
+  `events`, each firing once after a given hand, between the hand being
+  submitted and the hand refilling. Act I's Sponsor Safety Review has one:
+  after its first hand, S-004 is found never to have been dosed and leaves
+  the Safety population. `advanceRun` carries the history into the next
+  Blind, so the Dose Escalation Committee deals against `SNAP-P1-v2`;
+  `RESTART_RUN` returns to v1. Three reruns at the bottom of the sponsor
+  review's deck give a player whose Safety drafts went stale a way back.
+- **Presentation.** A stale card's printed data desaturates at once, a rose
+  STALE stamp slams on (transform and opacity only, and simply appears under
+  reduced motion), and its Chips badge strikes through to 0. The event is
+  announced politely. The HUD shows the current snapshot, and Read a card
+  and the Inspect drawer show the card's snapshot id and version.

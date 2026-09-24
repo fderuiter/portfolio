@@ -486,6 +486,35 @@ body {
   }
 }
 
+/* Stale expiry (T&E-03): an expired output's printed data desaturates at
+ * once, while its rose STALE stamp slams on (transform and opacity only) and
+ * its struck Chips badge keeps its colour. Under reduced motion the stamp
+ * simply appears. */
+[data-te-cabinet] .te-stale-dim {
+  filter: grayscale(1);
+}
+
+@keyframes te-stamp-slam {
+  0% {
+    opacity: 0;
+    transform: scale(2.4);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-te-cabinet] [data-stamp="STALE"] {
+    animation: te-stamp-slam 220ms ease-in both;
+  }
+}
+
 [data-te-cabinet][data-te-loud="on"] .te-loud-glow {
   text-shadow: 0 0 12px var(--te-fire);
 }

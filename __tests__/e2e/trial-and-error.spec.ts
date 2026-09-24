@@ -54,6 +54,35 @@ const gridCell = (page: Page, row: number, col: number) =>
     .getByRole("gridcell")
     .nth(col);
 
+/** Clears the Small Blind with Draft A and its listing, then deals the next. */
+async function clearSmallBlind(page: Page) {
+  await card(page, DRAFT_A).focus();
+  await page.keyboard.press("i");
+  await expect(gridCell(page, 0, 0)).toBeFocused();
+  for (let row = 0; row < 5; row++) {
+    for (let col = 0; col < 3; col++) {
+      await page.keyboard.press("Enter");
+      await page.keyboard.press("c");
+      if (col < 2) await page.keyboard.press("ArrowRight");
+    }
+    if (row < 4) {
+      await page.keyboard.press("Home");
+      await page.keyboard.press("ArrowDown");
+    }
+  }
+  await page.keyboard.press("Escape");
+  await expect(drawer(page)).toBeHidden();
+  await page.keyboard.press("Space");
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("Space");
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("Space");
+  await page.getByRole("button", { name: "Next Blind" }).click();
+  await expect(page.getByTestId("blind-name")).toHaveText(
+    "Big Blind: Sponsor Safety Review"
+  );
+}
+
 test.describe("Trial & Error: Biostat Ops Card Table", () => {
   test("is fully keyboard-playable: inspect, correct, select, play and clear the Small Blind", async ({
     page,
@@ -117,6 +146,51 @@ test.describe("Trial & Error: Biostat Ops Card Table", () => {
       "safety physician"
     );
     await expectNoBlockingViolations(page, "Big Blind start");
+  });
+
+  test("stales the Safety outputs when the data moves, and recompiles one with R (T&E-03)", async ({
+    page,
+  }) => {
+    await launch(page);
+    await clearSmallBlind(page);
+    await expect(page.getByTestId("current-snapshot")).toHaveText("SNAP-P1-v1");
+
+    // Play the ITT disposition table alone; S-004 then leaves the Safety set.
+    await card(page, "C-T14.1.2").focus();
+    await page.keyboard.press("Space");
+    await page.keyboard.press("Enter");
+    await page.keyboard.press("Space");
+    await expect(page.getByTestId("current-snapshot")).toHaveText("SNAP-P1-v2");
+    const stale = card(page, "C-T14.3.2.5-A");
+    await expect(stale).toHaveAttribute("data-stale", "true");
+    await expect(stale.locator('[data-stamp="STALE"]')).toBeVisible();
+    await expect(stale.getByTestId("stale-badge")).toHaveText("25 → 0 Chips");
+    await expect(card(page, "C-L16.1.1")).not.toHaveAttribute(
+      "data-stale",
+      "true"
+    );
+    await expectNoBlockingViolations(page, "stale cards");
+
+    // A stale card blocks Play Hand until it is recompiled.
+    await stale.focus();
+    await page.keyboard.press("Space");
+    await expect(page.getByTestId("stale-alert")).toContainText(
+      "Output compiled against obsolete population snapshot; recompile required (2 CPU)."
+    );
+    await expect(
+      page.getByRole("button", { name: /Play Hand/ })
+    ).toBeDisabled();
+    await page.keyboard.press("r");
+    await expect(stale).not.toHaveAttribute("data-stale", "true");
+    await expect(page.getByTestId("stale-alert")).toBeHidden();
+    await expect(page.getByTestId("cpu-counter")).toHaveText("6/10");
+    await expect(stale).toBeFocused();
+
+    // Its snapshot is readable from the card detail.
+    await page.keyboard.press("?");
+    await expect(
+      page.getByTestId("card-detail").getByTestId("snapshot-chip")
+    ).toHaveText("SNAP-P1-v2 · v2");
   });
 
   test("an uninspected card still zeroes the hand, and D discards for 1 CPU", async ({
