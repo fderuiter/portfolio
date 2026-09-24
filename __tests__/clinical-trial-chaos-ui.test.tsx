@@ -740,4 +740,63 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     // Subject selection state should remain stable without duplicate sound / selection errors
     expect(container.textContent).toContain("SUBJ-1001");
   });
+
+  it("should preserve rapid intentional sequential taps after touchend", async () => {
+    await act(async () => {
+      root.render(<ClinicalTrialChaos />);
+    });
+
+    const startBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Start 3-Phase Campaign")
+    );
+    await act(async () => {
+      startBtn?.click();
+    });
+
+    const canvas = container.querySelector("canvas");
+    expect(canvas).not.toBeNull();
+
+    // First tap: pointerdown -> touchend
+    const firstPointer = new CustomEvent("pointerdown", {
+      bubbles: true,
+      cancelable: true,
+    }) as any;
+    firstPointer.clientX = 100;
+    firstPointer.clientY = 60;
+    firstPointer.pointerId = 1;
+
+    await act(async () => {
+      canvas?.dispatchEvent(firstPointer);
+    });
+
+    const firstTouchEnd = new CustomEvent("touchend", {
+      bubbles: true,
+      cancelable: true,
+    }) as any;
+    firstTouchEnd.preventDefault = vi.fn();
+
+    await act(async () => {
+      canvas?.dispatchEvent(firstTouchEnd);
+    });
+
+    // Advance time slightly (e.g. 120ms after touchend)
+    vi.spyOn(Date, "now").mockReturnValue(Date.now() + 120);
+
+    // Second tap should NOT be suppressed by the first touchend
+    const secondPointer = new CustomEvent("pointerdown", {
+      bubbles: true,
+      cancelable: true,
+    }) as any;
+    secondPointer.clientX = 220;
+    secondPointer.clientY = 60;
+    secondPointer.pointerId = 2;
+
+    await act(async () => {
+      canvas?.dispatchEvent(secondPointer);
+    });
+
+    expect(container.textContent).toContain("SUBJ-1002");
+
+    vi.restoreAllMocks();
+  });
 });

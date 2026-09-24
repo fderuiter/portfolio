@@ -1874,7 +1874,7 @@ export const ClinicalTrialChaos: React.FC = () => {
     e: React.PointerEvent<HTMLCanvasElement>
   ) => {
     const now = Date.now();
-    if (now - lastTouchTimeRef.current < 400) return;
+    if (now - lastTouchTimeRef.current < 100) return;
     lastPointerTimeRef.current = now;
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
@@ -1890,7 +1890,7 @@ export const ClinicalTrialChaos: React.FC = () => {
   ) => {
     if (isPointerDownRef.current) {
       const now = Date.now();
-      if (now - lastTouchTimeRef.current < 400) return;
+      if (now - lastTouchTimeRef.current < 100) return;
       lastPointerTimeRef.current = now;
       handleCanvasClickOrTouch(e.clientX, e.clientY);
     }
@@ -1923,7 +1923,7 @@ export const ClinicalTrialChaos: React.FC = () => {
   const handleCanvasTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
     preventCancelable(e);
     const now = Date.now();
-    if (now - lastPointerTimeRef.current < 400) return;
+    if (now - lastPointerTimeRef.current < 100) return;
     lastTouchTimeRef.current = now;
     isPointerDownRef.current = true;
 
@@ -1937,7 +1937,7 @@ export const ClinicalTrialChaos: React.FC = () => {
     preventCancelable(e);
     if (isPointerDownRef.current) {
       const now = Date.now();
-      if (now - lastPointerTimeRef.current < 400) return;
+      if (now - lastPointerTimeRef.current < 100) return;
       lastTouchTimeRef.current = now;
       const touch = e.touches[0];
       if (touch) {
@@ -1948,13 +1948,11 @@ export const ClinicalTrialChaos: React.FC = () => {
 
   const handleCanvasTouchEnd = (e: React.TouchEvent<HTMLCanvasElement>) => {
     preventCancelable(e);
-    lastTouchTimeRef.current = Date.now();
     isPointerDownRef.current = false;
   };
 
   const handleCanvasTouchCancel = (e: React.TouchEvent<HTMLCanvasElement>) => {
     preventCancelable(e);
-    lastTouchTimeRef.current = Date.now();
     isPointerDownRef.current = false;
   };
 
