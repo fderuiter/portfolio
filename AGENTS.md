@@ -190,6 +190,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Subfolder internals (`lib/**/internal/*`, `lib/**/core/*`, `lib/**/presets/*`) are strictly private to their owning module.
 - Unit tests (`__tests__/`) and external components (`app/`, `components/`) must import exclusively through public root entry points.
 - Zero circular dependencies are permitted across the repository, enforced deterministically via `npm run lint:boundaries` and `npm run verify`.
+- The invariant also holds one layer down, between the webpack runtime chunks `npm run build` emits, which `dependency-cruiser` cannot see. A Web Worker created with `new Worker(new URL("./x.ts", import.meta.url))` gets its own runtime chunk, so a worker whose import graph reaches the module that constructs it makes its chunk start itself (#853). `ChunkCycleGuardPlugin` (`lib/dx/chunk-cycle-guard.ts`, registered in `next.config.ts`) fails the build on any such cycle instead of letting webpack warn, and `__tests__/chunk-cycle-guard.test.ts` checks worker import graphs statically. Break the reference, e.g. by having the worker import the computation directly rather than the module that offloads it; never add the warning to `ignoreWarnings`.
 
 ### 22. Free-Tier Provider Quota Governance & Edge Offloading
 

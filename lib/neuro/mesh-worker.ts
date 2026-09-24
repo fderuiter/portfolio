@@ -5,10 +5,13 @@
  * Completely free of 3D graphics library runtime dependencies.
  */
 
+// Import the geometry directly, never "./mesh-generator": that module constructs
+// this worker, so reaching it from here would make the worker's chunk start
+// itself, a cycle between webpack runtime chunks (#853).
 import {
   generateHemisphereBuffers,
   generateSubcorticalBuffers,
-} from "./mesh-generator";
+} from "./internal/mesh-geometry";
 import {
   MeshWorkerRequest,
   MeshWorkerResponse,

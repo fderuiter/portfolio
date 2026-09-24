@@ -8,8 +8,28 @@
 
 ## Functions
 
-- [createCorticalSurfaceMeshBuffers](functions/createCorticalSurfaceMeshBuffers.md)
 - [createCorticalSurfaceMeshBuffersAsync](functions/createCorticalSurfaceMeshBuffersAsync.md)
-- [generateHemisphereBuffers](functions/generateHemisphereBuffers.md)
-- [generateSubcorticalBuffers](functions/generateSubcorticalBuffers.md)
-- [getAnatomicalParcelAtCoordinate](functions/getAnatomicalParcelAtCoordinate.md)
+
+## References
+
+### createCorticalSurfaceMeshBuffers
+
+Re-exports [createCorticalSurfaceMeshBuffers](../internal/mesh-geometry/functions/createCorticalSurfaceMeshBuffers.md)
+
+***
+
+### generateHemisphereBuffers
+
+Re-exports [generateHemisphereBuffers](../internal/mesh-geometry/functions/generateHemisphereBuffers.md)
+
+***
+
+### generateSubcorticalBuffers
+
+Re-exports [generateSubcorticalBuffers](../internal/mesh-geometry/functions/generateSubcorticalBuffers.md)
+
+***
+
+### getAnatomicalParcelAtCoordinate
+
+Re-exports [getAnatomicalParcelAtCoordinate](../internal/mesh-geometry/functions/getAnatomicalParcelAtCoordinate.md)
