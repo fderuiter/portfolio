@@ -39,6 +39,16 @@ function main() {
   const warnOnly = args.includes("--warn");
   const branch =
     args.find((arg) => !arg.startsWith("--")) || getCurrentBranch();
+
+  if (process.env.JULES_SESSION_ID && branch.trim().startsWith("jules/")) {
+    if (!warnOnly) {
+      console.log(
+        `${colors.brightGreen}✔ Branch '${branch}' allowed in automated agent environment.${colors.reset}`
+      );
+    }
+    process.exit(0);
+  }
+
   const result = validateBranchName(branch);
 
   if (result.valid) {
