@@ -110,8 +110,8 @@ const REQUIRED_DOC_COMMANDS = [
     pattern: /migration:replay/i,
   },
   {
-    name: "pipeline release gate execution ('npm run release:gate' or 'release-gate.ts')",
-    pattern: /release:gate|release-gate\.ts/i,
+    name: "guarded Vercel production migration execution",
+    pattern: /VERCEL=1[\s\S]*VERCEL_ENV=production|Vercel production build/i,
   },
   {
     name: "destructive migration environment variable ('ALLOW_DESTRUCTIVE_MIGRATIONS')",
@@ -122,6 +122,41 @@ const REQUIRED_DOC_COMMANDS = [
     pattern: /check:migrations\b/i,
   },
 ];
+
+function validateProductionMigrationGuard(buildPath) {
+  if (!fs.existsSync(buildPath)) {
+    throw new Error(`Production build script not found at ${buildPath}.`);
+  }
+
+  const buildContent = fs.readFileSync(buildPath, "utf8");
+  const requirements = [
+    {
+      name: "Vercel production environment guard",
+      pattern:
+        /process\.env\.VERCEL\s*===\s*["']1["']\s*&&\s*process\.env\.VERCEL_ENV\s*===\s*["']production["']/,
+    },
+    {
+      name: "Vercel/Neon unpooled migration credential",
+      pattern: /process\.env\.DATABASE_URL_UNPOOLED/,
+    },
+    {
+      name: "Prisma migration deployment",
+      pattern:
+        /runStep\(["']npx["'],\s*\[["']prisma["'],\s*["']migrate["'],\s*["']deploy["']\]/,
+    },
+  ];
+  const missing = requirements
+    .filter(({ pattern }) => !pattern.test(buildContent))
+    .map(({ name }) => name);
+
+  if (missing.length > 0) {
+    throw new Error(
+      `Production migration guard check failed in ${path.basename(buildPath)}:\n` +
+        missing.map((name) => `  - Missing ${name}`).join("\n")
+    );
+  }
+  return true;
+}
 
 function validateDocCommands(docPath) {
   if (!fs.existsSync(docPath)) {
@@ -173,6 +208,7 @@ function checkMigrationIntegrity(options = {}) {
   const migrations = validateMigrationFiles(migrationsDir);
   const docMigrations = validateDocMigrations(docFile, migrationsDir);
   validateDocCommands(docFile);
+  validateProductionMigrationGuard(path.join(rootDir, "scripts/build.js"));
 
   console.log(
     `Migration integrity check passed: provider=${schemaProvider}, migrations=${migrations.length}, docMigrations=${docMigrations.length}.`
@@ -196,5 +232,6 @@ module.exports = {
   validateDocMigrations,
   validateDocCommands,
   validateMigrationFiles,
+  validateProductionMigrationGuard,
   REQUIRED_DOC_COMMANDS,
 };

@@ -99,6 +99,11 @@ therefore a poor fit for the desired governance model.
 
 ### CI and release gates
 
+> Historical finding: ADR 0049 superseded this release topology on 2026-09-24.
+> Vercel’s guarded production build is now the only production migration and
+> deployment path. The commands described below are retained only as audit
+> evidence and are no longer available or supported.
+
 The main CI workflow runs only for pushes to `main`/`master` and pull requests
 targeting `main`/`master`.
 [Checked-in CI workflow](../../../.github/workflows/ci.yml)
@@ -114,7 +119,7 @@ a red CI history because `main` is unprotected.
 
 The release gate currently performs a security audit, migration validation,
 and `prisma migrate deploy` against the `DATABASE_URL` supplied to that job.
-[Release gate](../../../scripts/release-gate.ts)
+[Superseding deployment decision](../../../adr/0049-deploy-main-on-green-ci.md)
 In CI, that URL points to the disposable PostgreSQL service. This validates the
 migration chain but does not deploy migrations to the production database.
 The Vercel build script validates migrations but deliberately does not run

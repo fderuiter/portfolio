@@ -69,10 +69,10 @@ export interface NeonConnectionHygiene {
     purpose: "Serverless route handlers & application runtime queries";
   };
   migrationDirectUrl: {
-    variable: "DIRECT_URL" | "DATABASE_URL_UNPOOLED";
+    variable: "DATABASE_URL_UNPOOLED";
     protocol: "postgresql";
     poolingMechanism: "Direct unpooled Postgres compute endpoint";
-    purpose: "Prisma CLI migrations & Pipeline Release Gate (prevents advisory lock timeouts)";
+    purpose: "Guarded Vercel production-build migrations (prevents advisory lock timeouts)";
   };
 }
 
@@ -186,11 +186,11 @@ export function getNeonCapacityInventory(): NeonCapacityInventory {
         purpose: "Serverless route handlers & application runtime queries",
       },
       migrationDirectUrl: {
-        variable: "DIRECT_URL",
+        variable: "DATABASE_URL_UNPOOLED",
         protocol: "postgresql",
         poolingMechanism: "Direct unpooled Postgres compute endpoint",
         purpose:
-          "Prisma CLI migrations & Pipeline Release Gate (prevents advisory lock timeouts)",
+          "Guarded Vercel production-build migrations (prevents advisory lock timeouts)",
       },
     },
     projects: [

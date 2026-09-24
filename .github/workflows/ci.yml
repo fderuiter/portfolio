@@ -140,10 +140,10 @@ jobs:
           npx tsx scripts/generate-theme.ts
           npx prisma generate
 
-      - name: Execute Pipeline Release Gate (Migrations & Integrity)
-        run: npm run release:gate
+      - name: Replay Migrations on Disposable CI Database
+        run: npm run migration:replay
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/portfolio_ci?schema=replay
+          MIGRATION_REPLAY_URL: postgresql://postgres:postgres@localhost:5432/portfolio_ci?schema=replay
 
       - name: Check Schema Drift
         run: |

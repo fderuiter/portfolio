@@ -24,9 +24,18 @@ The repository contains eleven active Prisma migrations:
 
 1. Change `prisma/schema.prisma` on a disposable development database.
 2. Create and review a migration with `npx prisma migrate dev --name <name>`.
-3. Run `npm run check:migrations`, `npm run check:migrations:drift`, and the test suite.
+3. Run `npm run check:migrations`, replay the full history with
+   `npm run migration:replay`, run `npm run check:migrations:drift` against the
+   disposable target, and run the test suite.
 4. Commit the schema, migration SQL, and `migration_lock.toml` together.
-5. Apply committed migrations in production with `prisma migrate deploy` or `npm run release:gate`.
+5. Merge through the normal pull-request workflow. Vercel's production build
+   of `main` applies committed migrations automatically from `scripts/build.js`
+   only when `VERCEL=1` and `VERCEL_ENV=production`.
+
+Production migration credentials are never supplied to local or GitHub Actions
+commands. `DATABASE_URL_UNPOOLED` must be provisioned by the Vercel/Neon
+integration; the guarded build step maps it to Prisma's `DIRECT_URL` for the
+migration process. Preview, CI, and local builds do not apply migrations.
 
 CI checks that the schema provider matches the migration lock, replays every
 migration on clean PostgreSQL, and compares the replayed database with
@@ -71,12 +80,10 @@ pre-applied baseline migrations:
 npx prisma migrate resolve --applied 20260417215437_init
 npx prisma migrate resolve --applied 20260528000000_add_telemetry_event
 npx prisma migrate status
-npx prisma migrate deploy
-npx prisma migrate status
 ```
 
 When resolving the initial baseline migrations on an unledgered setup,
-`npx prisma migrate status` between `resolve` and `deploy` will report the
+`npx prisma migrate status` after `resolve` and before the Vercel production build will report the
 remaining active migrations (`20260814000000_add_simulated_telemetry`,
 `20260818000000_add_feedback_and_reactions`, and
 `20261014000000_add_commands_and_playback`) as pending.
@@ -115,10 +122,12 @@ Expected results are all five finished and non-rolled-back migrations recorded i
 - `20260818000000_add_feedback_and_reactions`
 - `20261014000000_add_commands_and_playback`
 
-Run `npx prisma migrate deploy` once more and confirm it is a no-op. Then smoke-test
-the home page, case studies, and telemetry endpoints.
+Trigger the Vercel production build after the ledger-only baseline is complete.
+The build applies all remaining committed migrations before compilation. After
+promotion, confirm `npx prisma migrate status` is clean from a read-only operator
+session, then smoke-test the home page, case studies, and telemetry endpoints.
 
-## Release ordering, schema drift & release gate execution
+## Release ordering, schema drift & Vercel migration execution
 
 ### Schema drift verification
 
@@ -159,51 +168,45 @@ In CI pipelines or local Docker-less environments, provide an explicit disposabl
 MIGRATION_REPLAY_URL="${DISPOSABLE_POSTGRES_URL}" npm run migration:replay
 ```
 
-### Pipeline release gate execution
+### Guarded production migration execution
 
-Live database migrations execute strictly inside the dedicated Pipeline Release Gate stage (`npm run release:gate` / `scripts/release-gate.ts`), isolated from static application build compilation (`scripts/build.js`). Direct database write credentials exist exclusively within the release gate stage, eliminating sensitive credential exposure and database lock conflicts during application compilation.
+Production migrations run only inside the Vercel production build of `main`.
+After offline integrity validation, `scripts/build.js` checks both
+`VERCEL === "1"` and `VERCEL_ENV === "production"`, requires
+`DATABASE_URL_UNPOOLED` from the Vercel/Neon integration, maps that value to
+`DIRECT_URL`, and invokes Prisma's migration deployment before compiling the
+application. A missing credential or migration failure stops the build, so the
+new deployment is not promoted against an incompatible schema.
 
-To execute the release gate locally or in continuous integration pipelines:
-
-```bash
-npm run release:gate
-```
-
-The Pipeline Release Gate performs:
-
-1. Vulnerability security audit gate (`scripts/security-audit.ts`).
-2. Unified migration safety & integrity validation (`scripts/check-migrations.js`).
-3. Database migration deployment (`npx prisma migrate deploy`).
+There is no supported local, GitHub Actions, or operator-triggered production
+migration command. Local and CI workflows are limited to integrity checks,
+disposable replay, and drift verification against non-production targets.
 
 ### Destructive migration environment variables
 
 Automated migration safety checks (`scripts/check-migrations.js`) block any migration SQL containing destructive operations (`DROP TABLE` or `DROP COLUMN`) by default to prevent accidental data loss.
 
-To explicitly authorize destructive migrations during release gate execution or verification:
-
-```bash
-ALLOW_DESTRUCTIVE_MIGRATIONS=true npm run release:gate
-```
-
-or for local integrity validation:
+To explicitly authorize a destructive migration during local integrity
+validation:
 
 ```bash
 ALLOW_DESTRUCTIVE_MIGRATIONS=true npm run check:migrations
 ```
 
-The application build step (`scripts/build.js`) executes offline using fallback
-credentials (`DATABASE_URL`, `DIRECT_URL`, `CRON_SECRET`), running unified
-migration checks (`npm run check:migrations`) without live database connections.
-
 Every release must follow expand-and-contract:
 
 1. Expand with backward-compatible, additive migration SQL.
-2. Execute the Pipeline Release Gate (`npm run release:gate`) to run unified validation
-   (provider parity, file integrity, destructive schema checks) and apply `prisma migrate deploy`.
-3. Build and deploy static application assets offline (`scripts/build.js`).
+2. Validate integrity, replay, and drift locally or in CI without production
+   credentials.
+3. Merge to `main`; the guarded Vercel production build applies pending
+   migrations before compiling and promoting the new deployment.
 4. Automated destructive migration guards (`scripts/check-migrations.js`)
    block `DROP TABLE` or `DROP COLUMN` unless `ALLOW_DESTRUCTIVE_MIGRATIONS=true` is explicitly provided.
 5. Remove old fields only in a later release after all readers have migrated.
+
+Expand-and-contract remains mandatory because the migration completes before
+the new deployment is promoted, while the currently promoted application may
+continue serving traffic during the build.
 
 ## Email resilience rollout and rollback
 
@@ -236,12 +239,12 @@ are compatible with `prisma/schema.prisma`.
    ORDER BY tablename, indexname;
    ```
 
-3. With `DIRECT_URL` pointed at the rehearsed target, run the offline checks
-   and apply the committed migrations through the release gate:
+3. Run the offline checks and disposable replay, then merge through the normal
+   pull-request workflow. Do not point local commands at production:
 
    ```bash
    npm run check:migrations
-   npm run release:gate
+   npm run migration:replay
    ```
 
 4. Verify the migration ledger and required objects before deploying the
@@ -258,10 +261,10 @@ are compatible with `prisma/schema.prisma`.
      AND table_name IN ('SuppressionList', 'OutboundEmailQueue');
    ```
 
-5. Run `npm run check:migrations:drift` and require exit code 0 against the
-   freshly migrated database. Then smoke-test a suppressed recipient and a
-   retryable outbound failure. Run `npx prisma migrate deploy` once more and
-   confirm it is a no-op.
+5. Let the guarded Vercel production build apply the migration, then run
+   `npm run check:migrations:drift` against a non-production verification
+   target and require exit code 0. Smoke-test a suppressed recipient and a
+   retryable outbound failure after promotion.
 
 ### Rollback
 
@@ -274,7 +277,8 @@ If deployment fails before the migration finishes, stop the release, inspect
 `_prisma_migrations`, and restore the rehearsed snapshot only when the target
 cannot be safely repaired. After correcting the underlying issue, use
 `npx prisma migrate resolve --rolled-back 20261015000000_add_email_resilience`
-only for a migration recorded as failed, then rerun `npm run release:gate`.
+only for a migration recorded as failed. After repair, retry the failed Vercel
+production deployment so `scripts/build.js` remains the sole deployment path.
 Never mark a successfully applied migration rolled back.
 
 Prisma serializes concurrent migration attempts with its PostgreSQL advisory
@@ -299,12 +303,9 @@ If any row contains incompatible legacy values, the preflight transaction aborts
 Neon databases provide two connection endpoints:
 
 - **Pooled Connection (`DATABASE_URL`)**: Uses Neon's transaction pooler (e.g. `ep-xxx-pooler.us-east-2.aws.neon.tech`). Used by `lib/db.ts` for runtime queries.
-- **Direct Connection (`DIRECT_URL`)**: Connects directly to Postgres compute without PgBouncer (e.g. `ep-xxx.us-east-2.aws.neon.tech`). Used by `prisma.config.ts` for Prisma migrations and CLI tooling.
+- **Production migration connection (`DATABASE_URL_UNPOOLED`)**: The direct Postgres endpoint provisioned by the Vercel/Neon integration. `scripts/build.js` maps it to `DIRECT_URL` only in a Vercel production build.
 
-In Vercel and local development:
-
-- Set `DATABASE_URL` to the pooled connection string.
-- Set `DIRECT_URL` to the unpooled direct connection string.
+In Vercel, the Neon integration must provision both `DATABASE_URL` for pooled runtime access and `DATABASE_URL_UNPOOLED` for the guarded production migration. Local development may use `DIRECT_URL` only for disposable development and drift targets; it is not a production deployment mechanism.
 
 ## Troubleshooting: Advisory Lock Timeout (`P1002`)
 
@@ -336,4 +337,4 @@ This indicates a dangling lock held by a previous deployment, an interrupted bas
    WHERE pid <> pg_backend_pid()
      AND datname = current_database();
    ```
-5. Ensure `DIRECT_URL` is set in Vercel environment variables to avoid pooled lock contention.
+5. Reconnect the Vercel/Neon integration if `DATABASE_URL_UNPOOLED` is absent; do not substitute the pooled URL.

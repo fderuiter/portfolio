@@ -57,9 +57,9 @@ describe("Neon Capacity & Branch Inventory", () => {
       "Serverless route handlers"
     );
 
-    expect(hygiene.migrationDirectUrl.variable).toBe("DIRECT_URL");
+    expect(hygiene.migrationDirectUrl.variable).toBe("DATABASE_URL_UNPOOLED");
     expect(hygiene.migrationDirectUrl.purpose).toContain(
-      "Prisma CLI migrations"
+      "Guarded Vercel production-build migrations"
     );
   });
 

@@ -107,9 +107,7 @@ function printUsage(): void {
   console.log(
     `  ${colors.cyan}headroom:vercel${colors.reset}               Evaluate Vercel storage and build hour headroom budgets`
   );
-  console.log(
-    `  ${colors.cyan}release:gate${colors.reset}                  Run pre-release security audit and deploy gate`
-  );
+  console.log();
   console.log(
     `  ${colors.cyan}crf <cmd> [options]${colors.reset}           Clinical Research Form (CRF) authoring & validation CLI`
   );
@@ -1451,12 +1449,6 @@ export async function main(): Promise<void> {
       const ledger = Boolean(parsed.flags.ledger || parsed.flags.l);
       const { success } = runHeadroomVerification({ strict, json, ledger });
       if (!success) process.exit(1);
-      break;
-    }
-    case "release:gate": {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { executeReleaseGate } = require("./release-gate");
-      executeReleaseGate();
       break;
     }
     case "clean":

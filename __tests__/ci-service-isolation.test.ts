@@ -64,7 +64,8 @@ describe("CI Service Container Isolation", () => {
       body: block,
     }));
 
-  const MIGRATION_ENGINE_STEPS = /prisma migrate|release:gate|migrations:drift/;
+  const MIGRATION_ENGINE_STEPS =
+    /prisma migrate|migration:replay|migrations:drift/;
 
   const runtimeStepsWithServiceDsn = steps.filter((step) => {
     const dsn = step.body.match(/DATABASE_URL:\s*"?([^"\n]+)"?/)?.[1];

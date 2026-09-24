@@ -11,6 +11,7 @@ const {
   validateDocMigrations,
   validateDocCommands,
   validateMigrationFiles,
+  validateProductionMigrationGuard,
 } = require("../scripts/check-migration-integrity.js");
 
 const {
@@ -305,6 +306,32 @@ describe("Prisma migration integrity", () => {
     expect(() => validateDocCommands(docPath)).not.toThrow();
   });
 
+  it("validates the production migration guard in scripts/build.js", () => {
+    expect(() =>
+      validateProductionMigrationGuard(resolve(rootDir, "scripts/build.js"))
+    ).not.toThrow();
+  });
+
+  it("rejects a build script without the Vercel production guard", () => {
+    const fs = require("fs");
+    const path = require("path");
+    const os = require("os");
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "build-guard-test-"));
+    const buildFile = path.join(tmpDir, "build.js");
+
+    try {
+      fs.writeFileSync(
+        buildFile,
+        'const migrationUrl = process.env.DATABASE_URL_UNPOOLED; runStep("npx", ["prisma", "migrate", "deploy"]);'
+      );
+      expect(() => validateProductionMigrationGuard(buildFile)).toThrow(
+        /Vercel production environment guard/
+      );
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
   it("fails validateDocCommands when mandatory operational commands are omitted from documentation", () => {
     const fs = require("fs");
     const path = require("path");
@@ -314,7 +341,7 @@ describe("Prisma migration integrity", () => {
     const docFile = path.join(tmpDir, "DATABASE_MIGRATIONS.md");
 
     try {
-      // Documentation missing release:gate and check:migrations:drift
+      // Documentation missing guarded Vercel execution and drift verification
       fs.writeFileSync(
         docFile,
         "# Migrations\nRun `npm run check:migrations` and set `ALLOW_DESTRUCTIVE_MIGRATIONS=true`.\n"
@@ -327,7 +354,7 @@ describe("Prisma migration integrity", () => {
         /schema drift verification/
       );
       expect(() => validateDocCommands(docFile)).toThrow(
-        /pipeline release gate execution/
+        /guarded Vercel production migration execution/
       );
       expect(() => validateDocCommands(docFile)).toThrow(
         /disposable migration replay/
