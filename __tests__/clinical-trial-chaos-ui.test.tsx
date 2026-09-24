@@ -93,19 +93,52 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
       moveTo: vi.fn(),
       lineTo: vi.fn(),
       arc: vi.fn(),
+      arcTo: vi.fn(),
       ellipse: vi.fn(),
       roundRect: vi.fn(),
       rect: vi.fn(),
+      quadraticCurveTo: vi.fn(),
+      bezierCurveTo: vi.fn(),
       fill: vi.fn(),
       stroke: vi.fn(),
       fillText: vi.fn(),
+      strokeText: vi.fn(),
+      measureText: vi.fn((text: string) => ({
+        width: (text || "").length * 8,
+        height: 16,
+      })),
       createLinearGradient: vi.fn(() => ({
         addColorStop: vi.fn(),
       })),
       createRadialGradient: vi.fn(() => ({
         addColorStop: vi.fn(),
       })),
+      createPattern: vi.fn(),
+      getImageData: vi.fn(
+        (_sx?: number, _sy?: number, sw?: number, sh?: number) => {
+          const width = typeof sw === "number" && sw > 0 ? sw : 256;
+          const height = typeof sh === "number" && sh > 0 ? sh : 256;
+          return {
+            width,
+            height,
+            data: new Uint8ClampedArray(width * height * 4),
+          };
+        }
+      ),
+      putImageData: vi.fn(),
+      createImageData: vi.fn((w?: number | ImageData, h?: number) => {
+        const width = typeof w === "number" && w > 0 ? w : 256;
+        const height = typeof h === "number" && h > 0 ? h : 256;
+        return {
+          width,
+          height,
+          data: new Uint8ClampedArray(width * height * 4),
+        };
+      }),
+      drawImage: vi.fn(),
       setLineDash: vi.fn(),
+      getLineDash: vi.fn(() => []),
+      clip: vi.fn(),
     };
 
     HTMLCanvasElement.prototype.getContext = vi.fn(() => mockCtx as any);
