@@ -10,7 +10,7 @@ import {
   generateRoguelikeCampaign,
   STAGE_1_MAZE,
 } from "@/lib/dungeon/generator";
-import { calculateFOV } from "@/lib/dungeon/fov";
+import { calculateFOV, resetFogOfWar } from "@/lib/dungeon/fov";
 import { updateEnemyAI } from "@/lib/dungeon/ai";
 import {
   CyberdeckClassId,
@@ -80,6 +80,8 @@ export interface RetroLabyrinthSnapshot {
   cryptoCredits: number;
   crtThemeId: CRTThemeId;
   selectedClassId: CyberdeckClassId;
+  visibleCells?: boolean[][];
+  exploredCells?: boolean[][];
 }
 
 const START_X = 1;
@@ -292,6 +294,8 @@ export class RetroLabyrinthEngine extends ArcadeEngine<
       cryptoCredits: this.state.cryptoCredits,
       crtThemeId: this.state.crtThemeId,
       selectedClassId: this.state.selectedClassId,
+      visibleCells: this.state.visibleCells?.map((row) => [...row]),
+      exploredCells: this.state.exploredCells?.map((row) => [...row]),
     };
   }
 
@@ -376,6 +380,10 @@ export class RetroLabyrinthEngine extends ArcadeEngine<
     this.state.playerHp = selectedClass.baseHp;
     this.state.score = 0;
     this.state.gameStatus = "playing";
+    this.state.exploredCells = resetFogOfWar(
+      currentMaze.length,
+      currentMaze[0]?.length ?? 0
+    );
     this.updateFOV();
     this.notifySubscribers();
   }
