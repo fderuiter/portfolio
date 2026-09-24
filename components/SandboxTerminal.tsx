@@ -269,10 +269,8 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
                 `  help                                     -> View available command registry`,
             },
           ]);
-          announce(
-            "Help menu loaded displaying available SDK commands.",
-            "polite"
-          );
+          // prettier-ignore
+          announce("Help menu loaded displaying available SDK commands.", "polite");
           return;
         }
 
@@ -477,25 +475,17 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
           ]);
           playSuccess();
           if (trimmed === "imednet studies list") {
-            announce(
-              "Command execution completed. Returned active clinical trials: BRIGHT-01, ONCO-2026, and CARDIO-REF.",
-              "polite"
-            );
+            // prettier-ignore
+            announce("Command execution completed. Returned active clinical trials: BRIGHT-01, ONCO-2026, and CARDIO-REF.", "polite");
           } else if (trimmed === "imednet subjects get --id 123") {
-            announce(
-              "Command execution completed. Returned clinical records and HIPAA-anonymized demographics for subject 123.",
-              "polite"
-            );
+            // prettier-ignore
+            announce("Command execution completed. Returned clinical records and HIPAA-anonymized demographics for subject 123.", "polite");
           } else if (trimmed === "imednet records search --study BRIGHT-01") {
-            announce(
-              "Command execution completed. Returned 3 vital sign records matching study BRIGHT-01.",
-              "polite"
-            );
+            // prettier-ignore
+            announce("Command execution completed. Returned 3 vital sign records matching study BRIGHT-01.", "polite");
           } else {
-            announce(
-              "Command execution completed. Standard JSON payload results rendered.",
-              "polite"
-            );
+            // prettier-ignore
+            announce("Command execution completed. Standard JSON payload results rendered.", "polite");
           }
         } else {
           setLogs((prev) => [
@@ -506,10 +496,8 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
               text: `Command not found: '${trimmed}'. Type 'help' to review supported registry entries or try 'loon', 'cowsay', or 'duck'.`,
             },
           ]);
-          announce(
-            `Command execution failed. Unknown command: '${trimmed}'.`,
-            "polite"
-          );
+          // prettier-ignore
+          announce(`Command execution failed. Unknown command: '${trimmed}'.`, "polite");
         }
       }, 450);
     },
