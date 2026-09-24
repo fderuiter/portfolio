@@ -57,7 +57,7 @@ function main() {
       `\n${colors.yellow}⚠ Branch '${branch}' does not follow the naming convention.${colors.reset}`
     );
     console.warn(
-      `  ${colors.gray}Expected one of feat/, fix/, chore/, refactor/, docs/, perf/, dx/, test/.${colors.reset}`
+      `  ${colors.gray}Expected one of feat/, fix/, chore/, refactor/, docs/, perf/, dx/.${colors.reset}`
     );
     console.warn(
       `  ${colors.gray}Renaming now is free; a push will reject it later.${colors.reset}`

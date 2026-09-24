@@ -167,7 +167,9 @@ describe("Developer Experience (DX) Tooling Suite", () => {
       expect(validateBranchName("feat/add-dx-suite").valid).toBe(true);
       expect(validateBranchName("fix/proof-ast-bug").valid).toBe(true);
       expect(validateBranchName("dx/commit-wizard").valid).toBe(true);
-      expect(validateBranchName("jules/feat-branch-test").valid).toBe(true);
+
+      expect(validateBranchName("jules/feat-branch-test").valid).toBe(false);
+      expect(validateBranchName("test/some-test").valid).toBe(false);
 
       const invalidBranch = validateBranchName("random_branch_name");
       expect(invalidBranch.valid).toBe(false);
