@@ -132,4 +132,43 @@ describe("CI Gate Ordering", () => {
       expect(playwright).toBeGreaterThan(build);
     });
   });
+
+  /**
+   * #954: `__tests__/mermaid-corpus.test.ts` renders the Mermaid corpus in a
+   * real Chromium (`validateCorpus` -> `launchChromiumWithFallback`). The
+   * Fast Gate runs that suite through `npm run test:ci`, so it must provision
+   * Chromium before the Vitest step, the same cached way the Heavy Gate does.
+   */
+  describe("Fast Gate browser provisioning", () => {
+    const lines = ci.split("\n");
+    const start = lines.findIndex((line) => line === "  fast-gate:");
+    const end = lines.findIndex(
+      (line, index) => index > start && /^ {2}[a-z-]+:$/.test(line)
+    );
+    const block = lines.slice(start, end).join("\n");
+
+    it("installs Chromium before the Vitest step that renders the Mermaid corpus", () => {
+      const vitest = block.indexOf("run: npm run test:ci");
+      const install = block.indexOf(
+        "npx playwright install chromium --with-deps"
+      );
+      const depsOnly = block.indexOf("npx playwright install-deps chromium");
+
+      expect(vitest).toBeGreaterThan(-1);
+      expect(install, "fast-gate must install Chromium").toBeGreaterThan(-1);
+      expect(install).toBeLessThan(vitest);
+      expect(
+        depsOnly,
+        "a cache hit still needs host dependencies"
+      ).toBeGreaterThan(-1);
+      expect(depsOnly).toBeLessThan(vitest);
+    });
+
+    it("reuses the branch-scoped Chromium browser cache", () => {
+      expect(block).toMatch(/path:\s*~\/\.cache\/ms-playwright/);
+      expect(block).toMatch(
+        /key:\s*playwright-chromium-\$\{\{\s*github\.head_ref\s*\|\|\s*github\.ref_name\s*\}\}-\$\{\{\s*hashFiles\(['"]package-lock\.json['"]\)\s*\}\}/
+      );
+    });
+  });
 });
