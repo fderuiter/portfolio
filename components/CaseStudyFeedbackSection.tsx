@@ -15,6 +15,7 @@ import {
 import { isProductionEnvironment } from "@/lib/env";
 import { useOfflineQueue, getOfflineQueue } from "@/hooks/useOfflineQueue";
 import { validateConstructiveContent } from "@/lib/moderation";
+import { logger } from "@/lib/logger";
 
 interface CaseStudyFeedbackSectionProps {
   slug: string;
@@ -99,7 +100,7 @@ export function CaseStudyFeedbackSection({
         }
       } catch (err) {
         if (!isProductionEnvironment()) {
-          console.error(
+          logger.error(
             "Failed to load case study reaction/feedback status:",
             err
           );

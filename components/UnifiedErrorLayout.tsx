@@ -23,6 +23,7 @@ const RetroLabyrinth = dynamic(
   }
 );
 import { getClosestMatches, type CaseStudyItem } from "@/lib/search-utils";
+import { logger } from "@/lib/logger";
 import { resolveBaseUrl } from "@/lib/domain";
 
 interface UnifiedErrorLayoutProps {
@@ -84,7 +85,7 @@ export function UnifiedErrorLayout({
       if (!hasTracked.current) {
         hasTracked.current = true;
         recordEvent(currentPath, "route_error").catch((err) => {
-          console.error(
+          logger.error(
             `Failed to record route error telemetry for ${badge}:`,
             err
           );
@@ -111,7 +112,7 @@ export function UnifiedErrorLayout({
           setCaseStudies(data);
         }
       } catch (err) {
-        console.error(
+        logger.error(
           "Failed to fetch case studies for recovery suggestions:",
           err
         );
@@ -129,7 +130,7 @@ export function UnifiedErrorLayout({
 
   const handleSuggestionClick = (slug: string) => {
     recordEvent(slug, "project_click").catch((err) => {
-      console.error("Failed to record telemetry suggestion click:", err);
+      logger.error("Failed to record telemetry suggestion click:", err);
     });
   };
 

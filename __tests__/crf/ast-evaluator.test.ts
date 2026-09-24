@@ -53,10 +53,18 @@ describe("CRF Studio - AST Formula & Rule Evaluator", () => {
   describe("evaluateFormula", () => {
     it("evaluates basic arithmetic operations correctly", () => {
       const values = { f_height: 10, f_weight: 5 };
-      expect(evaluateFormula("f_height + f_weight", values, sampleFields)).toBe(15);
-      expect(evaluateFormula("f_height - f_weight", values, sampleFields)).toBe(5);
-      expect(evaluateFormula("f_height * f_weight", values, sampleFields)).toBe(50);
-      expect(evaluateFormula("f_height / f_weight", values, sampleFields)).toBe(2);
+      expect(evaluateFormula("f_height + f_weight", values, sampleFields)).toBe(
+        15
+      );
+      expect(evaluateFormula("f_height - f_weight", values, sampleFields)).toBe(
+        5
+      );
+      expect(evaluateFormula("f_height * f_weight", values, sampleFields)).toBe(
+        50
+      );
+      expect(evaluateFormula("f_height / f_weight", values, sampleFields)).toBe(
+        2
+      );
     });
 
     it("evaluates complex clinical formulas (e.g. BMI)", () => {
@@ -69,8 +77,22 @@ describe("CRF Studio - AST Formula & Rule Evaluator", () => {
     it("evaluates mathematical functions (sqrt, max, min, abs, round)", () => {
       const values = { val1: 16, val2: 25 };
       const fields: CRFField[] = [
-        { id: "val1", variableName: "VAL1", label: "V1", dataType: "number", columnSpan: 6, required: false },
-        { id: "val2", variableName: "VAL2", label: "V2", dataType: "number", columnSpan: 6, required: false },
+        {
+          id: "val1",
+          variableName: "VAL1",
+          label: "V1",
+          dataType: "number",
+          columnSpan: 6,
+          required: false,
+        },
+        {
+          id: "val2",
+          variableName: "VAL2",
+          label: "V2",
+          dataType: "number",
+          columnSpan: 6,
+          required: false,
+        },
       ];
 
       expect(evaluateFormula("sqrt(val1)", values, fields)).toBe(4);
@@ -88,7 +110,13 @@ describe("CRF Studio - AST Formula & Rule Evaluator", () => {
       expect(evaluateFormula("10 / 0", {}, [])).toBeNull();
       expect(evaluateFormula("10 % 0", {}, [])).toBeNull();
       expect(evaluateFormula("100 / MISSING_VAR", {}, sampleFields)).toBeNull();
-      expect(evaluateFormula("WEIGHT / ((HEIGHT / 100) ^ 2)", { WEIGHT: 70, HEIGHT: 0 }, sampleFields)).toBeNull();
+      expect(
+        evaluateFormula(
+          "WEIGHT / ((HEIGHT / 100) ^ 2)",
+          { WEIGHT: 70, HEIGHT: 0 },
+          sampleFields
+        )
+      ).toBeNull();
       expect(evaluateFormula("invalid token #@$", {}, [])).toBeNull();
       expect(evaluateFormula("", {}, [])).toBeNull();
     });
@@ -164,15 +192,23 @@ describe("CRF Studio - AST Formula & Rule Evaluator", () => {
         ],
       };
 
-      expect(evaluateRule(ruleAnd, { f_sysbp: 150, f_diabp: 95 }, sampleFields)).toBe(true);
-      expect(evaluateRule(ruleAnd, { f_sysbp: 150, f_diabp: 80 }, sampleFields)).toBe(false);
+      expect(
+        evaluateRule(ruleAnd, { f_sysbp: 150, f_diabp: 95 }, sampleFields)
+      ).toBe(true);
+      expect(
+        evaluateRule(ruleAnd, { f_sysbp: 150, f_diabp: 80 }, sampleFields)
+      ).toBe(false);
 
       const ruleOr: EditCheckRule = {
         ...ruleAnd,
         logicalOperator: "OR",
       };
-      expect(evaluateRule(ruleOr, { f_sysbp: 150, f_diabp: 80 }, sampleFields)).toBe(true);
-      expect(evaluateRule(ruleOr, { f_sysbp: 120, f_diabp: 75 }, sampleFields)).toBe(false);
+      expect(
+        evaluateRule(ruleOr, { f_sysbp: 150, f_diabp: 80 }, sampleFields)
+      ).toBe(true);
+      expect(
+        evaluateRule(ruleOr, { f_sysbp: 120, f_diabp: 75 }, sampleFields)
+      ).toBe(false);
     });
   });
 
@@ -201,22 +237,48 @@ describe("CRF Studio - AST Formula & Rule Evaluator", () => {
     });
 
     it("relational numeric operators (gt, gte, lt, lte) return false when comparing against missing or null flavor values", () => {
-      const nullFlavors = ["ND", "NA", "UNK", "ASKU", "NASK", "MSK", null, undefined, ""];
+      const nullFlavors = [
+        "ND",
+        "NA",
+        "UNK",
+        "ASKU",
+        "NASK",
+        "MSK",
+        null,
+        undefined,
+        "",
+      ];
 
       nullFlavors.forEach((nfVal) => {
         const values = { f_sysbp: nfVal };
 
         expect(
-          evaluateCondition({ fieldId: "f_sysbp", operator: "gt", value: 140 }, values, sampleFields)
+          evaluateCondition(
+            { fieldId: "f_sysbp", operator: "gt", value: 140 },
+            values,
+            sampleFields
+          )
         ).toBe(false);
         expect(
-          evaluateCondition({ fieldId: "f_sysbp", operator: "gte", value: 0 }, values, sampleFields)
+          evaluateCondition(
+            { fieldId: "f_sysbp", operator: "gte", value: 0 },
+            values,
+            sampleFields
+          )
         ).toBe(false);
         expect(
-          evaluateCondition({ fieldId: "f_sysbp", operator: "lt", value: 200 }, values, sampleFields)
+          evaluateCondition(
+            { fieldId: "f_sysbp", operator: "lt", value: 200 },
+            values,
+            sampleFields
+          )
         ).toBe(false);
         expect(
-          evaluateCondition({ fieldId: "f_sysbp", operator: "lte", value: 0 }, values, sampleFields)
+          evaluateCondition(
+            { fieldId: "f_sysbp", operator: "lte", value: 0 },
+            values,
+            sampleFields
+          )
         ).toBe(false);
       });
     });
@@ -224,10 +286,18 @@ describe("CRF Studio - AST Formula & Rule Evaluator", () => {
     it("treats CDISC null flavor codes as missing during presence checks (is_empty, is_not_empty)", () => {
       ["ND", "NA", "UNK", "ASKU", "NASK", "MSK"].forEach((nf) => {
         expect(
-          evaluateCondition({ fieldId: "f_sysbp", operator: "is_empty", value: "" }, { f_sysbp: nf }, sampleFields)
+          evaluateCondition(
+            { fieldId: "f_sysbp", operator: "is_empty", value: "" },
+            { f_sysbp: nf },
+            sampleFields
+          )
         ).toBe(true);
         expect(
-          evaluateCondition({ fieldId: "f_sysbp", operator: "is_not_empty", value: "" }, { f_sysbp: nf }, sampleFields)
+          evaluateCondition(
+            { fieldId: "f_sysbp", operator: "is_not_empty", value: "" },
+            { f_sysbp: nf },
+            sampleFields
+          )
         ).toBe(false);
       });
     });
@@ -239,11 +309,19 @@ describe("CRF Studio - AST Formula & Rule Evaluator", () => {
       ).toBeNull();
 
       expect(
-        evaluateFormula("f_weight / ((f_height / 100) ^ 2)", { f_height: 180, f_weight: "UNK" }, sampleFields)
+        evaluateFormula(
+          "f_weight / ((f_height / 100) ^ 2)",
+          { f_height: 180, f_weight: "UNK" },
+          sampleFields
+        )
       ).toBeNull();
 
       expect(
-        evaluateFormula("f_height - f_weight", { f_height: "NA", f_weight: 70 }, sampleFields)
+        evaluateFormula(
+          "f_height - f_weight",
+          { f_height: "NA", f_weight: 70 },
+          sampleFields
+        )
       ).toBeNull();
 
       expect(
@@ -256,25 +334,53 @@ describe("CRF Studio - AST Formula & Rule Evaluator", () => {
 
       // Relational checks
       expect(
-        evaluateCondition({ fieldId: "f_sysbp", operator: "eq", value: 0 }, valuesZero, sampleFields)
+        evaluateCondition(
+          { fieldId: "f_sysbp", operator: "eq", value: 0 },
+          valuesZero,
+          sampleFields
+        )
       ).toBe(true);
       expect(
-        evaluateCondition({ fieldId: "f_sysbp", operator: "gte", value: 0 }, valuesZero, sampleFields)
+        evaluateCondition(
+          { fieldId: "f_sysbp", operator: "gte", value: 0 },
+          valuesZero,
+          sampleFields
+        )
       ).toBe(true);
       expect(
-        evaluateCondition({ fieldId: "f_sysbp", operator: "gt", value: 0 }, valuesZero, sampleFields)
+        evaluateCondition(
+          { fieldId: "f_sysbp", operator: "gt", value: 0 },
+          valuesZero,
+          sampleFields
+        )
       ).toBe(false);
       expect(
-        evaluateCondition({ fieldId: "f_sysbp", operator: "lte", value: 0 }, valuesZero, sampleFields)
+        evaluateCondition(
+          { fieldId: "f_sysbp", operator: "lte", value: 0 },
+          valuesZero,
+          sampleFields
+        )
       ).toBe(true);
       expect(
-        evaluateCondition({ fieldId: "f_sysbp", operator: "is_empty", value: "" }, valuesZero, sampleFields)
+        evaluateCondition(
+          { fieldId: "f_sysbp", operator: "is_empty", value: "" },
+          valuesZero,
+          sampleFields
+        )
       ).toBe(false);
 
       // Calculations
-      expect(evaluateFormula("f_sysbp + 10", valuesZero, sampleFields)).toBe(10);
+      expect(evaluateFormula("f_sysbp + 10", valuesZero, sampleFields)).toBe(
+        10
+      );
       expect(evaluateFormula("f_sysbp * 5", valuesZero, sampleFields)).toBe(0);
-      expect(evaluateFormula("f_weight / ((f_height / 100) ^ 2)", valuesZero, sampleFields)).toBe(0);
+      expect(
+        evaluateFormula(
+          "f_weight / ((f_height / 100) ^ 2)",
+          valuesZero,
+          sampleFields
+        )
+      ).toBe(0);
     });
 
     it("prevents false-positive edit check queries when dependent fields contain null flavors", () => {
@@ -293,14 +399,38 @@ describe("CRF Studio - AST Formula & Rule Evaluator", () => {
       };
 
       // Diastolic BP not done (ND) -> rule should return false (no query)
-      expect(evaluateRule(hypertensionRule, { f_sysbp: 150, f_diabp: "ND" }, sampleFields)).toBe(false);
+      expect(
+        evaluateRule(
+          hypertensionRule,
+          { f_sysbp: 150, f_diabp: "ND" },
+          sampleFields
+        )
+      ).toBe(false);
       // Diastolic BP unknown (UNK) -> rule should return false
-      expect(evaluateRule(hypertensionRule, { f_sysbp: 150, f_diabp: "UNK" }, sampleFields)).toBe(false);
+      expect(
+        evaluateRule(
+          hypertensionRule,
+          { f_sysbp: 150, f_diabp: "UNK" },
+          sampleFields
+        )
+      ).toBe(false);
       // Diastolic BP uncollected (null) -> rule should return false
-      expect(evaluateRule(hypertensionRule, { f_sysbp: 150, f_diabp: null }, sampleFields)).toBe(false);
+      expect(
+        evaluateRule(
+          hypertensionRule,
+          { f_sysbp: 150, f_diabp: null },
+          sampleFields
+        )
+      ).toBe(false);
 
       // Actual high systolic and diastolic -> rule returns true
-      expect(evaluateRule(hypertensionRule, { f_sysbp: 150, f_diabp: 95 }, sampleFields)).toBe(true);
+      expect(
+        evaluateRule(
+          hypertensionRule,
+          { f_sysbp: 150, f_diabp: 95 },
+          sampleFields
+        )
+      ).toBe(true);
     });
 
     it("preserves field lookup resolution across cross-visit, visit-level, and nullFlavorValue fallback contexts", () => {
@@ -327,7 +457,12 @@ describe("CRF Studio - AST Formula & Rule Evaluator", () => {
       // Cross-visit lookup
       expect(
         evaluateCondition(
-          { fieldId: "WEIGHT", operator: "is_empty", value: "", crossVisitId: "V2" },
+          {
+            fieldId: "WEIGHT",
+            operator: "is_empty",
+            value: "",
+            crossVisitId: "V2",
+          },
           { V2_WEIGHT: "NA" },
           [fieldWithNullFlavor]
         )
@@ -384,7 +519,9 @@ describe("CRF Studio - AST Formula & Rule Evaluator", () => {
             triggerFieldIds: ["non_existent_field"],
             targetFieldId: "f_dup",
             actionType: "raise_query",
-            conditions: [{ fieldId: "non_existent_field", operator: "eq", value: "x" }],
+            conditions: [
+              { fieldId: "non_existent_field", operator: "eq", value: "x" },
+            ],
             logicalOperator: "AND",
           },
         ],
@@ -393,8 +530,12 @@ describe("CRF Studio - AST Formula & Rule Evaluator", () => {
       const diagnostics = lintForm(badForm);
       expect(diagnostics.length).toBeGreaterThan(0);
       expect(diagnostics.some((d) => d.id.startsWith("dup_id_"))).toBe(true);
-      expect(diagnostics.some((d) => d.id.startsWith("missing_var_"))).toBe(true);
-      expect(diagnostics.some((d) => d.id.startsWith("broken_rule_ref_"))).toBe(true);
+      expect(diagnostics.some((d) => d.id.startsWith("missing_var_"))).toBe(
+        true
+      );
+      expect(diagnostics.some((d) => d.id.startsWith("broken_rule_ref_"))).toBe(
+        true
+      );
     });
   });
 
@@ -403,6 +544,32 @@ describe("CRF Studio - AST Formula & Rule Evaluator", () => {
       const result = lintFormula("", sampleFields);
       expect(result.isValid).toBe(true);
       expect(result.diagnostics[0]?.code).toBe("EMPTY_FORMULA");
+
+      const sciNotation = lintFormula("1.5e-3 + 2.5E10", sampleFields);
+      expect(sciNotation.isValid).toBe(true);
+
+      const invalidToken = lintFormula("f_height # f_weight", sampleFields);
+      expect(invalidToken.isValid).toBe(false);
+
+      const sdtmFields: CRFField[] = [
+        {
+          id: "f_sdtm",
+          variableName: "CUSTOM_HEIGHT",
+          label: "Height",
+          dataType: "number",
+          columnSpan: 6,
+          required: true,
+          cdashMetadata: {
+            domain: "VS",
+            sdtmVariable: "HEIGHT",
+            cdashLabel: "Height",
+            core: "HR",
+            acrfAnnotation: "VS.HEIGHT",
+          },
+        },
+      ];
+      const sdtmMapped = mapPresetToFormVariables("HEIGHT + 5", sdtmFields);
+      expect(sdtmMapped).toContain("CUSTOM_HEIGHT");
     });
 
     it("tracks tokens with start and end character spans and bracket depths", () => {
@@ -419,27 +586,43 @@ describe("CRF Studio - AST Formula & Rule Evaluator", () => {
     it("detects unclosed and unexpected parentheses", () => {
       const unclosed = lintFormula("f_height * (f_weight + 5", sampleFields);
       expect(unclosed.isValid).toBe(false);
-      expect(unclosed.diagnostics.some((d) => d.code === "UNMATCHED_LPAREN")).toBe(true);
+      expect(
+        unclosed.diagnostics.some((d) => d.code === "UNMATCHED_LPAREN")
+      ).toBe(true);
 
       const extraClose = lintFormula("f_height * 2)", sampleFields);
       expect(extraClose.isValid).toBe(false);
-      expect(extraClose.diagnostics.some((d) => d.code === "UNMATCHED_RPAREN")).toBe(true);
+      expect(
+        extraClose.diagnostics.some((d) => d.code === "UNMATCHED_RPAREN")
+      ).toBe(true);
+
+      const emptyParen = lintFormula("f_height * ()", sampleFields);
+      expect(emptyParen.isValid).toBe(false);
+      expect(
+        emptyParen.diagnostics.some((d) => d.code === "EMPTY_PARENTHESES")
+      ).toBe(true);
     });
 
     it("flags consecutive binary operators and trailing operators", () => {
       const consecutive = lintFormula("f_height + * f_weight", sampleFields);
       expect(consecutive.isValid).toBe(false);
-      expect(consecutive.diagnostics.some((d) => d.code === "CONSECUTIVE_OPERATORS")).toBe(true);
+      expect(
+        consecutive.diagnostics.some((d) => d.code === "CONSECUTIVE_OPERATORS")
+      ).toBe(true);
 
       const trailing = lintFormula("f_height +", sampleFields);
       expect(trailing.isValid).toBe(false);
-      expect(trailing.diagnostics.some((d) => d.code === "TRAILING_OPERATOR")).toBe(true);
+      expect(
+        trailing.diagnostics.some((d) => d.code === "TRAILING_OPERATOR")
+      ).toBe(true);
     });
 
     it("flags static division by zero", () => {
       const divZero = lintFormula("f_weight / 0", sampleFields);
       expect(divZero.isValid).toBe(false);
-      expect(divZero.diagnostics.some((d) => d.code === "DIVISION_BY_ZERO")).toBe(true);
+      expect(
+        divZero.diagnostics.some((d) => d.code === "DIVISION_BY_ZERO")
+      ).toBe(true);
     });
 
     it("flags unknown variables and non-numeric variable types", () => {
@@ -456,26 +639,53 @@ describe("CRF Studio - AST Formula & Rule Evaluator", () => {
       ];
 
       const unknownVar = lintFormula("f_height + UNKNOWN_FIELD", mixedFields);
-      expect(unknownVar.diagnostics.some((d) => d.code === "UNKNOWN_VARIABLE")).toBe(true);
+      expect(
+        unknownVar.diagnostics.some((d) => d.code === "UNKNOWN_VARIABLE")
+      ).toBe(true);
+
+      const unknownFn = lintFormula("unknownFunc(f_height)", mixedFields);
+      expect(
+        unknownFn.diagnostics.some((d) => d.code === "UNKNOWN_FUNCTION")
+      ).toBe(true);
 
       const nonNum = lintFormula("f_height + SUBJNAME", mixedFields);
-      expect(nonNum.diagnostics.some((d) => d.code === "NON_NUMERIC_VARIABLE")).toBe(true);
+      expect(
+        nonNum.diagnostics.some((d) => d.code === "NON_NUMERIC_VARIABLE")
+      ).toBe(true);
     });
 
     it("detects circular self-referencing dependencies", () => {
       const circular = lintFormula("f_bmi + 10", sampleFields, "f_bmi");
       expect(circular.isValid).toBe(false);
-      expect(circular.diagnostics.some((d) => d.code === "CIRCULAR_REFERENCE")).toBe(true);
+      expect(
+        circular.diagnostics.some((d) => d.code === "CIRCULAR_REFERENCE")
+      ).toBe(true);
     });
 
     it("validates function arity for mathematical operations", () => {
       const badSqrt = lintFormula("sqrt(10, 20)", sampleFields);
       expect(badSqrt.isValid).toBe(false);
-      expect(badSqrt.diagnostics.some((d) => d.code === "INVALID_ARITY")).toBe(true);
+      expect(badSqrt.diagnostics.some((d) => d.code === "INVALID_ARITY")).toBe(
+        true
+      );
 
       const badRound = lintFormula("round(10, 2, 3)", sampleFields);
       expect(badRound.isValid).toBe(false);
-      expect(badRound.diagnostics.some((d) => d.code === "INVALID_ARITY")).toBe(true);
+      expect(badRound.diagnostics.some((d) => d.code === "INVALID_ARITY")).toBe(
+        true
+      );
+
+      const badClamp = lintFormula("clamp(10, 20)", sampleFields);
+      expect(badClamp.isValid).toBe(false);
+      expect(badClamp.diagnostics.some((d) => d.code === "INVALID_ARITY")).toBe(
+        true
+      );
+
+      const badAbs = lintFormula("abs(10, 20)", sampleFields);
+      expect(badAbs.isValid).toBe(false);
+      expect(badAbs.diagnostics.some((d) => d.code === "INVALID_ARITY")).toBe(
+        true
+      );
     });
 
     it("tokenizes with exact spans and identifies functions vs identifiers", () => {
@@ -492,8 +702,15 @@ describe("CRF Studio - AST Formula & Rule Evaluator", () => {
 
     it("provides clinical formula presets and maps preset variables to form fields", () => {
       expect(CLINICAL_FORMULA_PRESETS.length).toBeGreaterThanOrEqual(8);
-      const mosteller = CLINICAL_FORMULA_PRESETS.find((p) => p.id === "bsa_mosteller");
+      const mosteller = CLINICAL_FORMULA_PRESETS.find(
+        (p) => p.id === "bsa_mosteller"
+      );
       expect(mosteller).toBeDefined();
+
+      expect(mapPresetToFormVariables("", [])).toBe("");
+      expect(mapPresetToFormVariables("HEIGHT + WEIGHT", [])).toBe(
+        "HEIGHT + WEIGHT"
+      );
 
       const customFields: CRFField[] = [
         {
@@ -517,7 +734,22 @@ describe("CRF Studio - AST Formula & Rule Evaluator", () => {
       const mapped = mapPresetToFormVariables(mosteller!.formula, customFields);
       expect(mapped).toContain("VS_HT");
       expect(mapped).toContain("VS_WT");
+
+      const fuzzyFields: CRFField[] = [
+        {
+          id: "f_1",
+          variableName: "MY_PATIENT_HEIGHT",
+          label: "Height",
+          dataType: "number",
+          columnSpan: 6,
+          required: true,
+        },
+      ];
+      const fuzzyMapped = mapPresetToFormVariables(
+        "round(HEIGHT, 0)",
+        fuzzyFields
+      );
+      expect(fuzzyMapped).toContain("MY_PATIENT_HEIGHT");
     });
   });
 });
-
