@@ -25,8 +25,10 @@ import {
   INITIAL_STATIONS,
   getStationsForPhase,
   generateClinicalSubject,
+  generateClinicalSubjectFromProtocol,
   AMENDMENT_PRESETS,
 } from "../lib/clinical-trial-chaos/scenarios";
+import { StudyProtocol } from "../lib/crf/types";
 import * as soundEffects from "../lib/clinical-trial-chaos/sound-effects";
 import {
   ClinicalSubject,
@@ -453,6 +455,343 @@ describe("Clinical Trial Chaos Engine - Unit Tests", () => {
     const saeSubj = generateClinicalSubject(0.5, true, 2003, ["DM", "AE"]);
     expect(saeSubj.isSAE).toBe(true);
     expect(saeSubj.maxTime).toBe(22);
+  });
+
+  it("validates AMENDMENT_PRESETS protocol amendments", () => {
+    expect(AMENDMENT_PRESETS).toHaveLength(4);
+    expect(AMENDMENT_PRESETS.map((a) => a.id)).toEqual([
+      "amd-001",
+      "amd-002",
+      "amd-003",
+      "amd-004",
+    ]);
+
+    AMENDMENT_PRESETS.forEach((amd) => {
+      expect(amd.id).toBeTruthy();
+      expect(amd.version).toBeTruthy();
+      expect(amd.title).toBeTruthy();
+      expect(amd.description).toBeTruthy();
+      expect(amd.durationSeconds).toBeGreaterThan(0);
+      expect(amd.timeRemaining).toEqual(amd.durationSeconds);
+      expect(amd.active).toBe(false);
+    });
+  });
+
+  it("handles getStationsForPhase mode and phase branching", () => {
+    // Endless mode returns 6 stations regardless of phase
+    expect(getStationsForPhase(1, "endless")).toHaveLength(6);
+    expect(getStationsForPhase(2, "endless")).toHaveLength(6);
+
+    // Campaign mode phase 1 returns 4 stations
+    expect(getStationsForPhase(1, "campaign")).toHaveLength(4);
+    // Phase 2 returns 6 stations
+    expect(getStationsForPhase(2, "campaign")).toHaveLength(6);
+    // Phase 3 or higher returns 6 stations
+    expect(getStationsForPhase(3, "campaign")).toHaveLength(6);
+  });
+
+  it("handles generateClinicalSubject domain filtering and forceSAE fallback", () => {
+    // Domain filtering where eligible templates < 2 triggers fallback to full MOCK_OBSERVATION_TEMPLATES
+    const singleDomainSubj = generateClinicalSubject(0.5, false, 3000, []);
+    expect(singleDomainSubj.observations.length).toBeGreaterThanOrEqual(2);
+
+    // Force SAE guarantees at least one AE observation
+    const saeSubj = generateClinicalSubject(0.5, true, 3001, ["DM", "VS"]);
+    expect(saeSubj.isSAE).toBe(true);
+    expect(saeSubj.observations.some((o) => o.destination === "AE")).toBe(true);
+  });
+
+  it("generates clinical subject from protocol definition - empty protocol fallback", () => {
+    const emptyProtocol: StudyProtocol = {
+      id: "proto-empty",
+      protocolNumber: "PROT-000",
+      studyName: "Empty Study",
+      sponsor: "Acme Pharma",
+      version: "1.0",
+      lastModified: "2026-09-24",
+      visits: [],
+      codelists: [],
+      title: "Empty Protocol",
+      phase: "Phase I",
+      therapeuticArea: "Oncology",
+      forms: [],
+    };
+
+    const subj = generateClinicalSubjectFromProtocol(
+      emptyProtocol,
+      0.5,
+      false,
+      4000
+    );
+    expect(subj.subjectLabel).toBe("SUBJ-4000");
+    expect(subj.observations.length).toBeGreaterThan(0);
+  });
+
+  it("generates clinical subject from protocol definition - empty section fields fallback", () => {
+    const emptyFieldsProtocol: StudyProtocol = {
+      id: "proto-empty-fields",
+      protocolNumber: "PROT-001",
+      studyName: "Empty Fields Study",
+      sponsor: "Acme Pharma",
+      version: "1.0",
+      lastModified: "2026-09-24",
+      visits: [],
+      codelists: [],
+      title: "Empty Fields Protocol",
+      phase: "Phase II",
+      therapeuticArea: "Cardiology",
+      forms: [
+        {
+          id: "f1",
+          name: "Form 1",
+          domain: "DM",
+          description: "Demographics Form",
+          version: "1.0",
+          rules: [],
+          sections: [
+            {
+              id: "s1",
+              title: "Section 1",
+              fields: [],
+            },
+          ],
+        },
+      ],
+    };
+
+    const subj = generateClinicalSubjectFromProtocol(
+      emptyFieldsProtocol,
+      0.5,
+      false,
+      4001
+    );
+    expect(subj.subjectLabel).toBe("SUBJ-4001");
+    expect(subj.observations.length).toBeGreaterThan(0);
+  });
+
+  it("generates clinical subject from protocol definition - custom options, units, and default values", () => {
+    const fullProtocol: StudyProtocol = {
+      id: "proto-full",
+      protocolNumber: "PROT-002",
+      studyName: "Full Study",
+      sponsor: "Acme Pharma",
+      version: "1.0",
+      lastModified: "2026-09-24",
+      visits: [],
+      codelists: [],
+      title: "Full Protocol",
+      phase: "Phase III",
+      therapeuticArea: "Neurology",
+      forms: [
+        {
+          id: "f-dm",
+          name: "Demographics",
+          domain: "DM",
+          description: "DM Form",
+          version: "1.0",
+          sections: [
+            {
+              id: "s-dm",
+              title: "Demographics Section",
+              fields: [
+                {
+                  id: "fld-sex",
+                  variableName: "SEX",
+                  label: "Sex at Birth",
+                  dataType: "single_select",
+                  columnSpan: 6,
+                  required: true,
+                  customOptions: [
+                    { label: "Male", code: "M", order: 1 },
+                    { label: "Female", code: "F", order: 2 },
+                  ],
+                },
+                {
+                  id: "fld-height",
+                  variableName: "HEIGHT",
+                  label: "Height",
+                  dataType: "number",
+                  columnSpan: 6,
+                  required: true,
+                  unit: "cm",
+                  defaultValue: 175,
+                },
+              ],
+            },
+          ],
+          rules: [
+            {
+              id: "rule-sex",
+              name: "Sex Rule",
+              description: "Sex must be Male or Female",
+              triggerFieldIds: ["fld-sex"],
+              actionType: "raise_query",
+              targetFieldId: "fld-sex",
+              logicalOperator: "AND",
+              conditions: [
+                {
+                  fieldId: "SEX",
+                  operator: "eq",
+                  value: "Male",
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: "f-vs",
+          name: "Vital Signs",
+          domain: "vs", // lower case domain testing uppercase conversion
+          description: "VS Form",
+          version: "1.0",
+          rules: [],
+          sections: [
+            {
+              id: "s-vs",
+              title: "Vital Signs Section",
+              fields: [
+                {
+                  id: "fld-temp",
+                  variableName: "TEMP",
+                  label: "Body Temp",
+                  dataType: "number",
+                  columnSpan: 6,
+                  required: true,
+                  unit: "°C",
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      rules: [
+        {
+          id: "rule-temp",
+          name: "Temp Protocol Rule",
+          description: "Temp must be 37 °C",
+          triggerFieldIds: ["fld-temp"],
+          actionType: "raise_query",
+          targetFieldId: "fld-temp",
+          logicalOperator: "AND",
+          conditions: [
+            {
+              fieldId: "TEMP",
+              operator: "eq",
+              value: "37.0 °C",
+            },
+          ],
+        },
+      ],
+    };
+
+    // Test errorProbability = 0 (clean compliant subject)
+    const cleanSubj = generateClinicalSubjectFromProtocol(
+      fullProtocol,
+      0,
+      false,
+      5000
+    );
+    expect(cleanSubj.subjectLabel).toBe("SUBJ-5000");
+    expect(cleanSubj.isSAE).toBe(false);
+    expect(cleanSubj.maxTime).toBe(36);
+    expect(cleanSubj.observations).toHaveLength(2);
+
+    const sexObs = cleanSubj.observations.find((o) => o.ctCode === "SEX");
+    expect(sexObs).toBeDefined();
+    expect(sexObs?.destination).toBe("DM");
+    expect(sexObs?.rawValue).toBe("Male");
+    expect(sexObs?.isResolved).toBe(true);
+
+    const tempObs = cleanSubj.observations.find((o) => o.ctCode === "TEMP");
+    expect(tempObs).toBeDefined();
+    expect(tempObs?.destination).toBe("VS");
+    expect(tempObs?.rawValue).toBe("37.0 °C");
+    expect(tempObs?.isResolved).toBe(true);
+
+    // Test errorProbability = 1 (corrupted subject) with forceSAE = true
+    const corruptedSubj = generateClinicalSubjectFromProtocol(
+      fullProtocol,
+      1,
+      true,
+      5001
+    );
+    expect(corruptedSubj.subjectLabel).toBe("SUBJ-5001");
+    expect(corruptedSubj.isSAE).toBe(true);
+    expect(corruptedSubj.maxTime).toBe(22);
+    expect(corruptedSubj.observations.some((o) => !o.isResolved)).toBe(true);
+  });
+
+  it("generates clinical subject from protocol with fallback options and rules", () => {
+    const protocolWithCodeOptions: StudyProtocol = {
+      id: "proto-codes",
+      protocolNumber: "PROT-003",
+      studyName: "Code Options Study",
+      sponsor: "Acme Pharma",
+      version: "1.0",
+      lastModified: "2026-09-24",
+      visits: [],
+      codelists: [],
+      title: "Code Options Protocol",
+      phase: "Phase I",
+      therapeuticArea: "Oncology",
+      forms: [
+        {
+          id: "f-code",
+          name: "Code Form",
+          domain: "",
+          description: "Code Form",
+          version: "1.0",
+          sections: [
+            {
+              id: "s-code",
+              title: "Code Section",
+              fields: [
+                {
+                  id: "fld-code-only",
+                  variableName: "ETHNIC",
+                  label: "Ethnicity",
+                  dataType: "single_select",
+                  columnSpan: 6,
+                  required: true,
+                  customOptions: [
+                    { code: "HISPANIC", label: "Hispanic", order: 1 },
+                  ],
+                },
+              ],
+            },
+          ],
+          rules: [
+            {
+              id: "r-ethnic",
+              name: "Ethnic Rule",
+              description: "Ethnic rule",
+              logicalOperator: "AND",
+              triggerFieldIds: ["fld-code-only"],
+              actionType: "raise_query",
+              targetFieldId: "fld-code-only",
+              conditions: [
+                {
+                  fieldId: "ETHNIC",
+                  operator: "eq",
+                  value: "HISPANIC",
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    const subj = generateClinicalSubjectFromProtocol(
+      protocolWithCodeOptions,
+      1,
+      false,
+      6000
+    );
+    expect(subj.observations).toHaveLength(1);
+    expect(subj.observations[0].destination).toBe("DM"); // Empty domain falls back to DM
+    expect(subj.observations[0].correctedValue).toBe("HISPANIC");
+    expect(subj.observations[0].rawValue).toBe("Invalid Code");
   });
 
   it("exercises sound-effects module safely with synthetic audio calls", () => {
