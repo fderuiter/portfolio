@@ -5,9 +5,14 @@
 
 set -eu
 
-if [ "${ALLOW_DANGEROUS_GIT:-0}" = "1" ] || [[ "$(git rev-parse --abbrev-ref HEAD 2>/dev/null)" == jules/* ]]; then
+if [ "${ALLOW_DANGEROUS_GIT:-0}" = "1" ]; then
   exit 0
 fi
+
+CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo '')"
+case "$CURRENT_BRANCH" in
+  jules/*) exit 0 ;;
+esac
 
 # Branch naming convention (AGENTS.md section 15). The ADR 0037 and ADR 0049
 # workflows both assume prefixed short-lived branches cut from main.
