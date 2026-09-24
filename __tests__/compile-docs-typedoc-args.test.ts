@@ -25,4 +25,30 @@ describe("compile-docs TypeDoc invocation", () => {
     expect(cliArgs).not.toContain("--sourceLinkTemplate");
     expect(cliArgs).not.toContain("--gitRevision");
   });
+
+  it("regenerates through a scratch directory and syncs only real changes (#951)", async () => {
+    const fs = await import("node:fs");
+    const os = await import("node:os");
+    const path = await import("node:path");
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "portfolio-regen-"));
+    execFileSyncMock.mockImplementation((_cmd: string, args: string[]) => {
+      const out = args[args.indexOf("--out") + 1];
+      fs.writeFileSync(path.join(out, "Page.md"), "# Page\n");
+    });
+    try {
+      const { regenerateDocumentation } =
+        await import("../scripts/compile-docs");
+      expect(regenerateDocumentation(root)).toEqual(["Page.md"]);
+      expect(
+        fs.readFileSync(
+          path.join(root, "docs", "reference", "api", "Page.md"),
+          "utf8"
+        )
+      ).toBe("# Page\n");
+      expect(regenerateDocumentation(root)).toEqual([]);
+    } finally {
+      execFileSyncMock.mockReset();
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
 });
