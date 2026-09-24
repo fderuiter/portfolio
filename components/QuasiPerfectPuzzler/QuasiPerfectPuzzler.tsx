@@ -979,7 +979,12 @@ export const QuasiPerfectPuzzler: React.FC = () => {
           )}
 
           {/* Main Proof Expression Tree Canvas */}
-          <div className="mt-4">
+          <div
+            id={`subgoal-panel-${activeSubgoal.id}`}
+            role="tabpanel"
+            aria-labelledby={`subgoal-tab-${activeSubgoal.id}`}
+            className="mt-4"
+          >
             <ExpressionTree
               goalAST={goalAST}
               hypotheses={activeHypotheses}

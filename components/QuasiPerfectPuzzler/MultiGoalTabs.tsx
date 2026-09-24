@@ -31,7 +31,11 @@ export const MultiGoalTabs: React.FC<MultiGoalTabsProps> = ({
         </span>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div
+        className="flex flex-wrap gap-2"
+        role="tablist"
+        aria-label="Active Proof Subgoals"
+      >
         {subgoals.map((sg, idx) => {
           const isActive = idx === activeGoalIndex;
           const isDone = sg.isCompleted;
@@ -40,6 +44,10 @@ export const MultiGoalTabs: React.FC<MultiGoalTabsProps> = ({
             <button
               key={sg.id}
               type="button"
+              id={`subgoal-tab-${sg.id}`}
+              role="tab"
+              aria-selected={isActive}
+              aria-controls={`subgoal-panel-${sg.id}`}
               onClick={() => onSelectGoal(idx)}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                 isActive

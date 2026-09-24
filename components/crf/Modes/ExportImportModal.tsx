@@ -282,8 +282,17 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-zinc-800 gap-2 overflow-x-auto">
+      <div
+        className="flex border-b border-zinc-800 gap-2 overflow-x-auto"
+        role="tablist"
+        aria-label="Export Format Tabs"
+      >
         <button
+          type="button"
+          id="export-tab-universal"
+          role="tab"
+          aria-selected={activeTab === "universal"}
+          aria-controls="export-panel-universal"
           onClick={() => setActiveTab("universal")}
           className={`px-3 sm:px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
             activeTab === "universal"
@@ -296,6 +305,11 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
         </button>
 
         <button
+          type="button"
+          id="export-tab-usdm"
+          role="tab"
+          aria-selected={activeTab === "usdm"}
+          aria-controls="export-panel-usdm"
           onClick={() => setActiveTab("usdm")}
           className={`px-3 sm:px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
             activeTab === "usdm"
@@ -308,6 +322,11 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
         </button>
 
         <button
+          type="button"
+          id="export-tab-odm"
+          role="tab"
+          aria-selected={activeTab === "odm"}
+          aria-controls="export-panel-odm"
           onClick={() => setActiveTab("odm")}
           className={`px-3 sm:px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
             activeTab === "odm"
@@ -320,6 +339,11 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
         </button>
 
         <button
+          type="button"
+          id="export-tab-sas"
+          role="tab"
+          aria-selected={activeTab === "sas"}
+          aria-controls="export-panel-sas"
           onClick={() => setActiveTab("sas")}
           className={`px-3 sm:px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
             activeTab === "sas"
@@ -332,6 +356,11 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
         </button>
 
         <button
+          type="button"
+          id="export-tab-r"
+          role="tab"
+          aria-selected={activeTab === "r"}
+          aria-controls="export-panel-r"
           onClick={() => setActiveTab("r")}
           className={`px-3 sm:px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
             activeTab === "r"
@@ -344,6 +373,11 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
         </button>
 
         <button
+          type="button"
+          id="export-tab-fhir"
+          role="tab"
+          aria-selected={activeTab === "fhir"}
+          aria-controls="export-panel-fhir"
           onClick={() => setActiveTab("fhir")}
           className={`px-3 sm:px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
             activeTab === "fhir"
@@ -356,6 +390,11 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
         </button>
 
         <button
+          type="button"
+          id="export-tab-sdtm_spec"
+          role="tab"
+          aria-selected={activeTab === "sdtm_spec"}
+          aria-controls="export-panel-sdtm_spec"
           onClick={() => setActiveTab("sdtm_spec")}
           className={`px-3 sm:px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
             activeTab === "sdtm_spec"
@@ -368,6 +407,11 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
         </button>
 
         <button
+          type="button"
+          id="export-tab-json"
+          role="tab"
+          aria-selected={activeTab === "json"}
+          aria-controls="export-panel-json"
           onClick={() => setActiveTab("json")}
           className={`px-3 sm:px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
             activeTab === "json"
@@ -382,7 +426,12 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
 
       {/* Main Tab Content */}
       {activeTab === "sdtm_spec" ? (
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 overflow-x-auto shadow-xl">
+        <div
+          id="export-panel-sdtm_spec"
+          role="tabpanel"
+          aria-labelledby="export-tab-sdtm_spec"
+          className="rounded-2xl border border-zinc-800 bg-zinc-900/50 overflow-x-auto shadow-xl"
+        >
           <table className="w-full text-left border-collapse text-xs font-mono">
             <thead>
               <tr className="border-b border-zinc-800 bg-zinc-950/80 text-zinc-400">
@@ -430,7 +479,12 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
           </table>
         </div>
       ) : (
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-4 font-mono text-xs overflow-x-auto max-h-[450px]">
+        <div
+          id={`export-panel-${activeTab}`}
+          role="tabpanel"
+          aria-labelledby={`export-tab-${activeTab}`}
+          className="rounded-2xl border border-zinc-800 bg-zinc-950 p-4 font-mono text-xs overflow-x-auto max-h-[450px]"
+        >
           {isGenerating ? (
             <div className="flex items-center gap-2 text-zinc-400 py-6 justify-center font-mono">
               <IconLoader2 className="w-4 h-4 animate-spin text-brand-cyan" />
