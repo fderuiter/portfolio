@@ -671,7 +671,7 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
     objective:
       "Clear Act I, a Phase I safety study, in three Blinds: Internal QC (300), the Sponsor Safety Review (750) and the Dose Escalation Committee (1,500). Inspect suspect cards on the QC Desk before you trust them: an uncorrected fatal defect zeroes the whole hand, and losing a Blind ends the run.",
     quickSummary:
-      "Move across the hand with ← →, select up to five cards with Space, and press Enter to play the best hand they make (2 CPU). D discards the selection (1 CPU). I opens the focused card's QC Desk (1 CPU): inspect cells with Enter or Space, correct with C, and close with Esc. R recompiles a stale card (2 CPU).",
+      "Move across the hand with ← →, select up to five cards with Space, and press Enter to play the best hand they make (2 CPU). D discards the selection (1 CPU). I opens the focused card's QC Desk (1 CPU): inspect cells with Enter or Space, correct with C, and close with Esc. R recompiles a stale card (2 CPU). A jumps to a blank shell's analysis sets, and footnote seals from the tray press onto a card with Enter.",
     controls: [
       {
         action: "Move across the hand",
@@ -733,12 +733,24 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
           "Reruns the focused stale card against the current population snapshot for 2 CPU. Cells you corrected stay correct; defects nobody reported come back on the new data, so inspect the rerun again.",
         key: "R",
       },
+      {
+        action: "Allocate a blank shell",
+        description:
+          "Focuses the allocation choices for a selected blank shell. Each choice shows the set's N, the snapshot and the hand it would make. Allocating is free and final: the shell compiles on that set and takes it as its suit.",
+        key: "A",
+      },
+      {
+        action: "Apply a footnote seal",
+        description:
+          "Pick a seal up from the tray, then press Enter or Space on an eligible card to print it as a footnote (free). With a pointer, click the card or drag the seal onto it. Esc puts the seal back; Sell trades it for study budget.",
+        key: "Enter / Space",
+      },
     ],
     rules: [
       {
         title: "Three Blinds, one run",
         detail:
-          "Each Blind has its own SAP, deck and target, and a fresh 10 CPU. Clearing a Blind moves you to the next; failing one ends the run, and Restart run starts again from the Small Blind.",
+          "Each Blind has its own SAP, deck and target, and its CPU refills at the start of each Blind (unspent CPU does not carry over). Clearing a Blind moves you to the next; failing one ends the run, and Restart run starts again from the Small Blind.",
         badge: "Act I",
       },
       {
@@ -770,6 +782,18 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
         detail:
           "Every card records the population snapshot it was compiled against (Read a card shows it). When a subject joins or leaves a population, the snapshot moves to a new version and every card in hand built on that population goes STALE: it scores 0 Chips, a hand holding it cannot be played, and it cannot join a Population Flush. Recompile it (2 CPU) or discard it; new draws compile against the new snapshot, and cards of other populations stay valid.",
         badge: "Snapshot",
+      },
+      {
+        title: "Blank shells",
+        detail:
+          "A dashed card marked SHELL is a table with no data yet. It cannot be played or inspected until you allocate one of its analysis sets; Table 14.1.3 takes ITT or Safety. Allocate to match the suit of the cards around it: a Safety Demographics table completes a Population Flush.",
+        badge: "Shell",
+      },
+      {
+        title: "Footnote seals",
+        detail:
+          "Seals are real table footnotes. The tray holds two, and they carry to the next Blind. A bonus seal adds Chips or Mult to the card it is printed on; the sponsor rounding footnote waives the tie-rounding redline. Each shell has a fixed number of footnote slots, and no footnote can waive a fatal rule.",
+        badge: "Footnote",
       },
       {
         title: "The committee reads Safety only",

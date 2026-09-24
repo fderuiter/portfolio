@@ -1,8 +1,12 @@
 import type {
   BossBlindModifier,
+  FootnoteSeal,
   HandClassification,
   HandEvaluation,
   PopulationSnapshot,
+  PopulationType,
+  SapRulebook,
+  TableShellSpec,
   QcReport,
   RuleCheckResult,
   Scenario,
@@ -15,7 +19,7 @@ import type {
   RedactedCard,
 } from "../types";
 import { POPULATION_LABELS } from "../types";
-import { compileDraft } from "./compile";
+import { compileDraft, compileShell } from "./compile";
 import {
   CPU_COSTS,
   canAfford,
@@ -38,6 +42,7 @@ import {
 import { evaluateHand, ruleResultsFor } from "./scoring";
 import {
   applyTransition,
+  membership,
   sameMembership,
   snapshotRef,
   type SnapshotInvalidation,
@@ -60,7 +65,10 @@ export interface TableEvent {
     | "REFUSED"
     | "RESET"
     | "BLIND_STARTED"
-    | "RECOMPILED";
+    | "RECOMPILED"
+    | "ALLOCATED"
+    | "SEALED"
+    | "SOLD";
   message: string;
   /** Increments on every event so repeated messages are still announced. */
   sequence: number;
@@ -82,6 +90,30 @@ export interface StudyHistory {
   snapshots: PopulationSnapshot[];
   invalidations: SnapshotInvalidation[];
 }
+
+/** A footnote seal in the consumable tray. `id` is unique within the tray. */
+export interface Consumable {
+  id: string;
+  seal: FootnoteSeal;
+}
+
+/**
+ * What the player carries between Blinds besides the study: the consumable
+ * tray and the study budget. The Procurement Shop spends and fills it.
+ */
+export interface Inventory {
+  consumables: Consumable[];
+  budget: number;
+}
+
+/** How many consumables the tray holds. */
+export const CONSUMABLE_SLOTS = 2;
+
+const EMPTY_INVENTORY: Inventory = { consumables: [], budget: 0 };
+
+/** The alert shown when a hand holds a blank shell with no data allocated. */
+export const EMPTY_SHELL_ALERT =
+  "An empty shell cannot compile: allocate an analysis set to it first.";
 
 /** The alert shown when a hand holds an output compiled on an old snapshot. */
 export const STALE_ALERT = `Output compiled against obsolete population snapshot; recompile required (${CPU_COSTS.RECOMPILE} CPU).`;
@@ -114,8 +146,19 @@ export interface TableState {
   provenance: Record<string, SnapshotRef>;
   /** Cards in hand whose draft was compiled against a later snapshot. */
   drafts: Record<string, StagedTable>;
-  /** How much of `snapshots` and `invalidations` predates this Blind. */
-  opening: { snapshots: number; invalidations: number };
+  /** The analysis set allocated to each blank shell in hand. Final once set. */
+  allocations: Record<string, PopulationType>;
+  /** Footnote seals affixed to each card in hand, in the order applied. */
+  seals: Record<string, FootnoteSeal[]>;
+  /** The consumable tray, at most `CONSUMABLE_SLOTS`. */
+  consumables: Consumable[];
+  /** The study budget: the shop's money. */
+  budget: number;
+  /**
+   * How much of `snapshots` and `invalidations` predates this Blind, and the
+   * inventory it started with, so a restart returns to exactly that.
+   */
+  opening: { snapshots: number; invalidations: number; inventory: Inventory };
 }
 
 /** Player intents the Card Table reducer accepts. */
@@ -131,6 +174,12 @@ export type TableAction =
   | { type: "MOVE_CARD"; cardId: string; toIndex: number }
   /** Reruns a stale output against the current snapshot. */
   | { type: "RECOMPILE"; cardId: string }
+  /** Allocates an analysis set to a blank shell, which compiles it. Free and final. */
+  | { type: "ALLOCATE"; cardId: string; population: PopulationType }
+  /** Affixes a footnote seal from the tray to a card. Free; uses the seal up. */
+  | { type: "APPLY_SEAL"; consumableId: string; cardId: string }
+  /** Sells a tray consumable for its sell value. */
+  | { type: "SELL_CONSUMABLE"; consumableId: string }
   | { type: "RESET" };
 
 /** One card in hand as the table should render it. */
@@ -155,6 +204,14 @@ export interface TableCardView {
   stale: boolean;
   /** The snapshot this card was compiled against. */
   provenance: SnapshotRef;
+  /** A blank shell with no analysis set allocated: it cannot be played yet. */
+  blank: boolean;
+  /** The analysis sets this card's shell accepts. Empty for face-only cards. */
+  compatiblePopulations: PopulationType[];
+  /** Footnote seals affixed to this output, in the order applied. */
+  seals: FootnoteSeal[];
+  /** How many footnote seals this output takes: its shell's slots. */
+  footnoteSlots: number;
 }
 
 /** The open Inspect drawer's content. */
@@ -206,6 +263,27 @@ export interface TableView {
   canRecompile: boolean;
   /** Every population transition so far this study, oldest first. */
   invalidations: SnapshotInvalidation[];
+  /** Selected blank shells with no analysis set allocated, in selection order. */
+  emptySelected: string[];
+  /** The consumable tray. */
+  consumables: Consumable[];
+  consumableSlots: number;
+  budget: number;
+}
+
+/** One analysis set a blank shell could be compiled on, previewed before committing. */
+export interface AllocationOption {
+  population: PopulationType;
+  /** The snapshot the shell would be compiled against. */
+  snapshot: SnapshotRef;
+  /** Subjects in that population in the snapshot: the output's N. */
+  subjects: number;
+  /** Why this set cannot be allocated, or null. */
+  refusal: string | null;
+  /** The hand the selection would make with this allocation. */
+  classification: HandClassification | null;
+  /** That hand scored from revealed findings only: an estimate, unverified. */
+  estimate: HandEvaluation | null;
 }
 
 /**
@@ -215,8 +293,20 @@ export interface TableView {
 function faceFor(
   card: TlfCard,
   draft: StagedTable | undefined,
-  review: InspectionView | null
+  review: InspectionView | null,
+  shell: TableShellSpec | undefined
 ): CardFace {
+  if (!draft && shell?.layout) {
+    const { columns, rows } = shell.layout;
+    return {
+      kind: "TABLE",
+      columns: columns.map((c) => c.label),
+      rows: rows.slice(0, 5).map((row) => ({
+        label: row.label,
+        values: columns.map(() => "·"),
+      })),
+    };
+  }
   if (!draft) return card.face as CardFace;
   return {
     kind: "TABLE",
@@ -230,8 +320,51 @@ function faceFor(
   };
 }
 
-const cardById = (scenario: Scenario, id: string): TlfCard | undefined =>
+const deckCard = (scenario: Scenario, id: string): TlfCard | undefined =>
   scenario.deck.find((card) => card.id === id);
+
+/**
+ * A card as it stands on this table: an allocated blank shell takes the suit
+ * of the analysis set it was compiled on.
+ */
+function cardById(
+  scenario: Scenario,
+  state: TableState,
+  id: string
+): TlfCard | undefined {
+  const card = deckCard(scenario, id);
+  const allocated = state.allocations[id];
+  return card && allocated ? { ...card, population: allocated } : card;
+}
+
+const shellById = (
+  scenario: Scenario,
+  id: string | undefined
+): TableShellSpec | undefined =>
+  id === undefined ? undefined : scenario.shells.find((s) => s.id === id);
+
+/** The analysis sets a shell may be run on. */
+const compatibleWith = (shell: TableShellSpec): PopulationType[] =>
+  shell.compatiblePopulations ?? [shell.targetPopulation];
+
+/** A blank shell with nothing allocated yet. */
+const isBlank = (state: TableState, card: TlfCard): boolean =>
+  card.shellId !== undefined && state.allocations[card.id] === undefined;
+
+/**
+ * The rulebook a card's output is checked against. An allocated shell is
+ * held to its own analysis set, which the SAP names as valid for it.
+ */
+function rulebookFor(
+  scenario: Scenario,
+  state: TableState,
+  card: TlfCard
+): SapRulebook {
+  const allocated = state.allocations[card.id];
+  return allocated
+    ? { ...scenario.rulebook, populationSuit: allocated }
+    : scenario.rulebook;
+}
 
 /** The draft as authored in the scenario, compiled against its own snapshot. */
 const authoredDraft = (
@@ -265,16 +398,17 @@ const snapshotById = (
   state.snapshots.find((snapshot) => snapshot.id === id) ??
   scenario.populationSnapshot;
 
-/** Validates a draft against the snapshot it was compiled from. */
+/** Validates a card's draft against the snapshot it was compiled from. */
 const reportFor = (
   scenario: Scenario,
   state: TableState,
+  card: TlfCard,
   draft: StagedTable
 ): QcReport =>
   validate(
     draft,
     snapshotById(scenario, state, draft.populationSnapshotId),
-    scenario.rulebook
+    rulebookFor(scenario, state, card)
   );
 
 /** The snapshot a dealt card was compiled against. */
@@ -296,10 +430,16 @@ function isStale(
   );
 }
 
-/** A card as hand detection sees it: stale cards cannot make a flush. */
+/**
+ * A card as hand detection sees it: stale cards, and blank shells with no
+ * data, cannot make a flush.
+ */
 const classifiable = (scenario: Scenario, state: TableState, id: string) => {
-  const card = cardById(scenario, id) as TlfCard;
-  return { ...card, stale: isStale(scenario, state, card) };
+  const card = cardById(scenario, state, id) as TlfCard;
+  return {
+    ...card,
+    stale: isStale(scenario, state, card) || isBlank(state, card),
+  };
 };
 
 const label = (card: TlfCard) => `${card.number} ${card.title}`;
@@ -388,6 +528,131 @@ function staleFor(
   };
 }
 
+/** How many footnote seals a card takes: its shell's slots, or none. */
+function footnoteSlotsOf(
+  scenario: Scenario,
+  state: TableState,
+  card: TlfCard
+): number {
+  const shellId = card.shellId ?? draftFor(scenario, state, card)?.shellId;
+  return shellById(scenario, shellId)?.allowedFootnoteSlots ?? 0;
+}
+
+/** Why a seal cannot be affixed to a card, or null when it can. */
+function sealRefusal(
+  scenario: Scenario,
+  state: TableState,
+  card: TlfCard,
+  seal: FootnoteSeal
+): string | null {
+  const name = cardShortName(card);
+  if (isBlank(state, card)) {
+    return `${name} is an empty shell: allocate an analysis set before adding footnotes.`;
+  }
+  const slots = footnoteSlotsOf(scenario, state, card);
+  if (slots === 0) {
+    return `${name} has no footnote slot: only outputs compiled from a table shell take footnotes.`;
+  }
+  if ((state.seals[card.id] ?? []).length >= slots) {
+    return `${name} has no free footnote slot.`;
+  }
+  const { cardTypes, populations, topics } = seal.eligible;
+  if (cardTypes && !cardTypes.includes(card.cardType)) {
+    return `${seal.name} applies to ${cardTypes.map((t) => t.toLowerCase()).join(" and ")} outputs only.`;
+  }
+  if (populations && !populations.includes(card.population)) {
+    return `${seal.name} applies to ${populations.map((p) => POPULATION_LABELS[p]).join(" and ")} outputs only; ${name} is built on ${POPULATION_LABELS[card.population]}.`;
+  }
+  if (topics && !topics.includes(card.topic)) {
+    return `${seal.name} does not apply to ${name}.`;
+  }
+  if (
+    seal.effect.kind === "WAIVE" &&
+    waivedRules(scenario, state, card, [seal]).length === 0
+  ) {
+    return `No SAP rule for ${name} accepts the ${seal.name} footnote, so it has nothing to waive there.`;
+  }
+  return null;
+}
+
+/** A seal's effect in words, for announcements. */
+function sealEffectText(
+  scenario: Scenario,
+  state: TableState,
+  card: TlfCard,
+  seal: FootnoteSeal
+): string {
+  switch (seal.effect.kind) {
+    case "PLUS_CHIPS":
+      return `+${seal.effect.value} Chips`;
+    case "PLUS_MULT":
+      return `+${seal.effect.value} Mult`;
+    case "WAIVE":
+      return `waives ${waivedRules(scenario, state, card, [seal]).join(", ")} redlines`;
+  }
+}
+
+/** The rules a card's SAP lets these seals waive. */
+const waivedRules = (
+  scenario: Scenario,
+  state: TableState,
+  card: TlfCard,
+  seals: readonly FootnoteSeal[]
+): string[] =>
+  rulebookFor(scenario, state, card)
+    .rules.filter((rule) =>
+      seals.some(
+        (seal) =>
+          seal.effect.kind === "WAIVE" &&
+          (rule.waivableBy ?? []).includes(seal.id)
+      )
+    )
+    .map((rule) => rule.id);
+
+/**
+ * Applies a card's footnote seals to its rule results. A waiver turns the
+ * redline of a rule the SAP declares waivable into a passed result that says
+ * which footnote waived it; a fatal result is never touched. A bonus seal
+ * adds its own `SEAL-*` result. Either way the seal stays traceable.
+ */
+function withSeals(
+  scenario: Scenario,
+  state: TableState,
+  card: TlfCard,
+  results: readonly RuleCheckResult[]
+): RuleCheckResult[] {
+  const seals = state.seals[card.id] ?? [];
+  const rules = rulebookFor(scenario, state, card).rules;
+  const next = results.map((result) => {
+    if (result.passed || result.multMultiplier !== undefined) return result;
+    const rule = rules.find((r) => r.id === result.ruleId);
+    const seal = seals.find(
+      (s) =>
+        s.effect.kind === "WAIVE" && (rule?.waivableBy ?? []).includes(s.id)
+    );
+    if (!seal) return result;
+    return {
+      ...result,
+      passed: true,
+      multDelta: 0,
+      evidence: `Waived by footnote seal ${seal.name}: "${seal.footnote}" ${result.evidence}`,
+    };
+  });
+  for (const seal of seals) {
+    if (seal.effect.kind === "WAIVE") continue;
+    const chips = seal.effect.kind === "PLUS_CHIPS" ? seal.effect.value : 0;
+    const mult = seal.effect.kind === "PLUS_MULT" ? seal.effect.value : 0;
+    next.push({
+      ruleId: `SEAL-${seal.id}`,
+      passed: true,
+      chipsDelta: chips,
+      multDelta: mult,
+      evidence: `${card.number} carries the ${seal.name} footnote: "${seal.footnote}"`,
+    });
+  }
+  return next;
+}
+
 function scoreCards(
   scenario: Scenario,
   state: TableState,
@@ -399,11 +664,11 @@ function scoreCards(
   for (const card of cards) {
     const draft = draftFor(scenario, state, card);
     const inspection = state.inspections[card.id] ?? createInspectionState();
-    const results: RuleCheckResult[] = [];
+    let results: RuleCheckResult[] = [];
     if (draft) {
-      const report = reportFor(scenario, state, draft);
+      const report = reportFor(scenario, state, card, draft);
       results.push(
-        ...ruleResultsFor(report, scenario.rulebook, {
+        ...ruleResultsFor(report, rulebookFor(scenario, state, card), {
           resolvedFindingIds: inspection.resolvedFindingIds,
           visibleFindingIds: revealedOnly
             ? visibleFindingIds(report, inspection)
@@ -411,6 +676,7 @@ function scoreCards(
         })
       );
     }
+    results = withSeals(scenario, state, card, results);
     ruleResults.push(...results);
     const cancelled =
       staleFor(scenario, state, card, results) ??
@@ -431,6 +697,7 @@ function scoreCards(
 function compileAgainstCurrent(
   scenario: Scenario,
   state: TableState,
+  card: TlfCard,
   draft: StagedTable,
   inspection: InspectionState | undefined
 ): StagedTable {
@@ -438,7 +705,7 @@ function compileAgainstCurrent(
   if (inspection) {
     const resolved = new Set(inspection.resolvedFindingIds);
     const byCell = new Map<string, boolean>();
-    for (const f of reportFor(scenario, state, draft).findings) {
+    for (const f of reportFor(scenario, state, card, draft).findings) {
       const key = `${f.cell.row}:${f.cell.col}`;
       byCell.set(key, (byCell.get(key) ?? true) && resolved.has(f.id));
     }
@@ -450,7 +717,7 @@ function compileAgainstCurrent(
     draft,
     snapshotById(scenario, state, draft.populationSnapshotId),
     currentSnapshot(state),
-    scenario.rulebook,
+    rulebookFor(scenario, state, card),
     corrected
   );
 }
@@ -471,12 +738,14 @@ function refill(scenario: Scenario, state: TableState): TableState {
   ) {
     const card = scenario.deck[index];
     hand.push(card.id);
-    provenance[card.id] = snapshotRef(current);
+    // A blank shell has no data yet: it gets provenance when it is compiled.
+    if (card.shellId === undefined) provenance[card.id] = snapshotRef(current);
     const authored = authoredDraft(scenario, card);
     if (authored && authored.populationSnapshotId !== current.id) {
       drafts[card.id] = compileAgainstCurrent(
         scenario,
         state,
+        card,
         authored,
         undefined
       );
@@ -488,16 +757,25 @@ function refill(scenario: Scenario, state: TableState): TableState {
 
 /**
  * Fresh Card Table state: the first hand dealt against the study's current
- * snapshot, full CPU. `history` carries earlier Blinds' snapshot versions;
- * without it the study starts at the scenario's own snapshot.
+ * snapshot, CPU replenished to the Blind's allocation. `history` carries
+ * earlier Blinds' snapshot versions; without it the study starts at the
+ * scenario's own snapshot. `inventory` is the tray and budget carried in;
+ * the Blind's granted seals fill any free tray slots.
  */
 export function createTableState(
   scenario: Scenario,
   history: StudyHistory = {
     snapshots: [scenario.populationSnapshot],
     invalidations: [],
-  }
+  },
+  inventory: Inventory = EMPTY_INVENTORY
 ): TableState {
+  const consumables = [...inventory.consumables];
+  for (const seal of scenario.consumables ?? []) {
+    const id = `${seal.id}@${scenario.id}`;
+    if (consumables.length >= CONSUMABLE_SLOTS) break;
+    if (!consumables.some((c) => c.id === id)) consumables.push({ id, seal });
+  }
   return refill(scenario, {
     scenarioId: scenario.id,
     deckIndex: 0,
@@ -505,7 +783,10 @@ export function createTableState(
     selected: [],
     inspections: {},
     inspecting: null,
-    cpu: { available: scenario.table.startingCpu, spent: 0 },
+    cpu: cpuReducer(
+      { available: 0, spent: 0 },
+      { type: "REPLENISH", available: scenario.table.startingCpu }
+    ),
     roundScore: 0,
     handsPlayed: 0,
     discards: 0,
@@ -516,9 +797,14 @@ export function createTableState(
     invalidations: [...history.invalidations],
     provenance: {},
     drafts: {},
+    allocations: {},
+    seals: {},
+    consumables,
+    budget: inventory.budget,
     opening: {
       snapshots: history.snapshots.length,
       invalidations: history.invalidations.length,
+      inventory,
     },
   });
 }
@@ -526,6 +812,11 @@ export function createTableState(
 /** The study history this state carries, for the next Blind. */
 export function studyHistory(state: TableState): StudyHistory {
   return { snapshots: state.snapshots, invalidations: state.invalidations };
+}
+
+/** The tray and budget this state carries, for the next Blind. */
+export function carriedInventory(state: TableState): Inventory {
+  return { consumables: state.consumables, budget: state.budget };
 }
 
 /** Removes the selected cards and pays for the action. Does not refill. */
@@ -543,6 +834,8 @@ function spendSelection(state: TableState, action: CpuAction): TableState {
     inspections: keep(state.inspections),
     provenance: keep(state.provenance),
     drafts: keep(state.drafts),
+    allocations: keep(state.allocations),
+    seals: keep(state.seals),
     inspecting: null,
   };
 }
@@ -566,7 +859,7 @@ function applyStudyEvents(
     if (!outcome.ok) continue;
     next = { ...next, snapshots: [...next.snapshots, outcome.snapshot] };
     const staleCardIds = next.hand.filter((id) => {
-      const card = cardById(scenario, id) as TlfCard;
+      const card = cardById(scenario, next, id) as TlfCard;
       return (
         outcome.changed.includes(card.population) &&
         isStale(scenario, next, card)
@@ -589,7 +882,7 @@ function applyStudyEvents(
       ],
     };
     const names = staleCardIds.map((id) =>
-      cardShortName(cardById(scenario, id) as TlfCard)
+      cardShortName(cardById(scenario, next, id) as TlfCard)
     );
     const populations = outcome.changed
       .map((p) => POPULATION_LABELS[p])
@@ -636,13 +929,17 @@ export function advanceTable(
 ): TableState {
   if (action.type === "RESET") {
     return {
-      ...createTableState(scenario, {
-        snapshots: state.snapshots.slice(0, state.opening.snapshots),
-        invalidations: state.invalidations.slice(
-          0,
-          state.opening.invalidations
-        ),
-      }),
+      ...createTableState(
+        scenario,
+        {
+          snapshots: state.snapshots.slice(0, state.opening.snapshots),
+          invalidations: state.invalidations.slice(
+            0,
+            state.opening.invalidations
+          ),
+        },
+        state.opening.inventory
+      ),
       lastEvent: nextEvent(state, "RESET", `${scenario.blind.name} restarted.`),
     };
   }
@@ -658,7 +955,7 @@ export function advanceTable(
         0,
         Math.min(state.hand.length - 1, Math.trunc(action.toIndex) || 0)
       );
-      const card = cardById(scenario, action.cardId) as TlfCard;
+      const card = cardById(scenario, state, action.cardId) as TlfCard;
       if (to === from) {
         const where =
           to === 0
@@ -683,7 +980,7 @@ export function advanceTable(
     }
 
     case "TOGGLE_SELECT": {
-      const card = cardById(scenario, action.cardId);
+      const card = cardById(scenario, state, action.cardId);
       if (!card || !state.hand.includes(card.id)) {
         return refuse(state, "That card is not in your hand.");
       }
@@ -719,12 +1016,21 @@ export function advanceTable(
         return refuse(state, "Select at least one card to play.");
       }
       const stale = state.selected
-        .map((id) => cardById(scenario, id) as TlfCard)
+        .map((id) => cardById(scenario, state, id) as TlfCard)
         .filter((card) => isStale(scenario, state, card));
       if (stale.length > 0) {
         return refuse(
           state,
           `${STALE_ALERT} Stale: ${stale.map(cardShortName).join(", ")}.`
+        );
+      }
+      const empty = state.selected
+        .map((id) => cardById(scenario, state, id) as TlfCard)
+        .filter((card) => isBlank(state, card));
+      if (empty.length > 0) {
+        return refuse(
+          state,
+          `${EMPTY_SHELL_ALERT} Empty: ${empty.map(cardShortName).join(", ")}.`
         );
       }
       if (!canAfford(state.cpu, "PLAY_HAND")) {
@@ -734,7 +1040,7 @@ export function advanceTable(
         state.selected.map((id) => classifiable(scenario, state, id))
       ) as HandClassification;
       const scoring = classification.scoringCardIds.map(
-        (id) => cardById(scenario, id) as TlfCard
+        (id) => cardById(scenario, state, id) as TlfCard
       );
       const evaluation = scoreCards(
         scenario,
@@ -805,9 +1111,15 @@ export function advanceTable(
     }
 
     case "INSPECT_CARD": {
-      const card = cardById(scenario, action.cardId);
+      const card = cardById(scenario, state, action.cardId);
       if (!card || !state.hand.includes(card.id)) {
         return refuse(state, "That card is not in your hand.");
+      }
+      if (isBlank(state, card)) {
+        return refuse(
+          state,
+          `${cardShortName(card)} is an empty shell: allocate an analysis set to compile it first.`
+        );
       }
       if (!draftFor(scenario, state, card)) {
         return refuse(
@@ -846,7 +1158,7 @@ export function advanceTable(
     }
 
     case "RECOMPILE": {
-      const card = cardById(scenario, action.cardId);
+      const card = cardById(scenario, state, action.cardId);
       if (!card || !state.hand.includes(card.id)) {
         return refuse(state, "That card is not in your hand.");
       }
@@ -872,6 +1184,7 @@ export function advanceTable(
               [card.id]: compileAgainstCurrent(
                 scenario,
                 state,
+                card,
                 draft,
                 state.inspections[card.id]
               ),
@@ -888,6 +1201,103 @@ export function advanceTable(
       };
     }
 
+    case "ALLOCATE": {
+      const card = cardById(scenario, state, action.cardId);
+      if (!card || !state.hand.includes(card.id)) {
+        return refuse(state, "That card is not in your hand.");
+      }
+      const shell = shellById(scenario, card.shellId);
+      if (!shell?.layout) {
+        return refuse(
+          state,
+          `${cardShortName(card)} is already compiled; only a blank shell takes an allocation.`
+        );
+      }
+      const allocated = state.allocations[card.id];
+      if (allocated) {
+        return refuse(
+          state,
+          `${cardShortName(card)} is already compiled on the ${POPULATION_LABELS[allocated]} population. Allocation is final: recompile it if the data moves.`
+        );
+      }
+      const compatible = compatibleWith(shell);
+      const set = POPULATION_LABELS[action.population];
+      if (!compatible.includes(action.population)) {
+        return refuse(
+          state,
+          `${cardShortName(card)} cannot be built on the ${set} population: its shell accepts ${compatible.map((p) => POPULATION_LABELS[p]).join(", ")}.`
+        );
+      }
+      const current = currentSnapshot(state);
+      const subjects = membership(current, action.population).length;
+      if (subjects === 0) {
+        return refuse(
+          state,
+          `The ${set} population is empty in ${current.id}. ${EMPTY_SHELL_ALERT}`
+        );
+      }
+      const draft = compileShell(
+        { ...shell, layout: shell.layout },
+        `${shell.id}@${card.id}`,
+        current,
+        { ...scenario.rulebook, populationSuit: action.population }
+      );
+      return {
+        ...state,
+        allocations: { ...state.allocations, [card.id]: action.population },
+        drafts: { ...state.drafts, [card.id]: draft },
+        provenance: { ...state.provenance, [card.id]: snapshotRef(current) },
+        lastEvent: nextEvent(
+          state,
+          "ALLOCATED",
+          `Allocated ${set} data (N=${subjects}, ${current.id}) to ${card.number}. It compiled as a ${set} output.`
+        ),
+      };
+    }
+
+    case "APPLY_SEAL": {
+      const item = state.consumables.find((c) => c.id === action.consumableId);
+      if (!item)
+        return refuse(state, "That footnote seal is not in your tray.");
+      const card = cardById(scenario, state, action.cardId);
+      if (!card || !state.hand.includes(card.id)) {
+        return refuse(state, "That card is not in your hand.");
+      }
+      const why = sealRefusal(scenario, state, card, item.seal);
+      if (why) return refuse(state, why);
+      const { seal } = item;
+      return {
+        ...state,
+        consumables: state.consumables.filter((c) => c.id !== item.id),
+        seals: {
+          ...state.seals,
+          [card.id]: [...(state.seals[card.id] ?? []), seal],
+        },
+        lastEvent: nextEvent(
+          state,
+          "SEALED",
+          `Sealed ${cardShortName(card)} with ${seal.name}: ${sealEffectText(scenario, state, card, seal)}. Footnote: "${seal.footnote}"`
+        ),
+      };
+    }
+
+    case "SELL_CONSUMABLE": {
+      const item = state.consumables.find((c) => c.id === action.consumableId);
+      if (!item)
+        return refuse(state, "That footnote seal is not in your tray.");
+      const budget = state.budget + item.seal.sellValue;
+      return {
+        ...state,
+        consumables: state.consumables.filter((c) => c.id !== item.id),
+        budget,
+        lastEvent: nextEvent(
+          state,
+          "SOLD",
+          `Sold ${item.seal.name} for $${item.seal.sellValue}k. Study budget $${budget}k.`
+        ),
+      };
+    }
+
     case "CLOSE_INSPECT": {
       if (state.inspecting === null) return state;
       return {
@@ -900,13 +1310,13 @@ export function advanceTable(
     case "INSPECT_CELL":
     case "CORRECT_FINDING": {
       const card = state.inspecting
-        ? cardById(scenario, state.inspecting)
+        ? cardById(scenario, state, state.inspecting)
         : undefined;
       const draft = card ? draftFor(scenario, state, card) : undefined;
       if (!card || !draft) {
         return refuse(state, "Open a card's Inspect view first.");
       }
-      const report = reportFor(scenario, state, draft);
+      const report = reportFor(scenario, state, card, draft);
       const current = state.inspections[card.id];
       const outcome =
         action.type === "INSPECT_CELL"
@@ -933,17 +1343,18 @@ export function deriveTableView(
 ): TableView {
   const selected = new Set(state.selected);
   const hand = state.hand.map((id): TableCardView => {
-    const card = cardById(scenario, id) as TlfCard;
+    const card = cardById(scenario, state, id) as TlfCard;
     const draft = draftFor(scenario, state, card);
     const inspection = state.inspections[id];
     const review =
       draft && inspection
         ? deriveInspectionView(
             draft,
-            reportFor(scenario, state, draft),
+            reportFor(scenario, state, card, draft),
             inspection
           )
         : null;
+    const shell = shellById(scenario, card.shellId ?? draft?.shellId);
     const openRedlines = review?.openFindings.length ?? 0;
     const stale = isStale(scenario, state, card);
     const stamps: CardStamp[] = [];
@@ -961,16 +1372,23 @@ export function deriveTableView(
       inspected: inspection !== undefined,
       unverified: draft !== undefined && inspection === undefined,
       openRedlines,
-      face: faceFor(card, draft, review),
+      face: faceFor(card, draft, review, shell),
       stamps,
       debuffed: isDebuffed(scenario, card),
       stale,
       provenance: provenanceOf(state, card),
+      blank: isBlank(state, card),
+      compatiblePopulations: shell ? compatibleWith(shell) : [],
+      seals: state.seals[id] ?? [],
+      footnoteSlots: footnoteSlotsOf(scenario, state, card),
     };
   });
 
   const selectedCards = state.selected.map((id) =>
     classifiable(scenario, state, id)
+  );
+  const emptySelected = state.selected.filter((id) =>
+    isBlank(state, cardById(scenario, state, id) as TlfCard)
   );
   const classification = classifyHand(selectedCards);
   const preview = classification
@@ -978,24 +1396,28 @@ export function deriveTableView(
         scenario,
         state,
         classification.scoringCardIds.map(
-          (id) => cardById(scenario, id) as TlfCard
+          (id) => cardById(scenario, state, id) as TlfCard
         ),
         classification.handType,
         true
       )
     : null;
-  const staleSelected = selectedCards.filter((c) => c.stale).map((c) => c.id);
+  const empty = new Set(emptySelected);
+  const staleSelected = selectedCards
+    .filter((c) => c.stale && !empty.has(c.id))
+    .map((c) => c.id);
+  // Only staleness is lifted here: an empty shell still breaks the flush.
   const flushBrokenBy =
     staleSelected.length > 0 &&
     classification?.handType !== "POPULATION_FLUSH" &&
-    classifyHand(selectedCards.map((c) => ({ ...c, stale: false })))
+    classifyHand(selectedCards.map((c) => ({ ...c, stale: empty.has(c.id) })))
       ?.handType === "POPULATION_FLUSH"
       ? staleSelected
       : [];
 
   let inspection: TableInspectionView | null = null;
   const inspectingCard = state.inspecting
-    ? cardById(scenario, state.inspecting)
+    ? cardById(scenario, state, state.inspecting)
     : undefined;
   const inspectingDraft = inspectingCard
     ? draftFor(scenario, state, inspectingCard)
@@ -1005,7 +1427,7 @@ export function deriveTableView(
     inspectingDraft &&
     state.inspections[inspectingCard.id]
   ) {
-    const report = reportFor(scenario, state, inspectingDraft);
+    const report = reportFor(scenario, state, inspectingCard, inspectingDraft);
     const expected = scoreCards(
       scenario,
       state,
@@ -1065,6 +1487,7 @@ export function deriveTableView(
       reviewing &&
       state.selected.length > 0 &&
       staleSelected.length === 0 &&
+      emptySelected.length === 0 &&
       canAfford(state.cpu, "PLAY_HAND"),
     canDiscard:
       reviewing && state.selected.length > 0 && canAfford(state.cpu, "DISCARD"),
@@ -1073,9 +1496,74 @@ export function deriveTableView(
     lastTimeline,
     snapshot: snapshotRef(currentSnapshot(state)),
     staleSelected,
-    playBlockedReason: staleSelected.length > 0 ? STALE_ALERT : null,
+    playBlockedReason:
+      staleSelected.length > 0
+        ? STALE_ALERT
+        : emptySelected.length > 0
+          ? EMPTY_SHELL_ALERT
+          : null,
     flushBrokenBy,
     canRecompile: reviewing && canAfford(state.cpu, "RECOMPILE"),
     invalidations: state.invalidations,
+    emptySelected,
+    consumables: state.consumables,
+    consumableSlots: CONSUMABLE_SLOTS,
+    budget: state.budget,
   };
+}
+
+/**
+ * Previews every analysis set a blank shell in hand could be compiled on:
+ * the snapshot it would read, its N, and the hand the selection would make
+ * with it, scored from revealed findings only. The shell joins the selection
+ * when there is room. Pure; nothing is committed. Empty for any other card.
+ */
+export function previewAllocation(
+  scenario: Scenario,
+  state: TableState,
+  cardId: string
+): AllocationOption[] {
+  const card = cardById(scenario, state, cardId);
+  const shell = shellById(scenario, card?.shellId);
+  if (
+    !card ||
+    !shell ||
+    !state.hand.includes(cardId) ||
+    !isBlank(state, card)
+  ) {
+    return [];
+  }
+  const current = currentSnapshot(state);
+  return compatibleWith(shell).map((population): AllocationOption => {
+    const base = {
+      population,
+      snapshot: snapshotRef(current),
+      subjects: membership(current, population).length,
+    };
+    const next = advanceTable(scenario, state, {
+      type: "ALLOCATE",
+      cardId,
+      population,
+    });
+    if (next.lastEvent?.kind === "REFUSED") {
+      return {
+        ...base,
+        refusal: next.lastEvent.message,
+        classification: null,
+        estimate: null,
+      };
+    }
+    const selected = next.selected.includes(cardId)
+      ? next.selected
+      : next.selected.length < scenario.table.maxSelection
+        ? [...next.selected, cardId]
+        : [cardId];
+    const view = deriveTableView(scenario, { ...next, selected });
+    return {
+      ...base,
+      refusal: null,
+      classification: view.classification,
+      estimate: view.preview,
+    };
+  });
 }

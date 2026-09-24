@@ -56,6 +56,12 @@ Re-exports [AdverseEventSchema](types/variables/AdverseEventSchema.md)
 
 ***
 
+### AllocationOption
+
+Re-exports [AllocationOption](internal/table/interfaces/AllocationOption.md)
+
+***
+
 ### applyTransition
 
 Re-exports [applyTransition](internal/snapshots/functions/applyTransition.md)
@@ -170,6 +176,12 @@ Re-exports [CardTypeSchema](types/variables/CardTypeSchema.md)
 
 ***
 
+### carriedInventory
+
+Re-exports [carriedInventory](internal/table/functions/carriedInventory.md)
+
+***
+
 ### CellCoordinates
 
 Re-exports [CellCoordinates](types/type-aliases/CellCoordinates.md)
@@ -209,6 +221,24 @@ Re-exports [ColumnArmSchema](types/variables/ColumnArmSchema.md)
 ### compileDraft
 
 Re-exports [compileDraft](internal/compile/functions/compileDraft.md)
+
+***
+
+### compileShell
+
+Re-exports [compileShell](internal/compile/functions/compileShell.md)
+
+***
+
+### Consumable
+
+Re-exports [Consumable](internal/table/interfaces/Consumable.md)
+
+***
+
+### CONSUMABLE\_SLOTS
+
+Re-exports [CONSUMABLE_SLOTS](internal/table/variables/CONSUMABLE_SLOTS.md)
 
 ***
 
@@ -356,6 +386,12 @@ Re-exports [DOSE_ESCALATION_SCENARIO](scenarios/variables/DOSE_ESCALATION_SCENAR
 
 ***
 
+### EMPTY\_SHELL\_ALERT
+
+Re-exports [EMPTY_SHELL_ALERT](internal/table/variables/EMPTY_SHELL_ALERT.md)
+
+***
+
 ### evaluateHand
 
 Re-exports [evaluateHand](internal/scoring/functions/evaluateHand.md)
@@ -377,6 +413,18 @@ Re-exports [FigurePlot](types/type-aliases/FigurePlot.md)
 ### FigurePlotSchema
 
 Re-exports [FigurePlotSchema](types/variables/FigurePlotSchema.md)
+
+***
+
+### FootnoteSeal
+
+Re-exports [FootnoteSeal](types/type-aliases/FootnoteSeal.md)
+
+***
+
+### FootnoteSealSchema
+
+Re-exports [FootnoteSealSchema](types/variables/FootnoteSealSchema.md)
 
 ***
 
@@ -464,6 +512,12 @@ Re-exports [InspectionView](internal/inspection/interfaces/InspectionView.md)
 
 ***
 
+### Inventory
+
+Re-exports [Inventory](internal/table/interfaces/Inventory.md)
+
+***
+
 ### membership
 
 Re-exports [membership](internal/snapshots/functions/membership.md)
@@ -527,6 +581,12 @@ Re-exports [PopulationType](types/type-aliases/PopulationType.md)
 ### PopulationTypeSchema
 
 Re-exports [PopulationTypeSchema](types/variables/PopulationTypeSchema.md)
+
+***
+
+### previewAllocation
+
+Re-exports [previewAllocation](internal/table/functions/previewAllocation.md)
 
 ***
 
@@ -755,6 +815,18 @@ Re-exports [ScoreModifierSchema](types/variables/ScoreModifierSchema.md)
 ### scoreTimeline
 
 Re-exports [scoreTimeline](internal/timeline/functions/scoreTimeline.md)
+
+***
+
+### SealEffect
+
+Re-exports [SealEffect](types/type-aliases/SealEffect.md)
+
+***
+
+### SealEffectSchema
+
+Re-exports [SealEffectSchema](types/variables/SealEffectSchema.md)
 
 ***
 

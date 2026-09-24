@@ -11,6 +11,7 @@
 import type {
   Act,
   AdverseEvent,
+  FootnoteSeal,
   RowStatistic,
   SapRulebook,
   Scenario,
@@ -332,9 +333,73 @@ const demographicsCard = (id: "A" | "B" | "C"): TlfCard =>
   });
 
 /**
- * The Small Blind deck, dealt in this order. Only the three Table 14.1.1
- * drafts carry reviewable cells; the safety tables here are face-only
- * previews of what the next two Blinds put under review.
+ * Table 14.1.3, a blank demographics shell. The SAP allows it on the ITT or
+ * the Safety population, so the player chooses its suit when allocating.
+ */
+const demographicsShell = (rulebookId: string): TableShellSpec => ({
+  id: "T-14.1.3",
+  tableNumber: "Table 14.1.3",
+  title: "Demographics and Baseline Characteristics (blank shell)",
+  cardType: "TABLE",
+  targetPopulation: "ITT",
+  compatiblePopulations: ["ITT", "SAFETY"],
+  chips: 30,
+  mult: 1,
+  requiredRulebookId: rulebookId,
+  allowedFootnoteSlots: 1,
+  layout: { columns, rows: demographicsRows },
+});
+
+const DEMOGRAPHICS_BLANK = card({
+  id: "C-T14.1.3",
+  cardType: "TABLE",
+  number: "Table 14.1.3",
+  title: "Demographics",
+  population: "ITT",
+  chips: 30,
+  mult: 1,
+  topic: "DM",
+  csrStage: "BASELINE",
+  shellId: "T-14.1.3",
+});
+
+// Footnote seals: real table footnotes that legitimise a presentation choice.
+
+const SPONSOR_ROUNDING: FootnoteSeal = {
+  id: "FN-ROUND-SPONSOR",
+  name: "Sponsor rounding standard",
+  footnote:
+    "Percentages and means are rounded half away from zero, per the sponsor's reporting standard (SAP §9.1, note 2).",
+  effect: { kind: "WAIVE" },
+  eligible: { cardTypes: ["TABLE"] },
+  sellValue: 1,
+};
+
+const ADJUDICATED: FootnoteSeal = {
+  id: "FN-ADJUDICATED",
+  name: "Adjudicated Endpoint",
+  footnote:
+    "Serious events were adjudicated by an independent committee blinded to treatment.",
+  effect: { kind: "PLUS_MULT", value: 3 },
+  eligible: { cardTypes: ["TABLE"], populations: ["SAFETY"] },
+  sellValue: 2,
+};
+
+const AE_NOT_EXCLUSIVE: FootnoteSeal = {
+  id: "FN-AE-OVERLAP",
+  name: "AE Not Mutually Exclusive",
+  footnote:
+    "A subject with more than one event is counted once in each row that applies, so rows are not mutually exclusive.",
+  effect: { kind: "PLUS_CHIPS", value: 20 },
+  eligible: { cardTypes: ["TABLE"], populations: ["SAFETY"], topics: ["AE"] },
+  sellValue: 1,
+};
+
+/**
+ * The Small Blind deck, dealt in this order. The three Table 14.1.1 drafts
+ * carry reviewable cells, and the blank Table 14.1.3 shell compiles its cells
+ * when an analysis set is allocated to it; the safety tables here are
+ * face-only previews of what the next two Blinds put under review.
  */
 const DEMOGRAPHICS_DECK: TlfCard[] = [
   demographicsCard("A"),
@@ -365,6 +430,7 @@ const DEMOGRAPHICS_DECK: TlfCard[] = [
   DISCONTINUED_LISTING,
   demographicsCard("B"),
   demographicsCard("C"),
+  DEMOGRAPHICS_BLANK,
   card({
     id: "C-T14.3.2",
     cardType: "TABLE",
@@ -450,11 +516,12 @@ export const DEMOGRAPHICS_SCENARIO: Scenario = {
         category: "ROUNDING",
         severity: "MINOR",
         statement:
-          "Ties round half-to-even (banker's rounding): 45.25 becomes 45.2.",
+          "Ties round half-to-even (banker's rounding): 45.25 becomes 45.2, unless the output footnotes the sponsor's half-away-from-zero standard.",
         consequence:
-          "A different convention silently shifts ties and breaks double programming. Redline: −1 Mult; correcting it earns +1 Mult.",
+          "A different convention silently shifts ties and breaks double programming. Redline: −1 Mult; correcting it earns +1 Mult. The sponsor rounding footnote waives the redline.",
         correctionMultBonus: 1,
         redlineMultPenalty: 1,
+        waivableBy: [SPONSOR_ROUNDING.id],
       },
       {
         id: "SAP-DM-04",
@@ -470,7 +537,9 @@ export const DEMOGRAPHICS_SCENARIO: Scenario = {
     ],
   },
   populationSnapshot: POPULATION_SNAPSHOT,
+  consumables: [SPONSOR_ROUNDING, ADJUDICATED],
   shells: [
+    demographicsShell("SAP-DM-001"),
     {
       id: "T-14.1.1",
       tableNumber: "Table 14.1.1",
@@ -931,6 +1000,7 @@ export const SPONSOR_SAFETY_SCENARIO: Scenario = {
   ],
   rulebook: SPONSOR_RULEBOOK,
   populationSnapshot: POPULATION_SNAPSHOT,
+  consumables: [AE_NOT_EXCLUSIVE],
   shells: SPONSOR.shells,
   drawPile: SPONSOR.drawPile,
   events: [
@@ -1053,6 +1123,7 @@ export const DOSE_ESCALATION_SCENARIO: Scenario = {
     }),
     pick(COMMITTEE.cards, "general-A"),
     SAE_LISTING,
+    DEMOGRAPHICS_BLANK,
     pick(COMMITTEE.cards, "infections-A"),
     pick(COMMITTEE.cards, "overview-C"),
     pick(COMMITTEE.cards, "skin-A"),
@@ -1060,7 +1131,7 @@ export const DOSE_ESCALATION_SCENARIO: Scenario = {
   ],
   rulebook: COMMITTEE_RULEBOOK,
   populationSnapshot: POPULATION_SNAPSHOT,
-  shells: COMMITTEE.shells,
+  shells: [...COMMITTEE.shells, demographicsShell(COMMITTEE_RULEBOOK.id)],
   drawPile: COMMITTEE.drawPile,
 };
 

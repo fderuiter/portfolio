@@ -10,6 +10,30 @@ Serializable Card Table state. Contains no derived or browser data.
 
 ## Properties
 
+### allocations
+
+> **allocations**: `Record`\<`string`, [`PopulationType`](../../../types/type-aliases/PopulationType.md)\>
+
+The analysis set allocated to each blank shell in hand. Final once set.
+
+***
+
+### budget
+
+> **budget**: `number`
+
+The study budget: the shop's money.
+
+***
+
+### consumables
+
+> **consumables**: [`Consumable`](Consumable.md)[]
+
+The consumable tray, at most `CONSUMABLE_SLOTS`.
+
+***
+
 ### cpu
 
 > **cpu**: [`CpuLedger`](../../cpu/interfaces/CpuLedger.md)
@@ -92,11 +116,16 @@ One record per population transition so far this study.
 
 > **opening**: `object`
 
-How much of `snapshots` and `invalidations` predates this Blind.
+How much of `snapshots` and `invalidations` predates this Blind, and the
+inventory it started with, so a restart returns to exactly that.
 
 #### invalidations
 
 > **invalidations**: `number`
+
+#### inventory
+
+> **inventory**: [`Inventory`](Inventory.md)
 
 #### snapshots
 
@@ -121,6 +150,14 @@ The snapshot each card in hand was compiled against.
 ### scenarioId
 
 > **scenarioId**: `string`
+
+***
+
+### seals
+
+> **seals**: `Record`\<`string`, [`FootnoteSeal`](../../../types/type-aliases/FootnoteSeal.md)[]\>
+
+Footnote seals affixed to each card in hand, in the order applied.
 
 ***
 

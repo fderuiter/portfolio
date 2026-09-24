@@ -10,6 +10,14 @@ One card in hand as the table should render it.
 
 ## Properties
 
+### blank
+
+> **blank**: `boolean`
+
+A blank shell with no analysis set allocated: it cannot be played yet.
+
+***
+
 ### card
 
 > **card**: `object`
@@ -52,6 +60,13 @@ Face data. Draft cards derive their face from the draft table instead.
 
 > **population**: `"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"` = `PopulationTypeSchema`
 
+#### shellId?
+
+> `optional` **shellId?**: `string`
+
+A blank shell: a planned output with no cohort data allocated yet. It
+compiles only once the player allocates one of the shell's analysis sets.
+
 #### soc?
 
 > `optional` **soc?**: `string`
@@ -63,6 +78,14 @@ Face data. Draft cards derive their face from the draft table instead.
 #### topic
 
 > **topic**: `string` = `identifier`
+
+***
+
+### compatiblePopulations
+
+> **compatiblePopulations**: (`"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`)[]
+
+The analysis sets this card's shell accepts. Empty for face-only cards.
 
 ***
 
@@ -79,6 +102,14 @@ The Boss Blind's debuff cancels this card's Chips.
 > **face**: \{ `columns`: `string`[]; `kind`: `"TABLE"`; `rows`: `object`[]; \} \| \{ `columns`: `string`[]; `kind`: `"LISTING"`; `rows`: `string`[][]; \} \| \{ `kind`: `"FIGURE"`; `plot`: \{ `series`: `object`[]; `type`: `"KM"`; \} \| \{ `series`: `object`[]; `type`: `"SPARKLINE"`; \} \| \{ `intervals`: `object`[]; `reference`: `number`; `type`: `"FOREST"`; \}; \} \| \{ `cohort`: `string`; `count`: `number`; `kind`: `"TOKEN"`; \}
 
 The live mini-output printed on the card, as currently reviewed.
+
+***
+
+### footnoteSlots
+
+> **footnoteSlots**: `number`
+
+How many footnote seals this output takes: its shell's slots.
 
 ***
 
@@ -126,6 +157,56 @@ The snapshot this card was compiled against.
 
 ***
 
+### seals
+
+> **seals**: `object`[]
+
+Footnote seals affixed to this output, in the order applied.
+
+#### effect
+
+> **effect**: \{ `kind`: `"PLUS_CHIPS"`; `value`: `number`; \} \| \{ `kind`: `"PLUS_MULT"`; `value`: `number`; \} \| \{ `kind`: `"WAIVE"`; \} = `SealEffectSchema`
+
+#### eligible
+
+> **eligible**: `object`
+
+Outputs the seal may be affixed to. An absent list allows any.
+
+##### eligible.cardTypes?
+
+> `optional` **cardTypes?**: (`"TABLE"` \| `"LISTING"` \| `"FIGURE"` \| `"SUBJECT_TOKEN"`)[]
+
+##### eligible.populations?
+
+> `optional` **populations?**: (`"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`)[]
+
+##### eligible.topics?
+
+> `optional` **topics?**: `string`[]
+
+#### footnote
+
+> **footnote**: `string`
+
+The footnote as it prints under the output.
+
+#### id
+
+> **id**: `string` = `identifier`
+
+#### name
+
+> **name**: `string`
+
+#### sellValue
+
+> **sellValue**: `number` = `nonNegativeInt`
+
+What selling it adds to the study budget.
+
+***
+
 ### selected
 
 > **selected**: `boolean`
@@ -142,7 +223,7 @@ Compiled against a snapshot whose membership of this card's suit has since chang
 
 ### stamps
 
-> **stamps**: (`"REDLINE"` \| `"QC_PASS"` \| `"STALE"` \| `"SEALED"` \| `"BLINDED"`)[]
+> **stamps**: (`"REDLINE"` \| `"SEALED"` \| `"QC_PASS"` \| `"STALE"` \| `"BLINDED"`)[]
 
 Marks stamped on the face, in display order.
 

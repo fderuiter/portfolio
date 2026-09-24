@@ -9,3 +9,4 @@
 ## Functions
 
 - [compileDraft](functions/compileDraft.md)
+- [compileShell](functions/compileShell.md)

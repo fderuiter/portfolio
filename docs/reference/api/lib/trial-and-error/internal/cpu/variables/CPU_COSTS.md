@@ -8,4 +8,4 @@
 
 > `const` **CPU\_COSTS**: `Readonly`\<\{ `DISCARD`: `1`; `INSPECT`: `1`; `PLAY_HAND`: `2`; `RECOMPILE`: `2`; \}\>
 
-CPU cycles each workbench action costs. T&E-04 (#913) extends this table.
+CPU cycles each workbench action costs. Allocating a shell and applying a footnote seal are free.

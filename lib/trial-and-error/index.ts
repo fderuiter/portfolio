@@ -63,8 +63,15 @@ export {
   type TableState,
   type TableView,
   STALE_ALERT,
+  EMPTY_SHELL_ALERT,
+  CONSUMABLE_SLOTS,
   cardShortName,
+  carriedInventory,
+  previewAllocation,
   studyHistory,
+  type AllocationOption,
+  type Consumable,
+  type Inventory,
   type StudyHistory,
 } from "./internal/table";
 export {
@@ -75,7 +82,7 @@ export {
   type SnapshotInvalidation,
   type TransitionOutcome,
 } from "./internal/snapshots";
-export { compileDraft } from "./internal/compile";
+export { compileDraft, compileShell } from "./internal/compile";
 export {
   scoreTimeline,
   type TimelineContext,

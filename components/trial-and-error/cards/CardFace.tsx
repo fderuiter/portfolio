@@ -10,6 +10,7 @@ import {
 } from "@/components/trial-and-error/cards/MiniFigure";
 import { MiniTable } from "@/components/trial-and-error/cards/MiniTable";
 import { StampSlot } from "@/components/trial-and-error/cards/Stamp";
+import { LOUD_PRESETS } from "@/components/trial-and-error/LoudLayer";
 
 export const POPULATION_LABEL: Record<PopulationType, string> = {
   ITT: "ITT",
@@ -62,11 +63,36 @@ export function MiniOutput({
 }
 
 /**
+ * The seal slot: one wax-stamp badge per footnote seal affixed to the
+ * output. It presses on with a small loud flash when the cabinet allows it.
+ */
+export function SealSlot({ view }: { view: TableCardView }) {
+  if (view.seals.length === 0) return null;
+  return (
+    <span className="pointer-events-none absolute right-0 top-5 flex flex-col gap-0.5">
+      {view.seals.map((seal, i) => (
+        <span
+          key={`${seal.id}-${i}`}
+          data-testid="seal-badge"
+          data-seal={seal.id}
+          title={seal.name}
+          className={`${LOUD_PRESETS.sealPress} flex h-6 w-6 items-center justify-center rounded-full border-2 border-amber-400 bg-amber-950 text-[9px] font-bold text-amber-200`}
+        >
+          FN
+        </span>
+      ))}
+    </span>
+  );
+}
+
+/**
  * A card's face, printed from its data: type, suit (in colour and in text),
  * number, title, the live mini-output, the Chips badge (struck to 0 when a
  * Boss Blind disables the card's suit or the card is stale), the unverified
- * "?" badge and the stamp slot. Decorative inside the card button, whose
- * accessible name carries the same facts.
+ * "?" badge, the seal slot and the stamp slot. A blank shell prints its
+ * empty skeleton and the analysis sets it accepts instead of a suit.
+ * Decorative inside the card button, whose accessible name carries the same
+ * facts.
  */
 export function CardFace({ view }: { view: TableCardView }) {
   const { card } = view;
@@ -86,10 +112,26 @@ export function CardFace({ view }: { view: TableCardView }) {
               ?
             </span>
           )}
+          {view.blank && (
+            <span
+              className="border border-dashed border-zinc-400 px-1 font-bold text-zinc-200"
+              data-testid="shell-badge"
+            >
+              Shell
+            </span>
+          )}
         </span>
-        <span className={SUIT_TEXT[card.population]}>
-          {POPULATION_LABEL[card.population]}
-        </span>
+        {view.blank ? (
+          <span className="text-zinc-300">
+            {view.compatiblePopulations
+              .map((p) => POPULATION_LABEL[p])
+              .join(" / ")}
+          </span>
+        ) : (
+          <span className={SUIT_TEXT[card.population]}>
+            {POPULATION_LABEL[card.population]}
+          </span>
+        )}
       </span>
       <span className={`block font-bold leading-tight break-words${dim}`}>
         {card.number}
@@ -98,7 +140,7 @@ export function CardFace({ view }: { view: TableCardView }) {
         {card.title}
       </span>
       <span
-        className={`flex h-[4.75rem] min-w-0 items-start overflow-hidden border border-zinc-800 bg-[color:var(--te-surface-0)] p-0.5${dim}`}
+        className={`flex h-[4.75rem] min-w-0 items-start overflow-hidden border ${view.blank ? "border-dashed border-zinc-600 opacity-70" : "border-zinc-800"} bg-[color:var(--te-surface-0)] p-0.5${dim}`}
       >
         <MiniOutput face={view.face} size="card" />
       </span>
@@ -115,6 +157,7 @@ export function CardFace({ view }: { view: TableCardView }) {
             {card.chips} Chips
           </span>
         )}
+        {view.blank && <span className="text-zinc-400">Allocate [A]</span>}
         {view.inspected && (
           <span
             className={
@@ -127,6 +170,7 @@ export function CardFace({ view }: { view: TableCardView }) {
           </span>
         )}
       </span>
+      <SealSlot view={view} />
       <StampSlot stamps={view.stamps} />
     </span>
   );

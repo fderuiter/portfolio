@@ -51,7 +51,7 @@ describe("Card Table reducer", () => {
     expect(view).toMatchObject({
       classification: null,
       preview: null,
-      deckRemaining: 2,
+      deckRemaining: 3,
       handsAffordable: 5,
       discardsAffordable: 10,
       canPlay: false,
@@ -114,7 +114,7 @@ describe("Card Table reducer", () => {
     expect(state.cpu).toEqual({ available: 8, spent: 2 });
     expect(state.hand).toHaveLength(8);
     expect(state.hand).not.toContain(DRAFT_A);
-    expect(state.hand.slice(-2)).toEqual(["C-T14.3.2", "C-L16.2.8"]);
+    expect(state.hand.slice(-2)).toEqual(["C-T14.1.3", "C-T14.3.2"]);
   });
 
   it("matches evaluateHand exactly for preview and play", () => {

@@ -6,18 +6,8 @@
 
 # Type Alias: CpuEvent
 
-> **CpuEvent** = `object`
+> **CpuEvent** = \{ `action`: [`CpuAction`](CpuAction.md); `type`: `"SPEND"`; \} \| \{ `available`: `number`; `type`: `"REPLENISH"`; \}
 
-Events the CPU reducer understands.
-
-## Properties
-
-### action
-
-> **action**: [`CpuAction`](CpuAction.md)
-
-***
-
-### type
-
-> **type**: `"SPEND"`
+Events the CPU reducer understands. `SPEND` pays for one action;
+`REPLENISH` refills the ledger to the Blind's allocation, which happens
+once, deterministically, when each Blind starts.

@@ -6,11 +6,13 @@
 
 # Function: createTableState()
 
-> **createTableState**(`scenario`, `history?`): [`TableState`](../interfaces/TableState.md)
+> **createTableState**(`scenario`, `history?`, `inventory?`): [`TableState`](../interfaces/TableState.md)
 
 Fresh Card Table state: the first hand dealt against the study's current
-snapshot, full CPU. `history` carries earlier Blinds' snapshot versions;
-without it the study starts at the scenario's own snapshot.
+snapshot, CPU replenished to the Blind's allocation. `history` carries
+earlier Blinds' snapshot versions; without it the study starts at the
+scenario's own snapshot. `inventory` is the tray and budget carried in;
+the Blind's granted seals fill any free tray slots.
 
 ## Parameters
 
@@ -65,6 +67,12 @@ Present only on a Boss Blind.
 #### boss.name
 
 `string` = `...`
+
+#### consumables?
+
+`object`[] = `...`
+
+Footnote seals granted to the consumable tray when the Blind starts.
 
 #### deck
 
@@ -185,6 +193,10 @@ The short intro card shown when the Blind starts.
 ### history?
 
 [`StudyHistory`](../interfaces/StudyHistory.md) = `...`
+
+### inventory?
+
+[`Inventory`](../interfaces/Inventory.md) = `EMPTY_INVENTORY`
 
 ## Returns
 

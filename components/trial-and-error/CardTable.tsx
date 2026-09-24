@@ -16,10 +16,14 @@ import {
   HAND_NAMES,
   STALE_ALERT,
   advanceRun,
+  canAfford,
   cardShortName,
   createRunState,
   deriveRunView,
+  previewAllocation,
   type Act,
+  type Consumable,
+  type CpuAction,
   type RunAction,
   type RunState,
   type Scenario,
@@ -33,7 +37,10 @@ import { QcDesk } from "@/components/trial-and-error/QcDesk";
 import { CardBack } from "@/components/trial-and-error/cards/CardBack";
 import { CardDetail } from "@/components/trial-and-error/cards/CardDetail";
 import { POPULATION_LABEL } from "@/components/trial-and-error/cards/CardFace";
-import { HandCard } from "@/components/trial-and-error/cards/HandCard";
+import {
+  HandCard,
+  SEAL_DRAG_TYPE,
+} from "@/components/trial-and-error/cards/HandCard";
 import { STAMP_LABELS } from "@/components/trial-and-error/cards/Stamp";
 import {
   ScoreBreakdown,
@@ -68,12 +75,33 @@ const FIGURE_SPACE = "\u2007";
 const BUTTON_BASE =
   "min-h-[48px] px-4 py-3 border font-mono text-xs font-bold uppercase tracking-wider touch-manipulation active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 disabled:cursor-not-allowed disabled:border-zinc-700 disabled:bg-transparent disabled:text-zinc-400";
 
+/** A seal's effect in a few words, for the tray. */
+function sealSummary({ seal }: Consumable): string {
+  switch (seal.effect.kind) {
+    case "PLUS_CHIPS":
+      return `+${seal.effect.value} Chips`;
+    case "PLUS_MULT":
+      return `+${seal.effect.value} Mult`;
+    case "WAIVE":
+      return "Waiver";
+  }
+}
+
+const COST_NAMES: Record<CpuAction, string> = {
+  PLAY_HAND: "Play Hand",
+  DISCARD: "Discard",
+  INSPECT: "Inspect",
+  RECOMPILE: "Recompile",
+};
+
 function cardLabel(view: TableCardView): string {
   const { card } = view;
   const parts = [
     `${card.number}, ${card.title}`,
     `${card.cardType.toLowerCase()}`,
-    `${POPULATION_LABEL[card.population]} population`,
+    view.blank
+      ? `empty shell, accepts ${view.compatiblePopulations.map((p) => POPULATION_LABEL[p]).join(" or ")} data, press A to allocate`
+      : `${POPULATION_LABEL[card.population]} population`,
     `${card.chips} Chips`,
   ];
   if (view.debuffed) parts.push("disabled by the boss, scores 0 Chips");
@@ -91,6 +119,7 @@ function cardLabel(view: TableCardView): string {
     );
   }
   parts.push(...view.stamps.map((stamp) => STAMP_LABELS[stamp]));
+  for (const seal of view.seals) parts.push(`footnote seal: ${seal.name}`);
   if (view.selected) parts.push("selected");
   return parts.join(", ");
 }
@@ -170,11 +199,15 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
   // Local order while a card is being dragged; committed as MOVE_CARD on drop.
   const [dragOrder, setDragOrder] = useState<string[] | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
+  // A tray seal picked up with the keyboard or a click, waiting for a card.
+  const [armedId, setArmedId] = useState<string | null>(null);
+  const armed = view.consumables.find((c) => c.id === armedId) ?? null;
   const detailView = view.hand.find((h) => h.card.id === detailId);
   const activeIndex = Math.min(focusIndex, Math.max(0, view.hand.length - 1));
   const focusedCard = view.hand[activeIndex];
 
   const cardRefs = useRef(new Map<string, HTMLButtonElement>());
+  const allocateRef = useRef<HTMLButtonElement>(null);
   const restartRef = useRef<HTMLButtonElement>(null);
   const skipRef = useRef<HTMLButtonElement>(null);
   const deskFocusRef = useRef<HTMLElement | null>(null);
@@ -213,6 +246,9 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
         PLAYED: ["cardDeal"],
         INSPECT_OPENED: ["cardFlip"],
         RECOMPILED: ["cardFlip"],
+        ALLOCATED: ["cardFlip"],
+        SEALED: ["multThunk"],
+        SOLD: ["sell"],
       };
       cues[kind]?.forEach((cue) => sound.play(cue));
       if (kind === "PLAYED" || kind === "DISCARDED") {
@@ -257,6 +293,25 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
   const recompile = (cardId: string | undefined) => {
     if (cardId) send({ type: "RECOMPILE", cardId }, { kind: "card", cardId });
   };
+  const applySeal = (consumableId: string, cardId: string) => {
+    setArmedId(null);
+    send(
+      { type: "APPLY_SEAL", consumableId, cardId },
+      { kind: "card", cardId }
+    );
+  };
+  const toggleArmed = (id: string) => {
+    const next = armedId === id ? null : id;
+    setArmedId(next);
+    const item = view.consumables.find((c) => c.id === id);
+    if (item) {
+      announce(
+        next
+          ? `${item.seal.name} picked up. Focus a card and press Enter to affix it. Escape puts it back.`
+          : `${item.seal.name} put back.`
+      );
+    }
+  };
 
   const handOrder =
     dragOrder &&
@@ -278,6 +333,11 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
   };
 
   const activateCard = (index: number, cardId: string, pointerType: string) => {
+    if (armed) {
+      setFocusIndex(index);
+      applySeal(armed.id, cardId);
+      return;
+    }
     // On touch, a second tap on a selected card reads it instead of
     // deselecting it; the detail view offers Deselect.
     if (pointerType === "touch" && state.selected.includes(cardId)) {
@@ -324,7 +384,16 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
     if (event.target !== event.currentTarget || playing) return;
     if (event.metaKey || event.ctrlKey || event.altKey) return;
     const key = event.key.toLowerCase();
-    if (event.key === " ") {
+    if (armed && (event.key === "Enter" || event.key === " ")) {
+      event.preventDefault();
+      applySeal(armed.id, cardId);
+    } else if (armed && event.key === "Escape") {
+      event.preventDefault();
+      toggleArmed(armed.id);
+    } else if (key === "a" && view.hand[index]?.blank) {
+      event.preventDefault();
+      allocateRef.current?.focus();
+    } else if (event.key === " ") {
       event.preventDefault();
       send({ type: "TOGGLE_SELECT", cardId });
     } else if (event.key === "Enter") {
@@ -371,6 +440,8 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
         onKeyDown={(e) => onCardKeyDown(e, viewIndex, id)}
         onLongPress={() => setDetailId(id)}
         onDragEnd={() => commitDrag(id)}
+        onSealDrop={(consumableId) => applySeal(consumableId, id)}
+        sealTarget={armed !== null}
       />
     );
   });
@@ -382,6 +453,25 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
     { length: scenario.table.startingCpu },
     (_, i) => i < state.cpu.available
   );
+  const allocation =
+    focusedCard?.blank && state.status === "REVIEWING"
+      ? previewAllocation(scenario, state, focusedCard.card.id)
+      : [];
+  // Why a costed button the player has something selected for is disabled.
+  const costNotes = (
+    [
+      ["PLAY_HAND", state.selected.length > 0],
+      ["DISCARD", state.selected.length > 0],
+      ["INSPECT", focusedCard?.inspectable && !focusedCard.inspected],
+      ["RECOMPILE", focusedCard?.stale],
+    ] as const
+  )
+    .filter(([action, wanted]) => wanted && !canAfford(state.cpu, action))
+    .map(
+      ([action]) =>
+        `${COST_NAMES[action]} needs ${CPU_COSTS[action]} CPU; ${state.cpu.available} left.`
+    );
+  const costDescribedBy = costNotes.length > 0 ? "cpu-note" : undefined;
 
   return (
     <section
@@ -511,12 +601,23 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
               {view.snapshot.id}
             </dd>
           </dl>
-          <div className="mt-2 flex flex-wrap gap-0.5" aria-hidden="true">
+          <div
+            className="mt-2 flex flex-wrap gap-0.5"
+            aria-hidden="true"
+            data-testid="cpu-pips"
+          >
             {cpuPips.map((on, i) => (
+              // Keyed on state, so a pip that empties remounts and its burst
+              // plays once: the spent CPU pops off its slot.
               <span
-                key={i}
-                className={`h-3 w-2 border ${on ? "border-emerald-400 bg-emerald-400" : "border-zinc-700"}`}
-              />
+                key={`${i}:${on}`}
+                data-pip={on ? "on" : "spent"}
+                className={`relative h-3 w-2 border ${on ? "border-emerald-400 bg-emerald-400" : "border-zinc-700"}`}
+              >
+                {!on && (
+                  <span className="te-pip-burst absolute inset-0 bg-emerald-400" />
+                )}
+              </span>
             ))}
           </div>
           <p
@@ -565,6 +666,81 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
               </li>
             ))}
           </ul>
+          <div
+            role="group"
+            aria-label={`Consumables: ${view.consumables.length} of ${view.consumableSlots} slots filled. Study budget $${view.budget}k.`}
+            className="mt-2 flex flex-wrap items-stretch gap-2"
+            data-testid="consumable-tray"
+          >
+            {Array.from({ length: view.consumableSlots }, (_, i) => {
+              const item = view.consumables[i];
+              if (!item) {
+                return (
+                  <span
+                    key={`slot-${i}`}
+                    className="flex min-h-[48px] w-44 items-center justify-center border border-dashed border-zinc-700 text-[10px] uppercase text-zinc-400"
+                  >
+                    Empty slot
+                  </span>
+                );
+              }
+              const isArmed = armed?.id === item.id;
+              return (
+                <span
+                  key={item.id}
+                  className={`flex w-44 min-w-0 flex-col border text-[10px] ${isArmed ? "border-amber-400 bg-amber-500/10" : "border-zinc-700"}`}
+                  data-testid="consumable"
+                >
+                  <button
+                    type="button"
+                    draggable={state.status === "REVIEWING"}
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData(SEAL_DRAG_TYPE, item.id);
+                      e.dataTransfer.effectAllowed = "copy";
+                    }}
+                    onClick={() => toggleArmed(item.id)}
+                    aria-pressed={isArmed}
+                    disabled={state.status !== "REVIEWING" || playing}
+                    title={item.seal.footnote}
+                    className="min-h-[44px] min-w-0 px-2 py-1 text-left touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 disabled:text-zinc-400"
+                  >
+                    <span className="flex items-start gap-1 font-bold uppercase tracking-wider text-amber-300">
+                      <span
+                        aria-hidden="true"
+                        className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-amber-400 bg-amber-950 text-[7px]"
+                      >
+                        FN
+                      </span>
+                      <span className="min-w-0 break-words">
+                        {item.seal.name}
+                      </span>
+                    </span>
+                    <span className="block text-zinc-300">
+                      {sealSummary(item)}
+                      {isArmed ? " · pick a card" : ""}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (isArmed) setArmedId(null);
+                      send({ type: "SELL_CONSUMABLE", consumableId: item.id });
+                    }}
+                    disabled={state.status !== "REVIEWING" || playing}
+                    className="min-h-[44px] border-t border-zinc-800 px-2 text-left uppercase tracking-wider text-zinc-300 touch-manipulation hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 disabled:text-zinc-500"
+                  >
+                    Sell · ${item.seal.sellValue}k
+                  </button>
+                </span>
+              );
+            })}
+            <span
+              className="self-center text-[10px] uppercase tracking-wider text-zinc-400 tabular-nums"
+              data-testid="study-budget"
+            >
+              Budget ${view.budget}k
+            </span>
+          </div>
 
           {playing && timeline ? (
             <div className="mt-3 min-h-[13rem] border border-zinc-800 bg-[color:var(--te-surface-1)] px-3 py-2">
@@ -624,7 +800,7 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
                   {view.flushBrokenBy.length === 1 ? "is" : "are"} stale.
                 </p>
               )}
-              {view.playBlockedReason && (
+              {view.staleSelected.length > 0 && view.playBlockedReason && (
                 <p
                   className="mt-1 text-xs text-rose-300 break-words"
                   data-testid="stale-alert"
@@ -633,6 +809,15 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
                   {/* The flush line above already names the stale cards. */}
                   {view.flushBrokenBy.length === 0 &&
                     ` Stale: ${numbersOf(view.staleSelected)}.`}
+                </p>
+              )}
+              {view.emptySelected.length > 0 && (
+                <p
+                  className="mt-1 text-xs text-rose-300 break-words"
+                  data-testid="empty-alert"
+                >
+                  Empty shell: {numbersOf(view.emptySelected)}. Allocate an
+                  analysis set to compile it first.
                 </p>
               )}
               {view.previewUnverified && (
@@ -696,7 +881,7 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
                 values={handOrder}
                 onReorder={setDragOrder}
                 role="group"
-                aria-label={`Hand of ${view.hand.length}. Arrow keys move, Space selects, Enter plays, D discards, I inspects, R recompiles a stale card, question mark reads the card, Alt with arrows reorders.`}
+                aria-label={`Hand of ${view.hand.length}. Arrow keys move, Space selects, Enter plays, D discards, I inspects, R recompiles a stale card, A allocates a blank shell, question mark reads the card, Alt with arrows reorders. With a footnote seal picked up, Enter affixes it and Escape puts it back.`}
                 className="-mx-3 mt-1 flex overflow-x-auto px-3 pb-3 pt-7 [scrollbar-width:thin]"
                 data-testid="hand"
               >
@@ -716,6 +901,7 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
                   type="button"
                   onClick={play}
                   disabled={!view.canPlay}
+                  aria-describedby={costDescribedBy}
                   className={`${BUTTON_BASE} border-emerald-500 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20`}
                 >
                   Play Hand · {CPU_COSTS.PLAY_HAND} CPU [Enter]
@@ -724,6 +910,7 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
                   type="button"
                   onClick={discard}
                   disabled={!view.canDiscard}
+                  aria-describedby={costDescribedBy}
                   className={`${BUTTON_BASE} border-slate-400 text-slate-300 hover:bg-slate-400/10`}
                 >
                   Discard · {CPU_COSTS.DISCARD} CPU [D]
@@ -731,6 +918,7 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
                 <button
                   type="button"
                   onClick={() => inspect(focusedCard?.card.id)}
+                  aria-describedby={costDescribedBy}
                   disabled={
                     !focusedCard?.inspectable ||
                     (!focusedCard.inspected && !view.canInspect)
@@ -746,6 +934,7 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
                     type="button"
                     onClick={() => recompile(focusedCard.card.id)}
                     disabled={!view.canRecompile}
+                    aria-describedby={costDescribedBy}
                     className={`${BUTTON_BASE} border-rose-400 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20`}
                   >
                     Recompile {focusedCard.card.number} · {CPU_COSTS.RECOMPILE}{" "}
@@ -753,6 +942,84 @@ export function CardTable({ act: actProp, scenario: single }: CardTableProps) {
                   </button>
                 )}
               </div>
+              {costNotes.length > 0 && (
+                <p
+                  id="cpu-note"
+                  className="mt-2 text-xs text-amber-300 break-words"
+                  data-testid="cpu-note"
+                >
+                  {costNotes.join(" ")}
+                </p>
+              )}
+              {focusedCard?.blank && allocation.length > 0 && (
+                <div
+                  role="group"
+                  aria-labelledby="allocate-heading"
+                  className="mt-3 border border-dashed border-zinc-600 p-3"
+                  data-testid="allocate-panel"
+                >
+                  <p
+                    id="allocate-heading"
+                    className="text-[10px] font-bold uppercase tracking-wider text-zinc-300 break-words"
+                  >
+                    Allocate an analysis set to {focusedCard.card.number} ·
+                    free, final
+                  </p>
+                  <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    {allocation.map((option, i) => (
+                      <button
+                        key={option.population}
+                        ref={i === 0 ? allocateRef : undefined}
+                        type="button"
+                        disabled={option.refusal !== null}
+                        onClick={() =>
+                          send(
+                            {
+                              type: "ALLOCATE",
+                              cardId: focusedCard.card.id,
+                              population: option.population,
+                            },
+                            { kind: "card", cardId: focusedCard.card.id }
+                          )
+                        }
+                        className={`${BUTTON_BASE} h-auto border-zinc-500 text-left normal-case tracking-normal text-zinc-100 hover:bg-zinc-800`}
+                        data-testid="allocate-option"
+                      >
+                        <span className="block uppercase tracking-wider">
+                          Compile on {POPULATION_LABEL[option.population]} · N=
+                          {option.subjects}
+                        </span>
+                        <span className="block font-normal text-zinc-400">
+                          {option.snapshot.id} · v{option.snapshot.version}
+                        </span>
+                        {option.refusal ? (
+                          <span className="block font-normal text-rose-300 break-words">
+                            {option.refusal}
+                          </span>
+                        ) : (
+                          option.estimate &&
+                          option.classification && (
+                            <span className="block font-normal tabular-nums break-words">
+                              ≈ {HAND_NAMES[option.classification.handType]}{" "}
+                              <span className="text-[color:var(--te-chips)]">
+                                [{option.estimate.chips.total}]
+                              </span>{" "}
+                              ×{" "}
+                              <span className="text-[color:var(--te-plus-mult)]">
+                                [{option.estimate.finalMult}]
+                              </span>{" "}
+                              = {option.estimate.score}{" "}
+                              <span className="text-amber-300">
+                                ? unverified
+                              </span>
+                            </span>
+                          )
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="mt-3 p-4 text-center" data-testid="blind-result">

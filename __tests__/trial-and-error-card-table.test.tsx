@@ -441,3 +441,189 @@ describe("CardTable population snapshots (T&E-03)", () => {
     );
   });
 });
+
+describe("CardTable shells, seals and CPU (T&E-04)", () => {
+  const BLANK = "C-T14.1.3";
+  const tray = () => screen.getByTestId("consumable-tray");
+  const seal = (name: RegExp) =>
+    within(tray()).getByRole("button", { name }) as HTMLButtonElement;
+
+  /** Sends A, B and the DM listing back, which deals the blank shell. */
+  function renderWithBlank() {
+    render(<CardTable />);
+    for (const id of [DRAFT_A, "C-T14.1.1-B", DM_LISTING]) {
+      fireEvent.click(card(id));
+    }
+    fireEvent.click(screen.getByRole("button", { name: /Discard/ }));
+    expect(card(BLANK)).toBeTruthy();
+  }
+
+  it("draws the blank shell as an empty skeleton and blocks it from play", () => {
+    renderWithBlank();
+    const blank = card(BLANK);
+    expect(blank.dataset.blank).toBe("true");
+    expect(within(blank).getByTestId("shell-badge").textContent).toBe("Shell");
+    expect(blank.getAttribute("aria-label")).toContain(
+      "empty shell, accepts ITT or Safety data, press A to allocate"
+    );
+    fireEvent.click(blank);
+    expect(screen.getByTestId("empty-alert").textContent).toBe(
+      "Empty shell: Table 14.1.3. Allocate an analysis set to compile it first."
+    );
+    expect(
+      (screen.getByRole("button", { name: /Play Hand/ }) as HTMLButtonElement)
+        .disabled
+    ).toBe(true);
+    expect(screen.queryByTestId("stale-alert")).toBeNull();
+  });
+
+  it("previews each analysis set and allocates one with A, for free", () => {
+    renderWithBlank();
+    for (const id of [
+      "C-T14.3.1",
+      "C-L16.2.7",
+      "C-T14.3.2",
+      "C-L16.2.8",
+      BLANK,
+    ]) {
+      fireEvent.click(card(id));
+    }
+    const panel = screen.getByTestId("allocate-panel");
+    const [itt, safety] = within(panel).getAllByTestId("allocate-option");
+    expect(itt.textContent).toContain("Compile on ITT · N=12");
+    expect(itt.textContent).toContain("TLF Pair");
+    expect(safety.textContent).toContain("SNAP-P1-v1 · v1");
+    expect(safety.textContent).toContain("Population Flush");
+    expect(safety.textContent).toContain("? unverified");
+
+    act(() => card(BLANK).focus());
+    fireEvent.keyDown(card(BLANK), { key: "a" });
+    expect(document.activeElement).toBe(itt);
+    fireEvent.click(safety);
+    expect(lastAnnouncement()).toBe(
+      "Allocated Safety data (N=12, SNAP-P1-v1) to Table 14.1.3. It compiled as a Safety output."
+    );
+    expect(screen.getByTestId("cpu-counter").textContent).toBe("9/10");
+    expect(screen.queryByTestId("allocate-panel")).toBeNull();
+    expect(card(BLANK).getAttribute("aria-label")).toContain(
+      "Safety population"
+    );
+    expect(document.activeElement).toBe(card(BLANK));
+    expect(screen.getByTestId("hand-preview").textContent).toContain(
+      "Population Flush"
+    );
+  });
+
+  it("arms a seal from the tray and affixes it with Enter", () => {
+    renderWithBlank();
+    act(() => card(BLANK).focus());
+    fireEvent.keyDown(card(BLANK), { key: "a" });
+    fireEvent.click(
+      within(screen.getByTestId("allocate-panel")).getAllByTestId(
+        "allocate-option"
+      )[1]
+    );
+    expect(within(tray()).getAllByTestId("consumable")).toHaveLength(2);
+    const adjudicated = seal(/Adjudicated Endpoint/);
+    fireEvent.click(adjudicated);
+    expect(adjudicated.getAttribute("aria-pressed")).toBe("true");
+    expect(lastAnnouncement()).toContain("Adjudicated Endpoint picked up");
+    fireEvent.keyDown(card(BLANK), { key: "Escape" });
+    expect(lastAnnouncement()).toBe("Adjudicated Endpoint put back.");
+    expect(seal(/Adjudicated Endpoint/).getAttribute("aria-pressed")).toBe(
+      "false"
+    );
+
+    fireEvent.click(seal(/Adjudicated Endpoint/));
+    fireEvent.keyDown(card(BLANK), { key: "Enter" });
+    expect(lastAnnouncement()).toContain(
+      "Sealed Table 14.1.3 with Adjudicated Endpoint: +3 Mult."
+    );
+    expect(within(card(BLANK)).getAllByTestId("seal-badge")).toHaveLength(1);
+    expect(card(BLANK).getAttribute("aria-label")).toContain(
+      "footnote seal: Adjudicated Endpoint"
+    );
+    expect(within(tray()).getAllByTestId("consumable")).toHaveLength(1);
+    // Enter played nothing: the seal took it.
+    expect(screen.getByTestId("round-score").textContent?.trim()).toBe("0");
+
+    fireEvent.keyDown(card(BLANK), { key: "?" });
+    const footnotes = within(screen.getByTestId("card-detail")).getByTestId(
+      "card-footnotes"
+    );
+    expect(footnotes.textContent).toContain(
+      "Serious events were adjudicated by an independent committee blinded to treatment."
+    );
+  });
+
+  it("affixes a seal dropped on a card, or clicked onto one", () => {
+    render(<CardTable />);
+    const data = new Map<string, string>();
+    const dataTransfer = {
+      types: [] as string[],
+      setData: (type: string, value: string) => {
+        data.set(type, value);
+        dataTransfer.types.push(type);
+      },
+      getData: (type: string) => data.get(type) ?? "",
+      dropEffect: "none",
+      effectAllowed: "all",
+    };
+    fireEvent.dragStart(seal(/Sponsor rounding standard/), { dataTransfer });
+    fireEvent.dragOver(card(DRAFT_A), { dataTransfer });
+    fireEvent.drop(card(DRAFT_A), { dataTransfer });
+    expect(lastAnnouncement()).toContain(
+      "Sealed Table 14.1.1 (Draft A) with Sponsor rounding standard: waives SAP-DM-03 redlines."
+    );
+    // A click with a seal armed affixes it instead of selecting the card.
+    fireEvent.click(seal(/Adjudicated Endpoint/));
+    fireEvent.click(card("C-T14.1.1-B"));
+    expect(lastAnnouncement()).toBe(
+      "Adjudicated Endpoint applies to Safety outputs only; Table 14.1.1 (Draft B) is built on ITT."
+    );
+    expect(card("C-T14.1.1-B").getAttribute("aria-pressed")).toBe("false");
+  });
+
+  it("sells a seal into the study budget", () => {
+    render(<CardTable />);
+    expect(screen.getByTestId("study-budget").textContent).toBe("Budget $0k");
+    fireEvent.click(within(tray()).getByRole("button", { name: "Sell · $2k" }));
+    expect(lastAnnouncement()).toBe(
+      "Sold Adjudicated Endpoint for $2k. Study budget $2k."
+    );
+    expect(screen.getByTestId("study-budget").textContent).toBe("Budget $2k");
+    expect(within(tray()).getByText("Empty slot")).toBeTruthy();
+  });
+
+  it("draws CPU as pips that empty as they are spent, and says why a move is unaffordable", async () => {
+    const poor = {
+      ...DEMOGRAPHICS_SCENARIO,
+      table: { ...DEMOGRAPHICS_SCENARIO.table, startingCpu: 2 },
+    };
+    render(<CardTable scenario={poor} />);
+    const pips = () =>
+      Array.from(
+        screen
+          .getByTestId("cpu-pips")
+          .querySelectorAll<HTMLElement>("[data-pip]")
+      ).map((p) => p.dataset.pip);
+    expect(pips()).toEqual(["on", "on"]);
+    expect(screen.queryByTestId("cpu-note")).toBeNull();
+    await openInspect(DRAFT_A);
+    fireEvent.click(screen.getByRole("button", { name: /Close Inspect/ }));
+    await waitFor(() => expect(drawer()).toBeNull());
+    expect(pips()).toEqual(["on", "spent"]);
+    expect(
+      screen.getByTestId("cpu-pips").querySelectorAll(".te-pip-burst")
+    ).toHaveLength(1);
+    fireEvent.click(card(DRAFT_A));
+    expect(screen.getByTestId("cpu-note").textContent).toBe(
+      "Play Hand needs 2 CPU; 1 left."
+    );
+    expect(
+      screen
+        .getByRole("button", { name: /Play Hand/ })
+        .getAttribute("aria-describedby")
+    ).toBe("cpu-note");
+  });
+});

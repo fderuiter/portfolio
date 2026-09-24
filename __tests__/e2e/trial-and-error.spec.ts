@@ -18,8 +18,19 @@ async function launch(page: Page) {
   }).toPass({ timeout: 30000 });
 }
 
+/**
+ * The global footer ticker animates continuously, so a scan can land mid-fade
+ * and report a transient contrast failure. It is not a cabinet surface and the
+ * landing-page audit covers it, so it is scoped out here as in the Patrol Shift
+ * sweep (accessibility.spec.ts) rather than masked with a retry.
+ */
+const GLOBAL_ANIMATED_REGION = '[data-testid="footer-status-ticker"]';
+
 async function expectNoBlockingViolations(page: Page, state: string) {
-  const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
+  const results = await new AxeBuilder({ page })
+    .withTags(WCAG_TAGS)
+    .exclude(GLOBAL_ANIMATED_REGION)
+    .analyze();
   const blocking = results.violations
     .filter((v) => BLOCKING.has(v.impact ?? ""))
     .map(
@@ -191,6 +202,67 @@ test.describe("Trial & Error: Biostat Ops Card Table", () => {
     await expect(
       page.getByTestId("card-detail").getByTestId("snapshot-chip")
     ).toHaveText("SNAP-P1-v2 · v2");
+  });
+
+  test("allocates a blank shell to Safety for a flush, and seals it from the tray (T&E-04)", async ({
+    page,
+  }) => {
+    await launch(page);
+    // Send three ITT cards back to programming: the blank shell arrives.
+    for (const id of [DRAFT_A, "C-T14.1.1-B", "C-L16.2.4"]) {
+      await card(page, id).focus();
+      await page.keyboard.press("Space");
+    }
+    await page.keyboard.press("d");
+    const blank = card(page, "C-T14.1.3");
+    await expect(blank).toHaveAttribute("data-blank", "true");
+    await expect(
+      page.getByTestId("cpu-pips").locator('[data-pip="spent"]')
+    ).toHaveCount(1);
+
+    for (const id of [
+      "C-T14.3.1",
+      "C-L16.2.7",
+      "C-T14.3.2",
+      "C-L16.2.8",
+      "C-T14.1.3",
+    ]) {
+      await card(page, id).focus();
+      await page.keyboard.press("Space");
+    }
+    await expect(page.getByTestId("empty-alert")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /Play Hand/ })
+    ).toBeDisabled();
+    const options = page.getByTestId("allocate-option");
+    await expect(options.nth(1)).toContainText("Population Flush");
+    await expectNoBlockingViolations(page, "allocation preview");
+
+    // A jumps to the allocation choices; Safety makes the flush.
+    await page.keyboard.press("a");
+    await expect(options.first()).toBeFocused();
+    await options.nth(1).click();
+    await expect(blank).not.toHaveAttribute("data-blank", "true");
+    await expect(page.getByTestId("hand-preview")).toContainText(
+      "Population Flush"
+    );
+    await expect(page.getByTestId("cpu-counter")).toHaveText("9/10");
+
+    // Pick up the Adjudicated Endpoint seal and press it onto the shell.
+    await page
+      .getByTestId("consumable-tray")
+      .getByRole("button", { name: /Adjudicated Endpoint/ })
+      .click();
+    await blank.focus();
+    await page.keyboard.press("Enter");
+    await expect(blank.getByTestId("seal-badge")).toHaveCount(1);
+    await expect(page.getByTestId("consumable")).toHaveCount(1);
+    await expectNoBlockingViolations(page, "sealed card and tray");
+
+    await page.keyboard.press("Enter");
+    await expect(page.getByRole("button", { name: "Next Blind" })).toBeVisible({
+      timeout: 15000,
+    });
   });
 
   test("an uninspected card still zeroes the hand, and D discards for 1 CPU", async ({

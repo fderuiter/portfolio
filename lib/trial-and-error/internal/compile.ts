@@ -6,6 +6,7 @@ import type {
   RowStatistic,
   SapRulebook,
   StagedTable,
+  TableShellSpec,
 } from "../types";
 import { RoundingModeSchema } from "../types";
 import { decimalPlaces } from "./rounding";
@@ -150,4 +151,38 @@ export function compileDraft(
     })
   );
   return { ...draft, populationSnapshotId: to.id, cells };
+}
+
+/**
+ * Compiles a blank shell against a snapshot, as the programmer running it on
+ * the analysis set the player allocated. `rulebook` names that set as its
+ * population suit, so every cell is printed exactly as the SAP requires.
+ * Pure: the shell and snapshot are never modified.
+ */
+export function compileShell(
+  shell: TableShellSpec & { layout: NonNullable<TableShellSpec["layout"]> },
+  id: string,
+  snapshot: PopulationSnapshot,
+  rulebook: SapRulebook
+): StagedTable {
+  const { columns, rows } = shell.layout;
+  return {
+    id,
+    shellId: shell.id,
+    draftLabel: `Compiled on ${snapshot.id}`,
+    populationSnapshotId: snapshot.id,
+    columns,
+    rows,
+    cells: rows.map((row) =>
+      columns.map((column) =>
+        render(
+          row.statistic,
+          column.arm,
+          snapshot,
+          rulebook,
+          sapMechanism(row.statistic, rulebook)
+        )
+      )
+    ),
+  };
 }

@@ -21,6 +21,9 @@ const SUIT_BORDER: Record<PopulationType, string> = {
 };
 
 const LONG_PRESS_MS = 500;
+
+/** The drag payload type a tray seal carries onto a card. */
+export const SEAL_DRAG_TYPE = "application/x-te-seal";
 const TILT_DEG = 8;
 
 interface HandCardProps {
@@ -39,6 +42,10 @@ interface HandCardProps {
   onKeyDown: (event: React.KeyboardEvent<HTMLButtonElement>) => void;
   onLongPress: () => void;
   onDragEnd: () => void;
+  /** A footnote seal from the tray was dropped on this card. */
+  onSealDrop?: (consumableId: string) => void;
+  /** A seal is armed, so this card is a place to affix it. */
+  sealTarget?: boolean;
 }
 
 /**
@@ -60,6 +67,8 @@ export function HandCard({
   onKeyDown,
   onLongPress,
   onDragEnd,
+  onSealDrop,
+  sealTarget = false,
 }: HandCardProps) {
   const controls = useDragControls();
   const tiltX = useMotionValue(0);
@@ -174,6 +183,19 @@ export function HandCard({
         onContextMenu={(e) => {
           if (pointerType.current === "touch") e.preventDefault();
         }}
+        onDragOver={(e) => {
+          if (onSealDrop && e.dataTransfer.types.includes(SEAL_DRAG_TYPE)) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "copy";
+          }
+        }}
+        onDrop={(e) => {
+          const id = e.dataTransfer.getData(SEAL_DRAG_TYPE);
+          if (onSealDrop && id) {
+            e.preventDefault();
+            onSealDrop(id);
+          }
+        }}
         animate={{
           y: (physical ? offset * offset * 1.5 : 0) + lift,
           rotate: physical && !raised ? offset * 2.5 : 0,
@@ -185,7 +207,8 @@ export function HandCard({
         }
         style={{ rotateX: tiltX, rotateY: tiltY, transformPerspective: 700 }}
         data-stale={view.stale || undefined}
-        className={`block h-[13.5rem] w-full min-w-0 border border-l-4 text-left text-xs touch-manipulation select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${SUIT_BORDER[view.card.population]} ${
+        data-blank={view.blank || undefined}
+        className={`block h-[13.5rem] w-full min-w-0 border border-l-4 text-left text-xs touch-manipulation select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${view.blank ? "border-dashed border-l-zinc-500" : SUIT_BORDER[view.card.population]} ${sealTarget ? "outline outline-1 outline-dashed outline-amber-400/70" : ""} ${
           view.selected
             ? "border-amber-400 bg-[#1f1a10]"
             : "border-zinc-700 bg-[color:var(--te-surface-1)]"
