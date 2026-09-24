@@ -9,14 +9,24 @@
 > **advanceRun**(`act`, `run`, `action`): [`RunState`](../interfaces/RunState.md)
 
 Pure run reducer. It composes the Card Table reducer for the current Blind
-and moves between Blinds. The draw piles are fixed, so the same act and
-action sequence always yields the same state.
+and moves between Blinds, drawing each later Blind's crisis from the
+seeded event draw. The draw piles are fixed and every draw is a function
+of the seed and draw index, so the same act, seed and action sequence
+always yields the same state.
 
 ## Parameters
 
 ### act
 
 #### blinds
+
+`object`[] = `...`
+
+#### bossPool?
+
+`object`[] = `...`
+
+#### crisisDeck?
 
 `object`[] = `...`
 

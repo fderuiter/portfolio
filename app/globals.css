@@ -536,6 +536,27 @@ body {
   animation: te-seal-press 260ms ease-out 1 both;
 }
 
+/* Crisis slam (T&E-05): a drawn crisis card lands on the table with a jolt.
+ * Loud cabinets only, transform and opacity only. */
+@keyframes te-crisis-slam {
+  0% {
+    opacity: 0;
+    transform: translateY(-24px) scale(1.25) rotate(-6deg);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(2px) scale(0.96) rotate(1deg);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+[data-te-cabinet][data-te-loud="on"] .te-loud-crisis {
+  animation: te-crisis-slam 320ms ease-out 1 both;
+}
+
 /* CPU pips (T&E-04): a spent pip pops off its slot. Under reduced motion
  * the pip simply empties. */
 @keyframes te-pip-pop {

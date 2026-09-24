@@ -525,9 +525,13 @@ export const BossDebuffTypeSchema = z.enum([
 export type BossDebuffType = z.infer<typeof BossDebuffTypeSchema>;
 
 /**
- * A Boss Blind's rule twist. `DISABLE_POPULATION` scores every output built
- * on one of `disabledPopulations` at 0 Chips. The other debuff types are
- * declared for later bosses and have no effect yet.
+ * A Blind's rule twist, imposed by its boss or by a crisis choice.
+ * `DISABLE_POPULATION` scores every output built on one of
+ * `disabledPopulations` at 0 Chips. `HAND_LIMIT` fails the Blind once
+ * `maxHandsAllowed` hands have been played short of the target.
+ * `DISCARD_PENALTY` adds `discardCpuPenalty` CPU to every discard.
+ * `BLIND_FIREWALL` turns treatment-arm values face down: they are absent
+ * from the derived view, and no output can be inspected.
  */
 export const BossBlindModifierSchema = z
   .object({
@@ -548,6 +552,26 @@ export const BossBlindModifierSchema = z
         code: "custom",
         path: ["disabledPopulations"],
         message: "DISABLE_POPULATION must name at least one population",
+      });
+    }
+    if (
+      modifier.debuffType === "HAND_LIMIT" &&
+      modifier.maxHandsAllowed === undefined
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["maxHandsAllowed"],
+        message: "HAND_LIMIT must set maxHandsAllowed",
+      });
+    }
+    if (
+      modifier.debuffType === "DISCARD_PENALTY" &&
+      (modifier.discardCpuPenalty ?? 0) < 1
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["discardCpuPenalty"],
+        message: "DISCARD_PENALTY must add at least 1 CPU",
       });
     }
   });
@@ -773,6 +797,79 @@ export const FootnoteSealSchema = z.object({
 /** A footnote seal. */
 export type FootnoteSeal = z.infer<typeof FootnoteSealSchema>;
 
+/**
+ * What one crisis choice does. Every field is optional and deterministic:
+ * CPU and study budget deltas, a footnote seal granted to the tray or one
+ * spent from it, a population transition (routed through snapshot
+ * invalidation, so matching outputs go stale), and a modifier imposed on
+ * the current Blind.
+ */
+export const CrisisEffectSchema = z.object({
+  cpu: z.number().int().optional(),
+  budget: z.number().int().optional(),
+  grantSeal: FootnoteSealSchema.optional(),
+  /** Spends the first seal in the tray. */
+  spendSeal: z.literal(true).optional(),
+  transition: PopulationTransitionSchema.optional(),
+  modifier: BossBlindModifierSchema.optional(),
+});
+/** What one crisis choice does. */
+export type CrisisEffect = z.infer<typeof CrisisEffectSchema>;
+
+/** One way to answer a crisis, with its consequence stated before commit. */
+export const CrisisChoiceSchema = z.object({
+  id: identifier,
+  label: z.string().min(1).max(40),
+  /** The consequence, in plain words, shown on the button. */
+  consequence: z.string().min(1).max(160),
+  effect: CrisisEffectSchema,
+});
+/** One way to answer a crisis. */
+export type CrisisChoice = z.infer<typeof CrisisChoiceSchema>;
+
+/** Whether a crisis choice costs nothing the player might lack. */
+export const isFreeCrisisChoice = (choice: CrisisChoice): boolean =>
+  (choice.effect.cpu ?? 0) >= 0 &&
+  (choice.effect.budget ?? 0) >= 0 &&
+  choice.effect.spendSeal === undefined;
+
+/**
+ * A crisis card: something that happens to a study (a dropout, an
+ * amendment, an audit, a migration). It is drawn by the seeded event draw
+ * when a Blind starts and must be answered before the Blind is played. At
+ * least one choice is free, so a crisis can never strand a run.
+ */
+export const CrisisCardSchema = z
+  .object({
+    id: identifier,
+    name: z.string().min(1).max(32),
+    description: z.string().min(1).max(280),
+    choices: z.array(CrisisChoiceSchema).min(2).max(3),
+  })
+  .superRefine((crisis, ctx) => {
+    if (!crisis.choices.some(isFreeCrisisChoice)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["choices"],
+        message:
+          "A crisis needs at least one choice that costs no CPU, budget or seal",
+      });
+    }
+    const ids = new Set<string>();
+    crisis.choices.forEach((choice, index) => {
+      if (ids.has(choice.id)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["choices", index, "id"],
+          message: "Crisis choice ids must be unique",
+        });
+      }
+      ids.add(choice.id);
+    });
+  });
+/** A crisis card. */
+export type CrisisCard = z.infer<typeof CrisisCardSchema>;
+
 /** The best hand a selection makes, and the cards that actually score. */
 export const HandClassificationSchema = z.object({
   handType: HandTypeSchema,
@@ -945,15 +1042,91 @@ export type Scenario = z.infer<typeof ScenarioSchema>;
 /**
  * One act of a run: a single study whose Blinds are played in order, Small
  * to Boss. Every Blind declares the study's opening population snapshot; the
- * run carries any later versions from one Blind into the next.
+ * run carries any later versions from one Blind into the next. An act with
+ * a `bossPool` lists only its Small and Big Blinds: the run's seeded draw
+ * picks the Boss from the pool, and a pool of one is fixed and not drawn.
+ * Its `crisisDeck` is drawn from, without replacement, as each Blind after
+ * the first starts.
  */
 export const ActSchema = z
   .object({
     id: identifier,
     title: z.string().min(1),
     blinds: z.array(ScenarioSchema).min(1).max(3),
+    bossPool: z.array(ScenarioSchema).min(1).optional(),
+    crisisDeck: z.array(CrisisCardSchema).optional(),
   })
   .superRefine((act, ctx) => {
+    if (act.bossPool) {
+      act.blinds.forEach((blind, index) => {
+        if (blind.blind.tier === "BOSS_BLIND") {
+          ctx.addIssue({
+            code: "custom",
+            path: ["blinds", index, "blind", "tier"],
+            message: "An act with a boss pool draws its Boss from the pool",
+          });
+        }
+      });
+      const bossIds = new Set<string>();
+      act.bossPool.forEach((boss, index) => {
+        if (boss.blind.tier !== "BOSS_BLIND") {
+          ctx.addIssue({
+            code: "custom",
+            path: ["bossPool", index, "blind", "tier"],
+            message: "Every boss pool entry must be a Boss Blind",
+          });
+        }
+        if (bossIds.has(boss.id)) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["bossPool", index, "id"],
+            message: "Boss pool ids must be unique",
+          });
+        }
+        bossIds.add(boss.id);
+        if (
+          boss.populationSnapshot.id !== act.blinds[0].populationSnapshot.id
+        ) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["bossPool", index, "populationSnapshot", "id"],
+            message: "Every Blind in an act reads the study's one snapshot",
+          });
+        }
+      });
+    }
+    const crisisIds = new Set<string>();
+    const subjectIds = new Set(
+      act.blinds[0].populationSnapshot.subjects.map((s) => s.id)
+    );
+    (act.crisisDeck ?? []).forEach((crisis, index) => {
+      if (crisisIds.has(crisis.id)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["crisisDeck", index, "id"],
+          message: "Crisis card ids must be unique",
+        });
+      }
+      crisisIds.add(crisis.id);
+      crisis.choices.forEach((choice, c) => {
+        const subjectId = choice.effect.transition?.subjectId;
+        if (subjectId !== undefined && !subjectIds.has(subjectId)) {
+          ctx.addIssue({
+            code: "custom",
+            path: [
+              "crisisDeck",
+              index,
+              "choices",
+              c,
+              "effect",
+              "transition",
+              "subjectId",
+            ],
+            message: "A crisis transition must name a subject in the snapshot",
+          });
+        }
+      });
+    });
     const tiers = BlindTierSchema.options;
     act.blinds.forEach((blind, index) => {
       if (index === 0) return;

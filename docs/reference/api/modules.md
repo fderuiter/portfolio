@@ -250,6 +250,7 @@
 - [lib/trial-and-error/internal/desk](lib/trial-and-error/internal/desk/README.md)
 - [lib/trial-and-error/internal/hands](lib/trial-and-error/internal/hands/README.md)
 - [lib/trial-and-error/internal/inspection](lib/trial-and-error/internal/inspection/README.md)
+- [lib/trial-and-error/internal/rng](lib/trial-and-error/internal/rng/README.md)
 - [lib/trial-and-error/internal/rounding](lib/trial-and-error/internal/rounding/README.md)
 - [lib/trial-and-error/internal/run](lib/trial-and-error/internal/run/README.md)
 - [lib/trial-and-error/internal/scoring](lib/trial-and-error/internal/scoring/README.md)

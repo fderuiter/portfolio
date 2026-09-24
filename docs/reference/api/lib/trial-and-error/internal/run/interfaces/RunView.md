@@ -200,6 +200,12 @@ The short intro card shown when the Blind starts.
 
 ***
 
+### draws
+
+> **draws**: [`RunDraw`](RunDraw.md)[]
+
+***
+
 ### isFinalBlind
 
 > **isFinalBlind**: `boolean`
@@ -399,6 +405,12 @@ The short intro card shown when the Blind starts.
 ### phase
 
 > **phase**: [`RunPhase`](../type-aliases/RunPhase.md)
+
+***
+
+### seed
+
+> **seed**: `string`
 
 ***
 

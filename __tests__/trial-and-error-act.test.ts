@@ -10,6 +10,7 @@ import {
   advanceRun,
   advanceTable,
   classifyHand,
+  runBlinds,
   createRunState,
   createTableState,
   deriveRunView,
@@ -21,6 +22,11 @@ import {
   type TableAction,
   type TableState,
 } from "@/lib/trial-and-error";
+
+/** Act I's three Blinds, with its fixed Boss. */
+const ACT_I_BLINDS = runBlinds(ACT_I, createRunState(ACT_I));
+/** Act I without its crisis deck, for flows that test the Blinds alone. */
+const QUIET_ACT = { ...ACT_I, crisisDeck: undefined };
 
 const play = (
   scenario: Scenario,
@@ -86,17 +92,17 @@ const LINES: Record<string, TableAction[]> = {
 describe("Act I contract", () => {
   it("ships three escalating Blinds on one Phase I snapshot", () => {
     expect(ActSchema.safeParse(ACT_I).success).toBe(true);
-    expect(ACT_I.blinds.map((b) => [b.blind.tier, b.blind.quota])).toEqual([
+    expect(ACT_I_BLINDS.map((b) => [b.blind.tier, b.blind.quota])).toEqual([
       ["SMALL_BLIND", 300],
       ["BIG_BLIND", 750],
       ["BOSS_BLIND", 1500],
     ]);
-    expect(ACT_I.blinds.map((b) => b.blind.name)).toEqual([
+    expect(ACT_I_BLINDS.map((b) => b.blind.name)).toEqual([
       "Small Blind: Internal QC",
       "Big Blind: Sponsor Safety Review",
       "Boss Blind: Dose Escalation Committee",
     ]);
-    for (const blind of ACT_I.blinds) {
+    for (const blind of ACT_I_BLINDS) {
       expect(ScenarioSchema.safeParse(blind).success).toBe(true);
       expect(blind.intro.length).toBeLessThanOrEqual(280);
     }
@@ -358,7 +364,7 @@ describe("Act I hands", () => {
 });
 
 describe("each Blind is clearable, and a missed fatal defect zeroes it", () => {
-  it.each(ACT_I.blinds.map((b) => [b.blind.name, b] as const))(
+  it.each(ACT_I_BLINDS.map((b) => [b.blind.name, b] as const))(
     "%s clears with an inspected line",
     (_, scenario) => {
       const state = play(scenario, LINES[scenario.id]);
@@ -383,12 +389,12 @@ describe("each Blind is clearable, and a missed fatal defect zeroes it", () => {
 
 describe("run progression", () => {
   const step = (run: RunState, ...actions: RunAction[]) =>
-    actions.reduce((r, a) => advanceRun(ACT_I, r, a), run);
+    actions.reduce((r, a) => advanceRun(QUIET_ACT, r, a), run);
   const clearCurrent = (run: RunState) =>
-    step(run, ...(LINES[ACT_I.blinds[run.blindIndex].id] as RunAction[]));
+    step(run, ...(LINES[ACT_I_BLINDS[run.blindIndex].id] as RunAction[]));
 
   it("starts at the Small Blind with its intro showing", () => {
-    const view = deriveRunView(ACT_I, createRunState(ACT_I));
+    const view = deriveRunView(QUIET_ACT, createRunState(QUIET_ACT));
     expect(view).toMatchObject({
       blindIndex: 0,
       blindCount: 3,
@@ -402,15 +408,15 @@ describe("run progression", () => {
 
   it("hides the intro once the player acts", () => {
     const run = step(
-      createRunState(ACT_I),
+      createRunState(QUIET_ACT),
       ...(select("C-T14.1.2") as RunAction[]),
       { type: "DISCARD" }
     );
-    expect(deriveRunView(ACT_I, run).showIntro).toBe(false);
+    expect(deriveRunView(QUIET_ACT, run).showIntro).toBe(false);
   });
 
   it("refuses Next Blind until the Blind is cleared", () => {
-    const run = step(createRunState(ACT_I), { type: "NEXT_BLIND" });
+    const run = step(createRunState(QUIET_ACT), { type: "NEXT_BLIND" });
     expect(run.blindIndex).toBe(0);
     expect(run.table.lastEvent).toMatchObject({
       kind: "REFUSED",
@@ -419,8 +425,8 @@ describe("run progression", () => {
   });
 
   it("plays Small, Big and Boss in order to Act complete", () => {
-    let run = clearCurrent(createRunState(ACT_I));
-    expect(deriveRunView(ACT_I, run).phase).toBe("BLIND_CLEARED");
+    let run = clearCurrent(createRunState(QUIET_ACT));
+    expect(deriveRunView(QUIET_ACT, run).phase).toBe("BLIND_CLEARED");
     const before = run.table.lastEvent!.sequence;
     run = step(run, { type: "NEXT_BLIND" });
     expect(run.blindIndex).toBe(1);
@@ -431,12 +437,14 @@ describe("run progression", () => {
     });
     // CPU is the milestone's allocation: it resets for each Blind.
     expect(run.table.cpu).toEqual({ available: 10, spent: 0 });
-    expect(deriveRunView(ACT_I, run).showIntro).toBe(true);
+    expect(deriveRunView(QUIET_ACT, run).showIntro).toBe(true);
 
     run = step(clearCurrent(run), { type: "NEXT_BLIND" });
-    expect(deriveRunView(ACT_I, run).blind.boss?.id).toBe("DEC-SAFETY-ONLY");
+    expect(deriveRunView(QUIET_ACT, run).blind.boss?.id).toBe(
+      "DEC-SAFETY-ONLY"
+    );
     run = clearCurrent(run);
-    const done = deriveRunView(ACT_I, run);
+    const done = deriveRunView(QUIET_ACT, run);
     expect(done).toMatchObject({
       phase: "ACT_COMPLETE",
       isFinalBlind: true,
@@ -448,7 +456,7 @@ describe("run progression", () => {
   });
 
   it("ends the run when a Blind is lost, and restarts from the Small Blind", () => {
-    let run = clearCurrent(createRunState(ACT_I));
+    let run = clearCurrent(createRunState(QUIET_ACT));
     run = step(run, { type: "NEXT_BLIND" });
     // Discard one card at a time until no hand can be played.
     while (run.table.status === "REVIEWING") {
@@ -458,7 +466,7 @@ describe("run progression", () => {
         { type: "DISCARD" }
       );
     }
-    expect(deriveRunView(ACT_I, run).phase).toBe("RUN_FAILED");
+    expect(deriveRunView(QUIET_ACT, run).phase).toBe("RUN_FAILED");
     expect(
       step(run, { type: "TOGGLE_SELECT", cardId: run.table.hand[0] }).table
         .lastEvent?.message
@@ -481,8 +489,8 @@ describe("run progression", () => {
       { type: "NEXT_BLIND" },
       ...(LINES[DOSE_ESCALATION_SCENARIO.id] as RunAction[]),
     ];
-    const once = step(createRunState(ACT_I), ...script);
-    const twice = step(createRunState(ACT_I), ...script);
+    const once = step(createRunState(QUIET_ACT), ...script);
+    const twice = step(createRunState(QUIET_ACT), ...script);
     expect(twice).toEqual(once);
     expect(JSON.parse(JSON.stringify(once))).toEqual(once);
   });

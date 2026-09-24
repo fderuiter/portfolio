@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
-  ACT_I,
+  SCENARIOS,
   CardFaceSchema,
   DEMOGRAPHICS_SCENARIO,
   FACE_KIND_BY_CARD_TYPE,
@@ -51,7 +51,7 @@ describe("card faces", () => {
   });
 
   it("gives every card in every Act I Blind a valid face, drafts included", () => {
-    for (const blind of ACT_I.blinds) {
+    for (const blind of Object.values(SCENARIOS)) {
       const everyCard = {
         ...createTableState(blind),
         hand: blind.deck.map((c) => c.id),
@@ -84,7 +84,7 @@ describe("card faces", () => {
   });
 
   it("deals no efficacy outputs or Figures anywhere in Act I", () => {
-    for (const blind of ACT_I.blinds) {
+    for (const blind of Object.values(SCENARIOS)) {
       for (const card of blind.deck) {
         expect(card.cardType).not.toBe("FIGURE");
         expect(card.topic).not.toBe("EFF");

@@ -203,7 +203,9 @@ describe("CardTable", () => {
   });
 
   it("clears the Blind by inspecting, correcting and playing, then moves to the next Blind", async () => {
-    render(<CardTable />);
+    // Seed "early" draws the Site Audit for the Big Blind.
+    render(<CardTable seed="early" />);
+    expect(screen.getByTestId("run-seed").textContent).toBe("early");
     expect(screen.getByTestId("blind-intro").textContent).toContain(
       "Phase I, first data review."
     );
@@ -243,9 +245,38 @@ describe("CardTable", () => {
     expect(screen.getByTestId("blind-intro").textContent).toContain(
       "safety physician"
     );
-    expect(lastAnnouncement()).toBe(
-      "Big Blind: Sponsor Safety Review. Target 750."
+    expect(lastAnnouncement()).toContain(
+      "Big Blind: Sponsor Safety Review. Target 750. Crisis: Site Audit."
     );
+    // The crisis must be answered first, so focus goes to its first choice.
+    const crisis = screen.getByTestId("crisis");
+    expect(within(crisis).getByRole("heading").textContent).toBe(
+      "Crisis: Site Audit"
+    );
+    const host = within(crisis).getByRole("button", {
+      name: /Host the auditors/,
+    });
+    await waitFor(() => expect(document.activeElement).toBe(host));
+    expect(screen.getByRole("button", { name: /Play Hand/ })).toHaveProperty(
+      "disabled",
+      true
+    );
+    // Remote audit costs budget the study does not have.
+    const remote = within(crisis).getByRole("button", {
+      name: /Pay for a remote audit/,
+    });
+    expect(remote).toHaveProperty("disabled", true);
+    expect(remote.textContent).toContain("Needs $2k study budget; $0k left.");
+
+    fireEvent.click(host);
+    expect(screen.queryByTestId("crisis")).toBeNull();
+    expect(screen.getByTestId("blind-modifier").textContent).toContain(
+      "Crisis: Site Audit"
+    );
+    expect(
+      screen.getByRole("button", { name: /Discard · 2 CPU/ })
+    ).toBeTruthy();
+    expect(lastAnnouncement()).toContain("Site Audit: Host the auditors.");
     await waitFor(() =>
       expect(document.activeElement).toBe(card("C-T14.3.1-A"))
     );

@@ -9,6 +9,7 @@
 ## Variables
 
 - [ACT\_I](variables/ACT_I.md)
+- [ACT\_I\_CRISES](variables/ACT_I_CRISES.md)
 - [DEMOGRAPHICS\_SCENARIO](variables/DEMOGRAPHICS_SCENARIO.md)
 - [DOSE\_ESCALATION\_SCENARIO](variables/DOSE_ESCALATION_SCENARIO.md)
 - [SCENARIOS](variables/SCENARIOS.md)

@@ -4,12 +4,15 @@
  * Act I is a Phase I safety study played as three Blinds: Internal QC, the
  * sponsor's safety review, then the Dose Escalation Committee (ADR 0046).
  * The study opens on one population snapshot; a scripted data change during
- * the sponsor review moves it to a second version. All subjects, events, values and
+ * the sponsor review moves it to a second version. The Boss is drawn from
+ * the act's Boss pool, and every Blind after the first opens on a card from
+ * the crisis deck (T&E-05). All subjects, events, values and
  * rules are fictional teaching material. They supply game context only and
  * are not clinical or regulatory advice.
  */
 import type {
   Act,
+  CrisisCard,
   AdverseEvent,
   FootnoteSeal,
   RowStatistic,
@@ -1135,18 +1138,170 @@ export const DOSE_ESCALATION_SCENARIO: Scenario = {
   drawPile: COMMITTEE.drawPile,
 };
 
-/** Act I: the Phase I safety study, Small to Boss. */
+// ---------------------------------------------------------------------------
+// Crisis cards: things that happen to a study. One is drawn, by the run's
+// seeded event draw, as each Blind after the first starts.
+// ---------------------------------------------------------------------------
+
+const DATA_CUTOFF: FootnoteSeal = {
+  id: "FN-DATA-CUTOFF",
+  name: "Data cutoff",
+  footnote:
+    "Data as of the database freeze on 2026-02-01; records entered after the freeze are not included.",
+  effect: { kind: "PLUS_CHIPS", value: 10 },
+  eligible: { cardTypes: ["TABLE"] },
+  sellValue: 1,
+};
+
+/** Act I's crisis deck. Every card has one choice that costs nothing. */
+export const ACT_I_CRISES: CrisisCard[] = [
+  {
+    id: "CR-SITE-AUDIT",
+    name: "Site Audit",
+    description:
+      "The sponsor's QA team is auditing the Phase I unit this week, and every rerun needs a signed request.",
+    choices: [
+      {
+        id: "host",
+        label: "Host the auditors",
+        consequence: "Discard costs +1 CPU for this Blind.",
+        effect: {
+          modifier: {
+            id: "CR-AUDIT-DISCARD",
+            name: "Site Audit",
+            description: "Every discard needs a signed request: +1 CPU.",
+            debuffType: "DISCARD_PENALTY",
+            discardCpuPenalty: 1,
+          },
+        },
+      },
+      {
+        id: "remote",
+        label: "Pay for a remote audit",
+        consequence: "Costs $2k of study budget.",
+        effect: { budget: -2 },
+      },
+      {
+        id: "footnote",
+        label: "Document it in a footnote",
+        consequence: "Spends the first footnote seal in your tray.",
+        effect: { spendSeal: true },
+      },
+    ],
+  },
+  {
+    id: "CR-AMENDMENT-2",
+    name: "Protocol Amendment 2",
+    description:
+      "Amendment 2 tightens dosing compliance for the Per-Protocol set. S-011 missed the Day 3 dose.",
+    choices: [
+      {
+        id: "adopt",
+        label: "Adopt it now",
+        consequence:
+          "S-011 leaves the Per-Protocol set, so Per-Protocol outputs in hand go stale.",
+        effect: {
+          transition: {
+            id: "CR-P1-S011-AMENDMENT",
+            subjectId: "S-011",
+            reason: "PROTOCOL_AMENDMENT",
+            change: "LEAVE",
+            populations: ["PER_PROTOCOL"],
+            effectiveAt: "2026-01-29T09:00:00Z",
+            description:
+              "Protocol Amendment 2: S-011 missed the Day 3 dose and leaves the Per-Protocol set.",
+          },
+        },
+      },
+      {
+        id: "defer",
+        label: "Defer it to the next study",
+        consequence: "The medical monitor wants a memo: −1 CPU.",
+        effect: { cpu: -1 },
+      },
+    ],
+  },
+  {
+    id: "CR-DB-MIGRATION",
+    name: "Database Migration",
+    description:
+      "The EDC vendor moves the study to a new database version mid-milestone.",
+    choices: [
+      {
+        id: "migrate",
+        label: "Migrate now",
+        consequence: "Rerun the extracts on the new build: −2 CPU.",
+        effect: { cpu: -2 },
+      },
+      {
+        id: "freeze",
+        label: "Freeze and footnote the cutoff",
+        consequence:
+          "Gain a Data cutoff seal, but this Blind allows only 3 hands.",
+        effect: {
+          grantSeal: DATA_CUTOFF,
+          modifier: {
+            id: "CR-FREEZE-HANDS",
+            name: "Database Freeze",
+            description: "The frozen data can support only 3 submissions.",
+            debuffType: "HAND_LIMIT",
+            maxHandsAllowed: 3,
+          },
+        },
+      },
+    ],
+  },
+  {
+    id: "CR-EMERGENCY-REVIEW",
+    name: "Emergency Review",
+    description:
+      "The sponsor's safety physician wants the package early, ahead of a regulator call.",
+    choices: [
+      {
+        id: "accept",
+        label: "Accept the early deadline",
+        consequence:
+          "Earn $2k of study budget, but this Blind allows only 2 hands.",
+        effect: {
+          budget: 2,
+          modifier: {
+            id: "CR-EMERGENCY-HANDS",
+            name: "Emergency Review",
+            description: "The package is due early: 2 submissions only.",
+            debuffType: "HAND_LIMIT",
+            maxHandsAllowed: 2,
+          },
+        },
+      },
+      {
+        id: "decline",
+        label: "Keep the agreed date",
+        consequence: "Negotiating the date costs −1 CPU.",
+        effect: { cpu: -1 },
+      },
+    ],
+  },
+];
+
+/**
+ * Act I: the Phase I safety study. The Small and Big Blinds are fixed; the
+ * Boss comes from the act's pool, which holds only the Dose Escalation
+ * Committee until Act II adds a second, so it is fixed and not drawn.
+ */
 export const ACT_I: Act = {
   id: "act-1-phase-1",
   title: "Act I: Phase I Safety",
-  blinds: [
-    DEMOGRAPHICS_SCENARIO,
-    SPONSOR_SAFETY_SCENARIO,
-    DOSE_ESCALATION_SCENARIO,
-  ],
+  blinds: [DEMOGRAPHICS_SCENARIO, SPONSOR_SAFETY_SCENARIO],
+  bossPool: [DOSE_ESCALATION_SCENARIO],
+  crisisDeck: ACT_I_CRISES,
 };
 
 /** Every playable scenario, keyed by id. */
 export const SCENARIOS: Readonly<Record<string, Scenario>> = Object.freeze(
-  Object.fromEntries(ACT_I.blinds.map((scenario) => [scenario.id, scenario]))
+  Object.fromEntries(
+    [...ACT_I.blinds, ...(ACT_I.bossPool ?? [])].map((scenario) => [
+      scenario.id,
+      scenario,
+    ])
+  )
 );

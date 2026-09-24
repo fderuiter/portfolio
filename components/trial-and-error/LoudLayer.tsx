@@ -8,6 +8,8 @@ export const LOUD_PRESETS = {
   clearedBlind: "te-loud-glow",
   /** A footnote seal presses onto a card. */
   sealPress: "te-loud-seal",
+  /** A crisis card slams onto the table. */
+  crisisSlam: "te-loud-crisis",
 } as const;
 
 /** Screen-shake amplitude is capped so no intensity can exceed it. */

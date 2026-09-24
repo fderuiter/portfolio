@@ -1,7 +1,12 @@
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-const ROUTE = "/arcade/trial-and-error";
+/**
+ * A fixed seed makes the crisis draw repeatable (T&E-05): this one deals the
+ * Site Audit at the start of the Big Blind.
+ */
+const SEED = "e2e-4";
+const ROUTE = `/arcade/trial-and-error?seed=${SEED}`;
 const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"];
 const BLOCKING = new Set(["critical", "serious", "moderate"]);
 const DRAFT_A = "C-T14.1.1-A";
@@ -92,6 +97,16 @@ async function clearSmallBlind(page: Page) {
   await expect(page.getByTestId("blind-name")).toHaveText(
     "Big Blind: Sponsor Safety Review"
   );
+  await answerSiteAudit(page);
+}
+
+/** Answers the seeded Site Audit by hosting it, which costs nothing now. */
+async function answerSiteAudit(page: Page) {
+  const choice = page.getByRole("button", { name: /Host the auditors/ });
+  await expect(choice).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.getByTestId("crisis")).toBeHidden();
+  await expect(page.getByTestId("blind-modifier")).toContainText("Crisis:");
 }
 
 test.describe("Trial & Error: Biostat Ops Card Table", () => {
@@ -152,10 +167,28 @@ test.describe("Trial & Error: Biostat Ops Card Table", () => {
     await expect(page.getByTestId("blind-name")).toHaveText(
       "Big Blind: Sponsor Safety Review"
     );
-    await expect(card(page, "C-T14.3.1-A")).toBeFocused();
     await expect(page.getByTestId("blind-intro")).toContainText(
       "safety physician"
     );
+
+    // The Big Blind opens on a seeded crisis (T&E-05): the card turns up,
+    // play waits for an answer, and a choice the run cannot afford says why.
+    await expect(page.getByTestId("run-seed")).toContainText(SEED);
+    await expect(
+      page.getByRole("heading", { name: "Crisis: Site Audit" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /Play Hand/ })
+    ).toBeDisabled();
+    await expect(
+      page.getByRole("button", { name: /Pay for a remote audit/ })
+    ).toBeDisabled();
+    await expectNoBlockingViolations(page, "Big Blind crisis");
+    await answerSiteAudit(page);
+    await expect(card(page, "C-T14.3.1-A")).toBeFocused();
+    await expect(
+      page.getByRole("button", { name: /Discard · 2 CPU/ })
+    ).toBeVisible();
     await expectNoBlockingViolations(page, "Big Blind start");
   });
 

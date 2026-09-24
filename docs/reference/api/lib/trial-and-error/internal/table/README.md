@@ -10,6 +10,8 @@
 
 - [AllocationOption](interfaces/AllocationOption.md)
 - [Consumable](interfaces/Consumable.md)
+- [CrisisChoiceView](interfaces/CrisisChoiceView.md)
+- [CrisisView](interfaces/CrisisView.md)
 - [Inventory](interfaces/Inventory.md)
 - [PlayedHand](interfaces/PlayedHand.md)
 - [StudyHistory](interfaces/StudyHistory.md)
@@ -27,6 +29,8 @@
 
 - [CONSUMABLE\_SLOTS](variables/CONSUMABLE_SLOTS.md)
 - [EMPTY\_SHELL\_ALERT](variables/EMPTY_SHELL_ALERT.md)
+- [FIREWALL\_ALERT](variables/FIREWALL_ALERT.md)
+- [FIREWALL\_CELL](variables/FIREWALL_CELL.md)
 - [STALE\_ALERT](variables/STALE_ALERT.md)
 
 ## Functions
