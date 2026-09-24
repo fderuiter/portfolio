@@ -1,4 +1,5 @@
 import { CaseStudyService } from "@/lib/services/case-study-service";
+import { logger } from "@/lib/logger";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { SandboxTerminal } from "@/components/SandboxTerminal";
@@ -148,14 +149,14 @@ export default async function CaseStudyPage({ params }: PageProps) {
       commands = JSON.parse(study.commands_json);
     }
   } catch (err) {
-    console.error("Failed to parse commands_json:", err);
+    logger.error("Failed to parse commands_json:", err);
   }
   try {
     if (study.playback_json) {
       playback = JSON.parse(study.playback_json);
     }
   } catch (err) {
-    console.error("Failed to parse playback_json:", err);
+    logger.error("Failed to parse playback_json:", err);
   }
 
   return (

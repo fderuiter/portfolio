@@ -12,6 +12,7 @@ import {
   IconTarget,
 } from "@tabler/icons-react";
 import { CONTACT_INTENTS, ContactIntent } from "@/lib/schemas";
+import { logger } from "@/lib/logger";
 
 interface ContactFormProps {
   initialIntent?: ContactIntent;
@@ -135,7 +136,7 @@ export function ContactForm({
       setStatus("success");
       onSuccess?.();
     } catch (err) {
-      console.error("Contact submission error:", err);
+      logger.error("Contact submission error:", err);
       setStatus("error");
       setErrorMessage(
         "Network connection error. Please check your connection or email directly to fpderuiter@gmail.com."

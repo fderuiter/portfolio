@@ -350,6 +350,12 @@ Re-exports [renderWireframeMesh](boss/functions/renderWireframeMesh.md)
 
 ***
 
+### resetFogOfWar
+
+Re-exports [resetFogOfWar](fov/functions/resetFogOfWar.md)
+
+***
+
 ### retroAudio
 
 Re-exports [retroAudio](audio/variables/retroAudio.md)

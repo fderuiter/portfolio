@@ -21,6 +21,7 @@ import {
   IconChevronUp,
 } from "@tabler/icons-react";
 import { copyToClipboard } from "@/lib/clipboard";
+import { logger } from "@/lib/logger";
 
 interface CopySnippetProps {
   snippetKey: "wizard" | "email";
@@ -30,7 +31,13 @@ interface CopySnippetProps {
   onCopy: (key: "wizard" | "email", text: string) => void;
 }
 
-function CopySnippet({ snippetKey, text, label, copiedKey, onCopy }: CopySnippetProps) {
+function CopySnippet({
+  snippetKey,
+  text,
+  label,
+  copiedKey,
+  onCopy,
+}: CopySnippetProps) {
   const isCopied = copiedKey === snippetKey;
   return (
     <div className="flex items-center justify-between p-2.5 rounded bg-[#13151a] border border-white/10 min-w-0">
@@ -64,12 +71,15 @@ export function AdminLoginGateway() {
       setCopiedKey(key);
       setTimeout(() => setCopiedKey(null), 2000);
     } catch (err) {
-      console.error("Failed to copy snippet to clipboard:", err);
+      logger.error("Failed to copy snippet to clipboard:", err);
     }
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto flex flex-col gap-6 py-6" data-testid="admin-login-gateway">
+    <div
+      className="w-full max-w-5xl mx-auto flex flex-col gap-6 py-6"
+      data-testid="admin-login-gateway"
+    >
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
         {/* Left Column: Telemetry & Node Observability Console */}
         <div className="lg:col-span-5 flex flex-col gap-4">
@@ -81,11 +91,16 @@ export function AdminLoginGateway() {
 
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-zinc-100 font-mono flex items-center gap-2.5">
-              <IconTerminal2 className="w-6 h-6 text-amber-500" aria-hidden="true" />
+              <IconTerminal2
+                className="w-6 h-6 text-amber-500"
+                aria-hidden="true"
+              />
               <span>Edge Diagnostics</span>
             </h1>
             <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
-              Administrative gateway for drafting technical case studies, inspecting serverless telemetry streams, and validating CDISC data models.
+              Administrative gateway for drafting technical case studies,
+              inspecting serverless telemetry streams, and validating CDISC data
+              models.
             </p>
           </div>
 
@@ -97,7 +112,9 @@ export function AdminLoginGateway() {
                 <span className="w-2.5 h-2.5 rounded-full bg-red-500/80 inline-block" />
                 <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80 inline-block" />
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block" />
-                <span className="ml-2 text-zinc-300 font-semibold">gateway-iad1.sys</span>
+                <span className="ml-2 text-zinc-300 font-semibold">
+                  gateway-iad1.sys
+                </span>
               </div>
               <span className="text-emerald-400 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -109,28 +126,42 @@ export function AdminLoginGateway() {
             <div className="grid grid-cols-2 gap-2 text-[11px] py-1 border-b border-white/5">
               <div className="flex flex-col gap-0.5 min-w-0">
                 <span className="text-zinc-400 text-[10px] uppercase flex items-center gap-1">
-                  <IconServer className="w-3 h-3 text-zinc-400" aria-hidden="true" />
+                  <IconServer
+                    className="w-3 h-3 text-zinc-400"
+                    aria-hidden="true"
+                  />
                   Edge Region
                 </span>
                 <span className="text-zinc-200 truncate">iad1-us-east</span>
               </div>
               <div className="flex flex-col gap-0.5 min-w-0">
                 <span className="text-zinc-400 text-[10px] uppercase flex items-center gap-1">
-                  <IconCpu className="w-3 h-3 text-zinc-400" aria-hidden="true" />
+                  <IconCpu
+                    className="w-3 h-3 text-zinc-400"
+                    aria-hidden="true"
+                  />
                   Latency / SSR
                 </span>
-                <span className="text-emerald-400 truncate">0.00ms penalty</span>
+                <span className="text-emerald-400 truncate">
+                  0.00ms penalty
+                </span>
               </div>
               <div className="flex flex-col gap-0.5 min-w-0">
                 <span className="text-zinc-400 text-[10px] uppercase flex items-center gap-1">
-                  <IconLockCheck className="w-3 h-3 text-zinc-400" aria-hidden="true" />
+                  <IconLockCheck
+                    className="w-3 h-3 text-zinc-400"
+                    aria-hidden="true"
+                  />
                   Edge Security
                 </span>
                 <span className="text-zinc-200 truncate">SHA-256 Token</span>
               </div>
               <div className="flex flex-col gap-0.5 min-w-0">
                 <span className="text-zinc-400 text-[10px] uppercase flex items-center gap-1">
-                  <IconActivity className="w-3 h-3 text-zinc-400" aria-hidden="true" />
+                  <IconActivity
+                    className="w-3 h-3 text-zinc-400"
+                    aria-hidden="true"
+                  />
                   Auth Guard
                 </span>
                 <span className="text-amber-400 truncate">Env Allowlist</span>
@@ -139,16 +170,21 @@ export function AdminLoginGateway() {
 
             {/* Rolling Edge Log Feed */}
             <div className="flex flex-col gap-1 text-[10px] text-zinc-400 pt-1">
-              <span className="text-zinc-400 font-semibold">[EDGE LOG MATRIX]</span>
+              <span className="text-zinc-400 font-semibold">
+                [EDGE LOG MATRIX]
+              </span>
               <div className="p-2 rounded bg-[#13151a] border border-white/5 flex flex-col gap-1 text-[10px]">
                 <span className="text-zinc-400">
-                  <span className="text-amber-400">› EDGE_INIT</span> clerkMiddleware chained with HTTP security headers
+                  <span className="text-amber-400">› EDGE_INIT</span>{" "}
+                  clerkMiddleware chained with HTTP security headers
                 </span>
                 <span className="text-zinc-400">
-                  <span className="text-emerald-400">› ROUTE_GUARD</span> Edge route matcher active on /admin(.*)
+                  <span className="text-emerald-400">› ROUTE_GUARD</span> Edge
+                  route matcher active on /admin(.*)
                 </span>
                 <span className="text-zinc-400">
-                  <span className="text-zinc-300">› AUTH_GATE</span> Ready for hardware Passkey / OAuth
+                  <span className="text-zinc-300">› AUTH_GATE</span> Ready for
+                  hardware Passkey / OAuth
                 </span>
               </div>
             </div>
@@ -202,14 +238,18 @@ export function AdminLoginGateway() {
                   rootBox: "w-full",
                   card: "w-full bg-[#0d0e11] border border-white/10 shadow-2xl rounded-xl p-6 sm:p-7 backdrop-blur-md",
                   header: "text-left pb-4 mb-3 border-b border-white/10 gap-1",
-                  headerTitle: "text-zinc-100 font-mono text-base font-bold tracking-tight",
+                  headerTitle:
+                    "text-zinc-100 font-mono text-base font-bold tracking-tight",
                   headerSubtitle: "text-zinc-400 font-sans text-xs",
                   socialButtonsBlockButton:
                     "bg-[#13151a] hover:bg-zinc-800 text-zinc-200 border border-white/10 font-mono text-xs transition-all active:scale-[0.98]",
-                  socialButtonsBlockButtonText: "font-mono font-medium text-xs text-zinc-300",
+                  socialButtonsBlockButtonText:
+                    "font-mono font-medium text-xs text-zinc-300",
                   dividerLine: "bg-white/10",
-                  dividerText: "text-zinc-500 font-mono text-[10px] uppercase tracking-widest bg-[#0d0e11] px-3",
-                  formFieldLabel: "text-zinc-400 font-mono text-[11px] uppercase tracking-wider font-medium",
+                  dividerText:
+                    "text-zinc-500 font-mono text-[10px] uppercase tracking-widest bg-[#0d0e11] px-3",
+                  formFieldLabel:
+                    "text-zinc-400 font-mono text-[11px] uppercase tracking-wider font-medium",
                   formFieldInput:
                     "bg-[#13151a] border-white/10 text-zinc-100 placeholder:text-zinc-600 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 font-mono text-xs rounded-lg transition-colors",
                   formButtonPrimary:
@@ -260,16 +300,21 @@ export function AdminLoginGateway() {
               <IconCode className="w-4 h-4 text-amber-400" aria-hidden="true" />
               <span>Admin Allowlist &amp; Edge Architecture</span>
             </div>
-            <span className="text-[10px] text-zinc-400">ADR-0014 Architecture</span>
+            <span className="text-[10px] text-zinc-400">
+              ADR-0014 Architecture
+            </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Column 1: Setup Wizard & Snippet */}
             <div className="flex flex-col gap-3">
               <div>
-                <span className="text-zinc-300 font-semibold text-xs">1. CLI Setup Wizard</span>
+                <span className="text-zinc-300 font-semibold text-xs">
+                  1. CLI Setup Wizard
+                </span>
                 <p className="text-zinc-400 text-[11px] font-sans mt-0.5">
-                  Run the interactive bash wizard to configure Clerk credentials and admin environment variables.
+                  Run the interactive bash wizard to configure Clerk credentials
+                  and admin environment variables.
                 </p>
               </div>
 
@@ -282,7 +327,9 @@ export function AdminLoginGateway() {
               />
 
               <div className="flex flex-col gap-1 pt-1">
-                <span className="text-zinc-300 font-semibold text-xs">2. Manual Environment Allowlist</span>
+                <span className="text-zinc-300 font-semibold text-xs">
+                  2. Manual Environment Allowlist
+                </span>
                 <CopySnippet
                   snippetKey="email"
                   text='ADMIN_EMAILS="your-email@example.com"'
@@ -295,12 +342,35 @@ export function AdminLoginGateway() {
 
             {/* Column 2: Architectural Invariants */}
             <div className="flex flex-col gap-2 p-3.5 rounded-lg bg-[#13151a] border border-white/5 text-[11px]">
-              <span className="text-zinc-200 font-semibold">Security &amp; Performance Invariants:</span>
+              <span className="text-zinc-200 font-semibold">
+                Security &amp; Performance Invariants:
+              </span>
               <ul className="flex flex-col gap-1.5 text-zinc-400 font-sans list-disc list-inside">
-                <li><strong className="text-zinc-300 font-mono">Edge Middleware Chaining:</strong> Composes Clerk auth with WebCrypto SHA-256 telemetry fingerprinting.</li>
-                <li><strong className="text-zinc-300 font-mono">Zero SSR Penalty:</strong> Public portfolio routes bypass auth checks entirely.</li>
-                <li><strong className="text-zinc-300 font-mono">Environment-Gated RBAC:</strong> Server-side authorization against typed allowlists.</li>
-                <li><strong className="text-zinc-300 font-mono">CI/CD Offline Stubs:</strong> Deterministic test execution without live network keys.</li>
+                <li>
+                  <strong className="text-zinc-300 font-mono">
+                    Edge Middleware Chaining:
+                  </strong>{" "}
+                  Composes Clerk auth with WebCrypto SHA-256 telemetry
+                  fingerprinting.
+                </li>
+                <li>
+                  <strong className="text-zinc-300 font-mono">
+                    Zero SSR Penalty:
+                  </strong>{" "}
+                  Public portfolio routes bypass auth checks entirely.
+                </li>
+                <li>
+                  <strong className="text-zinc-300 font-mono">
+                    Environment-Gated RBAC:
+                  </strong>{" "}
+                  Server-side authorization against typed allowlists.
+                </li>
+                <li>
+                  <strong className="text-zinc-300 font-mono">
+                    CI/CD Offline Stubs:
+                  </strong>{" "}
+                  Deterministic test execution without live network keys.
+                </li>
               </ul>
             </div>
           </div>
@@ -309,4 +379,3 @@ export function AdminLoginGateway() {
     </div>
   );
 }
-

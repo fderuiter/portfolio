@@ -8,6 +8,7 @@
 import { createCorticalSurfaceMeshBuffers } from "./mesh-generator";
 import { HemisphereFilter, RawGeometryBuffer, SurfaceMode } from "./types";
 import { progressBus } from "./progress-bus";
+import { logger } from "@/lib/logger";
 import {
   createMeshGroupFromBuffers,
   loadGraphicsEngine,
@@ -249,7 +250,7 @@ export async function loadExternalBrainBuffers(
     });
 
     // Graceful fallback to procedural cortical surface mesh array buffers
-    console.warn(
+    logger.warn(
       `Failed to load external model from ${modelUrl}, falling back to procedural mesh:`,
       err
     );
