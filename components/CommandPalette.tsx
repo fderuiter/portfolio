@@ -32,6 +32,7 @@ import {
   IconCoffee,
   IconFlame,
   IconShieldCheck,
+  IconCamera,
 } from "@tabler/icons-react";
 import { filterFuzzySearch } from "@/lib/search-utils";
 import { useSearch } from "@/components/providers/SearchProvider";
@@ -980,6 +981,30 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
         icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
       },
       {
+        id: "nav-photos",
+        title: "Behind the Code · Visual Archive",
+        subtitle:
+          "14 authentic photographs spanning Duck's puppy-to-adult journey, Theodore Wirth 10K, and alpine skiing.",
+        category: "navigation",
+        url: "action:photos",
+        icon: <IconCamera className="w-4 h-4 text-brand-cyan" />,
+        badge: "Photos",
+        status: "Visual Gallery",
+        description:
+          "High-resolution photographic archive featuring Duck from 8-week fluff to 80-lb companion, Theodore Wirth mud run, alpine flame suit, and couple moments.",
+        techStack: [
+          "Next.js Image",
+          "WebP/AVIF",
+          "Accessible Lightbox",
+          "Keyboard Navigation",
+        ],
+        highlights: [
+          "14 authentic high-resolution photographs",
+          "Canine co-pilot puppy-to-adult growth progression",
+          "Accessible lightbox with keyboard arrow navigation",
+        ],
+      },
+      {
         id: "action-toggle-dyslexia",
         title: isDyslexic
           ? "Disable Dyslexia Mode (Return to Atkinson/Lexend)"
@@ -1287,6 +1312,10 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
         playMemeSound("friday-alarm");
       } else if (actionType === "ping") {
         playMemeSound("matrix-glitch");
+      } else if (actionType === "photos") {
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("open-photo-gallery"));
+        }
       }
       return;
     }

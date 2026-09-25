@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   IconMessageCode,
   IconCalendar,
@@ -17,6 +18,9 @@ import { ContactForm } from "@/components/ContactForm";
 import { NewsletterForm } from "@/components/NewsletterForm";
 
 export default function ContactPage() {
+  const [costcoMode, setCostcoMode] = React.useState<"wholesale" | "flame">(
+    "wholesale"
+  );
   return (
     <PageLayout
       variant="standard"
@@ -98,6 +102,53 @@ export default function ContactPage() {
 
             {/* Newsletter Dispatch Card */}
             <NewsletterForm variant="card" />
+
+            {/* Friendly Location & Lore Card with Easter Egg Flip */}
+            <button
+              type="button"
+              onClick={() =>
+                setCostcoMode((prev) =>
+                  prev === "wholesale" ? "flame" : "wholesale"
+                )
+              }
+              aria-label={`Toggle Costco mode. Currently ${costcoMode === "wholesale" ? "Wholesale Run" : "Alpine Flame"} mode. Click to flip.`}
+              className="w-full text-left p-4 sm:p-5 bg-zinc-900/40 border border-zinc-800 hover:border-amber-500/40 rounded-2xl flex items-center gap-4 transition-all cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+            >
+              <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border border-white/10 shrink-0 bg-black/60 shadow group-hover:scale-105 transition-transform duration-200">
+                <Image
+                  src={
+                    costcoMode === "wholesale"
+                      ? "/images/personal/fred-costco-parking-lot.jpg"
+                      : "/images/personal/fred-costco-flame-suit.jpg"
+                  }
+                  alt={
+                    costcoMode === "wholesale"
+                      ? "Frederick smiling in a Costco Wholesale t-shirt and sunglasses"
+                      : "Frederick in a flame ski suit crouched by the Costco Wholesale sign"
+                  }
+                  fill
+                  sizes="80px"
+                  className="object-cover"
+                />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400 block truncate">
+                    {costcoMode === "wholesale"
+                      ? "Based in Minnesota"
+                      : "Tactical Flame Mode"}
+                  </span>
+                  <span className="text-[9px] font-mono text-zinc-500 group-hover:text-amber-400 transition-colors shrink-0">
+                    [flip]
+                  </span>
+                </div>
+                <p className="text-xs text-zinc-300 font-sans leading-relaxed">
+                  {costcoMode === "wholesale"
+                    ? "Powered by TypeScript, Next.js, canine co-pilot Duck, and occasional Costco wholesale runs."
+                    : "When 90s slope flame suits meet the temple of bulk inventory."}
+                </p>
+              </div>
+            </button>
 
             {/* Verified Network Shortcuts */}
             <div className="p-4 bg-zinc-900/40 border border-zinc-800 rounded-xl space-y-2">

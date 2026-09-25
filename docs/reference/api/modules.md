@@ -160,6 +160,7 @@
 - [lib/layout-config](lib/layout-config/README.md)
 - [lib/logger](lib/logger/README.md)
 - [lib/masonry](lib/masonry/README.md)
+- [lib/media-registry](lib/media-registry/README.md)
 - [lib/meme-audio](lib/meme-audio/README.md)
 - [lib/meme-data](lib/meme-data/README.md)
 - [lib/moderation](lib/moderation/README.md)

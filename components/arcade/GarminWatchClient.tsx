@@ -7,13 +7,16 @@ import { NextPrevNav } from "@/components/ui/NextPrevNav";
 import { PlayCabinet } from "@/components/arcade/PlayCabinet";
 import { DesktopOnlyGate } from "@/components/arcade/DesktopOnlyGate";
 import Link from "next/link";
+import Image from "next/image";
 import {
   IconCpu,
   IconBolt,
   IconFlame,
   IconDeviceWatch,
   IconArrowLeft,
+  IconRun,
 } from "@tabler/icons-react";
+import { getPhotoById } from "@/lib/media-registry";
 
 const GarminWatchSimulatorLoader = () =>
   import("@/components/GarminWatchSimulator").then(
@@ -141,6 +144,54 @@ export const GarminWatchClient: React.FC = () => {
             </p>
           </div>
         </div>
+
+        {/* Real-World Origin & Inspiration */}
+        {(() => {
+          const runPhoto = getPhotoById("theodore-wirth-mud-run");
+          if (!runPhoto) return null;
+          return (
+            <div className="mt-12 rounded-3xl border border-zinc-800 bg-zinc-950/80 p-6 sm:p-8">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                <div className="md:col-span-5 relative aspect-[3/2] rounded-2xl overflow-hidden border border-zinc-700 bg-black/60">
+                  <Image
+                    src={runPhoto.src}
+                    alt={runPhoto.alt}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 420px"
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
+                  <div className="absolute bottom-2 left-2 right-2">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider bg-amber-400 text-black">
+                      Bib #1534 · Garmin on Wrist
+                    </span>
+                  </div>
+                </div>
+
+                <div className="md:col-span-7 flex flex-col justify-center">
+                  <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-mono mb-2 w-fit">
+                    <IconRun className="w-3.5 h-3.5" />
+                    <span>Real-World Engineering Inspiration</span>
+                  </div>
+                  <h3 className="text-xl font-mono font-extrabold text-white mb-2">
+                    Theodore Wirth Mud Run (Run Minnesota 10K)
+                  </h3>
+                  <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed mb-3">
+                    The inspiration behind <em>Monkey C Mayhem</em>: 10
+                    kilometers of Minnesota trail mud, humidity, and an actual
+                    Garmin watch strapped to Fred&apos;s wrist struggling to
+                    maintain GPS lock while fogging up under intense effort.
+                  </p>
+                  <p className="text-xs text-zinc-400 font-mono leading-relaxed">
+                    Developing ConnectIQ apps on Garmin devices means living
+                    inside strict 32KB RAM budgets—one extra object allocation
+                    during a muddy sprint and the runtime panics.
+                  </p>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Sequential Next / Previous Navigation */}
         <NextPrevNav

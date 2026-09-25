@@ -22,6 +22,7 @@ import {
   IconMessageCode,
   IconDirections,
   IconArticle,
+  IconCamera,
 } from "@tabler/icons-react";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { usePersona } from "@/components/providers/PersonaProvider";
@@ -379,6 +380,23 @@ export const Footer: React.FC = () => {
                   <IconBrandLinkedin className="w-3 h-3 text-zinc-400" />
                   LinkedIn ↗
                 </a>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof window !== "undefined") {
+                      window.dispatchEvent(
+                        new CustomEvent("open-photo-gallery")
+                      );
+                    }
+                  }}
+                  onMouseEnter={handleHover}
+                  className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5 cursor-pointer text-left"
+                >
+                  <IconCamera className="w-3 h-3 text-amber-400" />
+                  Behind the Code (Photos)
+                </button>
               </li>
             </ul>
           </div>

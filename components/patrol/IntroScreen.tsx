@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import {
   IconShieldCheck,
   IconStethoscope,
@@ -232,6 +233,28 @@ export const IntroScreen: React.FC<IntroScreenProps> = ({
                 radio, and assigned to quad chairlift sectors. Await dispatch
                 calls, respond to incidents, package patients, and complete
                 post-call debriefings.
+              </p>
+            </div>
+          </div>
+
+          {/* Alpine Inspiration Spotlight */}
+          <div className="p-4 rounded-xl bg-zinc-950/60 border border-zinc-800 flex flex-col sm:flex-row items-center gap-4">
+            <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden border border-white/10 shrink-0 bg-black/60 shadow-md">
+              <Image
+                src="/images/sports/fred-ski-flame-suit.jpg"
+                alt="Frederick de Ruiter on a snowy ski slope wearing a retro 1990s flame ski suit"
+                fill
+                sizes="96px"
+                className="object-cover"
+              />
+            </div>
+            <div className="text-center sm:text-left flex-1 min-w-0">
+              <span className="inline-block px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider bg-amber-400/20 text-amber-300 border border-amber-400/30 mb-1">
+                Slope Heritage // 90s Flame Suit Protocol
+              </span>
+              <p className="text-xs text-zinc-300 font-sans leading-relaxed">
+                Inspired by real days carving Welch Village snow and
+                understanding winter mountain topography.
               </p>
             </div>
           </div>

@@ -175,7 +175,7 @@ describe("Working With Duck - UI & Component Suite", () => {
         openBtn.click();
       });
       expect(container.textContent).toContain("Duck's Polaroid Scrapbook");
-      expect(container.textContent).toContain("The Little Prince");
+      expect(container.textContent).toContain("The Puppy Headrest");
     }
   });
 
@@ -468,7 +468,7 @@ describe("Working With Duck - UI & Component Suite", () => {
 
       const img = container.querySelector("img");
       expect(img).not.toBeNull();
-      expect(img?.getAttribute("src")).toContain("duck-prince.jpg");
+      expect(img?.getAttribute("src")).toContain("duck-puppy-headrest.jpg");
       expect(img?.getAttribute("loading")).toBe("lazy");
       expect(img?.getAttribute("fetchpriority")).toBeNull();
     }
