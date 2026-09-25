@@ -222,19 +222,3 @@ Conforms to ADR 0028 Typed Service Contract (Spec & Handler Pattern).
 #### Returns
 
 `Promise`\<[`EmailDispatchResult`](EmailDispatchResult.md)\>
-
-***
-
-### subscribeNewsletter()
-
-> **subscribeNewsletter**(`email`): `Promise`\<[`EmailDispatchResult`](EmailDispatchResult.md)\>
-
-#### Parameters
-
-##### email
-
-`string`
-
-#### Returns
-
-`Promise`\<[`EmailDispatchResult`](EmailDispatchResult.md)\>

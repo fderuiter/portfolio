@@ -10,7 +10,6 @@ import {
   renderContactAdminEmail,
   renderContactConfirmationEmail,
   renderFeedbackNotificationEmail,
-  renderNewsletterWelcomeEmail,
   FeedbackNotificationPayload,
 } from "@/lib/email-templates";
 
@@ -22,6 +21,8 @@ export interface RawEmailOptions {
   html: string;
   text?: string;
   tags?: Array<{ name: string; value: string }>;
+  /** Extra headers, e.g. List-Unsubscribe; persisted with queued retries. */
+  headers?: Record<string, string>;
   skipQueue?: boolean;
 }
 
@@ -60,7 +61,6 @@ export interface EmailServiceSpec {
   sendFeedbackNotification(
     payload: FeedbackNotificationPayload
   ): Promise<EmailDispatchResult>;
-  subscribeNewsletter(email: string): Promise<EmailDispatchResult>;
   processRetryQueue(options?: {
     maxBatchSize?: number;
     now?: Date;
@@ -166,6 +166,13 @@ const BASE_RETRY_DELAY_MS = 1000;
 const MAX_RETRY_DELAY_MS = 600000; // 10 minutes
 const RETRY_LEASE_MS = 5 * 60 * 1000;
 const MAX_RETRY_BATCH_SIZE = 20;
+
+/**
+ * Queued emails the daily maintenance run sends at most. Newsletter dispatch
+ * sizes itself against this, so queued mail can never take more than this
+ * share of Resend's 100 emails a day (#841).
+ */
+export const EMAIL_RETRY_BATCH_SIZE = 15;
 
 function shouldSimulateEmailDelivery(apiKey: string | undefined): boolean {
   const currentEnv = getEnv();
@@ -302,6 +309,51 @@ export class EmailService {
   }
 
   /**
+   * Reads a queued row's `headers` column back into a string map. Anything
+   * that is not a flat object of strings is dropped.
+   */
+  private static parseQueuedHeaders(
+    raw: unknown
+  ): Record<string, string> | undefined {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
+    const entries = Object.entries(raw as Record<string, unknown>).filter(
+      (entry): entry is [string, string] => typeof entry[1] === "string"
+    );
+    return entries.length > 0 ? Object.fromEntries(entries) : undefined;
+  }
+
+  /**
+   * Adds an email to the OutboundEmailQueue for the next maintenance run to
+   * send, without a first attempt. Used for bulk mail such as newsletter
+   * dispatches, which must go through the queue's leasing, retry and
+   * idempotency handling. Returns the queue id, or null if nothing was stored.
+   */
+  static async enqueueEmail(options: RawEmailOptions): Promise<string | null> {
+    const to = Array.isArray(options.to) ? options.to.join(", ") : options.to;
+    try {
+      const entry = await prisma.outboundEmailQueue.create({
+        data: {
+          to,
+          from: options.from || env.RESEND_FROM_EMAIL || DEFAULT_FROM_EMAIL,
+          replyTo: options.replyTo,
+          subject: options.subject,
+          html: options.html,
+          text: options.text,
+          tags: options.tags ?? undefined,
+          headers: options.headers ?? undefined,
+          attempts: 0,
+          status: "PENDING",
+          nextRetryAt: new Date(),
+        },
+      });
+      return entry.id;
+    } catch (err) {
+      logger.error("Failed to enqueue outbound email to database:", err);
+      return null;
+    }
+  }
+
+  /**
    * Enqueues an email to the persistent OutboundEmailQueue table.
    *
    * Returns the durable queue id, or `null` when the row could not be
@@ -335,6 +387,7 @@ export class EmailService {
           // Jsonb column: persist the structured tags themselves. Stringifying
           // here would store a string scalar that no longer round trips.
           tags: options.tags ?? undefined,
+          headers: options.headers ?? undefined,
           attempts: 1,
           status: "RETRYING",
           nextRetryAt,
@@ -373,6 +426,7 @@ export class EmailService {
       html: string;
       text: string | null;
       tags: unknown;
+      headers?: unknown;
       attempts: number;
       status: OutboundEmailStatus;
       nextRetryAt: Date;
@@ -425,6 +479,7 @@ export class EmailService {
         html: item.html,
         text: item.text || undefined,
         tags: this.parseQueuedTags(item.tags),
+        headers: this.parseQueuedHeaders(item.headers),
         skipQueue: true,
       };
 
@@ -475,6 +530,7 @@ export class EmailService {
             html: item.html,
             text: item.text || undefined,
             tags: rawOptions.tags,
+            headers: rawOptions.headers,
           },
           { idempotencyKey: `portfolio-email-${item.id}` }
         );
@@ -661,6 +717,7 @@ export class EmailService {
         html: options.html,
         text: options.text,
         tags: options.tags,
+        headers: options.headers,
       });
 
       if (error) {
@@ -816,43 +873,5 @@ export class EmailService {
         { name: "case-study", value: payload.caseStudySlug },
       ],
     });
-  }
-
-  /**
-   * Dispatches a newsletter subscription workflow:
-   * 1. Delivers welcome confirmation email to the subscriber
-   * 2. Alerts admin of the new subscription
-   */
-  static async subscribeNewsletter(
-    email: string,
-    connectionHash?: string
-  ): Promise<EmailDispatchResult> {
-    const welcomeTemplate = renderNewsletterWelcomeEmail({ email });
-    const adminEmail =
-      getEnv().CONTACT_NOTIFICATION_EMAIL ||
-      env.CONTACT_NOTIFICATION_EMAIL ||
-      "fpderuiter@gmail.com";
-
-    // 1. Deliver Welcome Confirmation to Subscriber
-    const welcomeResult = await this.sendRawEmail({
-      to: email,
-      subject: welcomeTemplate.subject,
-      html: welcomeTemplate.html,
-      text: welcomeTemplate.text,
-      tags: [{ name: "category", value: "newsletter-welcome" }],
-    });
-
-    // 2. Alert Admin of New Subscriber
-    if (welcomeResult.success) {
-      await this.sendRawEmail({
-        to: adminEmail,
-        subject: `[Newsletter] New Subscriber: ${email}`,
-        html: `<p>New subscriber registered: <strong>${email}</strong></p><p>Fingerprint: ${connectionHash || "anonymous"}</p>`,
-        text: `New subscriber registered: ${email}\nFingerprint: ${connectionHash || "anonymous"}`,
-        tags: [{ name: "category", value: "newsletter-admin-alert" }],
-      });
-    }
-
-    return welcomeResult;
   }
 }

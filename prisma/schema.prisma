@@ -43,6 +43,7 @@ model BlogPost {
   hero_image_url       String?
   created_at           DateTime @default(now())
   updated_at           DateTime @updatedAt
+  newsletterDispatch   NewsletterDispatch?
 }
 
 model TelemetryEvent {
@@ -137,9 +138,65 @@ model OutboundEmailQueue {
   status      OutboundEmailStatus @default(PENDING)
   nextRetryAt DateTime            @default(now())
   lastError   String?             @db.Text
+  /// Extra RFC 5322 headers (e.g. List-Unsubscribe) replayed on every attempt.
+  headers     Json?
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
 
   @@index([status, nextRetryAt])
   @@index([createdAt])
+}
+
+enum NewsletterSubscriberStatus {
+  PENDING
+  CONFIRMED
+  UNSUBSCRIBED
+}
+
+/// A Systems Dispatch subscriber. Double opt-in: only CONFIRMED rows ever
+/// receive a dispatch (#841).
+model NewsletterSubscriber {
+  id                 String                     @id @default(cuid())
+  email              String                     @unique
+  status             NewsletterSubscriberStatus @default(PENDING)
+  /// Single-use; cleared once the address is confirmed.
+  confirmationToken  String?                    @unique
+  confirmationSentAt DateTime?
+  /// Long-lived; every dispatch carries it in its one-click unsubscribe link.
+  unsubscribeToken   String                     @unique
+  confirmedAt        DateTime?
+  unsubscribedAt     DateTime?
+  createdAt          DateTime                   @default(now())
+  updatedAt          DateTime                   @updatedAt
+  deliveries         NewsletterDelivery[]
+
+  @@index([status])
+}
+
+/// One announcement of a newly published blog post, drained across daily
+/// maintenance runs under the dispatch cap.
+model NewsletterDispatch {
+  id          String               @id @default(cuid())
+  blogPostId  String               @unique
+  blogPost    BlogPost             @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+  createdAt   DateTime             @default(now())
+  completedAt DateTime?
+  deliveries  NewsletterDelivery[]
+
+  @@index([completedAt])
+}
+
+/// Records that a dispatch was queued for a subscriber, so no one is sent the
+/// same announcement twice.
+model NewsletterDelivery {
+  id           String               @id @default(cuid())
+  dispatchId   String
+  dispatch     NewsletterDispatch   @relation(fields: [dispatchId], references: [id], onDelete: Cascade)
+  subscriberId String
+  subscriber   NewsletterSubscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+  queueId      String?
+  createdAt    DateTime             @default(now())
+
+  @@unique([dispatchId, subscriberId])
+  @@index([subscriberId])
 }

@@ -8,6 +8,22 @@
 
 ## Methods
 
+### dispatchNewsletter()
+
+> **dispatchNewsletter**(`now`): `Promise`\<`Record`\<`string`, `number` \| `null`\>\>
+
+#### Parameters
+
+##### now
+
+`Date`
+
+#### Returns
+
+`Promise`\<`Record`\<`string`, `number` \| `null`\>\>
+
+***
+
 ### processEmailRetry()
 
 > **processEmailRetry**(`now`): `Promise`\<`Record`\<`string`, `number` \| `null`\>\>

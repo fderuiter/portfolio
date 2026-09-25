@@ -113,14 +113,47 @@ requests signed with whichever secret is not currently configured.
 
 ### Durable outbound retry safety
 
-The daily unified maintenance route leases at most five due queue rows before
-dispatching them. An overlapping invocation can lease each row only once; if a
+The daily unified maintenance route leases at most fifteen due queue rows
+(`EMAIL_RETRY_BATCH_SIZE`) before dispatching them. An overlapping invocation can lease each row only once; if a
 worker stops unexpectedly, its five-minute lease expires and the row becomes
 eligible again. Every retry uses `portfolio-email-<queue-id>` as the Resend
 idempotency key, so an ambiguous timeout and later retry converge on one
 provider send. Failures use capped exponential backoff with deterministic
 jitter, recheck the suppression list immediately before dispatch, and retain
 structured tags without logging message bodies.
+
+### Systems Dispatch newsletter and the daily budget
+
+Newsletter signups are double opt-in (#841). A signup is stored as a
+`PENDING` `NewsletterSubscriber` and gets one confirmation email; the address
+receives nothing else until someone follows that link. A pending address is
+re-sent a confirmation at most once an hour. Every later email carries a
+visible unsubscribe link plus `List-Unsubscribe` and `List-Unsubscribe-Post`
+headers, and `/api/newsletter/unsubscribe` works in one click with no sign-in.
+
+Publishing a blog post queues a `NewsletterDispatch`. The maintenance run
+also discovers posts published directly in the database within the last seven
+days. Nothing is sent on publish. Each run's `newsletter` phase, which runs
+before `emailRetry`, enqueues announcements into `OutboundEmailQueue` for
+subscribers who were confirmed when the post was queued, rechecking the
+suppression list for each one. The queue's own suppression recheck, leasing,
+retry and idempotency then apply to the send.
+
+**Why this cannot exhaust Resend's 100 emails a day:**
+
+- Queued mail goes out only from the daily run, at most 15 per run
+  (`EMAIL_RETRY_BATCH_SIZE`), and there is exactly one run a day.
+- The newsletter phase enqueues at most 10 per run
+  (`NEWSLETTER_DISPATCH_CAP`), and never more than the room left in the next
+  batch after retries already waiting. Several posts published the same day
+  share that same cap; the rest drain on later days.
+- So queued mail, newsletter included, uses at most 15 of the 100. At least
+  85 remain for mail sent inline: contact replies (two per inquiry), feedback
+  alerts, and newsletter confirmation, welcome and admin mail (three per
+  confirmed subscriber).
+
+Preview and development never transmit: `shouldSimulateEmailDelivery` covers
+the queue path too.
 
 ## 3. Register the webhook endpoint with Resend
 

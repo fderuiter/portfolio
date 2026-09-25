@@ -6,6 +6,8 @@ import { redis, getScopedRedisKey, isRedisConfigured } from "@/lib/redis";
 import { CONTENT_PILLARS, type ContentPillar } from "@/lib/blog/types";
 import { sanitizeContentHtml } from "@/lib/content-sanitizer";
 import { ALLOWED_REACTIONS } from "@/lib/schemas";
+import { NewsletterService } from "@/lib/services/newsletter-service";
+import { logger } from "@/lib/logger";
 
 export type { BlogPostData };
 
@@ -571,6 +573,16 @@ export class BlogPostService {
 
     if (!updated) {
       return null;
+    }
+
+    // Publishing queues a Systems Dispatch announcement for the daily
+    // maintenance run; nothing is sent synchronously on publish (#841).
+    if (!existing.published && updated.published) {
+      try {
+        await NewsletterService.queuePostAnnouncement(updated.id);
+      } catch (err) {
+        logger.error("Failed to queue the newsletter announcement:", err);
+      }
     }
 
     const slugs = new Set([existing.slug, updated.slug]);

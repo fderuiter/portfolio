@@ -707,7 +707,7 @@
     "/api/newsletter": {
       "post": {
         "summary": "Subscribe email address to the systems engineering dispatch newsletter",
-        "description": "Validates email address, verifies spam and duration gates, registers subscriber, and delivers a welcome confirmation receipt.",
+        "description": "Validates the email address and the spam and duration gates, records the address as a PENDING subscriber, and emails a double opt-in confirmation link. The response is the same whether or not the address was already subscribed. Only confirmed addresses ever receive a dispatch.",
         "requestBody": {
           "required": true,
           "content": {
@@ -720,7 +720,7 @@
         },
         "responses": {
           "201": {
-            "description": "Newsletter subscription registered successfully",
+            "description": "Signup recorded; the visitor is asked to confirm by email",
             "content": {
               "application/json": {
                 "schema": {
@@ -751,6 +751,162 @@
           },
           "500": {
             "description": "Internal server error registering subscription",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/newsletter/confirm": {
+      "get": {
+        "summary": "Confirm a newsletter subscription (double opt-in)",
+        "description": "Follows the link in the confirmation email. Moves a PENDING subscriber to CONFIRMED, clears the single-use token, and sends the welcome email. Returns an uncached, unindexed HTML page.",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "description": "Opaque token from the email link",
+            "schema": {
+              "type": "string",
+              "minLength": 16,
+              "maxLength": 128
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription confirmed (HTML page)",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or malformed token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown or already-used token (HTML page)",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/newsletter/unsubscribe": {
+      "get": {
+        "summary": "One-click newsletter unsubscribe",
+        "description": "Follows the unsubscribe link carried by every dispatch. Unsubscribes in a single request with no sign-in and no confirmation step, and cancels any dispatch still queued for the address. Returns an uncached, unindexed HTML page.",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "description": "Opaque token from the email link",
+            "schema": {
+              "type": "string",
+              "minLength": 16,
+              "maxLength": 128
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Unsubscribed (HTML page)",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or malformed token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown token (HTML page)",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "RFC 8058 one-click unsubscribe",
+        "description": "Target of the List-Unsubscribe header. Mail clients POST `List-Unsubscribe=One-Click` to the URL from the header, token included.",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "description": "Opaque token from the email link",
+            "schema": {
+              "type": "string",
+              "minLength": 16,
+              "maxLength": 128
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Unsubscribed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or malformed token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown token",
             "content": {
               "application/json": {
                 "schema": {

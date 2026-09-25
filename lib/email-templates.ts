@@ -336,6 +336,8 @@ ${payload.comments}`;
 
 export interface NewsletterWelcomePayload {
   email: string;
+  /** One-click unsubscribe link; rendered in the footer when present. */
+  unsubscribeUrl?: string;
 }
 
 /**
@@ -404,7 +406,11 @@ export function renderNewsletterWelcomeEmail(
                 Frederick de Ruiter &bull; Systems Architecture &amp; Engineering
               </p>
               <p style="margin: 0; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 10px; color: #52525b;">
-                You received this email because you subscribed on deruiter.dev.
+                You received this email because you subscribed on deruiter.dev.${
+                  payload.unsubscribeUrl
+                    ? ` <a href="${escapeHtml(payload.unsubscribeUrl)}" style="color: #71717a;">Unsubscribe</a>.`
+                    : ""
+                }
               </p>
             </td>
           </tr>
@@ -428,7 +434,127 @@ No spam, zero tracking.
 
 Frederick de Ruiter
 Systems Architecture & Engineering
-https://deruiter.dev`;
+https://deruiter.dev${payload.unsubscribeUrl ? `\n\nUnsubscribe: ${payload.unsubscribeUrl}` : ""}`;
 
   return { html, text, subject: emailSubject };
+}
+
+/**
+ * Wraps newsletter message content in the dispatch card layout shared by the
+ * confirmation and post-announcement emails.
+ */
+function renderNewsletterCard(options: {
+  title: string;
+  badge: string;
+  heading: string;
+  bodyHtml: string;
+  footerHtml: string;
+}): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${escapeHtml(options.title)}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #0d0e11; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f4f4f6;">
+  <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #0d0e11; padding: 32px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #13151a; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; overflow: hidden;">
+          <tr>
+            <td style="padding: 24px 28px; background-color: #181b22; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+              <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11px; font-weight: bold; color: #06b6d4; text-transform: uppercase; letter-spacing: 0.1em; background: rgba(6, 182, 212, 0.12); border: 1px solid rgba(6, 182, 212, 0.25); padding: 3px 8px; border-radius: 6px;">
+                ${escapeHtml(options.badge)}
+              </span>
+              <h1 style="margin: 16px 0 0 0; font-size: 20px; font-weight: 800; color: #ffffff; line-height: 1.3;">
+                ${escapeHtml(options.heading)}
+              </h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 24px 28px 16px 28px; font-size: 14px; line-height: 1.6; color: #d4d4d8;">
+              ${options.bodyHtml}
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 20px 28px; background-color: #0d0e11; border-top: 1px solid rgba(255, 255, 255, 0.06); text-align: center; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 10px; color: #52525b;">
+              ${options.footerHtml}
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
+/** Payload for the double opt-in confirmation email. */
+export interface NewsletterConfirmationPayload {
+  email: string;
+  confirmUrl: string;
+}
+
+/**
+ * Renders the double opt-in email that asks a new subscriber to confirm the
+ * address before any dispatch is sent to it.
+ */
+export function renderNewsletterConfirmationEmail(
+  payload: NewsletterConfirmationPayload
+): RenderedEmail {
+  const subject = "Confirm your Systems Dispatch subscription";
+  const safeUrl = escapeHtml(payload.confirmUrl);
+  const html = renderNewsletterCard({
+    title: subject,
+    badge: "SYSTEMS DISPATCH // CONFIRM",
+    heading: "One click to confirm",
+    bodyHtml: `<p style="margin: 0 0 16px 0;">Someone, hopefully you, asked to subscribe <strong style="color: #ffffff; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;">${escapeHtml(payload.email)}</strong> to the Systems Dispatch.</p>
+              <p style="margin: 0 0 20px 0;"><a href="${safeUrl}" style="display: inline-block; padding: 10px 16px; border-radius: 10px; background-color: #06b6d4; color: #0d0e11; font-weight: 700; text-decoration: none;">Confirm subscription</a></p>
+              <p style="margin: 0; color: #a1a1aa;">If this wasn't you, ignore this email. Nothing is sent to an unconfirmed address.</p>`,
+    footerHtml: "Frederick de Ruiter &bull; deruiter.dev",
+  });
+  const text = `Confirm your Systems Dispatch subscription
+
+Someone, hopefully you, asked to subscribe ${payload.email} to the Systems Dispatch.
+
+Confirm: ${payload.confirmUrl}
+
+If this wasn't you, ignore this email. Nothing is sent to an unconfirmed address.`;
+  return { html, text, subject };
+}
+
+/** Payload for a new-post announcement sent to confirmed subscribers. */
+export interface NewsletterDispatchPayload {
+  title: string;
+  dek: string;
+  postUrl: string;
+  unsubscribeUrl: string;
+}
+
+/**
+ * Renders the Systems Dispatch announcement of a newly published blog post.
+ * Every dispatch carries a visible unsubscribe link alongside the
+ * List-Unsubscribe headers the sender attaches.
+ */
+export function renderNewsletterDispatchEmail(
+  payload: NewsletterDispatchPayload
+): RenderedEmail {
+  const subject = `New dispatch: ${payload.title}`;
+  const html = renderNewsletterCard({
+    title: subject,
+    badge: "SYSTEMS DISPATCH // NEW POST",
+    heading: payload.title,
+    bodyHtml: `<p style="margin: 0 0 20px 0;">${escapeHtml(payload.dek)}</p>
+              <p style="margin: 0;"><a href="${escapeHtml(payload.postUrl)}" style="display: inline-block; padding: 10px 16px; border-radius: 10px; background-color: #06b6d4; color: #0d0e11; font-weight: 700; text-decoration: none;">Read the post</a></p>`,
+    footerHtml: `You receive the Systems Dispatch because you confirmed a subscription on deruiter.dev. <a href="${escapeHtml(payload.unsubscribeUrl)}" style="color: #71717a;">Unsubscribe</a> with one click.`,
+  });
+  const text = `${payload.title}
+
+${payload.dek}
+
+Read the post: ${payload.postUrl}
+
+Unsubscribe with one click: ${payload.unsubscribeUrl}`;
+  return { html, text, subject };
 }

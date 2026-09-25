@@ -1,14 +1,19 @@
 import { logger } from "@/lib/logger";
 import { CaseStudyService } from "@/lib/services/case-study-service";
 import { BlogPostService } from "@/lib/services/blog-service";
-import { EmailService } from "@/lib/services/email-service";
+import {
+  EmailService,
+  EMAIL_RETRY_BATCH_SIZE,
+} from "@/lib/services/email-service";
+import { NewsletterService } from "@/lib/services/newsletter-service";
 import { TelemetryService } from "@/lib/services/telemetry-service";
 import { sanitizeError } from "@/lib/error-sanitization";
 
 const DEFAULT_DEADLINE_MS = 8000;
 const RESPONSE_RESERVE_MS = 250;
 
-export type MaintenancePhaseName = "telemetry" | "emailRetry" | "retention";
+export type MaintenancePhaseName =
+  "telemetry" | "newsletter" | "emailRetry" | "retention";
 export type MaintenancePhaseStatus =
   "completed" | "failed" | "timed_out" | "skipped";
 
@@ -31,6 +36,7 @@ export interface MaintenanceSummary {
 
 export interface MaintenanceAdapters {
   syncTelemetry(batchSize: number): Promise<Record<string, number | null>>;
+  dispatchNewsletter(now: Date): Promise<Record<string, number | null>>;
   processEmailRetry(now: Date): Promise<Record<string, number | null>>;
   runRetention(now: Date): Promise<Record<string, number | null>>;
 }
@@ -104,9 +110,12 @@ function createProductionAdapters(batchSize: number): MaintenanceAdapters {
         blogReactionsInserted: blogReactions.inserted,
       };
     },
+    async dispatchNewsletter(now) {
+      return NewsletterService.dispatchDue(now);
+    },
     async processEmailRetry(now) {
       const retry = await EmailService.processRetryQueue({
-        maxBatchSize: 5,
+        maxBatchSize: EMAIL_RETRY_BATCH_SIZE,
         now,
       });
       const health = await EmailService.getRetryQueueHealth(now);
@@ -162,6 +171,13 @@ export class MaintenanceService {
     phases.telemetry = await runBoundedPhase(
       "telemetry",
       () => adapters.syncTelemetry(batchSize),
+      deadlineAt,
+      clock
+    );
+    // Before emailRetry, so announcements queued now go out in this run.
+    phases.newsletter = await runBoundedPhase(
+      "newsletter",
+      () => adapters.dispatchNewsletter(now),
       deadlineAt,
       clock
     );

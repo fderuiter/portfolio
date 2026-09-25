@@ -6,4 +6,4 @@
 
 # Type Alias: MaintenancePhaseName
 
-> **MaintenancePhaseName** = `"telemetry"` \| `"emailRetry"` \| `"retention"`
+> **MaintenancePhaseName** = `"telemetry"` \| `"newsletter"` \| `"emailRetry"` \| `"retention"`

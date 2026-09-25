@@ -123,7 +123,7 @@ export function NewsletterForm({
           className="flex items-center gap-3 p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-300 text-xs font-mono animate-fade-in"
         >
           <IconCheck className="w-4 h-4 shrink-0 text-emerald-400" />
-          <span>You’re subscribed. Thanks for reading!</span>
+          <span>Almost there: check your inbox to confirm.</span>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-2">
