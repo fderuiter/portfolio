@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { ONCOLOGY_RECIST_PRESET } from "../../lib/crf/presets";
 
 test.beforeEach(async ({ page, isMobile }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -32,6 +33,10 @@ test("desktop start keeps the Next instruction in view", async ({
   });
   const canvas = page.locator("canvas[role='application']");
   await expect(canvas).toHaveAttribute("height", "150");
+  // #834: the first-shift walkthrough sits below the Next instruction.
+  await expect(
+    page.getByRole("region", { name: "First-shift calibration" })
+  ).toBeVisible();
 });
 
 test("early station routing gives accessible guidance without an auditor penalty", async ({
@@ -138,4 +143,59 @@ test("phone fallback keeps a visible compact and selectable canvas", async ({
     });
     await expect(page.locator("#cc-dossier-title")).toContainText(expected);
   }
+});
+
+test.describe("with a CRF Studio protocol loaded (#1150)", () => {
+  test.beforeEach(async ({ page, isMobile }) => {
+    test.skip(isMobile, "Desktop flow; phones get the desktop-only notice");
+    // Mirrors CRF Studio's "Launch simulation", which leaves the protocol in
+    // localStorage for later visits to the game.
+    await page.evaluate((protocol) => {
+      localStorage.setItem("crf_active_protocol", JSON.stringify(protocol));
+    }, ONCOLOGY_RECIST_PRESET);
+    await page.reload();
+    await expect(async () => {
+      await page.getByRole("button", { name: /Launch Cabinet/i }).click();
+      await expect(page.locator("canvas[role='application']")).toBeVisible();
+    }).toPass({ timeout: 15000 });
+  });
+
+  test("every flagged field accepts one offered choice and the packet can route", async ({
+    page,
+  }) => {
+    await expect(async () => {
+      await page
+        .getByRole("button", { name: /Start 3-Phase Campaign/i })
+        .click();
+      await expect(page.locator("#cc-dossier-title")).toBeVisible();
+    }).toPass({ timeout: 15000 });
+
+    const dialog = page.getByRole("dialog", {
+      name: "CDISC Controlled Terminology Validation",
+    });
+    for (let fixed = 0; fixed < 8; fixed++) {
+      const flagged = page.getByText("Validate Choice").first();
+      if ((await flagged.count()) === 0) break;
+      await flagged.click();
+      await expect(dialog).toBeVisible();
+      const options = dialog.locator("button:has(kbd)");
+      const count = await options.count();
+      expect(count).toBeGreaterThan(0);
+      let verified = false;
+      for (let i = 0; i < count && !verified; i++) {
+        await options.nth(i).click();
+        verified = await dialog
+          .getByText("✓ Standard Verified")
+          .isVisible()
+          .catch(() => false);
+      }
+      expect(verified).toBe(true);
+      await expect(dialog).toBeHidden();
+    }
+
+    await expect(page.getByText("Clean.", { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /^\d?\s*Route to [A-Z]{2}$/ }).first()
+    ).toBeVisible();
+  });
 });

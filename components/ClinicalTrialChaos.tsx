@@ -3076,72 +3076,6 @@ export const ClinicalTrialChaos: React.FC = () => {
                       </span>
                     </div>
 
-                    {/* First-shift calibration (#834) */}
-                    {calibrationActive && calibrationSubject && (
-                      <section
-                        aria-label="First-shift calibration"
-                        data-testid="cc-calibration"
-                        className="mt-3 rounded-lg border border-sky-500/40 bg-sky-500/5 p-3"
-                      >
-                        <div className="flex flex-wrap items-start justify-between gap-2">
-                          <p className="min-w-0 text-[10px] font-bold uppercase tracking-wider text-sky-300">
-                            First-shift calibration · clocks paused
-                          </p>
-                          <button
-                            type="button"
-                            onClick={skipCalibration}
-                            className="min-h-[44px] shrink-0 rounded-lg border border-zinc-700 px-3 text-xs font-bold text-zinc-200 hover:border-zinc-500 hover:text-white active:scale-[0.98]"
-                          >
-                            Skip calibration
-                          </button>
-                        </div>
-                        <ol className="mt-2 space-y-1 text-xs text-zinc-200">
-                          <li
-                            aria-current={
-                              calibrationStep === "fix" ? "step" : undefined
-                            }
-                            className={
-                              calibrationStep === "fix"
-                                ? "font-bold text-white"
-                                : "text-zinc-400"
-                            }
-                          >
-                            {calibrationStep === "fix" ? "▸" : "✓"} 1. Fix: open
-                            the flagged field and pick the compliant value
-                            (Enter, then 1–4).
-                          </li>
-                          <li
-                            aria-current={
-                              calibrationStep === "route" ? "step" : undefined
-                            }
-                            className={
-                              calibrationStep === "route"
-                                ? "font-bold text-white"
-                                : "text-zinc-400"
-                            }
-                          >
-                            {calibrationStep === "route" ? "▸" : "·"} 2. Route:
-                            send the clean CRF to its matching station.
-                          </li>
-                          <li className="text-zinc-400">
-                            · 3. Sign: routine packets dispatch at once; SAE and
-                            phase-lock packets open the signature review.
-                          </li>
-                        </ol>
-                        {activeSubject.id !== calibrationSubject.id && (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setSelectedSubjectId(calibrationSubject.id)
-                            }
-                            className="mt-2 min-h-[44px] rounded-lg border border-sky-500/40 px-3 text-xs font-bold text-sky-200 hover:bg-sky-500/10 active:scale-[0.98]"
-                          >
-                            Back to {calibrationSubject.subjectLabel}
-                          </button>
-                        )}
-                      </section>
-                    )}
-
                     {/* Fix → Route → Dispatch stepper */}
                     <ol
                       className="mt-3 grid grid-cols-3 gap-1.5 text-[10px]"
@@ -3235,6 +3169,72 @@ export const ClinicalTrialChaos: React.FC = () => {
                           ))}
                         </div>
                       </div>
+                    )}
+
+                    {/* First-shift calibration (#834) */}
+                    {calibrationActive && calibrationSubject && (
+                      <section
+                        aria-label="First-shift calibration"
+                        data-testid="cc-calibration"
+                        className="mt-3 rounded-lg border border-sky-500/40 bg-sky-500/5 p-3"
+                      >
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                          <p className="min-w-0 text-[10px] font-bold uppercase tracking-wider text-sky-300">
+                            First-shift calibration · clocks paused
+                          </p>
+                          <button
+                            type="button"
+                            onClick={skipCalibration}
+                            className="min-h-[44px] shrink-0 rounded-lg border border-zinc-700 px-3 text-xs font-bold text-zinc-200 hover:border-zinc-500 hover:text-white active:scale-[0.98]"
+                          >
+                            Skip calibration
+                          </button>
+                        </div>
+                        <ol className="mt-2 space-y-1 text-xs text-zinc-200">
+                          <li
+                            aria-current={
+                              calibrationStep === "fix" ? "step" : undefined
+                            }
+                            className={
+                              calibrationStep === "fix"
+                                ? "font-bold text-white"
+                                : "text-zinc-400"
+                            }
+                          >
+                            {calibrationStep === "fix" ? "▸" : "✓"} 1. Fix: open
+                            the flagged field and pick the compliant value
+                            (Enter, then 1–4).
+                          </li>
+                          <li
+                            aria-current={
+                              calibrationStep === "route" ? "step" : undefined
+                            }
+                            className={
+                              calibrationStep === "route"
+                                ? "font-bold text-white"
+                                : "text-zinc-400"
+                            }
+                          >
+                            {calibrationStep === "route" ? "▸" : "·"} 2. Route:
+                            send the clean CRF to its matching station.
+                          </li>
+                          <li className="text-zinc-400">
+                            · 3. Sign: routine packets dispatch at once; SAE and
+                            phase-lock packets open the signature review.
+                          </li>
+                        </ol>
+                        {activeSubject.id !== calibrationSubject.id && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setSelectedSubjectId(calibrationSubject.id)
+                            }
+                            className="mt-2 min-h-[44px] rounded-lg border border-sky-500/40 px-3 text-xs font-bold text-sky-200 hover:bg-sky-500/10 active:scale-[0.98]"
+                          >
+                            Back to {calibrationSubject.subjectLabel}
+                          </button>
+                        )}
+                      </section>
                     )}
 
                     {/* Observations */}
