@@ -48,7 +48,7 @@ export const BioSpotlight: React.FC = () => {
         <div className="grid grid-cols-1 @2xl:grid-cols-12 gap-5 sm:gap-6 @2xl:gap-8 items-center">
           {/* Left Column: Image with interactive controls */}
           <div className="@2xl:col-span-5 min-w-0 flex flex-col items-center">
-            <div className="relative w-full max-w-[280px] sm:max-w-[320px] @2xl:max-w-none aspect-[3/4] rounded-2xl overflow-hidden border border-white/15 shadow-xl bg-black/60">
+            <div className="relative w-full max-w-[280px] sm:max-w-[320px] @2xl:max-w-none aspect-[3/4] min-w-0 rounded-2xl overflow-hidden border border-white/15 shadow-xl bg-black/60">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activePhoto.id}
@@ -136,7 +136,7 @@ export const BioSpotlight: React.FC = () => {
 
           {/* Right Column: Bio & Co-Pilot Narrative */}
           <div className="@2xl:col-span-7 min-w-0 flex flex-col justify-center text-left">
-            <div className="inline-flex max-w-full items-center gap-2 px-2.5 py-1 rounded-full bg-amber-400/10 border border-amber-400/20 text-amber-300 text-[11px] font-mono font-medium mb-3 w-fit">
+            <div className="inline-flex min-w-0 max-w-full items-center gap-2 px-2.5 py-1 rounded-full bg-amber-400/10 border border-amber-400/20 text-amber-300 text-[11px] font-mono font-medium mb-3 w-fit">
               <IconBone className="w-3.5 h-3.5 text-amber-400" />
               <span className="min-w-0 break-words">
                 Canine Co-Pilot &amp; Pair Programmer
