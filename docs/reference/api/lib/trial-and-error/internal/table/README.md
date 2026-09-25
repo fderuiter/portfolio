@@ -11,6 +11,8 @@
 - [AllocationOption](interfaces/AllocationOption.md)
 - [CrisisChoiceView](interfaces/CrisisChoiceView.md)
 - [CrisisView](interfaces/CrisisView.md)
+- [EncounterStageView](interfaces/EncounterStageView.md)
+- [EncounterView](interfaces/EncounterView.md)
 - [FigureInspectionView](interfaces/FigureInspectionView.md)
 - [FigureStatus](interfaces/FigureStatus.md)
 - [InspectionTraceView](interfaces/InspectionTraceView.md)

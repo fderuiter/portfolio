@@ -15,11 +15,13 @@ import {
   ACT_I,
   ACT_I_CRISES,
   DEMOGRAPHICS_SCENARIO,
+  DMC_MILESTONE_SCENARIO,
   DOSE_ESCALATION_SCENARIO,
   FIREWALL_CELL,
   SPONSOR_SAFETY_SCENARIO,
   type Act,
   type CrisisCard,
+  type Scenario,
 } from "@/lib/trial-and-error";
 import { SMALL_BLIND_WITH_KM } from "./utils/trial-and-error-km";
 import { BLINDED, DMC_SCENARIO } from "./utils/trial-and-error-dmc";
@@ -931,5 +933,89 @@ describe("CardTable DMC blinding firewall (T&E-08)", () => {
     const entries = await screen.findAllByTestId("access-entry");
     expect(entries).toHaveLength(4);
     expect(entries.every((e) => e.hasAttribute("data-authorized"))).toBe(true);
+  });
+});
+
+describe("CardTable DMC milestone Boss", () => {
+  const press = (id: string, key: string) => {
+    act(() => card(id).focus());
+    fireEvent.keyDown(card(id), { key });
+  };
+  const playCards = (...ids: string[]) => {
+    for (const id of ids) fireEvent.click(card(id));
+    fireEvent.click(screen.getByRole("button", { name: /Play Hand/ }));
+  };
+  const stages = () => screen.getAllByTestId("encounter-stage");
+  // A lower Stage 2 quota, so an unreconciled closed report clears it here.
+  const encounter = DMC_MILESTONE_SCENARIO.encounter!;
+  const boss: Scenario = {
+    ...DMC_MILESTONE_SCENARIO,
+    blind: { ...DMC_MILESTONE_SCENARIO.blind, quota: 1400 },
+    encounter: {
+      ...encounter,
+      stages: [encounter.stages[0], { ...encounter.stages[1], quota: 1000 }],
+    },
+  };
+
+  it("opens on the boss intro card, dismissed with Escape", async () => {
+    render(<CardTable scenario={boss} />);
+    const intro = screen.getByTestId("boss-intro");
+    expect(intro.getAttribute("role")).toBe("dialog");
+    expect(intro.textContent).toContain("Boss: Blinding Firewall");
+    expect(intro.textContent).toContain("Quota 1400");
+    await waitFor(() =>
+      expect(document.activeElement?.textContent).toBe("Take the seat [Enter]")
+    );
+    fireEvent.keyDown(document.activeElement!, { key: "Escape" });
+    await waitFor(() => expect(screen.queryByTestId("boss-intro")).toBeNull());
+  });
+
+  it("tracks both stages, then offers one SOP relic for the rack", async () => {
+    render(<CardTable scenario={boss} />);
+    fireEvent.click(screen.getByTestId("boss-intro-start"));
+    expect(screen.queryByTestId("boss-intro")).toBeNull();
+    expect(stages().map((s) => s.getAttribute("data-status"))).toEqual([
+      "ACTIVE",
+      "PENDING",
+    ]);
+    expect(stages()[0].getAttribute("aria-current")).toBe("step");
+    expect(screen.getByTestId("session-note").textContent).toMatch(
+      /^Premature unblinding/
+    );
+
+    playCards("C-T14.1.1", "C-L16.2.4");
+    playCards("C-T14.1.2", "C-L16.1.1");
+    expect(stages()[0].getAttribute("data-status")).toBe("DEFENDED");
+    expect(stages()[0].textContent).toContain("450 of 400");
+    expect(stages()[1].getAttribute("data-status")).toBe("ACTIVE");
+
+    for (const id of ["C-T14.3.1-D", "C-T14.3.3-D", "C-T14.3.2.5-D"]) {
+      press(id, "s");
+    }
+    fireEvent.click(screen.getByTestId("session-toggle"));
+    expect(screen.getByTestId("session-badge").textContent).toBe("CLOSED");
+    playCards(
+      "C-T14.3.1-D",
+      "C-T14.3.3-D",
+      "C-T14.3.2.5-D",
+      "C-F14.3.3",
+      "C-F14.3.1"
+    );
+
+    const reward = screen.getByTestId("relic-reward");
+    const choices = within(reward).getAllByTestId("relic-choice");
+    expect(choices).toHaveLength(3);
+    fireEvent.click(choices[1]);
+    expect(within(reward).getByText("SOP relic claimed")).toBeTruthy();
+    expect(choices.every((c) => (c as HTMLButtonElement).disabled)).toBe(true);
+    expect(choices[1].getAttribute("aria-pressed")).toBe("true");
+    const rack = screen.getByTestId("relic-rack");
+    expect(within(rack).getByTestId("relic").textContent).toBe("SOP-QC-12");
+    expect(within(rack).getAllByText("Empty")).toHaveLength(4);
+
+    fireEvent.click(screen.getByTestId("run-info-button"));
+    const relics = await screen.findByTestId("run-info-relics");
+    expect(relics.textContent).toContain("1 of 5 slots");
+    expect(relics.textContent).toContain("SOP-QC-12");
   });
 });

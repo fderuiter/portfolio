@@ -39,6 +39,7 @@ import { FigureDesk } from "@/components/trial-and-error/FigureDesk";
 import { CrisisPanel } from "@/components/trial-and-error/CrisisPanel";
 import { LevelUpPlate } from "@/components/trial-and-error/LevelUpPlate";
 import { RunInfo } from "@/components/trial-and-error/RunInfo";
+import { BossIntro } from "@/components/trial-and-error/BossIntro";
 import { FirewallDialog } from "@/components/trial-and-error/FirewallDialog";
 import { CardBack } from "@/components/trial-and-error/cards/CardBack";
 import { CardDetail } from "@/components/trial-and-error/cards/CardDetail";
@@ -258,6 +259,19 @@ export function CardTable({
   const [runInfoOpen, setRunInfoOpen] = useState(false);
   /** The face-down output the firewall dialog is asking about. */
   const [peekId, setPeekId] = useState<string | null>(null);
+  // A staged Boss Blind opens on its intro card until it is dismissed.
+  const bossIntroKey = `${runView.seed}:${runView.blindIndex}:${scenario.id}`;
+  const [bossIntroSeen, setBossIntroSeen] = useState<string | null>(null);
+  const showBossIntro =
+    view.encounter !== null &&
+    state.status === "REVIEWING" &&
+    state.handsPlayed === 0 &&
+    state.cpu.spent === 0 &&
+    bossIntroSeen !== bossIntroKey;
+  const playBossStinger = useEffectEvent(() => sound.play("bossStinger"));
+  useEffect(() => {
+    if (showBossIntro) playBossStinger();
+  }, [showBossIntro]);
   const detailView = view.hand.find((h) => h.card.id === detailId);
   const activeIndex = Math.min(focusIndex, Math.max(0, view.hand.length - 1));
   const focusedCard = view.hand[activeIndex];
@@ -750,6 +764,48 @@ export function CardTable({
               )}
             </div>
           )}
+          {view.encounter && (
+            <ol
+              aria-label="DMC milestone stages"
+              className="mt-2 space-y-1"
+              data-testid="encounter-stages"
+            >
+              {view.encounter.stages.map((stage) => (
+                <li
+                  key={stage.name}
+                  aria-current={stage.status === "ACTIVE" ? "step" : undefined}
+                  className={`border p-2 break-words ${stage.status === "ACTIVE" ? "border-amber-400/60" : stage.status === "DEFENDED" ? "border-emerald-500/60" : "border-zinc-700"}`}
+                  data-testid="encounter-stage"
+                  data-status={stage.status}
+                >
+                  <span className="block font-bold uppercase tracking-wider text-zinc-200">
+                    {stage.name}
+                  </span>
+                  <span className="block text-zinc-400 tabular-nums">
+                    {stage.session} session · {stage.score} of {stage.quota} ·{" "}
+                    <span
+                      className={
+                        stage.status === "DEFENDED"
+                          ? "text-emerald-300"
+                          : stage.status === "ACTIVE"
+                            ? "text-amber-300"
+                            : "text-zinc-400"
+                      }
+                    >
+                      {stage.status === "DEFENDED"
+                        ? "Defended"
+                        : stage.status === "ACTIVE"
+                          ? "In play"
+                          : "Pending"}
+                    </span>
+                  </span>
+                  <span className="block text-zinc-400">
+                    {stage.hands.map((h) => HAND_NAMES[h]).join(", ")}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          )}
           {runView.showIntro && (
             <p
               className="mt-2 border border-zinc-700 p-2 text-zinc-300 break-words"
@@ -854,19 +910,31 @@ export function CardTable({
 
         <div className="min-w-0 bg-[color:var(--te-surface-0)] p-3">
           <ul
-            aria-label={`Relic rack: 0 of ${RELIC_SLOTS} slots filled. Relics arrive with the Procurement Shop.`}
+            aria-label={`Relic rack: ${view.relics.length} of ${RELIC_SLOTS} slots filled.${view.relics.length === 0 ? " Relics arrive with the Procurement Shop and Boss rewards." : ""}`}
             tabIndex={0}
             className="flex flex-wrap gap-2 outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
             data-testid="relic-rack"
           >
-            {Array.from({ length: RELIC_SLOTS }, (_, i) => (
-              <li
-                key={i}
-                className="flex h-12 w-16 items-center justify-center border border-dashed border-zinc-700 text-[10px] uppercase text-zinc-400"
-              >
-                Empty
-              </li>
-            ))}
+            {Array.from({ length: RELIC_SLOTS }, (_, i) => {
+              const relic = view.relics[i];
+              return relic ? (
+                <li
+                  key={relic.id}
+                  title={`${relic.name}: ${relic.description}`}
+                  className="flex h-12 min-w-0 max-w-[10rem] items-center justify-center border border-emerald-500/60 px-2 text-center text-[10px] font-bold uppercase text-emerald-300 break-words"
+                  data-testid="relic"
+                >
+                  {relic.id}
+                </li>
+              ) : (
+                <li
+                  key={i}
+                  className="flex h-12 w-16 items-center justify-center border border-dashed border-zinc-700 text-[10px] uppercase text-zinc-400"
+                >
+                  Empty
+                </li>
+              );
+            })}
           </ul>
           <div
             role="group"
@@ -1351,6 +1419,49 @@ export function CardTable({
                 discard
                 {state.discards === 1 ? "" : "s"} · {state.cpu.spent} CPU spent
               </p>
+              {view.reward && (
+                <div
+                  role="group"
+                  aria-labelledby="relic-reward-heading"
+                  className="mx-auto mt-4 max-w-2xl text-left"
+                  data-testid="relic-reward"
+                >
+                  <p
+                    id="relic-reward-heading"
+                    className="text-xs font-bold uppercase tracking-wider text-zinc-200"
+                  >
+                    {view.reward.claimed
+                      ? "SOP relic claimed"
+                      : "Choose one SOP relic"}
+                  </p>
+                  <div className="mt-2 grid gap-2 sm:grid-cols-3">
+                    {view.reward.choices.map((relic) => {
+                      const taken = view.reward?.claimed === relic.id;
+                      return (
+                        <button
+                          key={relic.id}
+                          type="button"
+                          disabled={view.reward?.claimed != null}
+                          aria-pressed={taken}
+                          onClick={() =>
+                            send({ type: "CLAIM_RELIC", relicId: relic.id })
+                          }
+                          className={`min-h-[48px] min-w-0 border p-2 text-left text-xs touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 active:scale-[0.98] disabled:cursor-not-allowed ${taken ? "border-emerald-400 bg-emerald-500/10 text-emerald-200" : "border-zinc-600 text-zinc-200 hover:bg-zinc-800 disabled:opacity-50"}`}
+                          data-testid="relic-choice"
+                        >
+                          <span className="block font-bold break-words">
+                            {taken ? "Taken: " : "Take "}
+                            {relic.name}
+                          </span>
+                          <span className="block text-zinc-400 break-words">
+                            {relic.description}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
               {runView.nextBlind && runView.phase === "BLIND_CLEARED" ? (
                 <>
                   <p className="mt-2 text-xs text-zinc-400 break-words">
@@ -1364,6 +1475,9 @@ export function CardTable({
                       setFocusIndex(0);
                       send({ type: "NEXT_BLIND" }, { kind: "hand", index: 0 });
                     }}
+                    disabled={
+                      view.reward !== null && view.reward.claimed === null
+                    }
                     className={`${BUTTON_BASE} mt-4 border-emerald-500 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20`}
                   >
                     Next Blind
@@ -1489,9 +1603,17 @@ export function CardTable({
           rows={view.handTable}
           seed={runView.seed}
           relicSlots={RELIC_SLOTS}
+          relics={view.relics}
           accessLog={view.accessLog}
           dmc={view.dmcCharter !== null}
           onClose={() => setRunInfoOpen(false)}
+        />
+      )}
+
+      {showBossIntro && (
+        <BossIntro
+          scenario={scenario}
+          onDismiss={() => setBossIntroSeen(bossIntroKey)}
         />
       )}
 

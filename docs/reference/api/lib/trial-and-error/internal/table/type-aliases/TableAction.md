@@ -6,7 +6,7 @@
 
 # Type Alias: TableAction
 
-> **TableAction** = \{ `cardId`: `string`; `type`: `"TOGGLE_SELECT"`; \} \| \{ `type`: `"PLAY_HAND"`; \} \| \{ `type`: `"DISCARD"`; \} \| \{ `cardId`: `string`; `type`: `"INSPECT_CARD"`; \} \| \{ `type`: `"CLOSE_INSPECT"`; \} \| \{ `col`: `number`; `row`: `number`; `type`: `"INSPECT_CELL"`; \} \| \{ `findingId`: `string`; `type`: `"CORRECT_FINDING"`; \} \| \{ `col`: `number`; `row`: `number`; `type`: `"TRACE_CELL"`; \} \| \{ `cardId`: `string`; `toIndex`: `number`; `type`: `"MOVE_CARD"`; \} \| \{ `cardId`: `string`; `type`: `"RECOMPILE"`; \} \| \{ `cardId`: `string`; `population`: [`PopulationType`](../../../types/type-aliases/PopulationType.md); `type`: `"ALLOCATE"`; \} \| \{ `cardId`: `string`; `consumableId`: `string`; `type`: `"APPLY_SEAL"`; \} \| \{ `consumableId`: `string`; `type`: `"SELL_CONSUMABLE"`; \} \| \{ `consumableId`: `string`; `type`: `"USE_GUIDANCE"`; \} \| \{ `choiceId`: `string`; `type`: `"RESOLVE_CRISIS"`; \} \| \{ `cardId`: `string`; `type`: `"STRUCTURAL_QC"`; \} \| \{ `cardId`: `string`; `type`: `"PEEK_BLINDED"`; \} \| \{ `session`: [`DmcSession`](../../blinding/type-aliases/DmcSession.md); `type`: `"SET_SESSION"`; \} \| \{ `type`: `"RESET"`; \}
+> **TableAction** = \{ `cardId`: `string`; `type`: `"TOGGLE_SELECT"`; \} \| \{ `type`: `"PLAY_HAND"`; \} \| \{ `type`: `"DISCARD"`; \} \| \{ `cardId`: `string`; `type`: `"INSPECT_CARD"`; \} \| \{ `type`: `"CLOSE_INSPECT"`; \} \| \{ `col`: `number`; `row`: `number`; `type`: `"INSPECT_CELL"`; \} \| \{ `findingId`: `string`; `type`: `"CORRECT_FINDING"`; \} \| \{ `col`: `number`; `row`: `number`; `type`: `"TRACE_CELL"`; \} \| \{ `cardId`: `string`; `toIndex`: `number`; `type`: `"MOVE_CARD"`; \} \| \{ `cardId`: `string`; `type`: `"RECOMPILE"`; \} \| \{ `cardId`: `string`; `population`: [`PopulationType`](../../../types/type-aliases/PopulationType.md); `type`: `"ALLOCATE"`; \} \| \{ `cardId`: `string`; `consumableId`: `string`; `type`: `"APPLY_SEAL"`; \} \| \{ `consumableId`: `string`; `type`: `"SELL_CONSUMABLE"`; \} \| \{ `consumableId`: `string`; `type`: `"USE_GUIDANCE"`; \} \| \{ `choiceId`: `string`; `type`: `"RESOLVE_CRISIS"`; \} \| \{ `cardId`: `string`; `type`: `"STRUCTURAL_QC"`; \} \| \{ `cardId`: `string`; `type`: `"PEEK_BLINDED"`; \} \| \{ `session`: [`DmcSession`](../../blinding/type-aliases/DmcSession.md); `type`: `"SET_SESSION"`; \} \| \{ `relicId`: `string`; `type`: `"CLAIM_RELIC"`; \} \| \{ `type`: `"RESET"`; \}
 
 Player intents the Card Table reducer accepts.
 
@@ -140,6 +140,14 @@ Logged, and the next hand played scores ×0.
 \{ `session`: [`DmcSession`](../../blinding/type-aliases/DmcSession.md); `type`: `"SET_SESSION"`; \}
 
 Moves to the other DMC session under the scenario's charter.
+
+***
+
+### Type Literal
+
+\{ `relicId`: `string`; `type`: `"CLAIM_RELIC"`; \}
+
+Takes one relic from a defended encounter's reward.
 
 ***
 

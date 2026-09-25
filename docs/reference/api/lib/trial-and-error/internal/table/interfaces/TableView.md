@@ -136,6 +136,14 @@ Selected blank shells with no analysis set allocated, in selection order.
 
 ***
 
+### encounter
+
+> **encounter**: [`EncounterView`](EncounterView.md) \| `null`
+
+A staged encounter's progress, or null outside one.
+
+***
+
 ### figureInspection
 
 > **figureInspection**: [`FigureInspectionView`](FigureInspectionView.md) \| `null`
@@ -422,6 +430,58 @@ Any selected card is inspectable but uninspected.
 ### quota
 
 > **quota**: `number`
+
+***
+
+### relics
+
+> **relics**: `object`[]
+
+SOP relics the run has earned.
+
+#### description
+
+> **description**: `string`
+
+#### id
+
+> **id**: `string` = `identifier`
+
+#### modifier
+
+> **modifier**: `object` = `ScoreModifierSchema`
+
+##### modifier.chips
+
+> **chips**: `number`
+
+##### modifier.label
+
+> **label**: `string`
+
+##### modifier.plusMult
+
+> **plusMult**: `number`
+
+##### modifier.sourceId
+
+> **sourceId**: `string` = `identifier`
+
+##### modifier.xMult
+
+> **xMult**: `number`
+
+#### name
+
+> **name**: `string`
+
+***
+
+### reward
+
+> **reward**: \{ `choices`: `object`[]; `claimed`: `string` \| `null`; \} \| `null`
+
+A defended encounter's relic offer, or null.
 
 ***
 

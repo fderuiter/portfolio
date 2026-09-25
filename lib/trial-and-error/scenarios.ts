@@ -15,6 +15,7 @@ import type {
   CrisisCard,
   AdverseEvent,
   FootnoteSeal,
+  Relic,
   RowStatistic,
   SapRulebook,
   Scenario,
@@ -1298,12 +1299,281 @@ export const ACT_I: Act = {
   crisisDeck: ACT_I_CRISES,
 };
 
+// ---------------------------------------------------------------------------
+// Boss Blind: DMC milestone defense (T&E-09).
+// ---------------------------------------------------------------------------
+
+const DMC_RULEBOOK = safetyRulebook(
+  "DMC-SAF-001",
+  "DMC Charter §7 Closed-Session Safety Tables",
+  "DMC-SAF",
+  3
+);
+
+// The closed package: by-arm safety tables the open session must never see.
+const DMC = safetyDrafts(DMC_RULEBOOK.id, [
+  { output: "overview", version: "D", label: "DMC closed (v1.0)" },
+  // One SAE too many in Active: a closed-session redline to reconcile.
+  {
+    output: "sae",
+    version: "D",
+    label: "DMC closed (v1.0)",
+    defects: { "4:1": "2 (33.3)" },
+  },
+  { output: "nervous", version: "D", label: "DMC closed (v1.0)" },
+]);
+
+const DMC_SHELLS = DMC.shells.map((shell) => ({ ...shell, isBlinded: true }));
+
+/** Time-to-event records: `events` maps a subject to its event week. */
+const kmRecords = (events: Record<string, number>, censoredAt: number) =>
+  POPULATION_SNAPSHOT.subjects.map((s) => ({
+    subjectId: s.id,
+    time: events[s.id] ?? censoredAt,
+    event: s.id in events,
+  }));
+
+/**
+ * Time to first serious AE, drawn from the closed SAE table: S-005 (week 6,
+ * Placebo), S-008 (week 2) and S-010 (week 5, both Active). The draft's
+ * Placebo at-risk row keeps S-005 at week 8 after the event.
+ */
+const DMC_KM_SAE = card({
+  id: "C-F14.3.3",
+  cardType: "FIGURE",
+  number: "Figure 14.3.3",
+  title: "Time to First Serious AE (KM)",
+  population: "SAFETY",
+  chips: 30,
+  mult: 1,
+  topic: "SAE",
+  csrStage: "SAFETY_AE",
+  km: {
+    endpoint: "Time to first serious adverse event",
+    timeUnit: "weeks",
+    populationSnapshotId: snapshotId,
+    parent: {
+      cardId: "C-T14.3.3-D",
+      atRiskRow: "Subjects, N",
+      eventsRow: "Any SAE",
+    },
+    timeOrigin: 0,
+    milestones: [0, 4, 8, 12],
+    records: kmRecords({ "S-005": 6, "S-008": 2, "S-010": 5 }, 12),
+    displayed: [
+      {
+        arm: "PLACEBO",
+        curve: [
+          [0, 1],
+          [6, 0.833],
+          [12, 0.833],
+        ],
+        censorTicks: [12],
+        atRisk: [6, 6, 6, 5],
+      },
+      {
+        arm: "ACTIVE",
+        curve: [
+          [0, 1],
+          [2, 0.833],
+          [5, 0.667],
+          [12, 0.667],
+        ],
+        censorTicks: [12],
+        atRisk: [6, 5, 4, 4],
+      },
+    ],
+  },
+});
+
+/**
+ * Time to an AE leading to discontinuation, drawn from the closed AE
+ * overview: S-008 (week 2, Active). The draft marks the event with a
+ * censoring tick as well as a step.
+ */
+const DMC_KM_DISCONTINUATION = card({
+  id: "C-F14.3.1",
+  cardType: "FIGURE",
+  number: "Figure 14.3.1",
+  title: "Time to AE Discontinuation (KM)",
+  population: "SAFETY",
+  chips: 30,
+  mult: 1,
+  topic: "AE",
+  csrStage: "SAFETY_AE",
+  km: {
+    endpoint: "Time to an adverse event leading to discontinuation",
+    timeUnit: "weeks",
+    populationSnapshotId: snapshotId,
+    parent: {
+      cardId: "C-T14.3.1-D",
+      atRiskRow: "Subjects, N",
+      eventsRow: "AE to discont.",
+    },
+    timeOrigin: 0,
+    milestones: [0, 4, 8, 12],
+    records: kmRecords({ "S-008": 2 }, 12),
+    displayed: [
+      {
+        arm: "PLACEBO",
+        curve: [
+          [0, 1],
+          [12, 1],
+        ],
+        censorTicks: [12],
+        atRisk: [6, 6, 6, 6],
+      },
+      {
+        arm: "ACTIVE",
+        curve: [
+          [0, 1],
+          [2, 0.833],
+          [12, 0.833],
+        ],
+        censorTicks: [2, 12],
+        atRisk: [6, 5, 5, 5],
+      },
+    ],
+  },
+});
+
+/** The SOP relics a defended DMC milestone offers. The player keeps one. */
+export const DMC_RELICS: Relic[] = [
+  {
+    id: "SOP-DMC-07",
+    name: "SOP-DMC-07 Firewall Charter",
+    description: "A charter that keeps the seats apart: +4 Mult on every hand.",
+    modifier: {
+      sourceId: "SOP-DMC-07",
+      label: "Firewall Charter",
+      chips: 0,
+      plusMult: 4,
+      xMult: 1,
+    },
+  },
+  {
+    id: "SOP-QC-12",
+    name: "SOP-QC-12 Independent Double Programming",
+    description:
+      "Every output is programmed twice, independently: +50 Chips on every hand.",
+    modifier: {
+      sourceId: "SOP-QC-12",
+      label: "Double Programming",
+      chips: 50,
+      plusMult: 0,
+      xMult: 1,
+    },
+  },
+  {
+    id: "SOP-STAT-03",
+    name: "SOP-STAT-03 Pre-specified Analysis",
+    description:
+      "Nothing is decided after unblinding: ×1.5 Mult on every hand.",
+    modifier: {
+      sourceId: "SOP-STAT-03",
+      label: "Pre-specified Analysis",
+      chips: 0,
+      plusMult: 0,
+      xMult: 1.5,
+    },
+  },
+];
+
+/**
+ * Boss Blind: the Data Monitoring Committee's milestone review, a staged
+ * encounter under the DMC firewall. Stage 1 is the blinded study team's open
+ * report: pooled tables and listings, played while treatment-arm values stay
+ * face down. Stage 2 is the independent statistician's closed report: once
+ * Stage 1 is defended the closed session convenes, the by-arm tables and
+ * their Kaplan–Meier figures turn face up, and only an Efficacy Full House
+ * defends it. Its quota is set so that only a closed report whose figures
+ * reconcile clears it. Peeking early zeroes a hand. It is played on its own
+ * until the campaign links the acts and Act II's boss pool draws it. It
+ * reads Act I's fictional study data.
+ */
+export const DMC_MILESTONE_SCENARIO: Scenario = {
+  id: "dmc-milestone-boss-blind",
+  title: "DMC Milestone Review",
+  summary:
+    "The Data Monitoring Committee reviews the study at its milestone: an open-session report, then a closed, unblinded one.",
+  intro:
+    "The DMC meets in two sessions. First the open report, pooled, from the study team's seat. Then, behind the firewall, the closed report by arm. Convene the closed session only once the open report is defended; a peek before then zeroes a hand.",
+  blind: {
+    tier: "BOSS_BLIND",
+    name: "Boss Blind: DMC Milestone Review",
+    quota: 10000,
+  },
+  boss: {
+    id: "DMC-FIREWALL-BOSS",
+    name: "Blinding Firewall",
+    description:
+      "Treatment-arm values are face down in the open session, and no output can be inspected until the closed session convenes.",
+    debuffType: "BLIND_FIREWALL",
+  },
+  handType: "HIGH_TABLE",
+  startingCpu: 6,
+  table: { startingCpu: 16, handSize: 8, maxSelection: 5 },
+  deck: [
+    card({
+      id: "C-T14.1.1",
+      cardType: "TABLE",
+      number: "Table 14.1.1",
+      title: "Demographics (Final)",
+      population: "ITT",
+      chips: 30,
+      mult: 1,
+      topic: "DM",
+      csrStage: "BASELINE",
+      face: {
+        kind: "TABLE",
+        columns: ["Placebo", "Active", "Total"],
+        rows: demographicsRows.map((r, i) => ({
+          label: r.label,
+          values: DEMOGRAPHICS_CLEAN[i],
+        })),
+      },
+    }),
+    DM_LISTING,
+    pick(DMC.cards, "overview-D"),
+    DISPOSITION,
+    pick(DMC.cards, "sae-D"),
+    DMC_KM_SAE,
+    AE_LISTING,
+    pick(DMC.cards, "nervous-D"),
+    DMC_KM_DISCONTINUATION,
+    DISCONTINUED_LISTING,
+    SAE_LISTING,
+  ],
+  rulebook: DMC_RULEBOOK,
+  populationSnapshot: POPULATION_SNAPSHOT,
+  shells: DMC_SHELLS,
+  drawPile: DMC.drawPile,
+  dmc: { charter: "DMC Charter §7 (closed-session procedures)" },
+  encounter: {
+    kind: "DMC_DEFENSE",
+    stages: [
+      {
+        name: "Stage 1: Open report",
+        session: "OPEN",
+        quota: 400,
+        hands: ["HIGH_TABLE", "TLF_PAIR", "POPULATION_FLUSH"],
+      },
+      {
+        name: "Stage 2: Closed report",
+        session: "CLOSED",
+        quota: 9600,
+        hands: ["EFFICACY_FULL_HOUSE"],
+      },
+    ],
+    rewards: DMC_RELICS,
+  },
+};
+
 /** Every playable scenario, keyed by id. */
 export const SCENARIOS: Readonly<Record<string, Scenario>> = Object.freeze(
   Object.fromEntries(
-    [...ACT_I.blinds, ...(ACT_I.bossPool ?? [])].map((scenario) => [
-      scenario.id,
-      scenario,
-    ])
+    [...ACT_I.blinds, ...(ACT_I.bossPool ?? []), DMC_MILESTONE_SCENARIO].map(
+      (scenario) => [scenario.id, scenario]
+    )
   )
 );
