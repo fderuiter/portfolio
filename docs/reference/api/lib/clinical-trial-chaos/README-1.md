@@ -328,6 +328,12 @@ Re-exports [getStationsForPhase](scenarios/functions/getStationsForPhase.md)
 
 ***
 
+### getSubmissionMode
+
+Re-exports [getSubmissionMode](engine/functions/getSubmissionMode.md)
+
+***
+
 ### INITIAL\_STATIONS
 
 Re-exports [INITIAL_STATIONS](scenarios/variables/INITIAL_STATIONS.md)

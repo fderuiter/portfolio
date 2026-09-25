@@ -71,6 +71,35 @@ test("early station routing gives accessible guidance without an auditor penalty
   );
 });
 
+test("a clean routine packet dispatches without the review dialog", async ({
+  page,
+}) => {
+  await expect(async () => {
+    await page.getByRole("button", { name: /Start 3-Phase Campaign/i }).click();
+    await expect(page.locator("#cc-dossier-title")).toContainText("SUBJ-1001");
+  }).toPass({ timeout: 15000 });
+
+  await expect(async () => {
+    await page.getByText("Validate Choice").first().click();
+    await expect(
+      page.getByText("CDISC Controlled Terminology Validation")
+    ).toBeVisible();
+  }).toPass({ timeout: 15000 });
+  await page.getByRole("button", { name: /180 cm/ }).click();
+
+  const dm = page
+    .getByRole("region", { name: "EDC stations" })
+    .getByRole("button", { name: /DM Station/ });
+  await expect(async () => {
+    await expect(dm).toContainText("Accepts");
+    await dm.click();
+    await expect(dm).toContainText("Submits:1");
+  }).toPass({ timeout: 15000 });
+  await expect(
+    page.getByText("21 CFR Part 11 Electronic Signature")
+  ).toHaveCount(0);
+});
+
 test("phone fallback keeps a visible compact and selectable canvas", async ({
   page,
   isMobile,

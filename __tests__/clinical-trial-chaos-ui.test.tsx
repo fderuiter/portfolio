@@ -476,7 +476,7 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     );
   });
 
-  it("should open 21 CFR Part 11 signature modal and complete clean submission", async () => {
+  it("quick-dispatches a clean routine dossier exactly once without the signature modal", async () => {
     vi.useFakeTimers();
 
     await act(async () => {
@@ -511,7 +511,7 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
       vi.advanceTimersByTime(600);
     });
 
-    // Open signature modal via DM Station
+    // The first seeded packet is routine, clean, and below the phase target.
     const dmHeading = Array.from(container.querySelectorAll("h4")).find((h) =>
       h.textContent?.includes("DM Station")
     );
@@ -520,23 +520,27 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
 
     await act(async () => {
       dmStationCard.click();
+      dmStationCard.click();
     });
 
-    expect(container.textContent).toContain(
+    expect(container.textContent).not.toContain(
       "21 CFR Part 11 Electronic Signature"
     );
-
-    // Confirm signature
-    const confirmBtn = Array.from(container.querySelectorAll("button")).find(
-      (b) => b.textContent?.includes("Sign & Lock CRF (Enter)")
-    );
-    expect(confirmBtn).toBeDefined();
-
-    await act(async () => {
-      confirmBtn?.click();
-    });
-
     expect(container.textContent).toContain("Submits:1");
+    expect(container.textContent).toContain("Combo:1");
+    const auditTab = Array.from(container.querySelectorAll("button")).find(
+      (button) => button.textContent?.includes("Audit Trail Log")
+    );
+    await act(async () => {
+      auditTab?.click();
+    });
+    expect(container.textContent).toContain("SIMULATED ROUTINE DISPATCH");
+    const floorTab = Array.from(container.querySelectorAll("button")).find(
+      (button) => button.textContent?.includes("Conveyor Floor")
+    );
+    await act(async () => {
+      floorTab?.click();
+    });
 
     // Regression: a terminated trial's SDTM rows must not leak into the next trial.
     const sdtmTabLabel = () =>
@@ -566,6 +570,106 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     expect(sdtmTabLabel()).toMatch(/Live SDTM Studio0$/);
 
     vi.useRealTimers();
+  });
+
+  it("quick-dispatches a clean routine dossier from a numeric hotkey", async () => {
+    vi.useFakeTimers();
+    try {
+      await act(async () => {
+        root.render(<ClinicalTrialChaos />);
+      });
+      const start = Array.from(container.querySelectorAll("button")).find(
+        (button) => button.textContent?.includes("Start 3-Phase Campaign")
+      );
+      await act(async () => {
+        start?.click();
+      });
+      const observation = Array.from(container.querySelectorAll("span"))
+        .find((span) => span.textContent?.includes("Validate Choice"))
+        ?.closest(".cursor-pointer") as HTMLElement;
+      await act(async () => {
+        observation.click();
+      });
+      const correct = Array.from(container.querySelectorAll("button")).find(
+        (button) => button.textContent?.trim().replace(/^\d/, "") === "180 cm"
+      );
+      await act(async () => {
+        correct?.click();
+        vi.advanceTimersByTime(600);
+      });
+
+      const board = container.querySelector(
+        '[data-keyboard-boundary="true"]'
+      ) as HTMLElement;
+      await act(async () => {
+        board.dispatchEvent(
+          new KeyboardEvent("keydown", { key: "1", bubbles: true })
+        );
+      });
+      expect(container.textContent).toContain("Submits:1");
+      expect(container.textContent).not.toContain(
+        "21 CFR Part 11 Electronic Signature"
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("keeps full review for a clean SAE dossier", async () => {
+    vi.useFakeTimers();
+    try {
+      await act(async () => {
+        root.render(<ClinicalTrialChaos />);
+      });
+      const start = Array.from(container.querySelectorAll("button")).find(
+        (button) => button.textContent?.includes("Start 3-Phase Campaign")
+      );
+      await act(async () => {
+        start?.click();
+      });
+      const saeQueueCard = Array.from(
+        container.querySelectorAll("button")
+      ).find((button) => button.textContent?.includes("SUBJ-1003"));
+      await act(async () => {
+        saeQueueCard?.click();
+      });
+      expect(
+        container.querySelector("#cc-dossier-title")?.textContent
+      ).toContain("SUBJ-1003");
+      const observation = Array.from(container.querySelectorAll("span"))
+        .find((span) => span.textContent?.includes("Validate Choice"))
+        ?.closest(".cursor-pointer") as HTMLElement;
+      await act(async () => {
+        observation.click();
+      });
+      const correct = Array.from(container.querySelectorAll("button")).find(
+        (button) =>
+          button.textContent?.trim().replace(/^\d/, "") === "Headache (Grade 2)"
+      );
+      await act(async () => {
+        correct?.click();
+        vi.advanceTimersByTime(600);
+      });
+      const aeStation = Array.from(container.querySelectorAll("h4"))
+        .find((heading) => heading.textContent?.includes("AE Station"))
+        ?.closest("button") as HTMLElement;
+      await act(async () => {
+        aeStation.click();
+      });
+      expect(container.textContent).toContain(
+        "21 CFR Part 11 Electronic Signature"
+      );
+      expect(container.textContent).not.toContain("Submits:1");
+      const confirm = Array.from(container.querySelectorAll("button")).find(
+        (button) => button.textContent?.includes("Sign & Lock CRF (Enter)")
+      );
+      await act(async () => {
+        confirm?.click();
+      });
+      expect(container.textContent).toContain("Submits:1");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("guides early pointer and numeric routing without opening a modal or changing penalties", async () => {
@@ -846,14 +950,26 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
       }
     };
 
-    // Verify initial time is 40s
-    expect(container.textContent).toContain("40s");
+    // An SAE still requires the full review modal after its observation is clean.
+    const saeQueueCard = Array.from(container.querySelectorAll("button")).find(
+      (button) => button.textContent?.includes("SUBJ-1003")
+    );
+    await act(async () => {
+      saeQueueCard?.click();
+    });
+    const activeTimer = () =>
+      container
+        .querySelector("#cc-dossier-title")
+        ?.parentElement?.parentElement?.children.item(1)
+        ?.textContent?.trim();
+    const initialSeconds = parseInt(activeTimer() ?? "", 10);
+    expect(initialSeconds).toBeGreaterThan(0);
 
     // Let 2.5 seconds pass
     await tickGame(2500, 100);
 
-    // Timer should have ticked down to 38s (40 - 2.5 = 37.5 -> Math.ceil = 38)
-    expect(container.textContent).toContain("38s");
+    const afterTick = activeTimer();
+    expect(parseInt(afterTick ?? "", 10)).toBeLessThan(initialSeconds);
 
     // Find and click the observation card to open multi-choice validation drawer
     const validateChoiceEl = Array.from(
@@ -871,8 +987,7 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     // Let another 3 seconds pass while drawer is open
     await tickGame(3000, 100);
 
-    // The timer should still show 38s (since game loop frame delta is 0 seconds when drawer is open)
-    expect(container.textContent).toContain("38s");
+    expect(activeTimer()).toBe(afterTick);
 
     // Close the drawer using the close button
     const closeBtn = Array.from(container.querySelectorAll("button")).find(
@@ -885,34 +1000,31 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     // Let another 2.0 seconds pass after closing drawer
     await tickGame(2000, 100);
 
-    // Timer should now have ticked down to 36s (37.5 - 2.0 = 35.5 -> Math.ceil = 36)
-    expect(container.textContent).toContain("36s");
+    expect(parseInt(activeTimer() ?? "", 10)).toBeLessThan(
+      parseInt(afterTick ?? "", 10)
+    );
 
     // Routing now requires a clean dossier; fix the seeded observation first.
     await act(async () => {
       obsCard.click();
     });
     const correctChoice = Array.from(container.querySelectorAll("button")).find(
-      (button) => button.textContent?.trim().replace(/^\d/, "") === "180 cm"
+      (button) =>
+        button.textContent?.trim().replace(/^\d/, "") === "Headache (Grade 2)"
     );
     await act(async () => {
       correctChoice?.click();
     });
     await tickGame(600, 100);
-    const activeTimer = () =>
-      container
-        .querySelector("#cc-dossier-title")
-        ?.parentElement?.parentElement?.children.item(1)
-        ?.textContent?.trim();
     const beforeSignature = activeTimer();
 
-    // Open signature modal via DM Station
-    const dmHeading = Array.from(container.querySelectorAll("h4")).find((h) =>
-      h.textContent?.includes("DM Station")
+    // Open signature modal via AE Station
+    const aeHeading = Array.from(container.querySelectorAll("h4")).find((h) =>
+      h.textContent?.includes("AE Station")
     );
-    const dmStationCard = dmHeading?.closest(".group") as HTMLElement;
+    const aeStationCard = aeHeading?.closest(".group") as HTMLElement;
     await act(async () => {
-      dmStationCard.click();
+      aeStationCard.click();
     });
 
     expect(container.textContent).toContain(
