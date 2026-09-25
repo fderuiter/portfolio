@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { NewsletterSubscriptionSchema } from "@/lib/schemas";
-import { EmailService } from "@/lib/services/email-service";
+import { NewsletterService } from "@/lib/services/newsletter-service";
 import { getConnectionHashFromRequest } from "@/lib/services/privacy-service";
 import { createApiHandler } from "@/lib/route-wrapper";
 import { checkSubmissionAttemptRateLimit } from "@/lib/moderation";
@@ -44,8 +44,7 @@ export const POST = createApiHandler(
         return NextResponse.json(
           {
             success: true,
-            message:
-              "You have been successfully subscribed to the systems dispatch.",
+            message: "Check your inbox to confirm your subscription.",
             simulated: true,
           },
           { status: 201 }
@@ -59,8 +58,7 @@ export const POST = createApiHandler(
           return NextResponse.json(
             {
               success: true,
-              message:
-                "You have been successfully subscribed to the systems dispatch.",
+              message: "Check your inbox to confirm your subscription.",
               simulated: true,
             },
             { status: 201 }
@@ -68,11 +66,10 @@ export const POST = createApiHandler(
         }
       }
 
-      // 4. Dispatch Newsletter Subscription
-      const result = await EmailService.subscribeNewsletter(
-        data.email,
-        connectionHash
-      );
+      // 4. Record the signup as PENDING and send the double opt-in link.
+      // The response is identical whether or not the address was already
+      // subscribed, so the form cannot be used to probe the list.
+      const result = await NewsletterService.subscribe(data.email);
 
       if (!result.success) {
         return NextResponse.json(
@@ -88,9 +85,7 @@ export const POST = createApiHandler(
       return NextResponse.json(
         {
           success: true,
-          message:
-            "You have been successfully subscribed to the systems dispatch.",
-          subscriberId: result.data?.id,
+          message: "Check your inbox to confirm your subscription.",
           simulated: result.simulated,
         },
         { status: 201 }

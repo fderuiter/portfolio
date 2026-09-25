@@ -6,7 +6,7 @@ changes the schema without adding an entry to Prisma's migration history.
 
 ## Active migrations
 
-The repository contains eleven active Prisma migrations:
+The repository contains twelve active Prisma migrations:
 
 1. `20260417215437_init`: Initial database baseline and core models.
 2. `20260528000000_add_telemetry_event`: Telemetry event ingestion table.
@@ -19,6 +19,7 @@ The repository contains eleven active Prisma migrations:
 9. `20261018000000_add_blog_post`: Adds the `BlogPost` table (ADR 0041) backing the blog's Resilient Hybrid Fallback content service.
 10. `20261019000000_add_blog_post_reaction`: Adds the `BlogPostReaction` table and indexes for lightweight, write-buffered reader reaction tracking.
 11. `20261020000000_add_case_study_hero_image`: Hero image URL asset reference on case studies.
+12. `20261021000000_add_newsletter_subscribers`: Additive newsletter tables (`NewsletterSubscriber`, `NewsletterDispatch`, `NewsletterDelivery`) and a nullable `headers` column on `OutboundEmailQueue` for double opt-in and capped Systems Dispatch delivery (#841).
 
 ## Normal workflow
 

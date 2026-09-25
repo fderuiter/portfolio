@@ -21,6 +21,27 @@ bounce/complaint suppression list defenses, retry queueing, and webhook ingestio
 
 ## Methods
 
+### enqueueEmail()
+
+> `static` **enqueueEmail**(`options`): `Promise`\<`string` \| `null`\>
+
+Adds an email to the OutboundEmailQueue for the next maintenance run to
+send, without a first attempt. Used for bulk mail such as newsletter
+dispatches, which must go through the queue's leasing, retry and
+idempotency handling. Returns the queue id, or null if nothing was stored.
+
+#### Parameters
+
+##### options
+
+[`RawEmailOptions`](../interfaces/RawEmailOptions.md)
+
+#### Returns
+
+`Promise`\<`string` \| `null`\>
+
+***
+
 ### getRetryQueueHealth()
 
 > `static` **getRetryQueueHealth**(`now?`): `Promise`\<\{ `depth`: `number`; `oldestPendingAgeMs`: `number` \| `null`; `retryExhausted`: `number`; `terminalFailures`: `number`; \}\>
@@ -300,30 +321,6 @@ Core dispatcher that transmits an email via Resend SDK or executes simulated del
 ##### options
 
 [`RawEmailOptions`](../interfaces/RawEmailOptions.md)
-
-#### Returns
-
-`Promise`\<[`EmailDispatchResult`](../interfaces/EmailDispatchResult.md)\>
-
-***
-
-### subscribeNewsletter()
-
-> `static` **subscribeNewsletter**(`email`, `connectionHash?`): `Promise`\<[`EmailDispatchResult`](../interfaces/EmailDispatchResult.md)\>
-
-Dispatches a newsletter subscription workflow:
-1. Delivers welcome confirmation email to the subscriber
-2. Alerts admin of the new subscription
-
-#### Parameters
-
-##### email
-
-`string`
-
-##### connectionHash?
-
-`string`
 
 #### Returns
 

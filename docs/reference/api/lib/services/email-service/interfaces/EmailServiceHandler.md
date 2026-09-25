@@ -277,23 +277,3 @@ Execution handler interface implementing the EmailServiceSpec contract.
 #### Inherited from
 
 [`EmailServiceSpec`](EmailServiceSpec.md).[`sendRawEmail`](EmailServiceSpec.md#sendrawemail)
-
-***
-
-### subscribeNewsletter()
-
-> **subscribeNewsletter**(`email`): `Promise`\<[`EmailDispatchResult`](EmailDispatchResult.md)\>
-
-#### Parameters
-
-##### email
-
-`string`
-
-#### Returns
-
-`Promise`\<[`EmailDispatchResult`](EmailDispatchResult.md)\>
-
-#### Inherited from
-
-[`EmailServiceSpec`](EmailServiceSpec.md).[`subscribeNewsletter`](EmailServiceSpec.md#subscribenewsletter)

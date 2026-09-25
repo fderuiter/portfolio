@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { POST } from "@/app/api/newsletter/route";
 import { NextRequest } from "next/server";
 import { resetSubmissionAttemptRateLimit } from "@/lib/moderation";
-import { EmailService } from "@/lib/services/email-service";
+import { NewsletterService } from "@/lib/services/newsletter-service";
 
 describe("API: /api/newsletter Route Handler", () => {
   beforeEach(() => {
@@ -10,7 +10,14 @@ describe("API: /api/newsletter Route Handler", () => {
     resetSubmissionAttemptRateLimit();
   });
 
-  const createRequest = (body: unknown, headers: Record<string, string> = {}) => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  const createRequest = (
+    body: unknown,
+    headers: Record<string, string> = {}
+  ) => {
     return new NextRequest("http://localhost:3000/api/newsletter", {
       method: "POST",
       headers: {
@@ -49,6 +56,10 @@ describe("API: /api/newsletter Route Handler", () => {
       email: "subscriber@example.com",
       _clientTimestamp: Date.now() - 5000,
     };
+    vi.spyOn(NewsletterService, "subscribe").mockResolvedValue({
+      success: true,
+      confirmationSent: true,
+    });
 
     // 5 allowed attempts
     for (let i = 0; i < 5; i++) {
@@ -64,7 +75,7 @@ describe("API: /api/newsletter Route Handler", () => {
   });
 
   it("should silently absorb honeypot submissions without dispatching email", async () => {
-    const spy = vi.spyOn(EmailService, "subscribeNewsletter");
+    const spy = vi.spyOn(NewsletterService, "subscribe");
 
     const req = createRequest({
       email: "bot@spammer.com",
@@ -81,7 +92,7 @@ describe("API: /api/newsletter Route Handler", () => {
   });
 
   it("should silently absorb submissions that arrive under 2000ms duration threshold", async () => {
-    const spy = vi.spyOn(EmailService, "subscribeNewsletter");
+    const spy = vi.spyOn(NewsletterService, "subscribe");
 
     const req = createRequest({
       email: "fastbot@spammer.com",
@@ -97,9 +108,9 @@ describe("API: /api/newsletter Route Handler", () => {
   });
 
   it("should process valid subscription and return 201 with success message", async () => {
-    const spy = vi.spyOn(EmailService, "subscribeNewsletter").mockResolvedValueOnce({
+    const spy = vi.spyOn(NewsletterService, "subscribe").mockResolvedValueOnce({
       success: true,
-      data: { id: "msg_news_123" },
+      confirmationSent: true,
       simulated: true,
     });
 
@@ -112,8 +123,9 @@ describe("API: /api/newsletter Route Handler", () => {
     expect(res.status).toBe(201);
     const data = await res.json();
     expect(data.success).toBe(true);
-    expect(data.message).toContain("subscribed");
-    expect(data.subscriberId).toBe("msg_news_123");
-    expect(spy).toHaveBeenCalledWith("systems.architect@example.com", "test-newsletter-hash-1");
+    // Double opt-in (#841): the visitor is asked to confirm, and the address is
+    // passed on alone.
+    expect(data.message).toContain("confirm");
+    expect(spy).toHaveBeenCalledWith("systems.architect@example.com");
   });
 });

@@ -11,3 +11,11 @@
 ### email
 
 > **email**: `string`
+
+***
+
+### unsubscribeUrl?
+
+> `optional` **unsubscribeUrl?**: `string`
+
+One-click unsubscribe link; rendered in the footer when present.

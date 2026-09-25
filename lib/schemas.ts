@@ -472,6 +472,20 @@ export const NewsletterResponseSchema = z.object({
 export type NewsletterResponse = z.infer<typeof NewsletterResponseSchema>;
 
 /**
+ * Schema for the token query parameter on the newsletter confirmation and
+ * one-click unsubscribe links (#841).
+ */
+export const NewsletterTokenQuerySchema = z.object({
+  token: z
+    .string()
+    .trim()
+    .min(16, "Invalid or expired link")
+    .max(128, "Invalid or expired link"),
+});
+
+export type NewsletterTokenQuery = z.infer<typeof NewsletterTokenQuerySchema>;
+
+/**
  * Allowed Resend webhook lifecycle event types
  */
 export const RESEND_EVENT_TYPES = [

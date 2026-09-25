@@ -6,6 +6,7 @@ import { GET } from "@/app/api/cron/maintenance/route";
 function adapters(
   overrides?: Partial<{
     syncTelemetry: () => Promise<Record<string, number | null>>;
+    dispatchNewsletter: () => Promise<Record<string, number | null>>;
     processEmailRetry: () => Promise<Record<string, number | null>>;
     runRetention: () => Promise<Record<string, number | null>>;
   }>
@@ -14,6 +15,9 @@ function adapters(
     syncTelemetry:
       overrides?.syncTelemetry ||
       vi.fn().mockResolvedValue({ processed: 4, inserted: 4 }),
+    dispatchNewsletter:
+      overrides?.dispatchNewsletter ||
+      vi.fn().mockResolvedValue({ queued: 0, capacity: 10 }),
     processEmailRetry:
       overrides?.processEmailRetry ||
       vi.fn().mockResolvedValue({ processed: 1, succeeded: 1, failed: 0 }),
@@ -43,6 +47,10 @@ describe("unified maintenance pipeline (#714)", () => {
           calls.push("telemetry");
           return { processed: 4, inserted: 4 };
         }),
+        dispatchNewsletter: vi.fn(async () => {
+          calls.push("newsletter");
+          return { queued: 3, capacity: 10 };
+        }),
         processEmailRetry: vi.fn(async () => {
           calls.push("emailRetry");
           return { processed: 1, succeeded: 1, failed: 0 };
@@ -54,7 +62,14 @@ describe("unified maintenance pipeline (#714)", () => {
       }),
     });
 
-    expect(calls).toEqual(["telemetry", "emailRetry", "retention"]);
+    // Newsletter runs before emailRetry so its queued mail goes out the same run.
+    expect(calls).toEqual([
+      "telemetry",
+      "newsletter",
+      "emailRetry",
+      "retention",
+    ]);
+    expect(result.phases.newsletter.counts.queued).toBe(3);
     expect(result.success).toBe(true);
     expect(result.partial).toBe(false);
     expect(result.deadlineMs).toBe(8000);
@@ -103,6 +118,7 @@ describe("unified maintenance pipeline (#714)", () => {
 
     expect(result.durationMs).toBe(260);
     expect(result.phases.telemetry.status).toBe("completed");
+    expect(result.phases.newsletter.status).toBe("skipped");
     expect(result.phases.emailRetry.status).toBe("skipped");
     expect(result.phases.retention.status).toBe("skipped");
     expect(retention).not.toHaveBeenCalled();
@@ -132,6 +148,7 @@ describe("unified maintenance pipeline (#714)", () => {
       deadlineMs: 8000,
       phases: {
         telemetry: { status: "completed", durationMs: 10, counts: {} },
+        newsletter: { status: "completed", durationMs: 10, counts: {} },
         emailRetry: { status: "completed", durationMs: 10, counts: {} },
         retention: { status: "completed", durationMs: 10, counts: {} },
       },

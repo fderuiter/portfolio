@@ -19,6 +19,10 @@
 - [RawEmailOptions](interfaces/RawEmailOptions.md)
 - [SvixVerifyParams](interfaces/SvixVerifyParams.md)
 
+## Variables
+
+- [EMAIL\_RETRY\_BATCH\_SIZE](variables/EMAIL_RETRY_BATCH_SIZE.md)
+
 ## Functions
 
 - [verifySvixSignature](functions/verifySvixSignature.md)

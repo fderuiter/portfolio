@@ -14,6 +14,14 @@
 
 ***
 
+### headers?
+
+> `optional` **headers?**: `Record`\<`string`, `string`\>
+
+Extra headers, e.g. List-Unsubscribe; persisted with queued retries.
+
+***
+
 ### html
 
 > **html**: `string`

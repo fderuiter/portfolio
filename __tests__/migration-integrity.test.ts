@@ -58,6 +58,7 @@ describe("Prisma migration integrity", () => {
     "20261018000000_add_blog_post",
     "20261019000000_add_blog_post_reaction",
     "20261020000000_add_case_study_hero_image",
+    "20261021000000_add_newsletter_subscribers",
   ];
 
   it("validates every checked-in migration file", () => {
