@@ -196,6 +196,51 @@ The QStash integration provisions `QSTASH_*`. No code reads them yet.
   branch except `main` to protect build-hour and storage quota. Preview builds
   never migrate even if one is started by hand.
 
+## Building Production Output Locally
+
+Releasing never needs a local build: Vercel builds `main` with the
+production secrets it holds (ADR 0049). Build locally only to inspect what a
+production build generates, for example to confirm that database-backed pages
+render real content (#859).
+
+**What `npm run build` reads.** `scripts/build.js` loads `.env.local` (or
+`.env` if there is no `.env.local`) itself, because npm does not. With no
+`DATABASE_URL` it substitutes a dummy localhost connection, and every
+database-backed page is generated from static fallbacks. That build still
+succeeds: the data-source guard (`failBuildOnDataSourceError` in
+`lib/build-integrity.ts`) only fails a build when `VERCEL_ENV` is
+`production`. Migrations and the configuration preflight run only on Vercel
+(`VERCEL=1`), never locally.
+
+**Inputs for a build that proves real content renders:**
+
+1. Put `DATABASE_URL` in `.env.local` (gitignored by `.env*`). Use a database
+   you may read, preferably a non-production Neon branch. Copy the string
+   from the Neon console, which can show it again without rotating it. Don't
+   type it on the command line, where it lands in shell history.
+2. Build with the guard on, so an unreachable database fails the build
+   instead of falling back silently:
+
+   ```bash
+   VERCEL_ENV=production npm run build
+   ```
+
+3. Inspect the output, not the logs. The database-backed case studies from
+   #870 exist only when the database was read, so
+   `.next/server/app/case-studies/equipose.html` and `qrcraftly.html` must be
+   present. A fallback-only build has neither (`equipose-randomization.html`
+   is a different, static page). The blog cannot tell the two builds apart,
+   because missing posts are filled from fallbacks on the success path.
+
+**Two things that do not work:**
+
+- `vercel pull` and `vercel env pull` return the literal `[SENSITIVE]` for
+  every Sensitive variable, so a pulled file never contains a usable
+  `DATABASE_URL`.
+- `vercel env pull` **overwrites** `.env.local` without a backup. Back up a
+  working `.env.local` before running any `vercel` command that writes env
+  files (#851).
+
 ## Production Configuration Preflight
 
 A Vercel production build checks its own configuration before it does
