@@ -170,6 +170,7 @@ describe("CRF Studio - Direct PDF Exporter", () => {
       expect(headings[1]!.page).toBeGreaterThan(headings[0]!.page);
       expect(headings[1]!.page).toBe(tableHeaders[0]!.page);
       expect(headings[1]!.y).toBeLessThanOrEqual(297 - 14 - 40);
+      expect(tableHeaders[0]!.y).toBeLessThan(297 - 15);
       expect(fieldText!.page).toBe(tableHeaders[0]!.page);
       expect(fieldText!.y).toBeLessThan(297 - 15);
     }

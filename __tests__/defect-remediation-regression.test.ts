@@ -55,6 +55,7 @@ import {
 } from "@/lib/clinical-trial-chaos/engine";
 import { ClinicalSubject } from "@/lib/clinical-trial-chaos/types";
 import { exportStudyToCdiscOdmXml } from "@/lib/crf";
+import { generateStudyPdf } from "@/lib/crf/export-pdf";
 import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets";
 import { resolveSnippetTerminology } from "@/components/ProjectTeaserGrid";
 import { TelemetryService, _testCache } from "@/lib/services/telemetry-service";
@@ -1174,6 +1175,39 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
       const steppedFailed = stepDuckGame(failedState);
       expect(steppedFailed.status).toBe("failed");
       expect(steppedFailed.workProgress).toBe(15);
+    });
+  });
+
+  describe("CRF PDF section page-break regression (#1101)", () => {
+    it("allocates a new page before a section heading that lacks footer clearance", async () => {
+      const study = structuredClone(ONCOLOGY_RECIST_PRESET);
+      const form = study.forms[0]!;
+      const section = form.sections[0]!;
+      const sourceField = section.fields[0]!;
+      const expandedFields = Array.from({ length: 8 }, (_, index) => ({
+        ...sourceField,
+        id: `boundary-field-${index}`,
+        label: `Boundary field ${index} with a longer prompt to fill the page`,
+        description:
+          "A clinical observation value and its collection context must remain legible in the generated regulatory document.",
+      }));
+
+      form.sections = [
+        { ...section, title: "Preceding section", fields: expandedFields },
+        { ...section, title: "Near-footer boundary", fields: [sourceField] },
+      ];
+      study.forms = [form];
+
+      const blob = await generateStudyPdf(study, {
+        mode: "blank",
+        scope: "all",
+        includeTableOfContents: false,
+        includeSdtmAppendix: false,
+      });
+      const pdfSource = await blob.text();
+      const pageCount = Number(pdfSource.match(/\/Count\s+(\d+)\b/)?.[1]);
+
+      expect(pageCount).toBe(3);
     });
   });
 });
