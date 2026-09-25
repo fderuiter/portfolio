@@ -30,7 +30,7 @@ import {
   IconTrees,
   IconHeart,
   IconBrandGithub,
-  IconCalendar,
+  IconInfinity,
   IconBriefcase,
   IconVolume,
   IconVolumeOff,
@@ -4021,29 +4021,43 @@ export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
               </button>
             </div>
 
-            {/* Recruiter CTA Suite */}
+            {/* Victory lap: replay or explore */}
             <div className="pt-4 border-t border-zinc-800/80">
               <p className="text-[11px] sm:text-xs text-zinc-300 mb-3 font-sans leading-relaxed">
-                Raising Duck takes multitasking, empathy, and quick problem
-                solving — the exact skills Fred brings to engineering teams. Now
-                that Duck is napping, let&apos;s talk!
+                Every cable survived, the puppy pads held, and the office budget
+                spreadsheet is still unchewed. Duck has earned a nap, and you
+                have earned a victory lap.
               </p>
 
               <div className="flex flex-wrap items-center justify-center gap-2">
-                <Link
-                  href="/schedule"
-                  className="px-3.5 py-2 rounded-xl bg-brand-cyan/20 border border-brand-cyan/50 text-cyan-300 hover:bg-brand-cyan hover:text-black font-bold text-xs transition-all flex items-center gap-1.5 min-h-[40px]"
-                >
-                  <IconCalendar className="w-3.5 h-3.5" />
-                  <span>Schedule a Chat</span>
-                </Link>
+                {uiState.currentLevel < 5 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      applyTransition((state) => {
+                        const next = createInitialDuckGameState(
+                          5,
+                          "endless",
+                          state.unlockedAccessories,
+                          state.unlockedFacts
+                        );
+                        next.status = "running";
+                        return next;
+                      });
+                    }}
+                    className="px-3.5 py-2 rounded-xl bg-brand-cyan/20 border border-brand-cyan/50 text-cyan-300 hover:bg-brand-cyan hover:text-black font-bold text-xs transition-all flex items-center gap-1.5 min-h-[40px] cursor-pointer active:scale-[0.98]"
+                  >
+                    <IconInfinity className="w-3.5 h-3.5" />
+                    <span>Play Endless Mode</span>
+                  </button>
+                )}
 
                 <Link
                   href="/case-studies"
                   className="px-3.5 py-2 rounded-xl border border-zinc-800 bg-zinc-900 text-zinc-200 text-xs hover:border-zinc-600 transition-colors flex items-center gap-1.5 min-h-[40px]"
                 >
                   <IconBriefcase className="w-3.5 h-3.5" />
-                  <span>Case Studies</span>
+                  <span>Browse Case Studies</span>
                 </Link>
 
                 <a
