@@ -568,6 +568,119 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     vi.useRealTimers();
   });
 
+  it("guides early pointer and numeric routing without opening a modal or changing penalties", async () => {
+    vi.useFakeTimers();
+    try {
+      await act(async () => {
+        root.render(<ClinicalTrialChaos />);
+      });
+      const start = Array.from(container.querySelectorAll("button")).find(
+        (button) => button.textContent?.includes("Start 3-Phase Campaign")
+      );
+      await act(async () => {
+        start?.click();
+      });
+
+      const board = container.querySelector(
+        '[data-keyboard-boundary="true"]'
+      ) as HTMLElement;
+      const dmStation = Array.from(container.querySelectorAll("h4"))
+        .find((heading) => heading.textContent?.includes("DM Station"))
+        ?.closest("button") as HTMLButtonElement;
+      expect(dmStation).toBeDefined();
+      expect(dmStation.textContent).toContain("Fix first");
+      const initialScore = container.querySelector(
+        'output[for="clinical-score"]'
+      )?.textContent;
+      const initialCombo = container.querySelector(
+        '[title^="Lock CRFs back-to-back"]'
+      )?.textContent;
+      const initialAuditor = container
+        .querySelector('[aria-label="FDA auditor suspicion"]')
+        ?.getAttribute("aria-valuenow");
+
+      await act(async () => {
+        dmStation.click();
+      });
+      expect(container.textContent).toContain(
+        "Resolve 1 flagged observation before routing"
+      );
+      expect(container.textContent).not.toContain(
+        "21 CFR Part 11 Electronic Signature"
+      );
+
+      await act(async () => {
+        board.dispatchEvent(
+          new KeyboardEvent("keydown", { key: "1", bubbles: true })
+        );
+      });
+      expect(container.textContent).toContain(
+        "Resolve 1 flagged observation before routing"
+      );
+      expect(container.textContent).not.toContain(
+        "21 CFR Part 11 Electronic Signature"
+      );
+      expect(
+        container.querySelector('output[for="clinical-score"]')?.textContent
+      ).toBe(initialScore);
+      expect(
+        container.querySelector('[title^="Lock CRFs back-to-back"]')
+          ?.textContent
+      ).toBe(initialCombo);
+      expect(
+        container
+          .querySelector('[aria-label="FDA auditor suspicion"]')
+          ?.getAttribute("aria-valuenow")
+      ).toBe(initialAuditor);
+      expect(container.textContent).not.toContain("AUDIT REJECT");
+
+      const validateChoice = Array.from(container.querySelectorAll("span"))
+        .find((span) => span.textContent?.includes("Validate Choice"))
+        ?.closest(".cursor-pointer") as HTMLElement;
+      await act(async () => {
+        validateChoice.click();
+      });
+      const correctChoice = Array.from(
+        container.querySelectorAll("button")
+      ).find(
+        (button) => button.textContent?.trim().replace(/^\d/, "") === "180 cm"
+      );
+      await act(async () => {
+        correctChoice?.click();
+        vi.advanceTimersByTime(600);
+      });
+
+      expect(dmStation.textContent).toContain("Accepts ✓");
+      const aeStation = Array.from(container.querySelectorAll("h4"))
+        .find((heading) => heading.textContent?.includes("AE Station"))
+        ?.closest("button") as HTMLButtonElement;
+      expect(aeStation.textContent).toContain("Other domain");
+      await act(async () => {
+        aeStation.click();
+      });
+      expect(container.textContent).toContain(
+        "This dossier routes to DM or VS, not AE"
+      );
+      expect(container.textContent).not.toContain(
+        "21 CFR Part 11 Electronic Signature"
+      );
+      expect(
+        container
+          .querySelector('[aria-label="FDA auditor suspicion"]')
+          ?.getAttribute("aria-valuenow")
+      ).toBe(initialAuditor);
+
+      await act(async () => {
+        dmStation.click();
+      });
+      expect(container.textContent).toContain(
+        "21 CFR Part 11 Electronic Signature"
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("completes a Fast-Track 21 CFR Pass like a signed CRF (#897)", async () => {
     vi.useFakeTimers();
     fastTrackLifeline.alwaysCharged = true;
@@ -787,6 +900,24 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     // Timer should now have ticked down to 36s (37.5 - 2.0 = 35.5 -> Math.ceil = 36)
     expect(container.textContent).toContain("36s");
 
+    // Routing now requires a clean dossier; fix the seeded observation first.
+    await act(async () => {
+      obsCard.click();
+    });
+    const correctChoice = Array.from(container.querySelectorAll("button")).find(
+      (button) => button.textContent?.trim().replace(/^\d/, "") === "180 cm"
+    );
+    await act(async () => {
+      correctChoice?.click();
+    });
+    await tickGame(600, 100);
+    const activeTimer = () =>
+      container
+        .querySelector("#cc-dossier-title")
+        ?.parentElement?.parentElement?.children.item(1)
+        ?.textContent?.trim();
+    const beforeSignature = activeTimer();
+
     // Open signature modal via DM Station
     const dmHeading = Array.from(container.querySelectorAll("h4")).find((h) =>
       h.textContent?.includes("DM Station")
@@ -803,8 +934,8 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     // Let another 4 seconds pass while signature modal is open
     await tickGame(4000, 100);
 
-    // The timer should still show 36s (frozen frame delta)
-    expect(container.textContent).toContain("36s");
+    // The active dossier's timer stays frozen while the modal is open.
+    expect(activeTimer()).toBe(beforeSignature);
 
     // Cancel signature modal (Close/Cancel)
     const cancelBtn = Array.from(container.querySelectorAll("button")).find(
@@ -817,8 +948,10 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     // Let another 1 second pass after closing signature modal
     await tickGame(1000, 100);
 
-    // Timer should now tick down to 35s
-    expect(container.textContent).toContain("35s");
+    // The active dossier's timer resumes immediately after closing.
+    expect(parseInt(activeTimer() ?? "", 10)).toBeLessThan(
+      parseInt(beforeSignature ?? "", 10)
+    );
 
     vi.useRealTimers();
   }, 15000);

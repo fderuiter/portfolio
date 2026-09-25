@@ -96,6 +96,7 @@ import {
 } from "@/lib/clinical-trial-chaos/scenarios";
 
 import {
+  getRoutingReadiness,
   OFFICES,
   DEFAULT_OFFICE_ID,
   OfficeId,
@@ -339,6 +340,11 @@ export const ClinicalTrialChaos: React.FC = () => {
   });
   const [targetRoutingStation, setTargetRoutingStation] =
     useState<CDISCDomain>("DM");
+  const [routingNotice, setRoutingNotice] = useState<{
+    subjectId: string;
+    unresolvedCount: number;
+    message: string;
+  } | null>(null);
   const [bimoReport, setBimoReport] = useState<BIMOInspectionReport | null>(
     null
   );
@@ -477,6 +483,7 @@ export const ClinicalTrialChaos: React.FC = () => {
       setStations(phaseStations);
       setActiveAmendment(null);
       setSelectedSubjectId(null);
+      setRoutingNotice(null);
       setValidatingObs(null);
       setBimoReport(null);
       setLastBimoReport(null);
@@ -1023,6 +1030,26 @@ export const ClinicalTrialChaos: React.FC = () => {
   const handleInitiateSubmission = useCallback(
     (domain: CDISCDomain) => {
       if (!activeSubject) return;
+      const { matchingDomains, unresolvedCount } = getRoutingReadiness(
+        activeSubject,
+        stations
+      );
+      if (unresolvedCount > 0 || !matchingDomains.includes(domain)) {
+        const message =
+          unresolvedCount > 0
+            ? `Resolve ${unresolvedCount} flagged observation${unresolvedCount === 1 ? "" : "s"} before routing`
+            : matchingDomains.length > 0
+              ? `This dossier routes to ${matchingDomains.join(" or ")}, not ${domain}`
+              : "No active station accepts this dossier";
+        setRoutingNotice({
+          subjectId: activeSubject.id,
+          unresolvedCount,
+          message,
+        });
+        announce(message, "polite");
+        return;
+      }
+      setRoutingNotice(null);
       setTargetRoutingStation(domain);
       setSignatureModal({
         isOpen: true,
@@ -1034,7 +1061,7 @@ export const ClinicalTrialChaos: React.FC = () => {
         requiresReason: true,
       });
     },
-    [activeSubject]
+    [activeSubject, stations, announce]
   );
 
   // 15. Confirm 21 CFR Signature & Route Subject
@@ -2102,11 +2129,10 @@ export const ClinicalTrialChaos: React.FC = () => {
   const flaggedObs =
     activeSubject?.observations.filter((o) => !o.isResolved) ?? [];
   const nextFlaggedObs = flaggedObs[0] ?? null;
+  const routingReadiness = getRoutingReadiness(activeSubject, stations);
   const routeDomains: CDISCDomain[] =
-    activeSubject && flaggedObs.length === 0
-      ? Array.from(
-          new Set(activeSubject.observations.map((o) => o.destination))
-        ).filter((d) => stations.some((s) => s.id === d))
+    routingReadiness.unresolvedCount === 0
+      ? routingReadiness.matchingDomains
       : [];
   const flowStep: 0 | 1 | 2 = !activeSubject ? 0 : nextFlaggedObs ? 1 : 2;
   const stationHotkey = (id: CDISCDomain) =>
@@ -3065,6 +3091,14 @@ export const ClinicalTrialChaos: React.FC = () => {
                       Keys 1–{sortedStations.length}
                     </span>
                   </div>
+                  {routingNotice &&
+                    routingNotice.subjectId === activeSubject?.id &&
+                    routingNotice.unresolvedCount ===
+                      routingReadiness.unresolvedCount && (
+                      <p className="mt-2 rounded border border-amber-500/40 bg-amber-500/10 px-2.5 py-2 text-xs text-amber-200">
+                        {routingNotice.message}
+                      </p>
+                    )}
                   <div
                     className={`mt-2 grid gap-2 ${
                       sortedStations.length > 4
@@ -3073,8 +3107,10 @@ export const ClinicalTrialChaos: React.FC = () => {
                     }`}
                   >
                     {sortedStations.map((station, index) => {
-                      const accepts =
-                        flowStep === 2 && routeDomains.includes(station.id);
+                      const matches =
+                        !!activeSubject &&
+                        routingReadiness.matchingDomains.includes(station.id);
+                      const accepts = matches && flowStep === 2;
                       const isFlashing = flashStationId === station.id;
                       return (
                         <button
@@ -3086,9 +3122,11 @@ export const ClinicalTrialChaos: React.FC = () => {
                               ? "border-emerald-400 bg-emerald-500/20"
                               : accepts
                                 ? "border-emerald-500/70 bg-emerald-500/10 shadow-[0_0_0_1px_rgba(16,185,129,0.35)]"
-                                : flowStep === 2
-                                  ? "border-zinc-900 bg-transparent [&_h4]:text-zinc-400"
-                                  : "border-zinc-800 bg-[#0d0e11] hover:border-zinc-600"
+                                : matches
+                                  ? "border-amber-500/60 bg-amber-500/10"
+                                  : activeSubject
+                                    ? "border-zinc-900 bg-zinc-950/80 [&_h4]:text-zinc-300"
+                                    : "border-zinc-800 bg-[#0d0e11] hover:border-zinc-600"
                           }`}
                         >
                           <span className="flex items-center justify-between gap-1">
@@ -3098,6 +3136,14 @@ export const ClinicalTrialChaos: React.FC = () => {
                             {accepts ? (
                               <span className="text-[9px] font-bold text-emerald-300">
                                 Accepts ✓
+                              </span>
+                            ) : matches ? (
+                              <span className="text-[9px] font-bold text-amber-300">
+                                Fix first
+                              </span>
+                            ) : activeSubject ? (
+                              <span className="text-[9px] font-medium text-zinc-300">
+                                Other domain
                               </span>
                             ) : (
                               <span

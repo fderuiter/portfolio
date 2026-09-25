@@ -310,6 +310,12 @@ Re-exports [getOutfitById](outfits/functions/getOutfitById.md)
 
 ***
 
+### getRoutingReadiness
+
+Re-exports [getRoutingReadiness](engine/functions/getRoutingReadiness.md)
+
+***
+
 ### getSponsorMoodLabel
 
 Re-exports [getSponsorMoodLabel](sponsor/functions/getSponsorMoodLabel.md)

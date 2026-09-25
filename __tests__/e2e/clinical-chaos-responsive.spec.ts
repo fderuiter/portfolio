@@ -34,6 +34,43 @@ test("desktop start keeps the Next instruction in view", async ({
   await expect(canvas).toHaveAttribute("height", "150");
 });
 
+test("early station routing gives accessible guidance without an auditor penalty", async ({
+  page,
+}) => {
+  await expect(async () => {
+    await page.getByRole("button", { name: /Start 3-Phase Campaign/i }).click();
+    await expect(page.locator("#cc-dossier-title")).toContainText("SUBJ-1001");
+  }).toPass({ timeout: 15000 });
+
+  const stations = page.getByRole("region", { name: "EDC stations" });
+  const dm = stations.getByRole("button", { name: /DM Station/ });
+  const ae = stations.getByRole("button", { name: /AE Station/ });
+  const auditor = page.getByRole("meter", { name: "FDA auditor suspicion" });
+  const initialSuspicion = await auditor.getAttribute("aria-valuenow");
+  await expect(dm).toContainText("Fix first");
+  await expect(ae).toContainText("Other domain");
+
+  await expect(async () => {
+    await dm.click();
+    await expect(stations).toContainText(
+      "Resolve 1 flagged observation before routing"
+    );
+  }).toPass({ timeout: 15000 });
+  const board = page.locator('[data-keyboard-boundary="true"]');
+  await board.focus();
+  await board.press("1");
+  await expect(stations).toContainText(
+    "Resolve 1 flagged observation before routing"
+  );
+  await expect(
+    page.getByText("21 CFR Part 11 Electronic Signature")
+  ).toHaveCount(0);
+  await expect(auditor).toHaveAttribute(
+    "aria-valuenow",
+    initialSuspicion ?? "0"
+  );
+});
+
 test("phone fallback keeps a visible compact and selectable canvas", async ({
   page,
   isMobile,
