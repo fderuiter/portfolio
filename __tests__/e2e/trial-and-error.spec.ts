@@ -930,6 +930,10 @@ test.describe("Trial & Error saved runs (#1079)", () => {
     await card(page, DM_LISTING).click();
     await page.getByRole("button", { name: /Play Hand/ }).click();
     await expect(page.getByTestId("round-score")).not.toHaveText(/^0\b/);
+    // Played cards stay in the DOM while their exit animation runs.
+    for (const id of [DRAFT_A, DM_LISTING]) {
+      await expect(page.locator(`[data-card-id="${id}"]`)).toHaveCount(0);
+    }
     const handIds = () =>
       page
         .locator("[data-card-id]")
