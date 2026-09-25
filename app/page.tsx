@@ -29,7 +29,6 @@ const DynamicTimeline = dynamic(
 );
 import { InteractiveHighlights } from "@/components/InteractiveHighlights";
 import { PageLayout } from "@/components/PageLayout";
-import { BioSpotlight } from "@/components/BioSpotlight";
 import {
   IconMessageCode,
   IconCalendar,
@@ -199,9 +198,6 @@ export default async function PortfolioHomePage() {
             Vikings training camp, campus advocacy, Mayo Clinic, clinical data.
             The job titles changed; figuring things out with people stayed.
           </p>
-
-          {/* Canine Co-Pilot & Growth Journey Spotlight */}
-          <BioSpotlight />
 
           {/* Interactive Staggered Timeline Component */}
           <div className="w-full">

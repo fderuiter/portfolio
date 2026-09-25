@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   IconBone,
   IconHeart,
@@ -13,6 +13,7 @@ import {
 import { getPhotosByCategory } from "@/lib/media-registry";
 
 export const BioSpotlight: React.FC = () => {
+  const shouldReduceMotion = useReducedMotion();
   const duckPhotos = getPhotosByCategory("duck");
   const bioPhotos = getPhotosByCategory("bio");
 
@@ -38,35 +39,41 @@ export const BioSpotlight: React.FC = () => {
   };
 
   return (
-    <div
+    <section
       data-testid="bio-spotlight"
-      className="w-full max-w-4xl mx-auto mb-16 px-4"
+      aria-labelledby="duck-bio-spotlight-title"
+      className="@container w-full max-w-4xl min-w-0 mx-auto"
     >
-      <div className="relative rounded-3xl bg-gradient-to-b from-[#181b22] to-[#121418] border border-white/10 p-6 sm:p-8 md:p-10 shadow-2xl overflow-hidden">
-        {/* Subtle Ambient Background Accent */}
-        <div className="absolute top-0 right-0 w-72 h-72 bg-amber-500/5 blur-3xl pointer-events-none rounded-full" />
-        <div className="absolute bottom-0 left-0 w-72 h-72 bg-amber-600/5 blur-3xl pointer-events-none rounded-full" />
-
-        <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 items-center">
+      <div className="relative isolate rounded-3xl bg-[#13151a] border border-white/10 p-3 sm:p-5 @2xl:p-8 shadow-2xl overflow-hidden">
+        <div className="grid grid-cols-1 @2xl:grid-cols-12 gap-5 sm:gap-6 @2xl:gap-8 items-center">
           {/* Left Column: Image with interactive controls */}
-          <div className="md:col-span-5 min-w-0 flex flex-col items-center">
-            <div className="relative w-full max-w-[280px] sm:max-w-[320px] aspect-[3/4] rounded-2xl overflow-hidden border border-white/15 shadow-xl bg-black/60 group">
+          <div className="@2xl:col-span-5 min-w-0 flex flex-col items-center">
+            <div className="relative w-full max-w-[280px] sm:max-w-[320px] @2xl:max-w-none aspect-[3/4] rounded-2xl overflow-hidden border border-white/15 shadow-xl bg-black/60">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activePhoto.id}
-                  initial={{ opacity: 0, scale: 0.96 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 1.04 }}
-                  transition={{ duration: 0.25, ease: "easeInOut" }}
+                  initial={
+                    shouldReduceMotion ? false : { opacity: 0, scale: 0.96 }
+                  }
+                  animate={
+                    shouldReduceMotion ? undefined : { opacity: 1, scale: 1 }
+                  }
+                  exit={
+                    shouldReduceMotion ? undefined : { opacity: 0, scale: 1.04 }
+                  }
+                  transition={{
+                    duration: shouldReduceMotion ? 0 : 0.25,
+                    ease: "easeInOut",
+                  }}
                   className="relative w-full h-full"
                 >
                   <Image
                     src={activePhoto.src}
                     alt={activePhoto.alt}
                     fill
-                    sizes="(max-width: 768px) 280px, 320px"
+                    sizes="(min-width: 672px) 320px, (max-width: 639px) calc(100vw - 56px), 280px"
                     className="object-cover"
-                    loading="lazy"
+                    loading="eager"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80" />
                   <div className="absolute bottom-3 left-3 right-3 text-left">
@@ -85,7 +92,7 @@ export const BioSpotlight: React.FC = () => {
                 type="button"
                 onClick={handlePrev}
                 aria-label="Previous co-pilot milestone photo"
-                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 border border-white/20 flex items-center justify-center text-white hover:bg-amber-400 hover:text-black transition-colors backdrop-blur-sm cursor-pointer"
+                className="absolute z-10 left-3 top-1/2 -translate-y-1/2 min-w-11 min-h-11 rounded-full bg-black/70 border border-white/25 flex items-center justify-center text-white hover:bg-amber-400 hover:text-black active:scale-[0.98] transition-colors backdrop-blur-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
               >
                 <IconChevronLeft className="w-4 h-4" />
               </button>
@@ -93,7 +100,7 @@ export const BioSpotlight: React.FC = () => {
                 type="button"
                 onClick={handleNext}
                 aria-label="Next co-pilot milestone photo"
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 border border-white/20 flex items-center justify-center text-white hover:bg-amber-400 hover:text-black transition-colors backdrop-blur-sm cursor-pointer"
+                className="absolute z-10 right-3 top-1/2 -translate-y-1/2 min-w-11 min-h-11 rounded-full bg-black/70 border border-white/25 flex items-center justify-center text-white hover:bg-amber-400 hover:text-black active:scale-[0.98] transition-colors backdrop-blur-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
               >
                 <IconChevronRight className="w-4 h-4" />
               </button>
@@ -101,38 +108,47 @@ export const BioSpotlight: React.FC = () => {
 
             {/* Thumbnail Dot Strip */}
             <div
-              className="flex items-center gap-1.5 mt-3"
-              role="tablist"
+              className="flex items-center justify-center mt-1"
+              role="group"
               aria-label="Photo growth milestones"
             >
               {journey.map((p, idx) => (
                 <button
                   key={p.id}
                   type="button"
-                  role="tab"
-                  aria-selected={idx === activeIndex}
+                  aria-pressed={idx === activeIndex}
                   aria-label={`Jump to milestone ${idx + 1}: ${p.title}`}
                   onClick={() => setActiveIndex(idx)}
-                  className={`h-2 rounded-full transition-all duration-200 cursor-pointer ${
-                    idx === activeIndex
-                      ? "w-6 bg-amber-400"
-                      : "w-2 bg-white/20 hover:bg-white/40"
-                  }`}
-                />
+                  className="group min-w-11 min-h-11 inline-flex items-center justify-center rounded-full cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#13151a]"
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`h-2 rounded-full transition-[width,background-color] duration-200 ${
+                      idx === activeIndex
+                        ? "w-6 bg-amber-400"
+                        : "w-2 bg-white/20 group-hover:bg-white/40"
+                    }`}
+                  />
+                </button>
               ))}
             </div>
           </div>
 
           {/* Right Column: Bio & Co-Pilot Narrative */}
-          <div className="md:col-span-7 min-w-0 flex flex-col justify-center text-left">
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-amber-400/10 border border-amber-400/20 text-amber-300 text-[11px] font-mono font-medium mb-3 w-fit">
+          <div className="@2xl:col-span-7 min-w-0 flex flex-col justify-center text-left">
+            <div className="inline-flex max-w-full items-center gap-2 px-2.5 py-1 rounded-full bg-amber-400/10 border border-amber-400/20 text-amber-300 text-[11px] font-mono font-medium mb-3 w-fit">
               <IconBone className="w-3.5 h-3.5 text-amber-400" />
-              <span>Canine Co-Pilot &amp; Pair Programmer</span>
+              <span className="min-w-0 break-words">
+                Canine Co-Pilot &amp; Pair Programmer
+              </span>
             </div>
 
-            <h3 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight mb-2 heading-editorial">
+            <h2
+              id="duck-bio-spotlight-title"
+              className="min-w-0 break-words text-xl sm:text-2xl font-extrabold text-white tracking-tight mb-2 heading-editorial"
+            >
               Meet Duck: From 8-Week Fluff to 80-lb Marshmallow
-            </h3>
+            </h2>
 
             <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed mb-4">
               Behind the code, clinical derivations, and side projects is
@@ -142,12 +158,16 @@ export const BioSpotlight: React.FC = () => {
             </p>
 
             {/* Active Milestone Callout Box */}
-            <div className="p-3.5 rounded-xl bg-black/40 border border-white/10 mb-4">
-              <div className="flex items-center gap-2 text-xs font-mono font-bold text-amber-300 mb-1">
+            <div
+              aria-live="polite"
+              aria-atomic="true"
+              className="min-w-0 p-3.5 rounded-xl bg-black/40 border border-white/10 mb-4"
+            >
+              <div className="flex min-w-0 items-center gap-2 text-xs font-mono font-bold text-amber-300 mb-1">
                 <IconSparkles className="w-3.5 h-3.5 text-amber-400" />
-                <span>{activePhoto.title}</span>
+                <span className="min-w-0 break-words">{activePhoto.title}</span>
               </div>
-              <p className="text-xs text-zinc-300 leading-relaxed font-sans">
+              <p className="break-words text-xs text-zinc-300 leading-relaxed font-sans">
                 {activePhoto.caption}
               </p>
             </div>
@@ -167,6 +187,6 @@ export const BioSpotlight: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
