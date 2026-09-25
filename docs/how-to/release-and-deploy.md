@@ -265,7 +265,8 @@ half-migrated schema.
   - Setting any of `SENTRY_ORG`, `SENTRY_PROJECT` or `SENTRY_AUTH_TOKEN` turns
     on source-map upload, which then needs all three.
 - **Unsafe values:**
-  - A database URL that isn't `postgres://` or points at localhost.
+  - A database URL whose protocol isn't `postgres:` or `postgresql:`, or that
+    points at localhost.
   - An Upstash URL that isn't `https://`.
   - `NODE_OPTIONS` without `--experimental-require-module`.
   - A Clerk `sk_test_` or `pk_test_` key.
