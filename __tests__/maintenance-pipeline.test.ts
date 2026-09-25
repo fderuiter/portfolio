@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 import { MaintenanceService } from "@/lib/services/maintenance-service";
-import { GET } from "@/app/api/cron/maintenance/route";
+import { GET, maxDuration } from "@/app/api/cron/maintenance/route";
+import { logger } from "@/lib/logger";
 
 function adapters(
   overrides?: Partial<{
@@ -144,11 +145,59 @@ describe("unified maintenance pipeline (#714)", () => {
     );
 
     expect(response.status).toBe(200);
-    expect(run).toHaveBeenCalledWith({ batchSize: 25 });
+    expect(run).toHaveBeenCalledWith({ batchSize: 25, deadlineMs: 7000 });
     await expect(response.json()).resolves.toMatchObject({
       success: true,
       partial: false,
       deadlineMs: 8000,
     });
+  });
+
+  it("declares a platform maxDuration within the eight-second budget (#848)", () => {
+    expect(maxDuration).toBeLessThanOrEqual(8);
+  });
+
+  it("reports a partial run as a 500 with an error-level log (#848)", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("CRON_SECRET", "maintenance-secret");
+    const error = vi.spyOn(logger, "error").mockImplementation(() => ({
+      level: "error",
+      message: "",
+      timestamp: "",
+    }));
+    vi.spyOn(MaintenanceService, "run").mockResolvedValue({
+      success: false,
+      partial: true,
+      startedAt: "2026-09-13T00:00:00.000Z",
+      completedAt: "2026-09-13T00:00:07.000Z",
+      durationMs: 7000,
+      deadlineMs: 7000,
+      phases: {
+        telemetry: {
+          status: "failed",
+          durationMs: 10,
+          counts: {},
+          error: "connect ECONNREFUSED",
+        },
+        emailRetry: { status: "completed", durationMs: 10, counts: {} },
+        retention: { status: "skipped", durationMs: 0, counts: {} },
+      },
+    });
+
+    const response = await GET(
+      new NextRequest("https://www.deruiter.dev/api/cron/maintenance", {
+        headers: { authorization: "Bearer maintenance-secret" },
+      })
+    );
+
+    expect(response.status).toBe(500);
+    await expect(response.json()).resolves.toMatchObject({ partial: true });
+    expect(error).toHaveBeenCalledWith(
+      "[maintenance] Daily run did not complete: telemetry:failed, retention:skipped",
+      undefined,
+      expect.objectContaining({
+        maintenanceSummary: expect.objectContaining({ partial: true }),
+      })
+    );
   });
 });
