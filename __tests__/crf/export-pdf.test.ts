@@ -214,6 +214,21 @@ describe("CRF Studio - Direct PDF Exporter", () => {
           })
         ).rejects.toThrow(RangeError);
       }
+
+      if (scope === "single") {
+        await expect(
+          generateStudyPdf(ONCOLOGY_RECIST_PRESET, {
+            mode: "blank",
+            scope,
+            selectedFormIds: [
+              "unmatched-form-id",
+              ONCOLOGY_RECIST_PRESET.forms[0]!.id,
+            ],
+          })
+        ).rejects.toThrow(
+          "the first selectedFormIds entry must match a study form"
+        );
+      }
     }
   );
 

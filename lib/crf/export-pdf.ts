@@ -90,8 +90,11 @@ export async function generateStudyPdf(
     formsToInclude = study.forms;
   } else {
     const selectedFormIds = options.selectedFormIds;
-    const selectionError = `Cannot export with scope '${options.scope}': selectedFormIds must include at least one ID matching a study form.`;
     if (!selectedFormIds?.length) {
+      const selectionError =
+        options.scope === "single"
+          ? "Cannot export with scope 'single': selectedFormIds must contain a first entry."
+          : "Cannot export with scope 'selected': selectedFormIds must contain at least one entry.";
       throw new RangeError(selectionError);
     }
 
@@ -100,7 +103,9 @@ export async function generateStudyPdf(
         (candidate) => candidate.id === selectedFormIds[0]
       );
       if (!form) {
-        throw new RangeError(selectionError);
+        throw new RangeError(
+          "Cannot export with scope 'single': the first selectedFormIds entry must match a study form."
+        );
       }
       formsToInclude = [form];
     } else {
@@ -109,7 +114,9 @@ export async function generateStudyPdf(
         requestedFormIds.has(form.id)
       );
       if (formsToInclude.length === 0) {
-        throw new RangeError(selectionError);
+        throw new RangeError(
+          "Cannot export with scope 'selected': selectedFormIds must match at least one study form."
+        );
       }
     }
   }

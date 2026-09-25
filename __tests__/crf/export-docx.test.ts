@@ -20,7 +20,7 @@ import {
   SDTM_COL_WIDTH_4,
   SDTM_COL_WIDTH_5,
   SDTM_COL_WIDTH_6,
-} from "@/lib/crf/export-docx";
+} from "@/lib/crf";
 import { ONCOLOGY_RECIST_PRESET, CNS_NEURO_PRESET } from "@/lib/crf/presets";
 import { StudyBranding } from "@/lib/crf/types";
 import {
@@ -221,6 +221,21 @@ describe("CRF Studio - Microsoft Word (.docx) Exporter", () => {
             selectedFormIds,
           })
         ).rejects.toThrow(RangeError);
+      }
+
+      if (scope === "single") {
+        await expect(
+          generateStudyDocx(ONCOLOGY_RECIST_PRESET, {
+            mode: "blank",
+            scope,
+            selectedFormIds: [
+              "unmatched-form-id",
+              ONCOLOGY_RECIST_PRESET.forms[0]!.id,
+            ],
+          })
+        ).rejects.toThrow(
+          "the first selectedFormIds entry must match a study form"
+        );
       }
     }
   );
