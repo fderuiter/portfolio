@@ -1179,6 +1179,58 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
     });
   });
 
+  describe("Telemetry Raw and Daily Rollup Reconciliation (#1111)", () => {
+    it("includes historical rollups and still counts live raw events without a database", async () => {
+      const rawGroupBy = vi.fn().mockResolvedValue([
+        {
+          projectSlug: "/legacy",
+          eventType: "page_view",
+          _count: { id: 5 },
+        },
+      ]);
+      const rollupGroupBy = vi.fn().mockResolvedValue([
+        {
+          projectSlug: "/legacy",
+          eventType: "page_view",
+          _sum: { count: 8 },
+        },
+        {
+          projectSlug: "/archived",
+          eventType: "project_click",
+          _sum: { count: 3 },
+        },
+      ]);
+      const transactionClient = {
+        telemetryEvent: { groupBy: rawGroupBy },
+        telemetryDailyRollup: { groupBy: rollupGroupBy },
+      };
+      const transaction = vi.fn(
+        async (callback: (client: typeof transactionClient) => unknown) =>
+          callback(transactionClient)
+      );
+      vi.stubEnv("PLAYWRIGHT_TEST", "");
+      vi.doMock("@/lib/db", () => ({ prisma: { $transaction: transaction } }));
+      vi.resetModules();
+
+      try {
+        const { TelemetryService: isolatedTelemetryService } =
+          await import("@/lib/services/telemetry-service");
+
+        await expect(
+          isolatedTelemetryService.getAggregateStats()
+        ).resolves.toEqual({
+          "/legacy": { views: 13, clicks: 0 },
+          "/archived": { views: 0, clicks: 3 },
+        });
+        expect(transaction).toHaveBeenCalledTimes(1);
+      } finally {
+        vi.doUnmock("@/lib/db");
+        vi.resetModules();
+        vi.unstubAllEnvs();
+      }
+    });
+  });
+
   describe("CRF PDF section page-break regression (#1101)", () => {
     it("allocates a new page before a section heading that lacks footer clearance", async () => {
       const study = createNearFooterSectionStudy();
