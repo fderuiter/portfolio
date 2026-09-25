@@ -39,6 +39,7 @@ import { FigureDesk } from "@/components/trial-and-error/FigureDesk";
 import { CrisisPanel } from "@/components/trial-and-error/CrisisPanel";
 import { LevelUpPlate } from "@/components/trial-and-error/LevelUpPlate";
 import { RunInfo } from "@/components/trial-and-error/RunInfo";
+import { FirewallDialog } from "@/components/trial-and-error/FirewallDialog";
 import { CardBack } from "@/components/trial-and-error/cards/CardBack";
 import { CardDetail } from "@/components/trial-and-error/cards/CardDetail";
 import { POPULATION_LABEL } from "@/components/trial-and-error/cards/CardFace";
@@ -144,6 +145,17 @@ function cardLabel(view: TableCardView, partners: string[] = []): string {
       `stale, compiled against ${view.provenance.id}, scores 0 Chips until recompiled`
     );
   }
+  if (view.faceDown) {
+    parts.push(
+      "face down, blinded in the DMC open session, press S for structural QC"
+    );
+  }
+  if (view.structural) {
+    const passed = view.structural.checks.filter((c) => c.passed).length;
+    parts.push(
+      `structural QC ${passed} of ${view.structural.checks.length} checks pass`
+    );
+  }
   if (view.unverified) parts.push("unverified");
   if (view.inspected) {
     parts.push(
@@ -244,6 +256,8 @@ export function CardTable({
   const armedItem = view.consumables.find((c) => c.id === armedId);
   const armed = armedItem?.kind === "SEAL" ? armedItem : null;
   const [runInfoOpen, setRunInfoOpen] = useState(false);
+  /** The face-down output the firewall dialog is asking about. */
+  const [peekId, setPeekId] = useState<string | null>(null);
   const detailView = view.hand.find((h) => h.card.id === detailId);
   const activeIndex = Math.min(focusIndex, Math.max(0, view.hand.length - 1));
   const focusedCard = view.hand[activeIndex];
@@ -367,12 +381,26 @@ export function CardTable({
     return () => window.removeEventListener("keydown", listener);
   }, []);
 
+  const peekCard = peekId
+    ? (view.hand.find((h) => h.card.id === peekId && h.faceDown) ?? null)
+    : null;
   const play = () =>
     send({ type: "PLAY_HAND" }, { kind: "hand", index: activeIndex });
   const discard = () =>
     send({ type: "DISCARD" }, { kind: "hand", index: activeIndex });
   const inspect = (cardId: string | undefined) => {
-    if (cardId) send({ type: "INSPECT_CARD", cardId });
+    if (!cardId) return;
+    // Viewing a face-down output is an unblinding: confirm it first.
+    if (view.hand.find((h) => h.card.id === cardId)?.faceDown) {
+      setPeekId(cardId);
+      return;
+    }
+    send({ type: "INSPECT_CARD", cardId });
+  };
+  const structural = (cardId: string | undefined) => {
+    if (cardId) {
+      send({ type: "STRUCTURAL_QC", cardId }, { kind: "card", cardId });
+    }
   };
   const recompile = (cardId: string | undefined) => {
     if (cardId) send({ type: "RECOMPILE", cardId }, { kind: "card", cardId });
@@ -492,6 +520,9 @@ export function CardTable({
     } else if (key === "r" && !event.shiftKey) {
       event.preventDefault();
       recompile(cardId);
+    } else if (key === "s" && view.hand[index]?.faceDown) {
+      event.preventDefault();
+      structural(cardId);
     } else if (event.key === "?") {
       // On a focused card, ? reads that card; elsewhere it still opens the
       // Field Manual, whose listener sits on window in the bubble phase.
@@ -664,6 +695,61 @@ export function CardTable({
               </p>
             );
           })}
+          {view.dmcCharter !== null && (
+            <div
+              className="mt-2 border border-zinc-700 p-2"
+              data-testid="dmc-session"
+            >
+              <p className="flex min-w-0 items-center justify-between gap-2">
+                <span className="text-[10px] uppercase tracking-wider text-zinc-400">
+                  DMC session
+                </span>
+                <span
+                  className={`border px-1 font-bold tracking-widest ${view.session === "OPEN" ? "border-zinc-500 text-zinc-300" : "border-emerald-400 text-emerald-300"}`}
+                  data-testid="session-badge"
+                  data-session={view.session}
+                >
+                  {view.session}
+                </span>
+              </p>
+              <button
+                type="button"
+                onClick={() =>
+                  send({
+                    type: "SET_SESSION",
+                    session: view.session === "OPEN" ? "CLOSED" : "OPEN",
+                  })
+                }
+                disabled={view.sessionRefusal !== null || playing}
+                aria-describedby={
+                  view.sessionRefusal ? "session-note" : undefined
+                }
+                className={`${BUTTON_BASE} mt-2 w-full border-emerald-500 text-emerald-300 hover:bg-emerald-500/10`}
+                data-testid="session-toggle"
+              >
+                {view.session === "OPEN"
+                  ? "Convene closed session"
+                  : "Return to open session"}
+              </button>
+              {view.sessionRefusal && (
+                <p
+                  id="session-note"
+                  className="mt-1 text-zinc-400 break-words"
+                  data-testid="session-note"
+                >
+                  {view.sessionRefusal}
+                </p>
+              )}
+              {view.pendingViolations.length > 0 && (
+                <p
+                  className="mt-1 font-bold text-rose-300 break-words"
+                  data-testid="violation-note"
+                >
+                  Unblinding logged: the next hand scores ×0 Mult.
+                </p>
+              )}
+            </div>
+          )}
           {runView.showIntro && (
             <p
               className="mt-2 border border-zinc-700 p-2 text-zinc-300 break-words"
@@ -1079,7 +1165,7 @@ export function CardTable({
                 values={handOrder}
                 onReorder={setDragOrder}
                 role="group"
-                aria-label={`Hand of ${view.hand.length}. Arrow keys move, Space selects, Enter plays, D discards, I inspects, R recompiles a stale card, A allocates a blank shell, question mark reads the card, Alt with arrows reorders. With a footnote seal picked up, Enter affixes it and Escape puts it back. Shift+R opens Run Info.`}
+                aria-label={`Hand of ${view.hand.length}. Arrow keys move, Space selects, Enter plays, D discards, I inspects, R recompiles a stale card, S runs structural QC on a face-down card, A allocates a blank shell, question mark reads the card, Alt with arrows reorders. With a footnote seal picked up, Enter affixes it and Escape puts it back. Shift+R opens Run Info.`}
                 className="-mx-3 mt-1 flex overflow-x-auto px-3 pb-3 pt-7 [scrollbar-width:thin]"
                 data-testid="hand"
               >
@@ -1093,7 +1179,7 @@ export function CardTable({
               </Reorder.Group>
 
               <div
-                className={`mt-3 grid grid-cols-1 gap-2 ${focusedCard?.stale ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-3"}`}
+                className={`mt-3 grid grid-cols-1 gap-2 ${focusedCard?.stale || focusedCard?.faceDown ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-3"}`}
               >
                 <button
                   type="button"
@@ -1118,15 +1204,44 @@ export function CardTable({
                   onClick={() => inspect(focusedCard?.card.id)}
                   aria-describedby={costDescribedBy}
                   disabled={
-                    !focusedCard?.inspectable ||
-                    (!focusedCard.inspected && !view.canInspect)
+                    focusedCard?.faceDown
+                      ? false
+                      : !focusedCard?.inspectable ||
+                        (!focusedCard.inspected && !view.canInspect)
                   }
-                  className={`${BUTTON_BASE} border-amber-500 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20`}
+                  className={`${BUTTON_BASE} ${focusedCard?.faceDown ? "border-rose-400 text-rose-300 hover:bg-rose-500/10" : "border-amber-500 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20"}`}
                 >
-                  Inspect {focusedCard?.card.number ?? ""} ·{" "}
-                  {focusedCard?.inspected ? "open" : `${CPU_COSTS.INSPECT} CPU`}{" "}
-                  [I]
+                  {focusedCard?.faceDown ? (
+                    <>Unblind {focusedCard.card.number} [I]</>
+                  ) : (
+                    <>
+                      Inspect {focusedCard?.card.number ?? ""} ·{" "}
+                      {focusedCard?.inspected
+                        ? "open"
+                        : `${CPU_COSTS.INSPECT} CPU`}{" "}
+                      [I]
+                    </>
+                  )}
                 </button>
+                {focusedCard?.faceDown && (
+                  <button
+                    type="button"
+                    onClick={() => structural(focusedCard.card.id)}
+                    disabled={
+                      !focusedCard.structural &&
+                      state.cpu.available < CPU_COSTS.INSPECT
+                    }
+                    aria-describedby={costDescribedBy}
+                    className={`${BUTTON_BASE} border-amber-500 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20`}
+                    data-testid="structural-qc-button"
+                  >
+                    Structural QC {focusedCard.card.number} ·{" "}
+                    {focusedCard.structural
+                      ? "done"
+                      : `${CPU_COSTS.INSPECT} CPU`}{" "}
+                    [S]
+                  </button>
+                )}
                 {focusedCard?.stale && (
                   <button
                     type="button"
@@ -1374,7 +1489,22 @@ export function CardTable({
           rows={view.handTable}
           seed={runView.seed}
           relicSlots={RELIC_SLOTS}
+          accessLog={view.accessLog}
+          dmc={view.dmcCharter !== null}
           onClose={() => setRunInfoOpen(false)}
+        />
+      )}
+
+      {peekCard && (
+        <FirewallDialog
+          cardName={peekCard.card.number}
+          charter={view.dmcCharter}
+          onCancel={() => setPeekId(null)}
+          onConfirm={() => {
+            const cardId = peekCard.card.id;
+            setPeekId(null);
+            send({ type: "PEEK_BLINDED", cardId }, { kind: "card", cardId });
+          }}
         />
       )}
 

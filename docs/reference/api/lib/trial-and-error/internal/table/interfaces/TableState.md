@@ -10,6 +10,14 @@ Serializable Card Table state. Contains no derived or browser data.
 
 ## Properties
 
+### accessLog
+
+> **accessLog**: [`AccessRecord`](../../blinding/interfaces/AccessRecord.md)[]
+
+Every DMC access this Blind: structural QC, unblinding, session changes.
+
+***
+
 ### allocations
 
 > **allocations**: `Record`\<`string`, [`PopulationType`](../../../types/type-aliases/PopulationType.md)\>
@@ -206,6 +214,14 @@ exactly that.
 
 ***
 
+### pendingViolations
+
+> **pendingViolations**: `string`[]
+
+Unauthorized unblindings the next hand played will answer for with ×0.
+
+***
+
 ### provenance
 
 > **provenance**: `Record`\<`string`, [`SnapshotRef`](../../../types/type-aliases/SnapshotRef.md)\>
@@ -242,6 +258,14 @@ Selected card ids, in selection order (at most `maxSelection`).
 
 ***
 
+### session
+
+> **session**: [`DmcSession`](../../blinding/type-aliases/DmcSession.md)
+
+The DMC session in force. Blinded outputs are face down in OPEN.
+
+***
+
 ### snapshots
 
 > **snapshots**: `object`[]
@@ -269,3 +293,19 @@ Every population snapshot version so far, oldest first. The last is current.
 ### status
 
 > **status**: [`DeskStatus`](../../desk/type-aliases/DeskStatus.md)
+
+***
+
+### structuralQc
+
+> **structuralQc**: `string`[]
+
+Blinded outputs in hand that have had structural QC, in order.
+
+***
+
+### unblinded
+
+> **unblinded**: `string`[]
+
+Blinded outputs revealed by an unauthorized unblinding. They stay face up.

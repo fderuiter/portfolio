@@ -2,7 +2,7 @@
 
 import React from "react";
 import { createPortal } from "react-dom";
-import type { HandLevelRow } from "@/lib/trial-and-error";
+import type { AccessRecord, HandLevelRow } from "@/lib/trial-and-error";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface RunInfoProps {
@@ -11,6 +11,13 @@ interface RunInfoProps {
   seed: string;
   /** How many relic slots the rack has. */
   relicSlots: number;
+  /**
+   * The Blind's DMC access history, shown when the Blind has a DMC or any
+   * access was logged.
+   */
+  accessLog?: readonly AccessRecord[];
+  /** The Blind has a chartered DMC. */
+  dmc?: boolean;
   onClose: () => void;
 }
 
@@ -20,7 +27,14 @@ interface RunInfoProps {
  * run seed. It renders the domain's rows and never adds a level bonus
  * itself. Escape or Close dismisses it and focus returns to the trigger.
  */
-export function RunInfo({ rows, seed, relicSlots, onClose }: RunInfoProps) {
+export function RunInfo({
+  rows,
+  seed,
+  relicSlots,
+  accessLog = [],
+  dmc = false,
+  onClose,
+}: RunInfoProps) {
   const ref = useFocusTrap<HTMLDivElement>(true, { onEscape: onClose });
   return createPortal(
     <div
@@ -105,6 +119,37 @@ export function RunInfo({ rows, seed, relicSlots, onClose }: RunInfoProps) {
           None equipped (0 of {relicSlots} slots). Relics arrive with the
           Procurement Shop.
         </p>
+        {(dmc || accessLog.length > 0) && (
+          <>
+            <h3 className="mt-4 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+              DMC access history
+            </h3>
+            {accessLog.length === 0 ? (
+              <p className="text-xs text-zinc-300 break-words">
+                No access to blinded outputs this Blind.
+              </p>
+            ) : (
+              <ol className="space-y-1 text-xs" data-testid="access-history">
+                {accessLog.map((entry) => (
+                  <li
+                    key={entry.seq}
+                    data-testid="access-entry"
+                    data-authorized={entry.authorized ? "" : undefined}
+                    className={`border-l-2 pl-2 break-words ${entry.authorized ? "border-zinc-600 text-zinc-300" : "border-rose-400 text-rose-200"}`}
+                  >
+                    <span className="tabular-nums text-zinc-400">
+                      #{entry.seq} ·{" "}
+                      {entry.session === "OPEN" ? "Open" : "Closed"} session
+                      ·{" "}
+                    </span>
+                    {entry.authorized ? "" : "Violation: "}
+                    {entry.text}
+                  </li>
+                ))}
+              </ol>
+            )}
+          </>
+        )}
         <h3 className="mt-4 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
           Seed
         </h3>

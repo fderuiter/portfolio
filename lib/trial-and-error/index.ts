@@ -40,6 +40,16 @@ export {
   type KmReport,
 } from "./internal/km";
 export {
+  UNBLINDING_RULE_ID,
+  structuralQc,
+  type AccessKind,
+  type AccessRecord,
+  type DmcSession,
+  type StructuralCheck,
+  type StructuralCheckResult,
+  type StructuralQcReport,
+} from "./internal/blinding";
+export {
   evaluateHand,
   ruleResultsFor,
   type RuleResultOptions,

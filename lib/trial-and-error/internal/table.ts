@@ -55,6 +55,14 @@ import {
   type InspectionState,
   type InspectionView,
 } from "./inspection";
+import {
+  UNBLINDING_RULE_ID,
+  structuralQc,
+  type AccessKind,
+  type AccessRecord,
+  type DmcSession,
+  type StructuralQcReport,
+} from "./blinding";
 import { traceCell, type CellTrace } from "./listing";
 import { validateKm, type KmFinding, type KmReport } from "./km";
 import { evaluateHand, ruleResultsFor } from "./scoring";
@@ -89,7 +97,10 @@ export interface TableEvent {
     | "SOLD"
     | "LEVELED_UP"
     | "CRISIS_RESOLVED"
-    | "TRACED";
+    | "TRACED"
+    | "STRUCTURAL_QC"
+    | "UNBLINDED"
+    | "SESSION_CHANGED";
   message: string;
   /** On LEVELED_UP: the hand that levelled and its base before and after. */
   levelUp?: LevelUp;
@@ -248,6 +259,16 @@ export interface TableState {
   modifiers: BossBlindModifier[];
   /** Every table cell traced to its Listing this Blind, in trace order. */
   auditLog: TraceRecord[];
+  /** The DMC session in force. Blinded outputs are face down in OPEN. */
+  session: DmcSession;
+  /** Every DMC access this Blind: structural QC, unblinding, session changes. */
+  accessLog: AccessRecord[];
+  /** Blinded outputs in hand that have had structural QC, in order. */
+  structuralQc: string[];
+  /** Blinded outputs revealed by an unauthorized unblinding. They stay face up. */
+  unblinded: string[];
+  /** Unauthorized unblindings the next hand played will answer for with ×0. */
+  pendingViolations: string[];
   /**
    * How much of `snapshots` and `invalidations` predates this Blind, the
    * inventory it started with, and its crisis, so a restart returns to
@@ -286,6 +307,15 @@ export type TableAction =
   | { type: "USE_GUIDANCE"; consumableId: string }
   /** Answers the Blind's crisis with one of its choices. */
   | { type: "RESOLVE_CRISIS"; choiceId: string }
+  /** Structural QC of a face-down output: shape and format, no values. */
+  | { type: "STRUCTURAL_QC"; cardId: string }
+  /**
+   * Views a face-down output without DMC authorization: a blinding violation.
+   * Logged, and the next hand played scores ×0.
+   */
+  | { type: "PEEK_BLINDED"; cardId: string }
+  /** Moves to the other DMC session under the scenario's charter. */
+  | { type: "SET_SESSION"; session: DmcSession }
   | { type: "RESET" };
 
 /** One card in hand as the table should render it. */
@@ -325,6 +355,15 @@ export interface TableCardView {
   pairedWith: string[];
   /** A dependent Figure's parent and ×Mult status, or null for other cards. */
   figure: FigureStatus | null;
+  /** A closed-session output (its shell is blinded). */
+  blinded: boolean;
+  /**
+   * Face down under the DMC open session. `card` and `face` then carry no
+   * value: the face is the shell's structure with every cell redacted.
+   */
+  faceDown: boolean;
+  /** Structural QC of a blinded output, once run. */
+  structural: StructuralQcReport | null;
 }
 
 /** A dependent Figure's ×Mult badge: its parent, and why it is off if it is. */
@@ -458,6 +497,16 @@ export interface TableView {
   auditLog: TraceRecord[];
   /** The open Inspect drawer's content when it holds a KM figure. */
   figureInspection: FigureInspectionView | null;
+  /** The DMC session in force. */
+  session: DmcSession;
+  /** The charter the closed session is convened under, or null without a DMC. */
+  dmcCharter: string | null;
+  /** Why the session cannot change now, or null. */
+  sessionRefusal: string | null;
+  /** The Blind's DMC access history, oldest first. */
+  accessLog: AccessRecord[];
+  /** Unblinded outputs the next hand played will score ×0 for. */
+  pendingViolations: string[];
 }
 
 /** One analysis set a blank shell could be compiled on, previewed before committing. */
@@ -698,6 +747,118 @@ const firewallUp = (scenario: Scenario, state: TableState): boolean =>
     (m) => m.debuffType === "BLIND_FIREWALL"
   );
 
+/** A closed-session output: its shell is blinded. */
+function isBlindedCard(
+  scenario: Scenario,
+  state: TableState,
+  card: TlfCard
+): boolean {
+  const draft = draftFor(scenario, state, card);
+  return (
+    shellById(scenario, card.shellId ?? draft?.shellId)?.isBlinded === true
+  );
+}
+
+/** Face down: blinded, in the open session, and never unblinded by a peek. */
+const isFaceDown = (
+  scenario: Scenario,
+  state: TableState,
+  card: TlfCard
+): boolean =>
+  state.session === "OPEN" &&
+  !state.unblinded.includes(card.id) &&
+  isBlindedCard(scenario, state, card);
+
+/** The alert shown when Inspect meets a face-down output. */
+const faceDownAlert = (card: TlfCard) =>
+  `${cardShortName(card)} is face down in the DMC open session: run structural QC, or convene the closed session.`;
+
+/** A face with every value redacted: its structure and labels only. */
+function redactedFace(face: CardFace): CardFace {
+  if (face.kind === "TABLE") {
+    return {
+      ...face,
+      rows: face.rows.map((row) => ({
+        label: row.label,
+        values: row.values.map(() => FIREWALL_CELL),
+      })),
+    };
+  }
+  if (face.kind === "LISTING") {
+    return {
+      ...face,
+      rows: face.rows.map((row) => row.map(() => FIREWALL_CELL)),
+    };
+  }
+  return { kind: "TOKEN", cohort: FIREWALL_CELL, count: 0 };
+}
+
+/** The access history with one more entry. */
+function withAccess(
+  state: TableState,
+  kind: AccessKind,
+  cardId: string | null,
+  authorized: boolean,
+  text: string
+): AccessRecord[] {
+  return [
+    ...state.accessLog,
+    {
+      seq: state.accessLog.length + 1,
+      kind,
+      cardId,
+      session: state.session,
+      handsPlayed: state.handsPlayed,
+      authorized,
+      text,
+    },
+  ];
+}
+
+/** Blinded outputs in hand, in hand order. */
+const blindedInHand = (scenario: Scenario, state: TableState): TlfCard[] =>
+  state.hand
+    .map((id) => cardById(scenario, state, id) as TlfCard)
+    .filter((card) => isBlindedCard(scenario, state, card));
+
+/** Why the DMC session cannot move to `to` now, or null. */
+function sessionRefusal(
+  scenario: Scenario,
+  state: TableState,
+  to: DmcSession
+): string | null {
+  if (!scenario.dmc) {
+    return "No Data Monitoring Committee is chartered for this Blind.";
+  }
+  if (state.session === to) {
+    return `The ${to === "OPEN" ? "open" : "closed"} session is already in force.`;
+  }
+  if (to === "CLOSED") {
+    const pending = blindedInHand(scenario, state).filter(
+      (card) => !state.structuralQc.includes(card.id)
+    );
+    if (pending.length > 0) {
+      return `Run structural QC on every blinded output before convening the closed session: ${pending.map(cardShortName).join(", ")}.`;
+    }
+  }
+  return null;
+}
+
+/**
+ * Cards in hand whose reviews a session change withdraws: the blinded
+ * outputs, and any Figure built on one.
+ */
+function sessionDependents(scenario: Scenario, state: TableState): string[] {
+  return state.hand.filter((id) => {
+    const card = cardById(scenario, state, id) as TlfCard;
+    if (isBlindedCard(scenario, state, card)) return true;
+    const parent = card.km
+      ? cardById(scenario, state, card.km.parent.cardId)
+      : undefined;
+    return parent !== undefined && isBlindedCard(scenario, state, parent);
+  });
+}
+
 /** The alert shown while a crisis waits for an answer. */
 const crisisAlert = (crisis: CrisisCard) =>
   `${crisis.name}: answer the crisis first.`;
@@ -710,14 +871,17 @@ function kmReportFor(
 ): KmReport | null {
   if (!card.km) return null;
   const parent = cardById(scenario, state, card.km.parent.cardId);
-  const parentFace = parent
-    ? faceFor(
-        parent,
-        draftFor(scenario, state, parent),
-        null,
-        shellById(scenario, parent.shellId)
-      )
-    : undefined;
+  // A face-down parent's values stay behind the firewall: the figure cannot
+  // be reconciled against them until the closed session reveals them.
+  const parentFace =
+    parent && !isFaceDown(scenario, state, parent)
+      ? faceFor(
+          parent,
+          draftFor(scenario, state, parent),
+          null,
+          shellById(scenario, parent.shellId)
+        )
+      : undefined;
   return validateKm(
     card.km,
     snapshotById(scenario, state, card.km.populationSnapshotId),
@@ -1152,6 +1316,7 @@ function scoreCards(
 ): HandEvaluation {
   const ruleResults: RuleCheckResult[] = [];
   for (const card of cards) {
+    const first = ruleResults.length;
     const draft = draftFor(scenario, state, card);
     const inspection = state.inspections[card.id] ?? createInspectionState();
     let results: RuleCheckResult[] = [];
@@ -1211,6 +1376,30 @@ function scoreCards(
         evidence: `${cardShortName(card)}: Number-at-Risk, censoring ticks and survival estimates reconcile with ${figureStatus(scenario, state, card)?.parent}.`,
       });
     }
+    // A face-down output's findings score, but their evidence would print
+    // closed-session values, so it is withheld.
+    if (isFaceDown(scenario, state, card)) {
+      for (let i = first; i < ruleResults.length; i++) {
+        ruleResults[i] = {
+          ...ruleResults[i],
+          evidence: `${cardShortName(card)}: closed-session finding; its values are withheld in the open session.`,
+        };
+      }
+    }
+  }
+  if (state.pendingViolations.length > 0) {
+    ruleResults.push({
+      ruleId: UNBLINDING_RULE_ID,
+      passed: false,
+      chipsDelta: 0,
+      multDelta: 0,
+      multMultiplier: 0,
+      evidence: `Unauthorized unblinding of ${state.pendingViolations
+        .map((id) => cardShortName(cardById(scenario, state, id) as TlfCard))
+        .join(
+          ", "
+        )} in the open session: the DMC firewall zeroes this hand's Mult.`,
+    });
   }
   if (handType === "TLF_PAIR" || handType === "TLF_TWO_PAIR") {
     for (const table of cards.filter((c) => c.cardType === "TABLE")) {
@@ -1368,6 +1557,11 @@ export function createTableState(
     crisisResolution: null,
     modifiers: [],
     auditLog: [],
+    session: "OPEN",
+    accessLog: [],
+    structuralQc: [],
+    unblinded: [],
+    pendingViolations: [],
     opening: {
       snapshots: history.snapshots.length,
       invalidations: history.invalidations.length,
@@ -1412,6 +1606,7 @@ function spendSelection(
     drafts: keep(state.drafts),
     allocations: keep(state.allocations),
     seals: keep(state.seals),
+    structuralQc: state.structuralQc.filter((id) => !removed.has(id)),
     inspecting: null,
   };
 }
@@ -1772,6 +1967,8 @@ export function advanceTable(
             ...state,
             roundScore: state.roundScore + evaluation.score,
             handsPlayed: state.handsPlayed + 1,
+            // The violation is answered for by this hand's ×0.
+            pendingViolations: [],
             handLevels: {
               ...state.handLevels,
               [classification.handType]: {
@@ -1847,6 +2044,9 @@ export function advanceTable(
       if (firewallUp(scenario, state)) {
         return refuse(state, FIREWALL_ALERT);
       }
+      if (isFaceDown(scenario, state, card)) {
+        return refuse(state, faceDownAlert(card));
+      }
       if (isBlank(state, card)) {
         return refuse(
           state,
@@ -1886,6 +2086,132 @@ export function advanceTable(
           "INSPECT_OPENED",
           `Inspecting ${label(card)} for ${CPU_COSTS.INSPECT} CPU.`
         ),
+      };
+    }
+
+    case "STRUCTURAL_QC": {
+      const card = cardById(scenario, state, action.cardId);
+      if (!card || !state.hand.includes(card.id)) {
+        return refuse(state, "That card is not in your hand.");
+      }
+      if (!isFaceDown(scenario, state, card)) {
+        return refuse(
+          state,
+          `${cardShortName(card)} is face up: inspect it instead.`
+        );
+      }
+      const draft = draftFor(scenario, state, card);
+      if (!draft) {
+        return refuse(
+          state,
+          `${cardShortName(card)} is an empty shell: allocate an analysis set to compile it first.`
+        );
+      }
+      const report = structuralQc(
+        draft,
+        shellById(scenario, card.shellId ?? draft.shellId)
+      );
+      const summary = `${report.checks.filter((c) => c.passed).length} of ${report.checks.length} structural checks pass.${report.checks
+        .filter((c) => !c.passed)
+        .map((c) => ` ${c.label}: ${c.detail}`)
+        .join("")}`;
+      if (state.structuralQc.includes(card.id)) {
+        return {
+          ...state,
+          lastEvent: nextEvent(
+            state,
+            "STRUCTURAL_QC",
+            `${cardShortName(card)}: ${summary}`
+          ),
+        };
+      }
+      if (!canAfford(state.cpu, "INSPECT")) {
+        return refuse(state, `Structural QC needs ${CPU_COSTS.INSPECT} CPU.`);
+      }
+      return {
+        ...state,
+        cpu: cpuReducer(state.cpu, { type: "SPEND", action: "INSPECT" }),
+        structuralQc: [...state.structuralQc, card.id],
+        accessLog: withAccess(
+          state,
+          "STRUCTURAL_QC",
+          card.id,
+          true,
+          `Structural QC of ${cardShortName(card)} across the firewall: ${summary}`
+        ),
+        lastEvent: nextEvent(
+          state,
+          "STRUCTURAL_QC",
+          `Structural QC of ${cardShortName(card)} for ${CPU_COSTS.INSPECT} CPU, no values read: ${summary}`
+        ),
+      };
+    }
+
+    case "PEEK_BLINDED": {
+      const card = cardById(scenario, state, action.cardId);
+      if (!card || !state.hand.includes(card.id)) {
+        return refuse(state, "That card is not in your hand.");
+      }
+      if (!isFaceDown(scenario, state, card)) {
+        return refuse(state, `${cardShortName(card)} is not face down.`);
+      }
+      const text = `Unauthorized unblinding of ${cardShortName(card)} in the open session. Audit finding logged; the next hand played scores ×0 Mult.`;
+      return {
+        ...state,
+        unblinded: [...state.unblinded, card.id],
+        pendingViolations: [...state.pendingViolations, card.id],
+        accessLog: withAccess(
+          state,
+          "UNAUTHORIZED_UNBLINDING",
+          card.id,
+          false,
+          text
+        ),
+        lastEvent: nextEvent(state, "UNBLINDED", text),
+      };
+    }
+
+    case "SET_SESSION": {
+      const refusal = sessionRefusal(scenario, state, action.session);
+      if (refusal) return refuse(state, refusal);
+      const withdrawn = sessionDependents(scenario, state).filter(
+        (id) => state.inspections[id]
+      );
+      const inspections = Object.fromEntries(
+        Object.entries(state.inspections).filter(
+          ([id]) => !withdrawn.includes(id)
+        )
+      );
+      const count = blindedInHand(scenario, state).length;
+      const plural = count === 1 ? "" : "s";
+      const withdrawnText =
+        withdrawn.length > 0
+          ? ` Reviews withdrawn: ${withdrawn
+              .map((id) =>
+                cardShortName(cardById(scenario, state, id) as TlfCard)
+              )
+              .join(", ")}.`
+          : "";
+      const text =
+        action.session === "CLOSED"
+          ? `Closed DMC session convened under ${scenario.dmc?.charter}: ${count} blinded output${plural} revealed.${withdrawnText}`
+          : `Returned to the open session: ${count} blinded output${plural} face down again.${withdrawnText}`;
+      const moved: TableState = { ...state, session: action.session };
+      return {
+        ...moved,
+        inspections,
+        inspecting:
+          state.inspecting && withdrawn.includes(state.inspecting)
+            ? null
+            : state.inspecting,
+        accessLog: withAccess(
+          moved,
+          action.session === "CLOSED" ? "SESSION_CLOSED" : "SESSION_OPENED",
+          null,
+          true,
+          text
+        ),
+        lastEvent: nextEvent(state, "SESSION_CHANGED", text),
       };
     }
 
@@ -2256,7 +2582,10 @@ export function deriveTableView(
         : 0
       : (review?.openFindings.length ?? 0);
     const stale = isStale(scenario, state, card);
+    const blinded = isBlindedCard(scenario, state, card);
+    const faceDown = isFaceDown(scenario, state, card);
     const stamps: CardStamp[] = [];
+    if (faceDown) stamps.push("BLINDED");
     if (stale) stamps.push("STALE");
     if (openRedlines > 0) stamps.push("REDLINE");
     // QC ✓ only once every cell is reviewed, so it never vouches for a
@@ -2271,19 +2600,30 @@ export function deriveTableView(
       ? kmFace(scenario, state, card)
       : faceFor(card, draft, review, shell);
     const reviewable = draft !== undefined || km !== null;
+    const structural =
+      blinded && draft && state.structuralQc.includes(id)
+        ? structuralQc(draft, shell)
+        : null;
     return {
-      // Under a firewall the arm values are absent from the view itself,
-      // including the card's own authored face.
-      card:
-        firewall && card.face
+      // Face down, or under a firewall, the values are absent from the view
+      // itself, including the card's own authored face.
+      card: faceDown
+        ? { ...card, face: undefined, km: undefined }
+        : firewall && card.face
           ? { ...card, face: firewalled(card.face, undefined) }
           : card,
       selected: selected.has(id),
-      inspectable: reviewable,
+      inspectable: reviewable && !faceDown,
       inspected: inspection !== undefined,
-      unverified: reviewable && inspection === undefined,
+      unverified: faceDown
+        ? reviewable && structural === null
+        : reviewable && inspection === undefined,
       openRedlines,
-      face: firewall ? firewalled(face, draft) : face,
+      face: faceDown
+        ? redactedFace(face)
+        : firewall
+          ? firewalled(face, draft)
+          : face,
       stamps,
       debuffed: disablingModifier(scenario, state, card) !== undefined,
       stale,
@@ -2294,6 +2634,9 @@ export function deriveTableView(
       footnoteSlots: footnoteSlotsOf(scenario, state, card),
       pairedWith: pairPartners(scenario, state, card).map((c) => c.id),
       figure: figureStatus(scenario, state, card),
+      blinded,
+      faceDown,
+      structural,
     };
   });
 
@@ -2443,7 +2786,8 @@ export function deriveTableView(
         zeroRuleLabels: Object.fromEntries(
           scenario.rulebook.rules
             .filter((r) => r.severity === "FATAL")
-            .map((r) => [r.id, `${r.category} ERROR`])
+            .map((r): [string, string] => [r.id, `${r.category} ERROR`])
+            .concat([[UNBLINDING_RULE_ID, "UNBLINDING"]])
         ),
       })
     : null;
@@ -2511,6 +2855,15 @@ export function deriveTableView(
     firewall,
     auditLog: state.auditLog,
     figureInspection,
+    session: state.session,
+    dmcCharter: scenario.dmc?.charter ?? null,
+    sessionRefusal: sessionRefusal(
+      scenario,
+      state,
+      state.session === "OPEN" ? "CLOSED" : "OPEN"
+    ),
+    accessLog: state.accessLog,
+    pendingViolations: state.pendingViolations,
   };
 }
 

@@ -8,6 +8,18 @@
 
 ## References
 
+### AccessKind
+
+Re-exports [AccessKind](internal/blinding/type-aliases/AccessKind.md)
+
+***
+
+### AccessRecord
+
+Re-exports [AccessRecord](internal/blinding/interfaces/AccessRecord.md)
+
+***
+
 ### Act
 
 Re-exports [Act](types/type-aliases/Act.md)
@@ -461,6 +473,12 @@ Re-exports [DeskStatus](internal/desk/type-aliases/DeskStatus.md)
 ### DeskView
 
 Re-exports [DeskView](internal/desk/interfaces/DeskView.md)
+
+***
+
+### DmcSession
+
+Re-exports [DmcSession](internal/blinding/type-aliases/DmcSession.md)
 
 ***
 
@@ -1184,6 +1202,30 @@ Re-exports [stepAt](internal/km/functions/stepAt.md)
 
 ***
 
+### StructuralCheck
+
+Re-exports [StructuralCheck](internal/blinding/type-aliases/StructuralCheck.md)
+
+***
+
+### StructuralCheckResult
+
+Re-exports [StructuralCheckResult](internal/blinding/interfaces/StructuralCheckResult.md)
+
+***
+
+### structuralQc
+
+Re-exports [structuralQc](internal/blinding/functions/structuralQc.md)
+
+***
+
+### StructuralQcReport
+
+Re-exports [StructuralQcReport](internal/blinding/interfaces/StructuralQcReport.md)
+
+***
+
 ### StudyEvent
 
 Re-exports [StudyEvent](types/type-aliases/StudyEvent.md)
@@ -1355,6 +1397,12 @@ Re-exports [TransitionReason](types/type-aliases/TransitionReason.md)
 ### TransitionReasonSchema
 
 Re-exports [TransitionReasonSchema](types/variables/TransitionReasonSchema.md)
+
+***
+
+### UNBLINDING\_RULE\_ID
+
+Re-exports [UNBLINDING_RULE_ID](internal/blinding/variables/UNBLINDING_RULE_ID.md)
 
 ***
 

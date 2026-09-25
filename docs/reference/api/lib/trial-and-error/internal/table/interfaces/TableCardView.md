@@ -18,6 +18,14 @@ A blank shell with no analysis set allocated: it cannot be played yet.
 
 ***
 
+### blinded
+
+> **blinded**: `boolean`
+
+A closed-session output (its shell is blinded).
+
+***
+
 ### card
 
 > **card**: `object`
@@ -263,6 +271,15 @@ The parent Table's number, printed on a dependent Figure.
 
 ***
 
+### faceDown
+
+> **faceDown**: `boolean`
+
+Face down under the DMC open session. `card` and `face` then carry no
+value: the face is the shell's structure with every cell redacted.
+
+***
+
 ### figure
 
 > **figure**: [`FigureStatus`](FigureStatus.md) \| `null`
@@ -401,6 +418,14 @@ Compiled against a snapshot whose membership of this card's suit has since chang
 > **stamps**: (`"REDLINE"` \| `"SEALED"` \| `"QC_PASS"` \| `"STALE"` \| `"BLINDED"`)[]
 
 Marks stamped on the face, in display order.
+
+***
+
+### structural
+
+> **structural**: [`StructuralQcReport`](../../blinding/interfaces/StructuralQcReport.md) \| `null`
+
+Structural QC of a blinded output, once run.
 
 ***
 

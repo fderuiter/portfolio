@@ -22,6 +22,7 @@ import {
   type CrisisCard,
 } from "@/lib/trial-and-error";
 import { SMALL_BLIND_WITH_KM } from "./utils/trial-and-error-km";
+import { BLINDED, DMC_SCENARIO } from "./utils/trial-and-error-dmc";
 
 const announce = vi.fn();
 vi.mock("@/hooks/useAnnouncer", () => ({
@@ -859,5 +860,76 @@ describe("CardTable Kaplan–Meier figures (T&E-07)", () => {
     expect(
       within(card(FIG)).getByTestId("figure-xmult").hasAttribute("data-active")
     ).toBe(true);
+  });
+});
+
+describe("CardTable DMC blinding firewall (T&E-08)", () => {
+  const [A, B, C] = BLINDED;
+  const firewall = () => screen.queryByTestId("firewall-dialog");
+  const press = (id: string, key: string) => {
+    act(() => card(id).focus());
+    fireEvent.keyDown(card(id), { key });
+  };
+
+  it("deals blinded outputs face down and asks before unblinding one", async () => {
+    render(<CardTable scenario={DMC_SCENARIO} />);
+    expect(screen.getByTestId("session-badge").textContent).toBe("OPEN");
+    for (const id of BLINDED) {
+      expect(card(id).hasAttribute("data-face-down")).toBe(true);
+      expect(card(id).getAttribute("aria-label")).toContain(
+        "face down, blinded in the DMC open session"
+      );
+    }
+    expect(document.body.textContent).not.toContain("49.8");
+
+    press(A, "i");
+    await waitFor(() => expect(firewall()).not.toBeNull());
+    expect(firewall()!.getAttribute("role")).toBe("alertdialog");
+    await waitFor(() =>
+      expect(document.activeElement?.textContent).toBe("Keep blinded [Esc]")
+    );
+    fireEvent.keyDown(document.activeElement!, { key: "Escape" });
+    await waitFor(() => expect(firewall()).toBeNull());
+    expect(card(A).hasAttribute("data-face-down")).toBe(true);
+    expect(screen.queryByTestId("violation-note")).toBeNull();
+
+    press(A, "i");
+    await waitFor(() => expect(firewall()).not.toBeNull());
+    fireEvent.click(screen.getByTestId("firewall-confirm"));
+    await waitFor(() => expect(firewall()).toBeNull());
+    expect(card(A).hasAttribute("data-face-down")).toBe(false);
+    expect(screen.getByTestId("violation-note").textContent).toBe(
+      "Unblinding logged: the next hand scores ×0 Mult."
+    );
+    expect(lastAnnouncement()).toContain("Unauthorized unblinding");
+  });
+
+  it("convenes the closed session after structural QC, and logs every access", async () => {
+    render(<CardTable scenario={DMC_SCENARIO} />);
+    const toggle = () =>
+      screen.getByTestId("session-toggle") as HTMLButtonElement;
+    expect(toggle().disabled).toBe(true);
+    expect(screen.getByTestId("session-note").textContent).toContain(
+      "Run structural QC on every blinded output"
+    );
+
+    for (const id of [A, B, C]) press(id, "s");
+    expect(within(card(B)).getByTestId("blinded-marker").textContent).toMatch(
+      /^BLINDED · STRUCT \d\/3$/
+    );
+    expect(toggle().disabled).toBe(false);
+
+    fireEvent.click(toggle());
+    expect(screen.getByTestId("session-badge").textContent).toBe("CLOSED");
+    for (const id of BLINDED) {
+      expect(card(id).hasAttribute("data-face-down")).toBe(false);
+    }
+    expect(lastAnnouncement()).toContain("Closed DMC session convened");
+    expect(toggle().textContent).toBe("Return to open session");
+
+    fireEvent.click(screen.getByTestId("run-info-button"));
+    const entries = await screen.findAllByTestId("access-entry");
+    expect(entries).toHaveLength(4);
+    expect(entries.every((e) => e.hasAttribute("data-authorized"))).toBe(true);
   });
 });
