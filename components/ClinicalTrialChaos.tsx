@@ -73,6 +73,10 @@ import {
   createAuditLogEntry,
   fixObservation,
   validateObservationChoice,
+  getObservationChoices,
+  selectNextUrgentSubject,
+  shouldRunCalibration,
+  getCalibrationStep,
   isSubjectFullyCompliant,
   calculateSubmissionPoints,
   tickSubjectTimers,
@@ -326,6 +330,23 @@ export const ClinicalTrialChaos: React.FC = () => {
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(
     null
   );
+  // First-shift calibration (#834): the guided subject's id while active.
+  // Every clock that can expire work, raise the auditor or spawn subjects
+  // stays frozen until the subject is submitted or the player skips.
+  const [calibrationSubjectId, setCalibrationSubjectId] = useState<
+    string | null
+  >(null);
+  const calibrationActiveRef = useRef(false);
+  // Short "Next dossier loaded" cue shown after a submission auto-advances.
+  const [nextDossierCue, setNextDossierCue] = useState<{
+    subjectId: string;
+    text: string;
+  } | null>(null);
+  useEffect(() => {
+    if (!nextDossierCue) return;
+    const timer = setTimeout(() => setNextDossierCue(null), 2500);
+    return () => clearTimeout(timer);
+  }, [nextDossierCue]);
   const [validatingObs, setValidatingObs] = useState<{
     subjectId: string;
     obs: ClinicalObservation;
@@ -512,12 +533,26 @@ export const ClinicalTrialChaos: React.FC = () => {
       // unique (SUBJ-1004+) instead of reusing fixed three-digit ids per run.
       const baseSubs: ClinicalSubject[] = activeProtocol
         ? [
-            generateClinicalSubjectFromProtocol(activeProtocol, 0.4, false),
-            generateClinicalSubjectFromProtocol(activeProtocol, 0.6, false),
+            generateClinicalSubjectFromProtocol(
+              activeProtocol,
+              0.4,
+              false,
+              undefined,
+              activeDomains
+            ),
+            generateClinicalSubjectFromProtocol(
+              activeProtocol,
+              0.6,
+              false,
+              undefined,
+              activeDomains
+            ),
             generateClinicalSubjectFromProtocol(
               activeProtocol,
               0.7,
-              targetPhase >= 2
+              targetPhase >= 2,
+              undefined,
+              activeDomains
             ),
           ]
         : targetPhase === 1 && mode === "campaign"
@@ -538,6 +573,11 @@ export const ClinicalTrialChaos: React.FC = () => {
       );
       setConveyorSubjects(initialSubs);
       setSelectedSubjectId(initialSubs[0]?.id ?? null);
+      const calibrationId = shouldRunCalibration(mode, targetPhase)
+        ? (initialSubs[0]?.id ?? null)
+        : null;
+      setCalibrationSubjectId(calibrationId);
+      calibrationActiveRef.current = calibrationId !== null;
       setScoreState({
         ...createInitialScoreState(),
         highScore: effectiveHighScore,
@@ -820,12 +860,38 @@ export const ClinicalTrialChaos: React.FC = () => {
 
       // Remove from conveyor
       setConveyorSubjects((prev) => prev.filter((s) => s.id !== subj.id));
-      setSelectedSubjectId(null);
+
+      if (subj.id === calibrationSubjectId) {
+        setCalibrationSubjectId(null);
+        calibrationActiveRef.current = false;
+        announce("Calibration complete. The shift is live.", "polite");
+      }
 
       // Phase completion check in Campaign mode
+      const phaseCleared =
+        gameMode === "campaign" &&
+        scoreState.subjectsSubmitted + 1 >= PHASE_TARGETS[phase];
+
+      // Load the most urgent remaining dossier (#834), computed from the
+      // queue without the packet just submitted.
+      const nextSubject = phaseCleared
+        ? null
+        : selectNextUrgentSubject(
+            conveyorSubjects.filter((s) => s.id !== subj.id)
+          );
+      setSelectedSubjectId(nextSubject?.id ?? null);
+      if (nextSubject) {
+        const cue = `Next dossier loaded: ${nextSubject.subjectLabel}${
+          nextSubject.isSAE ? " (SAE)" : ""
+        }`;
+        setNextDossierCue({ subjectId: nextSubject.id, text: cue });
+        announce(cue, "polite");
+      } else {
+        setNextDossierCue(null);
+      }
+
       if (gameMode === "campaign") {
-        const targetCount = PHASE_TARGETS[phase];
-        if (scoreState.subjectsSubmitted + 1 >= targetCount) {
+        if (phaseCleared) {
           setPlayState("phase_cleared");
           playSuccess();
           const report = applySponsorSkeletonsToReport(
@@ -855,8 +921,11 @@ export const ClinicalTrialChaos: React.FC = () => {
       activeProtocol,
       gameMode,
       phase,
+      conveyorSubjects,
+      calibrationSubjectId,
       pushScorePop,
       playSuccess,
+      announce,
     ]
   );
 
@@ -1487,6 +1556,39 @@ export const ClinicalTrialChaos: React.FC = () => {
     ruleViolationsRef.current = ruleViolations;
   });
 
+  // First-shift calibration (#834)
+  const calibrationStep =
+    calibrationSubjectId && playState === "playing"
+      ? getCalibrationStep(conveyorSubjects, calibrationSubjectId)
+      : null;
+  const calibrationActive =
+    calibrationStep !== null && calibrationStep !== "complete";
+  const calibrationSubject = calibrationActive
+    ? (conveyorSubjects.find((s) => s.id === calibrationSubjectId) ?? null)
+    : null;
+  useEffect(() => {
+    calibrationActiveRef.current = calibrationActive;
+  }, [calibrationActive]);
+  useEffect(() => {
+    if (calibrationStep === "fix") {
+      announce(
+        "Calibration: clocks are paused. Step 1, fix the flagged field on the first dossier.",
+        "polite"
+      );
+    } else if (calibrationStep === "route") {
+      announce(
+        "Calibration step 2: route the clean dossier to its matching station to sign it.",
+        "polite"
+      );
+    }
+  }, [calibrationStep, announce]);
+  const skipCalibration = () => {
+    setCalibrationSubjectId(null);
+    calibrationActiveRef.current = false;
+    announce("Calibration skipped. The shift is live.", "polite");
+    containerRef.current?.focus({ preventScroll: true });
+  };
+
   // 17. Main Game Loop Tick (requestAnimationFrame)
   useEffect(() => {
     if (playState !== "playing") return;
@@ -1517,7 +1619,9 @@ export const ClinicalTrialChaos: React.FC = () => {
 
       const now = Date.now();
       const isPausedByModal =
-        !!validatingObsRef.current || !!signatureModalRef.current?.isOpen;
+        !!validatingObsRef.current ||
+        !!signatureModalRef.current?.isOpen ||
+        calibrationActiveRef.current;
       const deltaMs = Math.min(100, now - lastTickTimeRef.current);
       const deltaSeconds = isPausedByModal ? 0 : deltaMs / 1000;
       lastTickTimeRef.current = now;
@@ -1711,7 +1815,9 @@ export const ClinicalTrialChaos: React.FC = () => {
             ? generateClinicalSubjectFromProtocol(
                 activeProtocolRef.current,
                 errorChance,
-                isSAE
+                isSAE,
+                undefined,
+                stationsRef.current.map((s) => s.id)
               )
             : generateClinicalSubject(
                 errorChance,
@@ -1933,10 +2039,7 @@ export const ClinicalTrialChaos: React.FC = () => {
         setValidatingObs(null);
       } else if (!validatingObs.feedback?.isValid) {
         // Number keys pick an answer in the fix dialog
-        const options = validatingObs.obs.options || [
-          validatingObs.obs.correctedValue || validatingObs.obs.rawValue,
-          validatingObs.obs.rawValue,
-        ];
+        const options = getObservationChoices(validatingObs.obs);
         const optionIdx = parseInt(key, 10) - 1;
         if (optionIdx >= 0 && optionIdx < options.length) {
           e.preventDefault();
@@ -2189,6 +2292,7 @@ export const ClinicalTrialChaos: React.FC = () => {
     activeSubject?.observations.filter((o) => !o.isResolved) ?? [];
   const nextFlaggedObs = flaggedObs[0] ?? null;
   const routingReadiness = getRoutingReadiness(activeSubject, stations);
+
   const routeDomains: CDISCDomain[] =
     routingReadiness.unresolvedCount === 0
       ? routingReadiness.matchingDomains
@@ -2953,6 +3057,11 @@ export const ClinicalTrialChaos: React.FC = () => {
                         <p className="truncate text-[10px] text-zinc-400">
                           {activeSubject.studySite}
                         </p>
+                        {nextDossierCue?.subjectId === activeSubject.id && (
+                          <p className="mt-1 text-[10px] font-bold text-emerald-300">
+                            {nextDossierCue.text}
+                          </p>
+                        )}
                       </div>
                       <span
                         className={`flex shrink-0 items-center gap-1 text-sm font-bold tabular-nums ${
@@ -3060,6 +3169,72 @@ export const ClinicalTrialChaos: React.FC = () => {
                           ))}
                         </div>
                       </div>
+                    )}
+
+                    {/* First-shift calibration (#834) */}
+                    {calibrationActive && calibrationSubject && (
+                      <section
+                        aria-label="First-shift calibration"
+                        data-testid="cc-calibration"
+                        className="mt-3 rounded-lg border border-sky-500/40 bg-sky-500/5 p-3"
+                      >
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                          <p className="min-w-0 text-[10px] font-bold uppercase tracking-wider text-sky-300">
+                            First-shift calibration · clocks paused
+                          </p>
+                          <button
+                            type="button"
+                            onClick={skipCalibration}
+                            className="min-h-[44px] shrink-0 rounded-lg border border-zinc-700 px-3 text-xs font-bold text-zinc-200 hover:border-zinc-500 hover:text-white active:scale-[0.98]"
+                          >
+                            Skip calibration
+                          </button>
+                        </div>
+                        <ol className="mt-2 space-y-1 text-xs text-zinc-200">
+                          <li
+                            aria-current={
+                              calibrationStep === "fix" ? "step" : undefined
+                            }
+                            className={
+                              calibrationStep === "fix"
+                                ? "font-bold text-white"
+                                : "text-zinc-400"
+                            }
+                          >
+                            {calibrationStep === "fix" ? "▸" : "✓"} 1. Fix: open
+                            the flagged field and pick the compliant value
+                            (Enter, then 1–4).
+                          </li>
+                          <li
+                            aria-current={
+                              calibrationStep === "route" ? "step" : undefined
+                            }
+                            className={
+                              calibrationStep === "route"
+                                ? "font-bold text-white"
+                                : "text-zinc-400"
+                            }
+                          >
+                            {calibrationStep === "route" ? "▸" : "·"} 2. Route:
+                            send the clean CRF to its matching station.
+                          </li>
+                          <li className="text-zinc-400">
+                            · 3. Sign: routine packets dispatch at once; SAE and
+                            phase-lock packets open the signature review.
+                          </li>
+                        </ol>
+                        {activeSubject.id !== calibrationSubject.id && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setSelectedSubjectId(calibrationSubject.id)
+                            }
+                            className="mt-2 min-h-[44px] rounded-lg border border-sky-500/40 px-3 text-xs font-bold text-sky-200 hover:bg-sky-500/10 active:scale-[0.98]"
+                          >
+                            Back to {calibrationSubject.subjectLabel}
+                          </button>
+                        )}
+                      </section>
                     )}
 
                     {/* Observations */}
@@ -3970,7 +4145,7 @@ export const ClinicalTrialChaos: React.FC = () => {
             role="dialog"
             aria-modal="true"
             aria-labelledby="cc-fix-dialog-title"
-            className="max-w-lg w-full rounded-2xl border border-amber-500/50 bg-zinc-950 p-6 shadow-2xl"
+            className="max-w-lg w-full max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-2xl border border-amber-500/50 bg-zinc-950 p-6 shadow-2xl"
           >
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
               <div className="flex items-center gap-2">
@@ -4024,32 +4199,28 @@ export const ClinicalTrialChaos: React.FC = () => {
                   Select Compliant CDISC Standard Value / CT Code
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {(
-                    validatingObs.obs.options || [
-                      validatingObs.obs.correctedValue ||
-                        validatingObs.obs.rawValue,
-                      validatingObs.obs.rawValue,
-                    ]
-                  ).map((opt, optIdx) => (
-                    <button
-                      key={opt}
-                      onClick={() => handleSelectChoice(opt)}
-                      className={`p-2.5 min-h-[44px] rounded-xl border text-left font-mono text-xs transition ${
-                        validatingObs.selectedChoice === opt
-                          ? validatingObs.feedback?.isValid
-                            ? "border-emerald-500 bg-emerald-950/60 text-emerald-300 font-bold"
-                            : "border-rose-500 bg-rose-950/60 text-rose-300 font-bold"
-                          : "border-zinc-800 bg-zinc-900 text-zinc-300 hover:border-brand-cyan hover:bg-zinc-800"
-                      }`}
-                    >
-                      <span className="flex items-center gap-2">
-                        <kbd className="rounded border border-zinc-700 px-1 text-[10px] font-normal text-zinc-400">
-                          {optIdx + 1}
-                        </kbd>
-                        <span>{opt}</span>
-                      </span>
-                    </button>
-                  ))}
+                  {getObservationChoices(validatingObs.obs).map(
+                    (opt, optIdx) => (
+                      <button
+                        key={opt}
+                        onClick={() => handleSelectChoice(opt)}
+                        className={`p-2.5 min-h-[44px] rounded-xl border text-left font-mono text-xs transition ${
+                          validatingObs.selectedChoice === opt
+                            ? validatingObs.feedback?.isValid
+                              ? "border-emerald-500 bg-emerald-950/60 text-emerald-300 font-bold"
+                              : "border-rose-500 bg-rose-950/60 text-rose-300 font-bold"
+                            : "border-zinc-800 bg-zinc-900 text-zinc-300 hover:border-brand-cyan hover:bg-zinc-800"
+                        }`}
+                      >
+                        <span className="flex items-center gap-2">
+                          <kbd className="rounded border border-zinc-700 px-1 text-[10px] font-normal text-zinc-400">
+                            {optIdx + 1}
+                          </kbd>
+                          <span>{opt}</span>
+                        </span>
+                      </button>
+                    )
+                  )}
                 </div>
               </div>
 

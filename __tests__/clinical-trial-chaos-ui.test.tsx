@@ -10,6 +10,7 @@ import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { ClinicalTrialChaos } from "@/components/ClinicalTrialChaos";
 import { ClinicalChaosClient } from "@/components/arcade/ClinicalChaosClient";
+import { EMPTY_STUDY_PRESET } from "@/lib/crf";
 
 class LocalStorageMock {
   private store: Record<string, string> = {};
@@ -58,6 +59,37 @@ vi.mock("@/components/providers/AudioProvider", async (importOriginal) => {
     AudioProvider: ({ children }: { children: React.ReactNode }) => children,
   };
 });
+
+// Records polite announcements while keeping the real announcer behavior.
+const announcements = vi.hoisted(() => [] as string[]);
+vi.mock("@/hooks/useAnnouncer", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/hooks/useAnnouncer")>();
+  return {
+    ...actual,
+    useAnnouncer: () => {
+      const ctx = actual.useAnnouncer();
+      return {
+        ...ctx,
+        announce: (...args: Parameters<typeof ctx.announce>) => {
+          announcements.push(String(args[0]));
+          return ctx.announce(...args);
+        },
+      };
+    },
+  };
+});
+
+// A new Phase 1 campaign opens with the first-shift calibration (#834),
+// which freezes every clock; tests about live timers skip it.
+const skipCalibration = async (container: HTMLElement) => {
+  const skip = Array.from(container.querySelectorAll("button")).find(
+    (b) => b.textContent === "Skip calibration"
+  );
+  expect(skip).toBeDefined();
+  await act(async () => {
+    skip?.click();
+  });
+};
 
 // Lets a test fire the Fast-Track lifeline repeatedly: a zero maxCharge means
 // its charge never falls below the maximum, so it is always ready.
@@ -442,6 +474,200 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     vi.useRealTimers();
   });
 
+  it("accepts a compliant choice and lets the player retry after a rejection with a CRF Studio protocol loaded (#1150)", async () => {
+    vi.useFakeTimers();
+    // Every generated field starts flagged.
+    const randomSpy = vi.spyOn(Math, "random").mockReturnValue(0);
+    mockStorage.setItem(
+      "crf_active_protocol",
+      JSON.stringify(EMPTY_STUDY_PRESET)
+    );
+
+    await act(async () => {
+      root.render(<ClinicalTrialChaos />);
+    });
+    const startBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Start 3-Phase Campaign")
+    );
+    await act(async () => {
+      startBtn?.click();
+    });
+
+    const obsCard = Array.from(container.querySelectorAll("span"))
+      .find((s) => s.textContent?.includes("Validate Choice"))
+      ?.closest(".cursor-pointer") as HTMLElement;
+    expect(obsCard).toBeTruthy();
+    await act(async () => {
+      obsCard.click();
+    });
+
+    const dialog = () =>
+      container.querySelector('[aria-labelledby="cc-fix-dialog-title"]');
+    const choice = (label: string) =>
+      Array.from(dialog()?.querySelectorAll("button") ?? []).find(
+        (b) => b.textContent?.trim().replace(/^\d/, "") === label
+      );
+    expect(dialog()?.textContent).toContain("Date Informed Consent Signed");
+
+    await act(async () => {
+      choice("Unknown")?.click();
+    });
+    expect(dialog()?.textContent).toContain("Regulatory Query");
+    expect(dialog()?.textContent).toContain("Date Informed Consent Signed");
+
+    await act(async () => {
+      choice("2024-03-15")?.click();
+    });
+    expect(dialog()?.textContent).toContain("Standard Verified");
+    await act(async () => {
+      vi.advanceTimersByTime(600);
+    });
+    expect(dialog()).toBeNull();
+
+    randomSpy.mockRestore();
+    vi.useRealTimers();
+  });
+
+  describe("first-shift calibration (#834)", () => {
+    const timeLeft = (label: string) =>
+      container.textContent?.match(
+        new RegExp(`Subject ${label} \\([^)]*\\)\\): Time Remaining (\\d+)s`)
+      )?.[1];
+    const start = async () => {
+      await act(async () => {
+        root.render(<ClinicalTrialChaos />);
+      });
+      const startBtn = Array.from(container.querySelectorAll("button")).find(
+        (b) => b.textContent?.includes("Start 3-Phase Campaign")
+      );
+      await act(async () => {
+        startBtn?.click();
+      });
+    };
+    const tick = async (ms: number) => {
+      for (let t = 0; t < ms; t += 250) {
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(250);
+        });
+      }
+    };
+    const panel = () =>
+      container.querySelector('[data-testid="cc-calibration"]');
+
+    it("guides subject #1 through Fix, Route and Sign with every clock frozen", async () => {
+      vi.useFakeTimers();
+      announcements.length = 0;
+      try {
+        await start();
+        expect(panel()?.textContent).toContain("clocks paused");
+        expect(
+          panel()?.querySelector('[aria-current="step"]')?.textContent
+        ).toContain("Fix");
+        expect(
+          container.querySelector("#cc-dossier-title")?.textContent
+        ).toContain("SUBJ-1001");
+
+        await tick(6000);
+        expect(timeLeft("SUBJ-1001")).toBe("40");
+        expect(timeLeft("SUBJ-1003")).toBe("28");
+        expect(container.textContent).toContain("0%");
+        expect(container.textContent).toContain("Queue · 3/5");
+
+        const obsCard = Array.from(container.querySelectorAll("span"))
+          .find((s) => s.textContent?.includes("Validate Choice"))
+          ?.closest(".cursor-pointer") as HTMLElement;
+        await act(async () => {
+          obsCard.click();
+        });
+        const choice = Array.from(container.querySelectorAll("button")).find(
+          (b) => b.textContent?.trim().replace(/^\d/, "") === "180 cm"
+        );
+        await act(async () => {
+          choice?.click();
+        });
+        await tick(750);
+        expect(
+          panel()?.querySelector('[aria-current="step"]')?.textContent
+        ).toContain("Route");
+        expect(
+          announcements.some((a) => a.includes("Calibration step 2"))
+        ).toBe(true);
+
+        const dmStation = Array.from(container.querySelectorAll("h4"))
+          .find((h) => h.textContent?.includes("DM Station"))
+          ?.closest(".group") as HTMLElement;
+        await act(async () => {
+          dmStation.click();
+        });
+        expect(panel()).toBeNull();
+        expect(container.textContent).toContain("Submits:1");
+        expect(announcements).toContain(
+          "Calibration complete. The shift is live."
+        );
+
+        await tick(3000);
+        expect(Number(timeLeft("SUBJ-1003"))).toBeLessThan(28);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it("Skip resumes the same live state once and returns focus to the board", async () => {
+      vi.useFakeTimers();
+      announcements.length = 0;
+      try {
+        await start();
+        await tick(2000);
+        expect(timeLeft("SUBJ-1001")).toBe("40");
+        await skipCalibration(container);
+        expect(panel()).toBeNull();
+        expect(
+          document.activeElement?.getAttribute("data-keyboard-boundary")
+        ).toBe("true");
+        expect(
+          announcements.filter(
+            (a) => a === "Calibration skipped. The shift is live."
+          )
+        ).toHaveLength(1);
+        // Same seeded subject, still flagged, no resource consumed.
+        expect(
+          container.querySelector("#cc-dossier-title")?.textContent
+        ).toContain("SUBJ-1001");
+        expect(container.textContent).toContain("180 m");
+        expect(container.textContent).toContain("Queue · 3/5");
+        await tick(3000);
+        expect(Number(timeLeft("SUBJ-1001"))).toBeLessThan(40);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it("keeps endless mode live without calibration", async () => {
+      vi.useFakeTimers();
+      try {
+        await act(async () => {
+          root.render(<ClinicalTrialChaos />);
+        });
+        const endless = Array.from(container.querySelectorAll("button")).find(
+          (b) => b.textContent === "Endless"
+        );
+        await act(async () => {
+          endless?.click();
+        });
+        const startBtn = Array.from(container.querySelectorAll("button")).find(
+          (b) => b.textContent?.includes("Start Endless Sprint")
+        );
+        await act(async () => {
+          startBtn?.click();
+        });
+        expect(panel()).toBeNull();
+        expect(container.textContent).not.toContain("Skip calibration");
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+  });
+
   it("should switch between Conveyor Floor, Live SDTM Studio, and Audit Trail tabs", async () => {
     await act(async () => {
       root.render(<ClinicalTrialChaos />);
@@ -532,6 +758,14 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     // routed or rejected, because the player has not looked at it yet.
     expect(container.textContent).not.toContain("before routing");
     expect(container.textContent).toContain("Submits:1");
+    // #834: the SAE (SUBJ-1003) outranks SUBJ-1002 and loads next.
+    expect(container.querySelector("#cc-dossier-title")?.textContent).toContain(
+      "SUBJ-1003"
+    );
+    expect(container.textContent).toContain(
+      "Next dossier loaded: SUBJ-1003 (SAE)"
+    );
+    expect(announcements).toContain("Next dossier loaded: SUBJ-1003 (SAE)");
     expect(container.textContent).toContain("Combo:1");
     const auditTab = Array.from(container.querySelectorAll("button")).find(
       (button) => button.textContent?.includes("Audit Trail Log")
@@ -573,6 +807,8 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
       restartBtn?.click();
     });
     expect(sdtmTabLabel()).toMatch(/Live SDTM Studio0$/);
+    // A restarted Phase 1 campaign calibrates again (#834).
+    expect(container.textContent).toContain("Skip calibration");
 
     vi.useRealTimers();
   });
@@ -589,6 +825,7 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
       await act(async () => {
         startBtn?.click();
       });
+      await skipCalibration(container);
 
       const banner = () =>
         Array.from(container.querySelectorAll("p")).find((p) =>
@@ -982,6 +1219,7 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     await act(async () => {
       startBtn?.click();
     });
+    await skipCalibration(container);
 
     // Helper to tick fake timers in small steps asynchronously to allow recursive animation frames to execute
     const tickGame = async (totalMs: number, stepMs = 250) => {
@@ -1388,6 +1626,7 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
       });
 
       expect(container.textContent).toContain("SUBJ-1001");
+      await skipCalibration(container);
 
       // Helper to tick fake timers in small steps
       const tickGame = async (totalMs: number, stepMs = 250) => {

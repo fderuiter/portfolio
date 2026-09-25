@@ -9,6 +9,7 @@ import {
   ClinicalObservation,
   ClinicalSubject,
   GameMode,
+  GamePhase,
   GameScoreState,
   PowerUpInventory,
   PowerUpType,
@@ -122,6 +123,27 @@ export function createAuditLogEntry(
 }
 
 /**
+ * The choices the fix dialog offers for an observation. An empty or missing
+ * option list falls back to the expected value and the raw entry, so the
+ * dialog never opens without a button to press.
+ */
+export function getObservationChoices(
+  observation: ClinicalObservation
+): string[] {
+  const configured = (observation.options ?? []).filter(
+    (option) => option.trim().length > 0
+  );
+  const choices =
+    configured.length > 0
+      ? configured
+      : [
+          observation.correctedValue ?? observation.rawValue,
+          observation.rawValue,
+        ];
+  return Array.from(new Set(choices));
+}
+
+/**
  * Validates a user's multi-choice answer on a clinical observation using authored AST conditions.
  */
 export function validateObservationChoice(
@@ -137,44 +159,36 @@ export function validateObservationChoice(
   isAstEvaluated: boolean;
   ruleName?: string;
 } {
+  // The observation's own rule is its answer key. An authored protocol rule
+  // is consulted only when there is none, and only if every condition reads
+  // this field: a rule that also reads other fields (a BMI derivation, say)
+  // can never be satisfied by a single choice, so it would reject them all.
   let ruleToEvaluate: EditCheckRule | undefined = observation.astRule;
   let ruleName = ruleToEvaluate?.name || `AST Check (${observation.field})`;
 
-  if (activeProtocol) {
-    const protocolRules: EditCheckRule[] = [];
-    if (activeProtocol.forms) {
-      activeProtocol.forms.forEach((form) => {
-        if (form.rules && form.rules.length > 0) {
-          form.rules.forEach((r) => {
-            if (
-              r.targetFieldId === observation.field ||
-              r.targetFieldId === observation.fieldId ||
-              r.triggerFieldIds.includes(observation.field) ||
-              (observation.fieldId &&
-                r.triggerFieldIds.includes(observation.fieldId))
-            ) {
-              protocolRules.push(r);
-            }
-          });
-        }
-      });
-    }
-    if (activeProtocol.rules && activeProtocol.rules.length > 0) {
-      activeProtocol.rules.forEach((r) => {
-        if (
-          r.targetFieldId === observation.field ||
-          r.targetFieldId === observation.fieldId ||
-          r.triggerFieldIds.includes(observation.field) ||
-          (observation.fieldId &&
-            r.triggerFieldIds.includes(observation.fieldId))
-        ) {
-          protocolRules.push(r);
-        }
-      });
-    }
-    if (protocolRules.length > 0) {
-      ruleToEvaluate = protocolRules[0];
-      ruleName = ruleToEvaluate.name;
+  if (!ruleToEvaluate && activeProtocol) {
+    const aliases = new Set(
+      [observation.field, observation.fieldId].filter(
+        (alias): alias is string => Boolean(alias)
+      )
+    );
+    const readsOnlyThisField = (r: EditCheckRule) =>
+      !r.unsupportedExpression &&
+      !(r.conditionGroups && r.conditionGroups.length > 0) &&
+      r.conditions.length > 0 &&
+      r.conditions.every((c) => aliases.has(c.fieldId) && !c.crossVisitId);
+    const protocolRule = [
+      ...(activeProtocol.forms ?? []).flatMap((form) => form.rules ?? []),
+      ...(activeProtocol.rules ?? []),
+    ].find(
+      (r) =>
+        (aliases.has(r.targetFieldId) ||
+          r.triggerFieldIds.some((id) => aliases.has(id))) &&
+        readsOnlyThisField(r)
+    );
+    if (protocolRule) {
+      ruleToEvaluate = protocolRule;
+      ruleName = protocolRule.name;
     }
   }
 
@@ -540,6 +554,58 @@ export function verify21CFRSubmission(
     logMessage: `[COMPLIANT] 21 CFR Part 11 Signature verified for ${subject.subjectLabel} -> ${targetStation} (${reason}). Auditor satisfied.`,
     level: "COMPLIANT",
   };
+}
+
+/**
+ * Picks the dossier to load after a submission: SAE cases first, then the
+ * least time remaining, then the oldest arrival, then subject id, so the
+ * choice is deterministic. Returns null when nothing is pending.
+ */
+export function selectNextUrgentSubject(
+  queue: ReadonlyArray<ClinicalSubject>
+): ClinicalSubject | null {
+  const pending = queue.filter(
+    (subject) =>
+      subject.status !== "submitted" &&
+      subject.status !== "rejected" &&
+      subject.status !== "expired"
+  );
+  if (pending.length === 0) return null;
+  return [...pending].sort(
+    (a, b) =>
+      Number(Boolean(b.isSAE)) - Number(Boolean(a.isSAE)) ||
+      a.timeRemaining - b.timeRemaining ||
+      a.createdAt - b.createdAt ||
+      a.id.localeCompare(b.id)
+  )[0];
+}
+
+/** Where the first-shift calibration walkthrough stands (#834). */
+export type CalibrationStep = "fix" | "route" | "complete";
+
+/**
+ * Whether a new shift opens with the first-shift calibration: only a Phase 1
+ * campaign does; later phases and endless mode start live.
+ */
+export function shouldRunCalibration(
+  mode: GameMode,
+  phase: GamePhase
+): boolean {
+  return mode === "campaign" && phase === 1;
+}
+
+/**
+ * Derives the calibration step from the live queue: the guided subject still
+ * has flagged fields ("fix"), is clean and waiting to be routed ("route"), or
+ * has left the queue because it was submitted ("complete").
+ */
+export function getCalibrationStep(
+  queue: ReadonlyArray<ClinicalSubject>,
+  subjectId: string
+): CalibrationStep {
+  const subject = queue.find((s) => s.id === subjectId);
+  if (!subject) return "complete";
+  return subject.observations.some((o) => !o.isResolved) ? "fix" : "route";
 }
 
 /**

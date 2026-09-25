@@ -128,6 +128,12 @@ Re-exports [calculateSubmissionPoints](engine/functions/calculateSubmissionPoint
 
 ***
 
+### CalibrationStep
+
+Re-exports [CalibrationStep](engine/type-aliases/CalibrationStep.md)
+
+***
+
 ### CDISCDomain
 
 Re-exports [CDISCDomain](types/type-aliases/CDISCDomain.md)
@@ -284,9 +290,21 @@ Re-exports [generateSDTMDataset](engine/functions/generateSDTMDataset.md)
 
 ***
 
+### getCalibrationStep
+
+Re-exports [getCalibrationStep](engine/functions/getCalibrationStep.md)
+
+***
+
 ### getFollowUpSubject
 
 Re-exports [getFollowUpSubject](sponsor/functions/getFollowUpSubject.md)
+
+***
+
+### getObservationChoices
+
+Re-exports [getObservationChoices](engine/functions/getObservationChoices.md)
 
 ***
 
@@ -527,6 +545,18 @@ Re-exports [SDTMRow](types/interfaces/SDTMRow.md)
 ### SEEDED\_SCENARIOS
 
 Re-exports [SEEDED_SCENARIOS](scenarios/variables/SEEDED_SCENARIOS.md)
+
+***
+
+### selectNextUrgentSubject
+
+Re-exports [selectNextUrgentSubject](engine/functions/selectNextUrgentSubject.md)
+
+***
+
+### shouldRunCalibration
+
+Re-exports [shouldRunCalibration](engine/functions/shouldRunCalibration.md)
 
 ***
 
