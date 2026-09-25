@@ -316,28 +316,54 @@ export class TelemetryService {
       };
     }
 
-    const stats = await prisma.telemetryEvent.groupBy({
-      by: ["projectSlug", "eventType"],
-      _count: {
-        id: true,
-      },
-    });
-
     const formattedStats: Record<string, { views: number; clicks: number }> =
       {};
 
-    for (const item of stats) {
-      const slug = item.projectSlug;
-      if (!formattedStats[slug]) {
-        formattedStats[slug] = { views: 0, clicks: 0 };
-      }
+    await prisma.$transaction(
+      async (transaction) => {
+        const [rawStats, rollupStats] = await Promise.all([
+          transaction.telemetryEvent.groupBy({
+            by: ["projectSlug", "eventType"],
+            where: { eventType: { in: ["page_view", "project_click"] } },
+            _count: { id: true },
+          }),
+          transaction.telemetryDailyRollup.groupBy({
+            by: ["projectSlug", "eventType"],
+            where: { eventType: { in: ["page_view", "project_click"] } },
+            _sum: { count: true },
+          }),
+        ]);
 
-      if (item.eventType === "page_view") {
-        formattedStats[slug].views = item._count.id;
-      } else if (item.eventType === "project_click") {
-        formattedStats[slug].clicks = item._count.id;
-      }
-    }
+        const addStats = (
+          slug: string,
+          eventType: string,
+          count: number
+        ) => {
+          if (eventType !== "page_view" && eventType !== "project_click") {
+            return;
+          }
+
+          if (!formattedStats[slug]) {
+            formattedStats[slug] = { views: 0, clicks: 0 };
+          }
+
+          if (eventType === "page_view") {
+            formattedStats[slug].views += count;
+          } else {
+            formattedStats[slug].clicks += count;
+          }
+        };
+
+        for (const item of rawStats) {
+          addStats(item.projectSlug, item.eventType, item._count.id);
+        }
+
+        for (const item of rollupStats) {
+          addStats(item.projectSlug, item.eventType, item._sum.count ?? 0);
+        }
+      },
+      { isolationLevel: "RepeatableRead" }
+    );
 
     return formattedStats;
   }

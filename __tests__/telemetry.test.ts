@@ -3,16 +3,25 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import crypto from "crypto";
 
 // Use vi.hoisted to declare the mock function before any imports or mocks are executed
-const { mockRatelimitLimit, mockLpush, mockExpire, mockExec } = vi.hoisted(
-  () => {
-    return {
-      mockRatelimitLimit: vi.fn(),
-      mockLpush: vi.fn(),
-      mockExpire: vi.fn(),
-      mockExec: vi.fn().mockResolvedValue([1]),
-    };
-  }
-);
+const {
+  mockRatelimitLimit,
+  mockLpush,
+  mockExpire,
+  mockExec,
+  mockTelemetryTransaction,
+  mockRawGroupBy,
+  mockRollupGroupBy,
+} = vi.hoisted(() => {
+  return {
+    mockRatelimitLimit: vi.fn(),
+    mockLpush: vi.fn(),
+    mockExpire: vi.fn(),
+    mockExec: vi.fn().mockResolvedValue([1]),
+    mockTelemetryTransaction: vi.fn(),
+    mockRawGroupBy: vi.fn(),
+    mockRollupGroupBy: vi.fn(),
+  };
+});
 
 // Mock the dependencies
 vi.mock("@/lib/db", () => {
@@ -20,11 +29,18 @@ vi.mock("@/lib/db", () => {
     prisma: {
       telemetryEvent: {
         create: vi.fn(),
-        groupBy: vi.fn(),
+        groupBy: mockRawGroupBy,
       },
+      telemetryDailyRollup: { groupBy: mockRollupGroupBy },
+      $transaction: mockTelemetryTransaction,
     },
   };
 });
+
+const mockTelemetryTransactionClient = {
+  telemetryEvent: { groupBy: mockRawGroupBy },
+  telemetryDailyRollup: { groupBy: mockRollupGroupBy },
+};
 
 vi.mock("@upstash/redis", () => {
   class MockRedis {
@@ -56,6 +72,17 @@ import { prisma } from "@/lib/db";
 describe("Telemetry API Route - Route Error Telemetry", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockRawGroupBy.mockReset().mockResolvedValue([]);
+    mockRollupGroupBy.mockReset().mockResolvedValue([]);
+    mockTelemetryTransaction
+      .mockReset()
+      .mockImplementation(
+        async (
+          callback: (
+            transaction: typeof mockTelemetryTransactionClient
+          ) => unknown
+        ) => callback(mockTelemetryTransactionClient)
+      );
     // Default rate limit behavior to success for existing tests
     mockRatelimitLimit.mockReset().mockResolvedValue({
       success: true,
@@ -249,20 +276,33 @@ describe("Telemetry API Route - Route Error Telemetry", () => {
       },
       { projectSlug: "/about", eventType: "page_view", _count: { id: 4 } },
     ];
-    vi.mocked(prisma.telemetryEvent.groupBy).mockResolvedValue(
-      mockGroupByRes as any
-    );
+    mockRawGroupBy.mockResolvedValue(mockGroupByRes);
+    mockRollupGroupBy.mockResolvedValue([
+      {
+        projectSlug: "/dashboard",
+        eventType: "page_view",
+        _sum: { count: 3 },
+      },
+      {
+        projectSlug: "/about",
+        eventType: "project_click",
+        _sum: { count: 2 },
+      },
+    ]);
 
     const res = await GET();
     expect(res.status).toBe(200);
 
     const data = await res.json();
-    expect(data["/dashboard"]).toEqual({ views: 12, clicks: 7 });
-    expect(data["/about"]).toEqual({ views: 4, clicks: 0 });
+    expect(data["/dashboard"]).toEqual({ views: 15, clicks: 7 });
+    expect(data["/about"]).toEqual({ views: 4, clicks: 2 });
+    expect(mockTelemetryTransaction).toHaveBeenCalledTimes(1);
+    expect(mockRawGroupBy).toHaveBeenCalledTimes(1);
+    expect(mockRollupGroupBy).toHaveBeenCalledTimes(1);
   });
 
   it("should fail gracefully on GET request if database query fails", async () => {
-    vi.mocked(prisma.telemetryEvent.groupBy).mockRejectedValue(
+    mockRollupGroupBy.mockRejectedValue(
       new Error("Database connection timed out")
     );
 
