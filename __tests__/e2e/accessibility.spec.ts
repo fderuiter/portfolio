@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { test, expect, Page, TestInfo } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { settleFooterTicker } from "./helpers/footer-ticker";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -103,6 +104,7 @@ async function auditAndAssert(
     builder = builder.exclude(selector);
   }
 
+  await settleFooterTicker(page);
   const results = await builder.analyze();
   // Filter for critical, serious, and moderate violations (zero tolerance policy)
   const targetViolations = results.violations.filter(
@@ -317,15 +319,6 @@ test.describe("Continuous Accessibility (a11y) & WCAG 2.1 AA Audit Suite", () =>
   });
 
   /**
-   * The global footer ticker animates continuously and never settles, so a scan
-   * can land mid-transform and report a transient contrast failure on any
-   * route. It is not a Patrol Shift surface and is already covered by the
-   * landing-page audit, so it is scoped out of the Patrol Shift sweep rather
-   * than masked with a retry.
-   */
-  const GLOBAL_ANIMATED_REGIONS = ['[data-testid="footer-status-ticker"]'];
-
-  /**
    * The field manual fades in under framer-motion, which drives opacity through
    * inline style rather than a CSS animation, so the injected `animation: none`
    * reset does not stop it. Scanning mid-fade measures a partially transparent
@@ -370,9 +363,7 @@ test.describe("Continuous Accessibility (a11y) & WCAG 2.1 AA Audit Suite", () =>
     await page.waitForSelector('[data-testid="patrol-intro-screen"]', {
       timeout: 15000,
     });
-    await auditAndAssert(page, testInfo, "Patrol Shift Intro Screen", {
-      exclude: GLOBAL_ANIMATED_REGIONS,
-    });
+    await auditAndAssert(page, testInfo, "Patrol Shift Intro Screen");
 
     // 2. Field manual — reachable at any point, and must trap focus cleanly.
     await expect(async () => {
@@ -382,9 +373,7 @@ test.describe("Continuous Accessibility (a11y) & WCAG 2.1 AA Audit Suite", () =>
       await expect(page.getByRole("dialog")).toBeVisible({ timeout: 2000 });
     }).toPass({ timeout: 15000 });
     await waitForDialogFadeIn(page);
-    await auditAndAssert(page, testInfo, "Patrol Shift Field Manual Modal", {
-      exclude: GLOBAL_ANIMATED_REGIONS,
-    });
+    await auditAndAssert(page, testInfo, "Patrol Shift Field Manual Modal");
     await page.keyboard.press("Escape");
     await expect(page.getByRole("dialog")).toBeHidden();
 
@@ -395,9 +384,7 @@ test.describe("Continuous Accessibility (a11y) & WCAG 2.1 AA Audit Suite", () =>
         page.locator('[data-testid="patrol-briefing-screen"]')
       ).toBeVisible({ timeout: 2000 });
     }).toPass({ timeout: 15000 });
-    await auditAndAssert(page, testInfo, "Patrol Shift Briefing Screen", {
-      exclude: GLOBAL_ANIMATED_REGIONS,
-    });
+    await auditAndAssert(page, testInfo, "Patrol Shift Briefing Screen");
 
     // 4. MOUNTAIN MAP HUB
     await expect(async () => {
@@ -408,9 +395,7 @@ test.describe("Continuous Accessibility (a11y) & WCAG 2.1 AA Audit Suite", () =>
         page.locator('[data-testid="patrol-mountain-map"]')
       ).toBeVisible({ timeout: 2000 });
     }).toPass({ timeout: 15000 });
-    await auditAndAssert(page, testInfo, "Patrol Shift Mountain Map Hub", {
-      exclude: GLOBAL_ANIMATED_REGIONS,
-    });
+    await auditAndAssert(page, testInfo, "Patrol Shift Mountain Map Hub");
   });
 
   test("Audit: Patrol Shift Dispatch, Scene, Transport & Debrief", async ({
@@ -439,9 +424,7 @@ test.describe("Continuous Accessibility (a11y) & WCAG 2.1 AA Audit Suite", () =>
         page.getByRole("button", { name: /Acknowledge & Respond/i })
       ).toBeVisible({ timeout: 2000 });
     }).toPass({ timeout: 15000 });
-    await auditAndAssert(page, testInfo, "Patrol Shift Dispatch Overlay", {
-      exclude: GLOBAL_ANIMATED_REGIONS,
-    });
+    await auditAndAssert(page, testInfo, "Patrol Shift Dispatch Overlay");
 
     // SCENE (OEC)
     await expect(async () => {
@@ -452,9 +435,7 @@ test.describe("Continuous Accessibility (a11y) & WCAG 2.1 AA Audit Suite", () =>
         page.locator('[data-testid="patrol-scene-interaction"]')
       ).toBeVisible({ timeout: 2000 });
     }).toPass({ timeout: 15000 });
-    await auditAndAssert(page, testInfo, "Patrol Shift Scene Interaction", {
-      exclude: GLOBAL_ANIMATED_REGIONS,
-    });
+    await auditAndAssert(page, testInfo, "Patrol Shift Scene Interaction");
   });
 
   test("Audit: Patrol Shift OET step-through accessibility fallback", async ({
@@ -505,9 +486,7 @@ test.describe("Continuous Accessibility (a11y) & WCAG 2.1 AA Audit Suite", () =>
       ).toBeVisible({ timeout: 2000 });
     }).toPass({ timeout: 15000 });
 
-    await auditAndAssert(page, testInfo, "Patrol Shift OET Step-Through Mode", {
-      exclude: GLOBAL_ANIMATED_REGIONS,
-    });
+    await auditAndAssert(page, testInfo, "Patrol Shift OET Step-Through Mode");
   });
 
   test("Audit: Logical Proof Workspace", async ({ page }, testInfo) => {

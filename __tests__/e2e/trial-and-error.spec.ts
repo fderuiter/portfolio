@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { settleFooterTicker } from "./helpers/footer-ticker";
 
 /**
  * A fixed seed makes the crisis draw repeatable (T&E-05): this one deals the
@@ -23,19 +24,10 @@ async function launch(page: Page) {
   }).toPass({ timeout: 30000 });
 }
 
-/**
- * The global footer ticker animates continuously, so a scan can land mid-fade
- * and report a transient contrast failure. It is not a cabinet surface and the
- * landing-page audit covers it, so it is scoped out here as in the Patrol Shift
- * sweep (accessibility.spec.ts) rather than masked with a retry.
- */
-const GLOBAL_ANIMATED_REGION = '[data-testid="footer-status-ticker"]';
-
 async function expectNoBlockingViolations(page: Page, state: string) {
-  const results = await new AxeBuilder({ page })
-    .withTags(WCAG_TAGS)
-    .exclude(GLOBAL_ANIMATED_REGION)
-    .analyze();
+  // The footer stays in scope, held on a settled line (#952).
+  await settleFooterTicker(page);
+  const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
   const blocking = results.violations
     .filter((v) => BLOCKING.has(v.impact ?? ""))
     .map(
