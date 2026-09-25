@@ -655,27 +655,15 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
         .find((heading) => heading.textContent?.includes("AE Station"))
         ?.closest("button") as HTMLButtonElement;
       expect(aeStation.textContent).toContain("Other domain");
+      // A clean dossier sent to the wrong station is a real submission: it
+      // keeps the signature modal and the engine's mismatch validation.
       await act(async () => {
         aeStation.click();
       });
       expect(container.textContent).toContain(
-        "This dossier routes to DM or VS, not AE"
-      );
-      expect(container.textContent).not.toContain(
         "21 CFR Part 11 Electronic Signature"
       );
-      expect(
-        container
-          .querySelector('[aria-label="FDA auditor suspicion"]')
-          ?.getAttribute("aria-valuenow")
-      ).toBe(initialAuditor);
-
-      await act(async () => {
-        dmStation.click();
-      });
-      expect(container.textContent).toContain(
-        "21 CFR Part 11 Electronic Signature"
-      );
+      expect(container.textContent).not.toContain("before routing");
     } finally {
       vi.useRealTimers();
     }

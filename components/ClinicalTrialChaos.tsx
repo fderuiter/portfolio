@@ -1030,17 +1030,12 @@ export const ClinicalTrialChaos: React.FC = () => {
   const handleInitiateSubmission = useCallback(
     (domain: CDISCDomain) => {
       if (!activeSubject) return;
-      const { matchingDomains, unresolvedCount } = getRoutingReadiness(
-        activeSubject,
-        stations
-      );
-      if (unresolvedCount > 0 || !matchingDomains.includes(domain)) {
-        const message =
-          unresolvedCount > 0
-            ? `Resolve ${unresolvedCount} flagged observation${unresolvedCount === 1 ? "" : "s"} before routing`
-            : matchingDomains.length > 0
-              ? `This dossier routes to ${matchingDomains.join(" or ")}, not ${domain}`
-              : "No active station accepts this dossier";
+      // Only a premature route is forgiven (#834 Prompt 1). A clean dossier
+      // sent to the wrong station is a genuinely invalid submission and still
+      // goes through verify21CFRSubmission and its penalties.
+      const { unresolvedCount } = getRoutingReadiness(activeSubject, stations);
+      if (unresolvedCount > 0) {
+        const message = `Resolve ${unresolvedCount} flagged observation${unresolvedCount === 1 ? "" : "s"} before routing`;
         setRoutingNotice({
           subjectId: activeSubject.id,
           unresolvedCount,
@@ -3137,13 +3132,18 @@ export const ClinicalTrialChaos: React.FC = () => {
                               <span className="text-[9px] font-bold text-emerald-300">
                                 Accepts ✓
                               </span>
-                            ) : matches ? (
-                              <span className="text-[9px] font-bold text-amber-300">
-                                Fix first
-                              </span>
-                            ) : activeSubject ? (
-                              <span className="text-[9px] font-medium text-zinc-300">
-                                Other domain
+                            ) : matches || activeSubject ? (
+                              <span className="flex min-w-0 items-center gap-1">
+                                <span
+                                  className={`text-[9px] ${matches ? "font-bold text-amber-300" : "font-medium text-zinc-300"}`}
+                                >
+                                  {matches ? "Fix first" : "Other domain"}
+                                </span>
+                                <span
+                                  aria-hidden="true"
+                                  className="h-2 w-2 shrink-0 rounded-full"
+                                  style={{ backgroundColor: station.color }}
+                                />
                               </span>
                             ) : (
                               <span
