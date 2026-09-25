@@ -933,17 +933,6 @@ class IMednetClient:
       "A wedding website with invitation codes, RSVPs for multiple events, dietary requirements, and an admin dashboard. Built with **Next.js**, **Prisma**, and **PostgreSQL**. Apparently wedding planning was going to involve a schema.",
     architectural_narrative: `<h3>The problem</h3>
 <p>A wedding RSVP becomes a data-modeling problem surprisingly quickly. One household can have several guests, different event invitations, and multiple dietary requirements. This site gives those details a home without making guests think about the database underneath.</p>
-<div class="my-6 rounded-2xl overflow-hidden border border-white/10 bg-black/40 p-4">
-  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-    <div class="relative aspect-[3/4] rounded-xl overflow-hidden border border-white/10 bg-black/50">
-      <img src="/images/personal/fred-partner-statue-of-liberty.jpg" alt="Frederick and his partner in rain ponchos at the Statue of Liberty" class="w-full h-full object-cover" />
-    </div>
-    <div class="relative aspect-[3/4] rounded-xl overflow-hidden border border-white/10 bg-black/50">
-      <img src="/images/personal/fred-partner-sunny.jpg" alt="Frederick and his partner smiling on a sunny summer day" class="w-full h-full object-cover" />
-    </div>
-  </div>
-  <p class="text-xs text-zinc-400 font-mono mt-3 text-center">The real-world couple and guests behind the 250+ RSVP relational schema.</p>
-</div>
 <p><strong>The approach:</strong> Next.js Server Actions handle submissions, Zod checks the inputs, and Prisma writes guest and RSVP records to PostgreSQL. Confirmation emails close the loop.</p>
 <p><strong>Reported project measurements:</strong> 100% RSVP data integrity across 250+ guests; sub-100ms Server Action database transaction latency; zero dependency on commercial monolith builders.</p>
 

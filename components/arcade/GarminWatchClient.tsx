@@ -168,7 +168,7 @@ export const GarminWatchClient: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="md:col-span-7 flex flex-col justify-center">
+                <div className="md:col-span-7 min-w-0 flex flex-col justify-center">
                   <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-mono mb-2 w-fit">
                     <IconRun className="w-3.5 h-3.5" />
                     <span>Real-World Engineering Inspiration</span>

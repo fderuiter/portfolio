@@ -111,7 +111,6 @@ export default function ContactPage() {
                   prev === "wholesale" ? "flame" : "wholesale"
                 )
               }
-              aria-label={`Toggle Costco mode. Currently ${costcoMode === "wholesale" ? "Wholesale Run" : "Alpine Flame"} mode. Click to flip.`}
               className="w-full text-left p-4 sm:p-5 bg-zinc-900/40 border border-zinc-800 hover:border-amber-500/40 rounded-2xl flex items-center gap-4 transition-all cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
             >
               <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border border-white/10 shrink-0 bg-black/60 shadow group-hover:scale-105 transition-transform duration-200">
