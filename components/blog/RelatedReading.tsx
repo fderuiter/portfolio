@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import type { RelatedItem } from "@/lib/blog/related";
+import { InlineMarkdown } from "@/components/ui/InlineMarkdown";
 
 interface RelatedReadingProps {
   items: RelatedItem[];
@@ -71,7 +72,7 @@ export function RelatedReading({ items }: RelatedReadingProps) {
 
               {/* Summary */}
               <p className="text-xs text-zinc-400 leading-relaxed line-clamp-3 mb-4">
-                {item.summary}
+                <InlineMarkdown text={item.summary} />
               </p>
             </div>
 

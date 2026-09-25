@@ -157,4 +157,26 @@ describe("calculateRelatedReading", () => {
 
     expect(related.length).toBe(2);
   });
+
+  it("matches pillar keywords against whole title words only", () => {
+    const study = (id: string, title: string): CaseStudyData => ({
+      ...sampleCaseStudies[0],
+      id,
+      slug: id,
+      title,
+      tags: "",
+    });
+    const related = calculateRelatedReading(
+      { slug: "x", pillar: "formal-verification", tags: [] },
+      {
+        posts: [],
+        caseStudies: [
+          study("hono", "Hono-Kiln: A Clean Starting Point"),
+          study("lean", "Proofs in Lean"),
+        ],
+      }
+    );
+
+    expect(related.map((item) => item.slug)).toEqual(["lean"]);
+  });
 });

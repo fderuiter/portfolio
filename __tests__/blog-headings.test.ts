@@ -16,24 +16,24 @@ describe("Blog Headings Extractor & Injector (Ticket #1058)", () => {
 
     expect(headings).toHaveLength(3);
     expect(headings[0]).toEqual({
-      id: "the-challenge-memory-exhaustion",
+      id: "section-the-challenge-memory-exhaustion",
       text: "The Challenge: Memory Exhaustion",
       level: 2,
     });
     expect(headings[1]).toEqual({
-      id: "streaming-xml-tokenization",
+      id: "section-streaming-xml-tokenization",
       text: "Streaming XML Tokenization",
       level: 3,
     });
     expect(headings[2]).toEqual({
-      id: "enforcing-sdtm-conformance",
+      id: "section-enforcing-sdtm-conformance",
       text: "Enforcing SDTM Conformance",
       level: 3,
     });
 
-    expect(html).toContain('id="the-challenge-memory-exhaustion"');
-    expect(html).toContain('id="streaming-xml-tokenization"');
-    expect(html).toContain('id="enforcing-sdtm-conformance"');
+    expect(html).toContain('id="section-the-challenge-memory-exhaustion"');
+    expect(html).toContain('id="section-streaming-xml-tokenization"');
+    expect(html).toContain('id="section-enforcing-sdtm-conformance"');
   });
 
   it("cleans nested tags from heading text for display in TOC", () => {
@@ -45,8 +45,12 @@ describe("Blog Headings Extractor & Injector (Ticket #1058)", () => {
 
     expect(headings).toHaveLength(1);
     expect(headings[0].text).toBe("Building with Float64Array and Zero GC");
-    expect(headings[0].id).toBe("building-with-float64array-and-zero-gc");
-    expect(html).toContain('id="building-with-float64array-and-zero-gc"');
+    expect(headings[0].id).toBe(
+      "section-building-with-float64array-and-zero-gc"
+    );
+    expect(html).toContain(
+      'id="section-building-with-float64array-and-zero-gc"'
+    );
   });
 
   it("disambiguates duplicate heading titles with numbered suffixes", () => {
@@ -60,11 +64,11 @@ describe("Blog Headings Extractor & Injector (Ticket #1058)", () => {
     const { headings, html } = extractAndInjectHeadings(input);
 
     expect(headings).toHaveLength(2);
-    expect(headings[0].id).toBe("common-failure-modes");
-    expect(headings[1].id).toBe("common-failure-modes-1");
+    expect(headings[0].id).toBe("section-common-failure-modes");
+    expect(headings[1].id).toBe("section-common-failure-modes-1");
 
-    expect(html).toContain('id="common-failure-modes"');
-    expect(html).toContain('id="common-failure-modes-1"');
+    expect(html).toContain('id="section-common-failure-modes"');
+    expect(html).toContain('id="section-common-failure-modes-1"');
   });
 
   it("preserves pre-existing IDs on headings", () => {
@@ -86,5 +90,31 @@ describe("Blog Headings Extractor & Injector (Ticket #1058)", () => {
 
     expect(headings).toEqual([]);
     expect(html).toBe(input);
+  });
+
+  it("decodes entities in TOC labels and slugs", () => {
+    const { headings } = extractAndInjectHeadings(
+      "<h3>Audit Trails &amp; Provenance</h3>"
+    );
+    expect(headings[0].text).toBe("Audit Trails & Provenance");
+    expect(headings[0].id).toBe("section-audit-trails-provenance");
+  });
+
+  it("prefixes generated ids so DOMPurify anti-clobbering keeps them", () => {
+    const { headings, html } = extractAndInjectHeadings("<h2>Images</h2>");
+    expect(headings[0].id).toBe("section-images");
+    expect(html).toContain('id="section-images"');
+  });
+
+  it("ignores data-id and never duplicates an explicit id", () => {
+    const { headings, html } = extractAndInjectHeadings(
+      '<h2 data-id="x">Foo</h2><h2 id="section-setup">A</h2><h2>Setup</h2>'
+    );
+    expect(headings.map((h) => h.id)).toEqual([
+      "section-foo",
+      "section-setup",
+      "section-setup-1",
+    ]);
+    expect(html).toContain('<h2 id="section-foo" data-id="x">');
   });
 });

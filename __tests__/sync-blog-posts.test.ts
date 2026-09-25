@@ -37,6 +37,25 @@ describe("calculatePostMd5", () => {
     expect(calculatePostMd5(postA)).not.toBe(calculatePostMd5(postB));
   });
 
+  it("detects publish-state and hero image changes", () => {
+    const post = {
+      title: "Test Post",
+      dek: "Test Dek",
+      body: "<p>Content</p>",
+      pillar: "clinical-data-engineering",
+      tags: "cdisc",
+      published: true,
+      hero_image_url: null,
+    };
+
+    expect(calculatePostMd5(post)).not.toBe(
+      calculatePostMd5({ ...post, published: false })
+    );
+    expect(calculatePostMd5(post)).not.toBe(
+      calculatePostMd5({ ...post, hero_image_url: "/hero.png" })
+    );
+  });
+
   it("trims whitespace so harmless edge spaces do not alter MD5", () => {
     const postA = {
       title: "Test Post",
@@ -117,6 +136,8 @@ describe("syncBlogPosts", () => {
             pillar: "clinical-data-engineering",
             tags: "cdisc",
             reading_time_minutes: 5,
+            published: true,
+            hero_image_url: null,
           });
         }
         if (where.slug === "post-to-update") {
@@ -182,6 +203,7 @@ describe("syncBlogPosts", () => {
 
     const createMock = vi.fn().mockResolvedValue({});
     const updateMock = vi.fn().mockResolvedValue({});
+    const evictMock = vi.fn().mockResolvedValue(true);
 
     const mockPrisma = {
       blogPost: {
@@ -196,6 +218,7 @@ describe("syncBlogPosts", () => {
       silent: true,
       customPosts: [mockPosts[0], mockPosts[2]], // create & update
       prismaClient: mockPrisma,
+      evictCache: evictMock,
     });
 
     expect(report.mode).toBe("commit");
@@ -204,5 +227,7 @@ describe("syncBlogPosts", () => {
 
     expect(createMock).toHaveBeenCalledTimes(1);
     expect(updateMock).toHaveBeenCalledTimes(1);
+    expect(evictMock).toHaveBeenCalledWith("post-to-create");
+    expect(evictMock).toHaveBeenCalledWith("post-to-update");
   });
 });

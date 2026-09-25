@@ -2,6 +2,22 @@
 
 import React, { useState, useEffect, useRef } from "react";
 
+/**
+ * Chrome classes shared with RichNarrative's server-rendered fallback, so the
+ * header bar is already in place at first paint and rehydration causes no
+ * layout shift.
+ */
+export const CODE_BLOCK_WRAPPER_CLASS =
+  "relative group/code my-6 rounded-xl border border-zinc-800/80 bg-zinc-950/80 overflow-hidden shadow-md";
+export const CODE_BLOCK_HEADER_CLASS =
+  "flex items-center justify-between px-4 py-2 bg-zinc-900/60 border-b border-zinc-800/60 text-xs font-mono select-none";
+export const CODE_BLOCK_LABEL_CLASS =
+  "text-zinc-400 font-semibold tracking-wider";
+export const CODE_BLOCK_BUTTON_CLASS =
+  "inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-zinc-800/60 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-brand-cyan/50 text-xs";
+export const CODE_BLOCK_PRE_CLASS =
+  "p-4 overflow-x-auto text-sm font-mono text-zinc-200 leading-relaxed outline-none focus:ring-1 focus:ring-brand-cyan/40";
+
 interface CodeBlockProps {
   language?: string;
   code: string;
@@ -55,10 +71,10 @@ export function CodeBlock({
     : null;
 
   return (
-    <div className="relative group/code my-6 rounded-xl border border-zinc-800/80 bg-zinc-950/80 overflow-hidden shadow-md">
+    <div className={CODE_BLOCK_WRAPPER_CLASS}>
       {/* Code Block Header with Language Badge & Copy Button */}
-      <div className="flex items-center justify-between px-4 py-2 bg-zinc-900/60 border-b border-zinc-800/60 text-xs font-mono select-none">
-        <span className="text-zinc-400 font-semibold tracking-wider">
+      <div className={CODE_BLOCK_HEADER_CLASS}>
+        <span className={CODE_BLOCK_LABEL_CLASS}>
           {formattedLanguage || "CODE"}
         </span>
 
@@ -66,7 +82,7 @@ export function CodeBlock({
           type="button"
           onClick={handleCopy}
           aria-label={copied ? "Copied code" : "Copy code to clipboard"}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-zinc-800/60 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-brand-cyan/50 text-xs"
+          className={CODE_BLOCK_BUTTON_CLASS}
         >
           {copied ? (
             <>
@@ -116,7 +132,7 @@ export function CodeBlock({
       {/* Pre-formatted code block */}
       <pre
         {...cleanPreProps}
-        className={`p-4 overflow-x-auto text-sm font-mono text-zinc-200 leading-relaxed outline-none focus:ring-1 focus:ring-brand-cyan/40 ${
+        className={`${CODE_BLOCK_PRE_CLASS} ${
           (cleanPreProps.className as string) || ""
         }`}
       >

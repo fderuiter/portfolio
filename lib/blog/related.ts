@@ -211,12 +211,25 @@ export function calculateRelatedReading(
         }
       }
 
+      // Match pillar keywords against whole title words, not substrings,
+      // so short keywords like "ast" or "rust" don't hit "starting" or "trust"
+      // (adjacent pairs and triples cover keywords like "clean-architecture")
+      const titleWords = cs.title
+        .split(/[^a-z0-9]+/i)
+        .map((word) => normalizeTag(word))
+        .filter(Boolean);
+      const titleTokens = new Set<string>();
+      titleWords.forEach((_, i) => {
+        for (let n = 1; n <= 3 && i + n <= titleWords.length; n++) {
+          titleTokens.add(titleWords.slice(i, i + n).join(""));
+        }
+      });
+
       // Check domain keyword match with post's content pillar
       const matchesPillar =
         csNormalizedTags.some((t) =>
           currentPillarKeywords.includes(t.normalized)
-        ) ||
-        currentPillarKeywords.some((kw) => normalizeTag(cs.title).includes(kw));
+        ) || currentPillarKeywords.some((kw) => titleTokens.has(kw));
 
       if (matchesPillar) {
         score += 6;

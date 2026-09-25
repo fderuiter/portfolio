@@ -10,6 +10,42 @@ export interface HeadingItem {
 }
 
 /**
+ * Prefix applied to generated anchor IDs. Without it, headings such as
+ * "Images" or "Title" produce ids that DOMPurify's anti-clobbering pass strips.
+ */
+const GENERATED_ID_PREFIX = "section-";
+
+const NAMED_ENTITIES: Record<string, string> = {
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  apos: "'",
+  nbsp: " ",
+};
+
+/**
+ * Decodes the HTML entities DOMPurify emits so TOC labels read as plain text.
+ */
+function decodeEntities(text: string): string {
+  return text.replace(
+    /&(#x[0-9a-f]+|#\d+|[a-z]+);/gi,
+    (match, entity: string) => {
+      if (entity[0] === "#") {
+        const codePoint =
+          entity[1].toLowerCase() === "x"
+            ? parseInt(entity.slice(2), 16)
+            : parseInt(entity.slice(1), 10);
+        return Number.isFinite(codePoint) && codePoint <= 0x10ffff
+          ? String.fromCodePoint(codePoint)
+          : match;
+      }
+      return NAMED_ENTITIES[entity.toLowerCase()] ?? match;
+    }
+  );
+}
+
+/**
  * Transforms a human-readable heading string into a URL-friendly anchor slug.
  */
 export function slugifyHeading(text: string): string {
@@ -37,10 +73,20 @@ export function extractAndInjectHeadings(html: string): {
   }
 
   const headings: HeadingItem[] = [];
-  const usedIds = new Map<string, number>();
+  const usedIds = new Set<string>();
 
   // Regular expression targeting h2 and h3 headings
   const headingRegex = /<(h[23])(\b[^>]*)>([\s\S]*?)<\/\1>/gi;
+  // Matches a real `id` attribute, not `data-id` or `aria-...id`
+  const idAttrRegex = /(?:^|\s)id\s*=\s*(["'])(.*?)\1/i;
+
+  // Reserve explicit ids first so generated ids never duplicate them
+  for (const match of html.matchAll(headingRegex)) {
+    const explicit = idAttrRegex.exec(match[2]);
+    if (explicit?.[2]) {
+      usedIds.add(explicit[2]);
+    }
+  }
 
   const modifiedHtml = html.replace(
     headingRegex,
@@ -48,20 +94,25 @@ export function extractAndInjectHeadings(html: string): {
       const level = tag.toLowerCase() === "h2" ? 2 : 3;
 
       // Strip inner tags to get plain text label for the TOC
-      const cleanText = innerContent.replace(/<[^>]*>/g, "").trim();
+      const cleanText = decodeEntities(
+        innerContent.replace(/<[^>]*>/g, "")
+      ).trim();
 
       // Check if the heading already has an id attribute
-      const idMatch = /\bid=(["'])(.*?)\1/i.exec(attributes);
+      const idMatch = idAttrRegex.exec(attributes);
       let id: string;
 
       if (idMatch && idMatch[2]) {
         id = idMatch[2];
       } else {
-        const baseSlug = slugifyHeading(cleanText);
-        const count = usedIds.get(baseSlug) ?? 0;
-        usedIds.set(baseSlug, count + 1);
-
-        id = count === 0 ? baseSlug : `${baseSlug}-${count}`;
+        const baseSlug = `${GENERATED_ID_PREFIX}${slugifyHeading(cleanText)}`;
+        let count = 0;
+        id = baseSlug;
+        while (usedIds.has(id)) {
+          count += 1;
+          id = `${baseSlug}-${count}`;
+        }
+        usedIds.add(id);
       }
 
       headings.push({
@@ -71,7 +122,7 @@ export function extractAndInjectHeadings(html: string): {
       });
 
       // If id is already present, keep attributes as-is
-      if (idMatch) {
+      if (idMatch && idMatch[2]) {
         return `<${tag}${attributes}>${innerContent}</${tag}>`;
       }
 

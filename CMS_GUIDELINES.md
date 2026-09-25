@@ -165,7 +165,7 @@ To ensure the portfolio displays narratives with high aesthetic quality and robu
   - **Permitted Headers:** `<h2>`, `<h3>`, `<h4>` (e.g., `<h3>The Challenge</h3>`)
   - **Permitted Layout Elements:** `<p>`, `<ul>`, `<ol>`, `<li>`
   - **Permitted Code Layouts:** `<pre>`, `<code>` (e.g., `<pre><code class="language-typescript">// code</code></pre>`)
-  - **Permitted Inline Elements:** `<strong>`, `<em>`, `<a>`, `<span>`, `<abbr>` (with optional `class`, `href`, `target`, `rel`, `data-term`, `data-definition`, `data-key`, `role`, `tabindex`, `aria-label`, `aria-describedby`, `aria-hidden`, `aria-expanded`, and `aria-checked` attributes)
+  - **Permitted Inline Elements:** `<strong>`, `<em>`, `<a>`, `<span>`, `<abbr>` (with optional `class`, `id`, `href`, `target`, `rel`, `data-term`, `data-definition`, `data-key`, `role`, `tabindex`, `aria-label`, `aria-describedby`, `aria-hidden`, `aria-expanded`, and `aria-checked` attributes)
 - **Forbidden Elements:** Prohibits `<script>`, `<iframe>`, `<img onerror="...">`, or custom inline inline-styles to maintain strict data integrity boundaries.
 
 ### 3. `BlogPost.body` Field

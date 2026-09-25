@@ -1,5 +1,7 @@
 import { createHash } from "node:crypto";
 import { prisma } from "../lib/db";
+import { sanitizeContentHtml } from "../lib/content-sanitizer";
+import { BlogPostService } from "../lib/services/blog-service";
 import {
   FALLBACK_BLOG_POSTS,
   type BlogPostData,
@@ -10,6 +12,8 @@ export interface SyncOptions {
   silent?: boolean;
   customPosts?: BlogPostData[];
   prismaClient?: typeof prisma;
+  /** Evicts the Redis read-through cache and ISR page for a written slug. */
+  evictCache?: (slug: string) => Promise<unknown>;
 }
 
 export interface SyncItemResult {
@@ -40,6 +44,8 @@ export function calculatePostMd5(post: {
   pillar: string;
   tags: string;
   reading_time_minutes?: number | null;
+  published?: boolean | null;
+  hero_image_url?: string | null;
 }): string {
   const payload = [
     post.title.trim(),
@@ -48,6 +54,8 @@ export function calculatePostMd5(post: {
     post.pillar.trim(),
     post.tags.trim(),
     post.reading_time_minutes ?? "",
+    post.published ?? "",
+    post.hero_image_url ?? "",
   ].join(":::");
 
   return createHash("md5").update(payload, "utf8").digest("hex");
@@ -64,6 +72,9 @@ export async function syncBlogPosts(
   const isSilent = Boolean(options.silent);
   const posts = options.customPosts ?? FALLBACK_BLOG_POSTS;
   const db = options.prismaClient ?? prisma;
+  const evictCache =
+    options.evictCache ??
+    ((slug: string) => BlogPostService.evictBlogPostCache(slug));
 
   const report: SyncReport = {
     mode: isCommit ? "commit" : "dry-run",
@@ -86,7 +97,10 @@ export async function syncBlogPosts(
   );
   log(`Scanning ${posts.length} audited dispatches...\n`);
 
-  for (const post of posts) {
+  for (const rawPost of posts) {
+    // Store bodies through the same sanitizer every other write path uses,
+    // and hash the sanitized form so it compares equal to what is stored.
+    const post = { ...rawPost, body: sanitizeContentHtml(rawPost.body) };
     const localMd5 = calculatePostMd5(post);
 
     try {
@@ -111,6 +125,7 @@ export async function syncBlogPosts(
               updated_at: new Date(post.updated_at),
             },
           });
+          await evictCache(post.slug);
           log(`  [CREATED]  ${post.slug} (MD5: ${localMd5})`);
         } else {
           log(`  [WOULD CREATE] ${post.slug} (MD5: ${localMd5})`);
@@ -150,6 +165,7 @@ export async function syncBlogPosts(
                 updated_at: new Date(),
               },
             });
+            await evictCache(post.slug);
             log(
               `  [UPDATED]  ${post.slug} (Local: ${localMd5}, DB was: ${dbMd5})`
             );

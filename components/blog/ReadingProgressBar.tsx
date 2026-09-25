@@ -8,22 +8,31 @@ export function ReadingProgressBar() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const handleScroll = () => {
+    let frame = 0;
+    const measure = () => {
+      frame = 0;
       const scrollY = window.scrollY;
       const totalHeight =
         document.documentElement.scrollHeight - window.innerHeight;
 
-      if (totalHeight > 0) {
-        const currentProgress = Math.min(1, Math.max(0, scrollY / totalHeight));
-        setProgress(currentProgress);
+      setProgress(
+        totalHeight > 0 ? Math.min(1, Math.max(0, scrollY / totalHeight)) : 0
+      );
+    };
+    const handleScroll = () => {
+      if (!frame) {
+        frame = window.requestAnimationFrame(measure);
       }
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll, { passive: true });
     handleScroll();
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+      if (frame) window.cancelAnimationFrame(frame);
     };
   }, []);
 
@@ -39,7 +48,7 @@ export function ReadingProgressBar() {
       className="fixed top-0 left-0 right-0 h-[3px] bg-zinc-900 z-50 pointer-events-none"
     >
       <div
-        className="h-full bg-gradient-to-r from-brand-cyan via-cyan-400 to-brand-blue transition-transform duration-75 ease-out origin-left"
+        className="h-full bg-amber-500 transition-transform duration-75 ease-out origin-left"
         style={{ transform: `scaleX(${progress})` }}
       />
     </div>

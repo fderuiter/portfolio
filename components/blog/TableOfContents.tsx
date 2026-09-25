@@ -14,29 +14,38 @@ export function TableOfContents({ headings }: TableOfContentsProps) {
   useEffect(() => {
     if (typeof window === "undefined" || headings.length === 0) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveId(entry.target.id);
-          }
-        });
-      },
-      {
-        rootMargin: "0px 0px -70% 0px",
-        threshold: 0.1,
+    // Headings are looked up by id on every pass rather than observed once:
+    // RichNarrative replaces its server-rendered nodes after idle rehydration,
+    // which would leave an IntersectionObserver watching detached elements.
+    let frame = 0;
+    const updateActive = () => {
+      frame = 0;
+      const threshold = window.innerHeight * 0.3;
+      let current = "";
+      for (const heading of headings) {
+        const el = document.getElementById(heading.id);
+        if (el && el.getBoundingClientRect().top <= threshold) {
+          current = heading.id;
+        }
       }
-    );
+      if (current) {
+        setActiveId(current);
+      }
+    };
+    const onScroll = () => {
+      if (!frame) {
+        frame = window.requestAnimationFrame(updateActive);
+      }
+    };
 
-    headings.forEach((heading) => {
-      const el = document.getElementById(heading.id);
-      if (el) {
-        observer.observe(el);
-      }
-    });
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    onScroll();
 
     return () => {
-      observer.disconnect();
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
     };
   }, [headings]);
 

@@ -11,7 +11,14 @@ import React, {
 import DOMPurify from "isomorphic-dompurify";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { MermaidDiagram } from "@/components/MermaidDiagram";
-import { CodeBlock } from "@/components/blog/CodeBlock";
+import {
+  CodeBlock,
+  CODE_BLOCK_BUTTON_CLASS,
+  CODE_BLOCK_HEADER_CLASS,
+  CODE_BLOCK_LABEL_CLASS,
+  CODE_BLOCK_PRE_CLASS,
+  CODE_BLOCK_WRAPPER_CLASS,
+} from "@/components/blog/CodeBlock";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { usePersistentState } from "@/hooks/usePersistentState"; // Imported for static analysis test validation
 import { useTerminology } from "@/components/providers/TerminologyProvider";
@@ -56,6 +63,28 @@ export function resolveTermSwap(html: string, simplified: boolean): string {
     const visibleText = unescapeAttr(rawTerm);
     return `<${tagName}${attrs}>${visibleText}</${tagName}>`;
   });
+}
+
+/**
+ * Gives each server-rendered code block the same header chrome CodeBlock adds
+ * after rehydration, so the swap does not shift the page. The Copy control is
+ * an inert placeholder until the interactive CodeBlock replaces it.
+ */
+function wrapCodeBlockFallback(html: string): string {
+  return html.replace(
+    /<pre\b([^>]*)>([\s\S]*?)<\/pre>/gi,
+    (match, attributes: string, inner: string) => {
+      const language = /language-([a-zA-Z0-9_-]+)/.exec(match)?.[1];
+      const label = language ? language.toUpperCase() : "CODE";
+      const preAttributes = /\bclass=(["'])/.test(attributes)
+        ? attributes.replace(
+            /\bclass=(["'])/,
+            `class=$1${CODE_BLOCK_PRE_CLASS} `
+          )
+        : `${attributes} class="${CODE_BLOCK_PRE_CLASS}"`;
+      return `<div class="${CODE_BLOCK_WRAPPER_CLASS}"><div class="${CODE_BLOCK_HEADER_CLASS}" aria-hidden="true"><span class="${CODE_BLOCK_LABEL_CLASS}">${label}</span><span class="${CODE_BLOCK_BUTTON_CLASS}"><span class="w-3.5 h-3.5"></span><span>Copy</span></span></div><pre${preAttributes}>${inner}</pre></div>`;
+    }
+  );
 }
 
 function replaceMermaidFallback(html: string): string {
@@ -153,7 +182,10 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
 
   // Synchronously swap terms according to the active simplified preference for pre-hydration rendering
   const fallbackHtml = useMemo(
-    () => replaceMermaidFallback(resolveTermSwap(cleanHtml, simplified)),
+    () =>
+      wrapCodeBlockFallback(
+        replaceMermaidFallback(resolveTermSwap(cleanHtml, simplified))
+      ),
     [cleanHtml, simplified]
   );
 
