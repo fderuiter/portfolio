@@ -67,23 +67,17 @@ describe("Transparent Continuous Overlay Layer Compliance", () => {
     expect(content).toContain('data-pretext-layer="semantic"');
   });
 
-  it("should implement transparent text overlay in Hero components", () => {
+  it("should ensure HeroHeadline renders a single visible heading without transparent twin overlay", () => {
     const content = fs.readFileSync(heroPath, "utf-8");
 
-    // Headline and Text must be wrapped and set to relative with select-none and pointer-events-none on visual layer
-    expect(content).toContain(
-      'className="w-full select-none pointer-events-none"'
-    );
+    // Unified heading architecture: data-pretext-layer="heading" and data-pretext-layer="body" (ADR 0052, #817)
+    expect(content).toContain('data-pretext-layer="heading"');
+    expect(content).toContain('data-pretext-layer="body"');
+    expect(content).toContain("fluid-heading-hero");
 
-    // Headline absolute transparent overlay h1 with fluid typography
-    expect(content).toContain(
-      "fluid-heading-hero font-black tracking-tight text-center absolute inset-0 select-text bg-transparent"
-    );
-
-    // Subheadline absolute transparent overlay p with fluid typography
-    expect(content).toContain(
-      "text-neutral-400 fluid-body text-center absolute inset-0 select-text bg-transparent"
-    );
+    // Transparent twin overlays eliminated in Hero components
+    expect(content).not.toContain("absolute inset-0 select-text bg-transparent");
+    expect(content).not.toContain('color: "transparent"');
   });
 
   it("should tag all pretext visual and semantic layers for high contrast forced-colors protection", () => {
@@ -103,8 +97,8 @@ describe("Transparent Continuous Overlay Layer Compliance", () => {
     expect(pretextCardContent).toContain('data-pretext-layer="semantic"');
 
     // HeroHeadline & HeroText data attributes
-    expect(heroContent).toContain('data-pretext-layer="visual"');
-    expect(heroContent).toContain('data-pretext-layer="semantic"');
+    expect(heroContent).toContain('data-pretext-layer="heading"');
+    expect(heroContent).toContain('data-pretext-layer="body"');
   });
 
   it("should define centralized forced-colors CSS media queries for pretext layer suppression", () => {

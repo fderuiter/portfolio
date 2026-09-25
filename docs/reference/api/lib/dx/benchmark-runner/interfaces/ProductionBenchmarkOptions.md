@@ -26,6 +26,12 @@
 
 ***
 
+### throttled?
+
+> `optional` **throttled?**: `boolean`
+
+***
+
 ### url
 
 > **url**: `string`

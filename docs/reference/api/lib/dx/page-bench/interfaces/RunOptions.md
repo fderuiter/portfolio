@@ -95,3 +95,9 @@
 ### thresholds?
 
 > `optional` **thresholds?**: [`BenchmarkThresholds`](BenchmarkThresholds.md)
+
+***
+
+### throttled?
+
+> `optional` **throttled?**: `boolean`

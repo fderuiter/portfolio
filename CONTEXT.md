@@ -464,3 +464,14 @@ Fictional teaching material; nothing in the game is clinical or regulatory advic
 - **Blinding Firewall**: The CRO's separation between its blinded study team and its independent DMC statisticians. The player works both seats; peeking across triggers the zero-score rule.
 - **Stake (GCP Audit Level)**: A cumulative difficulty tier for a run, from Routine Monitoring to Warning Letter.
 - **Sponsor (Starter Sponsor)**: A starting configuration for a run: starting deck, starting item and one rule twist, such as Oncology Pharma or Virtual Biotech (the default). The sponsor is the client whose compound the player is developing.
+
+## Critical-Path Performance & Web Vitals Architecture
+
+### Pretext LCP Candidacy & Hydration Layout Isolation
+
+- **Visible Pretext LCP Candidacy**: The architectural requirement (ADR 0052, #817) that above-the-fold heading and text elements rendered via the Pretext text layout engine (`HeroHeadline`, `HeroText`) present an authentic, visible, and fully opaque semantic element on initial server paint (SSR) rather than a transparent semantic twin overlay (`color: transparent`), allowing Chromium and WebKit paint engines to immediately attribute Largest Contentful Paint (LCP) to the semantic heading without animation render delays.
+- **Transform-Only Hero Entrance**: Staggered typography entrance animations bounded strictly to GPU compositor properties (`transform: translate3d(...)` / `scale(...)`) without initial `opacity: 0`, ensuring continuous paint candidacy across all animation frames and zero layout thrash.
+- **Pervasive Lazy Geometry**: The performance pattern deferring layout reads (`getBoundingClientRect()`) away from component mount and hydration loops, caching geometry lazily on user pointer interaction (`onPointerMove`) and invalidating via `rectRef.current = null` on window/container resize.
+- **Non-Reflowing Dimension Estimation**: Prioritizing non-blocking ResizeObserver entries (`entry.contentRect.width`) and cached metrics over synchronous DOM layout queries during React hydration.
+- **Route-Scoped CSS Partitioning**: Decoupling heavyweight route-specific animation and cabinet styling (such as arcade tokens, CRT scanlines, and landscape orientation media queries) into dedicated route stylesheets (`app/arcade/arcade.css`) imported by route layouts (`app/arcade/layout.tsx`), minimizing the critical render-blocking CSS payload on the root landing page (`/`).
+- **Throttled Mobile Benchmark Profile**: Standardized Chrome DevTools Protocol (CDP) emulation profile (4x CPU slowdown, 1.6 Mbps download, 750 kbps upload, 150 ms RTT) configured in page benchmarking tooling (`scripts/benchmark-pages.ts`, `lib/dx/page-bench.ts`) providing reproducible Core Web Vitals evidence under constrained mobile network and CPU conditions.

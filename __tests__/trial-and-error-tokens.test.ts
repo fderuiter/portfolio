@@ -4,11 +4,11 @@ import path from "path";
 
 /**
  * The Trial & Error cabinet tokens (`--te-*`) are declared once, in
- * app/globals.css under `[data-te-cabinet]` (ADR 0046 amendment, #942). This
+ * app/arcade/arcade.css under `[data-te-cabinet]` (ADR 0052, #817). This
  * suite reads that declaration directly, so the CSS itself is what is audited.
  */
 const css = fs.readFileSync(
-  path.resolve(process.cwd(), "app/globals.css"),
+  path.resolve(process.cwd(), "app/arcade/arcade.css"),
   "utf-8"
 );
 
@@ -16,7 +16,7 @@ function cabinetTokens(): Record<string, string> {
   const block = /\[data-te-cabinet\]\s*\{([^}]*)\}/.exec(css);
   expect(
     block,
-    "app/globals.css must declare a [data-te-cabinet] block"
+    "app/arcade/arcade.css must declare a [data-te-cabinet] block"
   ).not.toBeNull();
   const tokens: Record<string, string> = {};
   for (const [, name, value] of block![1].matchAll(

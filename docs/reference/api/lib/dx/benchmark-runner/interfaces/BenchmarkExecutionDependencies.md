@@ -66,6 +66,10 @@ Injectable side effects keep production lifecycle behavior testable.
 
 `number`
 
+###### throttled?
+
+`boolean`
+
 #### Returns
 
 `Promise`\<[`PageBenchmarkSummary`](../../page-bench/interfaces/PageBenchmarkSummary.md)[]\>

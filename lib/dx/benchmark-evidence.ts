@@ -42,6 +42,7 @@ export interface BenchmarkEvidence {
     viewport: { width: number; height: number };
     isMobile: boolean;
     hasTouch: boolean;
+    throttled?: boolean;
   };
   sampling: {
     warmupRuns: number;

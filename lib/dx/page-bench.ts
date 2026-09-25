@@ -227,12 +227,20 @@ export async function measurePageRoute(
   return metrics;
 }
 
+export const THROTTLED_MOBILE_PROFILE = {
+  cpuSlowdownMultiplier: 4,
+  downloadThroughput: Math.floor((1.6 * 1024 * 1024) / 8), // 1.6 Mbps
+  uploadThroughput: Math.floor((750 * 1024) / 8), // 750 kbps
+  latency: 150, // 150 ms RTT
+} as const;
+
 export interface RunOptions {
   baseUrl?: string;
   runs?: number;
   routes?: PageBenchmarkRoute[];
   thresholds?: BenchmarkThresholds;
   isMobile?: boolean;
+  throttled?: boolean;
   device?: {
     viewport: { width: number; height: number };
     isMobile?: boolean;
@@ -258,6 +266,7 @@ export async function runPageBenchmarks(
   const routes = options.routes || CANONICAL_ROUTES;
   const thresholds = options.thresholds || DEFAULT_THRESHOLDS;
   const isMobile = options.isMobile || false;
+  const throttled = options.throttled || false;
 
   let browser: Browser | null = null;
   const summaries: PageBenchmarkSummary[] = [];
@@ -293,6 +302,31 @@ export async function runPageBenchmarks(
     for (const route of routes) {
       const pageUrl = `${baseUrl.replace(/\/$/, "")}${route.path}`;
       const page = await context.newPage();
+
+      if (throttled) {
+        try {
+          const client = await context.newCDPSession(page);
+          await client.send("Emulation.setCPUThrottlingRate", {
+            rate: THROTTLED_MOBILE_PROFILE.cpuSlowdownMultiplier,
+          });
+          await client.send("Network.enable");
+          await client.send("Network.emulateNetworkConditions", {
+            offline: false,
+            latency: THROTTLED_MOBILE_PROFILE.latency,
+            downloadThroughput: THROTTLED_MOBILE_PROFILE.downloadThroughput,
+            uploadThroughput: THROTTLED_MOBILE_PROFILE.uploadThroughput,
+          });
+        } catch (error) {
+          // The evidence records throttled: true, so an unthrottled run must
+          // not be reported as throttled.
+          await page.close();
+          throw new Error(
+            `Throttled benchmark requested but CDP throttling failed: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
+      }
 
       // Warmup run
       if (options.onProgress) {

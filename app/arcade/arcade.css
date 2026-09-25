@@ -1,0 +1,493 @@
+/* Arcade Cabinet Styles & Animations (ADR 0052, #817)
+ * Decoupled from app/globals.css so the landing page critical path is not blocked by arcade CSS.
+ */
+
+/* Trial & Error: Biostat Ops cabinet tokens (ADR 0046 amendment, #942).
+ * Scoped to [data-te-cabinet] so nothing leaks into the portfolio frame.
+ * "Calm at rest, loud when scoring": .te-loud-* layers only apply while the
+ * cabinet opts in with data-te-loud="on", which useTeMotion() withholds under
+ * 768px and under prefers-reduced-motion. */
+[data-te-cabinet] {
+  --te-surface-0: #0d0e11;
+  --te-surface-1: #13151a;
+  --te-hairline: rgba(255, 255, 255, 0.08);
+  --te-text: #f4f4f6;
+  --te-text-muted: #a1a1aa;
+  --te-chips: #93c5fd;
+  --te-plus-mult: #f59e0b;
+  --te-x-mult: #fb7185;
+  --te-redline: #fda4af;
+  --te-validated: #34d399;
+  --te-fire: #fb923c;
+  --te-suit-itt: #7dd3fc;
+  --te-suit-safety: #bef264;
+  --te-suit-pp: #fde047;
+  --te-suit-fas: #5eead4;
+  --te-suit-screened: #94a3b8;
+}
+
+/* Shake amplitude comes from --te-shake-amp (default 3px), which the
+ * LoudLayer helper clamps to at most 6px. */
+@keyframes te-loud-shake {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  25% {
+    transform: translate3d(
+      calc(var(--te-shake-amp, 3px) * -1),
+      calc(var(--te-shake-amp, 3px) / 3),
+      0
+    );
+  }
+  50% {
+    transform: translate3d(
+      calc(var(--te-shake-amp, 3px) * 0.67),
+      calc(var(--te-shake-amp, 3px) * -0.67),
+      0
+    );
+  }
+  75% {
+    transform: translate3d(
+      calc(var(--te-shake-amp, 3px) / -3),
+      calc(var(--te-shake-amp, 3px) * 0.67),
+      0
+    );
+  }
+}
+
+[data-te-cabinet][data-te-loud="on"] .te-loud-shake {
+  animation: te-loud-shake 240ms ease-out 1;
+}
+
+/* CRT: scanlines, a vignette, and a slight barrel curvature from a radial
+ * mask. Gradients and a mask only; no blur, no canvas. */
+[data-te-cabinet][data-te-loud="on"] .te-loud-crt {
+  pointer-events: none;
+  background-image:
+    radial-gradient(
+      ellipse at center,
+      transparent 60%,
+      rgba(0, 0, 0, 0.45) 100%
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.03) 0,
+      rgba(255, 255, 255, 0.03) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+  mask-image: radial-gradient(
+    ellipse 120% 110% at center,
+    #000 70%,
+    transparent 100%
+  );
+}
+
+@keyframes te-loud-swirl {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Background swirl: mounted only during a loud moment, so it never runs at
+ * rest. A slow rotation of a faint amber/rose conic gradient. */
+[data-te-cabinet][data-te-loud="on"] .te-loud-swirl::before {
+  content: "";
+  position: absolute;
+  inset: -50%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(245, 158, 11, 0.07),
+    transparent 25%,
+    rgba(251, 113, 133, 0.06) 50%,
+    transparent 75%,
+    rgba(245, 158, 11, 0.07)
+  );
+  animation: te-loud-swirl 9s linear infinite;
+}
+
+@keyframes te-loud-flicker {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scaleY(1);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scaleY(1.15);
+  }
+}
+
+/* The score plate "catches fire" when a hand crosses the Blind target: a
+ * bounded CSS flame (six flickers, transform and opacity only), never a loop. */
+[data-te-cabinet][data-te-loud="on"] .te-loud-fire {
+  position: relative;
+}
+
+[data-te-cabinet][data-te-loud="on"] .te-loud-fire::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 100% 0;
+  height: 1.25rem;
+  pointer-events: none;
+  background: linear-gradient(to top, var(--te-fire), transparent);
+  transform-origin: bottom;
+  animation: te-loud-flicker 320ms ease-in-out 6;
+}
+
+@keyframes te-card-breathe {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-1px) rotate(0.35deg);
+  }
+}
+
+/* Idle card "breathing" (T&E-UX-03): a barely-there, desynchronized CSS
+ * keyframe on the compositor, never React state (AGENTS.md §16). Off below
+ * 768px and under reduced motion. */
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  [data-te-cabinet] .te-card-wobble {
+    animation: te-card-breathe 5.5s ease-in-out infinite;
+  }
+}
+
+/* Stale expiry (T&E-03): an expired output's printed data desaturates at
+ * once, while its rose STALE stamp slams on (transform and opacity only) and
+ * its struck Chips badge keeps its colour. Under reduced motion the stamp
+ * simply appears. */
+[data-te-cabinet] .te-stale-dim {
+  filter: grayscale(1);
+}
+
+@keyframes te-stamp-slam {
+  0% {
+    opacity: 0;
+    transform: scale(2.4);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-te-cabinet] [data-stamp="STALE"] {
+    animation: te-stamp-slam 220ms ease-in both;
+  }
+}
+
+/* Footnote seal press (T&E-04): the wax badge lands with a small flash when
+ * it is affixed. Loud cabinets only, transform and opacity only. */
+@keyframes te-seal-press {
+  0% {
+    opacity: 0;
+    transform: scale(1.9) rotate(-20deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.9) rotate(4deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+[data-te-cabinet][data-te-loud="on"] .te-loud-seal {
+  animation: te-seal-press 260ms ease-out 1 both;
+}
+
+/* Crisis slam (T&E-05): a drawn crisis card lands on the table with a jolt.
+ * Loud cabinets only, transform and opacity only. */
+@keyframes te-crisis-slam {
+  0% {
+    opacity: 0;
+    transform: translateY(-24px) scale(1.25) rotate(-6deg);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(2px) scale(0.96) rotate(1deg);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+[data-te-cabinet][data-te-loud="on"] .te-loud-crisis {
+  animation: te-crisis-slam 320ms ease-out 1 both;
+}
+
+/* Level up (T&E-UX-05): a Guidance card lifts the hand's plate a step.
+ * Loud cabinets only, transform and opacity only. */
+@keyframes te-level-up {
+  0% {
+    opacity: 0.4;
+    transform: translateY(8px) scale(0.96);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-4px) scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+[data-te-cabinet][data-te-loud="on"] .te-loud-level {
+  animation: te-level-up 420ms ease-out 1 both;
+}
+
+/* CPU pips (T&E-04): a spent pip pops off its slot. Under reduced motion
+ * the pip simply empties. */
+@keyframes te-pip-pop {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-6px) scale(1.8);
+  }
+}
+
+[data-te-cabinet] .te-pip-burst {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-te-cabinet] .te-pip-burst {
+    animation: te-pip-pop 320ms ease-out 1 both;
+  }
+}
+
+[data-te-cabinet][data-te-loud="on"] .te-loud-glow {
+  text-shadow: 0 0 12px var(--te-fire);
+}
+
+/* Clinical Trial Chaos: floating score delta next to the HUD score */
+@keyframes cc-score-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-18px);
+  }
+}
+
+.cc-score-pop {
+  animation: cc-score-pop 900ms ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cc-score-pop {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* Cabinet boundaries own fullscreen; game controls remain inside that boundary. */
+.arcade-cabinet[data-fullscreen="true"] {
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+    env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+}
+.arcade-cabinet-stage > * {
+  flex-shrink: 0;
+  min-width: 0;
+  max-width: 100%;
+}
+.arcade-cabinet-toolbar button {
+  min-width: 48px;
+  min-height: 48px;
+}
+.arcade-shooter-playfield {
+  flex-shrink: 0;
+}
+.arcade-shooter-start > * {
+  flex-shrink: 0;
+}
+.arcade-shooter-start > :first-child {
+  margin-top: auto;
+}
+.arcade-shooter-start > :last-child {
+  margin-bottom: auto;
+}
+.arcade-cabinet[data-fullscreen="true"] .arcade-shooter {
+  margin: 0;
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  justify-items: center;
+}
+.arcade-cabinet[data-fullscreen="true"] .arcade-shooter > [role="status"] {
+  display: none;
+}
+.arcade-cabinet[data-fullscreen="true"] .arcade-shooter-options[open] {
+  max-height: 40dvh;
+  overflow-y: auto;
+}
+.arcade-cabinet[data-fullscreen="true"] .arcade-shooter-playfield {
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+  aspect-ratio: auto;
+  container-type: size;
+}
+.arcade-cabinet[data-fullscreen="true"] .arcade-shooter-playfield canvas {
+  width: min(100cqw, calc(100cqh * 768 / 420));
+  height: auto;
+  max-height: 100%;
+  margin: auto;
+  object-fit: contain;
+}
+@media (orientation: landscape) and (max-height: 600px) {
+  .arcade-cabinet[data-fullscreen="true"] .arcade-shooter {
+    grid-template-columns: minmax(0, 1fr) 164px;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: 4px;
+  }
+  .arcade-cabinet[data-fullscreen="true"] .arcade-shooter-options {
+    grid-column: 1 / -1;
+  }
+  .arcade-cabinet[data-fullscreen="true"] .arcade-shooter-controls {
+    margin: 0;
+    max-height: 100%;
+    overflow-y: visible;
+  }
+  .arcade-cabinet[data-fullscreen="true"]
+    .arcade-shooter-controls
+    button[aria-label="Primary Fire"] {
+    width: 56px;
+    height: 56px;
+  }
+  .arcade-cabinet[data-fullscreen="true"] .arcade-shooter-footer {
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+  .arcade-shooter-start h3 {
+    font-size: 1rem;
+  }
+  .arcade-shooter-start > :first-child {
+    display: none;
+  }
+  .arcade-shooter-start p {
+    margin-bottom: 8px;
+  }
+}
+.arcade-shooter-story > * {
+  flex-shrink: 0;
+  margin-block: auto;
+}
+.arcade-cabinet[data-fullscreen="true"][data-arcade-cabinet="working-with-duck"]
+  canvas {
+  width: min(100%, 104dvh);
+  height: auto;
+  max-height: 65dvh;
+  margin-inline: auto;
+}
+/* Short landscape viewports (e.g. 667x375) don't have room for a 65dvh canvas plus the HUD
+   and action dock stacked above/below it — the dock would start below the fold. Give the
+   playfield a smaller viewport budget so essential actions stay visible without scrolling. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .arcade-cabinet[data-fullscreen="true"][data-arcade-cabinet="working-with-duck"]
+    canvas {
+    max-height: 42dvh;
+  }
+}
+@media (orientation: landscape) and (max-height: 600px) {
+  .arcade-shooter-controls [role="group"] > :first-child {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    gap: 4px;
+    padding: 4px;
+  }
+  .arcade-shooter-controls [role="group"] > :first-child button {
+    min-width: 0;
+    padding-inline: 4px;
+    font-size: 10px;
+    gap: 4px;
+  }
+}
+.arcade-shooter-playfield > .absolute.inset-0 {
+  overflow-y: auto;
+  justify-content: safe center;
+}
+.arcade-shooter-playfield > .absolute.inset-0 > * {
+  flex-shrink: 0;
+  max-width: 100%;
+}
+@media (orientation: landscape) and (max-height: 600px) {
+  .arcade-cabinet[data-fullscreen="true"] .arcade-labyrinth {
+    height: 100%;
+    min-height: 0;
+    margin: 0;
+  }
+  .arcade-cabinet[data-fullscreen="true"] .arcade-labyrinth > [role="status"] {
+    display: none;
+  }
+  .arcade-cabinet[data-fullscreen="true"] .arcade-labyrinth-options {
+    flex-shrink: 0;
+    max-height: 40vh;
+    max-height: 40dvh;
+    overflow-y: auto;
+  }
+  .arcade-cabinet[data-fullscreen="true"] .arcade-labyrinth-playfield {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 252px;
+    grid-template-rows: auto minmax(0, 1fr);
+    flex: 1;
+    min-height: 0;
+    padding: 4px;
+    gap: 4px;
+    transform: none;
+  }
+  .arcade-cabinet[data-fullscreen="true"] .arcade-labyrinth-canvas {
+    grid-column: 1;
+    min-height: 0;
+    height: 100%;
+    width: 100%;
+    max-width: none;
+    aspect-ratio: auto;
+    container-type: size;
+  }
+  .arcade-cabinet[data-fullscreen="true"] .arcade-labyrinth-canvas canvas {
+    width: min(100cqw, calc(100cqh * 240 / 144));
+    height: auto;
+    max-width: none;
+    max-height: 100%;
+  }
+  .arcade-cabinet[data-fullscreen="true"] .arcade-labyrinth-controls {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0;
+  }
+}
+@media (orientation: landscape) and (max-height: 600px) {
+  .arcade-cabinet[data-fullscreen="true"]
+    .arcade-labyrinth-controls
+    > :last-child {
+    order: -1;
+    flex-shrink: 0;
+  }
+}

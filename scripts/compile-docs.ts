@@ -43,9 +43,11 @@ export function compileDocumentation(
   workspaceRoot: string,
   outputDirectory: string
 ): void {
-  execFileSync("npx", [...typedocArguments, "--out", outputDirectory], {
+  const npxCommand = process.platform === "win32" ? "npx.cmd" : "npx";
+  execFileSync(npxCommand, [...typedocArguments, "--out", outputDirectory], {
     cwd: workspaceRoot,
     stdio: "inherit",
+    shell: process.platform === "win32",
   });
 }
 

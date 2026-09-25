@@ -340,8 +340,15 @@ export const Navbar: React.FC = () => {
     (entry) => {
       const h = Math.round(entry.contentRect.height);
       if (typeof document !== "undefined" && h > 0) {
-        document.documentElement.style.setProperty("--header-height", `${h}px`);
-        document.documentElement.style.setProperty("--navbar-height", `${h}px`);
+        // Skip the :root write when the value is unchanged, so hydration does
+        // not invalidate styles page-wide for nothing (ADR 0052, #817). The
+        // comparison is against the current inline value, not the CSS
+        // default, so a return to a previous height is never dropped.
+        const root = document.documentElement.style;
+        if (root.getPropertyValue("--header-height") !== `${h}px`) {
+          root.setProperty("--header-height", `${h}px`);
+          root.setProperty("--navbar-height", `${h}px`);
+        }
       }
     },
     { trackVertical: true }

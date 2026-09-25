@@ -126,4 +126,29 @@ describe("production benchmark runner", () => {
     });
     expect(setup.stop).toHaveBeenCalledOnce();
   });
+
+  it("passes throttled mobile option to benchmark dependencies and captures it in evidence", async () => {
+    const setup = dependencies();
+
+    const evidence = await runProductionBenchmark(
+      {
+        url: "http://localhost:4312",
+        runs: 1,
+        routes: ["/"],
+        isMobile: true,
+        throttled: true,
+      },
+      setup.dependencies
+    );
+
+    expect(setup.dependencies.runPageBenchmarks).toHaveBeenCalledWith({
+      baseUrl: "http://localhost:4312/",
+      runs: 1,
+      isMobile: true,
+      throttled: true,
+    });
+    expect(evidence.browser.isMobile).toBe(true);
+    expect(evidence.browser.throttled).toBe(true);
+    expect(setup.stop).toHaveBeenCalledOnce();
+  });
 });
