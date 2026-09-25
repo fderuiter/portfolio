@@ -44,6 +44,16 @@ describe("[UI/UX 01] Homepage First Impression & Architectural Hierarchy Suite",
   });
 
   describe("1. Hero Value Copy & Grounded Editorial Positioning", () => {
+    it("uses the approved location caption in the existing desktop-only cue", () => {
+      render(<Hero />);
+
+      const locationCaption = screen.getByText("LOC: Minneapolis");
+      expect(locationCaption.parentElement?.className).toContain(
+        "hidden lg:flex"
+      );
+      expect(screen.queryByText("LOC: ROCHESTER & NYC")).toBeNull();
+    });
+
     it("renders the clear, grounded headline and intro without exaggerated absolute claims", () => {
       render(<Hero />);
 
