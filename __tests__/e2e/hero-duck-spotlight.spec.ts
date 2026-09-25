@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 
 const VIEWPORTS = [
   { name: "320px", width: 320, height: 568 },
@@ -6,6 +6,19 @@ const VIEWPORTS = [
   { name: "768px", width: 768, height: 1024 },
   { name: "1440px", width: 1440, height: 900 },
 ];
+
+async function assertNoHorizontalOverflow(
+  page: Page,
+  selector: string = "#hero *"
+): Promise<void> {
+  const overflow = await page.evaluate((sel) => {
+    const clientWidth = document.documentElement.clientWidth;
+    return Array.from(document.querySelectorAll(sel)).some(
+      (element) => element.getBoundingClientRect().right > clientWidth + 1
+    );
+  }, selector);
+  expect(overflow).toBe(false);
+}
 
 test.describe("Hero Duck spotlight", () => {
   for (const viewport of VIEWPORTS) {
@@ -102,38 +115,38 @@ test.describe("Hero Duck spotlight", () => {
       );
       await expect(page.getByText("Stage 1 of 6")).toBeVisible();
 
-      // Navigate forward via Next button
-      await nextButton.click();
-      await expect(milestoneButtons.nth(1)).toHaveAttribute(
-        "aria-pressed",
-        "true"
-      );
-      await expect(page.getByText("Stage 2 of 6")).toBeVisible();
+      // Navigate forward via Next button with toPass polling to avoid React 19 hydration races
+      await expect(async () => {
+        await nextButton.click();
+        await expect(milestoneButtons.nth(1)).toHaveAttribute(
+          "aria-pressed",
+          "true"
+        );
+        await expect(page.getByText("Stage 2 of 6")).toBeVisible();
+      }).toPass({ timeout: 15000 });
 
-      // Navigate backward via Prev button
-      await prevButton.click();
-      await expect(milestoneButtons.nth(0)).toHaveAttribute(
-        "aria-pressed",
-        "true"
-      );
-      await expect(page.getByText("Stage 1 of 6")).toBeVisible();
+      // Navigate backward via Prev button with toPass polling
+      await expect(async () => {
+        await prevButton.click();
+        await expect(milestoneButtons.nth(0)).toHaveAttribute(
+          "aria-pressed",
+          "true"
+        );
+        await expect(page.getByText("Stage 1 of 6")).toBeVisible();
+      }).toPass({ timeout: 15000 });
 
-      // Jump directly to milestone 4
-      await milestoneButtons.nth(3).click();
-      await expect(milestoneButtons.nth(3)).toHaveAttribute(
-        "aria-pressed",
-        "true"
-      );
-      await expect(page.getByText("Stage 4 of 6")).toBeVisible();
+      // Jump directly to milestone 4 with toPass polling
+      await expect(async () => {
+        await milestoneButtons.nth(3).click();
+        await expect(milestoneButtons.nth(3)).toHaveAttribute(
+          "aria-pressed",
+          "true"
+        );
+        await expect(page.getByText("Stage 4 of 6")).toBeVisible();
+      }).toPass({ timeout: 15000 });
 
       // Verify no horizontal overflow in the hero section
-      const overflow = await page.evaluate(() => {
-        const clientWidth = document.documentElement.clientWidth;
-        return Array.from(document.querySelectorAll("#hero *")).some(
-          (element) => element.getBoundingClientRect().right > clientWidth + 1
-        );
-      });
-      expect(overflow).toBe(false);
+      await assertNoHorizontalOverflow(page);
     });
   }
 
@@ -157,12 +170,6 @@ test.describe("Hero Duck spotlight", () => {
     });
     await expect(milestoneGroup).toBeVisible();
 
-    const overflow = await page.evaluate(() => {
-      const clientWidth = document.documentElement.clientWidth;
-      return Array.from(document.querySelectorAll("#hero *")).some(
-        (element) => element.getBoundingClientRect().right > clientWidth + 1
-      );
-    });
-    expect(overflow).toBe(false);
+    await assertNoHorizontalOverflow(page);
   });
 });
