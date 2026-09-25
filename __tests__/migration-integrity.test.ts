@@ -168,6 +168,11 @@ describe("Prisma migration integrity", () => {
     expect(migration).toContain(
       'PARTITION BY "caseStudySlug", "reactionType", "connectionHash"'
     );
+    expect(migration).toContain("BEGIN;");
+    expect(migration).toContain(
+      'LOCK TABLE "CaseStudyReaction" IN SHARE ROW EXCLUSIVE MODE;'
+    );
+    expect(migration).toContain("COMMIT;");
     expect(migration).toContain('ORDER BY "createdAt" ASC, "id" ASC');
     expect(migration).toContain("duplicate_rank > 1");
     expect(migration).toMatch(
@@ -178,6 +183,11 @@ describe("Prisma migration integrity", () => {
         'CREATE UNIQUE INDEX "CaseStudyReaction_caseStudySlug_reactionType_connectionHash_key"'
       )
     );
+    expect(
+      migration.indexOf(
+        'LOCK TABLE "CaseStudyReaction" IN SHARE ROW EXCLUSIVE MODE;'
+      )
+    ).toBeLessThan(migration.indexOf('DELETE FROM "CaseStudyReaction"'));
   });
 
   it("fails migration file validation when a migration asset is missing or empty", () => {
