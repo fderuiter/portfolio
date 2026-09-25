@@ -172,18 +172,18 @@ export const BioSpotlight: React.FC = () => {
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3 text-[11px] font-mono text-zinc-400">
+            <div className="min-w-0 flex flex-wrap items-center gap-3 text-[11px] font-mono text-zinc-400">
               <span className="flex min-w-0 items-center gap-1">
                 <IconHeart className="w-3.5 h-3.5 text-rose-400" />
                 <span className="min-w-0 break-words">
                   Treat Approval Rate: 100%
                 </span>
               </span>
-              <span className="text-zinc-600">•</span>
+              <span className="min-w-0 text-zinc-600">•</span>
               <span className="min-w-0 break-words">
                 Merge Conflict Shield: Active
               </span>
-              <span className="text-zinc-600">•</span>
+              <span className="min-w-0 text-zinc-600">•</span>
               <span className="min-w-0 break-words text-amber-300">
                 Duck Fact #{activeIndex + 1}
               </span>
