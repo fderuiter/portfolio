@@ -709,7 +709,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
         <span>CLINICAL DATA / SOFTWARE / SIDE QUESTS</span>
       </div>
       <div className="hidden lg:flex absolute top-28 right-12 items-center gap-2 text-[10px] font-mono text-zinc-600 select-none">
-        <span>LOC: ROCHESTER &amp; NYC</span>
+        <span>LOC: Minneapolis</span>
         <span className="text-amber-500/60">[+]</span>
       </div>
 
