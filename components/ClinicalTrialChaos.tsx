@@ -693,6 +693,122 @@ export const ClinicalTrialChaos: React.FC = () => {
     ]
   );
 
+  // 12b. Complete a verified submission: scoring, combo/multiplier, lifeline
+  // charge, auditor cool-down, station count, sponsor boost, history, and the
+  // campaign phase-target check. The signature modal and the Fast-Track
+  // lifeline both finish through here so neither can skip a side effect.
+  const completeSubmission = useCallback(
+    (
+      subj: ClinicalSubject,
+      domain: CDISCDomain,
+      {
+        allClean,
+        suspicionDelta,
+      }: { allClean: boolean; suspicionDelta: number }
+    ) => {
+      const points = applyOfficeScore(
+        calculateSubmissionPoints(subj, scoreState.multiplier, allClean),
+        office
+      );
+      const nextCombo = scoreState.combo + 1;
+      const nextMultiplier = Math.min(4, 1 + Math.floor(nextCombo / 3));
+
+      pushScorePop(points);
+      setScoreState((prev) => {
+        const newScore = prev.score + points;
+        return {
+          ...prev,
+          score: newScore,
+          highScore: Math.max(newScore, prev.highScore),
+          combo: nextCombo,
+          maxCombo: Math.max(prev.maxCombo, nextCombo),
+          multiplier: nextMultiplier,
+          subjectsSubmitted: prev.subjectsSubmitted + 1,
+          cleanSubmissions: allClean
+            ? prev.cleanSubmissions + 1
+            : prev.cleanSubmissions,
+        };
+      });
+      // Persist outside the updater (AGENTS.md §4).
+      if (typeof window.localStorage?.setItem === "function") {
+        try {
+          localStorage.setItem(
+            "clinical_chaos_highscore",
+            Math.max(scoreState.score + points, scoreState.highScore).toString()
+          );
+        } catch {}
+      }
+
+      // Charge power-ups
+      setPowerUps((pu) =>
+        chargePowerUps(pu, applyOfficeCharge(allClean ? 2 : 1, office))
+      );
+
+      // Cool down auditor suspicion
+      setAuditor((prev) => ({
+        ...prev,
+        suspicion: Math.max(0, prev.suspicion + suspicionDelta),
+      }));
+
+      // Update station stats
+      setStations((prev) =>
+        prev.map((s) =>
+          s.id === domain ? { ...s, processedCount: s.processedCount + 1 } : s
+        )
+      );
+
+      // Sponsors love throughput
+      sponsorRef.current = applySponsorSubmissionBoost(
+        sponsorRef.current,
+        allClean
+      );
+      setSponsor(sponsorRef.current);
+
+      // Record to submitted history
+      setSubmittedHistory((prev) => [...prev, subj]);
+
+      // Remove from conveyor
+      setConveyorSubjects((prev) => prev.filter((s) => s.id !== subj.id));
+      setSelectedSubjectId(null);
+
+      // Phase completion check in Campaign mode
+      if (gameMode === "campaign") {
+        const targetCount = PHASE_TARGETS[phase];
+        if (scoreState.subjectsSubmitted + 1 >= targetCount) {
+          setPlayState("phase_cleared");
+          playSuccess();
+          const report = applySponsorSkeletonsToReport(
+            generateBIMOReport(
+              {
+                ...scoreState,
+                subjectsSubmitted: scoreState.subjectsSubmitted + 1,
+              },
+              auditor,
+              auditLogs,
+              ruleViolations,
+              activeProtocol
+            ),
+            sponsorRef.current.skeletons
+          );
+          setBimoReport(report);
+          setLastBimoReport(report);
+        }
+      }
+    },
+    [
+      scoreState,
+      office,
+      auditor,
+      auditLogs,
+      ruleViolations,
+      activeProtocol,
+      gameMode,
+      phase,
+      pushScorePop,
+      playSuccess,
+    ]
+  );
+
   // 13. Power-Up Trigger Execution
   const triggerPowerUp = useCallback(
     (type: PowerUpType) => {
@@ -741,48 +857,35 @@ export const ClinicalTrialChaos: React.FC = () => {
         );
       } else if (type === "fast-sign") {
         if (activeSubject) {
-          // Auto clean and submit immediately to first matching domain
-          const domain = activeSubject.observations[0]?.destination || "DM";
+          // Auto-clean, then sign to the first active station the subject
+          // routes to, exactly as a signed CRF would be.
           const cleanedSubject = {
             ...activeSubject,
             observations: activeSubject.observations.map(
               (obs) => fixObservation(obs).observation
             ),
           };
+          const domain =
+            cleanedSubject.observations.find((obs) =>
+              stations.some((st) => st.id === obs.destination)
+            )?.destination ??
+            cleanedSubject.observations[0]?.destination ??
+            "DM";
+          const result = verify21CFRSubmission(
+            cleanedSubject,
+            "Intent to Submit",
+            domain
+          );
 
-          const points = applyOfficeScore(
-            calculateSubmissionPoints(
-              cleanedSubject,
-              scoreState.multiplier,
-              true
-            ),
-            office
-          );
-          pushScorePop(points);
-          setScoreState((prev) => ({
-            ...prev,
-            score: prev.score + points,
-            subjectsSubmitted: prev.subjectsSubmitted + 1,
-            cleanSubmissions: prev.cleanSubmissions + 1,
-            combo: prev.combo + 1,
-            maxCombo: Math.max(prev.maxCombo, prev.combo + 1),
-          }));
-
-          sponsorRef.current = applySponsorSubmissionBoost(
-            sponsorRef.current,
-            true
-          );
-          setSponsor(sponsorRef.current);
-          setSubmittedHistory((prev) => [...prev, cleanedSubject]);
-          setConveyorSubjects((prev) =>
-            prev.filter((s) => s.id !== activeSubject.id)
-          );
-          setSelectedSubjectId(null);
           triggerSound("sign");
           addAuditLog(
             `⚡ [FAST-TRACK 21 CFR PASS] Expedited NDA sign-off for ${cleanedSubject.subjectLabel} -> ${domain}.`,
             "COMPLIANT"
           );
+          completeSubmission(cleanedSubject, domain, {
+            allClean: true,
+            suspicionDelta: result.success ? result.suspicionDelta : 0,
+          });
         }
       }
 
@@ -800,11 +903,10 @@ export const ClinicalTrialChaos: React.FC = () => {
       powerUps,
       playState,
       activeSubject,
-      scoreState.multiplier,
-      office,
+      stations,
       triggerSound,
       addAuditLog,
-      pushScorePop,
+      completeSubmission,
     ]
   );
 
@@ -905,96 +1007,11 @@ export const ClinicalTrialChaos: React.FC = () => {
       setTimeout(() => setFlashStationId(null), 700);
       addAuditLog(result.logMessage, "COMPLIANT", result.suspicionDelta);
 
-      const allClean = isSubjectFullyCompliant(subj);
-      const points = applyOfficeScore(
-        calculateSubmissionPoints(subj, scoreState.multiplier, allClean),
-        office
-      );
-      const nextCombo = scoreState.combo + 1;
-      const nextMultiplier = Math.min(4, 1 + Math.floor(nextCombo / 3));
-
-      pushScorePop(points);
-      setScoreState((prev) => {
-        const newScore = prev.score + points;
-        const newHighScore = Math.max(newScore, prev.highScore);
-        if (typeof window !== "undefined") {
-          try {
-            localStorage.setItem(
-              "clinical_chaos_highscore",
-              newHighScore.toString()
-            );
-          } catch {}
-        }
-        return {
-          ...prev,
-          score: newScore,
-          highScore: newHighScore,
-          combo: nextCombo,
-          maxCombo: Math.max(prev.maxCombo, nextCombo),
-          multiplier: nextMultiplier,
-          subjectsSubmitted: prev.subjectsSubmitted + 1,
-          cleanSubmissions: allClean
-            ? prev.cleanSubmissions + 1
-            : prev.cleanSubmissions,
-        };
+      completeSubmission(subj, domain, {
+        allClean: isSubjectFullyCompliant(subj),
+        suspicionDelta: result.suspicionDelta,
       });
-
-      // Charge power-ups
-      setPowerUps((pu) =>
-        chargePowerUps(pu, applyOfficeCharge(allClean ? 2 : 1, office))
-      );
-
-      // Cool down auditor suspicion
-      setAuditor((prev) => ({
-        ...prev,
-        suspicion: Math.max(0, prev.suspicion + result.suspicionDelta),
-      }));
-
-      // Update station stats
-      setStations((prev) =>
-        prev.map((s) =>
-          s.id === domain ? { ...s, processedCount: s.processedCount + 1 } : s
-        )
-      );
-
-      // Sponsors love throughput
-      sponsorRef.current = applySponsorSubmissionBoost(
-        sponsorRef.current,
-        allClean
-      );
-      setSponsor(sponsorRef.current);
-
-      // Record to submitted history
-      setSubmittedHistory((prev) => [...prev, subj]);
-
-      // Remove from conveyor
-      setConveyorSubjects((prev) => prev.filter((s) => s.id !== subj.id));
-      setSelectedSubjectId(null);
       setSignatureModal((prev) => ({ ...prev, isOpen: false, subject: null }));
-
-      // Phase completion check in Campaign mode
-      if (gameMode === "campaign") {
-        const targetCount = PHASE_TARGETS[phase];
-        if (scoreState.subjectsSubmitted + 1 >= targetCount) {
-          setPlayState("phase_cleared");
-          playSuccess();
-          const report = applySponsorSkeletonsToReport(
-            generateBIMOReport(
-              {
-                ...scoreState,
-                subjectsSubmitted: scoreState.subjectsSubmitted + 1,
-              },
-              auditor,
-              auditLogs,
-              ruleViolations,
-              activeProtocol
-            ),
-            sponsorRef.current.skeletons
-          );
-          setBimoReport(report);
-          setLastBimoReport(report);
-        }
-      }
     } else {
       triggerSound("error");
       addAuditLog(result.logMessage, result.level, result.suspicionDelta);
@@ -1020,19 +1037,10 @@ export const ClinicalTrialChaos: React.FC = () => {
   }, [
     signatureModal,
     targetRoutingStation,
-    scoreState,
-    auditor,
-    auditLogs,
-    ruleViolations,
-    activeProtocol,
-    gameMode,
-    phase,
     triggerSound,
     spawnSparkles,
     addAuditLog,
-    playSuccess,
-    office,
-    pushScorePop,
+    completeSubmission,
   ]);
 
   // 16. Canvas 2D Simulation Renderer

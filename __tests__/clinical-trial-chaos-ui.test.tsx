@@ -59,6 +59,25 @@ vi.mock("@/components/providers/AudioProvider", async (importOriginal) => {
   };
 });
 
+// Lets a test fire the Fast-Track lifeline repeatedly: a zero maxCharge means
+// its charge never falls below the maximum, so it is always ready.
+const fastTrackLifeline = vi.hoisted(() => ({ alwaysCharged: false }));
+vi.mock("@/lib/clinical-trial-chaos/engine", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/lib/clinical-trial-chaos/engine")>();
+  return {
+    ...actual,
+    createInitialPowerUpInventory: () => {
+      const inventory = actual.createInitialPowerUpInventory();
+      if (!fastTrackLifeline.alwaysCharged) return inventory;
+      return {
+        ...inventory,
+        "fast-sign": { ...inventory["fast-sign"], charge: 0, maxCharge: 0 },
+      };
+    },
+  };
+});
+
 const mockRecordEvent = vi.fn().mockResolvedValue(true);
 vi.mock("@/hooks/useTelemetry", () => ({
   useTelemetry: () => ({
@@ -405,6 +424,67 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     expect(sdtmTabLabel()).toMatch(/Live SDTM Studio0$/);
 
     vi.useRealTimers();
+  });
+
+  it("completes a Fast-Track 21 CFR Pass like a signed CRF (#897)", async () => {
+    vi.useFakeTimers();
+    fastTrackLifeline.alwaysCharged = true;
+    try {
+      await act(async () => {
+        root.render(<ClinicalTrialChaos />);
+      });
+      const startBtn = Array.from(container.querySelectorAll("button")).find(
+        (b) => b.textContent?.includes("Start 3-Phase Campaign")
+      );
+      await act(async () => {
+        startBtn?.click();
+      });
+
+      const board = container.querySelector(
+        '[data-keyboard-boundary="true"]'
+      ) as HTMLElement;
+      const fastTrack = async () => {
+        // Wait for a packet if the conveyor has run dry.
+        for (
+          let i = 0;
+          i < 30 &&
+          container.textContent?.includes("Waiting for the next packet");
+          i++
+        ) {
+          await act(async () => {
+            vi.advanceTimersByTime(1000);
+          });
+        }
+        await act(async () => {
+          board.dispatchEvent(
+            new KeyboardEvent("keydown", { key: "r", bubbles: true })
+          );
+        });
+      };
+      const multiplierBadge = () =>
+        Array.from(container.querySelectorAll("span")).find((s) =>
+          /^×\d$/.test(s.textContent ?? "")
+        )?.textContent;
+
+      await fastTrack();
+      // The destination station counts the submission.
+      expect(container.textContent).toContain("Submits:1");
+
+      await fastTrack();
+      await fastTrack();
+      // Three in a row is a 3-combo, which raises the multiplier to ×2.
+      expect(multiplierBadge()).toBe("×2");
+
+      await fastTrack();
+      await fastTrack();
+      // The fifth CRF meets the Phase 1 target and clears the phase.
+      expect(container.textContent).toContain(
+        "PHASE 1 COMPLIANCE AUDIT PASSED!"
+      );
+    } finally {
+      fastTrackLifeline.alwaysCharged = false;
+      vi.useRealTimers();
+    }
   });
 
   it("does not start a shift when Enter is pressed on a focused briefing button", async () => {
