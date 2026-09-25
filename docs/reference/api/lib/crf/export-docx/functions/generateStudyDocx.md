@@ -22,7 +22,10 @@ StudyProtocol definition
 
 [`ExportDocxOptions`](../../types/interfaces/ExportDocxOptions.md)
 
-Export options (mode, scope, branding, etc.)
+Export options. `all` includes every form; `single` includes the form matching
+  the first `selectedFormIds` entry; `selected` includes matching requested forms in study order.
+  Those scopes throw a `RangeError` if `selectedFormIds` is missing or empty, if the first ID
+  does not resolve for `single`, or if no IDs resolve for `selected`.
 
 ## Returns
 

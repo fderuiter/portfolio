@@ -48,7 +48,7 @@ export const ANNOTATED_COL_WIDTH_3 = 2621; // ~28%
 /**
  * Table of contents column widths in DXA (sum = 9,360).
  */
-export const TOC_COL_WIDTH_1 = 749;  // ~8%
+export const TOC_COL_WIDTH_1 = 749; // ~8%
 export const TOC_COL_WIDTH_2 = 1404; // 15%
 export const TOC_COL_WIDTH_3 = 4399; // ~47%
 export const TOC_COL_WIDTH_4 = 1404; // 15%
@@ -61,9 +61,8 @@ export const SDTM_COL_WIDTH_1 = 1123; // ~12%
 export const SDTM_COL_WIDTH_2 = 1685; // ~18%
 export const SDTM_COL_WIDTH_3 = 2808; // 30%
 export const SDTM_COL_WIDTH_4 = 1872; // 20%
-export const SDTM_COL_WIDTH_5 = 936;  // 10%
-export const SDTM_COL_WIDTH_6 = 936;  // 10%
-
+export const SDTM_COL_WIDTH_5 = 936; // 10%
+export const SDTM_COL_WIDTH_6 = 936; // 10%
 
 /**
  * Decodes base64 image data to Uint8Array for docx ImageRun.
@@ -95,8 +94,7 @@ function renderFieldResponseMock(
   const codelist = study.codelists.find((cl) => cl.id === field.codelistId);
 
   if (field.dataType === "radio" || field.dataType === "single_select") {
-    const opts =
-      field.customOptions ||
+    const opts = field.customOptions ||
       codelist?.options || [
         { code: "1", label: "Option 1", order: 1 },
         { code: "2", label: "Option 2", order: 2 },
@@ -116,7 +114,9 @@ function renderFieldResponseMock(
       );
     });
 
-    return [new Paragraph({ children: runs, spacing: { before: 80, after: 80 } })];
+    return [
+      new Paragraph({ children: runs, spacing: { before: 80, after: 80 } }),
+    ];
   }
 
   if (field.dataType === "multi_select" || field.dataType === "checkbox") {
@@ -135,7 +135,9 @@ function renderFieldResponseMock(
           })
         );
       });
-      return [new Paragraph({ children: runs, spacing: { before: 80, after: 80 } })];
+      return [
+        new Paragraph({ children: runs, spacing: { before: 80, after: 80 } }),
+      ];
     }
 
     return [
@@ -335,7 +337,9 @@ function createSectionTable(
     const isRequired = field.required;
     const isDerived = field.dataType === "calculated";
     const sdtmTarget =
-      field.cdashMetadata?.sdtmVariable || field.cdashMetadata?.acrfAnnotation || field.variableName;
+      field.cdashMetadata?.sdtmVariable ||
+      field.cdashMetadata?.acrfAnnotation ||
+      field.variableName;
     const sdtmOrigin = isDerived ? "Derived" : "CRF";
     const sdtmCore = field.cdashMetadata?.core || (isRequired ? "HR" : "O");
 
@@ -343,7 +347,9 @@ function createSectionTable(
       new TextRun({ text: field.label, bold: true, size: 20, color: "0F172A" }),
     ];
     if (isRequired) {
-      labelRuns.push(new TextRun({ text: " *", bold: true, color: "DC2626", size: 20 }));
+      labelRuns.push(
+        new TextRun({ text: " *", bold: true, color: "DC2626", size: 20 })
+      );
     }
 
     const labelParagraphs: Paragraph[] = [
@@ -479,7 +485,14 @@ function createTableOfContentsTable(forms: CRFForm[]): Table {
           shading: { type: ShadingType.CLEAR, fill: "0F172A" },
           children: [
             new Paragraph({
-              children: [new TextRun({ text: "#", bold: true, color: "FFFFFF", size: 20 })],
+              children: [
+                new TextRun({
+                  text: "#",
+                  bold: true,
+                  color: "FFFFFF",
+                  size: 20,
+                }),
+              ],
             }),
           ],
         }),
@@ -488,7 +501,14 @@ function createTableOfContentsTable(forms: CRFForm[]): Table {
           shading: { type: ShadingType.CLEAR, fill: "0F172A" },
           children: [
             new Paragraph({
-              children: [new TextRun({ text: "Domain", bold: true, color: "FFFFFF", size: 20 })],
+              children: [
+                new TextRun({
+                  text: "Domain",
+                  bold: true,
+                  color: "FFFFFF",
+                  size: 20,
+                }),
+              ],
             }),
           ],
         }),
@@ -497,7 +517,14 @@ function createTableOfContentsTable(forms: CRFForm[]): Table {
           shading: { type: ShadingType.CLEAR, fill: "0F172A" },
           children: [
             new Paragraph({
-              children: [new TextRun({ text: "CRF Form Name", bold: true, color: "FFFFFF", size: 20 })],
+              children: [
+                new TextRun({
+                  text: "CRF Form Name",
+                  bold: true,
+                  color: "FFFFFF",
+                  size: 20,
+                }),
+              ],
             }),
           ],
         }),
@@ -506,7 +533,14 @@ function createTableOfContentsTable(forms: CRFForm[]): Table {
           shading: { type: ShadingType.CLEAR, fill: "0F172A" },
           children: [
             new Paragraph({
-              children: [new TextRun({ text: "Sections", bold: true, color: "FFFFFF", size: 20 })],
+              children: [
+                new TextRun({
+                  text: "Sections",
+                  bold: true,
+                  color: "FFFFFF",
+                  size: 20,
+                }),
+              ],
             }),
           ],
         }),
@@ -515,7 +549,14 @@ function createTableOfContentsTable(forms: CRFForm[]): Table {
           shading: { type: ShadingType.CLEAR, fill: "0F172A" },
           children: [
             new Paragraph({
-              children: [new TextRun({ text: "Fields", bold: true, color: "FFFFFF", size: 20 })],
+              children: [
+                new TextRun({
+                  text: "Fields",
+                  bold: true,
+                  color: "FFFFFF",
+                  size: 20,
+                }),
+              ],
             }),
           ],
         }),
@@ -530,32 +571,51 @@ function createTableOfContentsTable(forms: CRFForm[]): Table {
         children: [
           new TableCell({
             borders: cellBorder,
-            children: [new Paragraph({ children: [new TextRun({ text: `${idx + 1}`, size: 20 })] })],
+            children: [
+              new Paragraph({
+                children: [new TextRun({ text: `${idx + 1}`, size: 20 })],
+              }),
+            ],
           }),
           new TableCell({
             borders: cellBorder,
             children: [
               new Paragraph({
                 children: [
-                  new TextRun({ text: f.domain, bold: true, color: "0284C7", size: 20 }),
+                  new TextRun({
+                    text: f.domain,
+                    bold: true,
+                    color: "0284C7",
+                    size: 20,
+                  }),
                 ],
               }),
             ],
           }),
           new TableCell({
             borders: cellBorder,
-            children: [new Paragraph({ children: [new TextRun({ text: f.name, size: 20 })] })],
-          }),
-          new TableCell({
-            borders: cellBorder,
             children: [
-              new Paragraph({ children: [new TextRun({ text: `${f.sections.length}`, size: 20 })] }),
+              new Paragraph({
+                children: [new TextRun({ text: f.name, size: 20 })],
+              }),
             ],
           }),
           new TableCell({
             borders: cellBorder,
             children: [
-              new Paragraph({ children: [new TextRun({ text: `${totalFields}`, size: 20 })] }),
+              new Paragraph({
+                children: [
+                  new TextRun({ text: `${f.sections.length}`, size: 20 }),
+                ],
+              }),
+            ],
+          }),
+          new TableCell({
+            borders: cellBorder,
+            children: [
+              new Paragraph({
+                children: [new TextRun({ text: `${totalFields}`, size: 20 })],
+              }),
             ],
           }),
         ],
@@ -572,7 +632,7 @@ function createTableOfContentsTable(forms: CRFForm[]): Table {
 /**
  * Builds the complete SDTM Appendix specification table.
  */
-function createSdtmSpecificationTable(study: StudyProtocol): Table {
+function createSdtmSpecificationTable(forms: CRFForm[]): Table {
   const cellBorder = {
     top: { style: BorderStyle.SINGLE, size: 1, color: "CBD5E1" },
     bottom: { style: BorderStyle.SINGLE, size: 1, color: "CBD5E1" },
@@ -587,44 +647,111 @@ function createSdtmSpecificationTable(study: StudyProtocol): Table {
         new TableCell({
           width: { size: SDTM_COL_WIDTH_1, type: WidthType.DXA },
           shading: { type: ShadingType.CLEAR, fill: "0F172A" },
-          children: [new Paragraph({ children: [new TextRun({ text: "Domain", bold: true, color: "FFFFFF", size: 18 })] })],
+          children: [
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: "Domain",
+                  bold: true,
+                  color: "FFFFFF",
+                  size: 18,
+                }),
+              ],
+            }),
+          ],
         }),
         new TableCell({
           width: { size: SDTM_COL_WIDTH_2, type: WidthType.DXA },
           shading: { type: ShadingType.CLEAR, fill: "0F172A" },
-          children: [new Paragraph({ children: [new TextRun({ text: "Variable", bold: true, color: "FFFFFF", size: 18 })] })],
+          children: [
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: "Variable",
+                  bold: true,
+                  color: "FFFFFF",
+                  size: 18,
+                }),
+              ],
+            }),
+          ],
         }),
         new TableCell({
           width: { size: SDTM_COL_WIDTH_3, type: WidthType.DXA },
           shading: { type: ShadingType.CLEAR, fill: "0F172A" },
-          children: [new Paragraph({ children: [new TextRun({ text: "CDASH Question Label", bold: true, color: "FFFFFF", size: 18 })] })],
+          children: [
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: "CDASH Question Label",
+                  bold: true,
+                  color: "FFFFFF",
+                  size: 18,
+                }),
+              ],
+            }),
+          ],
         }),
         new TableCell({
           width: { size: SDTM_COL_WIDTH_4, type: WidthType.DXA },
           shading: { type: ShadingType.CLEAR, fill: "0F172A" },
-          children: [new Paragraph({ children: [new TextRun({ text: "SDTM Target", bold: true, color: "FFFFFF", size: 18 })] })],
+          children: [
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: "SDTM Target",
+                  bold: true,
+                  color: "FFFFFF",
+                  size: 18,
+                }),
+              ],
+            }),
+          ],
         }),
         new TableCell({
           width: { size: SDTM_COL_WIDTH_5, type: WidthType.DXA },
           shading: { type: ShadingType.CLEAR, fill: "0F172A" },
-          children: [new Paragraph({ children: [new TextRun({ text: "Origin", bold: true, color: "FFFFFF", size: 18 })] })],
+          children: [
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: "Origin",
+                  bold: true,
+                  color: "FFFFFF",
+                  size: 18,
+                }),
+              ],
+            }),
+          ],
         }),
         new TableCell({
           width: { size: SDTM_COL_WIDTH_6, type: WidthType.DXA },
           shading: { type: ShadingType.CLEAR, fill: "0F172A" },
-          children: [new Paragraph({ children: [new TextRun({ text: "Core", bold: true, color: "FFFFFF", size: 18 })] })],
+          children: [
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: "Core",
+                  bold: true,
+                  color: "FFFFFF",
+                  size: 18,
+                }),
+              ],
+            }),
+          ],
         }),
       ],
     }),
   ];
 
-  study.forms.forEach((form) => {
+  forms.forEach((form) => {
     form.sections.forEach((sec) => {
       sec.fields.forEach((field) => {
         const isDerived = field.dataType === "calculated";
         const origin = isDerived ? "Derived" : "CRF";
         const sdtmTarget =
-          field.cdashMetadata?.sdtmVariable || `${form.domain}.${field.variableName}`;
+          field.cdashMetadata?.sdtmVariable ||
+          `${form.domain}.${field.variableName}`;
         const core = field.cdashMetadata?.core || (field.required ? "HR" : "O");
 
         rows.push(
@@ -632,27 +759,70 @@ function createSdtmSpecificationTable(study: StudyProtocol): Table {
             children: [
               new TableCell({
                 borders: cellBorder,
-                children: [new Paragraph({ children: [new TextRun({ text: form.domain, bold: true, color: "0284C7", size: 18 })] })],
+                children: [
+                  new Paragraph({
+                    children: [
+                      new TextRun({
+                        text: form.domain,
+                        bold: true,
+                        color: "0284C7",
+                        size: 18,
+                      }),
+                    ],
+                  }),
+                ],
               }),
               new TableCell({
                 borders: cellBorder,
-                children: [new Paragraph({ children: [new TextRun({ text: field.variableName, bold: true, size: 18 })] })],
+                children: [
+                  new Paragraph({
+                    children: [
+                      new TextRun({
+                        text: field.variableName,
+                        bold: true,
+                        size: 18,
+                      }),
+                    ],
+                  }),
+                ],
               }),
               new TableCell({
                 borders: cellBorder,
-                children: [new Paragraph({ children: [new TextRun({ text: field.label, size: 18 })] })],
+                children: [
+                  new Paragraph({
+                    children: [new TextRun({ text: field.label, size: 18 })],
+                  }),
+                ],
               }),
               new TableCell({
                 borders: cellBorder,
-                children: [new Paragraph({ children: [new TextRun({ text: sdtmTarget, color: "0284C7", size: 18 })] })],
+                children: [
+                  new Paragraph({
+                    children: [
+                      new TextRun({
+                        text: sdtmTarget,
+                        color: "0284C7",
+                        size: 18,
+                      }),
+                    ],
+                  }),
+                ],
               }),
               new TableCell({
                 borders: cellBorder,
-                children: [new Paragraph({ children: [new TextRun({ text: origin, size: 18 })] })],
+                children: [
+                  new Paragraph({
+                    children: [new TextRun({ text: origin, size: 18 })],
+                  }),
+                ],
               }),
               new TableCell({
                 borders: cellBorder,
-                children: [new Paragraph({ children: [new TextRun({ text: core, size: 18 })] })],
+                children: [
+                  new Paragraph({
+                    children: [new TextRun({ text: core, size: 18 })],
+                  }),
+                ],
               }),
             ],
           })
@@ -671,25 +841,56 @@ function createSdtmSpecificationTable(study: StudyProtocol): Table {
  * Generates a complete Microsoft Word (.docx) document representing the CRF Study or a Single Form.
  *
  * @param study - StudyProtocol definition
- * @param options - Export options (mode, scope, branding, etc.)
+ * @param options - Export options. `all` includes every form; `single` includes the form matching
+ *   the first `selectedFormIds` entry; `selected` includes matching requested forms in study order.
+ *   Those scopes throw a `RangeError` if `selectedFormIds` is missing or empty, if the first ID
+ *   does not resolve for `single`, or if no IDs resolve for `selected`.
  * @returns Promise resolving to binary Blob
  */
 export async function generateStudyDocx(
   study: StudyProtocol,
   options: ExportDocxOptions
 ): Promise<Blob> {
+  let formsToInclude: CRFForm[];
+  if (options.scope === "all") {
+    formsToInclude = study.forms;
+  } else {
+    const selectedFormIds = options.selectedFormIds;
+    if (!selectedFormIds?.length) {
+      const selectionError =
+        options.scope === "single"
+          ? "Cannot export with scope 'single': selectedFormIds must contain a first entry."
+          : "Cannot export with scope 'selected': selectedFormIds must contain at least one entry.";
+      throw new RangeError(selectionError);
+    }
+
+    if (options.scope === "single") {
+      const form = study.forms.find(
+        (candidate) => candidate.id === selectedFormIds[0]
+      );
+      if (!form) {
+        throw new RangeError(
+          "Cannot export with scope 'single': the first selectedFormIds entry must match a study form."
+        );
+      }
+      formsToInclude = [form];
+    } else {
+      const requestedFormIds = new Set(selectedFormIds);
+      formsToInclude = study.forms.filter((form) =>
+        requestedFormIds.has(form.id)
+      );
+      if (formsToInclude.length === 0) {
+        throw new RangeError(
+          "Cannot export with scope 'selected': selectedFormIds must match at least one study form."
+        );
+      }
+    }
+  }
+
   const branding = options.branding || getStudyBranding(study);
   const isAnnotated = options.mode === "annotated";
   const primaryColor = cleanHex(branding.primaryColor, "0284C7");
   const accentColor = cleanHex(branding.accentColor, "0EA5E9");
-
-  // Determine which forms to include
-  let formsToInclude: CRFForm[] = study.forms;
-  if (options.scope === "single" && options.selectedFormIds?.length) {
-    formsToInclude = study.forms.filter((f) => f.id === options.selectedFormIds![0]);
-  } else if (options.scope === "selected" && options.selectedFormIds?.length) {
-    formsToInclude = study.forms.filter((f) => options.selectedFormIds!.includes(f.id));
-  }
 
   const documentChildren: (Paragraph | Table)[] = [];
 
@@ -779,19 +980,31 @@ export async function generateStudyDocx(
               children: [
                 new Paragraph({
                   children: [
-                    new TextRun({ text: "Protocol Number: ", bold: true, size: 20 }),
+                    new TextRun({
+                      text: "Protocol Number: ",
+                      bold: true,
+                      size: 20,
+                    }),
                     new TextRun({ text: study.protocolNumber, size: 20 }),
                   ],
                 }),
                 new Paragraph({
                   children: [
-                    new TextRun({ text: "Study Phase: ", bold: true, size: 20 }),
+                    new TextRun({
+                      text: "Study Phase: ",
+                      bold: true,
+                      size: 20,
+                    }),
                     new TextRun({ text: study.phase, size: 20 }),
                   ],
                 }),
                 new Paragraph({
                   children: [
-                    new TextRun({ text: "Therapeutic Area: ", bold: true, size: 20 }),
+                    new TextRun({
+                      text: "Therapeutic Area: ",
+                      bold: true,
+                      size: 20,
+                    }),
                     new TextRun({ text: study.therapeuticArea, size: 20 }),
                   ],
                 }),
@@ -814,8 +1027,17 @@ export async function generateStudyDocx(
                 }),
                 new Paragraph({
                   children: [
-                    new TextRun({ text: "Date / Generated: ", bold: true, size: 20 }),
-                    new TextRun({ text: study.lastModified || new Date().toISOString().slice(0, 10), size: 20 }),
+                    new TextRun({
+                      text: "Date / Generated: ",
+                      bold: true,
+                      size: 20,
+                    }),
+                    new TextRun({
+                      text:
+                        study.lastModified ||
+                        new Date().toISOString().slice(0, 10),
+                      size: 20,
+                    }),
                   ],
                 }),
               ],
@@ -944,7 +1166,13 @@ export async function generateStudyDocx(
           ],
           spacing: { before: 180, after: 80 },
         }),
-        createSectionTable(section.fields, study, isAnnotated, primaryColor, accentColor),
+        createSectionTable(
+          section.fields,
+          study,
+          isAnnotated,
+          primaryColor,
+          accentColor
+        ),
         new Paragraph({ spacing: { after: 160 } })
       );
     });
@@ -971,7 +1199,7 @@ export async function generateStudyDocx(
         ],
         spacing: { before: 200, after: 160 },
       }),
-      createSdtmSpecificationTable(study)
+      createSdtmSpecificationTable(formsToInclude)
     );
   }
 
@@ -1040,10 +1268,10 @@ export async function generateStudyDocx(
         properties: {
           page: {
             margin: {
-              top: 1440,    // 1 inch
+              top: 1440, // 1 inch
               bottom: 1440, // 1 inch
-              left: 1440,   // 1 inch
-              right: 1440,  // 1 inch
+              left: 1440, // 1 inch
+              right: 1440, // 1 inch
             },
           },
         },
