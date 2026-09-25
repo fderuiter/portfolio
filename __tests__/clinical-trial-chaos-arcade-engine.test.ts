@@ -1,8 +1,63 @@
 import { describe, it, expect, vi } from "vitest";
-import { ClinicalTrialChaosEngine } from "@/lib/clinical-trial-chaos/engine";
+import {
+  ClinicalTrialChaosEngine,
+  getRoutingReadiness,
+} from "@/lib/clinical-trial-chaos";
 import type { ClinicalSubject } from "@/lib/clinical-trial-chaos/types";
 
 describe("ClinicalTrialChaosEngine", () => {
+  it("keeps matching stations visible while observations still need fixing", () => {
+    const subject: ClinicalSubject = {
+      id: "routing-subject",
+      subjectLabel: "SUBJ-ROUTE",
+      studySite: "Site 001",
+      observations: [
+        {
+          id: "dm-observation",
+          field: "Subject ID",
+          rawValue: "123",
+          currentValue: "123",
+          destination: "DM",
+          isResolved: false,
+        },
+        {
+          id: "vs-observation",
+          field: "Height",
+          rawValue: "180 cm",
+          currentValue: "180 cm",
+          destination: "VS",
+          isResolved: true,
+        },
+      ],
+      status: "queued",
+      timeRemaining: 30,
+      maxTime: 30,
+      createdAt: 0,
+    };
+    const stations = [{ id: "DM" }, { id: "AE" }] as const;
+
+    expect(getRoutingReadiness(subject, stations)).toEqual({
+      matchingDomains: ["DM"],
+      unresolvedCount: 1,
+    });
+    expect(getRoutingReadiness(null, stations)).toEqual({
+      matchingDomains: [],
+      unresolvedCount: 0,
+    });
+    expect(
+      getRoutingReadiness(
+        {
+          ...subject,
+          observations: subject.observations.map((observation) => ({
+            ...observation,
+            isResolved: true,
+          })),
+        },
+        stations
+      )
+    ).toEqual({ matchingDomains: ["DM"], unresolvedCount: 0 });
+  });
+
   it("initializes score, auditor, and conveyor state", () => {
     const engine = new ClinicalTrialChaosEngine();
     const snapshot = engine.getSnapshot();

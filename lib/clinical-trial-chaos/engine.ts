@@ -542,6 +542,32 @@ export function verify21CFRSubmission(
 }
 
 /**
+ * Describes which active stations match a dossier before routing is allowed.
+ * Matching domains remain visible while observations are unresolved so the
+ * player can understand the destination without submitting prematurely.
+ */
+export function getRoutingReadiness(
+  subject: ClinicalSubject | null,
+  stations: ReadonlyArray<Pick<StationConfig, "id">>
+): { matchingDomains: CDISCDomain[]; unresolvedCount: number } {
+  if (!subject) return { matchingDomains: [], unresolvedCount: 0 };
+
+  const activeDomains = new Set(stations.map((station) => station.id));
+  return {
+    matchingDomains: Array.from(
+      new Set(
+        subject.observations
+          .map((observation) => observation.destination)
+          .filter((domain) => activeDomains.has(domain))
+      )
+    ),
+    unresolvedCount: subject.observations.filter(
+      (observation) => !observation.isResolved
+    ).length,
+  };
+}
+
+/**
  * Spawns a random mid-game protocol amendment.
  */
 export function triggerRandomAmendment(): ProtocolAmendment {

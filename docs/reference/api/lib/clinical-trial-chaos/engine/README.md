@@ -29,6 +29,7 @@
 - [formatAuditTimestamp](functions/formatAuditTimestamp.md)
 - [generateBIMOReport](functions/generateBIMOReport.md)
 - [generateSDTMDataset](functions/generateSDTMDataset.md)
+- [getRoutingReadiness](functions/getRoutingReadiness.md)
 - [isSubjectFullyCompliant](functions/isSubjectFullyCompliant.md)
 - [scrambleStations](functions/scrambleStations.md)
 - [tickAuditor](functions/tickAuditor.md)
