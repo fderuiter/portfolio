@@ -920,6 +920,12 @@ Re-exports [ListingRow](internal/listing/interfaces/ListingRow.md)
 
 ***
 
+### LoggedAction
+
+Re-exports [LoggedAction](internal/save/type-aliases/LoggedAction.md)
+
+***
+
 ### membership
 
 Re-exports [membership](internal/snapshots/functions/membership.md)

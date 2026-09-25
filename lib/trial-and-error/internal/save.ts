@@ -12,7 +12,8 @@ import { advanceRun, createRunState, deriveRunView } from "./run";
 // The save schema must describe exactly the moves the run reducer takes,
 // minus RESTART_RUN, which starts a new log instead of joining one.
 type SavedAction = z.infer<typeof RunActionSchema>;
-type LoggedAction = Exclude<RunAction, { type: "RESTART_RUN" }>;
+/** A move a save records: every run action but RESTART_RUN. */
+export type LoggedAction = Exclude<RunAction, { type: "RESTART_RUN" }>;
 type Same<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
 const schemaMatchesReducer: Same<SavedAction, LoggedAction> = true;
 void schemaMatchesReducer;

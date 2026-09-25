@@ -182,6 +182,7 @@ export {
   parseRunSave,
   replayRun,
   serializeRun,
+  type LoggedAction,
   type RestoredRun,
   type RunLog,
 } from "./internal/save";

@@ -18,7 +18,7 @@ A run as the save keeps it: where it started and every move since.
 
 ### actions
 
-> **actions**: `LoggedAction`[]
+> **actions**: [`LoggedAction`](../type-aliases/LoggedAction.md)[]
 
 ***
 

@@ -11,6 +11,10 @@
 - [RestoredRun](interfaces/RestoredRun.md)
 - [RunLog](interfaces/RunLog.md)
 
+## Type Aliases
+
+- [LoggedAction](type-aliases/LoggedAction.md)
+
 ## Functions
 
 - [parseRunSave](functions/parseRunSave.md)
