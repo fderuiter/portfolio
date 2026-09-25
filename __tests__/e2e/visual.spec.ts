@@ -15,7 +15,8 @@ test.describe("Visual Regression & Drift Detection", () => {
           transition: none !important;
           animation: none !important;
         }
-        [data-testid="bio-spotlight"] {
+        [data-testid="bio-spotlight"],
+        [data-testid="footer-photo-gallery"] {
           display: none !important;
         }
       `,

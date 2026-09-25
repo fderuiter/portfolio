@@ -381,7 +381,7 @@ export const Footer: React.FC = () => {
                   LinkedIn ↗
                 </a>
               </li>
-              <li>
+              <li data-testid="footer-photo-gallery">
                 <button
                   type="button"
                   onClick={() => {
