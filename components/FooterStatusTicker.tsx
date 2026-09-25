@@ -4,6 +4,7 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  useRef,
   useSyncExternalStore,
 } from "react";
 import Link from "next/link";
@@ -64,9 +65,14 @@ export const FooterStatusTicker: React.FC = () => {
     getVaultServerSnapshot
   );
 
-  // Rotate status ticker every 4.5 seconds
+  // Rotate status ticker every 4.5 seconds. Setting `data-ticker-paused` on
+  // the ticker root holds the current line: accessibility audits use it so a
+  // scan cannot land mid-cross-fade, where the partial opacity reads as a
+  // contrast failure (#952).
+  const tickerLineRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const timer = setInterval(() => {
+      if (tickerLineRef.current?.closest("[data-ticker-paused]")) return;
       setTickerIndex((prev) => (prev + 1) % STATUS_TICKER_ITEMS.length);
     }, 4500);
     return () => clearInterval(timer);
@@ -124,7 +130,10 @@ export const FooterStatusTicker: React.FC = () => {
           <span className="text-zinc-400 uppercase tracking-wider text-[10px] font-semibold shrink-0">
             Footnotes:
           </span>
-          <div className="h-5 overflow-hidden relative flex-1 sm:w-80">
+          <div
+            ref={tickerLineRef}
+            className="h-5 overflow-hidden relative flex-1 sm:w-80"
+          >
             <AnimatePresence mode="wait">
               <motion.span
                 key={tickerIndex}
