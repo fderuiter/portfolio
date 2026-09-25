@@ -503,3 +503,114 @@ describe("seeded replay", () => {
     expect(shopped.table.crisis?.id).toBe(skip.table.crisis?.id);
   });
 });
+
+describe("shop refusals", () => {
+  it("refuses every shop action before the Blind is cashed out", () => {
+    const fresh = createRunState(act, "closed");
+    const blind = runBlinds(act, fresh)[0].blind.name;
+    const refusals: [RunAction, string][] = [
+      [{ type: "CASH_OUT" }, `Clear ${blind} first.`],
+      [{ type: "REROLL" }, "The shop is closed."],
+      [{ type: "BUY", slot: 0 }, "The shop is closed."],
+      [{ type: "BUY_PACK", slot: 0 }, "The shop is closed."],
+      [{ type: "PICK_PACK_CARD", cardId: "x" }, "No pack is open."],
+      [{ type: "SELL_RELIC", relicId: "x" }, "Relics are sold between Blinds."],
+    ];
+    for (const [action, message] of refusals) {
+      const next = advanceRun(act, fresh, action);
+      expect(next.table.budget).toBe(fresh.table.budget);
+      expect(lastMessage(next)).toBe(message);
+    }
+  });
+
+  it("refuses a second cash-out, unknown items and a busy shop", () => {
+    const run = inShop();
+    expect(lastMessage(apply(run, { type: "CASH_OUT" }))).toBe(
+      "This Blind is already cashed out."
+    );
+    expect(lastMessage(apply(run, { type: "BUY_PACK", slot: 9 }))).toBe(
+      "That pack slot is empty."
+    );
+    expect(
+      lastMessage(apply(run, { type: "SELL_RELIC", relicId: "nope" }))
+    ).toBe("That relic is not in your rack.");
+    expect(
+      lastMessage(apply(run, { type: "SELL_CONSUMABLE", consumableId: "nope" }))
+    ).toBe("That consumable is not in your tray.");
+
+    const pack = ACT_I_SHOP.packs.find((p) => p.kind === "RELIC")!;
+    const opened = apply(
+      { ...run, shop: { ...run.shop!, packs: [{ pack, sold: false }] } },
+      { type: "BUY_PACK", slot: 0 }
+    );
+    const view = deriveRunView(act, opened).shop!;
+    expect(view.rerollRefusal).toBe("Finish opening the pack first.");
+    for (const action of [
+      { type: "REROLL" },
+      { type: "BUY_PACK", slot: 0 },
+    ] as RunAction[]) {
+      expect(lastMessage(apply(opened, action))).toBe(
+        "Finish opening the pack first."
+      );
+    }
+    expect(
+      lastMessage(apply(opened, { type: "PICK_PACK_CARD", cardId: "nope" }))
+    ).toBe("That card is not in the pack.");
+    // Skipped, the bought pack's slot reads as empty.
+    const skipped = apply(opened, { type: "SKIP_PACK" });
+    expect(lastMessage(apply(skipped, { type: "BUY_PACK", slot: 0 }))).toBe(
+      "That pack slot is empty."
+    );
+  });
+
+  it("refuses an enrollment without its subject or into no population", () => {
+    const [site] = ACT_I_SHOP.sites;
+    const snapshot = ACT_I.blinds[0].populationSnapshot;
+    const [first] = siteEnrollments(site, "2026-03-01T09:00:00Z");
+    expect(applyTransition(snapshot, { ...first, subject: undefined }).ok).toBe(
+      false
+    );
+    expect(
+      applyTransition(snapshot, {
+        ...first,
+        subject: { ...first.subject!, id: "S-999" },
+      }).ok
+    ).toBe(false);
+    expect(
+      applyTransition(snapshot, {
+        ...first,
+        subject: { ...first.subject!, populations: [] },
+      }).ok
+    ).toBe(false);
+  });
+
+  it("rejects mismatched subjects and duplicate catalog ids as data", () => {
+    const [site] = ACT_I_SHOP.sites;
+    const [first] = siteEnrollments(site, "2026-03-01T09:00:00Z");
+    expect(
+      PopulationTransitionSchema.safeParse({
+        ...first,
+        subject: { ...first.subject!, id: "S-999" },
+      }).success
+    ).toBe(false);
+    expect(
+      PopulationTransitionSchema.safeParse({
+        ...first,
+        change: "JOIN",
+      }).success
+    ).toBe(false);
+    const dupes = {
+      ...ACT_I_SHOP,
+      entries: [...ACT_I_SHOP.entries, ACT_I_SHOP.entries[0]],
+      packs: [...ACT_I_SHOP.packs, ACT_I_SHOP.packs[0]],
+      sites: [...ACT_I_SHOP.sites, ACT_I_SHOP.sites[0]],
+    };
+    const issues = ShopCatalogSchema.safeParse(dupes).error?.issues ?? [];
+    expect(issues.map((i) => i.message)).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(/^Duplicate id /),
+        "Each site enrolls its own subjects",
+      ])
+    );
+  });
+});
