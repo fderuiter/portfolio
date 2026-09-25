@@ -1538,7 +1538,7 @@ export function checkProactiveDefectInterception(
     },
     {
       file: "scripts/canary-analyzer.ts",
-      desc: "Automated Canary Analysis (ACA) engine",
+      desc: "Manual canary analysis tooling (not a deployment gate)",
     },
     {
       file: "adr/0008-proactive-defect-interception-strategy.md",
@@ -1560,7 +1560,7 @@ export function checkProactiveDefectInterception(
       category: "quality",
       status: "pass",
       message:
-        "Shift-left property fuzzing, synthetic journey probes, and canary analyzer are active.",
+        "Shift-left property fuzzing and synthetic journey probes are active; the manual canary analyzer is present.",
     };
   }
 

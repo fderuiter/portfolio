@@ -1,8 +1,11 @@
 #!/usr/bin/env node
 /**
- * Automated Canary Analysis (ACA) & Anomaly Detection Engine
- * Evaluates production rollout metrics against baseline error budgets, latency SLOs, and Sentry exceptions.
- * Triggers instant automated rollback dispatch when anomalies exceed critical safety thresholds.
+ * Canary analysis: manual tooling, not a deployment gate.
+ * Evaluates caller-supplied canary and baseline metric windows against error
+ * budgets, latency SLOs and Sentry exception rates. Nothing invokes it
+ * automatically and it has no live metrics source; `npm run canary:eval` runs
+ * it on built-in sample data. Production rollback is a person using Vercel's
+ * Instant Rollback (ADR 0049, DEPLOYMENT.md section 2).
  */
 
 export interface TelemetryMetrics {
@@ -229,7 +232,7 @@ if (require.main === module) {
     windowDurationMinutes: 60,
   };
 
-  console.log("\n🐥 Running Automated Canary Analysis (ACA)...");
+  console.log("\n🐥 Running canary analysis on built-in sample metrics...");
   const evaluation = evaluateCanaryRollout(sampleCanary, sampleBaseline);
   console.log(`Status: [${evaluation.decision}]`);
   for (const reason of evaluation.reasons) {

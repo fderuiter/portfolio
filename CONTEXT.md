@@ -258,7 +258,7 @@ Formal inference rules used to derive logical steps from valid premises:
 
 ### Production Canary Analysis & Health Governance
 
-- **Automated Canary Analysis (ACA)**: Production deployment verification engine (`scripts/canary-analyzer.ts`) evaluating live request telemetry and error budgets against statistical baseline thresholds (5xx error rate <= 0.5%, p95 latency <= 800ms, Sentry exception spike ratio <= 2.0x) to automate canary promotion or trigger rollback workflows.
+- **Canary Analysis (manual tooling)**: A library and demo command (`scripts/canary-analyzer.ts`, `npm run canary:eval`) that compares caller-supplied canary and baseline metric windows against fixed thresholds (5xx error rate <= 0.5%, p95 latency <= 800ms, Sentry exception spike ratio <= 2.0x) and returns HEALTHY, DEGRADED or ROLLBACK_REQUIRED. It is not wired into any deployment step: no automatic promotion or rollback exists, and acting on a verdict means a person using Vercel's Instant Rollback (ADR 0049).
 - **Telemetry Event Ingestion Guard**: Validated REST API endpoint (`/api/telemetry`) enforcing strict Zod schema parsing, origin sanitization, rate-limiting, and error-boundary isolation on client performance and user interaction metrics.
 
 ### Garmin Watch Hardware & Thermal Emulation
