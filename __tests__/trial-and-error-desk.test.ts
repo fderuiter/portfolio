@@ -72,7 +72,7 @@ describe("QC Desk reducer", () => {
     expect(view.table?.draftLabel).toBe("Draft A (v0.1)");
     expect(view.totalCells).toBe(15);
     expect(view.reviewedCells).toBe(0);
-    expect(view.quota).toBe(300);
+    expect(view.quota).toBe(450);
     expect(view.remainingDraws).toBe(3);
     expect(view.canPlay).toBe(true);
     // Nothing is revealed yet: the known expected value is the clean baseline.

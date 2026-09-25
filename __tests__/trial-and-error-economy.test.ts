@@ -224,10 +224,12 @@ describe("CPU replenishment and costs", () => {
       ...(select(DRAFT_C, DM_LISTING) as RunAction[]),
       { type: "PLAY_HAND" },
       ...(select("C-T14.1.1-B", "C-T14.1.2") as RunAction[]),
+      { type: "PLAY_HAND" },
+      ...(select("C-T14.3.1", "C-L16.2.7") as RunAction[]),
       { type: "PLAY_HAND" }
     );
     expect(r.table.status).toBe("CLEARED");
-    expect(r.table.cpu.spent).toBe(4);
+    expect(r.table.cpu.spent).toBe(6);
     go({ type: "NEXT_BLIND" });
     expect(r.table.cpu).toEqual({ available: 10, spent: 0 });
   });
@@ -825,6 +827,8 @@ describe("Footnote seals", () => {
       ...(select(DRAFT_C, DM_LISTING) as RunAction[]),
       { type: "PLAY_HAND" },
       ...(select("C-T14.1.1-B", "C-T14.1.2") as RunAction[]),
+      { type: "PLAY_HAND" },
+      ...(select("C-T14.3.1", "C-L16.2.7") as RunAction[]),
       { type: "PLAY_HAND" },
       { type: "NEXT_BLIND" }
     );

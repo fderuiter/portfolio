@@ -558,7 +558,7 @@ describe("recovering from the data change", () => {
     return advanceTable(BIG, next, { type: "CLOSE_INSPECT" });
   }
 
-  it("clears the Big Blind by sending stale drafts back and flushing fresh ones", () => {
+  it("recovers by sending stale drafts back and flushing fresh ones", () => {
     let state = play(
       BIG,
       [
@@ -581,10 +581,12 @@ describe("recovering from the data change", () => {
         provenance: { id: "SNAP-P1-v2" },
       });
     }
-    state = fix(fix(state, "C-T14.3.2.2-A"), "C-T14.3.1-C");
+    state = fresh.reduce(fix, state);
     state = play(BIG, [...select(...fresh), { type: "PLAY_HAND" }], state);
     expect(state.lastPlay?.classification.handType).toBe("POPULATION_FLUSH");
-    expect(state.status).toBe("CLEARED");
+    expect(state.lastPlay?.evaluation.zeroRule.triggered).toBe(false);
+    // 5,100 on fresh v2 outputs; the stale v1 drafts could not be played.
+    expect(state.lastPlay?.evaluation.score).toBe(5100);
   });
 });
 
@@ -612,7 +614,7 @@ describe("study events", () => {
     const state = play(noop, [...select(DISPOSITION), { type: "PLAY_HAND" }]);
     expect(state.snapshots).toHaveLength(1);
     expect(state.lastEvent?.message).toBe(
-      "High Table scored 80 (40 Chips × 2 Mult). Round 80 of 750."
+      "High Table scored 80 (40 Chips × 2 Mult). Round 80 of 7500."
     );
   });
 

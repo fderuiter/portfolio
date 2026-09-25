@@ -669,7 +669,7 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
     accentColor: "from-amber-500/20 via-amber-500/5 to-transparent",
     badgeBg: "bg-amber-500/10 text-amber-300 border-amber-500/30",
     objective:
-      "Clear Act I, a Phase I safety study, in three Blinds: Internal QC (300), the Sponsor Safety Review (750) and the Dose Escalation Committee (1,500). Inspect suspect cards on the QC Desk before you trust them: an uncorrected fatal defect zeroes the whole hand, and losing a Blind ends the run.",
+      "Clear Act I, a Phase I safety study, in three Blinds: Internal QC (450), the Sponsor Safety Review (7,500) and the Dose Escalation Committee (8,500). Inspect suspect cards on the QC Desk before you trust them: an uncorrected fatal defect zeroes the whole hand, and losing a Blind ends the run.",
     quickSummary:
       "Move across the hand with ← →, select up to five cards with Space, and press Enter to play the best hand they make (2 CPU). D discards the selection (1 CPU). I opens the focused card's QC Desk (1 CPU): inspect cells with Enter or Space, correct with C, and close with Esc. R recompiles a stale card (2 CPU). A jumps to a blank shell's analysis sets, and footnote seals from the tray press onto a card with Enter.",
     controls: [

@@ -480,7 +480,7 @@ export const DEMOGRAPHICS_SCENARIO: Scenario = {
   blind: {
     tier: "SMALL_BLIND",
     name: "Small Blind: Internal QC",
-    quota: 300,
+    quota: 450,
   },
   handType: "HIGH_TABLE",
   startingCpu: 6,
@@ -981,7 +981,7 @@ export const SPONSOR_SAFETY_SCENARIO: Scenario = {
   blind: {
     tier: "BIG_BLIND",
     name: "Big Blind: Sponsor Safety Review",
-    quota: 750,
+    quota: 7500,
   },
   handType: "HIGH_TABLE",
   startingCpu: 6,
@@ -1089,7 +1089,7 @@ export const DOSE_ESCALATION_SCENARIO: Scenario = {
   blind: {
     tier: "BOSS_BLIND",
     name: "Boss Blind: Dose Escalation Committee",
-    quota: 1500,
+    quota: 8500,
   },
   boss: {
     id: "DEC-SAFETY-ONLY",
@@ -1501,7 +1501,7 @@ export const DMC_MILESTONE_SCENARIO: Scenario = {
   blind: {
     tier: "BOSS_BLIND",
     name: "Boss Blind: DMC Milestone Review",
-    quota: 10000,
+    quota: 25400,
   },
   boss: {
     id: "DMC-FIREWALL-BOSS",
@@ -1561,7 +1561,7 @@ export const DMC_MILESTONE_SCENARIO: Scenario = {
       {
         name: "Stage 2: Closed report",
         session: "CLOSED",
-        quota: 9600,
+        quota: 25000,
         hands: ["EFFICACY_FULL_HOUSE"],
       },
     ],
