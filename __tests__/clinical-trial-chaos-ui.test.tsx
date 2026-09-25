@@ -10,6 +10,7 @@ import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { ClinicalTrialChaos } from "@/components/ClinicalTrialChaos";
 import { ClinicalChaosClient } from "@/components/arcade/ClinicalChaosClient";
+import { EMPTY_STUDY_PRESET } from "@/lib/crf";
 
 class LocalStorageMock {
   private store: Record<string, string> = {};
@@ -56,6 +57,25 @@ vi.mock("@/components/providers/AudioProvider", async (importOriginal) => {
       muted: false,
     }),
     AudioProvider: ({ children }: { children: React.ReactNode }) => children,
+  };
+});
+
+// Records polite announcements while keeping the real announcer behavior.
+const announcements = vi.hoisted(() => [] as string[]);
+vi.mock("@/hooks/useAnnouncer", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/hooks/useAnnouncer")>();
+  return {
+    ...actual,
+    useAnnouncer: () => {
+      const ctx = actual.useAnnouncer();
+      return {
+        ...ctx,
+        announce: (...args: Parameters<typeof ctx.announce>) => {
+          announcements.push(String(args[0]));
+          return ctx.announce(...args);
+        },
+      };
+    },
   };
 });
 
@@ -442,6 +462,60 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     vi.useRealTimers();
   });
 
+  it("accepts a compliant choice and lets the player retry after a rejection with a CRF Studio protocol loaded (#1150)", async () => {
+    vi.useFakeTimers();
+    // Every generated field starts flagged.
+    const randomSpy = vi.spyOn(Math, "random").mockReturnValue(0);
+    mockStorage.setItem(
+      "crf_active_protocol",
+      JSON.stringify(EMPTY_STUDY_PRESET)
+    );
+
+    await act(async () => {
+      root.render(<ClinicalTrialChaos />);
+    });
+    const startBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Start 3-Phase Campaign")
+    );
+    await act(async () => {
+      startBtn?.click();
+    });
+
+    const obsCard = Array.from(container.querySelectorAll("span"))
+      .find((s) => s.textContent?.includes("Validate Choice"))
+      ?.closest(".cursor-pointer") as HTMLElement;
+    expect(obsCard).toBeTruthy();
+    await act(async () => {
+      obsCard.click();
+    });
+
+    const dialog = () =>
+      container.querySelector('[aria-labelledby="cc-fix-dialog-title"]');
+    const choice = (label: string) =>
+      Array.from(dialog()?.querySelectorAll("button") ?? []).find(
+        (b) => b.textContent?.trim().replace(/^\d/, "") === label
+      );
+    expect(dialog()?.textContent).toContain("Date Informed Consent Signed");
+
+    await act(async () => {
+      choice("Unknown")?.click();
+    });
+    expect(dialog()?.textContent).toContain("Regulatory Query");
+    expect(dialog()?.textContent).toContain("Date Informed Consent Signed");
+
+    await act(async () => {
+      choice("2024-03-15")?.click();
+    });
+    expect(dialog()?.textContent).toContain("Standard Verified");
+    await act(async () => {
+      vi.advanceTimersByTime(600);
+    });
+    expect(dialog()).toBeNull();
+
+    randomSpy.mockRestore();
+    vi.useRealTimers();
+  });
+
   it("should switch between Conveyor Floor, Live SDTM Studio, and Audit Trail tabs", async () => {
     await act(async () => {
       root.render(<ClinicalTrialChaos />);
@@ -532,6 +606,14 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     // routed or rejected, because the player has not looked at it yet.
     expect(container.textContent).not.toContain("before routing");
     expect(container.textContent).toContain("Submits:1");
+    // #834: the SAE (SUBJ-1003) outranks SUBJ-1002 and loads next.
+    expect(container.querySelector("#cc-dossier-title")?.textContent).toContain(
+      "SUBJ-1003"
+    );
+    expect(container.textContent).toContain(
+      "Next dossier loaded: SUBJ-1003 (SAE)"
+    );
+    expect(announcements).toContain("Next dossier loaded: SUBJ-1003 (SAE)");
     expect(container.textContent).toContain("Combo:1");
     const auditTab = Array.from(container.querySelectorAll("button")).find(
       (button) => button.textContent?.includes("Audit Trail Log")

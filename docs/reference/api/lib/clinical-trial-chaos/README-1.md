@@ -298,6 +298,12 @@ Re-exports [getFollowUpSubject](sponsor/functions/getFollowUpSubject.md)
 
 ***
 
+### getObservationChoices
+
+Re-exports [getObservationChoices](engine/functions/getObservationChoices.md)
+
+***
+
 ### getOfficeById
 
 Re-exports [getOfficeById](offices/functions/getOfficeById.md)
@@ -535,6 +541,12 @@ Re-exports [SDTMRow](types/interfaces/SDTMRow.md)
 ### SEEDED\_SCENARIOS
 
 Re-exports [SEEDED_SCENARIOS](scenarios/variables/SEEDED_SCENARIOS.md)
+
+***
+
+### selectNextUrgentSubject
+
+Re-exports [selectNextUrgentSubject](engine/functions/selectNextUrgentSubject.md)
 
 ***
 

@@ -8,7 +8,7 @@ import {
   StationConfig,
   ValidationErrorType,
 } from "./types";
-import { EditCheckRule, StudyProtocol } from "../crf/types";
+import { CRFField, EditCheckRule, StudyProtocol } from "../crf/types";
 
 export interface MockObservationTemplate {
   field: string;
@@ -946,13 +946,84 @@ export function generateClinicalSubject(
 }
 
 /**
+ * Game stations that stand in for CDASH domains the conveyor has no dock for,
+ * so every protocol form still routes somewhere the player can reach.
+ */
+const PROTOCOL_DOMAIN_ALIASES: Record<string, CDISCDomain> = {
+  IC: "DS",
+  EG: "VS",
+  QS: "MH",
+  PC: "LB",
+  TR: "LB",
+  DA: "EX",
+  DI: "EX",
+  DU: "EX",
+  DE: "AE",
+};
+
+function resolveProtocolDestination(
+  formDomain: string | undefined,
+  activeDomains: CDISCDomain[]
+): CDISCDomain {
+  const domain = (formDomain || "").toUpperCase();
+  if (activeDomains.includes(domain as CDISCDomain)) {
+    return domain as CDISCDomain;
+  }
+  const alias = PROTOCOL_DOMAIN_ALIASES[domain];
+  if (alias && activeDomains.includes(alias)) return alias;
+  return activeDomains[0] ?? "DM";
+}
+
+/**
+ * Picks a compliant and a non-compliant entry for a protocol field from its
+ * own metadata (codelist, unit, date type or default), never from an authored
+ * edit check: those can describe the query condition, reference other fields,
+ * or compare against a threshold, so their literal is not a valid answer.
+ */
+function getProtocolFieldValues(field: CRFField): {
+  validVal: string;
+  invalidVal: string;
+} {
+  if (field.customOptions && field.customOptions.length > 0) {
+    const validVal =
+      field.customOptions[0].label || field.customOptions[0].code;
+    const second = field.customOptions[1];
+    const invalidVal =
+      second && (second.label || second.code) !== validVal
+        ? second.label || second.code
+        : "Invalid Code";
+    return { validVal, invalidVal };
+  }
+  if (field.dataType === "date" || field.dataType === "partial_date") {
+    return { validVal: "2024-03-15", invalidVal: "15/03/2024" };
+  }
+  if (field.unit) {
+    return { validVal: `100 ${field.unit}`, invalidVal: `10000 ${field.unit}` };
+  }
+  if (
+    field.defaultValue !== undefined &&
+    field.defaultValue !== null &&
+    String(field.defaultValue).trim() !== ""
+  ) {
+    return {
+      validVal: String(field.defaultValue),
+      invalidVal: "Non-Compliant",
+    };
+  }
+  return { validVal: "Compliant", invalidVal: "Non-Compliant" };
+}
+
+/**
  * Generates a ClinicalSubject populated directly from an active StudyProtocol definition.
+ * Observations route only to `activeDomains`, and each carries a single-field
+ * answer rule that exactly one of its options satisfies.
  */
 export function generateClinicalSubjectFromProtocol(
   protocol: StudyProtocol,
   errorProbability = 0.5,
   forceSAE = false,
-  customSeq?: number
+  customSeq?: number,
+  activeDomains: CDISCDomain[] = ["DM", "VS", "AE", "LB"]
 ): ClinicalSubject {
   const seq = customSeq ?? globalSubjSeq++;
   const subjectLabel = `SUBJ-${seq}`;
@@ -969,59 +1040,63 @@ export function generateClinicalSubjectFromProtocol(
     if (fields.length === 0) return;
 
     const field = fields[fIdx % fields.length];
-    const domain = (form.domain.toUpperCase() as CDISCDomain) || "DM";
+    const destination = resolveProtocolDestination(form.domain, activeDomains);
 
-    const matchingRules = [
+    const authoredRule = [
       ...(form.rules || []),
       ...(protocol.rules || []),
-    ].filter(
+    ].find(
       (r) =>
         r.targetFieldId === field.id ||
         r.targetFieldId === field.variableName ||
         r.triggerFieldIds.includes(field.id) ||
         r.triggerFieldIds.includes(field.variableName)
     );
+    const ruleName =
+      authoredRule?.name ?? `Protocol Rule for ${field.variableName}`;
 
-    const activeRule: EditCheckRule = matchingRules[0] || {
+    // An authored single-field equality check names the compliant value
+    // directly; anything else only lends its name to the hint.
+    const authoredCondition =
+      authoredRule &&
+      !authoredRule.unsupportedExpression &&
+      !(
+        authoredRule.conditionGroups && authoredRule.conditionGroups.length > 0
+      ) &&
+      authoredRule.conditions.length === 1 &&
+      authoredRule.conditions[0].operator === "eq" &&
+      !authoredRule.conditions[0].crossVisitId &&
+      [field.id, field.variableName].includes(
+        authoredRule.conditions[0].fieldId
+      )
+        ? authoredRule.conditions[0]
+        : undefined;
+    const fieldValues = getProtocolFieldValues(field);
+    const validVal =
+      authoredCondition && String(authoredCondition.value ?? "").trim() !== ""
+        ? String(authoredCondition.value)
+        : fieldValues.validVal;
+    const invalidVal =
+      fieldValues.invalidVal.toLowerCase() !== validVal.toLowerCase()
+        ? fieldValues.invalidVal
+        : "Invalid Code";
+    const explanation =
+      authoredRule?.description ||
+      `${field.label || field.variableName} must be recorded as '${validVal}' per protocol ${protocol.protocolNumber}.`;
+
+    const answerRule: EditCheckRule = {
       id: `rule_${field.id}_${seq}`,
-      name: `Protocol Rule for ${field.variableName}`,
-      description: `Protocol validation for ${field.label || field.variableName}`,
+      name: ruleName,
+      description: explanation,
       triggerFieldIds: [field.id],
       actionType: "raise_query",
       targetFieldId: field.id,
-      conditions: [
-        {
-          fieldId: field.variableName,
-          operator: "eq",
-          value:
-            field.defaultValue !== undefined && field.defaultValue !== null
-              ? String(field.defaultValue)
-              : "Standard Value",
-        },
-      ],
+      conditions: [{ fieldId: field.id, operator: "eq", value: validVal }],
       logicalOperator: "AND",
+      queryMessage: `Query on ${field.label || field.variableName}: the selected entry does not satisfy ${ruleName}.`,
     };
 
     const hasError = Math.random() < errorProbability;
-
-    let validVal = "Compliant";
-    let invalidVal = "Non-Compliant";
-
-    if (field.customOptions && field.customOptions.length > 0) {
-      validVal = field.customOptions[0].label || field.customOptions[0].code;
-      invalidVal =
-        field.customOptions[1]?.label ||
-        field.customOptions[1]?.code ||
-        "Invalid Code";
-    } else if (field.unit) {
-      validVal = `100 ${field.unit}`;
-      invalidVal = `10000 ${field.unit}`;
-    }
-
-    if (activeRule.conditions && activeRule.conditions[0]) {
-      validVal = String(activeRule.conditions[0].value);
-    }
-
     const rawValue = hasError ? invalidVal : validVal;
 
     observations.push({
@@ -1031,21 +1106,29 @@ export function generateClinicalSubjectFromProtocol(
       rawValue,
       correctedValue: validVal,
       currentValue: rawValue,
-      destination: domain,
+      destination,
       errorType: hasError ? "casing-mismatch" : undefined,
-      hint: `Protocol rule: ${activeRule.name}`,
-      explanation:
-        activeRule.description ||
-        `Field must comply with protocol edit check ${activeRule.name}`,
+      hint: `Protocol rule: ${ruleName}`,
+      explanation,
       ctCode: field.variableName,
-      options: [validVal, invalidVal, "Unverified Code", "Unknown"],
+      // Choices compare case-insensitively, so dedupe the same way to keep
+      // exactly one accepted option.
+      options: [validVal, invalidVal, "Unverified Code", "Unknown"].filter(
+        (option, i, all) =>
+          all.findIndex((o) => o.toLowerCase() === option.toLowerCase()) === i
+      ),
       isResolved: !hasError,
-      astRule: activeRule,
+      astRule: answerRule,
     });
   });
 
   if (observations.length === 0) {
-    return generateClinicalSubject(errorProbability, forceSAE, customSeq);
+    return generateClinicalSubject(
+      errorProbability,
+      forceSAE,
+      customSeq,
+      activeDomains
+    );
   }
 
   const maxTime = forceSAE ? 22 : 36;
