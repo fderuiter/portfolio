@@ -78,9 +78,17 @@ describe("BentoGrid Performance Optimizations", () => {
       // getBoundingClientRect should NOT have been called during pointermove
       expect(getBoundingClientRectMock.mock.calls.length).toBe(callsAfterEnter);
 
-      // Trigger window resize event - should call getBoundingClientRect
+      // Trigger window resize event - invalidates cache (rectRef.current = null) without synchronous reflow (#817, ADR 0052)
       fireEvent(window, new Event("resize"));
-      expect(getBoundingClientRectMock.mock.calls.length).toBeGreaterThan(callsAfterEnter);
+      expect(getBoundingClientRectMock.mock.calls.length).toBe(callsAfterEnter);
+
+      // Next pointermove lazily remeasures once
+      fireEvent.pointerMove(cardElement, { clientX: 80, clientY: 80, pointerType: "mouse" });
+      expect(getBoundingClientRectMock.mock.calls.length).toBe(callsAfterEnter + 1);
+
+      // Subsequent pointermove does not measure again
+      fireEvent.pointerMove(cardElement, { clientX: 90, clientY: 90, pointerType: "mouse" });
+      expect(getBoundingClientRectMock.mock.calls.length).toBe(callsAfterEnter + 1);
     } finally {
       HTMLDivElement.prototype.getBoundingClientRect = originalGetBoundingClientRect;
     }

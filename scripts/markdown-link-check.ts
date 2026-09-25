@@ -67,7 +67,9 @@ export function checkMarkdownLinkIntegrity(
         : path.resolve(path.dirname(filePath), cleanUrl);
 
       if (!fs.existsSync(resolvedPath)) {
-        const relativeFile = path.relative(workspaceRoot, filePath);
+        const relativeFile = path
+          .relative(workspaceRoot, filePath)
+          .replace(/\\/g, "/");
         details.push(`${relativeFile}: broken link to '${rawUrl}'`);
       }
     }

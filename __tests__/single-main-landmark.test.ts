@@ -45,7 +45,9 @@ describe("Single Main Landmark", () => {
   });
 
   it("renders exactly one <main> element, in the root layout", () => {
-    const relative = withMain.map((f) => path.relative(process.cwd(), f)).sort();
+    const relative = withMain
+      .map((f) => path.relative(process.cwd(), f).replace(/\\/g, "/"))
+      .sort();
     expect(relative).toEqual(["app/layout.tsx"]);
   });
 

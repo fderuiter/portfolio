@@ -75,44 +75,35 @@ export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
       style={{ minHeight: isReady && height ? `${height}px` : undefined }}
       className="relative w-full max-w-4xl mx-auto lg:mx-0 min-h-[72px] sm:min-h-[90px] lg:min-h-[110px] mb-4 sm:mb-6 transition-[min-height] duration-250 ease-[cubic-bezier(0.16,1,0.3,1)]"
     >
-      {/* 1. Custom Visual Presentation (hidden from screen readers, not selectable) */}
-      <div
+      <h1
         ref={ref}
-        aria-hidden="true"
-        role="presentation"
-        data-pretext-layer="visual"
-        className="w-full select-none pointer-events-none"
+        data-pretext-layer="heading"
+        aria-label={text}
+        className="fluid-heading-hero font-extrabold tracking-tight text-center lg:text-left text-white leading-tight heading-editorial w-full select-text"
       >
         {!isReady || isMobile ? (
-          <p className="fluid-heading-hero font-extrabold tracking-tight text-center lg:text-left text-white leading-tight heading-editorial">
-            {text}
-          </p>
+          text
         ) : (
-          <motion.div
+          <motion.span
             variants={containerVariants}
             initial={shouldReduceMotion ? false : "hidden"}
             animate="visible"
-            className="fluid-heading-hero font-extrabold tracking-tight text-center lg:text-left flex flex-wrap justify-center lg:justify-start heading-editorial"
+            className="flex flex-wrap justify-center lg:justify-start"
           >
             {words.map((word, i) => (
-              <motion.span
-                key={i}
-                variants={wordVariants}
-                className="inline-block mr-[0.22em] will-change-transform text-white font-extrabold"
-              >
-                {word}
-              </motion.span>
+              <React.Fragment key={i}>
+                <motion.span
+                  aria-hidden="true"
+                  variants={wordVariants}
+                  className="inline-block mr-[0.22em] will-change-transform text-white font-extrabold"
+                >
+                  {word}
+                </motion.span>
+                {i < words.length - 1 ? " " : null}
+              </React.Fragment>
             ))}
-          </motion.div>
+          </motion.span>
         )}
-      </div>
-
-      {/* 2. Transparent Standard Semantic Overlay (selectable, readable by screen readers) */}
-      <h1
-        className="fluid-heading-hero font-black tracking-tight text-center absolute inset-0 select-text bg-transparent"
-        data-pretext-layer="semantic"
-      >
-        {text}
       </h1>
     </div>
   );
@@ -167,44 +158,35 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
       style={{ minHeight: isReady && height ? `${height}px` : undefined }}
       className="relative w-full max-w-2xl mx-auto lg:mx-0 min-h-[48px] sm:min-h-[54px] mb-6 sm:mb-8 transition-[min-height] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
     >
-      {/* 1. Custom Visual Presentation (hidden from screen readers, not selectable) */}
-      <div
+      <p
         ref={ref}
-        aria-hidden="true"
-        role="presentation"
-        data-pretext-layer="visual"
-        className="w-full select-none pointer-events-none"
+        data-pretext-layer="body"
+        aria-label={text}
+        className="text-zinc-300 fluid-body leading-relaxed text-center lg:text-left w-full select-text"
       >
         {!isReady || isMobile ? (
-          <p className="text-zinc-300 fluid-body leading-relaxed text-center lg:text-left">
-            {text}
-          </p>
+          text
         ) : (
-          <motion.p
+          <motion.span
             variants={containerVariants}
             initial={shouldReduceMotion ? false : "hidden"}
             animate="visible"
-            className="text-zinc-300 fluid-body leading-relaxed text-center lg:text-left flex flex-wrap justify-center lg:justify-start"
+            className="flex flex-wrap justify-center lg:justify-start"
           >
             {words.map((word, i) => (
-              <motion.span
-                key={i}
-                variants={wordVariants}
-                className="inline-block mr-[0.3em] will-change-transform"
-              >
-                {word}
-              </motion.span>
+              <React.Fragment key={i}>
+                <motion.span
+                  aria-hidden="true"
+                  variants={wordVariants}
+                  className="inline-block mr-[0.3em] will-change-transform"
+                >
+                  {word}
+                </motion.span>
+                {i < words.length - 1 ? " " : null}
+              </React.Fragment>
             ))}
-          </motion.p>
+          </motion.span>
         )}
-      </div>
-
-      {/* 2. Transparent Standard Semantic Overlay (selectable, readable by screen readers) */}
-      <p
-        className="text-neutral-400 fluid-body text-center absolute inset-0 select-text bg-transparent"
-        data-pretext-layer="semantic"
-      >
-        {text}
       </p>
     </div>
   );

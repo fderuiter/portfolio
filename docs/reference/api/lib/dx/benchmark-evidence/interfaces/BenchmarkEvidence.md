@@ -42,6 +42,10 @@
 
 > **isMobile**: `boolean`
 
+#### throttled?
+
+> `optional` **throttled?**: `boolean`
+
 #### viewport
 
 > **viewport**: `object`

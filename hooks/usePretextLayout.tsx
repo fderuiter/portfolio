@@ -234,9 +234,8 @@ export function usePretextLayout({
   useLayoutEffect(() => {
     if (!isBrowser()) return;
 
-    if (containerRef.current) {
-      const initialWidth = containerRef.current.getBoundingClientRect().width;
-      measureText(initialWidth);
+    if (lastWidthRef.current > 0) {
+      measureText(lastWidthRef.current);
     } else {
       let fontString = "";
       if (
@@ -266,7 +265,7 @@ export function usePretextLayout({
         }
       }
       preparedTextRef.current = prepared;
-      setState((prev) => ({ ...prev, isReady: true }));
+      setState((prev) => (prev.isReady ? prev : { ...prev, isReady: true }));
     }
   }, [
     text,
@@ -611,11 +610,10 @@ export function usePretextRichLayout({
     });
     itemsRef.current = allItems;
 
-    if (containerRef.current) {
-      const initialWidth = containerRef.current.getBoundingClientRect().width;
-      measureRichText(initialWidth);
+    if (lastWidthRef.current > 0) {
+      measureRichText(lastWidthRef.current);
     } else {
-      setState((prev) => ({ ...prev, isReady: true }));
+      setState((prev) => (prev.isReady ? prev : { ...prev, isReady: true }));
     }
   }, [
     text,

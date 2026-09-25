@@ -31,6 +31,7 @@ interface BenchmarkCliOptions {
   runs: number;
   assertBudget: boolean;
   isMobile: boolean;
+  throttled: boolean;
   routeFilter: string | null;
   outputDirectory: string;
 }
@@ -187,6 +188,7 @@ function parseOptions(args: string[]): BenchmarkCliOptions | null {
     runs: 3,
     assertBudget: false,
     isMobile: false,
+    throttled: false,
     routeFilter: null,
     outputDirectory: path.resolve(DEFAULT_BENCHMARK_EVIDENCE_DIRECTORY),
   };
@@ -208,6 +210,8 @@ function parseOptions(args: string[]): BenchmarkCliOptions | null {
       options.assertBudget = true;
     } else if (argument === "--mobile" || argument === "-m") {
       options.isMobile = true;
+    } else if (argument === "--throttled") {
+      options.throttled = true;
     } else if (argument === "--routes") {
       if (!next) throw new Error("--routes requires a pattern.");
       try {
@@ -237,6 +241,9 @@ function parseOptions(args: string[]): BenchmarkCliOptions | null {
       );
       console.log(`  --runs <n>         Measured runs per page (default: 3)`);
       console.log(`  --mobile, -m       Emulate a 390x844 touch viewport`);
+      console.log(
+        `  --throttled        Emulate throttled mobile profile (4x CPU slowdown, 1.6 Mbps / 750 kbps, 150ms RTT)`
+      );
       console.log(
         `  --routes <pattern> Filter canonical routes by path or name`
       );
@@ -352,6 +359,7 @@ async function runExploratoryBenchmark(
     runs: options.runs,
     routes,
     isMobile: options.isMobile,
+    throttled: options.throttled,
   });
   const source = inspectSource();
   return {
@@ -384,6 +392,7 @@ async function runExploratoryBenchmark(
         : { width: 1280, height: 800 },
       isMobile: options.isMobile,
       hasTouch: options.isMobile,
+      throttled: options.throttled,
     },
     sampling: { warmupRuns: 1, measuredRuns: options.runs },
     assertion: {
@@ -405,6 +414,7 @@ export async function main(args = process.argv.slice(2)): Promise<void> {
           runs: options.runs,
           routes: routes.map((route) => route.path),
           isMobile: options.isMobile,
+          throttled: options.throttled,
         },
         createProductionDependencies(routes)
       )

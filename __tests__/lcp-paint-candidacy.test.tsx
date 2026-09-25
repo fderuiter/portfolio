@@ -55,10 +55,10 @@ describe("[#817] LCP paint candidacy & hydration render delay", () => {
       const text = "Clinical data systems that hold up";
       render(<HeroHeadline text={text} />);
 
-      // The visual presentation layer carries the paint candidate. Before
-      // measurement resolves it is the static fallback; either way the text
-      // must be present and must not be hidden behind a zero opacity.
-      const painted = document.querySelector('[data-pretext-layer="visual"]');
+      // The semantic heading carries the paint candidate (#817, ADR 0052).
+      // Before measurement resolves it is the static fallback; either way
+      // the text must be present and must not be hidden behind a zero opacity.
+      const painted = document.querySelector('[data-pretext-layer="heading"]');
       expect(painted).not.toBeNull();
       expect(painted?.textContent).toContain(text);
       expect((painted as HTMLElement).style.opacity).not.toBe("0");
@@ -69,7 +69,7 @@ describe("[#817] LCP paint candidacy & hydration render delay", () => {
       render(<HeroHeadline text={text} />);
 
       const heading = screen.getByRole("heading", { level: 1 });
-      expect(heading.getAttribute("data-pretext-layer")).toBe("semantic");
+      expect(heading.getAttribute("data-pretext-layer")).toBe("heading");
       expect(heading.textContent).toBe(text);
     });
   });

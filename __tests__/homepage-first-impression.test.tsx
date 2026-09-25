@@ -58,17 +58,16 @@ describe("[UI/UX 01] Homepage First Impression & Architectural Hierarchy Suite",
         })
       ).toBeDefined();
 
-      // Fallback heading presentation maintains consistent editorial typography
-      const visualHeadingFallback = document.querySelector(
-        '[data-pretext-layer="visual"] p'
-      );
-      expect(visualHeadingFallback?.className).toContain("heading-editorial");
+      // Semantic heading presentation maintains consistent editorial typography (#817, ADR 0052)
+      const headingElement = screen.getByRole("heading", { level: 1 });
+      expect(headingElement.className).toContain("heading-editorial");
 
-      // Intro text: dual layers (visual and semantic) both present
-      const introLayers = screen.getAllByText(
-        /My background is in clinical research/i
+      // Intro text: single authentic semantic body layer (#817, ADR 0052)
+      const introText = document.querySelector('[data-pretext-layer="body"]');
+      expect(introText).not.toBeNull();
+      expect(introText?.textContent).toContain(
+        "My background is in clinical research"
       );
-      expect(introLayers).toHaveLength(2);
 
       // Invariant telemetry badges state honest scope rather than absolute claims
       expect(screen.getByText(/TRY THE DEMOS/i)).toBeDefined();

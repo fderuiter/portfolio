@@ -33,6 +33,7 @@ export interface ProductionBenchmarkOptions {
   runs: number;
   routes: string[];
   isMobile?: boolean;
+  throttled?: boolean;
 }
 
 /** Injectable side effects keep production lifecycle behavior testable. */
@@ -49,21 +50,24 @@ export interface BenchmarkExecutionDependencies {
     baseUrl: string;
     runs: number;
     isMobile: boolean;
+    throttled?: boolean;
   }) => Promise<PageBenchmarkSummary[]>;
   now?: () => Date;
 }
 
-function browserSettings(isMobile: boolean) {
+function browserSettings(isMobile: boolean, throttled = false) {
   return isMobile
     ? {
         viewport: { width: 390, height: 844 },
         isMobile: true,
         hasTouch: true,
+        throttled,
       }
     : {
         viewport: { width: 1280, height: 800 },
         isMobile: false,
         hasTouch: false,
+        throttled,
       };
 }
 
@@ -104,10 +108,14 @@ export async function runProductionBenchmark(
       baseUrl: target.url,
       runs: options.runs,
       isMobile: options.isMobile ?? false,
+      throttled: options.throttled ?? false,
     });
     const sourceAfterMeasurement = dependencies.inspectSource();
     const capturedAt = (dependencies.now?.() ?? new Date()).toISOString();
-    const viewport = browserSettings(options.isMobile ?? false);
+    const viewport = browserSettings(
+      options.isMobile ?? false,
+      options.throttled ?? false
+    );
     const evidence: BenchmarkEvidence = {
       version: 1,
       mode: "production",

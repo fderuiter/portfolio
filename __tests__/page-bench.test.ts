@@ -8,6 +8,7 @@ import {
   CANONICAL_ROUTES,
   generateMarkdownReport,
   type PageBenchmarkSummary,
+  THROTTLED_MOBILE_PROFILE,
 } from "../lib/dx/page-bench";
 
 describe("Page Benchmark Suite Utilities & Statistical Aggregator", () => {
@@ -156,6 +157,19 @@ describe("Page Benchmark Suite Utilities & Statistical Aggregator", () => {
       expect(mobileOptions.isMobile).toBe(true);
       expect(mobileOptions.device.viewport.width).toBe(390);
       expect(mobileOptions.device.hasTouch).toBe(true);
+    });
+  });
+
+  describe("Throttled Mobile Profile (ADR 0052, #817)", () => {
+    it("defines the standard mobile throttling parameters", () => {
+      expect(THROTTLED_MOBILE_PROFILE.cpuSlowdownMultiplier).toBe(4);
+      expect(THROTTLED_MOBILE_PROFILE.latency).toBe(150);
+      expect(THROTTLED_MOBILE_PROFILE.downloadThroughput).toBe(
+        Math.floor((1.6 * 1024 * 1024) / 8)
+      );
+      expect(THROTTLED_MOBILE_PROFILE.uploadThroughput).toBe(
+        Math.floor((750 * 1024) / 8)
+      );
     });
   });
 });

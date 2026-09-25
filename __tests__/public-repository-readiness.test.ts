@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 
 const root = process.cwd();
 const read = (file: string): string =>
-  fs.readFileSync(path.join(root, file), "utf8");
+  fs.readFileSync(path.join(root, file), "utf8").replace(/\r\n/g, "\n");
 
 const sha256 = (content: string): string =>
   createHash("sha256").update(content, "utf8").digest("hex");

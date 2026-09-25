@@ -15,7 +15,7 @@ without also being available to the service worker's application shell.
 
 ### category
 
-> **category**: `"arcade"` \| `"case-study"` \| `"top-level"` \| `"tool"`
+> **category**: `"case-study"` \| `"arcade"` \| `"top-level"` \| `"tool"`
 
 ***
 

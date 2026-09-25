@@ -12,7 +12,7 @@ A single selectable line of dialogue within a `DialogueMoment`.
 
 ### clarity
 
-> **clarity**: `"high"` \| `"moderate"` \| `"low"`
+> **clarity**: `"moderate"` \| `"high"` \| `"low"`
 
 How unambiguous the instruction or statement is to the listener.
 

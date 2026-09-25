@@ -52,7 +52,7 @@ export const Card = ({
 
   useEffect(() => {
     const handleResize = () => {
-      updateRect();
+      rectRef.current = null;
     };
 
     window.addEventListener("resize", handleResize);
@@ -60,7 +60,7 @@ export const Card = ({
     let resizeObserver: ResizeObserver | null = null;
     if (typeof ResizeObserver !== "undefined" && refElement.current) {
       resizeObserver = new ResizeObserver(() => {
-        updateRect();
+        rectRef.current = null;
       });
       resizeObserver.observe(refElement.current);
     }
