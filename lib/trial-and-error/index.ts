@@ -178,3 +178,10 @@ export {
   type CashOutReport,
   type PackCard,
 } from "./internal/shop";
+export {
+  parseRunSave,
+  replayRun,
+  serializeRun,
+  type RestoredRun,
+  type RunLog,
+} from "./internal/save";

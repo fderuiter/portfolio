@@ -980,6 +980,12 @@ Re-exports [PackSlot](internal/run/interfaces/PackSlot.md)
 
 ***
 
+### parseRunSave
+
+Re-exports [parseRunSave](internal/save/functions/parseRunSave.md)
+
+***
+
 ### PlayBlocker
 
 Re-exports [PlayBlocker](internal/table/interfaces/PlayBlocker.md)
@@ -1142,6 +1148,12 @@ Re-exports [RelicSchema](types/variables/RelicSchema.md)
 
 ***
 
+### replayRun
+
+Re-exports [replayRun](internal/save/functions/replayRun.md)
+
+***
+
 ### REROLL\_BASE\_PRICE
 
 Re-exports [REROLL_BASE_PRICE](internal/shop/variables/REROLL_BASE_PRICE.md)
@@ -1151,6 +1163,12 @@ Re-exports [REROLL_BASE_PRICE](internal/shop/variables/REROLL_BASE_PRICE.md)
 ### rerollPrice
 
 Re-exports [rerollPrice](internal/shop/functions/rerollPrice.md)
+
+***
+
+### RestoredRun
+
+Re-exports [RestoredRun](internal/save/interfaces/RestoredRun.md)
 
 ***
 
@@ -1208,9 +1226,21 @@ Re-exports [ruleResultsFor](internal/scoring/functions/ruleResultsFor.md)
 
 ***
 
+### RUN\_SAVE\_VERSION
+
+Re-exports [RUN_SAVE_VERSION](types/variables/RUN_SAVE_VERSION.md)
+
+***
+
 ### RunAction
 
 Re-exports [RunAction](internal/run/type-aliases/RunAction.md)
+
+***
+
+### RunActionSchema
+
+Re-exports [RunActionSchema](types/variables/RunActionSchema.md)
 
 ***
 
@@ -1226,9 +1256,27 @@ Re-exports [RunDraw](internal/run/interfaces/RunDraw.md)
 
 ***
 
+### RunLog
+
+Re-exports [RunLog](internal/save/interfaces/RunLog.md)
+
+***
+
 ### RunPhase
 
 Re-exports [RunPhase](internal/run/type-aliases/RunPhase.md)
+
+***
+
+### RunSave
+
+Re-exports [RunSave](types/type-aliases/RunSave.md)
+
+***
+
+### RunSaveSchema
+
+Re-exports [RunSaveSchema](types/variables/RunSaveSchema.md)
 
 ***
 
@@ -1349,6 +1397,12 @@ Re-exports [SealEffectSchema](types/variables/SealEffectSchema.md)
 ### sellValue
 
 Re-exports [sellValue](internal/shop/functions/sellValue.md)
+
+***
+
+### serializeRun
+
+Re-exports [serializeRun](internal/save/functions/serializeRun.md)
 
 ***
 

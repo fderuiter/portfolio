@@ -25,7 +25,9 @@ import {
   type Act,
   type CpuAction,
   type FootnoteSeal,
+  type RestoredRun,
   type RunAction,
+  type RunLog,
   type RunState,
   type Scenario,
   type TableCardView,
@@ -38,6 +40,11 @@ import { QcDesk } from "@/components/trial-and-error/QcDesk";
 import { FigureDesk } from "@/components/trial-and-error/FigureDesk";
 import { CrisisPanel } from "@/components/trial-and-error/CrisisPanel";
 import { LevelUpPlate } from "@/components/trial-and-error/LevelUpPlate";
+import {
+  clearRunSave,
+  useSavedRun,
+  writeRunSave,
+} from "@/components/trial-and-error/useRunSave";
 import { RunInfo } from "@/components/trial-and-error/RunInfo";
 import { BossIntro } from "@/components/trial-and-error/BossIntro";
 import { FirewallDialog } from "@/components/trial-and-error/FirewallDialog";
@@ -81,6 +88,36 @@ interface CardTableProps {
    * parameter, or starts a fresh random seed.
    */
   seed?: string;
+  /**
+   * Saves the run to this browser after every move and offers to resume it
+   * on the next visit (#1079). Off by default, so embedded and test tables
+   * never share a save.
+   */
+  persist?: boolean;
+}
+
+/** The run and every move since it started: what a save replays. */
+interface LoggedRun {
+  run: RunState;
+  log: RunLog;
+}
+
+/** A move, or a saved run replacing the fresh one on resume. */
+type TableIntent = RunAction | { type: "LOAD_SAVED"; saved: RestoredRun };
+
+function logRun(act: Act, current: LoggedRun, intent: TableIntent): LoggedRun {
+  if (intent.type === "LOAD_SAVED") {
+    return { run: intent.saved.run, log: intent.saved.log };
+  }
+  const run = advanceRun(act, current.run, intent);
+  // A new run starts a new log; every other move joins the current one.
+  if (intent.type === "RESTART_RUN") {
+    return { run, log: { actId: act.id, seed: run.seed, actions: [] } };
+  }
+  return {
+    run,
+    log: { ...current.log, actions: [...current.log.actions, intent] },
+  };
 }
 
 const SEED_PATTERN = /^[A-Za-z0-9-]{1,32}$/;
@@ -178,6 +215,109 @@ function cardLabel(view: TableCardView, partners: string[] = []): string {
   return parts.join(", ");
 }
 
+const PROMPT_BUTTON =
+  "min-h-[44px] border px-4 text-xs font-bold uppercase touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 active:scale-[0.98]";
+
+/**
+ * The start view when this browser holds a saved run (#1079): Resume run,
+ * or New run after a confirmation, since starting over discards the save.
+ */
+function ResumePrompt({
+  saved,
+  confirming,
+  onResume,
+  onNew,
+  onConfirmNew,
+  onCancelNew,
+}: {
+  saved: RestoredRun;
+  confirming: boolean;
+  onResume: () => void;
+  onNew: () => void;
+  onConfirmNew: () => void;
+  onCancelNew: () => void;
+}) {
+  const view = deriveRunView(saved.act, saved.run);
+  const resumeRef = useRef<HTMLButtonElement>(null);
+  const confirmRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    (confirming ? confirmRef : resumeRef).current?.focus();
+  }, [confirming]);
+  return (
+    <section
+      aria-labelledby="resume-heading"
+      className="mx-auto max-w-xl border border-zinc-800 bg-[color:var(--te-surface-1)] p-4 text-left sm:p-6"
+      data-testid="resume-run"
+    >
+      <h2
+        id="resume-heading"
+        className="text-sm font-bold uppercase tracking-wider text-zinc-100"
+      >
+        Resume your run?
+      </h2>
+      <dl className="mt-3 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1 text-xs">
+        <dt className="text-zinc-400">Act</dt>
+        <dd className="min-w-0 text-zinc-200 break-words">{saved.act.title}</dd>
+        <dt className="text-zinc-400">Blind</dt>
+        <dd className="min-w-0 text-zinc-200 break-words">
+          {view.blind.blind.name}
+        </dd>
+        <dt className="text-zinc-400">Seed</dt>
+        <dd className="min-w-0 font-mono text-zinc-200 break-all">
+          {view.seed}
+        </dd>
+      </dl>
+      {confirming ? (
+        <div
+          role="group"
+          aria-label="Confirm a new run"
+          className="mt-4 border border-rose-500/60 p-3 text-xs text-zinc-200"
+          data-testid="resume-confirm-new"
+        >
+          <p className="break-words">
+            Start a new run? The saved run will be discarded.
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button
+              ref={confirmRef}
+              type="button"
+              onClick={onConfirmNew}
+              className={`${PROMPT_BUTTON} border-rose-400 text-rose-300 hover:bg-rose-500/10`}
+            >
+              Discard and start new
+            </button>
+            <button
+              type="button"
+              onClick={onCancelNew}
+              className={`${PROMPT_BUTTON} border-zinc-600 text-zinc-300 hover:bg-zinc-800`}
+            >
+              Keep saved run
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button
+            ref={resumeRef}
+            type="button"
+            onClick={onResume}
+            className={`${PROMPT_BUTTON} border-emerald-500 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20`}
+          >
+            Resume run
+          </button>
+          <button
+            type="button"
+            onClick={onNew}
+            className={`${PROMPT_BUTTON} border-zinc-600 text-zinc-300 hover:bg-zinc-800`}
+          >
+            New run
+          </button>
+        </div>
+      )}
+    </section>
+  );
+}
+
 /**
  * The Card Table: the game's main screen (T&E-UX-01). A thin adapter over
  * the pure run and table reducers in `@/lib/trial-and-error`; it renders the
@@ -188,6 +328,7 @@ export function CardTable({
   act: actProp,
   scenario: single,
   seed,
+  persist = false,
 }: CardTableProps) {
   const act = useMemo<Act>(
     () =>
@@ -197,12 +338,39 @@ export function CardTable({
         : ACT_I),
     [actProp, single]
   );
-  const [run, dispatch] = useReducer(
-    (r: RunState, a: RunAction) => advanceRun(act, r, a),
+  const [{ run, log }, dispatch] = useReducer(
+    (current: LoggedRun, intent: TableIntent) => logRun(act, current, intent),
     act,
-    (a: Act) => createRunState(a, seed ?? initialSeed())
+    (a: Act): LoggedRun => {
+      const run = createRunState(a, seed ?? initialSeed());
+      return { run, log: { actId: a.id, seed: run.seed, actions: [] } };
+    }
   );
+  const saved = useSavedRun(act, persist);
+  // A save found on arrival waits for Resume or New run; until then nothing
+  // is written, so the save is never overwritten before the choice.
+  const [resumeChoice, setResumeChoice] = useState<
+    "PENDING" | "CONFIRM_NEW" | "DONE"
+  >("PENDING");
+  const offerResume =
+    persist &&
+    saved !== null &&
+    resumeChoice !== "DONE" &&
+    log.actions.length === 0;
   const runView = deriveRunView(act, run);
+  const runOver =
+    runView.phase === "RUN_FAILED" || runView.phase === "ACT_COMPLETE";
+  // Keep this browser's save in step with the run: written after each move,
+  // removed when the run ends or a new one starts. Never while a found save
+  // still waits for the player's choice.
+  useEffect(() => {
+    if (!persist || offerResume) return;
+    if (runOver || log.actions.length === 0) {
+      clearRunSave(log.actId);
+    } else {
+      writeRunSave(log);
+    }
+  }, [persist, offerResume, runOver, log]);
   const scenario = runView.blind;
   const state = run.table;
   const view = runView.table;
@@ -634,6 +802,29 @@ export function CardTable({
     [view.playBlocker ? "play-blocker" : null, costDescribedBy]
       .filter(Boolean)
       .join(" ") || undefined;
+
+  if (offerResume && saved) {
+    return (
+      <ResumePrompt
+        saved={saved}
+        confirming={resumeChoice === "CONFIRM_NEW"}
+        onResume={() => {
+          setResumeChoice("DONE");
+          dispatch({ type: "LOAD_SAVED", saved });
+          announce(
+            `Resumed ${saved.act.title}: ${deriveRunView(saved.act, saved.run).blind.blind.name}.`
+          );
+        }}
+        onNew={() => setResumeChoice("CONFIRM_NEW")}
+        onConfirmNew={() => {
+          setResumeChoice("DONE");
+          clearRunSave(act.id);
+          announce("Saved run discarded. New run started.");
+        }}
+        onCancelNew={() => setResumeChoice("PENDING")}
+      />
+    );
+  }
 
   return (
     <section
