@@ -14,7 +14,7 @@ rendered stale.
 
 ### change
 
-> **change**: `"JOIN"` \| `"LEAVE"`
+> **change**: `"JOIN"` \| `"LEAVE"` \| `"ENROLL"`
 
 ***
 
@@ -46,7 +46,7 @@ Populations whose membership actually changed, in suit order.
 
 ### reason
 
-> **reason**: `"DROPOUT"` \| `"PROTOCOL_AMENDMENT"` \| `"SCREEN_FAILURE"` \| `"PROTOCOL_DEVIATION"`
+> **reason**: `"DROPOUT"` \| `"PROTOCOL_AMENDMENT"` \| `"SCREEN_FAILURE"` \| `"PROTOCOL_DEVIATION"` \| `"SITE_ACTIVATION"`
 
 ***
 

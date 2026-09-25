@@ -34,6 +34,14 @@ The Boss this run faces: drawn from the act's pool, or its fixed Boss.
 
 ***
 
+### cashOut
+
+> **cashOut**: [`CashOutReport`](../../shop/interfaces/CashOutReport.md) \| `null`
+
+The cleared Blind's cash-out, once the sponsor has paid it.
+
+***
+
 ### drawIndex
 
 > **drawIndex**: `number`
@@ -55,6 +63,22 @@ Every seeded draw so far, in order.
 > **seed**: `string`
 
 The run seed. The same seed and the same moves replay identically.
+
+***
+
+### shop
+
+> **shop**: [`ShopState`](ShopState.md) \| `null`
+
+The shop visit after the cash-out, if the act has a shop.
+
+***
+
+### shopDraws
+
+> **shopDraws**: `number`
+
+The next unused draw index on the shop's own seeded stream.
 
 ***
 

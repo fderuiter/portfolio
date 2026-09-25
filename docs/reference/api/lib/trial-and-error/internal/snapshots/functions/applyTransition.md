@@ -37,7 +37,9 @@ would change no membership, is refused.
 
 #### change
 
-`"JOIN"` \| `"LEAVE"` = `...`
+`"JOIN"` \| `"LEAVE"` \| `"ENROLL"` = `...`
+
+ENROLL adds `subject`, a subject the snapshot does not hold yet.
 
 #### description
 
@@ -59,7 +61,39 @@ What happened, in the study's words.
 
 #### reason
 
-`"DROPOUT"` \| `"PROTOCOL_AMENDMENT"` \| `"SCREEN_FAILURE"` \| `"PROTOCOL_DEVIATION"` = `TransitionReasonSchema`
+`"DROPOUT"` \| `"PROTOCOL_AMENDMENT"` \| `"SCREEN_FAILURE"` \| `"PROTOCOL_DEVIATION"` \| `"SITE_ACTIVATION"` = `TransitionReasonSchema`
+
+#### subject?
+
+\{ `adverseEvents?`: `object`[]; `age`: `number`; `arm`: `"PLACEBO"` \| `"ACTIVE"`; `id`: `string`; `populations`: (`"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`)[]; `sex`: `"F"` \| `"M"`; \} = `...`
+
+The subject an ENROLL transition adds.
+
+#### subject.adverseEvents?
+
+`object`[] = `...`
+
+Treatment-emergent adverse events. Absent means none were reported.
+
+#### subject.age
+
+`number` = `...`
+
+#### subject.arm
+
+`"PLACEBO"` \| `"ACTIVE"` = `ArmSchema`
+
+#### subject.id
+
+`string` = `identifier`
+
+#### subject.populations
+
+(`"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`)[] = `...`
+
+#### subject.sex
+
+`"F"` \| `"M"` = `...`
 
 #### subjectId
 

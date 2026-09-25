@@ -64,6 +64,16 @@ const gridCell = (page: Page, row: number, col: number) =>
 
 /** Clears the Small Blind with Draft A and its listing, then deals the next. */
 async function clearSmallBlind(page: Page) {
+  await winSmallBlind(page);
+  await page.getByRole("button", { name: "Next Blind" }).click();
+  await expect(page.getByTestId("blind-name")).toHaveText(
+    "Big Blind: Sponsor Safety Review"
+  );
+  await answerSiteAudit(page);
+}
+
+/** Clears the Small Blind with Draft A and its listing. */
+async function winSmallBlind(page: Page) {
   await card(page, DRAFT_A).focus();
   await page.keyboard.press("i");
   await expect(gridCell(page, 0, 0)).toBeFocused();
@@ -85,11 +95,7 @@ async function clearSmallBlind(page: Page) {
   await page.keyboard.press("Space");
   await page.keyboard.press("Enter");
   await page.keyboard.press("Space");
-  await page.getByRole("button", { name: "Next Blind" }).click();
-  await expect(page.getByTestId("blind-name")).toHaveText(
-    "Big Blind: Sponsor Safety Review"
-  );
-  await answerSiteAudit(page);
+  await expect(page.getByTestId("blind-result")).toContainText("Blind cleared");
 }
 
 /** Answers the seeded Site Audit by hosting it, which costs nothing now. */
@@ -152,6 +158,11 @@ test.describe("Trial & Error: Biostat Ops Card Table", () => {
       "Blind cleared"
     );
     await expect(page.getByTestId("blind-result")).toContainText("828 of 450");
+    // Cash-out is the primary next step; Next Blind skips the shop.
+    await expect(
+      page.getByRole("button", { name: /^Cash out \$\d+k$/ })
+    ).toBeFocused();
+    await page.keyboard.press("Tab");
     await expect(
       page.getByRole("button", { name: "Next Blind" })
     ).toBeFocused();
@@ -171,9 +182,11 @@ test.describe("Trial & Error: Biostat Ops Card Table", () => {
     await expect(
       page.getByRole("button", { name: /Play Hand/ })
     ).toBeDisabled();
+    // The Small Blind's payout, collected on the way past the shop, covers
+    // a remote audit.
     await expect(
       page.getByRole("button", { name: /Pay for a remote audit/ })
-    ).toBeDisabled();
+    ).toBeEnabled();
     await expectNoBlockingViolations(page, "Big Blind crisis");
     await answerSiteAudit(page);
     await expect(card(page, "C-T14.3.1-A")).toBeFocused();
@@ -852,5 +865,58 @@ test.describe("Trial & Error: Biostat Ops Card Table", () => {
       expect(inside).toBe("#93c5fd");
       expect(outside).toBe("");
     });
+  });
+});
+
+test.describe("Trial & Error Procurement Shop", () => {
+  // This seed stocks the Senior Programmer and a Guidance Pack.
+  const SHOP_ROUTE = "/arcade/trial-and-error?seed=shop-24";
+
+  test("clears a Blind, cashes out, buys a relic, opens a pack and continues", async ({
+    page,
+  }) => {
+    await page.goto(SHOP_ROUTE, { waitUntil: "domcontentloaded" });
+    await expect(async () => {
+      const launchBtn = page.getByRole("button", { name: /Launch Cabinet/i });
+      if (await launchBtn.isVisible()) await launchBtn.click();
+      await expect(page.getByTestId("hand")).toBeVisible({ timeout: 3000 });
+    }).toPass({ timeout: 30000 });
+    await winSmallBlind(page);
+
+    const cashOut = page.getByRole("button", { name: /^Cash out \$\d+k$/ });
+    await expect(cashOut).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(page.getByTestId("shop")).toBeVisible();
+    await expect(page.getByTestId("cash-out-line")).toHaveCount(3);
+    await expectNoBlockingViolations(page, "shop open");
+
+    // Sell both seals to afford the relic.
+    const tray = page.getByTestId("consumable-tray");
+    await tray.getByRole("button", { name: /^Sell/ }).first().click();
+    await tray.getByRole("button", { name: /^Sell/ }).first().click();
+    await page
+      .getByTestId("shop-items")
+      .getByRole("button", { name: "Buy Senior Programmer" })
+      .click();
+    await expect(
+      page.getByTestId("relic-rack").getByTestId("relic")
+    ).toContainText("REL-SENIOR-PROGRAMMER");
+
+    await page
+      .getByTestId("shop-packs")
+      .getByRole("button", { name: "Open Guidance Pack" })
+      .click();
+    const opening = page.getByTestId("pack-opening");
+    await expect(opening).toBeVisible();
+    await expect(opening.getByTestId("pack-card").first()).toBeFocused();
+    await expectNoBlockingViolations(page, "pack opening");
+    await page.keyboard.press("Enter");
+    await expect(opening).toBeHidden();
+    await expect(page.getByTestId("consumable-tray")).toContainText("Use:");
+
+    await page.getByRole("button", { name: "Next Blind" }).click();
+    await expect(page.getByTestId("blind-name")).toHaveText(
+      "Big Blind: Sponsor Safety Review"
+    );
   });
 });

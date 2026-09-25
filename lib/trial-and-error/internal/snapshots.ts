@@ -66,6 +66,49 @@ const nextId = (snapshot: PopulationSnapshot) =>
   `${snapshot.id.replace(/-v\d+$/, "")}-v${snapshot.version + 1}`;
 
 /**
+ * Enrolls a new subject: the next version holds every earlier subject and
+ * the new one, whose populations are the ones that change. Refused when the
+ * transition carries no subject or the snapshot already holds its id.
+ */
+function enroll(
+  snapshot: PopulationSnapshot,
+  transition: PopulationTransition
+): TransitionOutcome {
+  const subject = transition.subject;
+  if (!subject || subject.id !== transition.subjectId) {
+    return {
+      ok: false,
+      message: `Enrolling ${transition.subjectId} needs the subject's data.`,
+    };
+  }
+  if (snapshot.subjects.some((s) => s.id === subject.id)) {
+    return {
+      ok: false,
+      message: `${subject.id} is already enrolled; ${snapshot.id} is unchanged.`,
+    };
+  }
+  const changed = PopulationTypeSchema.options.filter((p) =>
+    subject.populations.includes(p)
+  );
+  if (changed.length === 0) {
+    return {
+      ok: false,
+      message: `${subject.id} belongs to no population; ${snapshot.id} is unchanged.`,
+    };
+  }
+  return {
+    ok: true,
+    changed,
+    snapshot: {
+      id: nextId(snapshot),
+      version: snapshot.version + 1,
+      capturedAt: transition.effectiveAt,
+      subjects: [...snapshot.subjects, subject],
+    },
+  };
+}
+
+/**
  * Applies one transition to a snapshot and returns the next version. Pure:
  * the input snapshot is never modified, so every earlier version stays
  * available for audit. A transition that names an unknown subject, or that
@@ -75,6 +118,7 @@ export function applyTransition(
   snapshot: PopulationSnapshot,
   transition: PopulationTransition
 ): TransitionOutcome {
+  if (transition.change === "ENROLL") return enroll(snapshot, transition);
   const target = snapshot.subjects.find((s) => s.id === transition.subjectId);
   if (!target) {
     return {

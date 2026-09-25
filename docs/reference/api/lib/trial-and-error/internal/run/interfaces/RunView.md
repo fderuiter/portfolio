@@ -240,6 +240,14 @@ The short intro card shown when the Blind starts.
 
 ***
 
+### cashOut
+
+> **cashOut**: [`CashOutReport`](../../shop/interfaces/CashOutReport.md) \| `null`
+
+The cash-out paid for this Blind, once paid.
+
+***
+
 ### draws
 
 > **draws**: [`RunDraw`](RunDraw.md)[]
@@ -482,6 +490,14 @@ The short intro card shown when the Blind starts.
 
 ***
 
+### pendingCashOut
+
+> **pendingCashOut**: [`CashOutReport`](../../shop/interfaces/CashOutReport.md) \| `null`
+
+What the sponsor will pay at cash-out, until it has been paid.
+
+***
+
 ### phase
 
 > **phase**: [`RunPhase`](../type-aliases/RunPhase.md)
@@ -491,6 +507,14 @@ The short intro card shown when the Blind starts.
 ### seed
 
 > **seed**: `string`
+
+***
+
+### shop
+
+> **shop**: [`ShopView`](ShopView.md) \| `null`
+
+The shop visit, while the run is in it.
 
 ***
 

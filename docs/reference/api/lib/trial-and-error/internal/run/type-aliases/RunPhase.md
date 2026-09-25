@@ -6,6 +6,6 @@
 
 # Type Alias: RunPhase
 
-> **RunPhase** = `"PLAYING"` \| `"BLIND_CLEARED"` \| `"RUN_FAILED"` \| `"ACT_COMPLETE"`
+> **RunPhase** = `"PLAYING"` \| `"BLIND_CLEARED"` \| `"SHOP"` \| `"RUN_FAILED"` \| `"ACT_COMPLETE"`
 
 Where the run stands.

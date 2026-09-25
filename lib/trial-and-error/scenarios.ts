@@ -19,6 +19,8 @@ import type {
   RowStatistic,
   SapRulebook,
   Scenario,
+  ShopCatalog,
+  ShopEntry,
   StagedTable,
   Subject,
   TableShellSpec,
@@ -1291,12 +1293,198 @@ export const ACT_I_CRISES: CrisisCard[] = [
  * Boss comes from the act's pool, which holds only the Dose Escalation
  * Committee until Act II adds a second, so it is fixed and not drawn.
  */
+// ---------------------------------------------------------------------------
+// Procurement Shop (#948). Relics are people and tools; documents are
+// Guidance cards. A consumable's price is twice its sell value plus one, so
+// selling it back returns half its price, rounded down.
+// ---------------------------------------------------------------------------
+
+const shopRelic = (
+  id: string,
+  name: string,
+  description: string,
+  price: number,
+  bonus: { chips?: number; plusMult?: number; xMult?: number }
+): ShopEntry => ({
+  kind: "RELIC",
+  price,
+  relic: {
+    id,
+    name,
+    description,
+    modifier: {
+      sourceId: id,
+      label: name,
+      chips: bonus.chips ?? 0,
+      plusMult: bonus.plusMult ?? 0,
+      xMult: bonus.xMult ?? 1,
+    },
+  },
+});
+
+const shopSeal = (seal: FootnoteSeal): ShopEntry => ({
+  kind: "SEAL",
+  price: seal.sellValue * 2 + 1,
+  seal,
+});
+
+/** Act I's Procurement Shop: its stock, its booster packs and its sites. */
+export const ACT_I_SHOP: ShopCatalog = {
+  entries: [
+    shopRelic(
+      "REL-SENIOR-PROGRAMMER",
+      "Senior Programmer",
+      "Twenty years of PROC REPORT muscle memory: +30 Chips on every hand.",
+      4,
+      { chips: 30 }
+    ),
+    shopRelic(
+      "REL-SECOND-REVIEWER",
+      "Second Reviewer",
+      "Reads every footnote twice, out loud: +3 Mult on every hand.",
+      6,
+      { plusMult: 3 }
+    ),
+    shopRelic(
+      "REL-MACRO-LIBRARY",
+      "Validated Macro Library",
+      "Qualified once, reused forever: +20 Chips and +1 Mult on every hand.",
+      6,
+      { chips: 20, plusMult: 1 }
+    ),
+    shopRelic(
+      "REL-CONFORMANCE-CHECKER",
+      "Conformance Checker",
+      "Flags the define.xml before the reviewer does: +40 Chips on every hand.",
+      7,
+      { chips: 40 }
+    ),
+    shopRelic(
+      "REL-BIOSTAT-LEAD",
+      "Biostatistics Lead",
+      "Signs the SAP and means it: ×1.25 Mult on every hand.",
+      8,
+      { xMult: 1.25 }
+    ),
+    ...Object.values(GUIDANCE_CARDS).map((guidance): ShopEntry => ({
+      kind: "GUIDANCE",
+      price: guidance.sellValue * 2 + 1,
+      guidance,
+    })),
+    shopSeal(ADJUDICATED),
+    shopSeal(AE_NOT_EXCLUSIVE),
+    shopSeal(DATA_CUTOFF),
+    shopSeal(SPONSOR_ROUNDING),
+  ],
+  packs: [
+    {
+      id: "PACK-SITE-ACTIVATION",
+      kind: "SITE_ACTIVATION",
+      name: "Site Activation Pack",
+      description:
+        "New sites, new subjects, more Chips. Their enrollment reopens the snapshot.",
+      price: 4,
+      size: 3,
+      choose: 1,
+    },
+    {
+      id: "PACK-GUIDANCE",
+      kind: "GUIDANCE",
+      name: "Guidance Pack",
+      description: "Freshly harmonised guidance, still warm from the printer.",
+      price: 3,
+      size: 3,
+      choose: 1,
+    },
+    {
+      id: "PACK-RELIC",
+      kind: "RELIC",
+      name: "Relic Pack",
+      description: "Headhunted talent and validated tooling.",
+      price: 6,
+      size: 2,
+      choose: 1,
+    },
+  ],
+  sites: [
+    {
+      id: "SITE-104",
+      name: "Site 104, Rotterdam",
+      description:
+        "A fast-enrolling site with an eager coordinator: +20 Chips on every hand.",
+      modifier: {
+        sourceId: "SITE-104",
+        label: "Site 104",
+        chips: 20,
+        plusMult: 0,
+        xMult: 1,
+      },
+      subjects: [
+        subject("S-013", "PLACEBO", 44, "M", [...ALL]),
+        subject("S-014", "ACTIVE", 51, "F", [...ALL], [ae(GI, "Nausea", 1)]),
+      ],
+    },
+    {
+      id: "SITE-211",
+      name: "Site 211, Lyon",
+      description: "Small, careful and slow to query: +15 Chips on every hand.",
+      modifier: {
+        sourceId: "SITE-211",
+        label: "Site 211",
+        chips: 15,
+        plusMult: 0,
+        xMult: 1,
+      },
+      subjects: [subject("S-015", "ACTIVE", 38, "M", [...NO_PP])],
+    },
+    {
+      id: "SITE-305",
+      name: "Site 305, Austin",
+      description:
+        "A research-naive site that enrolls anyone breathing: +30 Chips on every hand.",
+      modifier: {
+        sourceId: "SITE-305",
+        label: "Site 305",
+        chips: 30,
+        plusMult: 0,
+        xMult: 1,
+      },
+      subjects: [
+        subject("S-016", "PLACEBO", 63, "F", [...ALL]),
+        subject(
+          "S-017",
+          "ACTIVE",
+          57,
+          "M",
+          [...ITT_ONLY],
+          [ae(NERVOUS, "Headache", 2)]
+        ),
+      ],
+    },
+    {
+      id: "SITE-412",
+      name: "Site 412, Osaka",
+      description:
+        "Immaculate source data and a translator on retainer: +1 Mult on every hand.",
+      modifier: {
+        sourceId: "SITE-412",
+        label: "Site 412",
+        chips: 0,
+        plusMult: 1,
+        xMult: 1,
+      },
+      subjects: [subject("S-018", "PLACEBO", 29, "F", [...ALL])],
+    },
+  ],
+};
+
 export const ACT_I: Act = {
   id: "act-1-phase-1",
   title: "Act I: Phase I Safety",
   blinds: [DEMOGRAPHICS_SCENARIO, SPONSOR_SAFETY_SCENARIO],
   bossPool: [DOSE_ESCALATION_SCENARIO],
   crisisDeck: ACT_I_CRISES,
+  shop: ACT_I_SHOP,
 };
 
 // ---------------------------------------------------------------------------

@@ -22,7 +22,7 @@ The consequence, in plain words, shown on the button.
 
 #### effect
 
-\{ `budget?`: `number`; `cpu?`: `number`; `grantSeal?`: \{ `effect`: \{ `kind`: `"PLUS_CHIPS"`; `value`: `number`; \} \| \{ `kind`: `"PLUS_MULT"`; `value`: `number`; \} \| \{ `kind`: `"WAIVE"`; \}; `eligible`: \{ `cardTypes?`: (`"TABLE"` \| `"LISTING"` \| `"FIGURE"` \| `"SUBJECT_TOKEN"`)[]; `populations?`: (`"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`)[]; `topics?`: `string`[]; \}; `footnote`: `string`; `id`: `string`; `name`: `string`; `sellValue`: `number`; \}; `modifier?`: \{ `debuffType`: `"DISABLE_POPULATION"` \| `"HAND_LIMIT"` \| `"DISCARD_PENALTY"` \| `"BLIND_FIREWALL"`; `description`: `string`; `disabledPopulations?`: (`"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`)[]; `discardCpuPenalty?`: `number`; `id`: `string`; `maxHandsAllowed?`: `number`; `name`: `string`; \}; `spendSeal?`: `true`; `transition?`: \{ `change`: `"JOIN"` \| `"LEAVE"`; `description`: `string`; `effectiveAt`: `string`; `id`: `string`; `populations`: (`"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`)[]; `reason`: `"DROPOUT"` \| `"PROTOCOL_AMENDMENT"` \| `"SCREEN_FAILURE"` \| `"PROTOCOL_DEVIATION"`; `subjectId`: `string`; \}; \} = `CrisisEffectSchema`
+\{ `budget?`: `number`; `cpu?`: `number`; `grantSeal?`: \{ `effect`: \{ `kind`: `"PLUS_CHIPS"`; `value`: `number`; \} \| \{ `kind`: `"PLUS_MULT"`; `value`: `number`; \} \| \{ `kind`: `"WAIVE"`; \}; `eligible`: \{ `cardTypes?`: (`"TABLE"` \| `"LISTING"` \| `"FIGURE"` \| `"SUBJECT_TOKEN"`)[]; `populations?`: (`"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`)[]; `topics?`: `string`[]; \}; `footnote`: `string`; `id`: `string`; `name`: `string`; `sellValue`: `number`; \}; `modifier?`: \{ `debuffType`: `"DISABLE_POPULATION"` \| `"HAND_LIMIT"` \| `"DISCARD_PENALTY"` \| `"BLIND_FIREWALL"`; `description`: `string`; `disabledPopulations?`: (`"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`)[]; `discardCpuPenalty?`: `number`; `id`: `string`; `maxHandsAllowed?`: `number`; `name`: `string`; \}; `spendSeal?`: `true`; `transition?`: \{ `change`: `"JOIN"` \| `"LEAVE"` \| `"ENROLL"`; `description`: `string`; `effectiveAt`: `string`; `id`: `string`; `populations`: (`"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`)[]; `reason`: `"DROPOUT"` \| `"PROTOCOL_AMENDMENT"` \| `"SCREEN_FAILURE"` \| `"PROTOCOL_DEVIATION"` \| `"SITE_ACTIVATION"`; `subject?`: \{ `adverseEvents?`: `object`[]; `age`: `number`; `arm`: `"PLACEBO"` \| `"ACTIVE"`; `id`: `string`; `populations`: (`"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`)[]; `sex`: `"F"` \| `"M"`; \}; `subjectId`: `string`; \}; \} = `CrisisEffectSchema`
 
 #### effect.budget?
 
@@ -118,11 +118,13 @@ Spends the first seal in the tray.
 
 #### effect.transition?
 
-\{ `change`: `"JOIN"` \| `"LEAVE"`; `description`: `string`; `effectiveAt`: `string`; `id`: `string`; `populations`: (`"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`)[]; `reason`: `"DROPOUT"` \| `"PROTOCOL_AMENDMENT"` \| `"SCREEN_FAILURE"` \| `"PROTOCOL_DEVIATION"`; `subjectId`: `string`; \} = `...`
+\{ `change`: `"JOIN"` \| `"LEAVE"` \| `"ENROLL"`; `description`: `string`; `effectiveAt`: `string`; `id`: `string`; `populations`: (`"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`)[]; `reason`: `"DROPOUT"` \| `"PROTOCOL_AMENDMENT"` \| `"SCREEN_FAILURE"` \| `"PROTOCOL_DEVIATION"` \| `"SITE_ACTIVATION"`; `subject?`: \{ `adverseEvents?`: `object`[]; `age`: `number`; `arm`: `"PLACEBO"` \| `"ACTIVE"`; `id`: `string`; `populations`: (`"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`)[]; `sex`: `"F"` \| `"M"`; \}; `subjectId`: `string`; \} = `...`
 
 #### effect.transition.change
 
-`"JOIN"` \| `"LEAVE"` = `...`
+`"JOIN"` \| `"LEAVE"` \| `"ENROLL"` = `...`
+
+ENROLL adds `subject`, a subject the snapshot does not hold yet.
 
 #### effect.transition.description
 
@@ -144,7 +146,39 @@ What happened, in the study's words.
 
 #### effect.transition.reason
 
-`"DROPOUT"` \| `"PROTOCOL_AMENDMENT"` \| `"SCREEN_FAILURE"` \| `"PROTOCOL_DEVIATION"` = `TransitionReasonSchema`
+`"DROPOUT"` \| `"PROTOCOL_AMENDMENT"` \| `"SCREEN_FAILURE"` \| `"PROTOCOL_DEVIATION"` \| `"SITE_ACTIVATION"` = `TransitionReasonSchema`
+
+#### effect.transition.subject?
+
+\{ `adverseEvents?`: `object`[]; `age`: `number`; `arm`: `"PLACEBO"` \| `"ACTIVE"`; `id`: `string`; `populations`: (`"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`)[]; `sex`: `"F"` \| `"M"`; \} = `...`
+
+The subject an ENROLL transition adds.
+
+#### effect.transition.subject.adverseEvents?
+
+`object`[] = `...`
+
+Treatment-emergent adverse events. Absent means none were reported.
+
+#### effect.transition.subject.age
+
+`number` = `...`
+
+#### effect.transition.subject.arm
+
+`"PLACEBO"` \| `"ACTIVE"` = `ArmSchema`
+
+#### effect.transition.subject.id
+
+`string` = `identifier`
+
+#### effect.transition.subject.populations
+
+(`"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`)[] = `...`
+
+#### effect.transition.subject.sex
+
+`"F"` \| `"M"` = `...`
 
 #### effect.transition.subjectId
 

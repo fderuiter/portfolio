@@ -20,6 +20,7 @@ import {
   compileShell,
   cpuReducer,
   createRunState,
+  deriveRunView,
   createTableState,
   deriveTableView,
   previewAllocation,
@@ -801,6 +802,8 @@ describe("Footnote seals", () => {
       budget: 2,
       handLevels: sold.handLevels,
       relics: [],
+      sites: [],
+      enrollments: [],
     });
   });
 
@@ -829,11 +832,18 @@ describe("Footnote seals", () => {
       ...(select("C-T14.1.1-B", "C-T14.1.2") as RunAction[]),
       { type: "PLAY_HAND" },
       ...(select("C-T14.3.1", "C-L16.2.7") as RunAction[]),
-      { type: "PLAY_HAND" },
-      { type: "NEXT_BLIND" }
+      { type: "PLAY_HAND" }
     );
+    // Leaving without shopping still collects the sponsor's payout.
+    const payout = deriveRunView(act, r).pendingCashOut;
+    expect(payout?.lines.map((l) => [l.id, l.amount])).toEqual([
+      ["BASE", 3],
+      ["CPU", 2],
+      ["INTEREST", 0],
+    ]);
+    go({ type: "NEXT_BLIND" });
     expect(r.blindIndex).toBe(1);
-    expect(r.table.budget).toBe(1);
+    expect(r.table.budget).toBe(1 + 5);
     expect(r.table.consumables.map((c) => c.id)).toEqual([
       ADJUDICATED,
       OVERLAP,

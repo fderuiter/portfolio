@@ -122,7 +122,9 @@ Spends the first seal in the tray.
 
 ##### effect.transition.change
 
-> **change**: `"JOIN"` \| `"LEAVE"`
+> **change**: `"JOIN"` \| `"LEAVE"` \| `"ENROLL"`
+
+ENROLL adds `subject`, a subject the snapshot does not hold yet.
 
 ##### effect.transition.description
 
@@ -144,7 +146,39 @@ What happened, in the study's words.
 
 ##### effect.transition.reason
 
-> **reason**: `"DROPOUT"` \| `"PROTOCOL_AMENDMENT"` \| `"SCREEN_FAILURE"` \| `"PROTOCOL_DEVIATION"` = `TransitionReasonSchema`
+> **reason**: `"DROPOUT"` \| `"PROTOCOL_AMENDMENT"` \| `"SCREEN_FAILURE"` \| `"PROTOCOL_DEVIATION"` \| `"SITE_ACTIVATION"` = `TransitionReasonSchema`
+
+##### effect.transition.subject?
+
+> `optional` **subject?**: `object`
+
+The subject an ENROLL transition adds.
+
+##### effect.transition.subject.adverseEvents?
+
+> `optional` **adverseEvents?**: `object`[]
+
+Treatment-emergent adverse events. Absent means none were reported.
+
+##### effect.transition.subject.age
+
+> **age**: `number`
+
+##### effect.transition.subject.arm
+
+> **arm**: `"PLACEBO"` \| `"ACTIVE"` = `ArmSchema`
+
+##### effect.transition.subject.id
+
+> **id**: `string` = `identifier`
+
+##### effect.transition.subject.populations
+
+> **populations**: (`"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`)[]
+
+##### effect.transition.subject.sex
+
+> **sex**: `"F"` \| `"M"`
 
 ##### effect.transition.subjectId
 
