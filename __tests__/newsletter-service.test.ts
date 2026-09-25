@@ -78,7 +78,7 @@ vi.mock("@/lib/db", () => {
           const [key, value] = Object.entries(where)[0];
           return (
             db.subscribers.find(
-              (s) => (s as unknown as Where)[key] === value
+              (s) => s[key as keyof Subscriber] === value
             ) ?? null
           );
         }),
