@@ -603,6 +603,46 @@ export const BossBlindModifierSchema = z
 /** A Boss Blind's rule twist. */
 export type BossBlindModifier = z.infer<typeof BossBlindModifierSchema>;
 
+/**
+ * An SOP relic: a standing score modifier the run keeps once earned. It
+ * joins every later hand's scoring as a `ScoreModifier`.
+ */
+export const RelicSchema = z.object({
+  id: identifier,
+  name: z.string().min(1).max(60),
+  description: z.string().min(1).max(200),
+  modifier: ScoreModifierSchema,
+});
+/** An SOP relic. */
+export type Relic = z.infer<typeof RelicSchema>;
+
+/**
+ * One stage of a staged Boss encounter: the DMC session it is played in, the
+ * hands it accepts, and the score that defends it.
+ */
+export const EncounterStageSchema = z.object({
+  name: z.string().min(1).max(60),
+  session: z.enum(["OPEN", "CLOSED"]),
+  quota: z.number().int().positive(),
+  hands: z.array(HandTypeSchema).min(1),
+});
+/** One stage of a staged Boss encounter. */
+export type EncounterStage = z.infer<typeof EncounterStageSchema>;
+
+/**
+ * The DMC milestone defense (T&E-09): an open-session package played from
+ * the blinded study team's seat, then a closed-session package from the
+ * independent statistician's seat. Defending both earns a choice of relics.
+ */
+export const EncounterSchema = z.object({
+  kind: z.literal("DMC_DEFENSE"),
+  stages: z.tuple([EncounterStageSchema, EncounterStageSchema]),
+  /** The relics offered on victory; the player keeps one. */
+  rewards: z.array(RelicSchema).min(2).max(3),
+});
+/** A staged Boss encounter. */
+export type Encounter = z.infer<typeof EncounterSchema>;
+
 /** A milestone quota the player must reach. */
 export const BlindSchema = z.object({
   tier: BlindTierSchema,
@@ -1069,8 +1109,35 @@ export const ScenarioSchema = z
         charter: z.string().min(1).max(120),
       })
       .optional(),
+    /** A staged Boss encounter: this Blind is cleared stage by stage. */
+    encounter: EncounterSchema.optional(),
   })
   .superRefine((scenario, ctx) => {
+    if (scenario.encounter) {
+      const [open, closed] = scenario.encounter.stages;
+      if (open.session !== "OPEN" || closed.session !== "CLOSED") {
+        ctx.addIssue({
+          code: "custom",
+          path: ["encounter", "stages"],
+          message: "A DMC defense plays the open session, then the closed one",
+        });
+      }
+      if (open.quota + closed.quota !== scenario.blind.quota) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["encounter", "stages"],
+          message: "The stage quotas must add up to the Blind's quota",
+        });
+      }
+      if (!scenario.dmc || scenario.boss?.debuffType !== "BLIND_FIREWALL") {
+        ctx.addIssue({
+          code: "custom",
+          path: ["encounter"],
+          message:
+            "A DMC defense needs a chartered DMC and a BLIND_FIREWALL Boss",
+        });
+      }
+    }
     const subjectIds = new Set(
       scenario.populationSnapshot.subjects.map((s) => s.id)
     );

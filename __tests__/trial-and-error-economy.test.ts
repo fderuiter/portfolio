@@ -798,6 +798,7 @@ describe("Footnote seals", () => {
       consumables: sold.consumables,
       budget: 2,
       handLevels: sold.handLevels,
+      relics: [],
     });
   });
 

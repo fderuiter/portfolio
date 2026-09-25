@@ -2,7 +2,7 @@
 
 import React from "react";
 import { createPortal } from "react-dom";
-import type { AccessRecord, HandLevelRow } from "@/lib/trial-and-error";
+import type { AccessRecord, HandLevelRow, Relic } from "@/lib/trial-and-error";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface RunInfoProps {
@@ -11,6 +11,8 @@ interface RunInfoProps {
   seed: string;
   /** How many relic slots the rack has. */
   relicSlots: number;
+  /** The relics the run has equipped. */
+  relics?: readonly Relic[];
   /**
    * The Blind's DMC access history, shown when the Blind has a DMC or any
    * access was logged.
@@ -31,6 +33,7 @@ export function RunInfo({
   rows,
   seed,
   relicSlots,
+  relics = [],
   accessLog = [],
   dmc = false,
   onClose,
@@ -112,13 +115,27 @@ export function RunInfo({
         <h3 className="mt-4 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
           Relics
         </h3>
-        <p
-          className="text-xs text-zinc-300 break-words"
-          data-testid="run-info-relics"
-        >
-          None equipped (0 of {relicSlots} slots). Relics arrive with the
-          Procurement Shop.
-        </p>
+        {relics.length === 0 ? (
+          <p
+            className="text-xs text-zinc-300 break-words"
+            data-testid="run-info-relics"
+          >
+            None equipped (0 of {relicSlots} slots). Relics arrive with the
+            Procurement Shop and Boss rewards.
+          </p>
+        ) : (
+          <ul className="text-xs text-zinc-300" data-testid="run-info-relics">
+            <li className="text-zinc-400">
+              {relics.length} of {relicSlots} slots
+            </li>
+            {relics.map((relic) => (
+              <li key={relic.id} className="break-words">
+                <span className="font-bold text-emerald-300">{relic.name}</span>
+                : {relic.description}
+              </li>
+            ))}
+          </ul>
+        )}
         {(dmc || accessLog.length > 0) && (
           <>
             <h3 className="mt-4 text-[10px] font-bold uppercase tracking-wider text-zinc-400">

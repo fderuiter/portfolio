@@ -476,6 +476,18 @@ Re-exports [DeskView](internal/desk/interfaces/DeskView.md)
 
 ***
 
+### DMC\_MILESTONE\_SCENARIO
+
+Re-exports [DMC_MILESTONE_SCENARIO](scenarios/variables/DMC_MILESTONE_SCENARIO.md)
+
+***
+
+### DMC\_RELICS
+
+Re-exports [DMC_RELICS](scenarios/variables/DMC_RELICS.md)
+
+***
+
 ### DmcSession
 
 Re-exports [DmcSession](internal/blinding/type-aliases/DmcSession.md)
@@ -497,6 +509,42 @@ Re-exports [drawInt](internal/rng/functions/drawInt.md)
 ### EMPTY\_SHELL\_ALERT
 
 Re-exports [EMPTY_SHELL_ALERT](internal/table/variables/EMPTY_SHELL_ALERT.md)
+
+***
+
+### Encounter
+
+Re-exports [Encounter](types/type-aliases/Encounter.md)
+
+***
+
+### EncounterSchema
+
+Re-exports [EncounterSchema](types/variables/EncounterSchema.md)
+
+***
+
+### EncounterStage
+
+Re-exports [EncounterStage](types/type-aliases/EncounterStage.md)
+
+***
+
+### EncounterStageSchema
+
+Re-exports [EncounterStageSchema](types/variables/EncounterStageSchema.md)
+
+***
+
+### EncounterStageView
+
+Re-exports [EncounterStageView](internal/table/interfaces/EncounterStageView.md)
+
+***
+
+### EncounterView
+
+Re-exports [EncounterView](internal/table/interfaces/EncounterView.md)
 
 ***
 
@@ -953,6 +1001,18 @@ Re-exports [RedactedCard](types/type-aliases/RedactedCard.md)
 ### RedactedCardSchema
 
 Re-exports [RedactedCardSchema](types/variables/RedactedCardSchema.md)
+
+***
+
+### Relic
+
+Re-exports [Relic](types/type-aliases/Relic.md)
+
+***
+
+### RelicSchema
+
+Re-exports [RelicSchema](types/variables/RelicSchema.md)
 
 ***
 

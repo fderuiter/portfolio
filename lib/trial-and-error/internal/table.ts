@@ -25,6 +25,8 @@ import type {
   CardStamp,
   KmFigure,
   RedactedCard,
+  Relic,
+  EncounterStage,
 } from "../types";
 import { POPULATION_LABELS } from "../types";
 import { compileDraft, compileShell } from "./compile";
@@ -100,7 +102,8 @@ export interface TableEvent {
     | "TRACED"
     | "STRUCTURAL_QC"
     | "UNBLINDED"
-    | "SESSION_CHANGED";
+    | "SESSION_CHANGED"
+    | "RELIC_CLAIMED";
   message: string;
   /** On LEVELED_UP: the hand that levelled and its base before and after. */
   levelUp?: LevelUp;
@@ -161,6 +164,8 @@ export interface Inventory {
   consumables: Consumable[];
   budget: number;
   handLevels?: HandLevels;
+  /** SOP relics the run has earned. */
+  relics?: Relic[];
 }
 
 /**
@@ -269,6 +274,14 @@ export interface TableState {
   unblinded: string[];
   /** Unauthorized unblindings the next hand played will answer for with ×0. */
   pendingViolations: string[];
+  /** A staged encounter's current stage, from 0. */
+  stage: number;
+  /** Each encounter stage's score so far. Empty outside an encounter. */
+  stageScores: number[];
+  /** SOP relics the run has earned; each scores in every hand. */
+  relics: Relic[];
+  /** The relic taken as this Blind's encounter reward, once taken. */
+  rewardClaimed: string | null;
   /**
    * How much of `snapshots` and `invalidations` predates this Blind, the
    * inventory it started with, and its crisis, so a restart returns to
@@ -316,6 +329,8 @@ export type TableAction =
   | { type: "PEEK_BLINDED"; cardId: string }
   /** Moves to the other DMC session under the scenario's charter. */
   | { type: "SET_SESSION"; session: DmcSession }
+  /** Takes one relic from a defended encounter's reward. */
+  | { type: "CLAIM_RELIC"; relicId: string }
   | { type: "RESET" };
 
 /** One card in hand as the table should render it. */
@@ -507,6 +522,25 @@ export interface TableView {
   accessLog: AccessRecord[];
   /** Unblinded outputs the next hand played will score ×0 for. */
   pendingViolations: string[];
+  /** A staged encounter's progress, or null outside one. */
+  encounter: EncounterView | null;
+  /** A defended encounter's relic offer, or null. */
+  reward: { choices: Relic[]; claimed: string | null } | null;
+  /** SOP relics the run has earned. */
+  relics: Relic[];
+}
+
+/** One stage of a staged encounter, as the Blind panel shows it. */
+export interface EncounterStageView extends EncounterStage {
+  score: number;
+  status: "DEFENDED" | "ACTIVE" | "PENDING";
+}
+
+/** A staged encounter's progress. */
+export interface EncounterView {
+  stages: EncounterStageView[];
+  /** The stage being played, from 0. */
+  current: number;
 }
 
 /** One analysis set a blank shell could be compiled on, previewed before committing. */
@@ -743,6 +777,7 @@ const discardSurcharge = (scenario: Scenario, state: TableState): number =>
 
 /** Whether a DMC firewall turns treatment-arm values face down. */
 const firewallUp = (scenario: Scenario, state: TableState): boolean =>
+  state.session === "OPEN" &&
   activeModifiers(scenario, state).some(
     (m) => m.debuffType === "BLIND_FIREWALL"
   );
@@ -759,7 +794,23 @@ function isBlindedCard(
   );
 }
 
-/** Face down: blinded, in the open session, and never unblinded by a peek. */
+/** A closed-session output, or a Figure drawn from one. */
+function isClosedSession(
+  scenario: Scenario,
+  state: TableState,
+  card: TlfCard
+): boolean {
+  if (isBlindedCard(scenario, state, card)) return true;
+  const parent = card.km
+    ? cardById(scenario, state, card.km.parent.cardId)
+    : undefined;
+  return parent !== undefined && isBlindedCard(scenario, state, parent);
+}
+
+/**
+ * Face down: a closed-session output (or a Figure drawn from one), in the
+ * open session, and never unblinded by a peek.
+ */
 const isFaceDown = (
   scenario: Scenario,
   state: TableState,
@@ -767,7 +818,7 @@ const isFaceDown = (
 ): boolean =>
   state.session === "OPEN" &&
   !state.unblinded.includes(card.id) &&
-  isBlindedCard(scenario, state, card);
+  isClosedSession(scenario, state, card);
 
 /** The alert shown when Inspect meets a face-down output. */
 const faceDownAlert = (card: TlfCard) =>
@@ -788,6 +839,33 @@ function redactedFace(face: CardFace): CardFace {
     return {
       ...face,
       rows: face.rows.map((row) => row.map(() => FIREWALL_CELL)),
+    };
+  }
+  if (face.kind === "FIGURE") {
+    // The plot type and source print; no curve, interval or count does.
+    const { plot } = face;
+    const flat = {
+      label: FIREWALL_CELL,
+      points: [
+        [0, 1],
+        [1, 1],
+      ] as [number, number][],
+    };
+    return {
+      kind: "FIGURE",
+      source: face.source,
+      plot:
+        plot.type === "FOREST"
+          ? {
+              ...plot,
+              intervals: plot.intervals.map(() => ({
+                label: FIREWALL_CELL,
+                estimate: plot.reference,
+                lower: plot.reference,
+                upper: plot.reference,
+              })),
+            }
+          : { type: plot.type, series: [flat] },
     };
   }
   return { kind: "TOKEN", cohort: FIREWALL_CELL, count: 0 };
@@ -833,6 +911,13 @@ function sessionRefusal(
   if (state.session === to) {
     return `The ${to === "OPEN" ? "open" : "closed"} session is already in force.`;
   }
+  const encounter = scenario.encounter;
+  if (encounter && to === "CLOSED" && state.stage === 0) {
+    return `Premature unblinding: the DMC convenes the closed session only after ${encounter.stages[0].name} is defended.`;
+  }
+  if (encounter && to === "OPEN") {
+    return "The closed session stays in force until the closed package is defended.";
+  }
   if (to === "CLOSED") {
     const pending = blindedInHand(scenario, state).filter(
       (card) => !state.structuralQc.includes(card.id)
@@ -849,14 +934,53 @@ function sessionRefusal(
  * outputs, and any Figure built on one.
  */
 function sessionDependents(scenario: Scenario, state: TableState): string[] {
-  return state.hand.filter((id) => {
-    const card = cardById(scenario, state, id) as TlfCard;
-    if (isBlindedCard(scenario, state, card)) return true;
-    const parent = card.km
-      ? cardById(scenario, state, card.km.parent.cardId)
-      : undefined;
-    return parent !== undefined && isBlindedCard(scenario, state, parent);
-  });
+  return state.hand.filter((id) =>
+    isClosedSession(scenario, state, cardById(scenario, state, id) as TlfCard)
+  );
+}
+
+/** Why an encounter stage will not accept this hand, or null. */
+function stageRefusal(
+  scenario: Scenario,
+  state: TableState,
+  stage: EncounterStage,
+  classification: HandClassification
+): string | null {
+  if (state.session !== stage.session) {
+    return `${stage.name} is played in the closed session: convene it first.`;
+  }
+  if (!stage.hands.includes(classification.handType)) {
+    return `${stage.name} accepts ${stage.hands.map(handName).join(", ")}; this is ${handName(classification.handType)}.`;
+  }
+  if (stage.session === "OPEN") {
+    const closed = state.selected
+      .map((id) => cardById(scenario, state, id) as TlfCard)
+      .filter((card) => isClosedSession(scenario, state, card));
+    if (closed.length > 0) {
+      return `Closed-session outputs cannot be presented in the open session: ${closed.map(cardShortName).join(", ")}.`;
+    }
+  }
+  return null;
+}
+
+/** An encounter's stage scores after a hand, moving on once a stage is defended. */
+function advanceStage(
+  scenario: Scenario,
+  state: TableState,
+  score: number
+): Pick<TableState, "stage" | "stageScores"> {
+  const stages = scenario.encounter?.stages ?? [];
+  const stageScores = state.stageScores.map((s, i) =>
+    i === state.stage ? s + score : s
+  );
+  const defended = stageScores[state.stage] >= stages[state.stage].quota;
+  return {
+    stageScores,
+    stage:
+      defended && state.stage < stages.length - 1
+        ? state.stage + 1
+        : state.stage,
+  };
 }
 
 /** The alert shown while a crisis waits for an answer. */
@@ -1424,6 +1548,7 @@ function scoreCards(
     handType,
     cards: cards.map((c) => ({ id: c.id, chips: c.chips, mult: c.mult })),
     ruleResults,
+    modifiers: state.relics.map((r) => r.modifier),
     level: state.handLevels[handType].level,
   });
 }
@@ -1562,6 +1687,12 @@ export function createTableState(
     structuralQc: [],
     unblinded: [],
     pendingViolations: [],
+    stage: 0,
+    stageScores: scenario.encounter
+      ? scenario.encounter.stages.map(() => 0)
+      : [],
+    relics: [...(inventory.relics ?? [])],
+    rewardClaimed: null,
     opening: {
       snapshots: history.snapshots.length,
       invalidations: history.invalidations.length,
@@ -1582,6 +1713,7 @@ export function carriedInventory(state: TableState): Inventory {
     consumables: state.consumables,
     budget: state.budget,
     handLevels: state.handLevels,
+    relics: state.relics,
   };
 }
 
@@ -1692,10 +1824,16 @@ function settle(
   scenario: Scenario,
   state: TableState
 ): { state: TableState; outcome: string } {
-  if (state.roundScore >= scenario.blind.quota) {
+  const encounter = scenario.encounter;
+  const defended = encounter
+    ? encounter.stages.every((stage, i) => state.stageScores[i] >= stage.quota)
+    : state.roundScore >= scenario.blind.quota;
+  if (defended) {
     return {
       state: { ...state, status: "CLEARED" },
-      outcome: `${scenario.blind.name} cleared.`,
+      outcome: encounter
+        ? `${scenario.blind.name} defended. Choose an SOP relic.`
+        : `${scenario.blind.name} cleared.`,
     };
   }
   const limit = handLimit(scenario, state);
@@ -1845,6 +1983,28 @@ export function advanceTable(
       lastEvent: nextEvent(state, "RESET", `${scenario.blind.name} restarted.`),
     };
   }
+  if (action.type === "CLAIM_RELIC") {
+    const rewards = scenario.encounter?.rewards ?? [];
+    if (state.status !== "CLEARED" || rewards.length === 0) {
+      return refuse(state, "No relic is on offer.");
+    }
+    if (state.rewardClaimed) {
+      const taken = rewards.find((r) => r.id === state.rewardClaimed);
+      return refuse(state, `You already took ${taken?.name ?? "a relic"}.`);
+    }
+    const relic = rewards.find((r) => r.id === action.relicId);
+    if (!relic) return refuse(state, "That relic is not on offer.");
+    return {
+      ...state,
+      relics: [...state.relics, relic],
+      rewardClaimed: relic.id,
+      lastEvent: nextEvent(
+        state,
+        "RELIC_CLAIMED",
+        `${relic.name} joins your relics: ${relic.description}`
+      ),
+    };
+  }
   if (state.status !== "REVIEWING") {
     return refuse(state, "The Blind is over. Restart to play again.");
   }
@@ -1941,12 +2101,17 @@ export function advanceTable(
           `${EMPTY_SHELL_ALERT} Empty: ${empty.map(cardShortName).join(", ")}.`
         );
       }
-      if (!canAfford(state.cpu, "PLAY_HAND")) {
-        return refuse(state, `Play Hand needs ${CPU_COSTS.PLAY_HAND} CPU.`);
-      }
       const classification = classifyHand(
         state.selected.map((id) => classifiable(scenario, state, id))
       ) as HandClassification;
+      const stage = scenario.encounter?.stages[state.stage];
+      if (stage) {
+        const refusal = stageRefusal(scenario, state, stage, classification);
+        if (refusal) return refuse(state, refusal);
+      }
+      if (!canAfford(state.cpu, "PLAY_HAND")) {
+        return refuse(state, `Play Hand needs ${CPU_COSTS.PLAY_HAND} CPU.`);
+      }
       const scoring = classification.scoringCardIds.map(
         (id) => cardById(scenario, state, id) as TlfCard
       );
@@ -1969,6 +2134,7 @@ export function advanceTable(
             handsPlayed: state.handsPlayed + 1,
             // The violation is answered for by this hand's ×0.
             pendingViolations: [],
+            ...(stage ? advanceStage(scenario, state, evaluation.score) : {}),
             handLevels: {
               ...state.handLevels,
               [classification.handType]: {
@@ -1993,12 +2159,16 @@ export function advanceTable(
       const zero = evaluation.zeroRule.triggered
         ? " Zero-score rule triggered."
         : "";
+      const defended =
+        stage && settled.stage > state.stage && settled.status === "REVIEWING"
+          ? ` ${stage.name} defended: convene the closed session for ${scenario.encounter?.stages[settled.stage].name}.`
+          : "";
       return {
         ...settled,
         lastEvent: nextEvent(
           state,
           "PLAYED",
-          `${handName(classification.handType)} scored ${evaluation.score} (${evaluation.chips.total} Chips × ${evaluation.finalMult} Mult).${zero} Round ${settled.roundScore} of ${scenario.blind.quota}.${outcome ? ` ${outcome}` : ""}${news ? ` ${news}` : ""}`
+          `${handName(classification.handType)} scored ${evaluation.score} (${evaluation.chips.total} Chips × ${evaluation.finalMult} Mult).${zero} Round ${settled.roundScore} of ${scenario.blind.quota}.${defended}${outcome ? ` ${outcome}` : ""}${news ? ` ${news}` : ""}`
         ),
       };
     }
@@ -2098,6 +2268,12 @@ export function advanceTable(
         return refuse(
           state,
           `${cardShortName(card)} is face up: inspect it instead.`
+        );
+      }
+      if (card.km) {
+        return refuse(
+          state,
+          `${cardShortName(card)} is drawn from a closed-session table: it turns face up with the closed session.`
         );
       }
       const draft = draftFor(scenario, state, card);
@@ -2864,6 +3040,29 @@ export function deriveTableView(
     ),
     accessLog: state.accessLog,
     pendingViolations: state.pendingViolations,
+    encounter: scenario.encounter
+      ? {
+          current: state.stage,
+          stages: scenario.encounter.stages.map((stage, i) => ({
+            ...stage,
+            score: state.stageScores[i] ?? 0,
+            status:
+              (state.stageScores[i] ?? 0) >= stage.quota
+                ? "DEFENDED"
+                : i === state.stage
+                  ? "ACTIVE"
+                  : "PENDING",
+          })),
+        }
+      : null,
+    reward:
+      scenario.encounter && state.status === "CLEARED"
+        ? {
+            choices: scenario.encounter.rewards,
+            claimed: state.rewardClaimed,
+          }
+        : null,
+    relics: state.relics,
   };
 }
 

@@ -227,6 +227,9 @@ export function advanceRun(
       if (run.table.status !== "CLEARED") {
         return refuse(`Clear ${blind.blind.name} first.`);
       }
+      if (blind.encounter && !run.table.rewardClaimed) {
+        return refuse("Choose an SOP relic first.");
+      }
       const index = run.blindIndex + 1;
       if (index >= blinds.length) {
         return refuse(`${act.title} is complete.`);

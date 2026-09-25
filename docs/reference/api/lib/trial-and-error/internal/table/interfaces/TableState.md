@@ -230,6 +230,58 @@ The snapshot each card in hand was compiled against.
 
 ***
 
+### relics
+
+> **relics**: `object`[]
+
+SOP relics the run has earned; each scores in every hand.
+
+#### description
+
+> **description**: `string`
+
+#### id
+
+> **id**: `string` = `identifier`
+
+#### modifier
+
+> **modifier**: `object` = `ScoreModifierSchema`
+
+##### modifier.chips
+
+> **chips**: `number`
+
+##### modifier.label
+
+> **label**: `string`
+
+##### modifier.plusMult
+
+> **plusMult**: `number`
+
+##### modifier.sourceId
+
+> **sourceId**: `string` = `identifier`
+
+##### modifier.xMult
+
+> **xMult**: `number`
+
+#### name
+
+> **name**: `string`
+
+***
+
+### rewardClaimed
+
+> **rewardClaimed**: `string` \| `null`
+
+The relic taken as this Blind's encounter reward, once taken.
+
+***
+
 ### roundScore
 
 > **roundScore**: `number`
@@ -287,6 +339,22 @@ Every population snapshot version so far, oldest first. The last is current.
 #### version
 
 > **version**: `number`
+
+***
+
+### stage
+
+> **stage**: `number`
+
+A staged encounter's current stage, from 0.
+
+***
+
+### stageScores
+
+> **stageScores**: `number`[]
+
+Each encounter stage's score so far. Empty outside an encounter.
 
 ***
 
