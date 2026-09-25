@@ -37,6 +37,13 @@ function stepPath(
     .join("");
 }
 
+/** A KM step function's value at time t. */
+function kmValueAt(points: [number, number][], t: number) {
+  let value = points[0]?.[1] ?? 1;
+  for (const [px, py] of points) if (px <= t) value = py;
+  return value;
+}
+
 /**
  * A Figure face drawn from the card's data: a Kaplan-Meier step curve, a
  * sparkline, or a forest plot of subgroup intervals.
@@ -125,6 +132,25 @@ export function MiniFigure({ plot, size, label }: MiniFigureProps) {
           stroke={AXIS}
           strokeWidth={0.75}
         />
+        {plot.type === "KM" &&
+          plot.series.flatMap((series, i) =>
+            (series.censors ?? []).map((t, j) => {
+              const cx = x(t);
+              const cy = y(kmValueAt(series.points, t));
+              return (
+                <line
+                  key={`${series.label}-tick-${j}`}
+                  data-censor-tick=""
+                  x1={cx}
+                  x2={cx}
+                  y1={cy - 2.5}
+                  y2={cy + 2.5}
+                  stroke={SERIES_STROKES[i % SERIES_STROKES.length]}
+                  strokeWidth={0.75}
+                />
+              );
+            })
+          )}
         {plot.series.map((series, i) => (
           <path
             key={series.label}
@@ -169,7 +195,12 @@ export function describePlot(plot: FigurePlot): string {
   const kind = plot.type === "KM" ? "Kaplan-Meier curve" : "Line chart";
   return `${kind}: ${plot.series
     .map(
-      (s) => `${s.label} ${s.points.map(([x, y]) => `${x}: ${y}`).join(", ")}`
+      (s) =>
+        `${s.label} ${s.points.map(([x, y]) => `${x}: ${y}`).join(", ")}${
+          s.censors && s.censors.length > 0
+            ? `, censored at ${s.censors.join(", ")}`
+            : ""
+        }`
     )
     .join("; ")}.`;
 }

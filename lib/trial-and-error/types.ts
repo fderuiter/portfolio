@@ -634,6 +634,8 @@ const FigureSeriesSchema = z.object({
     .array(z.tuple([z.number(), z.number()]))
     .min(2)
     .max(12),
+  /** Right-censoring tick times on a KM curve, in data units. */
+  censors: z.array(z.number()).max(24).optional(),
 });
 
 /** One subgroup row on a forest-plot face. */
@@ -686,7 +688,27 @@ export const CardFaceSchema = z
       columns: z.array(faceText).min(2).max(4),
       rows: z.array(z.array(faceText)).min(3).max(4),
     }),
-    z.object({ kind: z.literal("FIGURE"), plot: FigurePlotSchema }),
+    z.object({
+      kind: z.literal("FIGURE"),
+      plot: FigurePlotSchema,
+      /** The parent Table's number, printed on a dependent Figure. */
+      source: faceText.optional(),
+      /** The Number-at-Risk strip under a KM plot, one row per arm. */
+      atRisk: z
+        .object({
+          times: z.array(z.number().nonnegative()).min(1).max(8),
+          rows: z
+            .array(
+              z.object({
+                label: faceText,
+                values: z.array(z.number().int().nonnegative()),
+              })
+            )
+            .min(1)
+            .max(2),
+        })
+        .optional(),
+    }),
     z.object({
       kind: z.literal("TOKEN"),
       cohort: faceText,
@@ -753,6 +775,79 @@ export const RedactedCardSchema = z
 /** A face-down card. */
 export type RedactedCard = z.infer<typeof RedactedCardSchema>;
 
+/** One subject's time-to-event record behind a Kaplan–Meier figure. */
+export const TimeToEventRecordSchema = z.object({
+  subjectId: identifier,
+  /** Time from the fixed origin, in the figure's time unit. */
+  time: z.number().nonnegative(),
+  /** True for an event; false for a right-censored observation. */
+  event: z.boolean(),
+});
+/** One subject's time-to-event record. */
+export type TimeToEventRecord = z.infer<typeof TimeToEventRecordSchema>;
+
+/** What a KM figure draft prints for one arm: the curve, ticks and at-risk row. */
+export const KmArmDisplaySchema = z.object({
+  arm: ArmSchema,
+  /** The plotted step function as `[time, survival]` points, origin first. */
+  curve: z
+    .array(z.tuple([z.number().nonnegative(), z.number().min(0).max(1)]))
+    .min(2)
+    .max(12),
+  /** Where right-censoring ticks are drawn. */
+  censorTicks: z.array(z.number().nonnegative()).max(24),
+  /** The Number-at-Risk row: one count per milestone. */
+  atRisk: z.array(nonNegativeInt),
+});
+/** What a KM figure draft prints for one arm. */
+export type KmArmDisplay = z.infer<typeof KmArmDisplaySchema>;
+
+/**
+ * A Kaplan–Meier figure: the time-to-event records it was compiled from, the
+ * immutable snapshot they belong to, the parent Table it depends on, and
+ * what the draft actually prints. `parent` names the parent's face rows that
+ * must reconcile with the figure: subjects at risk at the origin and events.
+ */
+export const KmFigureSchema = z
+  .object({
+    endpoint: z.string().min(1).max(80),
+    timeUnit: z.string().min(1).max(16),
+    populationSnapshotId: identifier,
+    parent: z.object({
+      cardId: identifier,
+      atRiskRow: faceText,
+      eventsRow: faceText,
+    }),
+    /** The time origin the draft's axis starts at. The SAP fixes it at 0. */
+    timeOrigin: z.number(),
+    /** Number-at-Risk milestone times, strictly increasing, from 0. */
+    milestones: z.array(z.number().nonnegative()).min(2).max(8),
+    records: z.array(TimeToEventRecordSchema).min(1),
+    displayed: z.array(KmArmDisplaySchema).min(1).max(2),
+  })
+  .superRefine((km, ctx) => {
+    km.milestones.forEach((t, i) => {
+      if (i > 0 && t <= km.milestones[i - 1]) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["milestones", i],
+          message: "Milestones must be strictly increasing",
+        });
+      }
+    });
+    km.displayed.forEach((arm, i) => {
+      if (arm.atRisk.length !== km.milestones.length) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["displayed", i, "atRisk"],
+          message: "The at-risk row needs one count per milestone",
+        });
+      }
+    });
+  });
+/** A Kaplan–Meier figure. */
+export type KmFigure = z.infer<typeof KmFigureSchema>;
+
 export const TlfCardSchema = z.object({
   id: identifier,
   cardType: CardTypeSchema,
@@ -772,6 +867,8 @@ export const TlfCardSchema = z.object({
    * compiles only once the player allocates one of the shell's analysis sets.
    */
   shellId: identifier.optional(),
+  /** A Kaplan–Meier figure: its face is drawn from this data. */
+  km: KmFigureSchema.optional(),
 });
 /** A TLF card on the Card Table. */
 export type TlfCard = z.infer<typeof TlfCardSchema>;
@@ -1035,7 +1132,7 @@ export const ScenarioSchema = z
           message: "A card's draft must exist in the draw pile",
         });
       }
-      const sources = [card.face, card.draftId, card.shellId].filter(
+      const sources = [card.face, card.draftId, card.shellId, card.km].filter(
         (source) => source !== undefined
       );
       if (sources.length !== 1) {
@@ -1043,7 +1140,42 @@ export const ScenarioSchema = z
           code: "custom",
           path: ["deck", index, "face"],
           message:
-            "A card needs exactly one of face data, a draft or a blank shell",
+            "A card needs exactly one of face data, a draft, a blank shell or KM data",
+        });
+      }
+      if (card.km !== undefined) {
+        const { km } = card;
+        if (card.cardType !== "FIGURE") {
+          ctx.addIssue({
+            code: "custom",
+            path: ["deck", index, "km"],
+            message: "Only a Figure carries Kaplan–Meier data",
+          });
+        }
+        if (km.populationSnapshotId !== scenario.populationSnapshot.id) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["deck", index, "km", "populationSnapshotId"],
+            message: "A KM figure must reference the scenario's snapshot",
+          });
+        }
+        const parent = scenario.deck.find((c) => c.id === km.parent.cardId);
+        if (!parent || parent.cardType !== "TABLE") {
+          ctx.addIssue({
+            code: "custom",
+            path: ["deck", index, "km", "parent", "cardId"],
+            message: "A KM figure's parent must be a Table in the deck",
+          });
+        }
+        km.records.forEach((record, r) => {
+          if (!subjectIds.has(record.subjectId)) {
+            ctx.addIssue({
+              code: "custom",
+              path: ["deck", index, "km", "records", r, "subjectId"],
+              message:
+                "A time-to-event record must name a subject in the snapshot",
+            });
+          }
         });
       }
       if (card.shellId !== undefined) {

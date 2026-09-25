@@ -120,6 +120,14 @@ Selected blank shells with no analysis set allocated, in selection order.
 
 ***
 
+### figureInspection
+
+> **figureInspection**: [`FigureInspectionView`](FigureInspectionView.md) \| `null`
+
+The open Inspect drawer's content when it holds a KM figure.
+
+***
+
 ### firewall
 
 > **firewall**: `boolean`

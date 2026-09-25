@@ -21,6 +21,7 @@ import {
   type Act,
   type CrisisCard,
 } from "@/lib/trial-and-error";
+import { SMALL_BLIND_WITH_KM } from "./utils/trial-and-error-km";
 
 const announce = vi.fn();
 vi.mock("@/hooks/useAnnouncer", () => ({
@@ -809,5 +810,54 @@ describe("CardTable shells, seals and CPU (T&E-04)", () => {
         .getByRole("button", { name: /Play Hand/ })
         .getAttribute("aria-describedby")
     ).toBe("cpu-note");
+  });
+});
+
+describe("CardTable Kaplan–Meier figures (T&E-07)", () => {
+  const FIG = "C-F14.1.2";
+
+  it("shows the dependency, then reconciles every KM finding to turn ×2 on", async () => {
+    render(<CardTable scenario={SMALL_BLIND_WITH_KM} />);
+    const badge = within(card(FIG)).getByTestId("figure-xmult");
+    expect(badge.hasAttribute("data-active")).toBe(false);
+    expect(badge.getAttribute("title")).toBe(
+      "Inspect the figure to reconcile its Number-at-Risk."
+    );
+
+    await openInspect(FIG);
+    const desk = screen.getByTestId("figure-desk");
+    expect(drawer()!.getAttribute("aria-labelledby")).toBe(
+      "figure-desk-heading"
+    );
+    expect(within(desk).getByTestId("figure-status").textContent).toBe(
+      "×2 off: 2 Kaplan–Meier discrepancies unresolved."
+    );
+    expect(
+      within(desk)
+        .getByTestId("figure-parent")
+        .querySelectorAll("[data-reconciles]")
+    ).toHaveLength(2);
+    const strip = within(desk).getByTestId("at-risk-strip");
+    expect(strip.querySelectorAll('[data-mark="open"]')).toHaveLength(1);
+
+    const findings = () => within(desk).getAllByTestId("km-finding");
+    expect(findings()).toHaveLength(2);
+    const first = within(findings()[0]).getByRole("button");
+    act(() => first.focus());
+    fireEvent.keyDown(first, { key: "c" });
+    expect(findings()[0].hasAttribute("data-resolved")).toBe(true);
+    fireEvent.keyDown(first, { key: "ArrowDown" });
+    const second = within(findings()[1]).getByRole("button");
+    expect(document.activeElement).toBe(second);
+    fireEvent.click(second);
+
+    expect(within(desk).getByTestId("figure-status").textContent).toBe(
+      "×2 live"
+    );
+    expect(strip.querySelectorAll('[data-mark="reconciled"]')).toHaveLength(1);
+    expect(lastAnnouncement()).toContain("×2 Mult is live.");
+    expect(
+      within(card(FIG)).getByTestId("figure-xmult").hasAttribute("data-active")
+    ).toBe(true);
   });
 });

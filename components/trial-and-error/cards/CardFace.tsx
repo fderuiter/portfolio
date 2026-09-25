@@ -144,6 +144,26 @@ export function CardFace({ view }: { view: TableCardView }) {
       >
         <MiniOutput face={view.face} size="card" />
       </span>
+      {view.figure && (
+        <span
+          className="flex items-center justify-between gap-1 text-[10px]"
+          data-testid="figure-dependency"
+        >
+          <span className="truncate text-zinc-400">← {view.figure.parent}</span>
+          <span
+            data-testid="figure-xmult"
+            data-active={view.figure.active ? "" : undefined}
+            title={view.figure.reason ?? undefined}
+            className={`border px-1 tabular-nums ${
+              view.figure.active
+                ? "border-[color:var(--te-x-mult)]/60 text-[color:var(--te-x-mult)]"
+                : "border-zinc-700 text-zinc-400 line-through"
+            }`}
+          >
+            ×{view.figure.xMult}
+          </span>
+        </span>
+      )}
       <span className="mt-auto flex items-center justify-between gap-1 text-[10px]">
         {view.debuffed || view.stale ? (
           <span

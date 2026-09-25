@@ -6,6 +6,7 @@ import {
   SUIT_TEXT,
 } from "@/components/trial-and-error/cards/CardFace";
 import { STAMP_LABELS } from "@/components/trial-and-error/cards/Stamp";
+import { AtRiskStrip } from "@/components/trial-and-error/cards/AtRiskStrip";
 
 interface CardDetailProps {
   view: TableCardView;
@@ -78,6 +79,18 @@ export function CardDetail({ view, headingId }: CardDetailProps) {
             </dd>
           </>
         )}
+        {view.figure && (
+          <>
+            <dt className="text-zinc-400">Depends on</dt>
+            <dd>{view.figure.parent}</dd>
+            <dt className="text-zinc-400">×Mult</dt>
+            <dd data-testid="figure-detail-xmult">
+              {view.figure.active
+                ? `×${view.figure.xMult} active`
+                : `×${view.figure.xMult} off: ${view.figure.reason}`}
+            </dd>
+          </>
+        )}
         {view.stamps.length > 0 && (
           <>
             <dt className="text-zinc-400">Stamps</dt>
@@ -95,6 +108,11 @@ export function CardDetail({ view, headingId }: CardDetailProps) {
           caption={`${card.number}: ${card.title}`}
         />
       </div>
+      {view.face.kind === "FIGURE" && view.face.atRisk && (
+        <div className="mt-2">
+          <AtRiskStrip atRisk={view.face.atRisk} />
+        </div>
+      )}
       {view.seals.length > 0 && (
         <ol
           className="mt-2 list-none space-y-1 text-xs text-zinc-300"

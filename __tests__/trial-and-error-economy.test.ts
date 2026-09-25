@@ -166,7 +166,7 @@ describe("T&E-04 contracts", () => {
       "A blank shell must name a scenario shell with a layout",
     ]);
     expect(issues(swap({ ...blank, draftId: "T-14.1.1-A" }))).toEqual([
-      "A card needs exactly one of face data, a draft or a blank shell",
+      "A card needs exactly one of face data, a draft, a blank shell or KM data",
     ]);
     // A shell without compatiblePopulations accepts its target only.
     const targetOnly = SMALL.shells.map((s) =>

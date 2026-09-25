@@ -494,6 +494,12 @@ Re-exports [FACE_KIND_BY_CARD_TYPE](types/variables/FACE_KIND_BY_CARD_TYPE.md)
 
 ***
 
+### FigureInspectionView
+
+Re-exports [FigureInspectionView](internal/table/interfaces/FigureInspectionView.md)
+
+***
+
 ### FigurePlot
 
 Re-exports [FigurePlot](types/type-aliases/FigurePlot.md)
@@ -503,6 +509,12 @@ Re-exports [FigurePlot](types/type-aliases/FigurePlot.md)
 ### FigurePlotSchema
 
 Re-exports [FigurePlotSchema](types/variables/FigurePlotSchema.md)
+
+***
+
+### FigureStatus
+
+Re-exports [FigureStatus](internal/table/interfaces/FigureStatus.md)
 
 ***
 
@@ -695,6 +707,78 @@ Re-exports [Inventory](internal/table/interfaces/Inventory.md)
 ### isFreeCrisisChoice
 
 Re-exports [isFreeCrisisChoice](types/functions/isFreeCrisisChoice.md)
+
+***
+
+### kaplanMeier
+
+Re-exports [kaplanMeier](internal/km/functions/kaplanMeier.md)
+
+***
+
+### KM\_DECIMALS
+
+Re-exports [KM_DECIMALS](internal/km/variables/KM_DECIMALS.md)
+
+***
+
+### KM\_REDLINE\_PENALTY
+
+Re-exports [KM_REDLINE_PENALTY](internal/table/variables/KM_REDLINE_PENALTY.md)
+
+***
+
+### KM\_SYNERGY
+
+Re-exports [KM_SYNERGY](internal/table/variables/KM_SYNERGY.md)
+
+***
+
+### KmArmDisplay
+
+Re-exports [KmArmDisplay](types/type-aliases/KmArmDisplay.md)
+
+***
+
+### KmArmDisplaySchema
+
+Re-exports [KmArmDisplaySchema](types/variables/KmArmDisplaySchema.md)
+
+***
+
+### KmArmExpected
+
+Re-exports [KmArmExpected](internal/km/interfaces/KmArmExpected.md)
+
+***
+
+### KmCheck
+
+Re-exports [KmCheck](internal/km/type-aliases/KmCheck.md)
+
+***
+
+### KmFigure
+
+Re-exports [KmFigure](types/type-aliases/KmFigure.md)
+
+***
+
+### KmFigureSchema
+
+Re-exports [KmFigureSchema](types/variables/KmFigureSchema.md)
+
+***
+
+### KmFinding
+
+Re-exports [KmFinding](internal/km/interfaces/KmFinding.md)
+
+***
+
+### KmReport
+
+Re-exports [KmReport](internal/km/interfaces/KmReport.md)
 
 ***
 
@@ -1094,6 +1178,12 @@ Re-exports [STALE_ALERT](internal/table/variables/STALE_ALERT.md)
 
 ***
 
+### stepAt
+
+Re-exports [stepAt](internal/km/functions/stepAt.md)
+
+***
+
 ### StudyEvent
 
 Re-exports [StudyEvent](types/type-aliases/StudyEvent.md)
@@ -1208,6 +1298,18 @@ Re-exports [TimelineStep](internal/timeline/type-aliases/TimelineStep.md)
 
 ***
 
+### TimeToEventRecord
+
+Re-exports [TimeToEventRecord](types/type-aliases/TimeToEventRecord.md)
+
+***
+
+### TimeToEventRecordSchema
+
+Re-exports [TimeToEventRecordSchema](types/variables/TimeToEventRecordSchema.md)
+
+***
+
 ### TLF\_PAIR\_SYNERGY
 
 Re-exports [TLF_PAIR_SYNERGY](internal/table/variables/TLF_PAIR_SYNERGY.md)
@@ -1265,3 +1367,9 @@ Re-exports [uniformAt](internal/rng/functions/uniformAt.md)
 ### validate
 
 Re-exports [validate](internal/validator/functions/validate.md)
+
+***
+
+### validateKm
+
+Re-exports [validateKm](internal/km/functions/validateKm.md)

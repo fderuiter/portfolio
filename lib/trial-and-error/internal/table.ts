@@ -23,6 +23,7 @@ import type {
   TlfCard,
   CardFace,
   CardStamp,
+  KmFigure,
   RedactedCard,
 } from "../types";
 import { POPULATION_LABELS } from "../types";
@@ -55,6 +56,7 @@ import {
   type InspectionView,
 } from "./inspection";
 import { traceCell, type CellTrace } from "./listing";
+import { validateKm, type KmFinding, type KmReport } from "./km";
 import { evaluateHand, ruleResultsFor } from "./scoring";
 import {
   applyTransition,
@@ -174,6 +176,12 @@ export interface TraceRecord {
   /** The Table was recompiled since: this trace describes an output that no longer exists. */
   superseded: boolean;
 }
+
+/** The ×Mult a reconciled Kaplan–Meier figure earns with a validated parent. */
+export const KM_SYNERGY = 2;
+
+/** The +Mult each unresolved Kaplan–Meier discrepancy costs a hand. */
+export const KM_REDLINE_PENALTY = 1;
 
 /** The ×Mult a traced, fully resolved Table earns when played with its Listing. */
 export const TLF_PAIR_SYNERGY = 2;
@@ -315,6 +323,38 @@ export interface TableCardView {
    * Listings, or a Listing's Tables. The linked-card indicator.
    */
   pairedWith: string[];
+  /** A dependent Figure's parent and ×Mult status, or null for other cards. */
+  figure: FigureStatus | null;
+}
+
+/** A dependent Figure's ×Mult badge: its parent, and why it is off if it is. */
+export interface FigureStatus {
+  /** The parent Table's number. */
+  parent: string;
+  xMult: number;
+  /** The ×Mult applies if the Figure is played now. */
+  active: boolean;
+  /** Why the ×Mult is off, or null when it is active. */
+  reason: string | null;
+  /** The parent is missing, stale or unvalidated: the Figure cannot compile. */
+  blocked: boolean;
+}
+
+/** The open Inspect drawer's content for a Kaplan–Meier figure. */
+export interface FigureInspectionView {
+  card: TlfCard;
+  km: KmFigure;
+  report: KmReport;
+  /** Findings still uncorrected. Inspection reveals every KM finding. */
+  openFindings: KmFinding[];
+  resolvedFindingIds: string[];
+  parent: TlfCard | null;
+  status: FigureStatus;
+  /** The Figure's own value as a High Table. */
+  expected: HandEvaluation;
+  unpenalizedMult: number;
+  provenance: SnapshotRef;
+  stale: boolean;
 }
 
 /** One crisis choice as the table renders it. */
@@ -416,6 +456,8 @@ export interface TableView {
   firewall: boolean;
   /** The Blind's inspection audit log, for end-of-Blind grading. */
   auditLog: TraceRecord[];
+  /** The open Inspect drawer's content when it holds a KM figure. */
+  figureInspection: FigureInspectionView | null;
 }
 
 /** One analysis set a blank shell could be compiled on, previewed before committing. */
@@ -659,6 +701,141 @@ const firewallUp = (scenario: Scenario, state: TableState): boolean =>
 /** The alert shown while a crisis waits for an answer. */
 const crisisAlert = (crisis: CrisisCard) =>
   `${crisis.name}: answer the crisis first.`;
+
+/** A KM figure's findings, validated against its parent Table's face. */
+function kmReportFor(
+  scenario: Scenario,
+  state: TableState,
+  card: TlfCard
+): KmReport | null {
+  if (!card.km) return null;
+  const parent = cardById(scenario, state, card.km.parent.cardId);
+  const parentFace = parent
+    ? faceFor(
+        parent,
+        draftFor(scenario, state, parent),
+        null,
+        shellById(scenario, parent.shellId)
+      )
+    : undefined;
+  return validateKm(
+    card.km,
+    snapshotById(scenario, state, card.km.populationSnapshotId),
+    card.population,
+    parentFace
+  );
+}
+
+/** Why a Figure's parent Table blocks it from compiling, or null. */
+function dependencyBlock(
+  scenario: Scenario,
+  state: TableState,
+  card: TlfCard
+): string | null {
+  if (!card.km) return null;
+  const parent = cardById(scenario, state, card.km.parent.cardId);
+  const name = parent ? cardShortName(parent) : card.km.parent.cardId;
+  if (!parent || !state.hand.includes(parent.id)) {
+    return `Parent ${name} is not on the table: a dependent Figure needs its source Table in hand.`;
+  }
+  if (isStale(scenario, state, parent)) {
+    return `Parent ${name} is stale: recompile it before the Figure can compile.`;
+  }
+  const draft = draftFor(scenario, state, parent);
+  if (draft) {
+    const inspection = state.inspections[parent.id];
+    if (!inspection) {
+      return `Parent ${name} is unvalidated: inspect it before the Figure can compile.`;
+    }
+    const open = deriveInspectionView(
+      draft,
+      reportFor(scenario, state, parent, draft),
+      inspection
+    ).openFindings.length;
+    if (open > 0) {
+      return `Parent ${name} has ${open} open redline${open === 1 ? "" : "s"}.`;
+    }
+  }
+  return null;
+}
+
+/** A Figure's ×Mult badge: its parent, and whether the ×Mult applies now. */
+function figureStatus(
+  scenario: Scenario,
+  state: TableState,
+  card: TlfCard
+): FigureStatus | null {
+  if (!card.km) return null;
+  const parent = cardById(scenario, state, card.km.parent.cardId);
+  const blockedBy = dependencyBlock(scenario, state, card);
+  const inspection = state.inspections[card.id];
+  const report = kmReportFor(scenario, state, card) as KmReport;
+  const open = report.findings.filter(
+    (f) => !inspection?.resolvedFindingIds.includes(f.id)
+  ).length;
+  const reason =
+    blockedBy ??
+    (isStale(scenario, state, card)
+      ? `${cardShortName(card)} is stale: recompile it.`
+      : !inspection
+        ? "Inspect the figure to reconcile its Number-at-Risk."
+        : open > 0
+          ? `${open} Kaplan–Meier discrepanc${open === 1 ? "y" : "ies"} unresolved.`
+          : null);
+  return {
+    parent: parent ? parent.number : card.km.parent.cardId,
+    xMult: KM_SYNERGY,
+    active: reason === null,
+    reason,
+    blocked: blockedBy !== null,
+  };
+}
+
+/** A KM figure's face: the draft as printed, each arm corrected once reconciled. */
+function kmFace(
+  scenario: Scenario,
+  state: TableState,
+  card: TlfCard
+): CardFace {
+  const km = card.km as KmFigure;
+  const report = kmReportFor(scenario, state, card) as KmReport;
+  const resolved = new Set(state.inspections[card.id]?.resolvedFindingIds);
+  const last = km.milestones[km.milestones.length - 1];
+  const arms = km.displayed.map((shown, i) => {
+    const exp = report.arms[i];
+    const fixed =
+      state.inspections[card.id] !== undefined &&
+      report.findings
+        .filter((f) => f.arm === shown.arm)
+        .every((f) => resolved.has(f.id));
+    const curve: [number, number][] = fixed
+      ? [...exp.curve, [last, exp.curve[exp.curve.length - 1][1]]]
+      : shown.curve;
+    return {
+      label: shown.arm === "PLACEBO" ? "Placebo" : "Active",
+      points: curve.slice(0, 12),
+      censors: fixed ? exp.censorTicks : shown.censorTicks,
+      atRisk: fixed ? exp.atRisk : shown.atRisk,
+    };
+  });
+  const parent = cardById(scenario, state, km.parent.cardId);
+  return {
+    kind: "FIGURE",
+    plot: {
+      type: "KM",
+      series: arms.map(({ label: l, points, censors }) => ({
+        label: l,
+        points,
+        censors,
+      })),
+    },
+    source: parent?.number.slice(0, 24),
+    atRisk: {
+      times: km.milestones,
+      rows: arms.map((a) => ({ label: a.label, values: a.atRisk })),
+    },
+  };
+}
 
 /** Cards in hand that form a TLF Pair with this one, in hand order. */
 function pairPartners(
@@ -991,10 +1168,49 @@ function scoreCards(
     }
     results = withSeals(scenario, state, card, results);
     ruleResults.push(...results);
+    const km = kmReportFor(scenario, state, card);
+    if (km) {
+      const inspection = state.inspections[card.id];
+      if (!revealedOnly || inspection) {
+        for (const f of km.findings) {
+          if (inspection?.resolvedFindingIds.includes(f.id)) continue;
+          results.push({
+            ruleId: `KM@${f.id}`,
+            passed: false,
+            chipsDelta: 0,
+            multDelta: -KM_REDLINE_PENALTY,
+            evidence: `${cardShortName(card)}: ${f.evidence} Shows ${f.observed}; expected ${f.expected}.`,
+          });
+        }
+      }
+      ruleResults.push(...results.filter((r) => r.ruleId.startsWith("KM@")));
+    }
+    const blockedBy = dependencyBlock(scenario, state, card);
     const cancelled =
       staleFor(scenario, state, card, results) ??
-      debuffFor(scenario, state, card, results);
+      debuffFor(scenario, state, card, results) ??
+      (blockedBy
+        ? {
+            ruleId: "FIG-DEPENDENCY",
+            passed: false,
+            chipsDelta: -(
+              card.chips + results.reduce((sum, r) => sum + r.chipsDelta, 0)
+            ),
+            multDelta: 0,
+            evidence: `${cardShortName(card)} cannot compile: ${blockedBy}`,
+          }
+        : null);
     if (cancelled) ruleResults.push(cancelled);
+    if (km && figureStatus(scenario, state, card)?.active) {
+      ruleResults.push({
+        ruleId: `KM-RECONCILED@${card.id}`,
+        passed: true,
+        chipsDelta: 0,
+        multDelta: 0,
+        multMultiplier: KM_SYNERGY,
+        evidence: `${cardShortName(card)}: Number-at-Risk, censoring ticks and survival estimates reconcile with ${figureStatus(scenario, state, card)?.parent}.`,
+      });
+    }
   }
   if (handType === "TLF_PAIR" || handType === "TLF_TWO_PAIR") {
     for (const table of cards.filter((c) => c.cardType === "TABLE")) {
@@ -1637,7 +1853,7 @@ export function advanceTable(
           `${cardShortName(card)} is an empty shell: allocate an analysis set to compile it first.`
         );
       }
-      if (!draftFor(scenario, state, card)) {
+      if (!draftFor(scenario, state, card) && !card.km) {
         return refuse(
           state,
           `${label(card)} has no reviewable cells in this slice.`
@@ -1881,6 +2097,37 @@ export function advanceTable(
       const card = state.inspecting
         ? cardById(scenario, state, state.inspecting)
         : undefined;
+      if (card?.km) {
+        if (action.type === "INSPECT_CELL") {
+          return refuse(
+            state,
+            `${cardShortName(card)} is a figure: inspecting it revealed every check at once.`
+          );
+        }
+        const report = kmReportFor(scenario, state, card) as KmReport;
+        const current = state.inspections[card.id];
+        const target = report.findings.find((f) => f.id === action.findingId);
+        if (!target || current.resolvedFindingIds.includes(target.id)) {
+          return refuse(state, "That Kaplan–Meier finding is not open.");
+        }
+        const inspection = {
+          ...current,
+          resolvedFindingIds: [...current.resolvedFindingIds, target.id],
+        };
+        const next = {
+          ...state,
+          inspections: { ...state.inspections, [card.id]: inspection },
+        };
+        const status = figureStatus(scenario, next, card) as FigureStatus;
+        return {
+          ...next,
+          lastEvent: nextEvent(
+            state,
+            "CORRECTED",
+            `Reconciled ${target.check.replaceAll("_", " ").toLowerCase()} for ${target.arm === "PLACEBO" ? "Placebo" : "Active"}: ${target.observed} to ${target.expected}.${status.active ? ` ${cardShortName(card)} ×${KM_SYNERGY} Mult is live.` : ""}`
+          ),
+        };
+      }
       const draft = card ? draftFor(scenario, state, card) : undefined;
       if (!card || !draft) {
         return refuse(state, "Open a card's Inspect view first.");
@@ -1999,17 +2246,31 @@ export function deriveTableView(
           )
         : null;
     const shell = shellById(scenario, card.shellId ?? draft?.shellId);
-    const openRedlines = review?.openFindings.length ?? 0;
+    const km = kmReportFor(scenario, state, card);
+    // Inspecting a KM figure reveals every one of its findings.
+    const openRedlines = km
+      ? inspection
+        ? km.findings.filter(
+            (f) => !inspection.resolvedFindingIds.includes(f.id)
+          ).length
+        : 0
+      : (review?.openFindings.length ?? 0);
     const stale = isStale(scenario, state, card);
     const stamps: CardStamp[] = [];
     if (stale) stamps.push("STALE");
     if (openRedlines > 0) stamps.push("REDLINE");
     // QC ✓ only once every cell is reviewed, so it never vouches for a
     // defect the player has not looked for.
-    if (review && review.reviewedCells === review.totalCells && !openRedlines) {
+    if (
+      (review && review.reviewedCells === review.totalCells && !openRedlines) ||
+      (km && inspection && !openRedlines)
+    ) {
       stamps.push("QC_PASS");
     }
-    const face = faceFor(card, draft, review, shell);
+    const face = card.km
+      ? kmFace(scenario, state, card)
+      : faceFor(card, draft, review, shell);
+    const reviewable = draft !== undefined || km !== null;
     return {
       // Under a firewall the arm values are absent from the view itself,
       // including the card's own authored face.
@@ -2018,9 +2279,9 @@ export function deriveTableView(
           ? { ...card, face: firewalled(card.face, undefined) }
           : card,
       selected: selected.has(id),
-      inspectable: draft !== undefined,
+      inspectable: reviewable,
       inspected: inspection !== undefined,
-      unverified: draft !== undefined && inspection === undefined,
+      unverified: reviewable && inspection === undefined,
       openRedlines,
       face: firewall ? firewalled(face, draft) : face,
       stamps,
@@ -2032,6 +2293,7 @@ export function deriveTableView(
       seals: state.seals[id] ?? [],
       footnoteSlots: footnoteSlotsOf(scenario, state, card),
       pairedWith: pairPartners(scenario, state, card).map((c) => c.id),
+      figure: figureStatus(scenario, state, card),
     };
   });
 
@@ -2134,6 +2396,36 @@ export function deriveTableView(
     };
   }
 
+  let figureInspection: FigureInspectionView | null = null;
+  if (inspectingCard?.km && state.inspections[inspectingCard.id]) {
+    const report = kmReportFor(scenario, state, inspectingCard) as KmReport;
+    const resolvedFindingIds =
+      state.inspections[inspectingCard.id].resolvedFindingIds;
+    const expected = scoreCards(
+      scenario,
+      state,
+      [inspectingCard],
+      "HIGH_TABLE",
+      true
+    );
+    figureInspection = {
+      card: inspectingCard,
+      km: inspectingCard.km,
+      report,
+      openFindings: report.findings.filter(
+        (f) => !resolvedFindingIds.includes(f.id)
+      ),
+      resolvedFindingIds,
+      parent:
+        cardById(scenario, state, inspectingCard.km.parent.cardId) ?? null,
+      status: figureStatus(scenario, state, inspectingCard) as FigureStatus,
+      expected,
+      unpenalizedMult: unpenalizedMult(expected),
+      provenance: provenanceOf(state, inspectingCard),
+      stale: isStale(scenario, state, inspectingCard),
+    };
+  }
+
   const reviewing = state.status === "REVIEWING" && state.crisis === null;
   const limit = handLimit(scenario, state);
   const handsLeft =
@@ -2218,6 +2510,7 @@ export function deriveTableView(
     discardCost,
     firewall,
     auditLog: state.auditLog,
+    figureInspection,
   };
 }
 
