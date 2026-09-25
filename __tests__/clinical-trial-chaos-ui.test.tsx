@@ -61,7 +61,10 @@ vi.mock("@/components/providers/AudioProvider", async (importOriginal) => {
 
 // Lets a test fire the Fast-Track lifeline repeatedly: a zero maxCharge means
 // its charge never falls below the maximum, so it is always ready.
-const fastTrackLifeline = vi.hoisted(() => ({ alwaysCharged: false }));
+const fastTrackLifeline = vi.hoisted(() => ({
+  alwaysCharged: false,
+  allCharged: false,
+}));
 vi.mock("@/lib/clinical-trial-chaos/engine", async (importOriginal) => {
   const actual =
     await importOriginal<typeof import("@/lib/clinical-trial-chaos/engine")>();
@@ -69,6 +72,27 @@ vi.mock("@/lib/clinical-trial-chaos/engine", async (importOriginal) => {
     ...actual,
     createInitialPowerUpInventory: () => {
       const inventory = actual.createInitialPowerUpInventory();
+      if (fastTrackLifeline.allCharged) {
+        return {
+          ...inventory,
+          "fda-coffee-break": {
+            ...inventory["fda-coffee-break"],
+            charge: inventory["fda-coffee-break"].maxCharge,
+          },
+          "auto-clean": {
+            ...inventory["auto-clean"],
+            charge: inventory["auto-clean"].maxCharge,
+          },
+          "query-extension": {
+            ...inventory["query-extension"],
+            charge: inventory["query-extension"].maxCharge,
+          },
+          "fast-sign": {
+            ...inventory["fast-sign"],
+            charge: inventory["fast-sign"].maxCharge,
+          },
+        };
+      }
       if (!fastTrackLifeline.alwaysCharged) return inventory;
       return {
         ...inventory,
@@ -182,6 +206,7 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
   });
 
   afterEach(() => {
+    fastTrackLifeline.allCharged = false;
     act(() => {
       root.unmount();
     });
@@ -244,6 +269,123 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
       "project_click"
     );
     expect(container.textContent).toContain("SUBJ-1001");
+  });
+
+  it("starts a seeded shift through the accessible fallback", async () => {
+    await act(async () => {
+      root.render(<ClinicalTrialChaos />);
+    });
+
+    const fallback = container.querySelector(
+      '[aria-label="Clinical Trial Chaos Accessible Subtree"]'
+    );
+    const start = Array.from(fallback?.querySelectorAll("button") ?? []).find(
+      (button) => button.textContent?.trim() === "Start Phase 1"
+    );
+    expect(start).toBeDefined();
+
+    await act(async () => {
+      start?.click();
+    });
+
+    expect(fallback?.textContent).toContain("Active Subjects on Conveyor: 3");
+    expect(container.textContent).toContain("SUBJ-1001");
+    expect(mockRecordEvent).toHaveBeenCalledWith(
+      "clinical_trial_chaos",
+      "project_click"
+    );
+  });
+
+  it("runs accessible lifelines through the real action handlers", async () => {
+    fastTrackLifeline.allCharged = true;
+    await act(async () => {
+      root.render(<ClinicalTrialChaos />);
+    });
+    const fallback = container.querySelector(
+      '[aria-label="Clinical Trial Chaos Accessible Subtree"]'
+    );
+    const start = Array.from(fallback?.querySelectorAll("button") ?? []).find(
+      (button) => button.textContent?.trim() === "Start Phase 1"
+    );
+    await act(async () => {
+      start?.click();
+    });
+
+    for (const name of [
+      "Coffee Break",
+      "Auto Clean",
+      "Query Extension",
+      "Fast-Track",
+    ]) {
+      const button = Array.from(
+        fallback?.querySelectorAll("button") ?? []
+      ).find((candidate) =>
+        candidate.textContent?.includes(`Activate ${name}`)
+      );
+      expect(button, name).toBeDefined();
+      expect(button?.disabled, name).toBe(false);
+    }
+
+    const coffee = Array.from(fallback?.querySelectorAll("button") ?? []).find(
+      (button) => button.textContent?.includes("Activate Coffee Break")
+    );
+    await act(async () => {
+      coffee?.click();
+    });
+    expect(fallback?.textContent).toContain(
+      "BIMO Auditor Behavior: coffee_break"
+    );
+    expect(coffee?.textContent).toContain("0 of");
+    for (const name of ["Auto Clean", "Query Extension", "Fast-Track"]) {
+      const button = Array.from(
+        fallback?.querySelectorAll("button") ?? []
+      ).find((candidate) =>
+        candidate.textContent?.includes(`Activate ${name}`)
+      );
+      await act(async () => {
+        button?.click();
+      });
+      expect(button?.textContent, name).toContain("0 of");
+    }
+    expect(fallback?.textContent).toContain("Active Subjects on Conveyor: 2");
+  });
+
+  it("uses compact canvas geometry and matching subject hit targets", async () => {
+    vi.mocked(
+      HTMLCanvasElement.prototype.getBoundingClientRect
+    ).mockReturnValue({
+      left: 0,
+      top: 0,
+      width: 330,
+      height: 127,
+      right: 330,
+      bottom: 127,
+      x: 0,
+      y: 0,
+      toJSON: () => {},
+    });
+    await act(async () => {
+      root.render(<ClinicalTrialChaos />);
+    });
+    const canvas = container.querySelector("canvas[role='application']");
+    expect(canvas).toBeInstanceOf(HTMLCanvasElement);
+    expect(canvas?.getAttribute("width")).toBe("330");
+    expect(canvas?.getAttribute("height")).toBe("127");
+
+    const start = Array.from(container.querySelectorAll("button")).find(
+      (button) => button.textContent?.includes("Start 3-Phase Campaign")
+    );
+    await act(async () => {
+      start?.click();
+    });
+    await act(async () => {
+      canvas?.dispatchEvent(
+        new MouseEvent("click", { bubbles: true, clientX: 135, clientY: 55 })
+      );
+    });
+    expect(container.querySelector("#cc-dossier-title")?.textContent).toContain(
+      "SUBJ-1002"
+    );
   });
 
   it("should open Multi-Choice Validation Drawer and resolve an observation", async () => {
@@ -927,9 +1069,9 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
       expect(container.textContent).toContain(
         "CDISC SDTM / 21 CFR Part 11 Arcade"
       );
-      expect(container.textContent).toContain("Standardize CDISC Data");
-      expect(container.textContent).toContain("21 CFR Electronic Signatures");
-      expect(container.textContent).toContain("FDA Auditor & Form 483");
+      expect(container.textContent).toContain("Two pressures");
+      expect(container.textContent).toContain("Offices and amendments");
+      expect(container.textContent).toContain("Shortcuts leave a trail");
       expect(container.textContent).toContain("Launch Cabinet");
     });
 

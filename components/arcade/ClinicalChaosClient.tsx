@@ -104,41 +104,38 @@ export const ClinicalChaosClient: React.FC = () => {
           </DesktopOnlyGate>
         </div>
 
-        {/* Instructions & Controls Reference */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs text-zinc-400">
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4">
+        {/* Context that complements the in-game Fix → Route → Sign briefing. */}
+        <div className="mt-8 grid grid-cols-1 gap-3 font-mono text-xs text-zinc-400 md:grid-cols-3">
+          <div className="min-w-0 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-3 md:p-4">
             <div className="flex items-center gap-2 text-emerald-400 font-bold mb-2">
               <IconFileText className="w-4 h-4" />
-              <span>Standardize CDISC Data</span>
+              <span>Two pressures</span>
             </div>
-            <p className="text-zinc-400 text-[11px] leading-relaxed">
-              Click invalid observations on active subject packets to convert
-              non-standard units (e.g. lbs to kg) and format timestamps to
-              ISO-8601 standard.
+            <p className="text-zinc-400 text-[11px] leading-relaxed break-words">
+              Keep the auditor&apos;s suspicion below 100% and the sponsor
+              satisfied. Clean data and steady throughput both matter.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4">
+          <div className="min-w-0 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-3 md:p-4">
             <div className="flex items-center gap-2 text-brand-cyan font-bold mb-2">
               <IconShieldCheck className="w-4 h-4" />
-              <span>21 CFR Electronic Signatures</span>
+              <span>Offices and amendments</span>
             </div>
-            <p className="text-zinc-400 text-[11px] leading-relaxed">
-              Route packets to stations (1: DM, 2: VS, 3: AE, 4: LB) and
-              authenticate electronic signatures with meaningful submission
-              intent before the conveyor expires.
+            <p className="text-zinc-400 text-[11px] leading-relaxed break-words">
+              Your office changes the shift. Check the current station labels:
+              later phases add stations, and amendments can reshuffle routes.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4">
+          <div className="min-w-0 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-3 md:p-4">
             <div className="flex items-center gap-2 text-rose-400 font-bold mb-2">
               <IconAlertTriangle className="w-4 h-4" />
-              <span>FDA Auditor &amp; Form 483</span>
+              <span>Shortcuts leave a trail</span>
             </div>
-            <p className="text-zinc-400 text-[11px] leading-relaxed">
-              Expired records or fraudulent non-compliant submissions raise
-              auditor suspicion. If suspicion reaches 100%, an FDA Form 483
-              warning is issued and the trial is terminated!
+            <p className="text-zinc-400 text-[11px] leading-relaxed break-words">
+              Sponsor shortcuts can hide audit findings in your final BIMO
+              report. This is a game simulation, not regulatory guidance.
             </p>
           </div>
         </div>
