@@ -316,8 +316,15 @@ export async function runPageBenchmarks(
             downloadThroughput: THROTTLED_MOBILE_PROFILE.downloadThroughput,
             uploadThroughput: THROTTLED_MOBILE_PROFILE.uploadThroughput,
           });
-        } catch {
-          // Graceful fallback if CDP is unsupported in mock or non-Chromium engines
+        } catch (error) {
+          // The evidence records throttled: true, so an unthrottled run must
+          // not be reported as throttled.
+          await page.close();
+          throw new Error(
+            `Throttled benchmark requested but CDP throttling failed: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
         }
       }
 

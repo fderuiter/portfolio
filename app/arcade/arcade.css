@@ -482,14 +482,6 @@
     overflow-y: auto;
     padding: 0;
   }
-  .arcade-labyrinth-controls [role="group"] {
-    padding: 2px;
-    gap: 2px;
-  }
-  .arcade-labyrinth-controls [role="group"] > :last-child {
-    flex-direction: column;
-    gap: 4px;
-  }
 }
 @media (orientation: landscape) and (max-height: 600px) {
   .arcade-cabinet[data-fullscreen="true"]

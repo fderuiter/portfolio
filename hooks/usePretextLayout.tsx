@@ -265,7 +265,11 @@ export function usePretextLayout({
         }
       }
       preparedTextRef.current = prepared;
-      setState((prev) => (prev.isReady ? prev : { ...prev, isReady: true }));
+      // With a mounted container, stay not-ready until the ResizeObserver
+      // reports a width; marking ready now would publish a zero height.
+      if (!containerRef.current) {
+        setState((prev) => (prev.isReady ? prev : { ...prev, isReady: true }));
+      }
     }
   }, [
     text,
@@ -612,7 +616,8 @@ export function usePretextRichLayout({
 
     if (lastWidthRef.current > 0) {
       measureRichText(lastWidthRef.current);
-    } else {
+    } else if (!containerRef.current) {
+      // As above: a mounted container waits for its first measured width.
       setState((prev) => (prev.isReady ? prev : { ...prev, isReady: true }));
     }
   }, [

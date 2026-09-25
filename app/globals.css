@@ -360,7 +360,6 @@ body {
   will-change: opacity;
 }
 
-
 [data-pretext-layer="semantic"] {
   color: transparent;
   -webkit-text-fill-color: transparent;
@@ -440,8 +439,9 @@ body {
   letter-spacing: -0.035em;
 }
 
-.portfolio-home #hero [data-pretext-layer="semantic"].fluid-body,
-.portfolio-home #hero [data-pretext-layer="body"].fluid-body {
+/* The in-flow hero body keeps .fluid-body's 1.6 line height, as the visible
+   layer did before #817; only the retired semantic overlay used 1.625. */
+.portfolio-home #hero [data-pretext-layer="semantic"].fluid-body {
   line-height: 1.625;
 }
 
@@ -455,3 +455,15 @@ body {
   }
 }
 
+/* RetroLabyrinth also renders on the 404 pages, outside /arcade, so its
+   unscoped landscape control rules stay in the global stylesheet. */
+@media (orientation: landscape) and (max-height: 600px) {
+  .arcade-labyrinth-controls [role="group"] {
+    padding: 2px;
+    gap: 2px;
+  }
+  .arcade-labyrinth-controls [role="group"] > :last-child {
+    flex-direction: column;
+    gap: 4px;
+  }
+}

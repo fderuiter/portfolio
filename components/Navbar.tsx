@@ -12,7 +12,6 @@ import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useResizeObserver } from "@/hooks/useResizeObserver";
 import { useFontPreference } from "@/hooks/useFontPreference";
 import { useAnnouncer } from "@/components/providers/A11yProvider";
-import { env } from "@/lib/env";
 import {
   IconVolume,
   IconVolumeOff,
@@ -341,29 +340,14 @@ export const Navbar: React.FC = () => {
     (entry) => {
       const h = Math.round(entry.contentRect.height);
       if (typeof document !== "undefined" && h > 0) {
-        // Skip synchronous :root style mutation during mount when height matches the CSS default (80px)
-        // to prevent global style invalidation and layout thrash during hydration (ADR 0052, #817).
-        if (h !== 80) {
-          const update = () => {
-            document.documentElement.style.setProperty(
-              "--header-height",
-              `${h}px`
-            );
-            document.documentElement.style.setProperty(
-              "--navbar-height",
-              `${h}px`
-            );
-          };
-          if (
-            typeof window !== "undefined" &&
-            ("vi" in globalThis || env.NODE_ENV === "test")
-          ) {
-            update();
-          } else if (typeof requestAnimationFrame === "function") {
-            requestAnimationFrame(update);
-          } else {
-            update();
-          }
+        // Skip the :root write when the value is unchanged, so hydration does
+        // not invalidate styles page-wide for nothing (ADR 0052, #817). The
+        // comparison is against the current inline value, not the CSS
+        // default, so a return to a previous height is never dropped.
+        const root = document.documentElement.style;
+        if (root.getPropertyValue("--header-height") !== `${h}px`) {
+          root.setProperty("--header-height", `${h}px`);
+          root.setProperty("--navbar-height", `${h}px`);
         }
       }
     },

@@ -78,31 +78,36 @@ export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
       <h1
         ref={ref}
         data-pretext-layer="heading"
-        aria-label={text}
         className="fluid-heading-hero font-extrabold tracking-tight text-center lg:text-left text-white leading-tight heading-editorial w-full select-text"
       >
         {!isReady || isMobile ? (
           text
         ) : (
-          <motion.span
-            variants={containerVariants}
-            initial={shouldReduceMotion ? false : "hidden"}
-            animate="visible"
-            className="flex flex-wrap justify-center lg:justify-start"
-          >
-            {words.map((word, i) => (
-              <React.Fragment key={i}>
-                <motion.span
-                  aria-hidden="true"
-                  variants={wordVariants}
-                  className="inline-block mr-[0.22em] will-change-transform text-white font-extrabold"
-                >
-                  {word}
-                </motion.span>
-                {i < words.length - 1 ? " " : null}
-              </React.Fragment>
-            ))}
-          </motion.span>
+          <>
+            {/* aria-label is prohibited on a paragraph and unreliable on
+                a heading, so screen readers get a visually hidden copy. */}
+            <span className="sr-only">{text}</span>
+            <motion.span
+              aria-hidden="true"
+              variants={containerVariants}
+              initial={shouldReduceMotion ? false : "hidden"}
+              animate="visible"
+              className="flex flex-wrap justify-center lg:justify-start"
+            >
+              {words.map((word, i) => (
+                <React.Fragment key={i}>
+                  <motion.span
+                    aria-hidden="true"
+                    variants={wordVariants}
+                    className="inline-block mr-[0.22em] will-change-transform text-white font-extrabold"
+                  >
+                    {word}
+                  </motion.span>
+                  {i < words.length - 1 ? " " : null}
+                </React.Fragment>
+              ))}
+            </motion.span>
+          </>
         )}
       </h1>
     </div>
@@ -161,31 +166,36 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
       <p
         ref={ref}
         data-pretext-layer="body"
-        aria-label={text}
         className="text-zinc-300 fluid-body leading-relaxed text-center lg:text-left w-full select-text"
       >
         {!isReady || isMobile ? (
           text
         ) : (
-          <motion.span
-            variants={containerVariants}
-            initial={shouldReduceMotion ? false : "hidden"}
-            animate="visible"
-            className="flex flex-wrap justify-center lg:justify-start"
-          >
-            {words.map((word, i) => (
-              <React.Fragment key={i}>
-                <motion.span
-                  aria-hidden="true"
-                  variants={wordVariants}
-                  className="inline-block mr-[0.3em] will-change-transform"
-                >
-                  {word}
-                </motion.span>
-                {i < words.length - 1 ? " " : null}
-              </React.Fragment>
-            ))}
-          </motion.span>
+          <>
+            {/* aria-label is prohibited on a paragraph and unreliable on
+                a heading, so screen readers get a visually hidden copy. */}
+            <span className="sr-only">{text}</span>
+            <motion.span
+              aria-hidden="true"
+              variants={containerVariants}
+              initial={shouldReduceMotion ? false : "hidden"}
+              animate="visible"
+              className="flex flex-wrap justify-center lg:justify-start"
+            >
+              {words.map((word, i) => (
+                <React.Fragment key={i}>
+                  <motion.span
+                    aria-hidden="true"
+                    variants={wordVariants}
+                    className="inline-block mr-[0.3em] will-change-transform"
+                  >
+                    {word}
+                  </motion.span>
+                  {i < words.length - 1 ? " " : null}
+                </React.Fragment>
+              ))}
+            </motion.span>
+          </>
         )}
       </p>
     </div>
