@@ -9,6 +9,7 @@ import {
   ClinicalObservation,
   ClinicalSubject,
   GameMode,
+  GamePhase,
   GameScoreState,
   PowerUpInventory,
   PowerUpType,
@@ -577,6 +578,34 @@ export function selectNextUrgentSubject(
       a.createdAt - b.createdAt ||
       a.id.localeCompare(b.id)
   )[0];
+}
+
+/** Where the first-shift calibration walkthrough stands (#834). */
+export type CalibrationStep = "fix" | "route" | "complete";
+
+/**
+ * Whether a new shift opens with the first-shift calibration: only a Phase 1
+ * campaign does; later phases and endless mode start live.
+ */
+export function shouldRunCalibration(
+  mode: GameMode,
+  phase: GamePhase
+): boolean {
+  return mode === "campaign" && phase === 1;
+}
+
+/**
+ * Derives the calibration step from the live queue: the guided subject still
+ * has flagged fields ("fix"), is clean and waiting to be routed ("route"), or
+ * has left the queue because it was submitted ("complete").
+ */
+export function getCalibrationStep(
+  queue: ReadonlyArray<ClinicalSubject>,
+  subjectId: string
+): CalibrationStep {
+  const subject = queue.find((s) => s.id === subjectId);
+  if (!subject) return "complete";
+  return subject.observations.some((o) => !o.isResolved) ? "fix" : "route";
 }
 
 /**

@@ -79,6 +79,18 @@ vi.mock("@/hooks/useAnnouncer", async (importOriginal) => {
   };
 });
 
+// A new Phase 1 campaign opens with the first-shift calibration (#834),
+// which freezes every clock; tests about live timers skip it.
+const skipCalibration = async (container: HTMLElement) => {
+  const skip = Array.from(container.querySelectorAll("button")).find(
+    (b) => b.textContent === "Skip calibration"
+  );
+  expect(skip).toBeDefined();
+  await act(async () => {
+    skip?.click();
+  });
+};
+
 // Lets a test fire the Fast-Track lifeline repeatedly: a zero maxCharge means
 // its charge never falls below the maximum, so it is always ready.
 const fastTrackLifeline = vi.hoisted(() => ({
@@ -516,6 +528,146 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     vi.useRealTimers();
   });
 
+  describe("first-shift calibration (#834)", () => {
+    const timeLeft = (label: string) =>
+      container.textContent?.match(
+        new RegExp(`Subject ${label} \\([^)]*\\)\\): Time Remaining (\\d+)s`)
+      )?.[1];
+    const start = async () => {
+      await act(async () => {
+        root.render(<ClinicalTrialChaos />);
+      });
+      const startBtn = Array.from(container.querySelectorAll("button")).find(
+        (b) => b.textContent?.includes("Start 3-Phase Campaign")
+      );
+      await act(async () => {
+        startBtn?.click();
+      });
+    };
+    const tick = async (ms: number) => {
+      for (let t = 0; t < ms; t += 250) {
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(250);
+        });
+      }
+    };
+    const panel = () =>
+      container.querySelector('[data-testid="cc-calibration"]');
+
+    it("guides subject #1 through Fix, Route and Sign with every clock frozen", async () => {
+      vi.useFakeTimers();
+      announcements.length = 0;
+      try {
+        await start();
+        expect(panel()?.textContent).toContain("clocks paused");
+        expect(
+          panel()?.querySelector('[aria-current="step"]')?.textContent
+        ).toContain("Fix");
+        expect(
+          container.querySelector("#cc-dossier-title")?.textContent
+        ).toContain("SUBJ-1001");
+
+        await tick(6000);
+        expect(timeLeft("SUBJ-1001")).toBe("40");
+        expect(timeLeft("SUBJ-1003")).toBe("28");
+        expect(container.textContent).toContain("0%");
+        expect(container.textContent).toContain("Queue · 3/5");
+
+        const obsCard = Array.from(container.querySelectorAll("span"))
+          .find((s) => s.textContent?.includes("Validate Choice"))
+          ?.closest(".cursor-pointer") as HTMLElement;
+        await act(async () => {
+          obsCard.click();
+        });
+        const choice = Array.from(container.querySelectorAll("button")).find(
+          (b) => b.textContent?.trim().replace(/^\d/, "") === "180 cm"
+        );
+        await act(async () => {
+          choice?.click();
+        });
+        await tick(750);
+        expect(
+          panel()?.querySelector('[aria-current="step"]')?.textContent
+        ).toContain("Route");
+        expect(
+          announcements.some((a) => a.includes("Calibration step 2"))
+        ).toBe(true);
+
+        const dmStation = Array.from(container.querySelectorAll("h4"))
+          .find((h) => h.textContent?.includes("DM Station"))
+          ?.closest(".group") as HTMLElement;
+        await act(async () => {
+          dmStation.click();
+        });
+        expect(panel()).toBeNull();
+        expect(container.textContent).toContain("Submits:1");
+        expect(announcements).toContain(
+          "Calibration complete. The shift is live."
+        );
+
+        await tick(3000);
+        expect(Number(timeLeft("SUBJ-1003"))).toBeLessThan(28);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it("Skip resumes the same live state once and returns focus to the board", async () => {
+      vi.useFakeTimers();
+      announcements.length = 0;
+      try {
+        await start();
+        await tick(2000);
+        expect(timeLeft("SUBJ-1001")).toBe("40");
+        await skipCalibration(container);
+        expect(panel()).toBeNull();
+        expect(
+          document.activeElement?.getAttribute("data-keyboard-boundary")
+        ).toBe("true");
+        expect(
+          announcements.filter(
+            (a) => a === "Calibration skipped. The shift is live."
+          )
+        ).toHaveLength(1);
+        // Same seeded subject, still flagged, no resource consumed.
+        expect(
+          container.querySelector("#cc-dossier-title")?.textContent
+        ).toContain("SUBJ-1001");
+        expect(container.textContent).toContain("180 m");
+        expect(container.textContent).toContain("Queue · 3/5");
+        await tick(3000);
+        expect(Number(timeLeft("SUBJ-1001"))).toBeLessThan(40);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it("keeps endless mode live without calibration", async () => {
+      vi.useFakeTimers();
+      try {
+        await act(async () => {
+          root.render(<ClinicalTrialChaos />);
+        });
+        const endless = Array.from(container.querySelectorAll("button")).find(
+          (b) => b.textContent === "Endless"
+        );
+        await act(async () => {
+          endless?.click();
+        });
+        const startBtn = Array.from(container.querySelectorAll("button")).find(
+          (b) => b.textContent?.includes("Start Endless Sprint")
+        );
+        await act(async () => {
+          startBtn?.click();
+        });
+        expect(panel()).toBeNull();
+        expect(container.textContent).not.toContain("Skip calibration");
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+  });
+
   it("should switch between Conveyor Floor, Live SDTM Studio, and Audit Trail tabs", async () => {
     await act(async () => {
       root.render(<ClinicalTrialChaos />);
@@ -655,6 +807,8 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
       restartBtn?.click();
     });
     expect(sdtmTabLabel()).toMatch(/Live SDTM Studio0$/);
+    // A restarted Phase 1 campaign calibrates again (#834).
+    expect(container.textContent).toContain("Skip calibration");
 
     vi.useRealTimers();
   });
@@ -671,6 +825,7 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
       await act(async () => {
         startBtn?.click();
       });
+      await skipCalibration(container);
 
       const banner = () =>
         Array.from(container.querySelectorAll("p")).find((p) =>
@@ -1064,6 +1219,7 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     await act(async () => {
       startBtn?.click();
     });
+    await skipCalibration(container);
 
     // Helper to tick fake timers in small steps asynchronously to allow recursive animation frames to execute
     const tickGame = async (totalMs: number, stepMs = 250) => {
@@ -1470,6 +1626,7 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
       });
 
       expect(container.textContent).toContain("SUBJ-1001");
+      await skipCalibration(container);
 
       // Helper to tick fake timers in small steps
       const tickGame = async (totalMs: number, stepMs = 250) => {

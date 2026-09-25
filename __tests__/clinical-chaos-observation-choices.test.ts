@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { fromPartial } from "@total-typescript/shoehorn";
 import {
   generateClinicalSubjectFromProtocol,
   getObservationChoices,
@@ -99,10 +100,10 @@ describe("Clinical Trial Chaos protocol observations (#1150)", () => {
   };
 
   it("ignores an authored protocol rule that also reads other fields", () => {
-    const protocol = {
+    const protocol = fromPartial<StudyProtocol>({
       forms: [],
       rules: [bmiRule],
-    } as unknown as StudyProtocol;
+    });
     expect(
       validateObservationChoice(heightObs, "180 cm", protocol).isValid
     ).toBe(true);
@@ -120,7 +121,7 @@ describe("Clinical Trial Chaos protocol observations (#1150)", () => {
       targetFieldId: "f_height",
       conditions: [{ fieldId: "f_height", operator: "eq", value: "180 cm" }],
     };
-    const protocol = {
+    const protocol = fromPartial<StudyProtocol>({
       forms: [],
       rules: [
         {
@@ -129,7 +130,7 @@ describe("Clinical Trial Chaos protocol observations (#1150)", () => {
           conditions: [{ fieldId: "f_height", operator: "eq", value: "999" }],
         },
       ],
-    } as unknown as StudyProtocol;
+    });
     const obs = { ...heightObs, astRule: ownRule };
     expect(validateObservationChoice(obs, "180 cm", protocol).isValid).toBe(
       true

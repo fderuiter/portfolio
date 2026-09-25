@@ -128,6 +128,12 @@ Re-exports [calculateSubmissionPoints](engine/functions/calculateSubmissionPoint
 
 ***
 
+### CalibrationStep
+
+Re-exports [CalibrationStep](engine/type-aliases/CalibrationStep.md)
+
+***
+
 ### CDISCDomain
 
 Re-exports [CDISCDomain](types/type-aliases/CDISCDomain.md)
@@ -281,6 +287,12 @@ Re-exports [generateClinicalSubjectFromProtocol](scenarios/functions/generateCli
 ### generateSDTMDataset
 
 Re-exports [generateSDTMDataset](engine/functions/generateSDTMDataset.md)
+
+***
+
+### getCalibrationStep
+
+Re-exports [getCalibrationStep](engine/functions/getCalibrationStep.md)
 
 ***
 
@@ -539,6 +551,12 @@ Re-exports [SEEDED_SCENARIOS](scenarios/variables/SEEDED_SCENARIOS.md)
 ### selectNextUrgentSubject
 
 Re-exports [selectNextUrgentSubject](engine/functions/selectNextUrgentSubject.md)
+
+***
+
+### shouldRunCalibration
+
+Re-exports [shouldRunCalibration](engine/functions/shouldRunCalibration.md)
 
 ***
 

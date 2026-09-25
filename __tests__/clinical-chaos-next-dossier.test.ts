@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import {
+  getCalibrationStep,
   selectNextUrgentSubject,
+  shouldRunCalibration,
   type ClinicalSubject,
 } from "@/lib/clinical-trial-chaos";
 
@@ -71,5 +73,36 @@ describe("selectNextUrgentSubject (#834)", () => {
         subject("open", { timeRemaining: 20 }),
       ])?.id
     ).toBe("open");
+  });
+});
+
+describe("first-shift calibration policy (#834)", () => {
+  it("runs only for a Phase 1 campaign", () => {
+    expect(shouldRunCalibration("campaign", 1)).toBe(true);
+    expect(shouldRunCalibration("campaign", 2)).toBe(false);
+    expect(shouldRunCalibration("campaign", 3)).toBe(false);
+    expect(shouldRunCalibration("endless", 1)).toBe(false);
+  });
+
+  it("derives fix, route and complete from the live queue", () => {
+    const flagged = subject("s1", {
+      observations: [
+        {
+          id: "o1",
+          field: "Height",
+          rawValue: "180 m",
+          currentValue: "180 m",
+          destination: "DM",
+          isResolved: false,
+        },
+      ],
+    });
+    const clean = {
+      ...flagged,
+      observations: [{ ...flagged.observations[0], isResolved: true }],
+    };
+    expect(getCalibrationStep([flagged], "s1")).toBe("fix");
+    expect(getCalibrationStep([clean], "s1")).toBe("route");
+    expect(getCalibrationStep([subject("other")], "s1")).toBe("complete");
   });
 });

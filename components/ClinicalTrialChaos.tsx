@@ -75,6 +75,8 @@ import {
   validateObservationChoice,
   getObservationChoices,
   selectNextUrgentSubject,
+  shouldRunCalibration,
+  getCalibrationStep,
   isSubjectFullyCompliant,
   calculateSubmissionPoints,
   tickSubjectTimers,
@@ -328,6 +330,13 @@ export const ClinicalTrialChaos: React.FC = () => {
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(
     null
   );
+  // First-shift calibration (#834): the guided subject's id while active.
+  // Every clock that can expire work, raise the auditor or spawn subjects
+  // stays frozen until the subject is submitted or the player skips.
+  const [calibrationSubjectId, setCalibrationSubjectId] = useState<
+    string | null
+  >(null);
+  const calibrationActiveRef = useRef(false);
   // Short "Next dossier loaded" cue shown after a submission auto-advances.
   const [nextDossierCue, setNextDossierCue] = useState<{
     subjectId: string;
@@ -564,6 +573,11 @@ export const ClinicalTrialChaos: React.FC = () => {
       );
       setConveyorSubjects(initialSubs);
       setSelectedSubjectId(initialSubs[0]?.id ?? null);
+      const calibrationId = shouldRunCalibration(mode, targetPhase)
+        ? (initialSubs[0]?.id ?? null)
+        : null;
+      setCalibrationSubjectId(calibrationId);
+      calibrationActiveRef.current = calibrationId !== null;
       setScoreState({
         ...createInitialScoreState(),
         highScore: effectiveHighScore,
@@ -847,6 +861,12 @@ export const ClinicalTrialChaos: React.FC = () => {
       // Remove from conveyor
       setConveyorSubjects((prev) => prev.filter((s) => s.id !== subj.id));
 
+      if (subj.id === calibrationSubjectId) {
+        setCalibrationSubjectId(null);
+        calibrationActiveRef.current = false;
+        announce("Calibration complete. The shift is live.", "polite");
+      }
+
       // Phase completion check in Campaign mode
       const phaseCleared =
         gameMode === "campaign" &&
@@ -902,6 +922,7 @@ export const ClinicalTrialChaos: React.FC = () => {
       gameMode,
       phase,
       conveyorSubjects,
+      calibrationSubjectId,
       pushScorePop,
       playSuccess,
       announce,
@@ -1535,6 +1556,39 @@ export const ClinicalTrialChaos: React.FC = () => {
     ruleViolationsRef.current = ruleViolations;
   });
 
+  // First-shift calibration (#834)
+  const calibrationStep =
+    calibrationSubjectId && playState === "playing"
+      ? getCalibrationStep(conveyorSubjects, calibrationSubjectId)
+      : null;
+  const calibrationActive =
+    calibrationStep !== null && calibrationStep !== "complete";
+  const calibrationSubject = calibrationActive
+    ? (conveyorSubjects.find((s) => s.id === calibrationSubjectId) ?? null)
+    : null;
+  useEffect(() => {
+    calibrationActiveRef.current = calibrationActive;
+  }, [calibrationActive]);
+  useEffect(() => {
+    if (calibrationStep === "fix") {
+      announce(
+        "Calibration: clocks are paused. Step 1, fix the flagged field on the first dossier.",
+        "polite"
+      );
+    } else if (calibrationStep === "route") {
+      announce(
+        "Calibration step 2: route the clean dossier to its matching station to sign it.",
+        "polite"
+      );
+    }
+  }, [calibrationStep, announce]);
+  const skipCalibration = () => {
+    setCalibrationSubjectId(null);
+    calibrationActiveRef.current = false;
+    announce("Calibration skipped. The shift is live.", "polite");
+    containerRef.current?.focus({ preventScroll: true });
+  };
+
   // 17. Main Game Loop Tick (requestAnimationFrame)
   useEffect(() => {
     if (playState !== "playing") return;
@@ -1565,7 +1619,9 @@ export const ClinicalTrialChaos: React.FC = () => {
 
       const now = Date.now();
       const isPausedByModal =
-        !!validatingObsRef.current || !!signatureModalRef.current?.isOpen;
+        !!validatingObsRef.current ||
+        !!signatureModalRef.current?.isOpen ||
+        calibrationActiveRef.current;
       const deltaMs = Math.min(100, now - lastTickTimeRef.current);
       const deltaSeconds = isPausedByModal ? 0 : deltaMs / 1000;
       lastTickTimeRef.current = now;
@@ -2236,6 +2292,7 @@ export const ClinicalTrialChaos: React.FC = () => {
     activeSubject?.observations.filter((o) => !o.isResolved) ?? [];
   const nextFlaggedObs = flaggedObs[0] ?? null;
   const routingReadiness = getRoutingReadiness(activeSubject, stations);
+
   const routeDomains: CDISCDomain[] =
     routingReadiness.unresolvedCount === 0
       ? routingReadiness.matchingDomains
@@ -3018,6 +3075,72 @@ export const ClinicalTrialChaos: React.FC = () => {
                         {Math.ceil(activeSubject.timeRemaining)}s
                       </span>
                     </div>
+
+                    {/* First-shift calibration (#834) */}
+                    {calibrationActive && calibrationSubject && (
+                      <section
+                        aria-label="First-shift calibration"
+                        data-testid="cc-calibration"
+                        className="mt-3 rounded-lg border border-sky-500/40 bg-sky-500/5 p-3"
+                      >
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                          <p className="min-w-0 text-[10px] font-bold uppercase tracking-wider text-sky-300">
+                            First-shift calibration · clocks paused
+                          </p>
+                          <button
+                            type="button"
+                            onClick={skipCalibration}
+                            className="min-h-[44px] shrink-0 rounded-lg border border-zinc-700 px-3 text-xs font-bold text-zinc-200 hover:border-zinc-500 hover:text-white active:scale-[0.98]"
+                          >
+                            Skip calibration
+                          </button>
+                        </div>
+                        <ol className="mt-2 space-y-1 text-xs text-zinc-200">
+                          <li
+                            aria-current={
+                              calibrationStep === "fix" ? "step" : undefined
+                            }
+                            className={
+                              calibrationStep === "fix"
+                                ? "font-bold text-white"
+                                : "text-zinc-400"
+                            }
+                          >
+                            {calibrationStep === "fix" ? "▸" : "✓"} 1. Fix: open
+                            the flagged field and pick the compliant value
+                            (Enter, then 1–4).
+                          </li>
+                          <li
+                            aria-current={
+                              calibrationStep === "route" ? "step" : undefined
+                            }
+                            className={
+                              calibrationStep === "route"
+                                ? "font-bold text-white"
+                                : "text-zinc-400"
+                            }
+                          >
+                            {calibrationStep === "route" ? "▸" : "·"} 2. Route:
+                            send the clean CRF to its matching station.
+                          </li>
+                          <li className="text-zinc-400">
+                            · 3. Sign: routine packets dispatch at once; SAE and
+                            phase-lock packets open the signature review.
+                          </li>
+                        </ol>
+                        {activeSubject.id !== calibrationSubject.id && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setSelectedSubjectId(calibrationSubject.id)
+                            }
+                            className="mt-2 min-h-[44px] rounded-lg border border-sky-500/40 px-3 text-xs font-bold text-sky-200 hover:bg-sky-500/10 active:scale-[0.98]"
+                          >
+                            Back to {calibrationSubject.subjectLabel}
+                          </button>
+                        )}
+                      </section>
+                    )}
 
                     {/* Fix → Route → Dispatch stepper */}
                     <ol
