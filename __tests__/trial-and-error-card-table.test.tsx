@@ -172,6 +172,54 @@ describe("CardTable", () => {
     expect(lastAnnouncement()).toBe("Select at least one card to play.");
   });
 
+  it("marks a Table and its supporting Listing as a pair on both faces", () => {
+    render(<CardTable />);
+    expect(within(card(DRAFT_A)).getByTestId("pair-link")).toBeTruthy();
+    expect(within(card(DM_LISTING)).getByTestId("pair-link")).toBeTruthy();
+    expect(card(DRAFT_A).getAttribute("aria-label")).toContain(
+      "TLF Pair with Listing 16.2.4"
+    );
+  });
+
+  it("traces a flagged cell to its Listing with T and cycles the matched rows", async () => {
+    render(<CardTable />);
+    fireEvent.click(card(DRAFT_A));
+    await openInspect(DRAFT_A);
+    fireEvent.click(gridCell(2, 2));
+    expect(screen.queryByTestId("trace-listing")).toBeNull();
+
+    fireEvent.keyDown(gridCell(2, 2), { key: "t" });
+    const listing = screen.getByTestId("trace-listing");
+    expect(listing.textContent).toContain("Listing 16.2.4");
+    expect(gridCell(2, 2).hasAttribute("data-traced")).toBe(true);
+    expect(lastAnnouncement()).toMatch(/^Traced Female, n \(%\), Total/);
+    const first = screen.getByTestId("trace-current").textContent;
+    const readout = screen.getByTestId("trace-readout").textContent;
+    expect(readout).toMatch(/row 1 of \d+/);
+
+    fireEvent.keyDown(gridCell(2, 2), { key: "t" });
+    expect(screen.getByTestId("trace-current").textContent).not.toBe(first);
+    expect(screen.getByTestId("trace-readout").textContent).toMatch(/row 2 of/);
+    fireEvent.keyDown(gridCell(2, 2), { key: "T", shiftKey: true });
+    expect(screen.getByTestId("trace-current").textContent).toBe(first);
+    expect(screen.getByTestId("trace-audit").textContent).toContain("open");
+
+    // Correcting the traced cell resolves the trace and readies the Pair.
+    for (
+      let i = 0;
+      i < 3 && gridCell(2, 2).dataset.status !== "CORRECTED";
+      i++
+    ) {
+      fireEvent.keyDown(gridCell(2, 2), { key: "c" });
+    }
+    expect(screen.getByTestId("trace-audit").textContent).toContain("resolved");
+    expect(screen.getByTestId("pair-synergy").textContent).toContain("×2");
+    // The staged selection survives the drill-down.
+    fireEvent.keyDown(gridCell(2, 2), { key: "Escape" });
+    await waitFor(() => expect(drawer()).toBeNull());
+    expect(card(DRAFT_A).getAttribute("aria-pressed")).toBe("true");
+  });
+
   it("opens a focus-trapped Inspect drawer that reviews cells and closes with Escape", async () => {
     render(<CardTable />);
     await openInspect(DRAFT_A);

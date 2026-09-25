@@ -208,12 +208,22 @@ export function HandCard({
         style={{ rotateX: tiltX, rotateY: tiltY, transformPerspective: 700 }}
         data-stale={view.stale || undefined}
         data-blank={view.blank || undefined}
-        className={`block h-[13.5rem] w-full min-w-0 border border-l-4 text-left text-xs touch-manipulation select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${view.blank ? "border-dashed border-l-zinc-500" : SUIT_BORDER[view.card.population]} ${sealTarget ? "outline outline-1 outline-dashed outline-amber-400/70" : ""} ${
+        className={`relative block h-[13.5rem] w-full min-w-0 border border-l-4 text-left text-xs touch-manipulation select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${view.blank ? "border-dashed border-l-zinc-500" : SUIT_BORDER[view.card.population]} ${sealTarget ? "outline outline-1 outline-dashed outline-amber-400/70" : ""} ${
           view.selected
             ? "border-amber-400 bg-[#1f1a10]"
             : "border-zinc-700 bg-[color:var(--te-surface-1)]"
         } ${raised && physical ? "shadow-lg shadow-black/60" : ""}`}
       >
+        {view.pairedWith.length > 0 && (
+          <span
+            aria-hidden="true"
+            title="Forms a TLF Pair with a card in hand"
+            data-testid="pair-link"
+            className="pointer-events-none absolute -right-px -top-px z-10 border border-[color:var(--te-x-mult)]/60 bg-[color:var(--te-surface-0)] px-1 font-mono text-[9px] leading-4 tracking-wider text-[color:var(--te-x-mult)]"
+          >
+            ⇄ PAIR
+          </span>
+        )}
         <CardFlip
           faceUp
           dealt

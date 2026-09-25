@@ -28,6 +28,7 @@ export {
 } from "./internal/hands";
 export { GUIDANCE_CARDS } from "./internal/guidance";
 export { validate } from "./internal/validator";
+export { traceCell, type CellTrace, type ListingRow } from "./internal/listing";
 export {
   evaluateHand,
   ruleResultsFor,
@@ -64,6 +65,7 @@ export {
   advanceTable,
   deriveTableView,
   type PlayedHand,
+  type InspectionTraceView,
   type TableAction,
   type TableCardView,
   type TableEvent,
@@ -79,6 +81,9 @@ export {
   studyHistory,
   FIREWALL_ALERT,
   FIREWALL_CELL,
+  PROVENANCE_ALERT,
+  TLF_PAIR_SYNERGY,
+  type TraceRecord,
   type AllocationOption,
   type Consumable,
   consumableName,

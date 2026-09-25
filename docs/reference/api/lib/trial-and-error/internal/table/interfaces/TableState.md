@@ -18,6 +18,14 @@ The analysis set allocated to each blank shell in hand. Final once set.
 
 ***
 
+### auditLog
+
+> **auditLog**: [`TraceRecord`](TraceRecord.md)[]
+
+Every table cell traced to its Listing this Blind, in trace order.
+
+***
+
 ### budget
 
 > **budget**: `number`

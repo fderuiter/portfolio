@@ -11,6 +11,7 @@
 - [AllocationOption](interfaces/AllocationOption.md)
 - [CrisisChoiceView](interfaces/CrisisChoiceView.md)
 - [CrisisView](interfaces/CrisisView.md)
+- [InspectionTraceView](interfaces/InspectionTraceView.md)
 - [Inventory](interfaces/Inventory.md)
 - [LevelUp](interfaces/LevelUp.md)
 - [PlayedHand](interfaces/PlayedHand.md)
@@ -20,6 +21,7 @@
 - [TableInspectionView](interfaces/TableInspectionView.md)
 - [TableState](interfaces/TableState.md)
 - [TableView](interfaces/TableView.md)
+- [TraceRecord](interfaces/TraceRecord.md)
 
 ## Type Aliases
 
@@ -32,7 +34,9 @@
 - [EMPTY\_SHELL\_ALERT](variables/EMPTY_SHELL_ALERT.md)
 - [FIREWALL\_ALERT](variables/FIREWALL_ALERT.md)
 - [FIREWALL\_CELL](variables/FIREWALL_CELL.md)
+- [PROVENANCE\_ALERT](variables/PROVENANCE_ALERT.md)
 - [STALE\_ALERT](variables/STALE_ALERT.md)
+- [TLF\_PAIR\_SYNERGY](variables/TLF_PAIR_SYNERGY.md)
 
 ## Functions
 
