@@ -614,7 +614,8 @@ export function CardTable({
   // Why a costed button the player has something selected for is disabled.
   const costNotes = (
     [
-      ["PLAY_HAND", state.selected.length > 0],
+      // The play blocker line already says when CPU stops Play Hand.
+      ["PLAY_HAND", state.selected.length > 0 && !view.playBlocker],
       ["DISCARD", state.selected.length > 0],
       ["INSPECT", focusedCard?.inspectable && !focusedCard.inspected],
       ["RECOMPILE", focusedCard?.stale],
@@ -629,6 +630,10 @@ export function CardTable({
         `${COST_NAMES[action]} needs ${costFor(action, view.discardCost)} CPU; ${state.cpu.available} left.`
     );
   const costDescribedBy = costNotes.length > 0 ? "cpu-note" : undefined;
+  const playDescribedBy =
+    [view.playBlocker ? "play-blocker" : null, costDescribedBy]
+      .filter(Boolean)
+      .join(" ") || undefined;
 
   return (
     <section
@@ -1342,7 +1347,7 @@ export function CardTable({
                   type="button"
                   onClick={play}
                   disabled={!view.canPlay}
-                  aria-describedby={costDescribedBy}
+                  aria-describedby={playDescribedBy}
                   className={`${BUTTON_BASE} border-emerald-500 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20`}
                 >
                   Play Hand · {CPU_COSTS.PLAY_HAND} CPU [Enter]
@@ -1412,6 +1417,26 @@ export function CardTable({
                   </button>
                 )}
               </div>
+              {view.playBlocker && (
+                // Below the controls, so the hand above never shifts when it
+                // comes and goes. The domain names the blocker and its fix.
+                <p
+                  id="play-blocker"
+                  className="mt-2 text-xs text-zinc-300 break-words"
+                  data-testid="play-blocker"
+                >
+                  {view.playBlocker.reason}
+                  {view.playBlocker.fix && (
+                    <>
+                      {" "}
+                      <span className="text-zinc-100">
+                        {view.playBlocker.fix}
+                        {view.playBlocker.key && ` [${view.playBlocker.key}]`}.
+                      </span>
+                    </>
+                  )}
+                </p>
+              )}
               {costNotes.length > 0 && (
                 <p
                   id="cpu-note"

@@ -278,7 +278,12 @@ describe("Blank shells", () => {
     expect(view.staleSelected).toEqual([]);
     expect(view.canPlay).toBe(false);
     expect(view.playBlockedReason).toBe(EMPTY_SHELL_ALERT);
+    expect(view.playBlocker).toMatchObject({
+      fix: expect.stringMatching(/^Allocate /),
+      key: "A",
+    });
     const played = run([{ type: "PLAY_HAND" }], state);
+    expect(played.lastEvent?.message).toBe(view.playBlocker?.reason);
     expect(played.lastEvent?.kind).toBe("REFUSED");
     expect(lastMessage(played)).toBe(
       `${EMPTY_SHELL_ALERT} Empty: Table 14.1.3.`

@@ -980,6 +980,12 @@ Re-exports [PackSlot](internal/run/interfaces/PackSlot.md)
 
 ***
 
+### PlayBlocker
+
+Re-exports [PlayBlocker](internal/table/interfaces/PlayBlocker.md)
+
+***
+
 ### PlayedHand
 
 Re-exports [PlayedHand](internal/table/interfaces/PlayedHand.md)

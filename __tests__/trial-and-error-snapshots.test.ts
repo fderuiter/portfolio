@@ -356,6 +356,11 @@ describe("stale outputs on the Card Table", () => {
     const view = deriveTableView(BIG, state);
     expect(view.canPlay).toBe(false);
     expect(view.playBlockedReason).toBe(STALE_ALERT);
+    expect(view.playBlocker).toMatchObject({
+      reason: expect.stringMatching(/^Output compiled against obsolete/),
+      fix: expect.stringMatching(/^Recompile /),
+      key: "R",
+    });
     expect(view.staleSelected).toEqual([NERVOUS_A]);
     const stale = view.preview!.ruleResults.at(-1)!;
     // Its 25 Chips and the 12 subjects its draft accounts for are cancelled.

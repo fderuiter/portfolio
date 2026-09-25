@@ -347,7 +347,17 @@ Unblinded outputs the next hand played will score ×0 for.
 
 > **playBlockedReason**: `string` \| `null`
 
-Why Play Hand is refused, when a stale card is selected.
+The stale or empty-shell alert when one of those blocks Play Hand, or
+null. `playBlocker` carries every reason, with the cards and the fix.
+
+***
+
+### playBlocker
+
+> **playBlocker**: [`PlayBlocker`](PlayBlocker.md) \| `null`
+
+The first reason Play Hand would be refused, with its fix, or null when
+the selection can be played. The same helper refuses `PLAY_HAND`.
 
 ***
 
