@@ -1,9 +1,13 @@
 import { describe, it, expect } from "vitest";
+import * as fc from "fast-check";
 import {
   DEMOGRAPHICS_SCENARIO,
   HandClassificationSchema,
+  CsrStageSchema,
+  HandTypeSchema,
   classifyHand,
   type ClassifiableCard,
+  type HandType,
 } from "@/lib/trial-and-error";
 
 let seq = 0;
@@ -243,5 +247,86 @@ describe("classifyHand", () => {
         )
       )?.handType
     ).toBe("POPULATION_FLUSH");
+  });
+});
+
+describe("classifyHand restricted to a stage's hands", () => {
+  it("finds an accepted pair inside a Two Pair the stage refuses", () => {
+    const cards = [
+      table("AE", { chips: 20 }),
+      listing("AE"),
+      table("DM", { chips: 30 }),
+      listing("DM"),
+    ];
+    expect(classifyHand(cards)?.handType).toBe("TLF_TWO_PAIR");
+    // The pair with more Chips wins, as without a restriction.
+    expect(
+      classifyHand(cards, ["HIGH_TABLE", "TLF_PAIR", "POPULATION_FLUSH"])
+    ).toEqual({ handType: "TLF_PAIR", scoringCardIds: ids(cards, 2, 3) });
+  });
+
+  it("classifies a Full House that is also a Population Flush as the Full House", () => {
+    const cards = [
+      table("EFF"),
+      table("AE"),
+      table("LAB"),
+      figure("EFF"),
+      figure("AE"),
+    ].map((card) => ({ ...card, population: "SAFETY" as const }));
+    expect(classifyHand(cards, ["EFFICACY_FULL_HOUSE"])?.handType).toBe(
+      "EFFICACY_FULL_HOUSE"
+    );
+    expect(classifyHand(cards, ["POPULATION_FLUSH"])?.handType).toBe(
+      "POPULATION_FLUSH"
+    );
+  });
+
+  it("falls back to the unrestricted hand when no accepted hand matches", () => {
+    const cards = [table("AE"), listing("AE")];
+    expect(classifyHand(cards, ["EFFICACY_FULL_HOUSE"])).toEqual(
+      classifyHand(cards)
+    );
+    expect(classifyHand([], ["TLF_PAIR"])).toBeNull();
+  });
+
+  const cardArb = fc.record({
+    cardType: fc.constantFrom("TABLE", "LISTING", "FIGURE" as const),
+    topic: fc.constantFrom("AE", "DM", "EFF"),
+    population: fc.constantFrom("ITT", "SAFETY" as const),
+    chips: fc.integer({ min: 0, max: 40 }),
+    csrStage: fc.option(fc.constantFrom(...CsrStageSchema.options), {
+      nil: undefined,
+    }),
+  });
+  const selectionArb = fc
+    .array(cardArb, { minLength: 1, maxLength: 5 })
+    .map((cards) =>
+      cards.map((card, i): ClassifiableCard => ({ ...card, id: `P${i}` }))
+    );
+  const allowedArb = fc.subarray([...HandTypeSchema.options] as HandType[], {
+    minLength: 1,
+  });
+
+  it("returns an allowed hand, or exactly the unrestricted one", () => {
+    fc.assert(
+      fc.property(selectionArb, allowedArb, (cards, allowed) => {
+        const restricted = classifyHand(cards, allowed);
+        const unrestricted = classifyHand(cards);
+        return (
+          (restricted !== null && allowed.includes(restricted.handType)) ||
+          JSON.stringify(restricted) === JSON.stringify(unrestricted)
+        );
+      })
+    );
+  });
+
+  it("is unchanged when every hand is allowed", () => {
+    fc.assert(
+      fc.property(selectionArb, (cards) => {
+        expect(classifyHand(cards, HandTypeSchema.options)).toEqual(
+          classifyHand(cards)
+        );
+      })
+    );
   });
 });

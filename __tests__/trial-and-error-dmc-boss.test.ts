@@ -175,6 +175,51 @@ describe("DMC milestone Boss Blind", () => {
     );
   });
 
+  it("plays an accepted pair from a selection the stage would refuse as Two Pair", () => {
+    // Two supporting pairs make a TLF Two Pair, which Stage 1 does not
+    // accept; the TLF Pair inside the selection is played instead (#1077).
+    // The second pair's Listing is dealt later, so the hand is set here.
+    const pairs = ["C-T14.1.1", "C-L16.2.4", "C-T14.1.2", "C-L16.1.1"];
+    const start = createTableState(scenario);
+    const selected = run(select(...pairs), {
+      ...start,
+      hand: [...pairs, ...start.hand.filter((id) => !pairs.includes(id))],
+    });
+    expect(selected.selected).toEqual(pairs);
+    const v = view(selected);
+    expect(v.stageAccepts).toEqual([
+      "HIGH_TABLE",
+      "TLF_PAIR",
+      "POPULATION_FLUSH",
+    ]);
+    expect(v.classification?.handType).toBe("TLF_PAIR");
+    const played = run([{ type: "PLAY_HAND" }], selected);
+    expect(played.lastEvent?.kind).not.toBe("REFUSED");
+    expect(played.lastPlay?.evaluation).toEqual(v.preview);
+    expect(played.lastPlay?.evaluation.handType).toBe("TLF_PAIR");
+  });
+
+  it("classifies Stage 2's mixed selection as the Full House and names what a refused one is", () => {
+    const closed = run([...OPEN_REPORT, ...CONVENE]);
+    const v = view(run(select(...FULL_HOUSE), closed));
+    expect(v.stageAccepts).toEqual(["EFFICACY_FULL_HOUSE"]);
+    expect(v.classification?.handType).toBe("EFFICACY_FULL_HOUSE");
+    const pair = run(play("C-T14.3.3-D", "C-L16.2.8"), closed);
+    expect(pair.lastEvent?.message).toBe(
+      "Stage 2: Closed report accepts Efficacy Full House; this is TLF Pair."
+    );
+  });
+
+  it("names no accepted hands outside a staged encounter or once it is defended", () => {
+    expect(
+      deriveTableView(
+        DEMOGRAPHICS_SCENARIO,
+        createTableState(DEMOGRAPHICS_SCENARIO)
+      ).stageAccepts
+    ).toBeNull();
+    expect(view(run(DEFENDED)).stageAccepts).toBeNull();
+  });
+
   it("is not cleared by an unreconciled closed report", () => {
     const sloppy = run([...OPEN_REPORT, ...CONVENE, ...play(...FULL_HOUSE)]);
     expect(sloppy.status).not.toBe("CLEARED");

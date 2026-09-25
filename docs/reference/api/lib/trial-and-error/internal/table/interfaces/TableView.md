@@ -657,6 +657,17 @@ Cards dealt and since played or discarded: the discard stack.
 
 ***
 
+### stageAccepts
+
+> **stageAccepts**: (`"HIGH_TABLE"` \| `"TLF_PAIR"` \| `"TLF_TWO_PAIR"` \| `"POPULATION_FLUSH"` \| `"CSR_STRAIGHT"` \| `"EFFICACY_FULL_HOUSE"` \| `"MEDDRA_FIVE_OF_A_KIND"`)[] \| `null`
+
+The hand types the current encounter stage accepts, weakest first, or
+null outside a staged encounter or once its Blind is decided. The
+selection is classified against them, so the preview and the scored
+hand agree.
+
+***
+
 ### staleSelected
 
 > **staleSelected**: `string`[]

@@ -977,6 +977,37 @@ describe("CardTable DMC milestone Boss", () => {
     await waitFor(() => expect(screen.queryByTestId("boss-intro")).toBeNull());
   });
 
+  it("says what the active stage accepts under the hand preview", () => {
+    render(<CardTable scenario={boss} />);
+    fireEvent.click(screen.getByTestId("boss-intro-start"));
+    const line = () => screen.getByTestId("stage-accepts");
+    expect(line().textContent).toBe(
+      "Stage 1 accepts: High Table, TLF Pair, Population Flush."
+    );
+    fireEvent.click(card("C-T14.1.1"));
+    fireEvent.click(card("C-L16.2.4"));
+    expect(line().className).not.toContain("text-rose-300");
+    fireEvent.click(card("C-T14.1.1"));
+    fireEvent.click(card("C-L16.2.4"));
+    playCards("C-T14.1.1", "C-L16.2.4");
+    playCards("C-T14.1.2", "C-L16.1.1");
+    for (const id of ["C-T14.3.1-D", "C-T14.3.3-D", "C-T14.3.2.5-D"]) {
+      press(id, "s");
+    }
+    fireEvent.click(screen.getByTestId("session-toggle"));
+    fireEvent.click(card("C-T14.3.3-D"));
+    fireEvent.click(card("C-L16.2.8"));
+    expect(line().textContent).toBe(
+      "Stage 2 accepts: Efficacy Full House. TLF Pair is not one of them."
+    );
+    expect(line().className).toContain("text-rose-300");
+  });
+
+  it("shows no stage line outside a staged Boss", () => {
+    render(<CardTable scenario={DEMOGRAPHICS_SCENARIO} />);
+    expect(screen.queryByTestId("stage-accepts")).toBeNull();
+  });
+
   it("tracks both stages, then offers one SOP relic for the rack", async () => {
     render(<CardTable scenario={boss} />);
     fireEvent.click(screen.getByTestId("boss-intro-start"));

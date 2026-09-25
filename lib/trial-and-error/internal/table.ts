@@ -29,7 +29,7 @@ import type {
   EncounterStage,
   Site,
 } from "../types";
-import { POPULATION_LABELS } from "../types";
+import { HandTypeSchema, POPULATION_LABELS } from "../types";
 import { compileDraft, compileShell } from "./compile";
 import {
   CPU_COSTS,
@@ -547,6 +547,13 @@ export interface TableView {
   pendingViolations: string[];
   /** A staged encounter's progress, or null outside one. */
   encounter: EncounterView | null;
+  /**
+   * The hand types the current encounter stage accepts, weakest first, or
+   * null outside a staged encounter or once its Blind is decided. The
+   * selection is classified against them, so the preview and the scored
+   * hand agree.
+   */
+  stageAccepts: HandType[] | null;
   /** A defended encounter's relic offer, or null. */
   reward: { choices: Relic[]; claimed: string | null } | null;
   /** SOP relics the run has earned. */
@@ -965,6 +972,18 @@ function sessionDependents(scenario: Scenario, state: TableState): string[] {
   return state.hand.filter((id) =>
     isClosedSession(scenario, state, cardById(scenario, state, id) as TlfCard)
   );
+}
+
+/**
+ * The hand types the encounter's current stage accepts, or undefined outside
+ * a staged encounter. Classification is restricted to them, so a lower
+ * accepted hand is not shadowed by a higher one the stage refuses (#1077).
+ */
+function stageHands(
+  scenario: Scenario,
+  state: TableState
+): readonly HandType[] | undefined {
+  return scenario.encounter?.stages[state.stage]?.hands;
 }
 
 /** Why an encounter stage will not accept this hand, or null. */
@@ -2104,7 +2123,8 @@ export function advanceTable(
         ? state.selected.filter((id) => id !== card.id)
         : [...state.selected, card.id];
       const classification = classifyHand(
-        selected.map((id) => classifiable(scenario, state, id))
+        selected.map((id) => classifiable(scenario, state, id)),
+        stageHands(scenario, state)
       );
       const summary = classification
         ? `${selected.length} selected: ${handName(classification.handType)}.`
@@ -2143,7 +2163,8 @@ export function advanceTable(
         );
       }
       const classification = classifyHand(
-        state.selected.map((id) => classifiable(scenario, state, id))
+        state.selected.map((id) => classifiable(scenario, state, id)),
+        stageHands(scenario, state)
       ) as HandClassification;
       const stage = scenario.encounter?.stages[state.stage];
       if (stage) {
@@ -2863,7 +2884,8 @@ export function deriveTableView(
   const emptySelected = state.selected.filter((id) =>
     isBlank(state, cardById(scenario, state, id) as TlfCard)
   );
-  const classification = classifyHand(selectedCards);
+  const accepts = stageHands(scenario, state);
+  const classification = classifyHand(selectedCards, accepts);
   const preview = classification
     ? scoreCards(
         scenario,
@@ -2883,8 +2905,10 @@ export function deriveTableView(
   const flushBrokenBy =
     staleSelected.length > 0 &&
     classification?.handType !== "POPULATION_FLUSH" &&
-    classifyHand(selectedCards.map((c) => ({ ...c, stale: empty.has(c.id) })))
-      ?.handType === "POPULATION_FLUSH"
+    classifyHand(
+      selectedCards.map((c) => ({ ...c, stale: empty.has(c.id) })),
+      accepts
+    )?.handType === "POPULATION_FLUSH"
       ? staleSelected
       : [];
 
@@ -3081,6 +3105,10 @@ export function deriveTableView(
     ),
     accessLog: state.accessLog,
     pendingViolations: state.pendingViolations,
+    stageAccepts:
+      accepts && state.status === "REVIEWING"
+        ? HandTypeSchema.options.filter((h) => accepts.includes(h))
+        : null,
     encounter: scenario.encounter
       ? {
           current: state.stage,
