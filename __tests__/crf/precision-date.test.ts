@@ -514,21 +514,35 @@ describe("lib/crf/precision-date.ts", () => {
       return set;
     }
 
+    it("returns unused valid names unchanged, including names at the 8-character limit", () => {
+      for (const name of ["A", "AGE", "VSTESTCD", "VAR_1234"]) {
+        expect(generateCdashVariableName(name, [])).toBe(name);
+      }
+    });
+
     it("cleans baseName and ensures valid CDASH variable format", () => {
-      expect(generateCdashVariableName("test", [])).toBe("TEST_2");
-      expect(generateCdashVariableName("123test", [])).toBe("V_TEST_2");
-      expect(generateCdashVariableName("", [])).toBe("VAR_2");
+      expect(generateCdashVariableName("test", [])).toBe("TEST");
+      expect(generateCdashVariableName("123test", [])).toBe("V_TEST");
+      expect(generateCdashVariableName("", [])).toBe("VAR");
+    });
+
+    it("adds numeric suffixes only when the normalized base name collides", () => {
+      expect(generateCdashVariableName("TEST", ["test"])).toBe("TEST_2");
+      expect(generateCdashVariableName("TEST", ["TEST", "TEST_2"])).toBe(
+        "TEST_3"
+      );
     });
 
     it("works with existing variable names as Set, Array, or Iterable", () => {
-      const existingArray = ["VAR_2", "VAR_3"];
+      const existingArray = ["VAR", "VAR_2", "VAR_3"];
       expect(generateCdashVariableName("VAR", existingArray)).toBe("VAR_4");
 
-      const existingSet = new Set(["VAR_2", "VAR_3"]);
+      const existingSet = new Set(["VAR", "VAR_2", "VAR_3"]);
       expect(generateCdashVariableName("VAR", existingSet)).toBe("VAR_4");
 
       const existingIterable = {
         *[Symbol.iterator]() {
+          yield "VAR";
           yield "VAR_2";
           yield "VAR_3";
         },
@@ -536,14 +550,25 @@ describe("lib/crf/precision-date.ts", () => {
       expect(generateCdashVariableName("VAR", existingIterable)).toBe("VAR_4");
     });
 
-    it("truncates stem to ensure generated variable is <= 8 characters", () => {
-      // Long base name "VERYLONGVARNAME"
-      const generated = generateCdashVariableName("VERYLONGVARNAME", []);
-      expect(generated.length).toBeLessThanOrEqual(8);
-      expect(generated).toBe("VERYLO_2");
+    it("keeps an unused long name as its truncated 8-character base", () => {
+      expect(generateCdashVariableName("VERYLONGNAME", new Set())).toBe(
+        "VERYLONG"
+      );
     });
 
-    it("increments counter when baseName already ends with a number suffix", () => {
+    it("truncates a colliding long base to keep the generated name within 8 characters", () => {
+      const generated = generateCdashVariableName("VERYLONGVARNAME", [
+        "VERYLONG",
+      ]);
+      expect(generated).toBe("VERYLO_2");
+      expect(generated.length).toBeLessThanOrEqual(8);
+    });
+
+    it("leaves an unused name with an existing numeric suffix unchanged", () => {
+      expect(generateCdashVariableName("TEST_1", ["TEST_2"])).toBe("TEST_1");
+    });
+
+    it("increments the numeric suffix when a suffixed base name collides", () => {
       const generated = generateCdashVariableName("TEST_1", [
         "TEST_1",
         "TEST_2",
@@ -551,11 +576,13 @@ describe("lib/crf/precision-date.ts", () => {
       expect(generated).toBe("TEST_3");
     });
 
-    it("falls back to letter suffixes (_A, _B, ...) when numeric counters reach limit", () => {
-      // Mock existing names set where all numeric counters _2 through _999 exist for stem "T"
+    it("falls back to letter suffixes when numeric counters reach the limit", () => {
+      // Mock existing names set where all numeric counters _2 through _999 exist for stem "T".
       const existing = createExhaustedNumericSet("T");
+      existing.add("T");
       const generated = generateCdashVariableName("T", existing);
       expect(generated).toBe("T_A");
+      expect(generated.length).toBeLessThanOrEqual(8);
 
       existing.add("T_A");
       const generatedB = generateCdashVariableName("T", existing);
@@ -563,19 +590,18 @@ describe("lib/crf/precision-date.ts", () => {
     });
 
     it("falls back to VAR when baseName consists only of non-alphabetic characters", () => {
-      const generated = generateCdashVariableName("12345", []);
-      expect(generated).toBe("V_VAR_2");
+      expect(generateCdashVariableName("12345", [])).toBe("V_VAR");
+      expect(generateCdashVariableName("12345", ["v_var"])).toBe("V_VAR_2");
     });
 
     it("handles random candidate collision during ultimate fallback loop", () => {
       const existing = createExhaustedNumericSet("T");
+      existing.add("T");
       for (let code = 65; code <= 90; code++) {
         existing.add(`T_${String.fromCharCode(code)}`);
       }
 
-      // Add a known random candidate to existing
-      // e.g. Math.random().toString(36).slice(2, 8).toUpperCase()
-      // If Math.random returns 0.123456789 -> toString(36) is "0.4fzyo8..." -> slice(2,8) is "4FZYO8" -> "V_4FZYO8"
+      // Mock an existing random candidate to ensure the ultimate fallback retries.
       const firstRandVal = 0.123456789;
       const firstRandCandidate =
         `V_${firstRandVal.toString(36).slice(2, 8).toUpperCase()}`.slice(0, 8);
@@ -594,13 +620,13 @@ describe("lib/crf/precision-date.ts", () => {
       }
     });
 
-    it("is case-insensitive regarding existing variable names across Array and Set inputs", () => {
-      const existingArray = ["vstest_2"];
+    it("matches existing base names and suffixes case-insensitively", () => {
+      const existingArray = ["vstest", "vstest_2"];
       expect(generateCdashVariableName("VSTEST", existingArray)).toBe(
         "VSTEST_3"
       );
 
-      const existingSet = new Set(["vstest_2"]);
+      const existingSet = new Set(["vstest", "vstest_2"]);
       expect(generateCdashVariableName("VSTEST", existingSet)).toBe("VSTEST_3");
     });
   });

@@ -427,6 +427,14 @@ export function generateCdashVariableName(
     cleaned = `V_${stripped || "VAR"}`.replace(/[^A-Z0-9_]/g, "");
   }
 
+  const baseCandidate = cleaned.slice(0, 8);
+  if (
+    /^[A-Z][A-Z0-9_]{0,7}$/.test(baseCandidate) &&
+    !existing.has(baseCandidate)
+  ) {
+    return baseCandidate;
+  }
+
   // If base already ends in _<digits>, parse stem and counter
   const match = cleaned.match(/^(.*?)_([0-9]+)$/);
   const stem =
