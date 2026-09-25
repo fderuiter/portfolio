@@ -161,23 +161,16 @@ async function submitReactionDirect(
   connectionHash: string
 ) {
   try {
-    const existing = await prisma.caseStudyReaction.findFirst({
-      where: {
-        caseStudySlug,
-        reactionType,
-        connectionHash,
-      },
-    });
-
-    if (!existing) {
-      await prisma.caseStudyReaction.create({
-        data: {
+    await prisma.caseStudyReaction.createMany({
+      data: [
+        {
           caseStudySlug,
           reactionType,
           connectionHash,
         },
-      });
-    }
+      ],
+      skipDuplicates: true,
+    });
 
     const reactions = await prisma.caseStudyReaction.groupBy({
       by: ["reactionType"],
@@ -1116,9 +1109,8 @@ export class CaseStudyService {
         createResult = await prisma.caseStudyReaction.createMany({
           data: events.map((e) => ({
             // Pin the primary key to the id minted when the event was buffered.
-            // CaseStudyReaction has no unique constraint on the payload columns,
-            // so this is what lets skipDuplicates make a replayed batch a no-op
-            // when acknowledgement failed after a successful write.
+            // The primary key makes queue replays idempotent, while the payload
+            // constraint prevents duplicate visitor reactions.
             id: e.id,
             caseStudySlug: e.caseStudySlug,
             reactionType: e.reactionType,

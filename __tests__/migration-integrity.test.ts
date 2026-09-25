@@ -59,6 +59,7 @@ describe("Prisma migration integrity", () => {
     "20261019000000_add_blog_post_reaction",
     "20261020000000_add_case_study_hero_image",
     "20261021000000_add_newsletter_subscribers",
+    "20261022000000_add_case_study_reaction_unique_constraint",
   ];
 
   it("validates every checked-in migration file", () => {
@@ -157,6 +158,26 @@ describe("Prisma migration integrity", () => {
       'CREATE INDEX "BlogPostReaction_connectionHash_idx" ON "BlogPostReaction"("connectionHash")'
     );
     expect(migration).not.toMatch(/DROP\s+(TABLE|COLUMN)/i);
+  });
+
+  it("deduplicates case study reactions before enforcing payload uniqueness", () => {
+    const migration = readMigrationSql(
+      "20261022000000_add_case_study_reaction_unique_constraint"
+    );
+
+    expect(migration).toContain(
+      'PARTITION BY "caseStudySlug", "reactionType", "connectionHash"'
+    );
+    expect(migration).toContain('ORDER BY "createdAt" ASC, "id" ASC');
+    expect(migration).toContain("duplicate_rank > 1");
+    expect(migration).toMatch(
+      /CREATE UNIQUE INDEX "CaseStudyReaction_caseStudySlug_reactionType_connectionHash_key"\s+ON "CaseStudyReaction"\("caseStudySlug", "reactionType", "connectionHash"\)/
+    );
+    expect(migration.indexOf('DELETE FROM "CaseStudyReaction"')).toBeLessThan(
+      migration.indexOf(
+        'CREATE UNIQUE INDEX "CaseStudyReaction_caseStudySlug_reactionType_connectionHash_key"'
+      )
+    );
   });
 
   it("fails migration file validation when a migration asset is missing or empty", () => {

@@ -418,7 +418,9 @@ describe("CaseStudyService - Two-Tier Redis Compute Shield & Reaction Buffering"
     it("writes reactions straight to Postgres without touching Redis", async () => {
       mockRedisConfigured.value = false;
 
-      vi.mocked(prisma.caseStudyReaction.findFirst).mockResolvedValueOnce(null);
+      vi.mocked(prisma.caseStudyReaction.createMany).mockResolvedValueOnce({
+        count: 1,
+      });
       vi.mocked(prisma.caseStudyReaction.groupBy).mockResolvedValueOnce(
         [] as never
       );
@@ -430,10 +432,115 @@ describe("CaseStudyService - Two-Tier Redis Compute Shield & Reaction Buffering"
       );
 
       expect(result.success).toBe(true);
-      expect(prisma.caseStudyReaction.create).toHaveBeenCalled();
+      expect(prisma.caseStudyReaction.createMany).toHaveBeenCalledWith({
+        data: [
+          {
+            caseStudySlug: "cadence-clinical",
+            reactionType: "insightful",
+            connectionHash: "hash-nored",
+          },
+        ],
+        skipDuplicates: true,
+      });
       // No dummy-endpoint round trips, and no 1500ms timeout per reaction.
       expect(mockRedisSismember).not.toHaveBeenCalled();
       expect(mockPipelineExec).not.toHaveBeenCalled();
+    });
+
+    it("persists only one reaction when identical submissions arrive concurrently", async () => {
+      mockRedisConfigured.value = false;
+      const persistedReactions: Array<{
+        caseStudySlug: string;
+        reactionType: string;
+        connectionHash: string;
+      }> = [];
+
+      const createMany = vi.mocked(prisma.caseStudyReaction.createMany);
+      const persistUniqueReaction = async (
+        args: Parameters<typeof createMany>[0]
+      ) => {
+        const { data, skipDuplicates } = args;
+        expect(skipDuplicates).toBe(true);
+        const rows = Array.isArray(data) ? data : [data];
+        let inserted = 0;
+
+        for (const row of rows) {
+          const duplicate = persistedReactions.some(
+            (persisted) =>
+              persisted.caseStudySlug === row.caseStudySlug &&
+              persisted.reactionType === row.reactionType &&
+              persisted.connectionHash === row.connectionHash
+          );
+
+          if (duplicate) continue;
+
+          persistedReactions.push({
+            caseStudySlug: row.caseStudySlug,
+            reactionType: row.reactionType,
+            connectionHash: row.connectionHash,
+          });
+          inserted += 1;
+        }
+
+        return { count: inserted };
+      };
+      createMany
+        .mockImplementationOnce(persistUniqueReaction as never)
+        .mockImplementationOnce(persistUniqueReaction as never);
+      const groupedReactionCounts = async () =>
+        [
+          {
+            reactionType: "insightful",
+            _count: {
+              id: persistedReactions.filter(
+                (reaction) => reaction.reactionType === "insightful"
+              ).length,
+            },
+          },
+        ] as never;
+      vi.mocked(prisma.caseStudyReaction.groupBy)
+        .mockImplementationOnce(groupedReactionCounts as never)
+        .mockImplementationOnce(groupedReactionCounts as never);
+      const listPersistedReactions = async () =>
+        persistedReactions.map(({ reactionType }) => ({
+          reactionType,
+        })) as never;
+      vi.mocked(prisma.caseStudyReaction.findMany)
+        .mockImplementationOnce(listPersistedReactions as never)
+        .mockImplementationOnce(listPersistedReactions as never);
+
+      const input = {
+        caseStudySlug: "cadence-clinical",
+        reactionType: "insightful",
+      };
+      const connectionHash = "hash-concurrent";
+      const [firstSubmission, secondSubmission] = await Promise.all([
+        CaseStudyService.submitReaction(input, connectionHash),
+        CaseStudyService.submitReaction(input, connectionHash),
+      ]);
+
+      expect(persistedReactions).toHaveLength(1);
+      expect(prisma.caseStudyReaction.createMany).toHaveBeenCalledTimes(2);
+      expect(prisma.caseStudyReaction.createMany).toHaveBeenNthCalledWith(1, {
+        data: [{ ...input, connectionHash }],
+        skipDuplicates: true,
+      });
+      expect(prisma.caseStudyReaction.createMany).toHaveBeenNthCalledWith(2, {
+        data: [{ ...input, connectionHash }],
+        skipDuplicates: true,
+      });
+      expect(firstSubmission).toMatchObject({
+        success: true,
+        counts: { insightful: 1 },
+        userReactions: ["insightful"],
+      });
+      expect(secondSubmission).toMatchObject({
+        success: true,
+        counts: { insightful: 1 },
+        userReactions: ["insightful"],
+      });
+      expect(prisma.caseStudyReaction.findFirst).not.toHaveBeenCalled();
+      expect(prisma.caseStudyReaction.create).not.toHaveBeenCalled();
     });
 
     it("skips the scheduled drain entirely", async () => {
@@ -547,8 +654,8 @@ describe("CaseStudyService - Two-Tier Redis Compute Shield & Reaction Buffering"
 
       const result = await CaseStudyService.flushBufferedReactionsToDatabase();
 
-      // CaseStudyReaction has no unique constraint on the payload columns, so
-      // skipDuplicates only suppresses the replay if the primary key is pinned.
+      // The compound key blocks duplicate visitor payloads, and the event ID
+      // still makes replaying this exact queued write a no-op.
       expect(prisma.caseStudyReaction.createMany).toHaveBeenCalledWith({
         data: [
           expect.objectContaining({
