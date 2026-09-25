@@ -113,7 +113,7 @@ safety net so a database outage never breaks the `/blog` index or the sitemap.
 Guarantees:
 - Empty lists are cached with bounded TTL to avoid repeated database reads.
 - Unpublished drafts in DB or cache are never exposed.
-- DB draft records take precedence over same-slug fallbacks.
+- Published DB records take precedence over same-slug fallbacks.
 - Resulting list is strictly ordered newest-first by creation timestamp.
 
 #### Returns

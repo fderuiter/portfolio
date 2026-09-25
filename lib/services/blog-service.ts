@@ -620,7 +620,7 @@ export class BlogPostService {
    * Guarantees:
    * - Empty lists are cached with bounded TTL to avoid repeated database reads.
    * - Unpublished drafts in DB or cache are never exposed.
-   * - DB draft records take precedence over same-slug fallbacks.
+   * - Published DB records take precedence over same-slug fallbacks.
    * - Resulting list is strictly ordered newest-first by creation timestamp.
    */
   static async getAllPublishedBlogPosts(): Promise<BlogPostData[]> {
@@ -656,6 +656,7 @@ export class BlogPostService {
 
     try {
       const records = await prisma.blogPost.findMany({
+        where: { published: true },
         orderBy: { created_at: "desc" },
       });
 
