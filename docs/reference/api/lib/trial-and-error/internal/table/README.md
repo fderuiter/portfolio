@@ -18,6 +18,7 @@
 - [InspectionTraceView](interfaces/InspectionTraceView.md)
 - [Inventory](interfaces/Inventory.md)
 - [LevelUp](interfaces/LevelUp.md)
+- [PlayBlocker](interfaces/PlayBlocker.md)
 - [PlayedHand](interfaces/PlayedHand.md)
 - [StudyHistory](interfaces/StudyHistory.md)
 - [TableCardView](interfaces/TableCardView.md)

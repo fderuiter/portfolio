@@ -812,14 +812,45 @@ describe("CardTable shells, seals and CPU (T&E-04)", () => {
       screen.getByTestId("cpu-pips").querySelectorAll(".te-pip-burst")
     ).toHaveLength(1);
     fireEvent.click(card(DRAFT_A));
-    expect(screen.getByTestId("cpu-note").textContent).toBe(
+    // Play Hand's shortfall is said once, by the play blocker line.
+    expect(screen.getByTestId("play-blocker").textContent).toBe(
       "Play Hand needs 2 CPU; 1 left."
+    );
+    expect(screen.queryByTestId("cpu-note")?.textContent ?? "").not.toContain(
+      "Play Hand"
     );
     expect(
       screen
         .getByRole("button", { name: /Play Hand/ })
         .getAttribute("aria-describedby")
-    ).toBe("cpu-note");
+        ?.split(" ")[0]
+    ).toBe("play-blocker");
+  });
+});
+
+describe("CardTable play blocker line (#1078)", () => {
+  it("says why Play Hand is disabled, describes the button, and clears when playable", () => {
+    render(<CardTable scenario={DEMOGRAPHICS_SCENARIO} />);
+    const playButton = () => screen.getByRole("button", { name: /Play Hand/ });
+    const line = () => screen.queryByTestId("play-blocker");
+    expect(line()?.textContent).toBe(
+      "Select at least one card to play. Select a card [Space]."
+    );
+    expect(playButton().getAttribute("aria-describedby")).toBe("play-blocker");
+    expect((playButton() as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(card(DM_LISTING));
+    expect(line()).toBeNull();
+    expect(playButton().getAttribute("aria-describedby")).toBeNull();
+    expect((playButton() as HTMLButtonElement).disabled).toBe(false);
+    fireEvent.click(card(DM_LISTING));
+    expect(line()).not.toBeNull();
+  });
+
+  it("sits below the controls, outside the hand", () => {
+    render(<CardTable scenario={DEMOGRAPHICS_SCENARIO} />);
+    expect(
+      screen.getByTestId("hand").contains(screen.getByTestId("play-blocker"))
+    ).toBe(false);
   });
 });
 

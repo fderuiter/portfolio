@@ -492,6 +492,11 @@ export interface TableView {
   handsAffordable: number;
   discardsAffordable: number;
   canPlay: boolean;
+  /**
+   * The first reason Play Hand would be refused, with its fix, or null when
+   * the selection can be played. The same helper refuses `PLAY_HAND`.
+   */
+  playBlocker: PlayBlocker | null;
   canDiscard: boolean;
   canInspect: boolean;
   inspection: TableInspectionView | null;
@@ -501,7 +506,10 @@ export interface TableView {
   snapshot: SnapshotRef;
   /** Selected cards that are stale, in selection order. */
   staleSelected: string[];
-  /** Why Play Hand is refused, when a stale card is selected. */
+  /**
+   * The stale or empty-shell alert when one of those blocks Play Hand, or
+   * null. `playBlocker` carries every reason, with the cards and the fix.
+   */
   playBlockedReason: string | null;
   /**
    * Stale cards that alone stop the selection from being a Population Flush:
@@ -986,26 +994,109 @@ function stageHands(
   return scenario.encounter?.stages[state.stage]?.hands;
 }
 
+/**
+ * Why Play Hand would be refused, and what clears it: `fix` is a short
+ * imperative and `key` its keyboard shortcut on a focused card, when one
+ * exists.
+ */
+export interface PlayBlocker {
+  reason: string;
+  fix: string | null;
+  key: string | null;
+}
+
+const blocker = (
+  reason: string,
+  fix: string | null = null,
+  key: string | null = null
+): PlayBlocker => ({ reason, fix, key });
+
 /** Why an encounter stage will not accept this hand, or null. */
 function stageRefusal(
   scenario: Scenario,
   state: TableState,
   stage: EncounterStage,
   classification: HandClassification
-): string | null {
+): PlayBlocker | null {
   if (state.session !== stage.session) {
-    return `${stage.name} is played in the closed session: convene it first.`;
+    return blocker(
+      `${stage.name} is played in the closed session: convene it first.`,
+      "Convene the closed session"
+    );
   }
   if (!stage.hands.includes(classification.handType)) {
-    return `${stage.name} accepts ${stage.hands.map(handName).join(", ")}; this is ${handName(classification.handType)}.`;
+    return blocker(
+      `${stage.name} accepts ${stage.hands.map(handName).join(", ")}; this is ${handName(classification.handType)}.`,
+      `Select ${stage.hands.length === 1 ? "an" : "one"} ${stage.hands.map(handName).join(" or ")}`
+    );
   }
   if (stage.session === "OPEN") {
     const closed = state.selected
       .map((id) => cardById(scenario, state, id) as TlfCard)
       .filter((card) => isClosedSession(scenario, state, card));
     if (closed.length > 0) {
-      return `Closed-session outputs cannot be presented in the open session: ${closed.map(cardShortName).join(", ")}.`;
+      return blocker(
+        `Closed-session outputs cannot be presented in the open session: ${closed.map(cardShortName).join(", ")}.`,
+        `Deselect ${closed.map((card) => card.number).join(", ")}`,
+        "Space"
+      );
     }
+  }
+  return null;
+}
+
+/**
+ * The first reason Play Hand would be refused now, in the order the reducer
+ * checks them, or null when the selection can be played. `PLAY_HAND` refuses
+ * with exactly this reason, and the view shows it under the button, so the
+ * two cannot drift apart (#1078). Pure: it dispatches nothing.
+ */
+function playBlocker(
+  scenario: Scenario,
+  state: TableState,
+  classification: HandClassification | null
+): PlayBlocker | null {
+  if (state.status !== "REVIEWING") {
+    return blocker("The Blind is over. Restart to play again.");
+  }
+  if (state.crisis) {
+    return blocker(crisisAlert(state.crisis), "Answer it in the crisis panel");
+  }
+  if (state.selected.length === 0 || !classification) {
+    return blocker(
+      "Select at least one card to play.",
+      "Select a card",
+      "Space"
+    );
+  }
+  const selected = state.selected.map(
+    (id) => cardById(scenario, state, id) as TlfCard
+  );
+  const stale = selected.filter((card) => isStale(scenario, state, card));
+  if (stale.length > 0) {
+    return blocker(
+      `${STALE_ALERT} Stale: ${stale.map(cardShortName).join(", ")}.`,
+      `Recompile ${stale[0].number}`,
+      "R"
+    );
+  }
+  const empty = selected.filter((card) => isBlank(state, card));
+  if (empty.length > 0) {
+    return blocker(
+      `${EMPTY_SHELL_ALERT} Empty: ${empty.map(cardShortName).join(", ")}.`,
+      `Allocate ${empty[0].number}`,
+      "A"
+    );
+  }
+  const stage = scenario.encounter?.stages[state.stage];
+  const refusal = stage
+    ? stageRefusal(scenario, state, stage, classification)
+    : null;
+  if (refusal) return refusal;
+  if (!canAfford(state.cpu, "PLAY_HAND")) {
+    return blocker(
+      `Play Hand needs ${CPU_COSTS.PLAY_HAND} CPU; ${state.cpu.available} left.`
+    );
   }
   return null;
 }
@@ -2141,39 +2232,14 @@ export function advanceTable(
     }
 
     case "PLAY_HAND": {
-      if (state.selected.length === 0) {
-        return refuse(state, "Select at least one card to play.");
-      }
-      const stale = state.selected
-        .map((id) => cardById(scenario, state, id) as TlfCard)
-        .filter((card) => isStale(scenario, state, card));
-      if (stale.length > 0) {
-        return refuse(
-          state,
-          `${STALE_ALERT} Stale: ${stale.map(cardShortName).join(", ")}.`
-        );
-      }
-      const empty = state.selected
-        .map((id) => cardById(scenario, state, id) as TlfCard)
-        .filter((card) => isBlank(state, card));
-      if (empty.length > 0) {
-        return refuse(
-          state,
-          `${EMPTY_SHELL_ALERT} Empty: ${empty.map(cardShortName).join(", ")}.`
-        );
-      }
-      const classification = classifyHand(
+      const found = classifyHand(
         state.selected.map((id) => classifiable(scenario, state, id)),
         stageHands(scenario, state)
-      ) as HandClassification;
+      );
+      const blocked = playBlocker(scenario, state, found);
+      if (blocked) return refuse(state, blocked.reason);
+      const classification = found as HandClassification;
       const stage = scenario.encounter?.stages[state.stage];
-      if (stage) {
-        const refusal = stageRefusal(scenario, state, stage, classification);
-        if (refusal) return refuse(state, refusal);
-      }
-      if (!canAfford(state.cpu, "PLAY_HAND")) {
-        return refuse(state, `Play Hand needs ${CPU_COSTS.PLAY_HAND} CPU.`);
-      }
       const scoring = classification.scoringCardIds.map(
         (id) => cardById(scenario, state, id) as TlfCard
       );
@@ -2886,6 +2952,7 @@ export function deriveTableView(
   );
   const accepts = stageHands(scenario, state);
   const classification = classifyHand(selectedCards, accepts);
+  const blocked = playBlocker(scenario, state, classification);
   const preview = classification
     ? scoreCards(
         scenario,
@@ -3051,12 +3118,8 @@ export function deriveTableView(
     handsAffordable:
       handsLeft === null ? cpuHands : Math.min(cpuHands, handsLeft),
     discardsAffordable: Math.floor(state.cpu.available / discardCost),
-    canPlay:
-      reviewing &&
-      state.selected.length > 0 &&
-      staleSelected.length === 0 &&
-      emptySelected.length === 0 &&
-      canAfford(state.cpu, "PLAY_HAND"),
+    canPlay: blocked === null,
+    playBlocker: blocked,
     canDiscard:
       reviewing &&
       state.selected.length > 0 &&
