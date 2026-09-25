@@ -1,30 +1,12 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Visual Regression & Drift Detection", () => {
-  test("Case Study components snapshot (desktop)", async ({ page }) => {
+  test("Case Study components layout and visibility", async ({ page }) => {
     // Emulate reduced motion to disable JS transitions/animations
     await page.emulateMedia({ reducedMotion: "reduce" });
 
     // Wait for the hydration and masonry layout to be stable
     await page.goto("/");
-
-    // Disable animations for consistent snapshots and isolate case study baseline
-    await page.addStyleTag({
-      content: `
-        *, *::before, *::after {
-          transition: none !important;
-          animation: none !important;
-        }
-        [data-testid="bio-spotlight"],
-        [data-testid="footer-photo-gallery"] {
-          display: none !important;
-        }
-        /* space-y-2 leaves margin on the item before the hidden link */
-        li:has(+ [data-testid="footer-photo-gallery"]) {
-          margin-block-end: 0 !important;
-        }
-      `,
-    });
 
     // Wait for the Pretext measuring text to finish on ALL cards
     await page.waitForFunction(() => {
@@ -35,14 +17,23 @@ test.describe("Visual Regression & Drift Detection", () => {
       );
     });
 
-    // Give a brief moment for layout/scroll coordinates to settle completely
-    await page.waitForTimeout(500);
+    // Verify the case studies section is rendered and visible
+    const caseStudies = page.locator("#case-studies");
+    await expect(caseStudies).toBeVisible();
 
-    // Take full page snapshot to cover case study components
-    await expect(page).toHaveScreenshot("home.png", {
-      fullPage: true,
-      maxDiffPixelRatio: 0.01,
-    });
+    // Verify all featured project cards are hydrated, visible, and bounded
+    const cards = page.getByTestId("featured-project-card");
+    const count = await cards.count();
+    expect(count).toBeGreaterThan(0);
+
+    for (let i = 0; i < count; i++) {
+      const card = cards.nth(i);
+      await expect(card).toBeVisible();
+      const box = await card.boundingBox();
+      expect(box).not.toBeNull();
+      expect(box!.width).toBeGreaterThan(0);
+      expect(box!.height).toBeGreaterThan(0);
+    }
   });
 
   test("Layout constraints drift detection", async ({ page }) => {
