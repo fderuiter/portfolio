@@ -108,6 +108,7 @@ export async function generateStudyPdf(
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const margin = 14;
+  const MIN_SECTION_CLEARANCE = 40;
   let currentY = 20;
 
   // 1. Cover Page
@@ -283,6 +284,11 @@ export async function generateStudyPdf(
     let startY = form.description ? 28 : 24;
 
     form.sections.forEach((sec) => {
+      if (startY > pageHeight - margin - MIN_SECTION_CLEARANCE) {
+        doc.addPage();
+        startY = 24;
+      }
+
       // Section Header Banner
       doc.setFont("helvetica", "bold");
       doc.setFontSize(10);
