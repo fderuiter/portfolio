@@ -137,6 +137,15 @@ Revealed findings still uncorrected.
 
 ***
 
+### pairedWith
+
+> **pairedWith**: `string`[]
+
+Cards in hand this one forms a TLF Pair with: a Table's supporting
+Listings, or a Listing's Tables. The linked-card indicator.
+
+***
+
 ### provenance
 
 > **provenance**: `object`

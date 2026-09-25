@@ -6,7 +6,7 @@
 
 # Type Alias: TableAction
 
-> **TableAction** = \{ `cardId`: `string`; `type`: `"TOGGLE_SELECT"`; \} \| \{ `type`: `"PLAY_HAND"`; \} \| \{ `type`: `"DISCARD"`; \} \| \{ `cardId`: `string`; `type`: `"INSPECT_CARD"`; \} \| \{ `type`: `"CLOSE_INSPECT"`; \} \| \{ `col`: `number`; `row`: `number`; `type`: `"INSPECT_CELL"`; \} \| \{ `findingId`: `string`; `type`: `"CORRECT_FINDING"`; \} \| \{ `cardId`: `string`; `toIndex`: `number`; `type`: `"MOVE_CARD"`; \} \| \{ `cardId`: `string`; `type`: `"RECOMPILE"`; \} \| \{ `cardId`: `string`; `population`: [`PopulationType`](../../../types/type-aliases/PopulationType.md); `type`: `"ALLOCATE"`; \} \| \{ `cardId`: `string`; `consumableId`: `string`; `type`: `"APPLY_SEAL"`; \} \| \{ `consumableId`: `string`; `type`: `"SELL_CONSUMABLE"`; \} \| \{ `consumableId`: `string`; `type`: `"USE_GUIDANCE"`; \} \| \{ `choiceId`: `string`; `type`: `"RESOLVE_CRISIS"`; \} \| \{ `type`: `"RESET"`; \}
+> **TableAction** = \{ `cardId`: `string`; `type`: `"TOGGLE_SELECT"`; \} \| \{ `type`: `"PLAY_HAND"`; \} \| \{ `type`: `"DISCARD"`; \} \| \{ `cardId`: `string`; `type`: `"INSPECT_CARD"`; \} \| \{ `type`: `"CLOSE_INSPECT"`; \} \| \{ `col`: `number`; `row`: `number`; `type`: `"INSPECT_CELL"`; \} \| \{ `findingId`: `string`; `type`: `"CORRECT_FINDING"`; \} \| \{ `col`: `number`; `row`: `number`; `type`: `"TRACE_CELL"`; \} \| \{ `cardId`: `string`; `toIndex`: `number`; `type`: `"MOVE_CARD"`; \} \| \{ `cardId`: `string`; `type`: `"RECOMPILE"`; \} \| \{ `cardId`: `string`; `population`: [`PopulationType`](../../../types/type-aliases/PopulationType.md); `type`: `"ALLOCATE"`; \} \| \{ `cardId`: `string`; `consumableId`: `string`; `type`: `"APPLY_SEAL"`; \} \| \{ `consumableId`: `string`; `type`: `"SELL_CONSUMABLE"`; \} \| \{ `consumableId`: `string`; `type`: `"USE_GUIDANCE"`; \} \| \{ `choiceId`: `string`; `type`: `"RESOLVE_CRISIS"`; \} \| \{ `type`: `"RESET"`; \}
 
 Player intents the Card Table reducer accepts.
 
@@ -51,6 +51,14 @@ Player intents the Card Table reducer accepts.
 ### Type Literal
 
 \{ `findingId`: `string`; `type`: `"CORRECT_FINDING"`; \}
+
+***
+
+### Type Literal
+
+\{ `col`: `number`; `row`: `number`; `type`: `"TRACE_CELL"`; \}
+
+Traces a flagged cell of the inspected Table to its Listing rows. Free.
 
 ***
 

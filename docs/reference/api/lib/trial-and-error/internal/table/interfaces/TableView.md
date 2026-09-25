@@ -10,6 +10,14 @@ Everything the Card Table renders, derived purely from scenario and state.
 
 ## Properties
 
+### auditLog
+
+> **auditLog**: [`TraceRecord`](TraceRecord.md)[]
+
+The Blind's inspection audit log, for end-of-Blind grading.
+
+***
+
 ### budget
 
 > **budget**: `number`

@@ -1,5 +1,6 @@
 import type {
   BossBlindModifier,
+  CellCoordinates,
   CrisisCard,
   CrisisChoice,
   FootnoteSeal,
@@ -53,6 +54,7 @@ import {
   type InspectionState,
   type InspectionView,
 } from "./inspection";
+import { traceCell, type CellTrace } from "./listing";
 import { evaluateHand, ruleResultsFor } from "./scoring";
 import {
   applyTransition,
@@ -84,7 +86,8 @@ export interface TableEvent {
     | "SEALED"
     | "SOLD"
     | "LEVELED_UP"
-    | "CRISIS_RESOLVED";
+    | "CRISIS_RESOLVED"
+    | "TRACED";
   message: string;
   /** On LEVELED_UP: the hand that levelled and its base before and after. */
   levelUp?: LevelUp;
@@ -147,6 +150,38 @@ export interface Inventory {
   handLevels?: HandLevels;
 }
 
+/**
+ * One entry in the Blind's inspection audit log: a flagged table cell traced
+ * to the patient Listing rows behind it, and how its discrepancy stands. The
+ * log is kept for end-of-Blind grading, so it outlives the cards in hand.
+ */
+export interface TraceRecord {
+  /** The summary Table traced. */
+  cardId: string;
+  /** The supporting Listing it was traced into. */
+  listingId: string;
+  cell: CellCoordinates;
+  /** The findings flagged on the cell. */
+  findingIds: string[];
+  /** Every subject row inspected on the Listing, by USUBJID. */
+  subjectIds: string[];
+  /** The subjects the cell counts: the rows the trace line highlights. */
+  matchedSubjectIds: string[];
+  /** The population snapshot the Listing rows were filtered on. */
+  snapshotId: string;
+  /** RESOLVED once every finding on the cell is corrected. */
+  resolution: "OPEN" | "RESOLVED";
+  /** The Table was recompiled since: this trace describes an output that no longer exists. */
+  superseded: boolean;
+}
+
+/** The ×Mult a traced, fully resolved Table earns when played with its Listing. */
+export const TLF_PAIR_SYNERGY = 2;
+
+/** The alert shown when a Table and its Listing disagree on provenance. */
+export const PROVENANCE_ALERT =
+  "Listing and table were compiled against different population snapshots: recompile the stale output before tracing.";
+
 /** How many consumables the tray holds. */
 export const CONSUMABLE_SLOTS = 2;
 
@@ -203,6 +238,8 @@ export interface TableState {
   crisisResolution: { crisisId: string; choiceId: string } | null;
   /** Modifiers crisis choices imposed on this Blind, besides its boss. */
   modifiers: BossBlindModifier[];
+  /** Every table cell traced to its Listing this Blind, in trace order. */
+  auditLog: TraceRecord[];
   /**
    * How much of `snapshots` and `invalidations` predates this Blind, the
    * inventory it started with, and its crisis, so a restart returns to
@@ -225,6 +262,8 @@ export type TableAction =
   | { type: "CLOSE_INSPECT" }
   | { type: "INSPECT_CELL"; row: number; col: number }
   | { type: "CORRECT_FINDING"; findingId: string }
+  /** Traces a flagged cell of the inspected Table to its Listing rows. Free. */
+  | { type: "TRACE_CELL"; row: number; col: number }
   /** Cosmetic: moves a card within the hand. Costs nothing. */
   | { type: "MOVE_CARD"; cardId: string; toIndex: number }
   /** Reruns a stale output against the current snapshot. */
@@ -271,6 +310,11 @@ export interface TableCardView {
   seals: FootnoteSeal[];
   /** How many footnote seals this output takes: its shell's slots. */
   footnoteSlots: number;
+  /**
+   * Cards in hand this one forms a TLF Pair with: a Table's supporting
+   * Listings, or a Listing's Tables. The linked-card indicator.
+   */
+  pairedWith: string[];
 }
 
 /** One crisis choice as the table renders it. */
@@ -296,6 +340,21 @@ export interface TableInspectionView extends InspectionView {
   /** The snapshot the inspected output was compiled against. */
   provenance: SnapshotRef;
   stale: boolean;
+  trace: InspectionTraceView;
+}
+
+/** Table-to-Listing tracing for the inspected output. */
+export interface InspectionTraceView {
+  /** The supporting Listing in hand the Table traces into, or null. */
+  listing: TlfCard | null;
+  /** Why no cell can be traced now, or null. */
+  blocked: string | null;
+  /** The Listing rows behind each traced cell, keyed `row:col`. */
+  cells: Record<string, CellTrace>;
+  /** This output's audit log entries, in trace order. */
+  log: TraceRecord[];
+  /** Playing the Table with `listing` earns the TLF Pair ×Mult now. */
+  synergy: boolean;
 }
 
 /** Everything the Card Table renders, derived purely from scenario and state. */
@@ -355,6 +414,8 @@ export interface TableView {
   discardCost: number;
   /** Treatment-arm values are face down (a DMC firewall). */
   firewall: boolean;
+  /** The Blind's inspection audit log, for end-of-Blind grading. */
+  auditLog: TraceRecord[];
 }
 
 /** One analysis set a blank shell could be compiled on, previewed before committing. */
@@ -598,6 +659,96 @@ const firewallUp = (scenario: Scenario, state: TableState): boolean =>
 /** The alert shown while a crisis waits for an answer. */
 const crisisAlert = (crisis: CrisisCard) =>
   `${crisis.name}: answer the crisis first.`;
+
+/** Cards in hand that form a TLF Pair with this one, in hand order. */
+function pairPartners(
+  scenario: Scenario,
+  state: TableState,
+  card: TlfCard
+): TlfCard[] {
+  const partnerType =
+    card.cardType === "TABLE"
+      ? "LISTING"
+      : card.cardType === "LISTING"
+        ? "TABLE"
+        : null;
+  if (partnerType === null) return [];
+  return state.hand
+    .map((id) => cardById(scenario, state, id) as TlfCard)
+    .filter(
+      (c) =>
+        c.id !== card.id && c.cardType === partnerType && c.topic === card.topic
+    );
+}
+
+/**
+ * Whether a Listing shares the Table's provenance: neither output is stale,
+ * and the Listing's snapshot has the same members of the Table's analysis
+ * set as the snapshot the Table was compiled against.
+ */
+function provenanceMatches(
+  scenario: Scenario,
+  state: TableState,
+  table: TlfCard,
+  draft: StagedTable,
+  listing: TlfCard
+): boolean {
+  if (isStale(scenario, state, table) || isStale(scenario, state, listing)) {
+    return false;
+  }
+  return sameMembership(
+    snapshotById(scenario, state, provenanceOf(state, listing).id),
+    snapshotById(scenario, state, draft.populationSnapshotId),
+    rulebookFor(scenario, state, table).populationSuit
+  );
+}
+
+/** The Listing a Table's cells trace into, or why none can be traced now. */
+function traceTarget(
+  scenario: Scenario,
+  state: TableState,
+  table: TlfCard,
+  draft: StagedTable
+): { listing: TlfCard | null; blocked: string | null } {
+  if (firewallUp(scenario, state)) {
+    return { listing: null, blocked: FIREWALL_ALERT };
+  }
+  const partners = pairPartners(scenario, state, table);
+  if (partners.length === 0) {
+    return {
+      listing: null,
+      blocked: `No supporting Listing for ${cardShortName(table)} is in hand: a trace needs one.`,
+    };
+  }
+  const listing = partners.find((l) =>
+    provenanceMatches(scenario, state, table, draft, l)
+  );
+  return listing
+    ? { listing, blocked: null }
+    : { listing: partners[0], blocked: PROVENANCE_ALERT };
+}
+
+/** A Table's current audit log entries traced into one Listing. */
+const tracesOf = (state: TableState, tableId: string, listingId?: string) =>
+  state.auditLog.filter(
+    (e) =>
+      e.cardId === tableId &&
+      !e.superseded &&
+      (listingId === undefined || e.listingId === listingId)
+  );
+
+/**
+ * Whether a Table played with this Listing earns the TLF Pair ×Mult: at least
+ * one flagged cell traced into it, and every traced discrepancy resolved.
+ */
+function pairSynergy(
+  state: TableState,
+  tableId: string,
+  listingId: string
+): boolean {
+  const traces = tracesOf(state, tableId, listingId);
+  return traces.length > 0 && traces.every((e) => e.resolution === "RESOLVED");
+}
 
 /** A face-down cell under a DMC firewall. */
 export const FIREWALL_CELL = "■";
@@ -845,6 +996,25 @@ function scoreCards(
       debuffFor(scenario, state, card, results);
     if (cancelled) ruleResults.push(cancelled);
   }
+  if (handType === "TLF_PAIR" || handType === "TLF_TWO_PAIR") {
+    for (const table of cards.filter((c) => c.cardType === "TABLE")) {
+      const listing = cards.find(
+        (c) =>
+          c.cardType === "LISTING" &&
+          c.topic === table.topic &&
+          pairSynergy(state, table.id, c.id)
+      );
+      if (!listing) continue;
+      ruleResults.push({
+        ruleId: `TLF-PAIR@${table.id}`,
+        passed: true,
+        chipsDelta: 0,
+        multDelta: 0,
+        multMultiplier: TLF_PAIR_SYNERGY,
+        evidence: `${cardShortName(table)} traced to ${listing.number} with every traced discrepancy resolved: TLF Pair synergy.`,
+      });
+    }
+  }
   return evaluateHand({
     handType,
     cards: cards.map((c) => ({ id: c.id, chips: c.chips, mult: c.mult })),
@@ -981,6 +1151,7 @@ export function createTableState(
     crisis,
     crisisResolution: null,
     modifiers: [],
+    auditLog: [],
     opening: {
       snapshots: history.snapshots.length,
       invalidations: history.invalidations.length,
@@ -1535,8 +1706,12 @@ export function advanceTable(
               ),
             }
           : state.drafts,
-        // A recompiled output is a new output: its review starts over.
+        // A recompiled output is a new output: its review starts over, and
+        // its traces describe the old one.
         inspections,
+        auditLog: state.auditLog.map((e) =>
+          e.cardId === card.id ? { ...e, superseded: true } : e
+        ),
         inspecting: state.inspecting === card.id ? null : state.inspecting,
         lastEvent: nextEvent(
           state,
@@ -1717,13 +1892,87 @@ export function advanceTable(
           ? inspectCell(draft, report, current, action.row, action.col)
           : correctFinding(report, current, action.findingId);
       if (!outcome.ok) return refuse(state, outcome.message);
+      const resolved = new Set(outcome.inspection.resolvedFindingIds);
       return {
         ...state,
         inspections: { ...state.inspections, [card.id]: outcome.inspection },
+        auditLog: state.auditLog.map((e) =>
+          e.cardId === card.id && !e.superseded
+            ? {
+                ...e,
+                resolution: e.findingIds.every((id) => resolved.has(id))
+                  ? "RESOLVED"
+                  : "OPEN",
+              }
+            : e
+        ),
         lastEvent: nextEvent(
           state,
           action.type === "INSPECT_CELL" ? "INSPECTED" : "CORRECTED",
           outcome.message
+        ),
+      };
+    }
+
+    case "TRACE_CELL": {
+      const card = state.inspecting
+        ? cardById(scenario, state, state.inspecting)
+        : undefined;
+      const draft = card ? draftFor(scenario, state, card) : undefined;
+      const inspection = card ? state.inspections[card.id] : undefined;
+      if (!card || !draft || !inspection) {
+        return refuse(state, "Open a card's Inspect view first.");
+      }
+      const { listing, blocked } = traceTarget(scenario, state, card, draft);
+      if (!listing || blocked) return refuse(state, blocked as string);
+      const report = reportFor(scenario, state, card, draft);
+      const revealed = new Set(visibleFindingIds(report, inspection));
+      const flagged = report.findings.filter(
+        (f) =>
+          f.cell.row === action.row &&
+          f.cell.col === action.col &&
+          revealed.has(f.id)
+      );
+      if (flagged.length === 0) {
+        return refuse(
+          state,
+          "Only a flagged cell can be traced: inspect it and reveal a redline first."
+        );
+      }
+      const trace = traceCell(
+        draft,
+        snapshotById(scenario, state, draft.populationSnapshotId),
+        rulebookFor(scenario, state, card),
+        action.row,
+        action.col
+      ) as CellTrace;
+      const where = `${draft.rows[action.row].label}, ${draft.columns[action.col].label}`;
+      const traced = tracesOf(state, card.id, listing.id).some(
+        (e) => e.cell.row === action.row && e.cell.col === action.col
+      );
+      const record: TraceRecord = {
+        cardId: card.id,
+        listingId: listing.id,
+        cell: { row: action.row, col: action.col },
+        findingIds: flagged.map((f) => f.id),
+        subjectIds: trace.rows.map((r) => r.usubjid),
+        matchedSubjectIds: trace.matchedSubjectIds,
+        snapshotId: trace.snapshotId,
+        resolution: flagged.every((f) =>
+          inspection.resolvedFindingIds.includes(f.id)
+        )
+          ? "RESOLVED"
+          : "OPEN",
+        superseded: false,
+      };
+      const n = trace.matchedSubjectIds.length;
+      return {
+        ...state,
+        auditLog: traced ? state.auditLog : [...state.auditLog, record],
+        lastEvent: nextEvent(
+          state,
+          "TRACED",
+          `Traced ${where} of ${cardShortName(card)} to ${listing.number} on ${trace.snapshotId}: ${n} of ${trace.rows.length} subject row${trace.rows.length === 1 ? "" : "s"} counted${n > 0 ? ` (${trace.matchedSubjectIds.join(", ")})` : ""}.`
         ),
       };
     }
@@ -1782,6 +2031,7 @@ export function deriveTableView(
       compatiblePopulations: shell ? compatibleWith(shell) : [],
       seals: state.seals[id] ?? [],
       footnoteSlots: footnoteSlotsOf(scenario, state, card),
+      pairedWith: pairPartners(scenario, state, card).map((c) => c.id),
     };
   });
 
@@ -1836,6 +2086,29 @@ export function deriveTableView(
       "HIGH_TABLE",
       true
     );
+    const target = traceTarget(
+      scenario,
+      state,
+      inspectingCard,
+      inspectingDraft
+    );
+    const log = tracesOf(state, inspectingCard.id);
+    const traceSnapshot = snapshotById(
+      scenario,
+      state,
+      inspectingDraft.populationSnapshotId
+    );
+    const cells: Record<string, CellTrace> = {};
+    for (const entry of log) {
+      const key = `${entry.cell.row}:${entry.cell.col}`;
+      cells[key] ??= traceCell(
+        inspectingDraft,
+        traceSnapshot,
+        rulebookFor(scenario, state, inspectingCard),
+        entry.cell.row,
+        entry.cell.col
+      ) as CellTrace;
+    }
     inspection = {
       ...deriveInspectionView(
         inspectingDraft,
@@ -1848,6 +2121,16 @@ export function deriveTableView(
       unpenalizedMult: unpenalizedMult(expected),
       provenance: provenanceOf(state, inspectingCard),
       stale: isStale(scenario, state, inspectingCard),
+      trace: {
+        listing: target.listing,
+        blocked: target.blocked,
+        cells,
+        log,
+        synergy:
+          target.listing !== null &&
+          target.blocked === null &&
+          pairSynergy(state, inspectingCard.id, target.listing.id),
+      },
     };
   }
 
@@ -1934,6 +2217,7 @@ export function deriveTableView(
     handsLeft,
     discardCost,
     firewall,
+    auditLog: state.auditLog,
   };
 }
 

@@ -173,11 +173,14 @@ export function scoreTimeline(
   for (const factor of evaluation.xMult.factors) {
     if (zeroIds.has(factor.sourceId) && factor.value === 0) continue;
     running.xMult *= factor.value;
+    const because = evaluation.ruleResults.find(
+      (r) => r.ruleId === factor.sourceId && r.multMultiplier === factor.value
+    )?.evidence;
     steps.push({
       kind: "X_MULT",
       source: factor.sourceId,
       factor: factor.value,
-      text: `${factor.sourceId}: ×${factor.value} Mult.`,
+      text: `${factor.sourceId}: ×${factor.value} Mult.${because ? ` ${because}` : ""}`,
       running: snapshot(),
     });
   }

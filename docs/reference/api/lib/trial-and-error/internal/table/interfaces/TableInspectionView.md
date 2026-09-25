@@ -353,6 +353,12 @@ The snapshot the inspected output was compiled against.
 
 ***
 
+### trace
+
+> **trace**: [`InspectionTraceView`](InspectionTraceView.md)
+
+***
+
 ### unpenalizedMult
 
 > **unpenalizedMult**: `number`

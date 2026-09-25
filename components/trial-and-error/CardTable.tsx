@@ -127,7 +127,7 @@ const COST_NAMES: Record<CpuAction, string> = {
   RECOMPILE: "Recompile",
 };
 
-function cardLabel(view: TableCardView): string {
+function cardLabel(view: TableCardView, partners: string[] = []): string {
   const { card } = view;
   const parts = [
     `${card.number}, ${card.title}`,
@@ -153,6 +153,8 @@ function cardLabel(view: TableCardView): string {
   }
   parts.push(...view.stamps.map((stamp) => STAMP_LABELS[stamp]));
   for (const seal of view.seals) parts.push(`footnote seal: ${seal.name}`);
+  if (partners.length > 0)
+    parts.push(`TLF Pair with ${partners.join(" and ")}`);
   if (view.selected) parts.push("selected");
   return parts.join(", ");
 }
@@ -502,7 +504,13 @@ export function CardTable({
         physical={physical}
         animate={animateCards}
         tabIndex={viewIndex === activeIndex ? 0 : -1}
-        label={cardLabel(h)}
+        label={cardLabel(
+          h,
+          h.pairedWith.map(
+            (pid) =>
+              view.hand.find((c) => c.card.id === pid)?.card.number ?? pid
+          )
+        )}
         buttonRef={(el) => {
           if (el) cardRefs.current.set(id, el);
           else cardRefs.current.delete(id);
@@ -1315,6 +1323,9 @@ export function CardTable({
                 onCorrect={(findingId) =>
                   send({ type: "CORRECT_FINDING", findingId })
                 }
+                trace={view.inspection.trace}
+                onTrace={(row, col) => send({ type: "TRACE_CELL", row, col })}
+                reducedMotion={reducedMotion}
                 initialFocusRef={deskFocusRef}
               />
               <div className="border-t border-zinc-800 p-3">

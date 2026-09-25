@@ -200,6 +200,12 @@ Re-exports [CellCoordinatesSchema](types/variables/CellCoordinatesSchema.md)
 
 ***
 
+### CellTrace
+
+Re-exports [CellTrace](internal/listing/interfaces/CellTrace.md)
+
+***
+
 ### ClassifiableCard
 
 Re-exports [ClassifiableCard](internal/hands/type-aliases/ClassifiableCard.md)
@@ -668,6 +674,12 @@ Re-exports [InspectionState](internal/inspection/interfaces/InspectionState.md)
 
 ***
 
+### InspectionTraceView
+
+Re-exports [InspectionTraceView](internal/table/interfaces/InspectionTraceView.md)
+
+***
+
 ### InspectionView
 
 Re-exports [InspectionView](internal/inspection/interfaces/InspectionView.md)
@@ -695,6 +707,12 @@ Re-exports [leveledBase](internal/hands/functions/leveledBase.md)
 ### LevelUp
 
 Re-exports [LevelUp](internal/table/interfaces/LevelUp.md)
+
+***
+
+### ListingRow
+
+Re-exports [ListingRow](internal/listing/interfaces/ListingRow.md)
 
 ***
 
@@ -767,6 +785,12 @@ Re-exports [PopulationTypeSchema](types/variables/PopulationTypeSchema.md)
 ### previewAllocation
 
 Re-exports [previewAllocation](internal/table/functions/previewAllocation.md)
+
+***
+
+### PROVENANCE\_ALERT
+
+Re-exports [PROVENANCE_ALERT](internal/table/variables/PROVENANCE_ALERT.md)
 
 ***
 
@@ -1184,6 +1208,12 @@ Re-exports [TimelineStep](internal/timeline/type-aliases/TimelineStep.md)
 
 ***
 
+### TLF\_PAIR\_SYNERGY
+
+Re-exports [TLF_PAIR_SYNERGY](internal/table/variables/TLF_PAIR_SYNERGY.md)
+
+***
+
 ### TlfCard
 
 Re-exports [TlfCard](types/type-aliases/TlfCard.md)
@@ -1193,6 +1223,18 @@ Re-exports [TlfCard](types/type-aliases/TlfCard.md)
 ### TlfCardSchema
 
 Re-exports [TlfCardSchema](types/variables/TlfCardSchema.md)
+
+***
+
+### traceCell
+
+Re-exports [traceCell](internal/listing/functions/traceCell.md)
+
+***
+
+### TraceRecord
+
+Re-exports [TraceRecord](internal/table/interfaces/TraceRecord.md)
 
 ***
 

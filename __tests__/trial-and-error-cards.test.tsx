@@ -197,6 +197,7 @@ const deckView = (): TableCardView[] =>
           compatiblePopulations: [],
           seals: [],
           footnoteSlots: 0,
+          pairedWith: [],
         },
       ];
     }
