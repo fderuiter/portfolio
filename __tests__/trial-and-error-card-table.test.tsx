@@ -315,8 +315,14 @@ describe("CardTable", () => {
     expect(result.textContent).toContain(
       "Next: Big Blind: Sponsor Safety Review · target 7500"
     );
+    // Cash-out is the primary next step; Next Blind skips the shop.
+    expect(document.activeElement).toBe(
+      screen.getByRole("button", { name: /^Cash out \$\d+k$/ })
+    );
+    expect(screen.getByTestId("cash-out").textContent).toContain(
+      "Sponsor owes"
+    );
     const next = screen.getByRole("button", { name: "Next Blind" });
-    expect(document.activeElement).toBe(next);
     fireEvent.click(next);
     expect(screen.getByTestId("blind-name").textContent).toBe(
       "Big Blind: Sponsor Safety Review"
@@ -343,12 +349,13 @@ describe("CardTable", () => {
       "disabled",
       true
     );
-    // Remote audit costs budget the study does not have.
+    // The Small Blind's payout, collected on the way past the shop, covers
+    // a remote audit.
     const remote = within(crisis).getByRole("button", {
       name: /Pay for a remote audit/,
     });
-    expect(remote).toHaveProperty("disabled", true);
-    expect(remote.textContent).toContain("Needs $2k study budget; $0k left.");
+    expect(remote).toHaveProperty("disabled", false);
+    expect(remote.textContent).not.toContain("Needs");
 
     fireEvent.click(host);
     expect(screen.queryByTestId("crisis")).toBeNull();
@@ -1007,7 +1014,10 @@ describe("CardTable DMC milestone Boss", () => {
     expect(choices).toHaveLength(3);
     fireEvent.click(choices[1]);
     expect(within(reward).getByText("SOP relic claimed")).toBeTruthy();
-    expect(choices.every((c) => (c as HTMLButtonElement).disabled)).toBe(true);
+    // Claimed: every choice answers with its reason instead of acting.
+    expect(
+      choices.every((c) => c.getAttribute("aria-disabled") === "true")
+    ).toBe(true);
     expect(choices[1].getAttribute("aria-pressed")).toBe("true");
     const rack = screen.getByTestId("relic-rack");
     expect(within(rack).getByTestId("relic").textContent).toBe("SOP-QC-12");

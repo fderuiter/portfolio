@@ -10,6 +10,7 @@
 
 - [ACT\_I](variables/ACT_I.md)
 - [ACT\_I\_CRISES](variables/ACT_I_CRISES.md)
+- [ACT\_I\_SHOP](variables/ACT_I_SHOP.md)
 - [DEMOGRAPHICS\_SCENARIO](variables/DEMOGRAPHICS_SCENARIO.md)
 - [DMC\_MILESTONE\_SCENARIO](variables/DMC_MILESTONE_SCENARIO.md)
 - [DMC\_RELICS](variables/DMC_RELICS.md)

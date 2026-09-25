@@ -267,6 +267,7 @@
 - [lib/trial-and-error/internal/rounding](lib/trial-and-error/internal/rounding/README.md)
 - [lib/trial-and-error/internal/run](lib/trial-and-error/internal/run/README.md)
 - [lib/trial-and-error/internal/scoring](lib/trial-and-error/internal/scoring/README.md)
+- [lib/trial-and-error/internal/shop](lib/trial-and-error/internal/shop/README.md)
 - [lib/trial-and-error/internal/snapshots](lib/trial-and-error/internal/snapshots/README.md)
 - [lib/trial-and-error/internal/table](lib/trial-and-error/internal/table/README.md)
 - [lib/trial-and-error/internal/timeline](lib/trial-and-error/internal/timeline/README.md)

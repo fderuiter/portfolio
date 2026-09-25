@@ -285,6 +285,8 @@ export const TransitionReasonSchema = z.enum([
   "PROTOCOL_AMENDMENT",
   "SCREEN_FAILURE",
   "PROTOCOL_DEVIATION",
+  /** A newly activated site enrolled the subject (#948). */
+  "SITE_ACTIVATION",
 ]);
 /** Why a subject's population membership changed. */
 export type TransitionReason = z.infer<typeof TransitionReasonSchema>;
@@ -294,16 +296,37 @@ export type TransitionReason = z.infer<typeof TransitionReasonSchema>;
  * snapshot produces the next version; `effectiveAt` becomes that version's
  * `capturedAt`, so no clock is read.
  */
-export const PopulationTransitionSchema = z.object({
-  id: identifier,
-  subjectId: identifier,
-  reason: TransitionReasonSchema,
-  change: z.enum(["JOIN", "LEAVE"]),
-  populations: z.array(PopulationTypeSchema).min(1),
-  effectiveAt: z.iso.datetime(),
-  /** What happened, in the study's words. */
-  description: z.string().min(1).max(280),
-});
+export const PopulationTransitionSchema = z
+  .object({
+    id: identifier,
+    subjectId: identifier,
+    reason: TransitionReasonSchema,
+    /** ENROLL adds `subject`, a subject the snapshot does not hold yet. */
+    change: z.enum(["JOIN", "LEAVE", "ENROLL"]),
+    populations: z.array(PopulationTypeSchema).min(1),
+    effectiveAt: z.iso.datetime(),
+    /** What happened, in the study's words. */
+    description: z.string().min(1).max(280),
+    /** The subject an ENROLL transition adds. */
+    subject: SubjectSchema.optional(),
+  })
+  .superRefine((transition, ctx) => {
+    const enrolls = transition.change === "ENROLL";
+    if (enrolls !== (transition.subject !== undefined)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["subject"],
+        message: "An ENROLL transition, and only one, carries its subject",
+      });
+    }
+    if (transition.subject && transition.subject.id !== transition.subjectId) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["subject", "id"],
+        message: "The enrolled subject must be the one the transition names",
+      });
+    }
+  });
 /** One subject joining or leaving analysis populations. */
 export type PopulationTransition = z.infer<typeof PopulationTransitionSchema>;
 
@@ -981,6 +1004,125 @@ export const GuidanceCardSchema = z.object({
 export type GuidanceCard = z.infer<typeof GuidanceCardSchema>;
 
 /**
+ * A trial site a Site Activation pack can activate (#948). Activating
+ * it adds its standing Chips to every later hand and enrolls its subjects
+ * into the study after the next Blind's first hand, which versions the
+ * population snapshot and stales the outputs in hand that depend on it.
+ */
+export const SiteSchema = z.object({
+  id: identifier,
+  name: z.string().min(1).max(60),
+  description: z.string().min(1).max(200),
+  modifier: ScoreModifierSchema,
+  /** The subjects the site enrolls. Their ids must be new to the study. */
+  subjects: z.array(SubjectSchema).min(1).max(3),
+});
+/** A trial site. */
+export type Site = z.infer<typeof SiteSchema>;
+
+/** One item the Procurement Shop can stock in a single slot, with its price. */
+export const ShopEntrySchema = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.literal("RELIC"),
+    price: z.number().int().positive(),
+    relic: RelicSchema,
+  }),
+  z.object({
+    kind: z.literal("GUIDANCE"),
+    price: z.number().int().positive(),
+    guidance: GuidanceCardSchema,
+  }),
+  z.object({
+    kind: z.literal("SEAL"),
+    price: z.number().int().positive(),
+    seal: FootnoteSealSchema,
+  }),
+]);
+/** One item the Procurement Shop can stock. */
+export type ShopEntry = z.infer<typeof ShopEntrySchema>;
+
+/** What a booster pack opens into. */
+export const PackKindSchema = z.enum(["SITE_ACTIVATION", "GUIDANCE", "RELIC"]);
+/** What a booster pack opens into. */
+export type PackKind = z.infer<typeof PackKindSchema>;
+
+/** A booster pack: it opens to `size` cards, of which the player keeps `choose`. */
+export const PackSchema = z
+  .object({
+    id: identifier,
+    kind: PackKindSchema,
+    name: z.string().min(1).max(40),
+    description: z.string().min(1).max(200),
+    price: z.number().int().positive(),
+    size: z.number().int().min(1).max(5),
+    choose: z.number().int().min(1).max(2),
+  })
+  .refine((pack) => pack.choose <= pack.size, {
+    message: "A pack cannot keep more cards than it opens",
+    path: ["choose"],
+  });
+/** A booster pack. */
+export type Pack = z.infer<typeof PackSchema>;
+
+/**
+ * An act's Procurement Shop catalog: the single-slot stock, the packs and
+ * the sites Site Activation packs draw from. Every item is data, validated
+ * here, and the shop draws from it only through the seeded PRNG.
+ */
+export const ShopCatalogSchema = z
+  .object({
+    entries: z.array(ShopEntrySchema).min(1),
+    packs: z.array(PackSchema).min(1),
+    sites: z.array(SiteSchema),
+  })
+  .superRefine((catalog, ctx) => {
+    const ids = new Set<string>();
+    const unique = (id: string, path: (string | number)[]) => {
+      if (ids.has(id)) {
+        ctx.addIssue({ code: "custom", path, message: `Duplicate id ${id}` });
+      }
+      ids.add(id);
+    };
+    catalog.entries.forEach((entry, i) =>
+      unique(shopEntryId(entry), ["entries", i])
+    );
+    catalog.packs.forEach((pack, i) => unique(pack.id, ["packs", i, "id"]));
+    catalog.sites.forEach((site, i) => unique(site.id, ["sites", i, "id"]));
+    const subjects = new Set<string>();
+    catalog.sites.forEach((site, i) =>
+      site.subjects.forEach((subject, j) => {
+        if (subjects.has(subject.id)) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["sites", i, "subjects", j, "id"],
+            message: "Each site enrolls its own subjects",
+          });
+        }
+        subjects.add(subject.id);
+      })
+    );
+    if (
+      catalog.packs.some((p) => p.kind === "SITE_ACTIVATION") &&
+      catalog.sites.length === 0
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["sites"],
+        message: "A Site Activation pack needs sites to draw",
+      });
+    }
+  });
+/** An act's Procurement Shop catalog. */
+export type ShopCatalog = z.infer<typeof ShopCatalogSchema>;
+
+/** A shop entry's id: the id of the relic, Guidance card or seal it sells. */
+export function shopEntryId(entry: ShopEntry): string {
+  if (entry.kind === "RELIC") return entry.relic.id;
+  if (entry.kind === "GUIDANCE") return entry.guidance.id;
+  return entry.seal.id;
+}
+
+/**
  * What one crisis choice does. Every field is optional and deterministic:
  * CPU and study budget deltas, a footnote seal granted to the tray or one
  * spent from it, a population transition (routed through snapshot
@@ -1313,6 +1455,8 @@ export const ActSchema = z
     blinds: z.array(ScenarioSchema).min(1).max(3),
     bossPool: z.array(ScenarioSchema).min(1).optional(),
     crisisDeck: z.array(CrisisCardSchema).optional(),
+    /** The Procurement Shop between Blinds. Without it there is no shop. */
+    shop: ShopCatalogSchema.optional(),
   })
   .superRefine((act, ctx) => {
     if (act.bossPool) {
@@ -1385,6 +1529,17 @@ export const ActSchema = z
         }
       });
     });
+    (act.shop?.sites ?? []).forEach((site, index) =>
+      site.subjects.forEach((subject, j) => {
+        if (subjectIds.has(subject.id)) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["shop", "sites", index, "subjects", j, "id"],
+            message: "A site must enroll subjects new to the study",
+          });
+        }
+      })
+    );
     const tiers = BlindTierSchema.options;
     act.blinds.forEach((blind, index) => {
       if (index === 0) return;

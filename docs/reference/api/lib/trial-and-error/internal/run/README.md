@@ -8,9 +8,16 @@
 
 ## Interfaces
 
+- [OpenedPack](interfaces/OpenedPack.md)
+- [PackCardView](interfaces/PackCardView.md)
+- [PackSlot](interfaces/PackSlot.md)
 - [RunDraw](interfaces/RunDraw.md)
 - [RunState](interfaces/RunState.md)
 - [RunView](interfaces/RunView.md)
+- [ShopItemView](interfaces/ShopItemView.md)
+- [ShopSlot](interfaces/ShopSlot.md)
+- [ShopState](interfaces/ShopState.md)
+- [ShopView](interfaces/ShopView.md)
 
 ## Type Aliases
 

@@ -27,6 +27,7 @@ import type {
   RedactedCard,
   Relic,
   EncounterStage,
+  Site,
 } from "../types";
 import { POPULATION_LABELS } from "../types";
 import { compileDraft, compileShell } from "./compile";
@@ -103,7 +104,9 @@ export interface TableEvent {
     | "STRUCTURAL_QC"
     | "UNBLINDED"
     | "SESSION_CHANGED"
-    | "RELIC_CLAIMED";
+    | "RELIC_CLAIMED"
+    | "CASHED_OUT"
+    | "SHOP";
   message: string;
   /** On LEVELED_UP: the hand that levelled and its base before and after. */
   levelUp?: LevelUp;
@@ -166,6 +169,10 @@ export interface Inventory {
   handLevels?: HandLevels;
   /** SOP relics the run has earned. */
   relics?: Relic[];
+  /** Trial sites the run has activated; each adds its Chips to every hand. */
+  sites?: Site[];
+  /** Site enrollments waiting for the next Blind's first hand. */
+  enrollments?: PopulationTransition[];
 }
 
 /**
@@ -209,7 +216,19 @@ export const PROVENANCE_ALERT =
 /** How many consumables the tray holds. */
 export const CONSUMABLE_SLOTS = 2;
 
+/** How many SOP relics the run can hold. */
+export const RELIC_SLOTS = 5;
+
+/**
+ * Pending site enrollments land once this many hands of a Blind have been
+ * played: after the first hand, so the outputs still in hand go stale.
+ */
+export const ENROLLMENT_AFTER_HANDS = 1;
+
 const EMPTY_INVENTORY: Inventory = { consumables: [], budget: 0 };
+
+/** The alert shown when a relic would exceed `RELIC_SLOTS`. */
+export const RELIC_RACK_FULL = `The relic rack holds ${RELIC_SLOTS}: sell a relic first.`;
 
 /** The alert shown when a hand holds a blank shell with no data allocated. */
 export const EMPTY_SHELL_ALERT =
@@ -282,6 +301,10 @@ export interface TableState {
   relics: Relic[];
   /** The relic taken as this Blind's encounter reward, once taken. */
   rewardClaimed: string | null;
+  /** Trial sites the run has activated; each adds its Chips to every hand. */
+  sites: Site[];
+  /** Site enrollments that land after this Blind's first hand. */
+  enrollments: PopulationTransition[];
   /**
    * How much of `snapshots` and `invalidations` predates this Blind, the
    * inventory it started with, and its crisis, so a restart returns to
@@ -528,6 +551,11 @@ export interface TableView {
   reward: { choices: Relic[]; claimed: string | null } | null;
   /** SOP relics the run has earned. */
   relics: Relic[];
+  relicSlots: number;
+  /** Trial sites the run has activated. */
+  sites: Site[];
+  /** Site enrollments that land after this Blind's first hand. */
+  enrollments: PopulationTransition[];
 }
 
 /** One stage of a staged encounter, as the Blind panel shows it. */
@@ -1548,7 +1576,7 @@ function scoreCards(
     handType,
     cards: cards.map((c) => ({ id: c.id, chips: c.chips, mult: c.mult })),
     ruleResults,
-    modifiers: state.relics.map((r) => r.modifier),
+    modifiers: [...state.relics, ...state.sites].map((r) => r.modifier),
     level: state.handLevels[handType].level,
   });
 }
@@ -1693,6 +1721,8 @@ export function createTableState(
       : [],
     relics: [...(inventory.relics ?? [])],
     rewardClaimed: null,
+    sites: [...(inventory.sites ?? [])],
+    enrollments: [...(inventory.enrollments ?? [])],
     opening: {
       snapshots: history.snapshots.length,
       invalidations: history.invalidations.length,
@@ -1714,6 +1744,8 @@ export function carriedInventory(state: TableState): Inventory {
     budget: state.budget,
     handLevels: state.handLevels,
     relics: state.relics,
+    sites: state.sites,
+    enrollments: state.enrollments,
   };
 }
 
@@ -1754,9 +1786,15 @@ function applyStudyEvents(
   const due: StudyEvent[] = (scenario.events ?? []).filter(
     (event) => event.afterHands === state.handsPlayed
   );
-  let next = state;
+  const enrolling =
+    state.handsPlayed === ENROLLMENT_AFTER_HANDS ? state.enrollments : [];
+  let next: TableState =
+    enrolling.length > 0 ? { ...state, enrollments: [] } : state;
   const messages: string[] = [];
-  for (const { transition } of due) {
+  for (const transition of [
+    ...due.map((event) => event.transition),
+    ...enrolling,
+  ]) {
     const applied = transitionTable(scenario, next, transition);
     if (!applied) continue;
     next = applied.state;
@@ -1994,6 +2032,9 @@ export function advanceTable(
     }
     const relic = rewards.find((r) => r.id === action.relicId);
     if (!relic) return refuse(state, "That relic is not on offer.");
+    if (state.relics.length >= RELIC_SLOTS) {
+      return refuse(state, RELIC_RACK_FULL);
+    }
     return {
       ...state,
       relics: [...state.relics, relic],
@@ -3063,6 +3104,9 @@ export function deriveTableView(
           }
         : null,
     relics: state.relics,
+    relicSlots: RELIC_SLOTS,
+    sites: state.sites,
+    enrollments: state.enrollments,
   };
 }
 

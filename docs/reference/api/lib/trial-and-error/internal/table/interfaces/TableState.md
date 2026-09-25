@@ -94,6 +94,78 @@ Cards in hand whose draft was compiled against a later snapshot.
 
 ***
 
+### enrollments
+
+> **enrollments**: `object`[]
+
+Site enrollments that land after this Blind's first hand.
+
+#### change
+
+> **change**: `"JOIN"` \| `"LEAVE"` \| `"ENROLL"`
+
+ENROLL adds `subject`, a subject the snapshot does not hold yet.
+
+#### description
+
+> **description**: `string`
+
+What happened, in the study's words.
+
+#### effectiveAt
+
+> **effectiveAt**: `string`
+
+#### id
+
+> **id**: `string` = `identifier`
+
+#### populations
+
+> **populations**: (`"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`)[]
+
+#### reason
+
+> **reason**: `"DROPOUT"` \| `"PROTOCOL_AMENDMENT"` \| `"SCREEN_FAILURE"` \| `"PROTOCOL_DEVIATION"` \| `"SITE_ACTIVATION"` = `TransitionReasonSchema`
+
+#### subject?
+
+> `optional` **subject?**: `object`
+
+The subject an ENROLL transition adds.
+
+##### subject.adverseEvents?
+
+> `optional` **adverseEvents?**: `object`[]
+
+Treatment-emergent adverse events. Absent means none were reported.
+
+##### subject.age
+
+> **age**: `number`
+
+##### subject.arm
+
+> **arm**: `"PLACEBO"` \| `"ACTIVE"` = `ArmSchema`
+
+##### subject.id
+
+> **id**: `string` = `identifier`
+
+##### subject.populations
+
+> **populations**: (`"SCREENED"` \| `"ITT"` \| `"SAFETY"` \| `"PER_PROTOCOL"` \| `"FAS"`)[]
+
+##### subject.sex
+
+> **sex**: `"F"` \| `"M"`
+
+#### subjectId
+
+> **subjectId**: `string` = `identifier`
+
+***
+
 ### hand
 
 > **hand**: `string`[]
@@ -315,6 +387,56 @@ Selected card ids, in selection order (at most `maxSelection`).
 > **session**: [`DmcSession`](../../blinding/type-aliases/DmcSession.md)
 
 The DMC session in force. Blinded outputs are face down in OPEN.
+
+***
+
+### sites
+
+> **sites**: `object`[]
+
+Trial sites the run has activated; each adds its Chips to every hand.
+
+#### description
+
+> **description**: `string`
+
+#### id
+
+> **id**: `string` = `identifier`
+
+#### modifier
+
+> **modifier**: `object` = `ScoreModifierSchema`
+
+##### modifier.chips
+
+> **chips**: `number`
+
+##### modifier.label
+
+> **label**: `string`
+
+##### modifier.plusMult
+
+> **plusMult**: `number`
+
+##### modifier.sourceId
+
+> **sourceId**: `string` = `identifier`
+
+##### modifier.xMult
+
+> **xMult**: `number`
+
+#### name
+
+> **name**: `string`
+
+#### subjects
+
+> **subjects**: `object`[]
+
+The subjects the site enrolls. Their ids must be new to the study.
 
 ***
 

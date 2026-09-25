@@ -41,6 +41,12 @@ import { LevelUpPlate } from "@/components/trial-and-error/LevelUpPlate";
 import { RunInfo } from "@/components/trial-and-error/RunInfo";
 import { BossIntro } from "@/components/trial-and-error/BossIntro";
 import { FirewallDialog } from "@/components/trial-and-error/FirewallDialog";
+import { CashOut } from "@/components/trial-and-error/CashOut";
+import { Shop } from "@/components/trial-and-error/Shop";
+import {
+  PackOpening,
+  type RevealCard,
+} from "@/components/trial-and-error/PackOpening";
 import { CardBack } from "@/components/trial-and-error/cards/CardBack";
 import { CardDetail } from "@/components/trial-and-error/cards/CardDetail";
 import { POPULATION_LABEL } from "@/components/trial-and-error/cards/CardFace";
@@ -100,7 +106,6 @@ function initialSeed(): string {
 type PendingFocus =
   { kind: "card"; cardId: string } | { kind: "hand"; index: number } | null;
 
-const RELIC_SLOTS = 5;
 const SPEEDS = [1, 2, 4] as const;
 const FIGURE_SPACE = "\u2007";
 
@@ -257,6 +262,12 @@ export function CardTable({
   const armedItem = view.consumables.find((c) => c.id === armedId);
   const armed = armedItem?.kind === "SEAL" ? armedItem : null;
   const [runInfoOpen, setRunInfoOpen] = useState(false);
+  /** The relic waiting for a sale to be confirmed, in the shop. */
+  const [sellRelicId, setSellRelicId] = useState<string | null>(null);
+  const shopView = runView.shop;
+  const sellingRelic = shopView
+    ? (view.relics.find((r) => r.id === sellRelicId) ?? null)
+    : null;
   /** The face-down output the firewall dialog is asking about. */
   const [peekId, setPeekId] = useState<string | null>(null);
   // A staged Boss Blind opens on its intro card until it is dismissed.
@@ -353,7 +364,8 @@ export function CardTable({
       return;
     }
     if (state.status !== "REVIEWING") {
-      restartRef.current?.focus();
+      // The shop and pack reveals manage their own focus.
+      if (!run.shop) restartRef.current?.focus();
       return;
     }
     const target = pendingFocus.current;
@@ -375,6 +387,7 @@ export function CardTable({
     state.hand,
     state.crisis,
     playing,
+    run.shop,
   ]);
 
   // Shift+R opens Run Info from anywhere in the table; a plain R on a card
@@ -910,32 +923,86 @@ export function CardTable({
 
         <div className="min-w-0 bg-[color:var(--te-surface-0)] p-3">
           <ul
-            aria-label={`Relic rack: ${view.relics.length} of ${RELIC_SLOTS} slots filled.${view.relics.length === 0 ? " Relics arrive with the Procurement Shop and Boss rewards." : ""}`}
+            aria-label={`Relic rack: ${view.relics.length} of ${view.relicSlots} slots filled.${view.relics.length === 0 ? " Relics arrive with the Procurement Shop and Boss rewards." : ""}${shopView && view.relics.length > 0 ? " Press S on a relic to sell it." : ""}`}
             tabIndex={0}
             className="flex flex-wrap gap-2 outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
             data-testid="relic-rack"
           >
-            {Array.from({ length: RELIC_SLOTS }, (_, i) => {
+            {Array.from({ length: view.relicSlots }, (_, i) => {
               const relic = view.relics[i];
-              return relic ? (
+              if (!relic) {
+                return (
+                  <li
+                    key={i}
+                    className="flex h-12 w-16 items-center justify-center border border-dashed border-zinc-700 text-[10px] uppercase text-zinc-400"
+                  >
+                    Empty
+                  </li>
+                );
+              }
+              const chip =
+                "flex h-12 min-w-0 max-w-[10rem] items-center justify-center border border-emerald-500/60 px-2 text-center text-[10px] font-bold uppercase text-emerald-300 break-words";
+              return (
                 <li
                   key={relic.id}
                   title={`${relic.name}: ${relic.description}`}
-                  className="flex h-12 min-w-0 max-w-[10rem] items-center justify-center border border-emerald-500/60 px-2 text-center text-[10px] font-bold uppercase text-emerald-300 break-words"
+                  className="min-w-0"
                   data-testid="relic"
                 >
-                  {relic.id}
-                </li>
-              ) : (
-                <li
-                  key={i}
-                  className="flex h-12 w-16 items-center justify-center border border-dashed border-zinc-700 text-[10px] uppercase text-zinc-400"
-                >
-                  Empty
+                  {shopView ? (
+                    <button
+                      type="button"
+                      aria-label={`${relic.name}: ${relic.description} Sells for $${shopView.relicSellValues[relic.id]}k. Press S or Enter to sell.`}
+                      onClick={() => setSellRelicId(relic.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === "s" || e.key === "S") {
+                          e.preventDefault();
+                          setSellRelicId(relic.id);
+                        }
+                      }}
+                      className={`${chip} touch-manipulation hover:bg-emerald-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 active:scale-[0.98]`}
+                      data-testid="relic-sell"
+                    >
+                      {relic.id}
+                    </button>
+                  ) : (
+                    <span className={chip}>{relic.id}</span>
+                  )}
                 </li>
               );
             })}
           </ul>
+          {sellingRelic && shopView && (
+            <div
+              role="group"
+              aria-label={`Sell ${sellingRelic.name}`}
+              className="mt-2 flex flex-wrap items-center gap-2 border border-amber-500/60 p-2 text-xs text-zinc-200"
+              data-testid="relic-sell-confirm"
+            >
+              <span className="min-w-0 break-words">
+                Sell {sellingRelic.name} for $
+                {shopView.relicSellValues[sellingRelic.id]}k?
+              </span>
+              <button
+                type="button"
+                autoFocus
+                onClick={() => {
+                  setSellRelicId(null);
+                  send({ type: "SELL_RELIC", relicId: sellingRelic.id });
+                }}
+                className={`${BUTTON_BASE} border-amber-500 text-amber-300 hover:bg-amber-500/10`}
+              >
+                Sell
+              </button>
+              <button
+                type="button"
+                onClick={() => setSellRelicId(null)}
+                className={`${BUTTON_BASE} border-zinc-600 text-zinc-300 hover:bg-zinc-800`}
+              >
+                Keep
+              </button>
+            </div>
+          )}
           <div
             role="group"
             aria-label={`Consumables: ${view.consumables.length} of ${view.consumableSlots} slots filled. Study budget $${view.budget}k.`}
@@ -961,7 +1028,10 @@ export function CardTable({
                     if (armed?.id === item.id) setArmedId(null);
                     send({ type: "SELL_CONSUMABLE", consumableId: item.id });
                   }}
-                  disabled={state.status !== "REVIEWING" || playing}
+                  // The shop buys between Blinds too.
+                  disabled={
+                    (state.status !== "REVIEWING" && !shopView) || playing
+                  }
                   className="min-h-[44px] border-t border-zinc-800 px-2 text-left uppercase tracking-wider text-zinc-300 touch-manipulation hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 disabled:text-zinc-500"
                 >
                   Sell · $
@@ -1409,7 +1479,8 @@ export function CardTable({
               >
                 {runView.phase === "ACT_COMPLETE"
                   ? `${act.title} complete`
-                  : runView.phase === "BLIND_CLEARED"
+                  : runView.phase === "BLIND_CLEARED" ||
+                      runView.phase === "SHOP"
                     ? "Blind cleared"
                     : "Blind failed · run over"}
               </p>
@@ -1420,68 +1491,142 @@ export function CardTable({
                 {state.discards === 1 ? "" : "s"} · {state.cpu.spent} CPU spent
               </p>
               {view.reward && (
-                <div
-                  role="group"
-                  aria-labelledby="relic-reward-heading"
-                  className="mx-auto mt-4 max-w-2xl text-left"
-                  data-testid="relic-reward"
-                >
-                  <p
-                    id="relic-reward-heading"
-                    className="text-xs font-bold uppercase tracking-wider text-zinc-200"
-                  >
-                    {view.reward.claimed
+                <PackOpening
+                  title={
+                    view.reward.claimed
                       ? "SOP relic claimed"
-                      : "Choose one SOP relic"}
-                  </p>
-                  <div className="mt-2 grid gap-2 sm:grid-cols-3">
-                    {view.reward.choices.map((relic) => {
-                      const taken = view.reward?.claimed === relic.id;
-                      return (
-                        <button
-                          key={relic.id}
-                          type="button"
-                          disabled={view.reward?.claimed != null}
-                          aria-pressed={taken}
-                          onClick={() =>
-                            send({ type: "CLAIM_RELIC", relicId: relic.id })
-                          }
-                          className={`min-h-[48px] min-w-0 border p-2 text-left text-xs touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 active:scale-[0.98] disabled:cursor-not-allowed ${taken ? "border-emerald-400 bg-emerald-500/10 text-emerald-200" : "border-zinc-600 text-zinc-200 hover:bg-zinc-800 disabled:opacity-50"}`}
-                          data-testid="relic-choice"
-                        >
-                          <span className="block font-bold break-words">
-                            {taken ? "Taken: " : "Take "}
-                            {relic.name}
-                          </span>
-                          <span className="block text-zinc-400 break-words">
-                            {relic.description}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
+                      : "Choose one SOP relic"
+                  }
+                  picksLeft={view.reward.claimed ? 0 : 1}
+                  cards={view.reward.choices.map((relic): RevealCard => ({
+                    id: relic.id,
+                    kind: "Relic",
+                    name: relic.name,
+                    description: relic.description,
+                    picked: view.reward?.claimed === relic.id,
+                    refusal:
+                      view.reward?.claimed != null &&
+                      view.reward.claimed !== relic.id
+                        ? "Another relic was taken."
+                        : view.relics.length >= view.relicSlots
+                          ? `The relic rack holds ${view.relicSlots}.`
+                          : null,
+                    warning: null,
+                  }))}
+                  onPick={(relicId) => send({ type: "CLAIM_RELIC", relicId })}
+                  animate={animateCards}
+                  loud={loudEffectsEnabled}
+                  testId="relic-reward"
+                  cardTestId="relic-choice"
+                />
               )}
-              {runView.nextBlind && runView.phase === "BLIND_CLEARED" ? (
+              {runView.phase === "BLIND_CLEARED" && runView.pendingCashOut && (
+                <CashOut
+                  report={runView.pendingCashOut}
+                  paid={false}
+                  animate={false}
+                  loud={false}
+                />
+              )}
+              {runView.phase === "SHOP" && runView.cashOut && (
+                <CashOut
+                  report={runView.cashOut}
+                  paid
+                  animate={animateCards}
+                  loud={loudEffectsEnabled}
+                />
+              )}
+              {shopView?.opened ? (
+                <PackOpening
+                  key={`${shopView.opened.packId}-${run.shop?.purchases}`}
+                  title={shopView.opened.name}
+                  picksLeft={shopView.opened.picksLeft}
+                  cards={shopView.opened.cards.map((card): RevealCard => ({
+                    ...card,
+                    kind:
+                      card.kind === "SITE"
+                        ? "Site"
+                        : card.kind === "RELIC"
+                          ? "Relic"
+                          : card.kind === "GUIDANCE"
+                            ? "Guidance"
+                            : "Seal",
+                  }))}
+                  onPick={(cardId) => send({ type: "PICK_PACK_CARD", cardId })}
+                  onSkip={() => send({ type: "SKIP_PACK" })}
+                  animate={animateCards}
+                  loud={loudEffectsEnabled}
+                />
+              ) : (
+                shopView && (
+                  <Shop
+                    view={shopView}
+                    budget={view.budget}
+                    onBuy={(slot) => send({ type: "BUY", slot })}
+                    onBuyPack={(slot) => send({ type: "BUY_PACK", slot })}
+                    onReroll={() => send({ type: "REROLL" })}
+                  />
+                )
+              )}
+              {runView.nextBlind &&
+              (runView.phase === "BLIND_CLEARED" ||
+                runView.phase === "SHOP") ? (
                 <>
                   <p className="mt-2 text-xs text-zinc-400 break-words">
                     Next: {runView.nextBlind.blind.name} · target{" "}
                     {runView.nextBlind.blind.quota}
                   </p>
-                  <button
-                    ref={restartRef}
-                    type="button"
-                    onClick={() => {
-                      setFocusIndex(0);
-                      send({ type: "NEXT_BLIND" }, { kind: "hand", index: 0 });
-                    }}
-                    disabled={
-                      view.reward !== null && view.reward.claimed === null
-                    }
-                    className={`${BUTTON_BASE} mt-4 border-emerald-500 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20`}
-                  >
-                    Next Blind
-                  </button>
+                  <div className="mt-4 flex flex-wrap justify-center gap-2">
+                    {runView.phase === "BLIND_CLEARED" &&
+                      runView.pendingCashOut &&
+                      act.shop && (
+                        <button
+                          ref={restartRef}
+                          type="button"
+                          onClick={() => send({ type: "CASH_OUT" })}
+                          className={`${BUTTON_BASE} border-amber-500 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20`}
+                          data-testid="cash-out-button"
+                        >
+                          Cash out ${runView.pendingCashOut.total}k
+                        </button>
+                      )}
+                    <button
+                      ref={
+                        runView.phase === "BLIND_CLEARED" && act.shop
+                          ? undefined
+                          : restartRef
+                      }
+                      type="button"
+                      onClick={() => {
+                        setFocusIndex(0);
+                        setSellRelicId(null);
+                        send(
+                          { type: "NEXT_BLIND" },
+                          { kind: "hand", index: 0 }
+                        );
+                      }}
+                      disabled={
+                        view.reward !== null && view.reward.claimed === null
+                      }
+                      aria-disabled={shopView?.opened ? true : undefined}
+                      aria-describedby={
+                        runView.phase === "BLIND_CLEARED" && act.shop
+                          ? "skip-shop-note"
+                          : undefined
+                      }
+                      className={`${BUTTON_BASE} border-emerald-500 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20`}
+                    >
+                      Next Blind
+                    </button>
+                  </div>
+                  {runView.phase === "BLIND_CLEARED" && act.shop && (
+                    <p
+                      id="skip-shop-note"
+                      className="mt-2 text-[11px] text-zinc-400 break-words"
+                    >
+                      Next Blind skips the shop; the sponsor still pays.
+                    </p>
+                  )}
                 </>
               ) : (
                 <button
@@ -1602,7 +1747,7 @@ export function CardTable({
         <RunInfo
           rows={view.handTable}
           seed={runView.seed}
-          relicSlots={RELIC_SLOTS}
+          relicSlots={view.relicSlots}
           relics={view.relics}
           accessLog={view.accessLog}
           dmc={view.dmcCharter !== null}
