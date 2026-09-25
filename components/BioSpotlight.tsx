@@ -38,7 +38,10 @@ export const BioSpotlight: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto mb-16 px-4">
+    <div
+      data-testid="bio-spotlight"
+      className="w-full max-w-4xl mx-auto mb-16 px-4"
+    >
       <div className="relative rounded-3xl bg-gradient-to-b from-[#181b22] to-[#121418] border border-white/10 p-6 sm:p-8 md:p-10 shadow-2xl overflow-hidden">
         {/* Subtle Ambient Background Accent */}
         <div className="absolute top-0 right-0 w-72 h-72 bg-amber-500/5 blur-3xl pointer-events-none rounded-full" />
