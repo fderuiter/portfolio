@@ -208,6 +208,7 @@ export function HandCard({
         style={{ rotateX: tiltX, rotateY: tiltY, transformPerspective: 700 }}
         data-stale={view.stale || undefined}
         data-blank={view.blank || undefined}
+        data-face-down={view.faceDown || undefined}
         className={`relative block h-[13.5rem] w-full min-w-0 border border-l-4 text-left text-xs touch-manipulation select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${view.blank ? "border-dashed border-l-zinc-500" : SUIT_BORDER[view.card.population]} ${sealTarget ? "outline outline-1 outline-dashed outline-amber-400/70" : ""} ${
           view.selected
             ? "border-amber-400 bg-[#1f1a10]"
@@ -224,8 +225,19 @@ export function HandCard({
             ⇄ PAIR
           </span>
         )}
+        {view.faceDown && (
+          <span
+            aria-hidden="true"
+            data-testid="blinded-marker"
+            className="pointer-events-none absolute -left-px -top-px z-10 border border-zinc-500 bg-[color:var(--te-surface-0)] px-1 font-mono text-[9px] leading-4 tracking-wider text-zinc-300"
+          >
+            {view.structural
+              ? `BLINDED · STRUCT ${view.structural.checks.filter((c) => c.passed).length}/${view.structural.checks.length}`
+              : "BLINDED"}
+          </span>
+        )}
         <CardFlip
-          faceUp
+          faceUp={!view.faceDown}
           dealt
           animate={animate}
           delay={animate ? Math.min(index, 8) * 0.04 : 0}

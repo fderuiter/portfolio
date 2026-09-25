@@ -77,6 +77,20 @@ Footnote seals granted to the consumable tray when the Blind starts.
 
 `object`[] = `...`
 
+#### dmc?
+
+\{ `charter`: `string`; \} = `...`
+
+The Data Monitoring Committee chartered for this Blind. Outputs whose
+shell `isBlinded` stay face down in the open session; only this
+charter's governance can convene the closed session that reveals them.
+
+#### dmc.charter
+
+`string` = `...`
+
+The documented control the closed session is convened under.
+
 #### drawPile
 
 `object`[] = `...`

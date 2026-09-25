@@ -10,6 +10,14 @@ Everything the Card Table renders, derived purely from scenario and state.
 
 ## Properties
 
+### accessLog
+
+> **accessLog**: [`AccessRecord`](../../blinding/interfaces/AccessRecord.md)[]
+
+The Blind's DMC access history, oldest first.
+
+***
+
 ### auditLog
 
 > **auditLog**: [`TraceRecord`](TraceRecord.md)[]
@@ -93,6 +101,14 @@ What one discard costs, with any penalty.
 ### discardsAffordable
 
 > **discardsAffordable**: `number`
+
+***
+
+### dmcCharter
+
+> **dmcCharter**: `string` \| `null`
+
+The charter the closed session is convened under, or null without a DMC.
 
 ***
 
@@ -236,6 +252,14 @@ Every modifier in force: the boss's, then any a crisis imposed.
 #### name
 
 > **name**: `string`
+
+***
+
+### pendingViolations
+
+> **pendingViolations**: `string`[]
+
+Unblinded outputs the next hand played will score ×0 for.
 
 ***
 
@@ -398,6 +422,22 @@ Any selected card is inspectable but uninspected.
 ### quota
 
 > **quota**: `number`
+
+***
+
+### session
+
+> **session**: [`DmcSession`](../../blinding/type-aliases/DmcSession.md)
+
+The DMC session in force.
+
+***
+
+### sessionRefusal
+
+> **sessionRefusal**: `string` \| `null`
+
+Why the session cannot change now, or null.
 
 ***
 

@@ -199,6 +199,9 @@ const deckView = (): TableCardView[] =>
           footnoteSlots: 0,
           pairedWith: [],
           figure: null,
+          blinded: false,
+          faceDown: false,
+          structural: null,
         },
       ];
     }

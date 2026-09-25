@@ -379,6 +379,10 @@ export const TableShellSpecSchema = z.object({
   mult: nonNegativeInt,
   requiredRulebookId: identifier,
   allowedFootnoteSlots: nonNegativeInt,
+  /**
+   * A closed-session output: face down, and absent from the derived view,
+   * until the scenario's DMC convenes the closed session.
+   */
   isBlinded: z.boolean().optional(),
   compatiblePopulations: z.array(PopulationTypeSchema).min(1).optional(),
   layout: z
@@ -1054,6 +1058,17 @@ export const ScenarioSchema = z
     consumables: z.array(FootnoteSealSchema).optional(),
     /** Guidance cards granted to free tray slots, after the seals. */
     guidance: z.array(GuidanceCardSchema).optional(),
+    /**
+     * The Data Monitoring Committee chartered for this Blind. Outputs whose
+     * shell `isBlinded` stay face down in the open session; only this
+     * charter's governance can convene the closed session that reveals them.
+     */
+    dmc: z
+      .object({
+        /** The documented control the closed session is convened under. */
+        charter: z.string().min(1).max(120),
+      })
+      .optional(),
   })
   .superRefine((scenario, ctx) => {
     const subjectIds = new Set(
