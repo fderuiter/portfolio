@@ -1,6 +1,11 @@
 import { describe, it, expect } from "vitest";
+import * as fc from "fast-check";
 import {
+  ACT_I_CRISES,
   DEMOGRAPHICS_SCENARIO,
+  DMC_MILESTONE_SCENARIO,
+  DOSE_ESCALATION_SCENARIO,
+  SPONSOR_SAFETY_SCENARIO,
   advanceTable,
   createInspectionState,
   createTableState,
@@ -242,7 +247,7 @@ describe("Card Table reducer", () => {
     };
     const start = run(select(DRAFT_A), createTableState(poor), poor);
     const played = run([{ type: "PLAY_HAND" }], start, poor);
-    expect(played.lastEvent?.message).toBe("Play Hand needs 2 CPU.");
+    expect(played.lastEvent?.message).toBe("Play Hand needs 2 CPU; 1 left.");
     expect({ ...played, lastEvent: null }).toEqual({
       ...start,
       lastEvent: null,
@@ -322,5 +327,163 @@ describe("Card Table reducer", () => {
       inspectedCells: [],
       resolvedFindingIds: [],
     });
+  });
+});
+
+describe("play blocker (#1078)", () => {
+  /**
+   * The view's blocker and the reducer's refusal for the same state: the
+   * line names exactly what Play Hand refuses with, or Play Hand succeeds.
+   */
+  function parity(s: Scenario, state: TableState) {
+    const view = deriveTableView(s, state);
+    const played = advanceTable(s, state, { type: "PLAY_HAND" });
+    if (view.playBlocker) {
+      expect(played.lastEvent?.kind).toBe("REFUSED");
+      expect(played.lastEvent?.message).toBe(view.playBlocker.reason);
+      expect(view.canPlay).toBe(false);
+    } else {
+      expect(played.lastEvent?.kind).not.toBe("REFUSED");
+      expect(view.canPlay).toBe(true);
+    }
+    return view.playBlocker;
+  }
+
+  it("asks for a selection, then clears once a card is selected", () => {
+    expect(parity(scenario, createTableState(scenario))).toEqual({
+      reason: "Select at least one card to play.",
+      fix: "Select a card",
+      key: "Space",
+    });
+    expect(parity(scenario, run(select(DM_LISTING)))).toBeNull();
+  });
+
+  it("names a CPU shortfall with what is left", () => {
+    const poor: Scenario = {
+      ...scenario,
+      table: { ...scenario.table, startingCpu: 1 },
+    };
+    const start = run(select(DRAFT_A), createTableState(poor), poor);
+    expect(parity(poor, start)).toEqual({
+      reason: "Play Hand needs 2 CPU; 1 left.",
+      fix: null,
+      key: null,
+    });
+  });
+
+  it("puts a pending crisis ahead of everything else", () => {
+    const [crisis] = ACT_I_CRISES;
+    const state = createTableState(scenario, undefined, undefined, crisis);
+    expect(parity(scenario, state)).toMatchObject({
+      reason: `${crisis.name}: answer the crisis first.`,
+      fix: "Answer it in the crisis panel",
+    });
+  });
+
+  it("says a decided Blind cannot be played", () => {
+    const over = { ...createTableState(scenario), status: "FAILED" as const };
+    expect(parity(scenario, over)?.reason).toBe(
+      "The Blind is over. Restart to play again."
+    );
+  });
+
+  it("names the stage refusals of a staged Boss with their fixes", () => {
+    const dmc = DMC_MILESTONE_SCENARIO;
+    const at = (actions: TableAction[], from = createTableState(dmc)) =>
+      actions.reduce((state, action) => advanceTable(dmc, state, action), from);
+    const closedInOpen = at(select("C-T14.3.3-D", "C-L16.2.8"));
+    expect(parity(dmc, closedInOpen)).toMatchObject({
+      reason: expect.stringMatching(
+        /^Closed-session outputs cannot be presented in the open session/
+      ),
+      fix: "Deselect Table 14.3.3",
+      key: "Space",
+    });
+    const defended = at([
+      ...select("C-T14.1.1", "C-L16.2.4"),
+      { type: "PLAY_HAND" },
+      ...select("C-T14.1.2", "C-L16.1.1"),
+      { type: "PLAY_HAND" },
+    ]);
+    expect(
+      parity(dmc, at(select("C-T14.3.3-D", "C-L16.2.8"), defended))
+    ).toMatchObject({ fix: "Convene the closed session", key: null });
+    const closed = at(
+      [
+        ...["C-T14.3.1-D", "C-T14.3.3-D", "C-T14.3.2.5-D"].map(
+          (cardId): TableAction => ({ type: "STRUCTURAL_QC", cardId })
+        ),
+        { type: "SET_SESSION", session: "CLOSED" },
+        ...select("C-T14.3.3-D", "C-L16.2.8"),
+      ],
+      defended
+    );
+    expect(parity(dmc, closed)).toEqual({
+      reason:
+        "Stage 2: Closed report accepts Efficacy Full House; this is TLF Pair.",
+      fix: "Select an Efficacy Full House",
+      key: null,
+    });
+  });
+
+  it("matches PLAY_HAND's refusal in every state random play reaches", () => {
+    const scenarios = [
+      DEMOGRAPHICS_SCENARIO,
+      SPONSOR_SAFETY_SCENARIO,
+      DOSE_ESCALATION_SCENARIO,
+      DMC_MILESTONE_SCENARIO,
+    ];
+    /** Every action worth trying from `state`, so each draw is meaningful. */
+    const candidates = (s: Scenario, state: TableState): TableAction[] => [
+      ...state.hand.map((cardId): TableAction => ({
+        type: "TOGGLE_SELECT",
+        cardId,
+      })),
+      ...state.hand.map((cardId): TableAction => ({
+        type: "RECOMPILE",
+        cardId,
+      })),
+      ...state.hand.map((cardId): TableAction => ({
+        type: "STRUCTURAL_QC",
+        cardId,
+      })),
+      ...state.hand.map((cardId): TableAction => ({
+        type: "ALLOCATE",
+        cardId,
+        population: "SAFETY",
+      })),
+      { type: "PLAY_HAND" },
+      { type: "DISCARD" },
+      { type: "SET_SESSION", session: "CLOSED" },
+      ...(state.crisis
+        ? state.crisis.choices.map((c): TableAction => ({
+            type: "RESOLVE_CRISIS",
+            choiceId: c.id,
+          }))
+        : []),
+    ];
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 0, max: scenarios.length - 1 }),
+        fc.boolean(),
+        fc.array(fc.nat(), { maxLength: 14 }),
+        (which, withCrisis, picks) => {
+          const s = scenarios[which];
+          let state = createTableState(
+            s,
+            undefined,
+            undefined,
+            withCrisis ? ACT_I_CRISES[which % ACT_I_CRISES.length] : null
+          );
+          parity(s, state);
+          for (const pick of picks) {
+            const options = candidates(s, state);
+            state = advanceTable(s, state, options[pick % options.length]);
+            parity(s, state);
+          }
+        }
+      ),
+      { numRuns: 60 }
+    );
   });
 });

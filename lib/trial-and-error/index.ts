@@ -95,6 +95,7 @@ export {
   type TableInspectionView,
   type TableState,
   type TableView,
+  type PlayBlocker,
   STALE_ALERT,
   EMPTY_SHELL_ALERT,
   CONSUMABLE_SLOTS,
