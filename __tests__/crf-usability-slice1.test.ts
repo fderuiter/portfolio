@@ -213,9 +213,9 @@ describe("CRF Usability Foundation - Slice 1 Suite", () => {
       expect(nextSysbp).toBe("SYSBP_3");
       expect(nextSysbp.length).toBeLessThanOrEqual(8);
 
-      // 8-char variable: DIABPRAW -> stem DIABPR, suffix _2 -> DIABPR_2 (in existing), so DIABPR_3
+      // DIABPRAW is an unused valid 8-character base, so it stays unchanged.
       const nextDiabpraw = generateCdashVariableName("DIABPRAW", existing);
-      expect(nextDiabpraw).toBe("DIABPR_3");
+      expect(nextDiabpraw).toBe("DIABPRAW");
       expect(nextDiabpraw.length).toBeLessThanOrEqual(8);
 
       // Lowercase / dirty input
