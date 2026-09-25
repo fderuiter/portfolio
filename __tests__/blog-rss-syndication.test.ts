@@ -6,6 +6,7 @@ import {
   type BlogPostData,
 } from "@/lib/services/blog-service";
 import { resolveBaseUrl } from "@/lib/domain";
+import { JSDOM } from "jsdom";
 
 describe("Blog RSS/Atom Syndication (Issue #763)", () => {
   beforeEach(() => {
@@ -77,6 +78,37 @@ describe("Blog RSS/Atom Syndication (Issue #763)", () => {
     // Assert that unpublished drafts are strictly excluded
     expect(xml).not.toContain("Unpublished Draft Post");
     expect(xml).not.toContain("unpublished-draft-post");
+  });
+
+  it("stays well-formed XML when a post body contains a CDATA terminator", async () => {
+    const body = "<pre><code>if (a[b[0]]> 1) return;</code></pre>";
+    vi.spyOn(BlogPostService, "getAllPublishedBlogPosts").mockResolvedValue([
+      {
+        id: "post-cdata",
+        slug: "cdata-terminator",
+        title: "Arrays & <Generics>",
+        dek: "Nested ]]> sequences in prose.",
+        body,
+        pillar: "systems-architecture",
+        tags: "xml",
+        published: true,
+        reading_time_minutes: 1,
+        hero_image_url: null,
+        created_at: new Date("2026-03-10T12:00:00.000Z"),
+        updated_at: new Date("2026-03-10T12:00:00.000Z"),
+      },
+    ] as BlogPostData[]);
+
+    const xml = await (await getRss()).text();
+
+    // A strict XML parser throws on a raw "]]>" inside the CDATA section.
+    const doc = new JSDOM(xml, { contentType: "application/xml" }).window
+      .document;
+    const encoded = doc.getElementsByTagName("content:encoded")[0];
+    expect(encoded?.textContent).toBe(body);
+    expect(doc.querySelector("item > title")?.textContent).toBe(
+      "Arrays & <Generics>"
+    );
   });
 
   it("redirects /feed.xml to /blog/rss.xml with a 301 status", async () => {
