@@ -72,32 +72,52 @@ function formatResponseMock(field: CRFField, study: StudyProtocol): string {
 }
 
 /**
- * Generates a high-fidelity PDF Document for a Study Protocol or single form.
+ * Generates a high-fidelity PDF document representing a study or selected forms.
  *
  * @param study - StudyProtocol definition
- * @param options - Export options (mode, scope, branding, etc.)
+ * @param options - Export options. `all` includes every form; `single` includes the form matching
+ *   the first `selectedFormIds` entry; `selected` includes matching requested forms in study order.
+ *   Those scopes throw a `RangeError` if `selectedFormIds` is missing or empty, if the first ID
+ *   does not resolve for `single`, or if no IDs resolve for `selected`.
  * @returns Promise resolving to binary Blob
  */
 export async function generateStudyPdf(
   study: StudyProtocol,
   options: ExportPdfOptions
 ): Promise<Blob> {
+  let formsToInclude: CRFForm[];
+  if (options.scope === "all") {
+    formsToInclude = study.forms;
+  } else {
+    const selectedFormIds = options.selectedFormIds;
+    const selectionError = `Cannot export with scope '${options.scope}': selectedFormIds must include at least one ID matching a study form.`;
+    if (!selectedFormIds?.length) {
+      throw new RangeError(selectionError);
+    }
+
+    if (options.scope === "single") {
+      const form = study.forms.find(
+        (candidate) => candidate.id === selectedFormIds[0]
+      );
+      if (!form) {
+        throw new RangeError(selectionError);
+      }
+      formsToInclude = [form];
+    } else {
+      const requestedFormIds = new Set(selectedFormIds);
+      formsToInclude = study.forms.filter((form) =>
+        requestedFormIds.has(form.id)
+      );
+      if (formsToInclude.length === 0) {
+        throw new RangeError(selectionError);
+      }
+    }
+  }
+
   const branding = options.branding || getStudyBranding(study);
   const isAnnotated = options.mode === "annotated";
   const primaryRgb = hexToRgb(branding.primaryColor, [2, 132, 199]);
   const accentRgb = hexToRgb(branding.accentColor, [14, 165, 233]);
-
-  // Determine forms to include
-  let formsToInclude: CRFForm[] = study.forms;
-  if (options.scope === "single" && options.selectedFormIds?.length) {
-    formsToInclude = study.forms.filter(
-      (f) => f.id === options.selectedFormIds![0]
-    );
-  } else if (options.scope === "selected" && options.selectedFormIds?.length) {
-    formsToInclude = study.forms.filter((f) =>
-      options.selectedFormIds!.includes(f.id)
-    );
-  }
 
   const doc = new jsPDF({
     orientation: "portrait",
@@ -378,7 +398,7 @@ export async function generateStudyPdf(
     doc.text("Appendix: CDISC SDTM Mapping Specification", margin, 20);
 
     const sdtmRows: string[][] = [];
-    study.forms.forEach((f) => {
+    formsToInclude.forEach((f) => {
       f.sections.forEach((sec) => {
         sec.fields.forEach((field) => {
           sdtmRows.push([
