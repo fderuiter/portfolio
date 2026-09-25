@@ -60,6 +60,7 @@ describe("Prisma migration integrity", () => {
     "20261020000000_add_case_study_hero_image",
     "20261021000000_add_newsletter_subscribers",
     "20261022000000_add_case_study_reaction_unique_constraint",
+    "20261023000000_add_telemetry_event_created_at_idx",
   ];
 
   it("validates every checked-in migration file", () => {
@@ -188,6 +189,17 @@ describe("Prisma migration integrity", () => {
         'LOCK TABLE "CaseStudyReaction" IN SHARE ROW EXCLUSIVE MODE;'
       )
     ).toBeLessThan(migration.indexOf('DELETE FROM "CaseStudyReaction"'));
+  });
+
+  it("adds the TelemetryEvent createdAt index without destructive drops", () => {
+    const migration = readMigrationSql(
+      "20261023000000_add_telemetry_event_created_at_idx"
+    );
+
+    expect(migration).toMatch(
+      /CREATE INDEX(?: IF NOT EXISTS)? "TelemetryEvent_createdAt_idx"\s+ON "TelemetryEvent"\("createdAt"\)/
+    );
+    expect(migration).not.toMatch(/\bDROP\s+(?:TABLE|COLUMN|INDEX)\b/i);
   });
 
   it("fails migration file validation when a migration asset is missing or empty", () => {
