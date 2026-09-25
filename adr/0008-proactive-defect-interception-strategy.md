@@ -11,6 +11,7 @@ Accepted
 Complex modern web applications and computational engines require continuous deployment without risking stability or introducing user-facing regressions. Reactive bug fixing after user discovery creates customer friction, operational drag, and deploy hesitation.
 
 To achieve continuous deployment confidence, defects must be intercepted proactively before reaching or impacting users via a unified three-pillar strategy:
+
 1. Shift-Left automated analysis (property-based fuzzing, strict static invariants) running during CI before code merges.
 2. Synthetic user probing continuously running headless user journeys and API health probes against preview, staging, and production environments.
 3. Automated Canary Analysis (ACA) and anomaly detection telemetry to silently detect regressions and trigger instant rollbacks.
@@ -48,3 +49,19 @@ We establish an end-to-end Proactive Defect Interception architecture spanning t
 - **AGENTS.md Invariant 1 (Test Path Resolution)**: Dynamic root path resolution in all probe runners and scripts.
 - **AGENTS.md Invariant 6 (Developer Suite & Quality)**: Integrated into `npm run dx doctor`, `npm run verify`, and `npm run quality`.
 - **AGENTS.md Invariant 12 (Proactive Defect Interception & Synthetic Reliability)**: Enforces active property fuzzing gates, fast-check property suites, synthetic journey probes, and canary analysis scripts.
+
+## Amendment 2026-09-25: Canary Analysis Is Manual Tooling
+
+Pillar 3 was never wired into a deployment. `scripts/canary-analyzer.ts` is
+invoked only by its tests and by `npm run canary:eval`, which evaluates
+built-in sample metrics. No workflow, build step or Vercel integration feeds
+it live telemetry, and `executeAutomatedRollback` has no caller.
+[ADR 0049](0049-deploy-main-on-green-ci.md) made Vercel's Git build of `main`,
+gated by Merge Gate and a Vercel Deployment Check, the only production path,
+with rollback done by a person through Vercel's Instant Rollback.
+
+The analyzer stays as manual tooling for judging a deploy from metrics a
+person supplies. Automating promotion or rollback would need a new ADR
+covering a separately authenticated Vercel control-plane integration, a live
+metrics source, idempotency and audit logging, without placing a Vercel token
+in ordinary GitHub CI. See `DEPLOYMENT.md` section 2 and issue #987.

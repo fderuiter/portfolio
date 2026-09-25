@@ -562,10 +562,10 @@ To guarantee that layouts remain resilient across all devices, viewports, and ed
 
 ## Standalone Deployment Operations & Synthetic Monitoring
 
-The deployment pipeline integrates Automated Canary Analysis (ACA) and continuous synthetic user probing to safeguard production rollouts and enable rapid failure triage:
+Production ships through Vercel's Git integration building `main` behind CI's Merge Gate and a Vercel Deployment Check ([ADR 0049](adr/0049-deploy-main-on-green-ci.md); procedure in [`docs/how-to/release-and-deploy.md`](docs/how-to/release-and-deploy.md)). Around that flow:
 
-- **Automated Canary Release Gates (`scripts/canary-analyzer.ts`)**: Evaluates real-time telemetry against baseline error budgets, enforcing 0.5% 5xx error limits, 800ms p95 latency ceilings, 25% relative latency regression limits, and 2.0x Sentry exception spike ratios before traffic cutover.
-- **Automated Rollback Dispatch**: Automatically prepares and posts JSON payloads (`AUTOMATED_CANARY_ROLLBACK`) to infrastructure webhooks when canary analysis triggers `ROLLBACK_REQUIRED`.
+- **Manual Canary Analysis (`scripts/canary-analyzer.ts`)**: A library and demo command that compares caller-supplied metric windows against 0.5% 5xx error limits, 800ms p95 latency ceilings, 25% relative latency regression limits, and 2.0x Sentry exception spike ratios. No workflow or build step invokes it, and it has no live metrics source.
+- **Rollback**: A person uses Vercel's Instant Rollback. The `executeAutomatedRollback` helper only builds a webhook payload and has no caller; nothing rolls back automatically.
 - **Scheduled Synthetic Journey Monitoring (`.github/workflows/synthetic-probes.yml`)**: A daily cron (`17 7 * * *`) executing Playwright headless probes across 5 critical user journeys (Landing Pretext layout, Command Palette discovery, Proof Assistant DAG studio, Arcade canvas lifecycle, and Telemetry API schemas).
 
 Detailed operational evaluation commands, webhook payload structures, custom target URL overrides, and step-by-step failure triage runbooks are maintained in [**`DEPLOYMENT.md`**](DEPLOYMENT.md).

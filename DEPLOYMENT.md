@@ -1,24 +1,45 @@
-# Standalone Deployment Operations & Synthetic Monitoring Guide
+# Production Deployment, Rollback & Synthetic Monitoring
 
-This guide provides operational workflows, automated canary evaluation procedures, service-level agreement (SLA) gating criteria, automated rollback webhook dispatch specifications, and step-by-step triage runbooks for synthetic user journey probes.
+Production ships through Vercel's Git integration building `main`
+([ADR 0049](adr/0049-deploy-main-on-green-ci.md)). The canonical, step-by-step
+release procedure is
+[`docs/how-to/release-and-deploy.md`](docs/how-to/release-and-deploy.md). This
+guide describes the controls around that flow, the manual canary-analysis
+tooling, and the triage runbooks for the scheduled synthetic probes.
 
 ---
 
-## 1. Automated Canary Analysis (ACA) & Release Gates
+## 1. The Controls That Actually Guard Production
 
-To evaluate production rollout health before promoting full user traffic, the deployment pipeline executes Automated Canary Analysis (ACA).
+| Stage                     | Control                                                                                                                | Where it lives                           |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| Before merge              | **Merge Gate (Required Checks Summary)** must be green on the PR                                                       | `.github/workflows/ci.yml`               |
+| On merge                  | Vercel's Git integration builds the `main` commit with the production secrets it holds; GitHub Actions never deploys   | Vercel project, `vercel.json`            |
+| During the build          | Pending migrations are applied through the unpooled Neon endpoint on Vercel production builds only, before compilation | `scripts/build.js`                       |
+| Before promotion          | A Vercel **Deployment Check** holds the domains until Merge Gate passes on that commit                                 | Vercel project settings                  |
+| After promotion           | The daily synthetic probes exercise the critical journeys against production (section 3)                               | `.github/workflows/synthetic-probes.yml` |
+| When production is broken | A person uses Vercel's **Instant Rollback** to the previous production deployment, then fixes forward with a PR        | Vercel dashboard                         |
 
-### Canary Analysis Commands & Entry Points
+Nothing in this repository promotes or rolls back a deployment automatically.
 
-- **CLI Evaluation Command**:
-  ```bash
-  npm run canary:eval
-  ```
-  Or directly via `tsx`:
-  ```bash
-  npx tsx scripts/canary-analyzer.ts
-  ```
-- **Engine Entry Point**: `evaluateCanaryRollout(canary, baseline, customThresholds)` in `scripts/canary-analyzer.ts`.
+---
+
+## 2. Canary Analysis Tooling (Manual)
+
+`scripts/canary-analyzer.ts` is a library and a manual command. **No workflow,
+build step, cron or Vercel integration invokes it**, and it has no source of
+live production metrics. Its verdicts are advice for a person deciding whether
+to use Instant Rollback.
+
+### Commands and Entry Points
+
+- **Demo run**: `npm run canary:eval` (or `npx tsx scripts/canary-analyzer.ts`)
+  evaluates a built-in sample pair of metric windows and prints the verdict.
+  It does not read production data.
+- **Library**: `evaluateCanaryRollout(canary, baseline, customThresholds)`
+  compares two `TelemetryMetrics` windows that the caller supplies, for
+  example numbers copied from Vercel Observability and Sentry for the
+  15 minutes after a deploy and the preceding hour.
 
 ### Evaluation Window Parameters
 
@@ -27,15 +48,13 @@ To evaluate production rollout health before promoting full user traffic, the de
 
 ### Canary Decision States
 
-1. **`HEALTHY`**: All canary telemetry signals (error rate, p95 latency, Sentry exception rate) reside within normal error budgets and SLA limits. Safe for full traffic promotion.
-2. **`DEGRADED`**: Non-critical performance regression detected (e.g., p95 latency increased by > 25% vs baseline, but remains below the 800ms hard ceiling). Warnings are logged; manual engineer review is recommended before full traffic cutover.
-3. **`ROLLBACK_REQUIRED`**: Critical SLA breach or exception anomaly detected. Triggers automated rollback dispatch.
+1. **`HEALTHY`**: Error rate, p95 latency and Sentry exception rate are within the thresholds below.
+2. **`DEGRADED`**: p95 latency rose by more than 25% against the baseline but stays under the 800ms ceiling. Review before doing anything else.
+3. **`ROLLBACK_REQUIRED`**: A hard threshold was breached. Use Vercel's Instant Rollback, then fix forward.
 
----
+### Thresholds
 
-## 2. Canary Service-Level Agreement (SLA) Thresholds
-
-Production canary evaluations enforce four default service-level agreement (SLA) thresholds defined in `DEFAULT_THRESHOLDS` (`scripts/canary-analyzer.ts`):
+The defaults live in `DEFAULT_THRESHOLDS` (`scripts/canary-analyzer.ts`):
 
 | SLA Metric                      | Threshold Parameter       | Default Limit      | Evaluation Condition                                | Result State        |
 | ------------------------------- | ------------------------- | ------------------ | --------------------------------------------------- | ------------------- |
@@ -44,54 +63,23 @@ Production canary evaluations enforce four default service-level agreement (SLA)
 | **Relative Latency Regression** | `maxLatencyRegressionPct` | **25%**            | `latencyDeltaPct > 25%` (when p95 <= 800ms)         | `DEGRADED`          |
 | **Exception Spike Ratio**       | `maxExceptionSpikeRatio`  | **2.0x**           | `canaryExceptionRate / baselineExceptionRate > 2.0` | `ROLLBACK_REQUIRED` |
 
-### SLA Threshold Details
+- **5xx error rate**: `serverErrors5xx / totalRequests`.
+- **Relative latency regression**: `((canary.p95LatencyMs - baseline.p95LatencyMs) / baseline.p95LatencyMs) * 100`.
+- **Exception spike ratio**: exceptions are normalized per minute of each window, so windows of different lengths compare fairly. New exceptions against a zero baseline count as a spike.
 
-- **Max 0.5% 5xx Error Rate**: Evaluates `serverErrors5xx / totalRequests`. Exceeding 0.5% (0.005) immediately triggers `ROLLBACK_REQUIRED`.
-- **800ms p95 Latency Ceiling**: Hard upper bound for 95th percentile response latency. Any p95 response time above 800ms triggers `ROLLBACK_REQUIRED`.
-- **25% Relative Latency Regression Limit**: Measures percentage increase in p95 latency vs baseline (`((canary.p95LatencyMs - baseline.p95LatencyMs) / baseline.p95LatencyMs) * 100`). An increase greater than 25% marks the rollout as `DEGRADED`.
-- **2.0x Exception Spike Ratio**: Normalizes Sentry exceptions over window duration (`canaryExceptionRate = sentryExceptionCount / windowDurationMinutes`). If the canary exception rate per minute is more than 2.0x the baseline rate, or if new exceptions occur when baseline is zero, `ROLLBACK_REQUIRED` is dispatched.
+### `executeAutomatedRollback` (Unwired Webhook Helper)
 
----
-
-## 3. Automated Rollback Webhooks & Failure Triggers
-
-When `evaluateCanaryRollout` yields a `decision` of `ROLLBACK_REQUIRED`, the deployment pipeline automatically invokes `executeAutomatedRollback(result, options)`.
-
-### Webhook Dispatch Behavior
-
-- **Function**: `executeAutomatedRollback(result, { dryRun, webhookUrl })`
-- **Dry-Run Mode**: If `options.dryRun` is set to `true` or `webhookUrl` is omitted, the engine outputs the prepared payload to logs without dispatching an HTTP POST:
-  `[DRY RUN] Automated rollback payload prepared: ...`
-- **Live Webhook Mode**: If `webhookUrl` is provided, the function sends an HTTP `POST` request with `Content-Type: application/json`.
-
-### Automated Rollback Payload Structure
-
-```json
-{
-  "event": "AUTOMATED_CANARY_ROLLBACK",
-  "timestamp": "2026-08-21T08:30:00.000Z",
-  "reasons": [
-    "CRITICAL: Canary 5xx error rate (0.85%) exceeds safety budget threshold (0.50%).",
-    "CRITICAL: p95 latency (920ms) breached hard latency SLA (800ms)."
-  ],
-  "metrics": {
-    "errorRate": 0.0085,
-    "errorRatePct": "0.85%",
-    "p95LatencyMs": 920,
-    "sentryExceptionCount": 12,
-    "exceptionRatePerMinute": 0.8
-  }
-}
-```
-
-### Webhook Response & Error Handling
-
-- **Success (HTTP 200–299)**: Logs `Rollback webhook dispatched successfully.` and returns `{ success: true }`.
-- **Failure (HTTP 4xx/5xx or Network Failure)**: Returns `{ success: false, message: "Failed to trigger rollback webhook: ..." }` and logs critical alert for on-call notification.
+`executeAutomatedRollback(result, { dryRun, webhookUrl })` builds an
+`AUTOMATED_CANARY_ROLLBACK` JSON payload. It posts that payload only when a
+caller passes a `webhookUrl`, and no caller does; with `dryRun` or no URL it
+only logs the payload. It cannot roll back a Vercel deployment by itself.
+Automating rollback would need a separately authenticated Vercel control-plane
+integration, a live metrics source, idempotency and an audit log, and it must
+not put a Vercel token in ordinary GitHub CI. None of that exists today.
 
 ---
 
-## 4. Scheduled Synthetic Probe Monitoring
+## 3. Scheduled Synthetic Probe Monitoring
 
 To catch silent production regressions, the repository runs automated, continuous end-to-end Playwright synthetic probes.
 
@@ -133,7 +121,7 @@ Engineers can manually trigger synthetic probes locally or against preview/stagi
 
 ---
 
-## 5. Synthetic Probe Failure Triage Runbooks
+## 4. Synthetic Probe Failure Triage Runbooks
 
 When a synthetic probe alert triggers, on-call engineers should follow the dedicated triage runbook for the failing journey. Triage should be completed within 10 minutes.
 
