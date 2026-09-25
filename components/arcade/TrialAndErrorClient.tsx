@@ -83,7 +83,7 @@ export const TrialAndErrorClient: React.FC = () => {
             ]}
             importComponent={CardTableLoader}
           >
-            <DynamicCardTable />
+            <DynamicCardTable persist />
           </PlayCabinet>
         </div>
       </div>

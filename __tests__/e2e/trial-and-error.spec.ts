@@ -920,3 +920,43 @@ test.describe("Trial & Error Procurement Shop", () => {
     );
   });
 });
+
+test.describe("Trial & Error saved runs (#1079)", () => {
+  test("resumes the same table after a reload, from the keyboard", async ({
+    page,
+  }) => {
+    await launch(page);
+    await card(page, DRAFT_A).click();
+    await card(page, DM_LISTING).click();
+    await page.getByRole("button", { name: /Play Hand/ }).click();
+    await expect(page.getByTestId("round-score")).not.toHaveText(/^0\b/);
+    // Played cards stay in the DOM while their exit animation runs.
+    for (const id of [DRAFT_A, DM_LISTING]) {
+      await expect(page.locator(`[data-card-id="${id}"]`)).toHaveCount(0);
+    }
+    const handIds = () =>
+      page
+        .locator("[data-card-id]")
+        .evaluateAll((els) => els.map((el) => el.getAttribute("data-card-id")));
+    const hand = await handIds();
+    const score = await page.getByTestId("round-score").textContent();
+
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await expect(async () => {
+      const launchBtn = page.getByRole("button", { name: /Launch Cabinet/i });
+      if (await launchBtn.isVisible()) await launchBtn.click();
+      await expect(page.getByTestId("resume-run")).toBeVisible({
+        timeout: 3000,
+      });
+    }).toPass({ timeout: 30000 });
+    await expect(page.getByTestId("resume-run")).toContainText(SEED);
+    await expectNoBlockingViolations(page, "resume prompt");
+    const resume = page.getByRole("button", { name: "Resume run" });
+    await expect(resume).toBeFocused();
+    await page.keyboard.press("Enter");
+
+    await expect(page.getByTestId("hand")).toBeVisible();
+    await expect(page.getByTestId("round-score")).toHaveText(score ?? "");
+    expect(await handIds()).toEqual(hand);
+  });
+});

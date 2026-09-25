@@ -1564,3 +1564,65 @@ export const ActSchema = z
   });
 /** One act of a run. */
 export type Act = z.infer<typeof ActSchema>;
+
+const id = z.string().min(1).max(128);
+const index = z.number().int().min(0).max(1000);
+
+/**
+ * Every move a run records, as data (#1079). A saved run is its seed and
+ * these moves, replayed on load, so the save never holds a compiled value:
+ * blinded outputs stay out of storage by construction.
+ */
+export const RunActionSchema = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("TOGGLE_SELECT"), cardId: id }),
+  z.object({ type: z.literal("PLAY_HAND") }),
+  z.object({ type: z.literal("DISCARD") }),
+  z.object({ type: z.literal("INSPECT_CARD"), cardId: id }),
+  z.object({ type: z.literal("CLOSE_INSPECT") }),
+  z.object({ type: z.literal("INSPECT_CELL"), row: index, col: index }),
+  z.object({ type: z.literal("CORRECT_FINDING"), findingId: id }),
+  z.object({ type: z.literal("TRACE_CELL"), row: index, col: index }),
+  z.object({ type: z.literal("MOVE_CARD"), cardId: id, toIndex: index }),
+  z.object({ type: z.literal("RECOMPILE"), cardId: id }),
+  z.object({
+    type: z.literal("ALLOCATE"),
+    cardId: id,
+    population: PopulationTypeSchema,
+  }),
+  z.object({ type: z.literal("APPLY_SEAL"), consumableId: id, cardId: id }),
+  z.object({ type: z.literal("SELL_CONSUMABLE"), consumableId: id }),
+  z.object({ type: z.literal("USE_GUIDANCE"), consumableId: id }),
+  z.object({ type: z.literal("RESOLVE_CRISIS"), choiceId: id }),
+  z.object({ type: z.literal("STRUCTURAL_QC"), cardId: id }),
+  z.object({ type: z.literal("PEEK_BLINDED"), cardId: id }),
+  z.object({
+    type: z.literal("SET_SESSION"),
+    session: z.enum(["OPEN", "CLOSED"]),
+  }),
+  z.object({ type: z.literal("CLAIM_RELIC"), relicId: id }),
+  z.object({ type: z.literal("NEXT_BLIND") }),
+  z.object({ type: z.literal("CASH_OUT") }),
+  z.object({ type: z.literal("REROLL") }),
+  z.object({ type: z.literal("BUY"), slot: index }),
+  z.object({ type: z.literal("BUY_PACK"), slot: index }),
+  z.object({ type: z.literal("PICK_PACK_CARD"), cardId: id }),
+  z.object({ type: z.literal("SKIP_PACK") }),
+  z.object({ type: z.literal("SELL_RELIC"), relicId: id }),
+]);
+
+/** The save format's current version. */
+export const RUN_SAVE_VERSION = 1;
+
+/**
+ * A saved run (#1079): the act, the seed and every move since the run
+ * started. Loading replays the moves, so resuming never re-draws.
+ */
+export const RunSaveSchema = z.object({
+  version: z.literal(RUN_SAVE_VERSION),
+  actId: id,
+  savedAt: z.string().datetime(),
+  seed: z.string().regex(/^[A-Za-z0-9-]{1,64}$/),
+  actions: z.array(RunActionSchema).max(5000),
+});
+/** A saved run, as stored. */
+export type RunSave = z.infer<typeof RunSaveSchema>;
