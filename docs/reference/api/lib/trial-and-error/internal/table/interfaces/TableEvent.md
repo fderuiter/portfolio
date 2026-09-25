@@ -12,7 +12,15 @@ The most recent Card Table outcome, phrased for a polite announcement.
 
 ### kind
 
-> **kind**: `"RESET"` \| `"INSPECTED"` \| `"CORRECTED"` \| `"PLAYED"` \| `"DISCARDED"` \| `"REFUSED"` \| `"SELECTED"` \| `"DESELECTED"` \| `"INSPECT_OPENED"` \| `"INSPECT_CLOSED"` \| `"MOVED"` \| `"BLIND_STARTED"` \| `"RECOMPILED"` \| `"ALLOCATED"` \| `"SEALED"` \| `"SOLD"` \| `"CRISIS_RESOLVED"`
+> **kind**: `"RESET"` \| `"INSPECTED"` \| `"CORRECTED"` \| `"PLAYED"` \| `"DISCARDED"` \| `"REFUSED"` \| `"SELECTED"` \| `"DESELECTED"` \| `"INSPECT_OPENED"` \| `"INSPECT_CLOSED"` \| `"MOVED"` \| `"BLIND_STARTED"` \| `"RECOMPILED"` \| `"ALLOCATED"` \| `"SEALED"` \| `"SOLD"` \| `"LEVELED_UP"` \| `"CRISIS_RESOLVED"`
+
+***
+
+### levelUp?
+
+> `optional` **levelUp?**: [`LevelUp`](LevelUp.md)
+
+On LEVELED_UP: the hand that levelled and its base before and after.
 
 ***
 

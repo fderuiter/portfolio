@@ -11,8 +11,9 @@
 Fresh Card Table state: the first hand dealt against the study's current
 snapshot, CPU replenished to the Blind's allocation. `history` carries
 earlier Blinds' snapshot versions; without it the study starts at the
-scenario's own snapshot. `inventory` is the tray and budget carried in;
-the Blind's granted seals fill any free tray slots.
+scenario's own snapshot. `inventory` is the tray, budget and hand levels
+carried in; the Blind's granted seals, then its Guidance cards, fill any
+free tray slots.
 
 ## Parameters
 
@@ -87,6 +88,12 @@ Footnote seals granted to the consumable tray when the Blind starts.
 `object`[] = `...`
 
 Scripted population changes during this Blind, in hand order.
+
+#### guidance?
+
+`object`[] = `...`
+
+Guidance cards granted to free tray slots, after the seals.
 
 #### handType
 

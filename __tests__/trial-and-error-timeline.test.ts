@@ -46,7 +46,7 @@ describe("scoreTimeline", () => {
       level: 1,
       chips: 30,
       mult: 2,
-      text: "TLF Pair: 30 Chips, +2 Mult.",
+      text: "TLF Pair Lv.1: 30 Chips, +2 Mult.",
     });
     expect(steps[1]).toMatchObject({
       cardId: "T",

@@ -88,10 +88,10 @@ export function scoreTimeline(
   steps.push({
     kind: "HAND_BASE",
     handType: evaluation.handType,
-    level: 1,
+    level: evaluation.level,
     chips: evaluation.base.baseChips,
     mult: evaluation.base.baseMult,
-    text: `${HAND_NAMES[evaluation.handType]}: ${evaluation.base.baseChips} Chips, +${evaluation.base.baseMult} Mult.`,
+    text: `${HAND_NAMES[evaluation.handType]} Lv.${evaluation.level}: ${evaluation.base.baseChips} Chips, +${evaluation.base.baseMult} Mult.`,
     running: snapshot(),
   });
 

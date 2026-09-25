@@ -92,6 +92,22 @@ export const HandBaseScoreSchema = z.object({
 /** Base Chips and +Mult for one hand type. */
 export type HandBaseScore = z.infer<typeof HandBaseScoreSchema>;
 
+/** One hand type's level this run, and how many times it has been played. */
+export const HandLevelSchema = z.object({
+  level: z.number().int().min(1),
+  playedCount: nonNegativeInt,
+});
+/** One hand type's level and play count. */
+export type HandLevel = z.infer<typeof HandLevelSchema>;
+
+/**
+ * The run's hand levels: one entry per hand type, every hand starting at
+ * level 1. Guidance cards level a hand up for the rest of the run.
+ */
+export const HandLevelsSchema = z.record(HandTypeSchema, HandLevelSchema);
+/** The run's hand levels, keyed by hand type. */
+export type HandLevels = z.infer<typeof HandLevelsSchema>;
+
 /** A zero-based grid coordinate inside a staged output. */
 export const CellCoordinatesSchema = z.object({
   row: nonNegativeInt,
@@ -463,6 +479,8 @@ export const HandInputSchema = z.object({
   cards: z.array(ScoredCardSchema).min(1),
   ruleResults: z.array(RuleCheckResultSchema),
   modifiers: z.array(ScoreModifierSchema).optional(),
+  /** The hand type's level this run. Absent means level 1. */
+  level: z.number().int().min(1).optional(),
 });
 /** Input to the hand evaluator. */
 export type HandInput = z.infer<typeof HandInputSchema>;
@@ -485,6 +503,9 @@ export type ScoreLedgerEntry = z.infer<typeof ScoreLedgerEntrySchema>;
 export const HandEvaluationSchema = z.object({
   handType: HandTypeSchema,
   cardIds: z.array(z.string()),
+  /** The hand type's level this hand was scored at. */
+  level: z.number().int().min(1),
+  /** The hand's base at that level: its level-1 base plus the level bonus. */
   base: HandBaseScoreSchema,
   chips: z.object({
     base: z.number().int(),
@@ -798,6 +819,27 @@ export const FootnoteSealSchema = z.object({
 export type FootnoteSeal = z.infer<typeof FootnoteSealSchema>;
 
 /**
+ * A Guidance card: a consumable named after a real guidance document. Using
+ * it levels its hand type up by one for the rest of the run; the bonus per
+ * level is the hand's, in `HAND_LEVEL_BONUS`. Flavour text is a joke, not
+ * regulatory advice.
+ */
+export const GuidanceCardSchema = z.object({
+  id: identifier,
+  /** The short name printed on the card, e.g. "ICH E9". */
+  name: z.string().min(1).max(32),
+  /** The document's full title. */
+  document: z.string().min(1).max(120),
+  /** The hand type it levels up. */
+  handType: HandTypeSchema,
+  flavor: z.string().min(1).max(200),
+  /** What selling it adds to the study budget. */
+  sellValue: nonNegativeInt,
+});
+/** A Guidance card. */
+export type GuidanceCard = z.infer<typeof GuidanceCardSchema>;
+
+/**
  * What one crisis choice does. Every field is optional and deterministic:
  * CPU and study budget deltas, a footnote seal granted to the tray or one
  * spent from it, a population transition (routed through snapshot
@@ -913,6 +955,8 @@ export const ScenarioSchema = z
     events: z.array(StudyEventSchema).optional(),
     /** Footnote seals granted to the consumable tray when the Blind starts. */
     consumables: z.array(FootnoteSealSchema).optional(),
+    /** Guidance cards granted to free tray slots, after the seals. */
+    guidance: z.array(GuidanceCardSchema).optional(),
   })
   .superRefine((scenario, ctx) => {
     const subjectIds = new Set(

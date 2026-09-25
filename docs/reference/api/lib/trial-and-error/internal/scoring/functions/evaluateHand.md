@@ -9,9 +9,11 @@
 > **evaluateHand**(`input`): `object`
 
 Scores a hand through the pipeline pinned in #890:
-(base hand Chips + Σ output Chips + Σ relic Chips) × (base hand Mult +
+(leveled base hand Chips + Σ output Chips + Σ relic Chips) × (base hand Mult +
 Σ card and rule +Mult + Σ relic +Mult) × Π ×Mult. Any rule result with a
-`multMultiplier` of 0 triggers the zero-score rule. Pure and deterministic.
+`multMultiplier` of 0 triggers the zero-score rule. The base is the hand's
+at `input.level` (default 1): `HAND_BASE_SCORES` plus the level bonus.
+Pure and deterministic.
 
 ## Parameters
 
@@ -25,6 +27,12 @@ Scores a hand through the pipeline pinned in #890:
 
 `"HIGH_TABLE"` \| `"TLF_PAIR"` \| `"TLF_TWO_PAIR"` \| `"POPULATION_FLUSH"` \| `"CSR_STRAIGHT"` \| `"EFFICACY_FULL_HOUSE"` \| `"MEDDRA_FIVE_OF_A_KIND"` = `HandTypeSchema`
 
+#### level?
+
+`number` = `...`
+
+The hand type's level this run. Absent means level 1.
+
 #### modifiers?
 
 `object`[] = `...`
@@ -35,11 +43,11 @@ Scores a hand through the pipeline pinned in #890:
 
 ## Returns
 
-`object`
-
 ### base
 
 > **base**: `object` = `HandBaseScoreSchema`
+
+The hand's base at that level: its level-1 base plus the level bonus.
 
 #### base.baseChips
 
@@ -92,6 +100,12 @@ Scores a hand through the pipeline pinned in #890:
 ### ledger
 
 > **ledger**: `object`[]
+
+### level
+
+> **level**: `number`
+
+The hand type's level this hand was scored at.
 
 ### mult
 

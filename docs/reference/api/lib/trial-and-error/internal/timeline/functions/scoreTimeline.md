@@ -24,6 +24,8 @@ Pure and deterministic; the TOTAL step always equals the evaluation.
 
 \{ `baseChips`: `number`; `baseMult`: `number`; `description`: `string`; `handType`: `"HIGH_TABLE"` \| `"TLF_PAIR"` \| `"TLF_TWO_PAIR"` \| `"POPULATION_FLUSH"` \| `"CSR_STRAIGHT"` \| `"EFFICACY_FULL_HOUSE"` \| `"MEDDRA_FIVE_OF_A_KIND"`; \} = `HandBaseScoreSchema`
 
+The hand's base at that level: its level-1 base plus the level bonus.
+
 #### base.baseChips
 
 `number` = `nonNegativeInt`
@@ -75,6 +77,12 @@ Pure and deterministic; the TOTAL step always equals the evaluation.
 #### ledger
 
 `object`[] = `...`
+
+#### level
+
+`number` = `...`
+
+The hand type's level this hand was scored at.
 
 #### mult
 

@@ -18,6 +18,8 @@ The +Mult a hand would carry before redline penalties: the slash display.
 
 \{ `baseChips`: `number`; `baseMult`: `number`; `description`: `string`; `handType`: `"HIGH_TABLE"` \| `"TLF_PAIR"` \| `"TLF_TWO_PAIR"` \| `"POPULATION_FLUSH"` \| `"CSR_STRAIGHT"` \| `"EFFICACY_FULL_HOUSE"` \| `"MEDDRA_FIVE_OF_A_KIND"`; \} = `HandBaseScoreSchema`
 
+The hand's base at that level: its level-1 base plus the level bonus.
+
 #### base.baseChips
 
 `number` = `nonNegativeInt`
@@ -69,6 +71,12 @@ The +Mult a hand would carry before redline penalties: the slash display.
 #### ledger
 
 `object`[] = `...`
+
+#### level
+
+`number` = `...`
+
+The hand type's level this hand was scored at.
 
 #### mult
 

@@ -590,7 +590,7 @@ describe("Footnote seals", () => {
       eligible: { cardTypes: ["LISTING"] },
     };
     const inv = (seal: FootnoteSeal): Inventory => ({
-      consumables: [{ id: seal.id, seal }],
+      consumables: [{ id: seal.id, kind: "SEAL", seal }],
       budget: 0,
     });
     const onDraftC = (seal: FootnoteSeal, scenario = SMALL) =>
@@ -666,7 +666,10 @@ describe("Footnote seals", () => {
 
   it("adds +Chips on an eligible AE table, cancelled with the card when it goes stale", () => {
     const state = createTableState(BIG);
-    expect(state.consumables.map((c) => c.id)).toEqual([OVERLAP]);
+    expect(state.consumables.map((c) => c.id)).toEqual([
+      OVERLAP,
+      "GUIDE-ICH-E2A@sponsor-safety-big-blind",
+    ]);
     const sealed = run(
       [
         { type: "APPLY_SEAL", consumableId: OVERLAP, cardId: "C-T14.3.1-A" },
@@ -790,10 +793,11 @@ describe("Footnote seals", () => {
     });
     expect(
       lastMessage(run([{ type: "SELL_CONSUMABLE", consumableId: "nope" }]))
-    ).toBe("That footnote seal is not in your tray.");
+    ).toBe("That consumable is not in your tray.");
     expect(carriedInventory(sold)).toEqual({
       consumables: sold.consumables,
       budget: 2,
+      handLevels: sold.handLevels,
     });
   });
 

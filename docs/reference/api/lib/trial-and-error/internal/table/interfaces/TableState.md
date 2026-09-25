@@ -28,7 +28,7 @@ The study budget: the shop's money.
 
 ### consumables
 
-> **consumables**: [`Consumable`](Consumable.md)[]
+> **consumables**: [`Consumable`](../type-aliases/Consumable.md)[]
 
 The consumable tray, at most `CONSUMABLE_SLOTS`.
 
@@ -83,6 +83,14 @@ Cards in hand whose draft was compiled against a later snapshot.
 > **hand**: `string`[]
 
 Card ids in hand, in deal order.
+
+***
+
+### handLevels
+
+> **handLevels**: [`HandLevels`](../../../types/type-aliases/HandLevels.md)
+
+The run's hand levels, carried from Blind to Blind.
 
 ***
 

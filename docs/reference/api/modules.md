@@ -254,6 +254,7 @@
 - [lib/trial-and-error/internal/compile](lib/trial-and-error/internal/compile/README.md)
 - [lib/trial-and-error/internal/cpu](lib/trial-and-error/internal/cpu/README.md)
 - [lib/trial-and-error/internal/desk](lib/trial-and-error/internal/desk/README.md)
+- [lib/trial-and-error/internal/guidance](lib/trial-and-error/internal/guidance/README.md)
 - [lib/trial-and-error/internal/hands](lib/trial-and-error/internal/hands/README.md)
 - [lib/trial-and-error/internal/inspection](lib/trial-and-error/internal/inspection/README.md)
 - [lib/trial-and-error/internal/rng](lib/trial-and-error/internal/rng/README.md)

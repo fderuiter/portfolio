@@ -23,6 +23,7 @@ import type {
   TableShellSpec,
   TlfCard,
 } from "./types";
+import { GUIDANCE_CARDS } from "./internal/guidance";
 
 const snapshotId = "SNAP-P1-v1";
 
@@ -1004,6 +1005,7 @@ export const SPONSOR_SAFETY_SCENARIO: Scenario = {
   rulebook: SPONSOR_RULEBOOK,
   populationSnapshot: POPULATION_SNAPSHOT,
   consumables: [AE_NOT_EXCLUSIVE],
+  guidance: [GUIDANCE_CARDS.MEDDRA_FIVE_OF_A_KIND],
   shells: SPONSOR.shells,
   drawPile: SPONSOR.drawPile,
   events: [

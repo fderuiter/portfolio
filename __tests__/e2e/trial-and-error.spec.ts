@@ -165,7 +165,6 @@ test.describe("Trial & Error: Biostat Ops Card Table", () => {
 
     // The Big Blind opens on a seeded crisis (T&E-05): the card turns up,
     // play waits for an answer, and a choice the run cannot afford says why.
-    await expect(page.getByTestId("run-seed")).toContainText(SEED);
     await expect(
       page.getByRole("heading", { name: "Crisis: Site Audit" })
     ).toBeVisible();
@@ -182,6 +181,17 @@ test.describe("Trial & Error: Biostat Ops Card Table", () => {
       page.getByRole("button", { name: /Discard · 2 CPU/ })
     ).toBeVisible();
     await expectNoBlockingViolations(page, "Big Blind start");
+
+    // Run Info (T&E-UX-05): Shift+R opens it with the seed; Escape returns
+    // focus to the card.
+    await page.keyboard.press("Shift+R");
+    const runInfo = page.getByRole("dialog", { name: "Run Info" });
+    await expect(runInfo.getByTestId("run-seed")).toHaveText(SEED);
+    await expect(runInfo.getByTestId("run-info-hand")).toHaveCount(7);
+    await expectNoBlockingViolations(page, "Run Info");
+    await page.keyboard.press("Escape");
+    await expect(runInfo).toBeHidden();
+    await expect(card(page, "C-T14.3.1-A")).toBeFocused();
   });
 
   test("stales the Safety outputs when the data moves, and recompiles one with R (T&E-03)", async ({
@@ -412,6 +422,23 @@ test.describe("Trial & Error: Biostat Ops Card Table", () => {
     });
     await card(page, DRAFT_A).click();
     await expectNoHorizontalOverflow(page);
+  });
+
+  test("opens Run Info without page overflow at 200% zoom", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await launch(page);
+    await page.evaluate(() => {
+      document.documentElement.style.fontSize = "200%";
+    });
+    const runInfo = page.getByRole("dialog", { name: "Run Info" });
+    await expect(async () => {
+      await page.getByTestId("run-info-button").click();
+      await expect(runInfo).toBeVisible({ timeout: 1000 });
+    }).toPass({ timeout: 15000 });
+    await expectNoHorizontalOverflow(page);
+    await expectNoBlockingViolations(page, "Run Info at 200% zoom");
   });
 
   test("respects prefers-reduced-motion", async ({ page }) => {

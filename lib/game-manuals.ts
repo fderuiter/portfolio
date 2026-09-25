@@ -745,6 +745,18 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
           "Pick a seal up from the tray, then press Enter or Space on an eligible card to print it as a footnote (free). With a pointer, click the card or drag the seal onto it. Esc puts the seal back; Sell trades it for study budget.",
         key: "Enter / Space",
       },
+      {
+        action: "Use a Guidance card",
+        description:
+          "Guidance cards in the tray are named after real guidance documents. Using one (free) levels its hand up for the rest of the run, adding Chips and +Mult to that hand's base; Sell trades it for study budget instead.",
+        key: "Use",
+      },
+      {
+        action: "Run Info",
+        description:
+          "Opens the run's hand table (level, base Chips, base +Mult and times played), the equipped relics and the run seed. Esc closes it.",
+        key: "Shift + R",
+      },
     ],
     rules: [
       {
@@ -758,6 +770,12 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
         detail:
           "Hand Score = (base hand Chips + output Chips + relic Chips) × (base hand Mult + card and rule +Mult + relic +Mult) × every ×Mult. A High Table is 15 Chips / +1 Mult; the Demographics table adds 30 Chips / +1 Mult, and 12 verified subject records add 12 Chips.",
         badge: "Chips × Mult",
+      },
+      {
+        title: "Hand levels",
+        detail:
+          "Every hand starts the run at level 1. A Guidance card raises its hand one level for the rest of the run, and the preview shows the hand's Lv. The Sponsor Safety Review deals ICH E2A, which levels MedDRA Five of a Kind by +35 Chips and +3 Mult. The flavour text is a joke, not regulatory advice.",
+        badge: "Guidance",
       },
       {
         title: "Zero-score rule",

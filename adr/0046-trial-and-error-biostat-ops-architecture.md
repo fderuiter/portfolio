@@ -647,3 +647,41 @@ study budget and snapshot changes are the only resources.
   choice the run can afford, each choice shows its consequence and any
   refusal, and the table lists the Blind's modifiers, the seed and any hand
   limit.
+
+### Guidance cards, hand levels and Run Info (T&E-UX-05)
+
+T&E-UX-05 (#947) adds build identity: Guidance cards are the game's Planet
+cards.
+
+- **Hand levels.** A run keeps `HandLevels`, one `{ level, playedCount }`
+  per hand type, starting at level 1. `evaluateHand` takes the hand's
+  `level` and scores from `leveledBase`: `HAND_BASE_SCORES` plus one
+  `HAND_LEVEL_BONUS` per level above 1. The evaluation records its `level`,
+  and the timeline's `HAND_BASE` step carries it. Score is monotone
+  non-decreasing in level for a fixed hand, which a property test checks.
+- **Balance.** Per level: High Table +10 Chips/+1 Mult, TLF Pair +15/+1,
+  TLF Two Pair +20/+2, Population Flush +25/+2, CSR Straight +30/+3,
+  Efficacy Full House +35/+3, MedDRA Five of a Kind +35/+3. These are the
+  ticket's numbers; a level is worth roughly one strong output card, so a
+  levelled hand shifts a build without replacing inspection.
+- **Guidance cards.** `GUIDANCE_CARDS` holds one per hand, named after a
+  real document (FDA Study Data TCG, CDISC SDTM IG, CDISC ADaM IG, ICH E9,
+  ICH E3, ICH E9(R1), ICH E2A). Flavour text is dry insider humour and is
+  not regulatory advice. They share the two consumable slots with footnote
+  seals: a `Consumable` is now a `SEAL` or a `GUIDANCE` item. `USE_GUIDANCE`
+  levels the hand, removes the card and records a `LevelUp` on the event;
+  `SELL_CONSUMABLE` sells either kind. Using one is allowed while a crisis
+  waits, like selling, because it does not play the Blind. Hand levels and
+  unused cards travel with the tray and budget in `Inventory`; `RESET`
+  restores the Blind's opening levels and a new run starts at level 1.
+- **Act I content.** A scenario may grant `guidance` into free tray slots
+  after its seals. The Sponsor Safety Review grants ICH E2A. The shop
+  (T&E-UX-06) will sell the rest.
+- **Presentation.** Using a card is a loud moment: the hand's plate steps up
+  a level while its Chips and Mult tick from the old base to the new, with a
+  chip tick and a mult thunk. Under reduced motion the numbers land at once.
+  The live preview shows `Lv.N`. Run Info is a focus-trapped dialog with the
+  hand table, the relics and the run seed, which moved there from the Blind
+  panel. The ticket asks for the R key, but R on a focused card already
+  recompiles it (T&E-03), so Run Info opens with Shift+R anywhere in the
+  table and from a header button.

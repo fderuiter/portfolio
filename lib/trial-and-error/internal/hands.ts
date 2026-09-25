@@ -1,6 +1,7 @@
 import type {
   HandBaseScore,
   HandClassification,
+  HandLevels,
   HandType,
   TlfCard,
 } from "../types";
@@ -64,6 +65,78 @@ export const HAND_NAMES: Readonly<Record<HandType, string>> = Object.freeze({
   EFFICACY_FULL_HOUSE: "Efficacy Full House",
   MEDDRA_FIVE_OF_A_KIND: "MedDRA Five of a Kind",
 });
+
+/**
+ * What each level above 1 adds to a hand's base, balanced in T&E-UX-05
+ * (#947). A hand at level `n` scores its base plus `n - 1` bonuses.
+ */
+export const HAND_LEVEL_BONUS: Readonly<
+  Record<HandType, { chips: number; mult: number }>
+> = Object.freeze({
+  HIGH_TABLE: { chips: 10, mult: 1 },
+  TLF_PAIR: { chips: 15, mult: 1 },
+  TLF_TWO_PAIR: { chips: 20, mult: 2 },
+  POPULATION_FLUSH: { chips: 25, mult: 2 },
+  CSR_STRAIGHT: { chips: 30, mult: 3 },
+  EFFICACY_FULL_HOUSE: { chips: 35, mult: 3 },
+  MEDDRA_FIVE_OF_A_KIND: { chips: 35, mult: 3 },
+});
+
+/**
+ * A hand's base Chips and +Mult at a level: `HAND_BASE_SCORES` plus the
+ * level bonus. Levels below 1 (or not whole) count as level 1. Pure.
+ */
+export function leveledBase(handType: HandType, level = 1): HandBaseScore {
+  const base = HAND_BASE_SCORES[handType];
+  const bonus = HAND_LEVEL_BONUS[handType];
+  const extra = Number.isInteger(level) && level > 1 ? level - 1 : 0;
+  return {
+    ...base,
+    baseChips: base.baseChips + extra * bonus.chips,
+    baseMult: base.baseMult + extra * bonus.mult,
+  };
+}
+
+/** Every hand at level 1, never played: the start of a run. */
+export function initialHandLevels(): HandLevels {
+  return Object.fromEntries(
+    HandTypeSchema.options.map((handType) => [
+      handType,
+      { level: 1, playedCount: 0 },
+    ])
+  ) as HandLevels;
+}
+
+/** One row of the Run Info hand table. */
+export interface HandLevelRow {
+  handType: HandType;
+  name: string;
+  level: number;
+  /** Base Chips at this level. */
+  chips: number;
+  /** Base +Mult at this level. */
+  mult: number;
+  playedCount: number;
+}
+
+/**
+ * The run's hand table, weakest hand first, with each hand's base at its
+ * current level. The UI renders it and never adds a bonus itself. Pure.
+ */
+export function handLevelTable(levels: HandLevels): HandLevelRow[] {
+  return HandTypeSchema.options.map((handType) => {
+    const { level, playedCount } = levels[handType];
+    const base = leveledBase(handType, level);
+    return {
+      handType,
+      name: HAND_NAMES[handType],
+      level,
+      chips: base.baseChips,
+      mult: base.baseMult,
+      playedCount,
+    };
+  });
+}
 
 /**
  * The card fields hand detection reads. `stale` marks an output compiled
