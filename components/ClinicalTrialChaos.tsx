@@ -158,6 +158,7 @@ const getHighScoreServerSnapshot = () => "0";
 
 /** CRFs to lock before a campaign phase is cleared. */
 const PHASE_TARGETS: Record<GamePhase, number> = { 1: 5, 2: 8, 3: 12 };
+const QUICK_DISPATCH_GUARD_MS = 400;
 
 const AUDITOR_BEHAVIOR_LABELS: Record<AuditorState["behavior"], string> = {
   patrolling: "Patrolling",
@@ -341,6 +342,7 @@ export const ClinicalTrialChaos: React.FC = () => {
   });
   const [targetRoutingStation, setTargetRoutingStation] =
     useState<CDISCDomain>("DM");
+  const lastQuickDispatchAtRef = useRef(0);
   const [routingNotice, setRoutingNotice] = useState<{
     subjectId: string;
     unresolvedCount: number;
@@ -1037,7 +1039,14 @@ export const ClinicalTrialChaos: React.FC = () => {
       domain: CDISCDomain,
       mode: "quick" | "full"
     ) => {
-      if (submittedSubjectIdsRef.current.has(subj.id)) return;
+      if (submittedSubjectIdsRef.current.has(subj.id)) {
+        setSignatureModal((prev) => ({
+          ...prev,
+          isOpen: false,
+          subject: null,
+        }));
+        return;
+      }
       const result = verify21CFRSubmission(subj, reason, domain);
 
       if (result.success) {
@@ -1100,6 +1109,11 @@ export const ClinicalTrialChaos: React.FC = () => {
   const handleInitiateSubmission = useCallback(
     (domain: CDISCDomain) => {
       if (!activeSubject) return;
+      // A quick dispatch clears the selection, so the queue head becomes the
+      // active subject at once. Ignore a double-click or repeated hotkey so
+      // it cannot route a dossier the player has not looked at.
+      if (Date.now() - lastQuickDispatchAtRef.current < QUICK_DISPATCH_GUARD_MS)
+        return;
       // Only a premature route is forgiven (#834 Prompt 1). A clean dossier
       // sent to the wrong station is a genuinely invalid submission and still
       // goes through verify21CFRSubmission and its penalties.
@@ -1123,6 +1137,7 @@ export const ClinicalTrialChaos: React.FC = () => {
           amendmentActive: !!activeAmendment?.active,
         }) === "quick"
       ) {
+        lastQuickDispatchAtRef.current = Date.now();
         submitDossier(activeSubject, "Intent to Submit", domain, "quick");
         return;
       }
@@ -1439,6 +1454,11 @@ export const ClinicalTrialChaos: React.FC = () => {
   const scoreStateRef = useRef(scoreState);
   const powerUpsRef = useRef(powerUps);
   const activeAmendmentRef = useRef(activeAmendment);
+  // Sync only when the state changes: the game loop owns the countdown, and
+  // an every-render sync would reset it to the last rendered value.
+  useEffect(() => {
+    activeAmendmentRef.current = activeAmendment;
+  }, [activeAmendment]);
   const auditLogsRef = useRef(auditLogs);
   const addAuditLogRef = useRef(addAuditLog);
   const triggerSoundRef = useRef(triggerSound);
@@ -1457,7 +1477,6 @@ export const ClinicalTrialChaos: React.FC = () => {
     stationsRef.current = stations;
     scoreStateRef.current = scoreState;
     powerUpsRef.current = powerUps;
-    activeAmendmentRef.current = activeAmendment;
     auditLogsRef.current = auditLogs;
     addAuditLogRef.current = addAuditLog;
     triggerSoundRef.current = triggerSound;
@@ -1621,10 +1640,14 @@ export const ClinicalTrialChaos: React.FC = () => {
           activeAmendmentRef.current = null;
           setActiveAmendment(null);
         } else {
+          const secondChanged =
+            Math.ceil(remaining) !==
+            Math.ceil(activeAmendmentRef.current.timeRemaining);
           activeAmendmentRef.current = {
             ...activeAmendmentRef.current,
             timeRemaining: remaining,
           };
+          if (secondChanged) setActiveAmendment(activeAmendmentRef.current);
         }
       }
 

@@ -520,12 +520,17 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
 
     await act(async () => {
       dmStationCard.click();
+    });
+    await act(async () => {
       dmStationCard.click();
     });
 
     expect(container.textContent).not.toContain(
       "21 CFR Part 11 Electronic Signature"
     );
+    // The second press lands on the next queue head; it must be ignored, not
+    // routed or rejected, because the player has not looked at it yet.
+    expect(container.textContent).not.toContain("before routing");
     expect(container.textContent).toContain("Submits:1");
     expect(container.textContent).toContain("Combo:1");
     const auditTab = Array.from(container.querySelectorAll("button")).find(
@@ -570,6 +575,43 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     expect(sdtmTabLabel()).toMatch(/Live SDTM Studio0$/);
 
     vi.useRealTimers();
+  });
+
+  it("counts a protocol amendment down to its end during play", async () => {
+    vi.useFakeTimers();
+    try {
+      await act(async () => {
+        root.render(<ClinicalTrialChaos />);
+      });
+      const startBtn = Array.from(container.querySelectorAll("button")).find(
+        (b) => b.textContent?.includes("Start 3-Phase Campaign")
+      );
+      await act(async () => {
+        startBtn?.click();
+      });
+
+      const banner = () =>
+        Array.from(container.querySelectorAll("p")).find((p) =>
+          p.textContent?.startsWith("Protocol amendment:")
+        );
+      for (let i = 0; i < 60 && !banner(); i++) {
+        await act(async () => {
+          vi.advanceTimersByTime(1000);
+        });
+      }
+      expect(banner()).toBeDefined();
+
+      // Every render used to copy the stale state back into the loop's ref,
+      // so the countdown never reached zero and the amendment never ended.
+      for (let i = 0; i < 30 && banner(); i++) {
+        await act(async () => {
+          vi.advanceTimersByTime(1000);
+        });
+      }
+      expect(banner()).toBeUndefined();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("quick-dispatches a clean routine dossier from a numeric hotkey", async () => {
