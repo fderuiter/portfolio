@@ -31,6 +31,7 @@ const CONTENT_SANITIZE_OPTIONS = {
     "div",
   ],
   ALLOWED_ATTR: [
+    "id",
     "href",
     "target",
     "rel",

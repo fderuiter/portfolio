@@ -11,6 +11,7 @@ import React, {
 import DOMPurify from "isomorphic-dompurify";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { MermaidDiagram } from "@/components/MermaidDiagram";
+import { CodeBlock } from "@/components/blog/CodeBlock";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { usePersistentState } from "@/hooks/usePersistentState"; // Imported for static analysis test validation
 import { useTerminology } from "@/components/providers/TerminologyProvider";
@@ -114,6 +115,7 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
         "abbr",
       ],
       ALLOWED_ATTR: [
+        "id",
         "href",
         "target",
         "rel",
@@ -227,6 +229,9 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
 
             // Build safe attributes
             const props: Record<string, any> = { key: `${tagName}-${index}` };
+            if (element.hasAttribute("id")) {
+              props.id = element.getAttribute("id");
+            }
             if (element.hasAttribute("class")) {
               props.className = element.getAttribute("class");
             }
@@ -252,6 +257,29 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
                 props.tabIndex = isNaN(parsed) ? 0 : parsed;
               }
             });
+
+            if (tagName === "pre") {
+              const codeEl = element.firstElementChild;
+              const isCode = codeEl && codeEl.tagName.toLowerCase() === "code";
+              const rawClass = isCode
+                ? codeEl.getAttribute("class") || ""
+                : element.getAttribute("class") || "";
+              const langMatch = /language-([a-zA-Z0-9_-]+)/.exec(rawClass);
+              const language = langMatch ? langMatch[1] : undefined;
+              const codeText =
+                (isCode ? codeEl.textContent : element.textContent) || "";
+
+              return (
+                <CodeBlock
+                  key={`codeblock-${index}`}
+                  language={language}
+                  code={codeText}
+                  preProps={props}
+                >
+                  {children}
+                </CodeBlock>
+              );
+            }
 
             return React.createElement(tagName, props, children);
           }

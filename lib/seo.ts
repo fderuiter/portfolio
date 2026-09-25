@@ -1,5 +1,7 @@
 import { BaseCaseStudy } from "@/types/domain";
 import { GitHubStats } from "@/lib/github";
+import type { BlogPost, BlogPostSummary } from "@/lib/blog/types";
+import { CONTENT_PILLAR_CATALOG } from "@/lib/blog/presets";
 import { resolveBaseUrl } from "./domain";
 
 export const SITE_BASE_URL = resolveBaseUrl();
@@ -496,6 +498,94 @@ export function getSoftwareSourceCodeSchema(
   const schema = {
     "@context": "https://schema.org",
     ...getSoftwareSourceCodeNode(study, stats, options),
+  };
+
+  return JSON.stringify(schema).replace(/</g, "\\u003c");
+}
+
+export interface BlogPostingNodeOptions {
+  inLanguage?: string;
+  isAccessibleForFree?: boolean;
+}
+
+/**
+ * Returns a Schema.org BlogPosting entity node for technical blog dispatches.
+ */
+export function getBlogPostingNode(
+  post: BlogPostSummary | BlogPost,
+  options?: BlogPostingNodeOptions
+): Record<string, unknown> {
+  const fullUrl = `${SITE_BASE_URL}/blog/${post.slug}`;
+  const ogImageUrl = post.heroImageUrl || `${fullUrl}/opengraph-image`;
+
+  const node: Record<string, unknown> = {
+    "@type": "BlogPosting",
+    "@id": `${fullUrl}#blogposting`,
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": fullUrl,
+    },
+    headline: post.title,
+    description: post.dek,
+    url: fullUrl,
+    image: ogImageUrl,
+    datePublished:
+      post.publishedAt instanceof Date
+        ? post.publishedAt.toISOString()
+        : String(post.publishedAt),
+    dateModified:
+      post.updatedAt instanceof Date
+        ? post.updatedAt.toISOString()
+        : String(post.updatedAt),
+    author: {
+      "@type": "Person",
+      "@id": PERSON_NODE_ID,
+      name: "Frederick de Ruiter",
+      url: SITE_BASE_URL,
+    },
+    publisher: {
+      "@type": "Person",
+      "@id": PERSON_NODE_ID,
+      name: "Frederick de Ruiter",
+      url: SITE_BASE_URL,
+    },
+    articleSection: CONTENT_PILLAR_CATALOG[post.pillar]?.label || post.pillar,
+    keywords: Array.isArray(post.tags)
+      ? post.tags.join(", ")
+      : String(post.tags || ""),
+    inLanguage: options?.inLanguage || "en-US",
+    isAccessibleForFree: options?.isAccessibleForFree ?? true,
+  };
+
+  if (
+    typeof post.readingTimeMinutes === "number" &&
+    Number.isFinite(post.readingTimeMinutes) &&
+    post.readingTimeMinutes > 0
+  ) {
+    node.timeRequired = `PT${post.readingTimeMinutes}M`;
+  }
+
+  if ("body" in post && typeof post.body === "string" && post.body) {
+    const textOnly = post.body.replace(/<[^>]*>/g, "").trim();
+    const wordCount = textOnly.split(/\s+/).filter(Boolean).length;
+    if (wordCount > 0) {
+      node.wordCount = wordCount;
+    }
+  }
+
+  return node;
+}
+
+/**
+ * Returns a Schema.org BlogPosting JSON-LD string with angle brackets escaped against script injection.
+ */
+export function getBlogPostingSchema(
+  post: BlogPostSummary | BlogPost,
+  options?: BlogPostingNodeOptions
+): string {
+  const schema = {
+    "@context": "https://schema.org",
+    ...getBlogPostingNode(post, options),
   };
 
   return JSON.stringify(schema).replace(/</g, "\\u003c");

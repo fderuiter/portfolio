@@ -1,5 +1,7 @@
 export * from "./types";
 export * from "./presets";
+export * from "./headings";
+export * from "./related";
 
 import {
   BlogPostService,

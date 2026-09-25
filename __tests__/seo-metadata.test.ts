@@ -893,4 +893,72 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
       }
     });
   });
+
+  describe("BlogPosting Schema (Ticket #1057)", () => {
+    it("getBlogPostingSchema generates valid, parseable Schema.org BlogPosting with XSS sanitization", async () => {
+      const { getBlogPostingSchema } = await import("@/lib/seo");
+
+      const post = {
+        slug: "cdisc-odm-sdtm-clinical-data-pipelines",
+        title: "Architecting CDISC ODM & SDTM Clinical Data Pipelines",
+        dek: "How to design deterministic, streaming XML compilation pipelines for FDA-compliant CDISC ODM and SDTM datasets without memory blowouts.",
+        pillar: "clinical-data-engineering" as const,
+        tags: ["cdisc", "odm", "sdtm", "fda"],
+        publishedAt: new Date("2026-03-01T00:00:00.000Z"),
+        updatedAt: new Date("2026-03-02T00:00:00.000Z"),
+        readingTimeMinutes: 6,
+        heroImageUrl: null,
+        body: "<p>Electronic Data Capture systems produce massive XML payloads conforming to CDISC ODM standards.</p>",
+      };
+
+      const raw = getBlogPostingSchema(post);
+      expect(raw).not.toContain("<script");
+      const parsed = JSON.parse(raw);
+
+      expect(parsed["@context"]).toBe("https://schema.org");
+      expect(parsed["@type"]).toBe("BlogPosting");
+      expect(parsed["@id"]).toBe(
+        `${SITE_BASE_URL}/blog/${post.slug}#blogposting`
+      );
+      expect(parsed.headline).toBe(post.title);
+      expect(parsed.description).toBe(post.dek);
+      expect(parsed.articleSection).toBe(
+        "Clinical Data Engineering & CDISC Standards"
+      );
+      expect(parsed.keywords).toBe("cdisc, odm, sdtm, fda");
+      expect(parsed.datePublished).toBe("2026-03-01T00:00:00.000Z");
+      expect(parsed.dateModified).toBe("2026-03-02T00:00:00.000Z");
+      expect(parsed.timeRequired).toBe("PT6M");
+      expect(parsed.wordCount).toBeGreaterThan(5);
+      expect(parsed.author["@type"]).toBe("Person");
+      expect(parsed.author.name).toBe("Frederick de Ruiter");
+      expect(parsed.publisher["@type"]).toBe("Person");
+      expect(parsed.mainEntityOfPage["@type"]).toBe("WebPage");
+      expect(parsed.mainEntityOfPage["@id"]).toBe(
+        `${SITE_BASE_URL}/blog/${post.slug}`
+      );
+      expect(parsed.inLanguage).toBe("en-US");
+      expect(parsed.isAccessibleForFree).toBe(true);
+    });
+
+    it("getBlogPostingSchema securely escapes angle brackets against script injection", async () => {
+      const { getBlogPostingSchema } = await import("@/lib/seo");
+
+      const maliciousPost = {
+        slug: "xss-test",
+        title: "Malicious <script>alert(1)</script> Title",
+        dek: "Exploit attempt <img src=x onerror=alert(1)>",
+        pillar: "field-notes" as const,
+        tags: ["<script>"],
+        publishedAt: new Date("2026-03-01T00:00:00.000Z"),
+        updatedAt: new Date("2026-03-01T00:00:00.000Z"),
+        readingTimeMinutes: null,
+        heroImageUrl: null,
+      };
+
+      const raw = getBlogPostingSchema(maliciousPost);
+      expect(raw).not.toContain("<script");
+      expect(raw).toContain("\\u003cscript");
+    });
+  });
 });
