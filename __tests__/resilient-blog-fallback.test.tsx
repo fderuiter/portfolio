@@ -59,7 +59,7 @@ vi.mock("@/lib/fallback-blog-posts", () => ({
       id: "fallback-same-slug",
       slug: "conflicting-slug",
       title: "Fallback Same Slug Post",
-      dek: "Should not be returned if DB has draft with same slug.",
+      dek: "Returned when the database query excludes an unpublished post.",
       body: "<p>Fallback conflicting body</p>",
       pillar: "field-notes",
       tags: "conflict",
@@ -333,7 +333,7 @@ describe("Resilient Hybrid Blog Post Fallback Suite", () => {
   });
 
   describe("BlogPostService.getAllPublishedBlogPosts", () => {
-    it("merges DB records with missing fallback posts, excludes DB drafts, and orders newest-first", async () => {
+    it("filters DB drafts, merges missing fallbacks, prefers DB duplicates, and orders newest-first", async () => {
       const mockDbPosts = [
         {
           id: "db-post-old",
@@ -364,6 +364,20 @@ describe("Resilient Hybrid Blog Post Fallback Suite", () => {
           updated_at: new Date("2026-03-01T00:00:00.000Z"),
         },
         {
+          id: "db-post-fallback-dispatch",
+          slug: "fallback-dispatch",
+          title: "Database Fallback Dispatch",
+          dek: "Published database version of the static fallback.",
+          body: "<p>DB fallback dispatch</p>",
+          pillar: "field-notes",
+          tags: "database, fallback",
+          published: true,
+          reading_time_minutes: 4,
+          hero_image_url: null,
+          created_at: new Date("2026-02-15T00:00:00.000Z"),
+          updated_at: new Date("2026-02-15T00:00:00.000Z"),
+        },
+        {
           id: "db-draft-same-slug",
           slug: "conflicting-slug",
           title: "DB Draft With Same Slug As Fallback",
@@ -380,24 +394,32 @@ describe("Resilient Hybrid Blog Post Fallback Suite", () => {
       ];
 
       vi.mocked(prisma.blogPost.findMany).mockResolvedValueOnce(
-        mockDbPosts as never
+        mockDbPosts.filter((post) => post.published) as never
       );
 
       const results = await BlogPostService.getAllPublishedBlogPosts();
 
       // DB query verified newest-first descending
       expect(prisma.blogPost.findMany).toHaveBeenCalledWith({
+        where: { published: true },
         orderBy: { created_at: "desc" },
       });
 
-      // Conflicting slug draft must NOT be included from DB nor fallback!
-      expect(results.some((p) => p.slug === "conflicting-slug")).toBe(false);
+      // The filtered DB response excludes its draft, so the same-slug fallback remains available.
+      expect(results.some((p) => p.slug === "conflicting-slug")).toBe(true);
+      expect(results.find((p) => p.slug === "conflicting-slug")?.title).toBe(
+        "Fallback Same Slug Post"
+      );
 
-      // Must contain newest-db-post, older-db-post, and fallback-dispatch
-      expect(results.length).toBe(3);
+      // The published DB row wins over the same-slug static fallback and appears only once.
+      const fallbackDispatchPosts = results.filter(
+        (post) => post.slug === "fallback-dispatch"
+      );
+      expect(fallbackDispatchPosts).toHaveLength(1);
+      expect(fallbackDispatchPosts[0].title).toBe("Database Fallback Dispatch");
+
+      expect(results).toHaveLength(4);
       expect(results[0].slug).toBe("newest-db-post");
-      expect(results[1].slug).toBe("older-db-post");
-      expect(results[2].slug).toBe("fallback-dispatch");
 
       // Verify sorted newest-first
       for (let i = 0; i < results.length - 1; i++) {
