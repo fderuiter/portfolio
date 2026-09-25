@@ -20,6 +20,7 @@ import { RetroChaosOverlayWrapper } from "@/components/RetroChaosOverlayWrapper"
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { SearchWrapper } from "@/components/SearchWrapper";
+import { GlobalPhotoGallery } from "@/components/GlobalPhotoGallery";
 import { resolveBaseUrl } from "@/lib/domain";
 
 import { SerwistRegister } from "@/components/providers/SerwistRegister";
@@ -176,6 +177,7 @@ export default function RootLayout({
                   <Analytics />
                   <SpeedInsights />
                   <SearchWrapper />
+                  <GlobalPhotoGallery />
                   <SerwistRegister />
                 </AudioProvider>
               </A11yProvider>

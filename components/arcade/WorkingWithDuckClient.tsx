@@ -7,12 +7,16 @@ import { NextPrevNav } from "@/components/ui/NextPrevNav";
 import { PlayCabinet } from "@/components/arcade/PlayCabinet";
 import { DesktopOnlyGate } from "@/components/arcade/DesktopOnlyGate";
 import Link from "next/link";
+import Image from "next/image";
 import {
   IconBone,
   IconTrees,
   IconAlertTriangle,
   IconArrowLeft,
+  IconCamera,
+  IconHeart,
 } from "@tabler/icons-react";
+import { getPhotosByCategory } from "@/lib/media-registry";
 
 const WorkingWithDuckLoader = () =>
   import("@/components/WorkingWithDuck").then((mod) => mod.WorkingWithDuck);
@@ -135,6 +139,58 @@ export const WorkingWithDuckClient: React.FC = () => {
               <strong>Spacebar</strong> to steer Duck around mud puddles and
               earn the 20-second Tired Puppy calm buff.
             </p>
+          </div>
+        </div>
+
+        {/* Real-Life Co-Pilot Gallery */}
+        <div className="mt-12 rounded-3xl border border-zinc-800 bg-zinc-950/80 p-6 sm:p-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-zinc-800/80 pb-4">
+            <div>
+              <div className="flex items-center gap-2 text-amber-400 font-mono text-xs font-bold uppercase tracking-wider mb-1">
+                <IconCamera className="w-4 h-4" />
+                <span>Behind the Simulation</span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-mono font-extrabold text-white">
+                Meet the Real-Life <span className="text-amber-400">Duck</span>
+              </h2>
+            </div>
+            <div className="flex items-center gap-2 text-xs font-mono text-zinc-400">
+              <IconHeart className="w-4 h-4 text-rose-400" />
+              <span>8-Week Fluff → 80-lb Marshmallow</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {getPhotosByCategory("duck")
+              .concat(getPhotosByCategory("bio"))
+              .slice(0, 6)
+              .map((photo) => (
+                <div
+                  key={photo.id}
+                  className="group relative rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-900/50 hover:border-amber-500/40 transition-all flex flex-col"
+                >
+                  <div className="relative w-full aspect-[3/4] bg-black/40 overflow-hidden">
+                    <Image
+                      src={photo.src}
+                      alt={photo.alt}
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/90 via-transparent to-transparent opacity-80" />
+                    <div className="absolute bottom-2 left-2 right-2">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider bg-amber-400/90 text-black">
+                        {photo.title}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-3.5 flex-1 flex flex-col justify-between">
+                    <p className="text-xs text-zinc-300 leading-relaxed font-sans">
+                      {photo.caption}
+                    </p>
+                  </div>
+                </div>
+              ))}
           </div>
         </div>
 

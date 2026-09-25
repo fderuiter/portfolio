@@ -927,6 +927,7 @@ class IMednetClient:
     github_url: "https://github.com/fderuiter/wedding_website",
     published: true,
     simulated_telemetry: false,
+    hero_image_url: "/images/personal/fred-partner-statue-of-liberty.jpg",
     tags: "TypeScript, Next.js, React, Tailwind CSS, PostgreSQL, Prisma, Server Actions, Zod, Full-Stack, UX Design",
     editorial_content:
       "A wedding website with invitation codes, RSVPs for multiple events, dietary requirements, and an admin dashboard. Built with **Next.js**, **Prisma**, and **PostgreSQL**. Apparently wedding planning was going to involve a schema.",

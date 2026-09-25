@@ -414,7 +414,9 @@ describe("Working With Duck - Deterministic Game Engine", () => {
   it("should include valid photoUrl and svgUrl for all 10 milestones in DUCK_FACTS", () => {
     expect(DUCK_FACTS).toHaveLength(10);
     DUCK_FACTS.forEach((fact) => {
-      expect(fact.photoUrl).toMatch(/^\/duck\/duck-.*\.jpg$/);
+      expect(fact.photoUrl).toMatch(
+        /^\/(duck|images\/(duck|bio|sports))\/.*\.jpg$/
+      );
       expect(fact.svgUrl).toMatch(/^\/duck\/duck-.*\.svg$/);
       expect(fact.fact.length).toBeGreaterThan(0);
       expect(fact.caption.length).toBeGreaterThan(0);

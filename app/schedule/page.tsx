@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   IconCalendar,
   IconClock,
@@ -81,6 +82,40 @@ export default function SchedulePage() {
             a question, an idea, or just yourself. The booking link handles the
             calendar details.
           </p>
+        </div>
+
+        {/* Host & Co-Pilot Greeting Card */}
+        <div className="w-full max-w-2xl mb-10 p-4 sm:p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 flex flex-col sm:flex-row items-center gap-5 shadow-lg">
+          <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border border-white/10 shrink-0 bg-black/60 shadow-md">
+            <Image
+              src="/images/bio/fred-duck-shoulder.jpg"
+              alt="Frederick de Ruiter smiling warmly with his canine co-pilot Duck resting his chin over Fred's shoulder"
+              fill
+              sizes="112px"
+              className="object-cover"
+            />
+          </div>
+          <div className="text-center sm:text-left flex-1 min-w-0">
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-1">
+              <span className="font-mono text-sm font-bold text-white">
+                Frederick de Ruiter
+              </span>
+              <span className="text-xs font-mono text-zinc-400">
+                • Canine Co-Pilot Duck
+              </span>
+            </div>
+            <p className="text-xs text-zinc-300 leading-relaxed font-sans mb-2">
+              Clinical software engineering, distributed systems, web
+              experiments, and talking about dogs and video games.
+            </p>
+            <div className="flex items-center justify-center sm:justify-start gap-3 text-[11px] font-mono text-brand-cyan">
+              <span>● Based in Minnesota</span>
+              <span className="text-zinc-600">/</span>
+              <span>● Google Meet</span>
+              <span className="text-zinc-600">/</span>
+              <span>● 30-min chat</span>
+            </div>
+          </div>
         </div>
 
         {/* Feature Highlights Grid */}

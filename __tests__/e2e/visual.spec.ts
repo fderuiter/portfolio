@@ -8,12 +8,20 @@ test.describe("Visual Regression & Drift Detection", () => {
     // Wait for the hydration and masonry layout to be stable
     await page.goto("/");
 
-    // Disable animations for consistent snapshots
+    // Disable animations for consistent snapshots and isolate case study baseline
     await page.addStyleTag({
       content: `
         *, *::before, *::after {
           transition: none !important;
           animation: none !important;
+        }
+        [data-testid="bio-spotlight"],
+        [data-testid="footer-photo-gallery"] {
+          display: none !important;
+        }
+        /* space-y-2 leaves margin on the item before the hidden link */
+        li:has(+ [data-testid="footer-photo-gallery"]) {
+          margin-block-end: 0 !important;
         }
       `,
     });
