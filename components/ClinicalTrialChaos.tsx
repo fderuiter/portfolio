@@ -1346,12 +1346,13 @@ export const ClinicalTrialChaos: React.FC = () => {
       if (canvas.width !== logicalWidth || canvas.height !== logicalHeight) {
         canvas.width = logicalWidth;
         canvas.height = logicalHeight;
-        // The CSS box follows the bitmap chosen from the canvas's own width,
-        // not a viewport breakpoint, so the drawing is never stretched.
-        canvas.style.aspectRatio = `${logicalWidth} / ${logicalHeight}`;
         // Resizing clears the bitmap; let the static-frame effect redraw it.
         setCanvasSize(`${logicalWidth}x${logicalHeight}`);
       }
+      // The CSS box follows the bitmap chosen from the canvas's own width,
+      // not a viewport breakpoint, so the drawing is never stretched. Set it
+      // unconditionally: the initial bitmap attributes may already match.
+      canvas.style.aspectRatio = `${logicalWidth} / ${logicalHeight}`;
     };
 
     resizeCanvas();
@@ -2603,7 +2604,7 @@ export const ClinicalTrialChaos: React.FC = () => {
               role="application"
               aria-label="Clinical Trial Chaos Simulation Canvas. Use Tab to navigate accessible controls, or space/enter to interact with subjects."
               tabIndex={0}
-              className="block w-full aspect-[13/5] cursor-pointer touch-none focus:outline-none focus:ring-2 focus:ring-emerald-500/50 "
+              className="block w-full aspect-[13/5] cursor-pointer touch-none focus:outline-none focus:ring-2 focus:ring-emerald-500/50 md:aspect-[760/150]"
             />
 
             {/* Off-screen Accessible DOM Fallback Subtree */}
