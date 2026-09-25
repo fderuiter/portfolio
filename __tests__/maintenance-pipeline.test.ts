@@ -196,6 +196,7 @@ describe("unified maintenance pipeline (#714)", () => {
           counts: {},
           error: "connect ECONNREFUSED",
         },
+        newsletter: { status: "completed", durationMs: 10, counts: {} },
         emailRetry: { status: "completed", durationMs: 10, counts: {} },
         retention: { status: "skipped", durationMs: 0, counts: {} },
       },
