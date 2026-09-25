@@ -40,8 +40,10 @@ The whole stack is designed to run inside free-tier provider limits; see
 
 ## Run it locally
 
-You need **Node.js 22 or newer** (CI uses Node 24) and **npm 10 or newer**.
-npm is the only supported package manager.
+You need **Node.js 22, 23 or 24** (CI and Vercel use Node 24; `engines.node`
+stops before the next major) and **npm 10 or newer**. npm is the only supported
+package manager. Dependency install scripts are allowlisted in
+`scripts/install-script-allowlist.json`.
 
 The quickest path is the interactive setup, which checks your toolchain,
 creates `.env.local`, pushes the schema, and seeds sample data:
