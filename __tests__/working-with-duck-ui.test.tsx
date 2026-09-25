@@ -8,6 +8,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { createInitialDuckGameState } from "@/lib/working-with-duck-engine";
 
 // Mock ResizeObserver and IntersectionObserver
 global.ResizeObserver = class {
@@ -471,5 +472,42 @@ describe("Working With Duck - UI & Component Suite", () => {
       expect(img?.getAttribute("loading")).toBe("lazy");
       expect(img?.getAttribute("fetchpriority")).toBeNull();
     }
+  });
+
+  it("celebrates a cleared sprint with arcade actions instead of a recruiter pitch (#923)", async () => {
+    const wonState = createInitialDuckGameState(1, "campaign");
+    wonState.status = "won";
+
+    await act(async () => {
+      root.render(<WorkingWithDuck initialState={wonState} />);
+    });
+
+    const dialog = container.querySelector(
+      '[aria-labelledby="duck-win-dialog-heading"]'
+    ) as HTMLElement;
+    expect(dialog).not.toBeNull();
+    const text = dialog.textContent ?? "";
+    expect(text).not.toMatch(/Schedule a Chat|exact skills|let.s talk/i);
+    expect(dialog.querySelector('a[href="/schedule"]')).toBeNull();
+    expect(text).toContain("budget spreadsheet");
+
+    const caseStudies = dialog.querySelector('a[href="/case-studies"]');
+    expect(caseStudies?.textContent).toContain("Browse Case Studies");
+    const github = dialog.querySelector(
+      'a[href="https://github.com/fderuiter"]'
+    );
+    expect(github?.textContent).toContain("GitHub");
+
+    const endless = Array.from(dialog.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Play Endless Mode")
+    );
+    expect(endless).toBeDefined();
+    await act(async () => {
+      endless!.click();
+    });
+    expect(
+      container.querySelector('[aria-labelledby="duck-win-dialog-heading"]')
+    ).toBeNull();
+    expect(container.textContent).toContain("Endless Mode");
   });
 });
