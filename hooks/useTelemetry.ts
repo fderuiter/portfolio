@@ -218,6 +218,7 @@ export const telemetryOutbox = new TelemetryOutbox({
 
 let inFlightFetch: Promise<void> | null = null;
 let lastFetchTime = 0;
+let offlineSyncReported = false;
 
 async function fetchTelemetryAggregates(options?: {
   force?: boolean;
@@ -228,19 +229,34 @@ async function fetchTelemetryAggregates(options?: {
   lastFetchTime = now;
 
   inFlightFetch = (async () => {
+    let expectedOffline = false;
     try {
       const res = await fetch("/api/telemetry");
-      if (!res.ok) throw new Error("Telemetry sync fetch failure");
+      if (!res.ok) {
+        // Outside a production runtime the route marks a missing database as
+        // expected (a dev server usually runs without Postgres). Reporting
+        // that as console.error would pin an issue badge on the Next.js dev
+        // overlay and hide real problems, so it is warned about once instead.
+        expectedOffline = res.headers.get("x-telemetry-offline") === "expected";
+        throw new Error("Telemetry sync fetch failure");
+      }
       const data = (await res.json()) as TelemetryData;
       updateStore((prev) => ({
         telemetry: { ...prev.telemetry, ...data },
         syncFailed: false,
       }));
     } catch (err) {
-      logger.error(
-        "Background telemetry synchronization failed:",
-        sanitizeError(err)
-      );
+      if (!expectedOffline) {
+        logger.error(
+          "Background telemetry synchronization failed:",
+          sanitizeError(err)
+        );
+      } else if (!offlineSyncReported) {
+        offlineSyncReported = true;
+        logger.warn(
+          "Telemetry aggregates are unavailable without a local database; showing defaults."
+        );
+      }
       updateStore((prev) => ({ ...prev, syncFailed: true }));
     } finally {
       inFlightFetch = null;

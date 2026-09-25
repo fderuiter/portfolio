@@ -3,6 +3,7 @@ import { TelemetryEventSchema } from "@/lib/schemas";
 import { TelemetryService } from "@/lib/services/telemetry-service";
 import { createApiHandler } from "@/lib/route-wrapper";
 import { logger } from "@/lib/logger";
+import { env, isBuildPhase } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 
@@ -17,10 +18,24 @@ export const GET = createApiHandler(async () => {
       },
     });
   } catch (err) {
-    logger.error("Telemetry statistics aggregate query failed:", err);
+    // Gate on the runtime, not the build (AGENTS.md section 15). Outside a
+    // production runtime an unreachable database is expected, so it is logged
+    // as a warning and flagged for the client, which then stays off
+    // console.error.
+    if (env.VERCEL_ENV === "production" && !isBuildPhase()) {
+      logger.error("Telemetry statistics aggregate query failed:", err);
+      return NextResponse.json(
+        { error: "Failed to compile aggregate portfolio telemetry" },
+        { status: 500 }
+      );
+    }
+    logger.warn(
+      "Telemetry statistics are unavailable without a reachable database:",
+      err
+    );
     return NextResponse.json(
       { error: "Failed to compile aggregate portfolio telemetry" },
-      { status: 500 }
+      { status: 500, headers: { "X-Telemetry-Offline": "expected" } }
     );
   }
 });
