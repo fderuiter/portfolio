@@ -44,21 +44,32 @@ test("phone fallback keeps a visible compact and selectable canvas", async ({
     await expect(page.locator("#cc-dossier-title")).toContainText("SUBJ-1001");
   }).toPass({ timeout: 15000 });
   const canvas = page.locator("canvas[role='application']");
-  for (const width of [320, 390]) {
+  // Each width taps a different slot, so a broken hit test cannot pass on the
+  // previous iteration's selection.
+  for (const [width, x, expected] of [
+    [320, 130, "SUBJ-1002"],
+    [390, 60, "SUBJ-1001"],
+  ] as const) {
     await page.setViewportSize({ width, height: 844 });
+    // Wait for the ResizeObserver to size the bitmap for this width
+    await expect
+      .poll(() =>
+        canvas.evaluate(
+          (element: HTMLCanvasElement) =>
+            element.height ===
+            Math.round((element.getBoundingClientRect().width * 5) / 13)
+        )
+      )
+      .toBe(true);
     const canvasSize = await canvas.evaluate((element: HTMLCanvasElement) => ({
       width: element.width,
       height: element.height,
-      displayWidth: element.getBoundingClientRect().width,
     }));
     expect(canvasSize.width).toBeLessThanOrEqual(500);
-    expect(canvasSize.height).toBe(
-      Math.round((canvasSize.displayWidth * 5) / 13)
-    );
     expect(canvasSize.width).toBeGreaterThanOrEqual(200);
     await canvas.click({
-      position: { x: 130, y: canvasSize.height * 0.55 },
+      position: { x, y: canvasSize.height * 0.55 },
     });
-    await expect(page.locator("#cc-dossier-title")).toContainText("SUBJ-1002");
+    await expect(page.locator("#cc-dossier-title")).toContainText(expected);
   }
 });

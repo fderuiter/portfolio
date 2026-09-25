@@ -186,6 +186,22 @@ function getConveyorGeometry(width: number, height: number) {
   };
 }
 
+/**
+ * The slice of the queue the canvas shows. The window follows the selected
+ * subject so a selection past the visible slots (via Tab or the dossier) is
+ * still drawn, highlighted and tappable.
+ */
+function getVisibleSubjects<T extends { id: string }>(
+  subjects: T[],
+  selectedId: string | null,
+  visibleSlots: number
+): T[] {
+  const selectedIndex = subjects.findIndex((s) => s.id === selectedId);
+  const start =
+    selectedIndex >= visibleSlots ? selectedIndex - visibleSlots + 1 : 0;
+  return subjects.slice(start, start + visibleSlots);
+}
+
 function timerBarColor(ratio: number): string {
   if (ratio > 0.5) return "bg-emerald-500";
   if (ratio > 0.25) return "bg-amber-500";
@@ -252,6 +268,8 @@ export const ClinicalTrialChaos: React.FC = () => {
   const [phase, setPhase] = useState<GamePhase>(1);
   const [playState, setPlayState] = useState<PlayState>("idle");
   const [soundEnabled, setSoundEnabled] = useState(true);
+  // Bitmap size of the conveyor canvas; changes trigger an idle redraw
+  const [canvasSize, setCanvasSize] = useState("");
   const [bgmEnabled, setBgmEnabled] = useState(false);
   const [officeId, setOfficeId] = useState<OfficeId>(DEFAULT_OFFICE_ID);
   const office = getOfficeById(officeId);
@@ -1031,7 +1049,14 @@ export const ClinicalTrialChaos: React.FC = () => {
     if (result.success) {
       triggerSound("sign");
       triggerSound("chute");
-      spawnSparkles(380, 100, "#38bdf8");
+      const sparkleCanvas = canvasRef.current;
+      if (sparkleCanvas) {
+        spawnSparkles(
+          sparkleCanvas.width / 2,
+          getConveyorGeometry(sparkleCanvas.width, sparkleCanvas.height).beltY,
+          "#38bdf8"
+        );
+      }
       setFlashStationId(domain);
       setTimeout(() => setFlashStationId(null), 700);
       addAuditLog(result.logMessage, "COMPLIANT", result.suspicionDelta);
@@ -1128,66 +1153,68 @@ export const ClinicalTrialChaos: React.FC = () => {
       ctx.strokeRect(20, beltY, width - 40, beltHeight);
 
       // Conveyor Subject Parcels
-      subjects.slice(0, visibleSlots).forEach((subj, idx) => {
-        const px = 28 + idx * slotWidth;
-        const py = subjectTop;
+      getVisibleSubjects(subjects, selectedSubjectId, visibleSlots).forEach(
+        (subj, idx) => {
+          const px = 28 + idx * slotWidth;
+          const py = subjectTop;
 
-        const isSelected = subj.id === selectedSubjectId;
-        ctx.fillStyle = subj.isSAE
-          ? "#7f1d1d"
-          : isSelected
-            ? "#1e3a8a"
-            : "#1f2937";
-        ctx.strokeStyle = subj.isSAE
-          ? "#ef4444"
-          : isSelected
-            ? "#38bdf8"
-            : "#4b5563";
-        ctx.lineWidth = isSelected ? 2 : 1;
-        ctx.fillRect(px, py, slotWidth - 10, subjectHeight);
-        ctx.strokeRect(px, py, slotWidth - 10, subjectHeight);
-
-        // Subject Label
-        ctx.fillStyle = "#f3f4f6";
-        ctx.font = "bold 10px monospace";
-        ctx.fillText(subj.subjectLabel, px + 6, py + 16);
-
-        // SAE Badge or Domain Badge
-        if (subj.isSAE && !narrow) {
-          // Right-aligned so it ends before the status pip; light text reads on the red card
-          ctx.fillStyle = "#fecaca";
-          ctx.font = "bold 8px monospace";
-          ctx.textAlign = "right";
-          ctx.fillText("⚡ SAE", px + slotWidth - 26, py + 16);
-          ctx.textAlign = "left";
-        }
-
-        // Compliance status pip
-        const allClean = isSubjectFullyCompliant(subj);
-        if (!narrow) {
-          ctx.fillStyle = allClean ? "#10b981" : "#f59e0b";
-          ctx.beginPath();
-          ctx.arc(px + slotWidth - 18, py + 12, 4, 0, Math.PI * 2);
-          ctx.fill();
-        }
-
-        // Mini timer bar
-        const timePercent = Math.max(0, subj.timeRemaining / subj.maxTime);
-        ctx.fillStyle = "#374151";
-        ctx.fillRect(px + 6, py + subjectHeight - 14, slotWidth - 22, 5);
-        ctx.fillStyle =
-          timePercent < 0.25
+          const isSelected = subj.id === selectedSubjectId;
+          ctx.fillStyle = subj.isSAE
+            ? "#7f1d1d"
+            : isSelected
+              ? "#1e3a8a"
+              : "#1f2937";
+          ctx.strokeStyle = subj.isSAE
             ? "#ef4444"
-            : timePercent < 0.5
-              ? "#f59e0b"
-              : "#3b82f6";
-        ctx.fillRect(
-          px + 6,
-          py + subjectHeight - 14,
-          (slotWidth - 22) * timePercent,
-          5
-        );
-      });
+            : isSelected
+              ? "#38bdf8"
+              : "#4b5563";
+          ctx.lineWidth = isSelected ? 2 : 1;
+          ctx.fillRect(px, py, slotWidth - 10, subjectHeight);
+          ctx.strokeRect(px, py, slotWidth - 10, subjectHeight);
+
+          // Subject Label
+          ctx.fillStyle = "#f3f4f6";
+          ctx.font = "bold 10px monospace";
+          ctx.fillText(subj.subjectLabel, px + 6, py + 16);
+
+          // SAE Badge or Domain Badge
+          if (subj.isSAE && !narrow) {
+            // Right-aligned so it ends before the status pip; light text reads on the red card
+            ctx.fillStyle = "#fecaca";
+            ctx.font = "bold 8px monospace";
+            ctx.textAlign = "right";
+            ctx.fillText("⚡ SAE", px + slotWidth - 26, py + 16);
+            ctx.textAlign = "left";
+          }
+
+          // Compliance status pip
+          const allClean = isSubjectFullyCompliant(subj);
+          if (!narrow) {
+            ctx.fillStyle = allClean ? "#10b981" : "#f59e0b";
+            ctx.beginPath();
+            ctx.arc(px + slotWidth - 18, py + 12, 4, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // Mini timer bar
+          const timePercent = Math.max(0, subj.timeRemaining / subj.maxTime);
+          ctx.fillStyle = "#374151";
+          ctx.fillRect(px + 6, py + subjectHeight - 14, slotWidth - 22, 5);
+          ctx.fillStyle =
+            timePercent < 0.25
+              ? "#ef4444"
+              : timePercent < 0.5
+                ? "#f59e0b"
+                : "#3b82f6";
+          ctx.fillRect(
+            px + 6,
+            py + subjectHeight - 14,
+            (slotWidth - 22) * timePercent,
+            5
+          );
+        }
+      );
 
       if (!compact) {
         // Preserve the chosen outfit in the narrow right-side desk lane.
@@ -1319,6 +1346,11 @@ export const ClinicalTrialChaos: React.FC = () => {
       if (canvas.width !== logicalWidth || canvas.height !== logicalHeight) {
         canvas.width = logicalWidth;
         canvas.height = logicalHeight;
+        // The CSS box follows the bitmap chosen from the canvas's own width,
+        // not a viewport breakpoint, so the drawing is never stretched.
+        canvas.style.aspectRatio = `${logicalWidth} / ${logicalHeight}`;
+        // Resizing clears the bitmap; let the static-frame effect redraw it.
+        setCanvasSize(`${logicalWidth}x${logicalHeight}`);
       }
     };
 
@@ -1752,7 +1784,14 @@ export const ClinicalTrialChaos: React.FC = () => {
         particlesRef.current
       );
     }
-  }, [playState, activeTab, renderConveyorCanvas, auditor, conveyorSubjects]);
+  }, [
+    playState,
+    activeTab,
+    renderConveyorCanvas,
+    auditor,
+    conveyorSubjects,
+    canvasSize,
+  ]);
 
   // 18. Hotkeys and Keyboard Boundary
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -1936,7 +1975,11 @@ export const ClinicalTrialChaos: React.FC = () => {
       getConveyorGeometry(canvas.width, canvas.height);
 
     if (y >= subjectTop && y <= subjectTop + subjectHeight) {
-      conveyorSubjects.slice(0, visibleSlots).forEach((subj, idx) => {
+      getVisibleSubjects(
+        conveyorSubjects,
+        selectedSubjectId,
+        visibleSlots
+      ).forEach((subj, idx) => {
         const px = 28 + idx * slotWidth;
         if (x >= px && x <= px + slotWidth - 10) {
           setSelectedSubjectId(subj.id);
@@ -2560,7 +2603,7 @@ export const ClinicalTrialChaos: React.FC = () => {
               role="application"
               aria-label="Clinical Trial Chaos Simulation Canvas. Use Tab to navigate accessible controls, or space/enter to interact with subjects."
               tabIndex={0}
-              className="block w-full aspect-[13/5] cursor-pointer touch-none focus:outline-none focus:ring-2 focus:ring-emerald-500/50 md:aspect-[760/150]"
+              className="block w-full aspect-[13/5] cursor-pointer touch-none focus:outline-none focus:ring-2 focus:ring-emerald-500/50 "
             />
 
             {/* Off-screen Accessible DOM Fallback Subtree */}
@@ -2606,10 +2649,19 @@ export const ClinicalTrialChaos: React.FC = () => {
                 >
                   <button
                     type="button"
-                    onClick={() => startGame(gameMode, phase)}
+                    onClick={() =>
+                      playState === "phase_cleared"
+                        ? startGame(
+                            "campaign",
+                            (phase < 3 ? phase + 1 : 1) as GamePhase
+                          )
+                        : startGame(gameMode, 1)
+                    }
                     disabled={playState === "playing"}
                   >
-                    Start Phase {phase}
+                    {playState === "phase_cleared"
+                      ? `Start Phase ${phase < 3 ? phase + 1 : 1}`
+                      : "Start Phase 1"}
                   </button>
 
                   <button
