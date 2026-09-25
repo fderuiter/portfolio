@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { describe, expect, it } from "vitest";
 
-// ADR 0049: Vercel builds, migrates and promotes `main`; GitHub only runs CI.
+// ADR 0051: all Git-triggered deployments are paused during the manual hold.
 describe("production deploy configuration", () => {
   const root = process.cwd();
   const read = (file: string) => fs.readFileSync(path.join(root, file), "utf8");
@@ -19,11 +19,8 @@ describe("production deploy configuration", () => {
     expect(vercelConfig.buildCommand).toBe("npm run build");
   });
 
-  it("lets Vercel's Git integration build main and nothing else", () => {
-    expect(vercelConfig.git.deploymentEnabled).toEqual({
-      "*": false,
-      main: true,
-    });
+  it("disables all Git-triggered deployments during the manual hold", () => {
+    expect(vercelConfig.git.deploymentEnabled).toBe(false);
   });
 
   it("schedules exactly one daily cron, the maintenance route (Vercel Hobby limit)", () => {
@@ -130,15 +127,18 @@ describe("production deploy configuration", () => {
     expect(migrationGuide).toContain("DATABASE_URL_UNPOOLED");
   });
 
-  it("documents the canonical Vercel flow in the release runbook and agent rules", () => {
+  it("documents the manual release hold and October 1 return to automation", () => {
     const runbook = read("docs/how-to/release-and-deploy.md");
     for (const step of [
       "adr/0049-deploy-main-on-green-ci.md",
+      "adr/0051-manual-production-releases.md",
       "Merge Gate (Required Checks Summary)",
       "Deployment Checks",
       "DATABASE_URL_UNPOOLED",
       "Instant Rollback",
       "vercel.json",
+      "Create Deployment",
+      "2026-10-01",
     ]) {
       expect(runbook).toContain(step);
     }
@@ -146,6 +146,10 @@ describe("production deploy configuration", () => {
     const adr = read("adr/0049-deploy-main-on-green-ci.md");
     expect(adr).toMatch(/## Status\s+Accepted/);
     expect(adr).toContain('"*": false, "main": true');
+
+    const temporaryAdr = read("adr/0051-manual-production-releases.md");
+    expect(temporaryAdr).toContain("2026-10-01");
+    expect(temporaryAdr).toContain("Dashboard → Deployments → Create");
 
     expect(read("AGENTS.md")).toMatch(
       /GitHub Actions runs CI and never deploys/

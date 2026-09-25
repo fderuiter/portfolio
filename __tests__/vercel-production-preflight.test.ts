@@ -7,6 +7,7 @@ const {
   checkVercelProductionEnv,
   runVercelProductionPreflight,
   shouldRunPreflight,
+  verifyUpstashCredentials,
 } = require("../scripts/vercel-production-preflight.js");
 
 type Env = Record<string, string | undefined>;
@@ -282,5 +283,62 @@ describe("secret redaction", () => {
     const serialized = JSON.stringify([...problems, ...notes]);
     expect(serialized).not.toMatch(/sentinel/i);
     expect(problems.length).toBeGreaterThan(0);
+  });
+});
+
+describe("Upstash production authentication", () => {
+  it("accepts credentials only after Upstash returns PONG", async () => {
+    const fetchImpl = vi.fn<typeof fetch>(
+      async () =>
+        new Response(JSON.stringify({ result: "PONG" }), { status: 200 })
+    );
+
+    await expect(
+      verifyUpstashCredentials(validProductionEnv(), fetchImpl)
+    ).resolves.toEqual({ ok: true });
+    expect(fetchImpl).toHaveBeenCalledWith(
+      new URL("https://cache.upstash.test/ping"),
+      expect.objectContaining({
+        method: "GET",
+        headers: { Authorization: "Bearer tok-fake-9Z" },
+      })
+    );
+  });
+
+  it("names a rejected token without returning or logging its value", async () => {
+    const secret = "fake-upstash-token-7Q2";
+    const fetchImpl = vi.fn<typeof fetch>(
+      async () => new Response("Unauthorized", { status: 401 })
+    );
+
+    const result = await verifyUpstashCredentials(
+      { ...validProductionEnv(), UPSTASH_REDIS_REST_TOKEN: secret },
+      fetchImpl
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      name: "UPSTASH_REDIS_REST_TOKEN",
+      reason: "was rejected by Upstash",
+    });
+    expect(JSON.stringify(result)).not.toContain(secret);
+  });
+
+  it("names a REST URL failure and redacts fetch errors", async () => {
+    const fetchImpl = vi.fn<typeof fetch>(async () => {
+      throw new Error("fake-upstash-token-7Q2");
+    });
+
+    const result = await verifyUpstashCredentials(
+      validProductionEnv(),
+      fetchImpl
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      name: "UPSTASH_REDIS_REST_URL",
+      reason: "could not complete a PING within 3 seconds",
+    });
+    expect(JSON.stringify(result)).not.toContain("fake-upstash-token-7Q2");
   });
 });

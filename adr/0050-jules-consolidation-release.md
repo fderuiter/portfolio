@@ -6,7 +6,8 @@ Accepted on 2026-09-24 as a temporary exception to ADR 0037. This ADR governs
 the current `dev` → `main` release only; it does not establish `dev` as a
 permanent integration or staging branch. After this consolidation, normal
 feature pull requests target `main` under ADR 0037. Production deployment
-remains governed by ADR 0049.
+follows the temporary manual-release hold in ADR 0051, then returns to ADR
+0049 on 2026-10-01.
 
 ## Context
 
@@ -40,10 +41,12 @@ deployment is part of this decision.
 - CI continues to gate pull requests targeting `main`, including #1029. The
   workflow remains scoped to `main`; it does not add a second long-lived
   branch gate or run duplicate full checks on pushes to `dev`.
-- Keep Vercel automatic non-production deployments disabled. Vercel builds
-  production from `main` under ADR 0049; GitHub Actions validates code and
-  does not deploy it. When Vercel service recovers, verify the production
-  configuration and post-release behavior using the checklist in PR #1029.
+- Keep Vercel Git deployments disabled during the manual-release hold in ADR
+  0051. An operator creates Production deployments from the Vercel Dashboard
+  after CI passes; GitHub Actions validates code and does not deploy it. On
+  2026-10-01, restore ADR 0049's automatic `main` deployment policy unless a
+  newer decision replaces it. Verify production configuration and post-release
+  behavior using the checklist in PR #1029.
 - Leave changing GitHub's default branch, configuring required checks, and
   deleting the now-inactive `dev` ref to a separately reviewed operator task.
   Track dashboard verification in #732; the current API connection cannot
