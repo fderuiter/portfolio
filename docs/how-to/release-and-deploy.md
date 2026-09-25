@@ -1,10 +1,14 @@
 # Release and Deployment Workflow
 
-Last reconciled: 2026-09-24. Governed by
-[ADR 0049](../../adr/0049-deploy-main-on-green-ci.md).
+Last reconciled: 2026-09-24. Manual Production releases are required until
+2026-10-01 under [ADR 0051](../../adr/0051-manual-production-releases.md);
+automatic `main` deployment resumes on that date under
+[ADR 0049](../../adr/0049-deploy-main-on-green-ci.md), unless a new decision
+is recorded.
 
-**In one line:** open a PR, let CI go green, squash-merge it. Vercel deploys
-`main` itself.
+**In one line until October 1:** open a PR, let CI go green, squash-merge
+it, then have an operator create a Production deployment from the current
+`main` commit in the Vercel Dashboard.
 
 ## The Flow
 
@@ -13,33 +17,41 @@ Last reconciled: 2026-09-24. Governed by
    Commits, and open a pull request into `main`.
 2. CI (`.github/workflows/ci.yml`) runs on the PR. Merge only when
    **Merge Gate (Required Checks Summary)** is green.
-3. The merge pushes to `main`. Two things start at once:
-   - CI runs on the `main` commit in GitHub;
-   - Vercel builds the same commit with the production secrets it holds.
-4. The Vercel build applies pending migrations through the unpooled Neon
-   endpoint, then compiles the site. If either step fails, nothing goes live.
-5. Vercel waits for **Merge Gate** on that commit (Deployment Checks), then
-   points `deruiter.dev` at the new deployment.
+3. Merge after **Merge Gate** is green. Git pushes the merge commit to `main`;
+   Vercel does not automatically build it during this temporary hold.
+4. In the Vercel Dashboard, open the `portfolio` project and choose
+   **Deployments → Create Deployment**. Select the current `main` commit SHA,
+   confirm the target is **Production**, and press **Create Deployment**.
+5. The Vercel build authenticates Upstash, applies pending migrations through
+   the unpooled Neon endpoint, then compiles the site. A failed check or build
+   leaves the current deployment serving traffic.
+6. Confirm the new deployment's commit SHA, successful build and Deployment
+   Check before verifying that `deruiter.dev` points to it.
 
 Everything about production lives in Vercel. GitHub holds no deploy secrets.
+On 2026-10-01, restore automatic `main` deployments under ADR 0049 unless a
+new decision is recorded.
 
 ## Buttons
 
 | Situation | Do this |
 | --- | --- |
 | Production is broken after a deploy | Vercel dashboard, Deployments, **Instant Rollback** to the previous production deployment. Then open a `fix/` PR. |
-| A build failed for a transient reason | Vercel dashboard, the failed `main` deployment, **Redeploy**. |
+| A Production build failed for a transient reason | Fix the cause, then use **Create Deployment** with the current green `main` SHA. |
 | A deployment is built but not live | Its Deployment Check is waiting on CI, or CI failed. Fix forward with a new PR. |
 
-**Redeploy** rebuilds the commit it is pressed on. Pressing it on the live
-deployment does not ship `main`.
+**Redeploy** rebuilds the commit it is pressed on. During this hold, use
+**Create Deployment** and select the current `main` SHA to release a merge.
+Production deploy commands in the Vercel CLI are blocked by the repository
+guardrail during the hold.
 
 ## One-Time Setup
 
 In the Vercel dashboard for the `portfolio` project:
 
-1. **Settings, Git:** confirm the production branch is `main`.
-   `vercel.json` already enables Git deployments for `main` only.
+1. **Settings, Git:** confirm automatic Git deployments are disabled during
+   this hold. `vercel.json` sets `git.deploymentEnabled` to `false` for all
+   branches.
 2. **Settings, Deployment Checks:** add the GitHub check
    **Merge Gate (Required Checks Summary)** so production waits for CI.
 3. **Settings, Environment Variables:** set what
@@ -59,7 +71,7 @@ the owner's audit of the live Vercel settings against it.
 | | Production | Preview | Development |
 | --- | --- | --- | --- |
 | **Purpose** | The public site | Checking one PR on real infrastructure before merge | Local work |
-| **Created by** | Vercel's Git integration, on every push to `main` | An operator, deliberately, for one PR (below) | `npm run dev` or a local `npm run build` |
+| **Created by** | An operator in the Vercel Dashboard after a green `main` merge, until 2026-10-01 | An operator, deliberately, for one PR (below) | `npm run dev` or a local `npm run build` |
 | **Domain** | `deruiter.dev`; `www` redirects to the apex (AGENTS.md section 18) | Its own `*.vercel.app` URL only, never a production alias | `localhost` |
 | **Access** | Public | Vercel Deployment Protection where the plan provides it; otherwise the URL is unlisted, not private | Local machine |
 | **Database** | Production Neon branch; migrations run during the build | A non-production Neon branch (#622); Preview builds never migrate | A local or personal Neon branch |
@@ -74,12 +86,12 @@ rendering runs.
 
 ### Using a Preview
 
-Git deployments are off for every branch except `main` (`vercel.json`), so a
-Preview exists only when someone asks for one.
+Git deployments are off for every branch until 2026-10-01 (`vercel.json`),
+so a Preview exists only when someone asks for one.
 
-1. **Request:** in the Vercel dashboard, create a deployment of the PR's
-   branch, or run `vercel deploy` (never `--prod` or `--prebuilt`) from a
-   checkout of it. Either one builds on Vercel with the Preview variables.
+1. **Request:** in the Vercel Dashboard, create a deployment of the PR's
+   branch. It builds on Vercel with the Preview variables. The Vercel CLI may
+   still create ordinary Preview builds, but never use it for Production.
 2. **Verify** before trusting what it shows:
    - Its URL is a `*.vercel.app` deployment URL, and the Domains page shows
      no production alias on it.
@@ -92,13 +104,18 @@ Preview exists only when someone asks for one.
 
 ### Checking a Production Release
 
-A fresh deployment of `main` is correct when:
+A fresh Production deployment of `main` is correct when:
 
-- it was built from the merged `main` commit by the Git integration, not by
-  a dashboard Redeploy of an older deployment;
+- it was started with **Create Deployment** from the current merged `main`
+  commit SHA in the Dashboard, not by Redeploying an older deployment;
 - its build log shows "Production configuration preflight passed." and the
-  migration step;
+  "Upstash REST authentication passed." check before the migration step;
 - its Deployment Check passed on **Merge Gate** before the domains moved.
+
+On 2026-10-01, restore the `main`-only Git trigger
+(`"*": false, "main": true`) in `vercel.json` and verify automatic
+Production deployment under ADR 0049. Vercel does not automatically expire
+this temporary setting.
 
 ## Environment Variables
 
@@ -234,23 +251,26 @@ The QStash integration provisions `QSTASH_*`. No code reads them yet.
 
 ## Rules That Keep This Safe
 
-- **Migrations ship on merge, before CI on `main` finishes.** Every migration
-  must be expand/contract: the live app and the new app must both work against
-  the migrated schema. Never drop or rename a column in the same PR that stops
-  using it.
+- **Until 2026-10-01, migrations start only after the operator creates a
+  Production deployment from the current green `main` SHA.** On October 1,
+  automatic `main` builds and migrations resume under ADR 0049 unless a new
+  decision is recorded. Every migration must be expand/contract: the live app
+  and the new app must both work against the migrated schema. Never drop or
+  rename a column in the same PR that stops using it.
 - **Hold work back with a flag, not by leaving it unmerged for days.**
 - **Database recovery is roll-forward.** Add a new migration through a normal
   PR. Restore from a Neon backup only for confirmed data loss.
-- **Previews are off.** `vercel.json` disables Git deployments for every
-  branch except `main` to protect build-hour and storage quota. Preview builds
-  never migrate even if one is started by hand.
+- **Git-triggered deployments are paused.** Until October 1,
+  `vercel.json` disables Git deployments for every branch. Preview builds
+  never migrate even if an operator starts one by hand.
 
 ## Building Production Output Locally
 
-Releasing never needs a local build: Vercel builds `main` with the
-production secrets it holds (ADR 0049). Build locally only to inspect what a
-production build generates, for example to confirm that database-backed pages
-render real content (#859).
+Releasing never needs a local build: during the manual hold, Vercel builds the
+selected `main` SHA with the production secrets it holds after an operator
+starts **Create Deployment** in the Dashboard (ADR 0051). Build locally only
+to inspect what a production build generates, for example to confirm that
+database-backed pages render real content (#859).
 
 **What `npm run build` reads.** `scripts/build.js` loads `.env.local` (or
 `.env` if there is no `.env.local`) itself, because npm does not. With no
@@ -318,6 +338,10 @@ half-migrated schema.
   - A `NEXT_PUBLIC_APP_URL` other than `https://deruiter.dev`. Unset is fine.
   - A value containing a placeholder marker such as `dummy`, `example` or
     `placeholder`.
+- **Upstash authentication:** the production build sends one authenticated
+  REST `PING` with a three-second timeout and requires `PONG`. A rejected token
+  fails the build before migrations; URL, network and service failures name the
+  affected variable without printing either credential.
 
 **Optional:** an unset `RESEND_API_KEY`, `RESEND_WEBHOOK_SECRET`,
 `NEXT_PUBLIC_SENTRY_DSN` or `BLOB_READ_WRITE_TOKEN` prints a note naming the
@@ -330,9 +354,10 @@ The preflight prints variable names and reasons, never values.
 
 1. In Vercel, open **Settings, Environment Variables** and correct each named
    variable for **Production**.
-2. Open the newest failed `main` deployment and press **Redeploy**. It
-   rebuilds that commit with the corrected variables. Use it only when that
-   commit is still the tip of `main`; otherwise merge the next PR.
+2. After confirming the current `main` SHA contains the fix, open **Deployments
+   → Create Deployment**, select that SHA, confirm **Production**, and press
+   **Create Deployment**. This builds the current code with corrected
+   variables. Do not use Redeploy on an older deployment to ship the fix.
 3. If the preflight itself is wrong, fix it with a `fix/` PR. It has no
    override variable.
 

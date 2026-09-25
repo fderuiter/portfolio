@@ -2,7 +2,10 @@
 
 ## Status
 
-Accepted on 2026-09-24. Supersedes
+Accepted on 2026-09-24. Temporarily superseded for the manual-release period
+by [ADR 0051](0051-manual-production-releases.md), until 2026-10-01. On
+2026-10-01, restore this ADR's automatic `main` deployment policy unless the
+operator records a new decision. Supersedes
 [ADR 0038](0038-protected-build-once-production-releases.md) and, for
 production builds only, the migration placement in
 [ADR 0001](0001-pre-build-database-migrations.md).
@@ -37,8 +40,9 @@ integration provisions as `DATABASE_URL_UNPOOLED`, already lives in Vercel.
 Vercel is the only deploy path. GitHub Actions runs CI and nothing that
 deploys.
 
-- `vercel.json` enables Vercel's Git integration for `main` only
-  (`"*": false, "main": true`). Every other branch still builds nothing.
+- Outside the temporary manual-release period in ADR 0051, `vercel.json`
+  enables Vercel's Git integration for `main` only (`"*": false,
+  "main": true`). Every other branch still builds nothing.
 - `scripts/build.js` runs `prisma migrate deploy` before `next build` when,
   and only when, the build runs on Vercel for the production environment
   (`VERCEL=1` and `VERCEL_ENV=production`). It migrates through
@@ -57,8 +61,8 @@ deploys.
 
 - One place holds production configuration and secrets. A rotation happens
   once, in Vercel.
-- Production tracks `main` within one build of a merge, and nobody has to
-  remember to release.
+- Once ADR 0051 expires, Production tracks `main` within one build of a merge,
+  and nobody has to remember to release.
 - Migrations run before the build that depends on them. A failed migration
   or build publishes nothing, and a build that cannot reach its data sources
   still fails rather than baking fallback content.

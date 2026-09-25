@@ -58,7 +58,10 @@ recovery state reconcile.
 
 When the meter is critical:
 
-1. Keep automatic non-production deployments disabled.
+1. Keep automatic Git deployments disabled until 2026-10-01 per
+   [ADR 0051](../../adr/0051-manual-production-releases.md). On October 1,
+   restore `main`-only Production deployment under ADR 0049 unless a new
+   decision is recorded.
 2. Open the Vercel usage dashboard, select All Projects and Last 30 Days, and
    record all three meter values with a UTC timestamp.
 3. Run a fresh paginated deployment and alias inventory.
@@ -75,11 +78,14 @@ When the meter is critical:
 
 ## Warning Build-Time Response
 
-1. Confirm Vercel Git deployments are allowlisted to `main` in `vercel.json`.
+1. During the temporary hold, confirm `vercel.json` sets
+   `git.deploymentEnabled` to `false`. On 2026-10-01, restore the `main`-only
+   allowlist (`"*": false, "main": true`).
 2. Confirm no GitHub Action, Deploy Hook, or second integration also deploys
    the same commit.
-3. Keep one production build per accepted pull request and use an on-demand
-   preview only when deployed review materially reduces risk.
+3. Keep one Production build per accepted pull request, started manually from
+   the current `main` SHA during the hold; use an on-demand preview only when
+   deployed review materially reduces risk.
 4. Review failed and canceled build frequency before changing retention.
 
 ## Refresh the Audited Snapshot

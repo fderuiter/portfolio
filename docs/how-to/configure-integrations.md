@@ -191,9 +191,11 @@ curl -X POST http://localhost:3000/api/telemetry \
 ### Credential rotation & namespace cleanup runbook
 
 - **Credential rotation**: Generate a new REST token in the Upstash console.
-  Update `UPSTASH_REDIS_REST_TOKEN` in the Vercel project environment variables
-  and trigger a redeployment. There is no dual-secret overlap window in the
-  Upstash REST API, so the redeploy constitutes the atomic switch.
+  Update the Production URL and token together in Vercel project environment
+  variables, then create a Production deployment from the current green `main`
+  SHA in the Dashboard. Until 2026-10-01, all Production releases are
+  Dashboard-only (ADR 0051). There is no dual-secret overlap window in the
+  Upstash REST API, so the deployment constitutes the atomic switch.
 - **Preview namespace cleanup**: Ephemeral preview keys prefixed with `preview:`
   or a custom PR prefix can be listed via `SCAN 0 MATCH preview:* COUNT 100`.
   Queue keys have an explicit 48-hour TTL (`172800s`), and rate-limit sliding

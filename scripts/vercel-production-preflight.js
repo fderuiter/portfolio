@@ -216,6 +216,75 @@ function shouldRunPreflight(env) {
 }
 
 /**
+ * Authenticates the configured Upstash REST credentials with a bounded PING.
+ * The result and any error intentionally contain no credential values.
+ */
+async function verifyUpstashCredentials(env = process.env, fetchImpl = fetch) {
+  const urlValue = env.UPSTASH_REDIS_REST_URL;
+  const token = env.UPSTASH_REDIS_REST_TOKEN;
+  if (
+    !isSet(env, "UPSTASH_REDIS_REST_URL") ||
+    !isSet(env, "UPSTASH_REDIS_REST_TOKEN")
+  ) {
+    const name = isSet(env, "UPSTASH_REDIS_REST_URL")
+      ? "UPSTASH_REDIS_REST_TOKEN"
+      : "UPSTASH_REDIS_REST_URL";
+    return { ok: false, name, reason: "is not configured" };
+  }
+
+  const baseUrl = parseUrl(urlValue);
+  if (!baseUrl || baseUrl.protocol !== "https:") {
+    return {
+      ok: false,
+      name: "UPSTASH_REDIS_REST_URL",
+      reason: "is not a valid HTTPS URL",
+    };
+  }
+
+  const pingUrl = new URL(baseUrl.toString());
+  pingUrl.pathname = `${pingUrl.pathname.replace(/\/$/, "")}/ping`;
+  pingUrl.search = "";
+  pingUrl.hash = "";
+
+  try {
+    const response = await fetchImpl(pingUrl, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+      signal: AbortSignal.timeout(3000),
+    });
+    if (!response.ok) {
+      return response.status === 401 || response.status === 403
+        ? {
+            ok: false,
+            name: "UPSTASH_REDIS_REST_TOKEN",
+            reason: "was rejected by Upstash",
+          }
+        : {
+            ok: false,
+            name: "UPSTASH_REDIS_REST_URL",
+            reason: `returned HTTP ${response.status}`,
+          };
+    }
+
+    const payload = await response.json();
+    if (payload?.result !== "PONG") {
+      return {
+        ok: false,
+        name: "UPSTASH_REDIS_REST_URL",
+        reason: "did not return the expected PONG response",
+      };
+    }
+    return { ok: true };
+  } catch {
+    return {
+      ok: false,
+      name: "UPSTASH_REDIS_REST_URL",
+      reason: "could not complete a PING within 3 seconds",
+    };
+  }
+}
+
+/**
  * Runs the preflight when this is a Vercel production build. Returns false
  * when the build must stop; true when it passed or was skipped.
  */
@@ -237,7 +306,8 @@ function runVercelProductionPreflight(env = process.env, logger = console) {
     logger.error(`  - ${problem.name} ${problem.reason}.`);
   logger.error(
     "Fix these in Vercel → Settings → Environment Variables (Production), then " +
-      "merge a PR or redeploy this commit. See 'Production Configuration " +
+      "create a Production deployment from the current green main commit in " +
+      "Dashboard → Deployments → Create Deployment. See 'Production Configuration " +
       "Preflight' in docs/how-to/release-and-deploy.md."
   );
   return false;
@@ -248,4 +318,5 @@ module.exports = {
   checkVercelProductionEnv,
   runVercelProductionPreflight,
   shouldRunPreflight,
+  verifyUpstashCredentials,
 };

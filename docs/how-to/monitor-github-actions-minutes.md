@@ -216,7 +216,8 @@ need verification:
   `403` when asked to read branch-protection settings, so #732 tracks manual
   confirmation. Client-side guardrails remain defense-in-depth. Since
   [ADR 0049](../../adr/0049-deploy-main-on-green-ci.md), no GitHub workflow or
-  environment deploys: Vercel builds and promotes `main` itself.
+  environment deploys. Until 2026-10-01, an operator starts Production from
+  the Vercel Dashboard after CI passes ([ADR 0051](../../adr/0051-manual-production-releases.md)); automatic `main` deployment resumes on October 1 unless a new decision is recorded.
 - **Runtime measurements**: The `timeout-minutes` values on `fast-gate` (20),
   `security-gate` (15), `heavy-gate` (40), `device-gate` (25), and `merge-gate` (5)
   remain upper bounds, not measured runtimes. Review successful GitHub run

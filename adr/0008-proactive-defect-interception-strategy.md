@@ -56,9 +56,12 @@ Pillar 3 was never wired into a deployment. `scripts/canary-analyzer.ts` is
 invoked only by its tests and by `npm run canary:eval`, which evaluates
 built-in sample metrics. No workflow, build step or Vercel integration feeds
 it live telemetry, and `executeAutomatedRollback` has no caller.
-[ADR 0049](0049-deploy-main-on-green-ci.md) made Vercel's Git build of `main`,
-gated by Merge Gate and a Vercel Deployment Check, the only production path,
-with rollback done by a person through Vercel's Instant Rollback.
+[ADR 0049](0049-deploy-main-on-green-ci.md) makes Vercel's build of `main`,
+gated by Merge Gate and a Vercel Deployment Check, the automatic production
+path after 2026-10-01. Until that date, [ADR
+0051](0051-manual-production-releases.md) requires an operator to start the
+production build from the Vercel Dashboard. Rollback remains a person using
+Vercel's Instant Rollback.
 
 The analyzer stays as manual tooling for judging a deploy from metrics a
 person supplies. Automating promotion or rollback would need a new ADR
