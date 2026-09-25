@@ -8,6 +8,7 @@ import {
   CDISCDomain,
   ClinicalObservation,
   ClinicalSubject,
+  GameMode,
   GameScoreState,
   PowerUpInventory,
   PowerUpType,
@@ -565,6 +566,39 @@ export function getRoutingReadiness(
       (observation) => !observation.isResolved
     ).length,
   };
+}
+
+/**
+ * Chooses the in-game submission flow for a station route. Routine packets
+ * can dispatch directly; safety cases, phase locks, active amendments, and
+ * invalid destinations keep the full review dialog.
+ */
+export function getSubmissionMode(
+  subject: ClinicalSubject,
+  targetStation: CDISCDomain,
+  stations: ReadonlyArray<Pick<StationConfig, "id">>,
+  context: {
+    gameMode: GameMode;
+    submittedCount: number;
+    phaseTarget: number;
+    amendmentActive: boolean;
+  }
+): "quick" | "full" {
+  const { matchingDomains, unresolvedCount } = getRoutingReadiness(
+    subject,
+    stations
+  );
+  if (
+    unresolvedCount > 0 ||
+    !matchingDomains.includes(targetStation) ||
+    subject.isSAE ||
+    context.amendmentActive ||
+    (context.gameMode === "campaign" &&
+      context.submittedCount + 1 >= context.phaseTarget)
+  ) {
+    return "full";
+  }
+  return "quick";
 }
 
 /**

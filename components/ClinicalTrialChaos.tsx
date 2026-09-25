@@ -97,6 +97,7 @@ import {
 
 import {
   getRoutingReadiness,
+  getSubmissionMode,
   OFFICES,
   DEFAULT_OFFICE_ID,
   OfficeId,
@@ -157,6 +158,7 @@ const getHighScoreServerSnapshot = () => "0";
 
 /** CRFs to lock before a campaign phase is cleared. */
 const PHASE_TARGETS: Record<GamePhase, number> = { 1: 5, 2: 8, 3: 12 };
+const QUICK_DISPATCH_GUARD_MS = 400;
 
 const AUDITOR_BEHAVIOR_LABELS: Record<AuditorState["behavior"], string> = {
   patrolling: "Patrolling",
@@ -340,6 +342,7 @@ export const ClinicalTrialChaos: React.FC = () => {
   });
   const [targetRoutingStation, setTargetRoutingStation] =
     useState<CDISCDomain>("DM");
+  const lastQuickDispatchAtRef = useRef(0);
   const [routingNotice, setRoutingNotice] = useState<{
     subjectId: string;
     unresolvedCount: number;
@@ -385,6 +388,7 @@ export const ClinicalTrialChaos: React.FC = () => {
   const sponsorRef = useRef<SponsorState>(sponsor);
   const terminalContainerRef = useRef<HTMLDivElement>(null);
   const particlesRef = useRef<Particle[]>([]);
+  const submittedSubjectIdsRef = useRef<Set<string>>(new Set());
   const activeProtocolRef = useRef<StudyProtocol | null>(activeProtocol);
   const ruleViolationsRef = useRef<RecordedRuleViolation[]>(ruleViolations);
 
@@ -483,6 +487,7 @@ export const ClinicalTrialChaos: React.FC = () => {
       setStations(phaseStations);
       setActiveAmendment(null);
       setSelectedSubjectId(null);
+      submittedSubjectIdsRef.current.clear();
       setRoutingNotice(null);
       setValidatingObs(null);
       setBimoReport(null);
@@ -1026,10 +1031,89 @@ export const ClinicalTrialChaos: React.FC = () => {
     [addAuditLog, triggerSound, announce, pushScorePop]
   );
 
-  // 14. Initiate 21 CFR Electronic Signature Modal
+  // 14. Shared verified submission path for routine and reviewed dossiers.
+  const submitDossier = useCallback(
+    (
+      subj: ClinicalSubject,
+      reason: SignatureReason,
+      domain: CDISCDomain,
+      mode: "quick" | "full"
+    ) => {
+      if (submittedSubjectIdsRef.current.has(subj.id)) {
+        setSignatureModal((prev) => ({
+          ...prev,
+          isOpen: false,
+          subject: null,
+        }));
+        return;
+      }
+      const result = verify21CFRSubmission(subj, reason, domain);
+
+      if (result.success) {
+        submittedSubjectIdsRef.current.add(subj.id);
+        triggerSound("sign");
+        triggerSound("chute");
+        const sparkleCanvas = canvasRef.current;
+        if (sparkleCanvas) {
+          spawnSparkles(
+            sparkleCanvas.width / 2,
+            getConveyorGeometry(sparkleCanvas.width, sparkleCanvas.height)
+              .beltY,
+            "#38bdf8"
+          );
+        }
+        setFlashStationId(domain);
+        setTimeout(() => setFlashStationId(null), 700);
+        addAuditLog(
+          mode === "quick"
+            ? `[SIMULATED ROUTINE DISPATCH] ${subj.subjectLabel} routed to ${domain} without exceptional review.`
+            : result.logMessage,
+          "COMPLIANT",
+          result.suspicionDelta
+        );
+
+        completeSubmission(subj, domain, {
+          allClean: isSubjectFullyCompliant(subj),
+          suspicionDelta: result.suspicionDelta,
+        });
+        announce(`${subj.subjectLabel} routed to ${domain}`, "polite");
+      } else {
+        triggerSound("error");
+        addAuditLog(result.logMessage, result.level, result.suspicionDelta);
+
+        setScoreState((prev) => ({
+          ...prev,
+          combo: 0,
+          multiplier: 1,
+          auditViolations: prev.auditViolations + 1,
+        }));
+
+        setAuditor((prev) => {
+          const nextSusp = Math.min(
+            100,
+            prev.suspicion + result.suspicionDelta
+          );
+          return {
+            ...prev,
+            suspicion: nextSusp,
+            behavior: nextSusp >= 100 ? "issuing_483" : "suspicious",
+          };
+        });
+      }
+      setSignatureModal((prev) => ({ ...prev, isOpen: false, subject: null }));
+    },
+    [triggerSound, spawnSparkles, addAuditLog, completeSubmission, announce]
+  );
+
+  // 15. Route now or open the full review dialog for exceptional packets.
   const handleInitiateSubmission = useCallback(
     (domain: CDISCDomain) => {
       if (!activeSubject) return;
+      // A quick dispatch clears the selection, so the queue head becomes the
+      // active subject at once. Ignore a double-click or repeated hotkey so
+      // it cannot route a dossier the player has not looked at.
+      if (Date.now() - lastQuickDispatchAtRef.current < QUICK_DISPATCH_GUARD_MS)
+        return;
       // Only a premature route is forgiven (#834 Prompt 1). A clean dossier
       // sent to the wrong station is a genuinely invalid submission and still
       // goes through verify21CFRSubmission and its penalties.
@@ -1045,6 +1129,18 @@ export const ClinicalTrialChaos: React.FC = () => {
         return;
       }
       setRoutingNotice(null);
+      if (
+        getSubmissionMode(activeSubject, domain, stations, {
+          gameMode,
+          submittedCount: scoreState.subjectsSubmitted,
+          phaseTarget: PHASE_TARGETS[phase],
+          amendmentActive: !!activeAmendment?.active,
+        }) === "quick"
+      ) {
+        lastQuickDispatchAtRef.current = Date.now();
+        submitDossier(activeSubject, "Intent to Submit", domain, "quick");
+        return;
+      }
       setTargetRoutingStation(domain);
       setSignatureModal({
         isOpen: true,
@@ -1056,68 +1152,28 @@ export const ClinicalTrialChaos: React.FC = () => {
         requiresReason: true,
       });
     },
-    [activeSubject, stations, announce]
+    [
+      activeSubject,
+      stations,
+      announce,
+      gameMode,
+      scoreState.subjectsSubmitted,
+      phase,
+      activeAmendment,
+      submitDossier,
+    ]
   );
 
-  // 15. Confirm 21 CFR Signature & Route Subject
+  // 16. Confirm the exceptional packet through the same submission path.
   const handleConfirmSignature = useCallback(() => {
     if (!signatureModal.subject) return;
-    const subj = signatureModal.subject;
-    const reason = signatureModal.selectedReason;
-    const domain = targetRoutingStation;
-
-    const result = verify21CFRSubmission(subj, reason, domain);
-
-    if (result.success) {
-      triggerSound("sign");
-      triggerSound("chute");
-      const sparkleCanvas = canvasRef.current;
-      if (sparkleCanvas) {
-        spawnSparkles(
-          sparkleCanvas.width / 2,
-          getConveyorGeometry(sparkleCanvas.width, sparkleCanvas.height).beltY,
-          "#38bdf8"
-        );
-      }
-      setFlashStationId(domain);
-      setTimeout(() => setFlashStationId(null), 700);
-      addAuditLog(result.logMessage, "COMPLIANT", result.suspicionDelta);
-
-      completeSubmission(subj, domain, {
-        allClean: isSubjectFullyCompliant(subj),
-        suspicionDelta: result.suspicionDelta,
-      });
-      setSignatureModal((prev) => ({ ...prev, isOpen: false, subject: null }));
-    } else {
-      triggerSound("error");
-      addAuditLog(result.logMessage, result.level, result.suspicionDelta);
-
-      setScoreState((prev) => ({
-        ...prev,
-        combo: 0,
-        multiplier: 1,
-        auditViolations: prev.auditViolations + 1,
-      }));
-
-      setAuditor((prev) => {
-        const nextSusp = Math.min(100, prev.suspicion + result.suspicionDelta);
-        return {
-          ...prev,
-          suspicion: nextSusp,
-          behavior: nextSusp >= 100 ? "issuing_483" : "suspicious",
-        };
-      });
-
-      setSignatureModal((prev) => ({ ...prev, isOpen: false, subject: null }));
-    }
-  }, [
-    signatureModal,
-    targetRoutingStation,
-    triggerSound,
-    spawnSparkles,
-    addAuditLog,
-    completeSubmission,
-  ]);
+    submitDossier(
+      signatureModal.subject,
+      signatureModal.selectedReason,
+      targetRoutingStation,
+      "full"
+    );
+  }, [signatureModal, targetRoutingStation, submitDossier]);
 
   // 16. Canvas 2D Simulation Renderer
   const renderConveyorCanvas = useCallback(
@@ -1398,6 +1454,11 @@ export const ClinicalTrialChaos: React.FC = () => {
   const scoreStateRef = useRef(scoreState);
   const powerUpsRef = useRef(powerUps);
   const activeAmendmentRef = useRef(activeAmendment);
+  // Sync only when the state changes: the game loop owns the countdown, and
+  // an every-render sync would reset it to the last rendered value.
+  useEffect(() => {
+    activeAmendmentRef.current = activeAmendment;
+  }, [activeAmendment]);
   const auditLogsRef = useRef(auditLogs);
   const addAuditLogRef = useRef(addAuditLog);
   const triggerSoundRef = useRef(triggerSound);
@@ -1416,7 +1477,6 @@ export const ClinicalTrialChaos: React.FC = () => {
     stationsRef.current = stations;
     scoreStateRef.current = scoreState;
     powerUpsRef.current = powerUps;
-    activeAmendmentRef.current = activeAmendment;
     auditLogsRef.current = auditLogs;
     addAuditLogRef.current = addAuditLog;
     triggerSoundRef.current = triggerSound;
@@ -1580,10 +1640,14 @@ export const ClinicalTrialChaos: React.FC = () => {
           activeAmendmentRef.current = null;
           setActiveAmendment(null);
         } else {
+          const secondChanged =
+            Math.ceil(remaining) !==
+            Math.ceil(activeAmendmentRef.current.timeRemaining);
           activeAmendmentRef.current = {
             ...activeAmendmentRef.current,
             timeRemaining: remaining,
           };
+          if (secondChanged) setActiveAmendment(activeAmendmentRef.current);
         }
       }
 
@@ -2903,7 +2967,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                       </span>
                     </div>
 
-                    {/* Fix → Route → Sign stepper */}
+                    {/* Fix → Route → Dispatch stepper */}
                     <ol
                       className="mt-3 grid grid-cols-3 gap-1.5 text-[10px]"
                       aria-label="CRF progress"
@@ -2922,7 +2986,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                           done: false,
                           current: flowStep === 2,
                         },
-                        { label: "Sign", done: false, current: false },
+                        { label: "Dispatch", done: false, current: false },
                       ].map((step, i) => (
                         <li
                           key={step.label}
@@ -2977,7 +3041,8 @@ export const ClinicalTrialChaos: React.FC = () => {
                           <span className="font-bold text-emerald-300">
                             Clean.
                           </span>{" "}
-                          Route it to a matching station, then sign.
+                          Route it to a matching station. Routine packets
+                          dispatch immediately; exceptional packets need review.
                         </p>
                         <div className="mt-2 flex flex-wrap gap-2">
                           {routeDomains.map((domain) => (
@@ -3178,7 +3243,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                   <div className="flex flex-wrap items-center justify-between gap-x-2 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                     <span>Lifelines</span>
                     <span className="font-normal normal-case text-zinc-400">
-                      Charge by fixing and signing
+                      Charge by fixing and dispatching
                     </span>
                   </div>
                   <div className="mt-2 grid grid-cols-2 gap-2">

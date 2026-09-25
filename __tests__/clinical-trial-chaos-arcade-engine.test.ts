@@ -2,10 +2,82 @@ import { describe, it, expect, vi } from "vitest";
 import {
   ClinicalTrialChaosEngine,
   getRoutingReadiness,
+  getSubmissionMode,
 } from "@/lib/clinical-trial-chaos";
 import type { ClinicalSubject } from "@/lib/clinical-trial-chaos/types";
 
 describe("ClinicalTrialChaosEngine", () => {
+  it("quick-dispatches only clean routine packets outside phase locks and amendments", () => {
+    const subject: ClinicalSubject = {
+      id: "routine-subject",
+      subjectLabel: "SUBJ-ROUTINE",
+      studySite: "Site 001",
+      observations: [
+        {
+          id: "routine-observation",
+          field: "Height",
+          rawValue: "180 cm",
+          currentValue: "180 cm",
+          destination: "DM",
+          isResolved: true,
+        },
+      ],
+      status: "queued",
+      timeRemaining: 30,
+      maxTime: 30,
+      createdAt: 0,
+    };
+    const stations = [{ id: "DM" }, { id: "AE" }] as const;
+    const context = {
+      gameMode: "campaign" as const,
+      submittedCount: 2,
+      phaseTarget: 5,
+      amendmentActive: false,
+    };
+
+    expect(getSubmissionMode(subject, "DM", stations, context)).toBe("quick");
+    expect(
+      getSubmissionMode({ ...subject, isSAE: true }, "DM", stations, context)
+    ).toBe("full");
+    expect(
+      getSubmissionMode(
+        {
+          ...subject,
+          observations: subject.observations.map((observation) => ({
+            ...observation,
+            isResolved: false,
+          })),
+        },
+        "DM",
+        stations,
+        context
+      )
+    ).toBe("full");
+    expect(getSubmissionMode(subject, "AE", stations, context)).toBe("full");
+    expect(getSubmissionMode(subject, "DM", [{ id: "AE" }], context)).toBe(
+      "full"
+    );
+    expect(
+      getSubmissionMode(subject, "DM", stations, {
+        ...context,
+        submittedCount: 4,
+      })
+    ).toBe("full");
+    expect(
+      getSubmissionMode(subject, "DM", stations, {
+        ...context,
+        amendmentActive: true,
+      })
+    ).toBe("full");
+    expect(
+      getSubmissionMode(subject, "DM", stations, {
+        ...context,
+        gameMode: "endless",
+        submittedCount: 4,
+      })
+    ).toBe("quick");
+  });
+
   it("keeps matching stations visible while observations still need fixing", () => {
     const subject: ClinicalSubject = {
       id: "routing-subject",
