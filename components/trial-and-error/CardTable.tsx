@@ -35,6 +35,7 @@ import { useAnnouncer } from "@/hooks/useAnnouncer";
 import { isAnyFocusTrapActive, useFocusTrap } from "@/hooks/useFocusTrap";
 import { FieldManualButton } from "@/components/FieldManualButton";
 import { QcDesk } from "@/components/trial-and-error/QcDesk";
+import { FigureDesk } from "@/components/trial-and-error/FigureDesk";
 import { CrisisPanel } from "@/components/trial-and-error/CrisisPanel";
 import { LevelUpPlate } from "@/components/trial-and-error/LevelUpPlate";
 import { RunInfo } from "@/components/trial-and-error/RunInfo";
@@ -263,7 +264,16 @@ export function CardTable({
     dispatch({ type: "CLOSE_INSPECT" });
   };
 
-  const drawerRef = useFocusTrap<HTMLDivElement>(view.inspection !== null, {
+  const inspected = view.inspection ?? view.figureInspection;
+  const figureFace = view.figureInspection
+    ? view.hand.find((h) => h.card.id === view.figureInspection?.card.id)?.face
+    : undefined;
+  const figureParentFace = view.figureInspection?.parent
+    ? (view.hand.find((h) => h.card.id === view.figureInspection?.parent?.id)
+        ?.face ?? null)
+    : null;
+
+  const drawerRef = useFocusTrap<HTMLDivElement>(inspected !== null, {
     onEscape: closeInspect,
     initialFocusRef: deskFocusRef,
     returnFocus: false,
@@ -1282,7 +1292,7 @@ export function CardTable({
         </div>
       </div>
 
-      {view.inspection &&
+      {inspected &&
         // Portalled out of the table's isolated stacking context so the site
         // footer and cabinet chrome cannot paint over it. In real fullscreen
         // only the fullscreen element renders, so the drawer mounts there.
@@ -1295,7 +1305,9 @@ export function CardTable({
               ref={drawerRef}
               role="dialog"
               aria-modal="true"
-              aria-labelledby="qc-desk-heading"
+              aria-labelledby={
+                view.inspection ? "qc-desk-heading" : "figure-desk-heading"
+              }
               className="max-h-[90dvh] w-full max-w-5xl overflow-y-auto border border-zinc-700 bg-[color:var(--te-surface-0)]"
               data-testid="inspect-drawer"
             >
@@ -1303,31 +1315,46 @@ export function CardTable({
                 className="border-b border-zinc-800 px-4 py-2 font-mono text-xs text-zinc-300 break-words"
                 data-testid="snapshot-chip"
               >
-                Compiled against {view.inspection.provenance.id} · v
-                {view.inspection.provenance.version} · captured{" "}
-                {view.inspection.provenance.capturedAt.slice(0, 10)}
-                {view.inspection.stale && (
+                Compiled against {inspected.provenance.id} · v
+                {inspected.provenance.version} · captured{" "}
+                {inspected.provenance.capturedAt.slice(0, 10)}
+                {inspected.stale && (
                   <span className="text-rose-300"> · stale: {STALE_ALERT}</span>
                 )}
               </p>
-              <QcDesk
-                card={view.inspection.card}
-                table={view.inspection.table}
-                rulebook={scenario.rulebook}
-                view={view.inspection}
-                expected={view.inspection.expected}
-                unpenalizedMult={view.inspection.unpenalizedMult}
-                onInspectCell={(row, col) =>
-                  send({ type: "INSPECT_CELL", row, col })
-                }
-                onCorrect={(findingId) =>
-                  send({ type: "CORRECT_FINDING", findingId })
-                }
-                trace={view.inspection.trace}
-                onTrace={(row, col) => send({ type: "TRACE_CELL", row, col })}
-                reducedMotion={reducedMotion}
-                initialFocusRef={deskFocusRef}
-              />
+              {view.inspection ? (
+                <QcDesk
+                  card={view.inspection.card}
+                  table={view.inspection.table}
+                  rulebook={scenario.rulebook}
+                  view={view.inspection}
+                  expected={view.inspection.expected}
+                  unpenalizedMult={view.inspection.unpenalizedMult}
+                  onInspectCell={(row, col) =>
+                    send({ type: "INSPECT_CELL", row, col })
+                  }
+                  onCorrect={(findingId) =>
+                    send({ type: "CORRECT_FINDING", findingId })
+                  }
+                  trace={view.inspection.trace}
+                  onTrace={(row, col) => send({ type: "TRACE_CELL", row, col })}
+                  reducedMotion={reducedMotion}
+                  initialFocusRef={deskFocusRef}
+                />
+              ) : (
+                view.figureInspection &&
+                figureFace && (
+                  <FigureDesk
+                    view={view.figureInspection}
+                    face={figureFace}
+                    parentFace={figureParentFace}
+                    onReconcile={(findingId) =>
+                      send({ type: "CORRECT_FINDING", findingId })
+                    }
+                    initialFocusRef={deskFocusRef}
+                  />
+                )
+              )}
               <div className="border-t border-zinc-800 p-3">
                 <button
                   type="button"

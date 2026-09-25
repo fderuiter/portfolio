@@ -40,13 +40,119 @@ A blank shell with no analysis set allocated: it cannot be played yet.
 
 #### face?
 
-> `optional` **face?**: \{ `columns`: `string`[]; `kind`: `"TABLE"`; `rows`: `object`[]; \} \| \{ `columns`: `string`[]; `kind`: `"LISTING"`; `rows`: `string`[][]; \} \| \{ `kind`: `"FIGURE"`; `plot`: \{ `series`: `object`[]; `type`: `"KM"`; \} \| \{ `series`: `object`[]; `type`: `"SPARKLINE"`; \} \| \{ `intervals`: `object`[]; `reference`: `number`; `type`: `"FOREST"`; \}; \} \| \{ `cohort`: `string`; `count`: `number`; `kind`: `"TOKEN"`; \}
+> `optional` **face?**: \{ `columns`: `string`[]; `kind`: `"TABLE"`; `rows`: `object`[]; \} \| \{ `columns`: `string`[]; `kind`: `"LISTING"`; `rows`: `string`[][]; \} \| \{ `atRisk?`: \{ `rows`: `object`[]; `times`: `number`[]; \}; `kind`: `"FIGURE"`; `plot`: \{ `series`: `object`[]; `type`: `"KM"`; \} \| \{ `series`: `object`[]; `type`: `"SPARKLINE"`; \} \| \{ `intervals`: `object`[]; `reference`: `number`; `type`: `"FOREST"`; \}; `source?`: `string`; \} \| \{ `cohort`: `string`; `count`: `number`; `kind`: `"TOKEN"`; \}
 
 Face data. Draft cards derive their face from the draft table instead.
+
+##### Union Members
+
+###### Type Literal
+
+\{ `columns`: `string`[]; `kind`: `"TABLE"`; `rows`: `object`[]; \}
+
+***
+
+###### Type Literal
+
+\{ `columns`: `string`[]; `kind`: `"LISTING"`; `rows`: `string`[][]; \}
+
+***
+
+###### Type Literal
+
+\{ `atRisk?`: \{ `rows`: `object`[]; `times`: `number`[]; \}; `kind`: `"FIGURE"`; `plot`: \{ `series`: `object`[]; `type`: `"KM"`; \} \| \{ `series`: `object`[]; `type`: `"SPARKLINE"`; \} \| \{ `intervals`: `object`[]; `reference`: `number`; `type`: `"FOREST"`; \}; `source?`: `string`; \}
+
+###### atRisk?
+
+> `optional` **atRisk?**: `object`
+
+The Number-at-Risk strip under a KM plot, one row per arm.
+
+###### atRisk.rows
+
+> **rows**: `object`[]
+
+###### atRisk.times
+
+> **times**: `number`[]
+
+###### kind
+
+> **kind**: `"FIGURE"`
+
+###### plot
+
+> **plot**: \{ `series`: `object`[]; `type`: `"KM"`; \} \| \{ `series`: `object`[]; `type`: `"SPARKLINE"`; \} \| \{ `intervals`: `object`[]; `reference`: `number`; `type`: `"FOREST"`; \} = `FigurePlotSchema`
+
+###### source?
+
+> `optional` **source?**: `string`
+
+The parent Table's number, printed on a dependent Figure.
+
+***
+
+###### Type Literal
+
+\{ `cohort`: `string`; `count`: `number`; `kind`: `"TOKEN"`; \}
 
 #### id
 
 > **id**: `string` = `identifier`
+
+#### km?
+
+> `optional` **km?**: `object`
+
+A Kaplan–Meier figure: its face is drawn from this data.
+
+##### km.displayed
+
+> **displayed**: `object`[]
+
+##### km.endpoint
+
+> **endpoint**: `string`
+
+##### km.milestones
+
+> **milestones**: `number`[]
+
+Number-at-Risk milestone times, strictly increasing, from 0.
+
+##### km.parent
+
+> **parent**: `object`
+
+##### km.parent.atRiskRow
+
+> **atRiskRow**: `string` = `faceText`
+
+##### km.parent.cardId
+
+> **cardId**: `string` = `identifier`
+
+##### km.parent.eventsRow
+
+> **eventsRow**: `string` = `faceText`
+
+##### km.populationSnapshotId
+
+> **populationSnapshotId**: `string` = `identifier`
+
+##### km.records
+
+> **records**: `object`[]
+
+##### km.timeOrigin
+
+> **timeOrigin**: `number`
+
+The time origin the draft's axis starts at. The SAP fixes it at 0.
+
+##### km.timeUnit
+
+> **timeUnit**: `string`
 
 #### mult
 
@@ -99,9 +205,69 @@ The Boss Blind's debuff cancels this card's Chips.
 
 ### face
 
-> **face**: \{ `columns`: `string`[]; `kind`: `"TABLE"`; `rows`: `object`[]; \} \| \{ `columns`: `string`[]; `kind`: `"LISTING"`; `rows`: `string`[][]; \} \| \{ `kind`: `"FIGURE"`; `plot`: \{ `series`: `object`[]; `type`: `"KM"`; \} \| \{ `series`: `object`[]; `type`: `"SPARKLINE"`; \} \| \{ `intervals`: `object`[]; `reference`: `number`; `type`: `"FOREST"`; \}; \} \| \{ `cohort`: `string`; `count`: `number`; `kind`: `"TOKEN"`; \}
+> **face**: \{ `columns`: `string`[]; `kind`: `"TABLE"`; `rows`: `object`[]; \} \| \{ `columns`: `string`[]; `kind`: `"LISTING"`; `rows`: `string`[][]; \} \| \{ `atRisk?`: \{ `rows`: `object`[]; `times`: `number`[]; \}; `kind`: `"FIGURE"`; `plot`: \{ `series`: `object`[]; `type`: `"KM"`; \} \| \{ `series`: `object`[]; `type`: `"SPARKLINE"`; \} \| \{ `intervals`: `object`[]; `reference`: `number`; `type`: `"FOREST"`; \}; `source?`: `string`; \} \| \{ `cohort`: `string`; `count`: `number`; `kind`: `"TOKEN"`; \}
 
 The live mini-output printed on the card, as currently reviewed.
+
+#### Union Members
+
+##### Type Literal
+
+\{ `columns`: `string`[]; `kind`: `"TABLE"`; `rows`: `object`[]; \}
+
+***
+
+##### Type Literal
+
+\{ `columns`: `string`[]; `kind`: `"LISTING"`; `rows`: `string`[][]; \}
+
+***
+
+##### Type Literal
+
+\{ `atRisk?`: \{ `rows`: `object`[]; `times`: `number`[]; \}; `kind`: `"FIGURE"`; `plot`: \{ `series`: `object`[]; `type`: `"KM"`; \} \| \{ `series`: `object`[]; `type`: `"SPARKLINE"`; \} \| \{ `intervals`: `object`[]; `reference`: `number`; `type`: `"FOREST"`; \}; `source?`: `string`; \}
+
+##### atRisk?
+
+> `optional` **atRisk?**: `object`
+
+The Number-at-Risk strip under a KM plot, one row per arm.
+
+###### atRisk.rows
+
+> **rows**: `object`[]
+
+###### atRisk.times
+
+> **times**: `number`[]
+
+##### kind
+
+> **kind**: `"FIGURE"`
+
+##### plot
+
+> **plot**: \{ `series`: `object`[]; `type`: `"KM"`; \} \| \{ `series`: `object`[]; `type`: `"SPARKLINE"`; \} \| \{ `intervals`: `object`[]; `reference`: `number`; `type`: `"FOREST"`; \} = `FigurePlotSchema`
+
+##### source?
+
+> `optional` **source?**: `string`
+
+The parent Table's number, printed on a dependent Figure.
+
+***
+
+##### Type Literal
+
+\{ `cohort`: `string`; `count`: `number`; `kind`: `"TOKEN"`; \}
+
+***
+
+### figure
+
+> **figure**: [`FigureStatus`](FigureStatus.md) \| `null`
+
+A dependent Figure's parent and ×Mult status, or null for other cards.
 
 ***
 

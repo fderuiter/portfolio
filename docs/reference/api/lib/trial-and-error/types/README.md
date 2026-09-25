@@ -34,6 +34,8 @@
 - [HandLevel](type-aliases/HandLevel.md)
 - [HandLevels](type-aliases/HandLevels.md)
 - [HandType](type-aliases/HandType.md)
+- [KmArmDisplay](type-aliases/KmArmDisplay.md)
+- [KmFigure](type-aliases/KmFigure.md)
 - [PopulationAlias](type-aliases/PopulationAlias.md)
 - [PopulationSnapshot](type-aliases/PopulationSnapshot.md)
 - [PopulationTransition](type-aliases/PopulationTransition.md)
@@ -59,6 +61,7 @@
 - [Subject](type-aliases/Subject.md)
 - [TableRules](type-aliases/TableRules.md)
 - [TableShellSpec](type-aliases/TableShellSpec.md)
+- [TimeToEventRecord](type-aliases/TimeToEventRecord.md)
 - [TlfCard](type-aliases/TlfCard.md)
 - [TransitionReason](type-aliases/TransitionReason.md)
 
@@ -92,6 +95,8 @@
 - [HandLevelsSchema](variables/HandLevelsSchema.md)
 - [HandType](variables/HandType.md)
 - [HandTypeSchema](variables/HandTypeSchema.md)
+- [KmArmDisplaySchema](variables/KmArmDisplaySchema.md)
+- [KmFigureSchema](variables/KmFigureSchema.md)
 - [POPULATION\_LABELS](variables/POPULATION_LABELS.md)
 - [PopulationAliasSchema](variables/PopulationAliasSchema.md)
 - [PopulationSnapshotSchema](variables/PopulationSnapshotSchema.md)
@@ -118,6 +123,7 @@
 - [SubjectSchema](variables/SubjectSchema.md)
 - [TableRulesSchema](variables/TableRulesSchema.md)
 - [TableShellSpecSchema](variables/TableShellSpecSchema.md)
+- [TimeToEventRecordSchema](variables/TimeToEventRecordSchema.md)
 - [TlfCardSchema](variables/TlfCardSchema.md)
 - [TransitionReasonSchema](variables/TransitionReasonSchema.md)
 

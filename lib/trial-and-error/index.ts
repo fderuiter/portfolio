@@ -30,6 +30,16 @@ export { GUIDANCE_CARDS } from "./internal/guidance";
 export { validate } from "./internal/validator";
 export { traceCell, type CellTrace, type ListingRow } from "./internal/listing";
 export {
+  KM_DECIMALS,
+  kaplanMeier,
+  stepAt,
+  validateKm,
+  type KmArmExpected,
+  type KmCheck,
+  type KmFinding,
+  type KmReport,
+} from "./internal/km";
+export {
   evaluateHand,
   ruleResultsFor,
   type RuleResultOptions,
@@ -82,6 +92,10 @@ export {
   FIREWALL_ALERT,
   FIREWALL_CELL,
   PROVENANCE_ALERT,
+  KM_REDLINE_PENALTY,
+  KM_SYNERGY,
+  type FigureInspectionView,
+  type FigureStatus,
   TLF_PAIR_SYNERGY,
   type TraceRecord,
   type AllocationOption,

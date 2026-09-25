@@ -198,6 +198,7 @@ const deckView = (): TableCardView[] =>
           seals: [],
           footnoteSlots: 0,
           pairedWith: [],
+          figure: null,
         },
       ];
     }
