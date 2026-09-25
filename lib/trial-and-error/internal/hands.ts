@@ -241,13 +241,33 @@ function betterSubset(
  * highest-ranked hand wins, and ties go to the subset with more Chips, then to
  * the earliest-selected cards. Cards outside the winning subset are kickers
  * and do not score. Returns `null` for an empty selection. Pure.
+ *
+ * With `allowed`, only those hand types are considered, so a staged Boss
+ * that accepts a lower hand is not shadowed by a higher one it refuses
+ * (#1077). When no allowed hand matches, the unrestricted result is
+ * returned, so a refusal can still say what the selection is.
  */
 export function classifyHand(
-  cards: readonly ClassifiableCard[]
+  cards: readonly ClassifiableCard[],
+  allowed?: readonly HandType[]
 ): HandClassification | null {
   if (cards.length === 0) return null;
+  if (allowed) {
+    const restricted = bestHand(cards, allowed);
+    if (restricted) return restricted;
+  }
+  return bestHand(cards, HandTypeSchema.options);
+}
+
+/** The highest-ranked of `handTypes` the cards make, or null. */
+function bestHand(
+  cards: readonly ClassifiableCard[],
+  handTypes: readonly HandType[]
+): HandClassification | null {
   const candidates = subsets(cards.length);
-  const ranked = [...HandTypeSchema.options].reverse();
+  const ranked = [...HandTypeSchema.options]
+    .reverse()
+    .filter((handType) => handTypes.includes(handType));
   for (const handType of ranked) {
     let best: number[] | null = null;
     for (const subset of candidates) {
@@ -258,6 +278,5 @@ export function classifyHand(
       return { handType, scoringCardIds: best.map((i) => cards[i].id) };
     }
   }
-  /* v8 ignore next -- HIGH_TABLE matches any single card, so this is unreachable. */
   return null;
 }

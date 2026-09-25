@@ -597,6 +597,12 @@ export function CardTable({
   const preview = view.preview;
   const slashed =
     preview !== null && preview.finalMult < view.previewUnpenalizedMult;
+  // The domain already classified against the stage: a hand outside the
+  // accepted list means none of them is in the selection.
+  const stageRefuses =
+    view.stageAccepts !== null &&
+    view.classification !== null &&
+    !view.stageAccepts.includes(view.classification.handType);
   const cpuPips = Array.from(
     { length: scenario.table.startingCpu },
     (_, i) => i < state.cpu.available
@@ -1196,6 +1202,19 @@ export function CardTable({
                     {preview.finalMult}
                   </span>
                   ] = {preview.score}
+                </p>
+              )}
+              {view.stageAccepts && view.encounter && (
+                <p
+                  className={`mt-1 text-xs break-words ${
+                    stageRefuses ? "text-rose-300" : "text-zinc-300"
+                  }`}
+                  data-testid="stage-accepts"
+                >
+                  Stage {view.encounter.current + 1} accepts:{" "}
+                  {view.stageAccepts.map((h) => HAND_NAMES[h]).join(", ")}.
+                  {stageRefuses &&
+                    ` ${HAND_NAMES[view.classification!.handType]} is not one of them.`}
                 </p>
               )}
               {view.flushBrokenBy.length > 0 && (
