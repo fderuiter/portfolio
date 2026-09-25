@@ -269,7 +269,7 @@ class USDMGraphTransformer:
       "A **bespoke event portal** and guest operations engine crafted in **Next.js** and **Framer Motion**. Features real-time multi-household `RSVP tracking`, interactive personalized travel timelines, accommodation logistics, and custom canvas physics animations built to survive zero-downtime family scrutiny.",
     architectural_narrative: `
 <h3>The Challenge</h3>
-<p>Off-the-shelf wedding websites are notoriously cookie-cutter, rigid, and cluttered with third-party tracking scripts. Coordinating multi-event logistics across multiple time zones—including rehearsal dinners, hotel blocks, dietary accommodations, and real-time RSVPs—demanded a high-craft, bespoke digital experience engineered with zero-downtime reliability.</p>
+<p>Off-the-shelf wedding websites are notoriously cookie-cutter, rigid, and cluttered with third-party tracking scripts. Coordinating multi-event logistics across multiple time zones (including rehearsal dinners, hotel blocks, dietary accommodations, and real-time RSVPs) demanded a high-craft, bespoke digital experience engineered with zero-downtime reliability.</p>
 
 <h3>Technical Architecture</h3>
 <p>The platform is designed around three architectural pillars: the <strong>Multi-Party RSVP State Machine</strong>, the <strong>Personalized Guest Timeline Engine</strong>, and the <strong>Hardware-Accelerated Canvas Presentation Layer</strong>.</p>
@@ -509,7 +509,7 @@ endmodule
       "A **unified, memory-safe, verified scientific computation framework** built in **Rust** across pure mathematics, medical physics, biology, and machine learning domains. Solves the 'two-language problem' through compile-time proc-macro theory verification and dynamic double-buffered state execution.",
     architectural_narrative: `
 <h3>The Challenge</h3>
-<p>High-performance scientific computing and mathematical simulations frequently suffer from the "two-language problem"—prototyping in interpreted environments (Python/MATLAB) and rewriting in compiled languages (C/C++). This workflow introduces numerical drift, translation bugs, concurrency hazards, and missing academic provenance.</p>
+<p>High-performance scientific computing and mathematical simulations frequently suffer from the "two-language problem": prototyping in interpreted environments (Python/MATLAB) and rewriting in compiled languages (C/C++). This workflow introduces numerical drift, translation bugs, concurrency hazards, and missing academic provenance.</p>
 
 <h3>Technical Architecture</h3>
 <p>OxidizeMath is structured as a domain-driven modular monorepo comprising 10+ focused crates (domain_ai, domain_physics, domain_applied, domain_biology, math_commons, oxidize_core, pure_math, verified_engine, verified_engine_macros, math_explorer_gui).</p>
@@ -1738,7 +1738,7 @@ def evaluate_adversarial_drift(train_df, test_df, feature_cols) -> float:
       "A high-throughput **real-time sports analytics platform** and **Monte Carlo simulation engine** engineered in **TypeScript**. Ingests live match event streams, computes spatial **Expected Goals (xG)** and **Possession Value (xPV)** in sub-50ms cycles, and evaluates fan tactical hypotheses through 10,000-iteration stochastic game simulations.",
     architectural_narrative: `
 <h3>1. Executive Summary & Value Proposition</h3>
-<p>Modern football tracking systems generate dense 25Hz spatial telemetry streams alongside discrete on-pitch event feeds. Ingesting, parsing, and evaluating tactical hypotheses in real time—answering questions like "Does Fred Know Ball?"—requires sub-50ms processing latency, geometric pitch decomposition, and fast stochastic simulation without locking up event ingestion.</p>
+<p>Modern football tracking systems generate dense 25Hz spatial telemetry streams alongside discrete on-pitch event feeds. Ingesting, parsing, and evaluating tactical hypotheses in real time (answering questions like "Does Fred Know Ball?") requires sub-50ms processing latency, geometric pitch decomposition, and fast stochastic simulation without locking up event ingestion.</p>
 <p><strong>Core Technical Highlight:</strong> Engineered a real-time analytics engine in TypeScript utilizing lock-free in-memory ring buffers, Voronoi spatial pitch discretization for Expected Goals (xG) and Expected Possession Value (xPV), and a 10,000-iteration Monte Carlo simulation engine executing in under 150ms.</p>
 
 <h3>2. Architecture & Design Patterns</h3>
@@ -2013,7 +2013,7 @@ export function serializeODMStudy(study: { oid: string; name: string; descriptio
       "A robust **LLM prompt orchestration and automated evaluation framework** built in **TypeScript**. Treats prompts as immutable, version-controlled software assets with strict **semantic versioning (SemVer)**, deterministic **Zod schema output validation**, and automated **CI/CD regression evaluation pipelines** protecting against semantic drift and hallucination.",
     architectural_narrative: `
 <h3>1. Executive Summary & Value Proposition</h3>
-<p>Production LLM applications frequently encounter non-deterministic outputs, prompt regressions across foundation model upgrades, malformed JSON responses that break API contracts, and a lack of reproducible versioning. Engineering teams need a disciplined framework that treats prompts like code—complete with typed parameters, automated regression suites, and release gates.</p>
+<p>Production LLM applications frequently encounter non-deterministic outputs, prompt regressions across foundation model upgrades, malformed JSON responses that break API contracts, and a lack of reproducible versioning. Engineering teams need a disciplined framework that treats prompts like code, complete with typed parameters, automated regression suites, and release gates.</p>
 <p><strong>Core Technical Highlight:</strong> PromptOps introduces an immutable prompt orchestration framework in TypeScript with semantic SemVer releases, Zod output schema enforcement with automatic JSON repair, multi-provider failover routing, and automated CI/CD golden eval regression test suites.</p>
 
 <h3>2. Architecture & Design Patterns</h3>

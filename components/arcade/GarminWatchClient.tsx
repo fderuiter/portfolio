@@ -184,7 +184,7 @@ export const GarminWatchClient: React.FC = () => {
                   </p>
                   <p className="text-xs text-zinc-400 font-mono leading-relaxed">
                     Developing ConnectIQ apps on Garmin devices means living
-                    inside strict 32KB RAM budgets—one extra object allocation
+                    inside strict 32KB RAM budgets: one extra object allocation
                     during a muddy sprint and the runtime panics.
                   </p>
                 </div>

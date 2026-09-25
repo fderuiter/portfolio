@@ -246,7 +246,7 @@ describe("WebGL Context Loss & Restoration Recovery Suite", () => {
 
       // Verify HUD banner appears indicating recovery in progress
       expect(container.textContent).toContain(
-        "GPU Context Interrupted — Re-instantiating buffers..."
+        "GPU Context Interrupted: Re-instantiating buffers..."
       );
 
       // Trigger webglcontextrestored
@@ -290,7 +290,7 @@ describe("WebGL Context Loss & Restoration Recovery Suite", () => {
       });
 
       expect(container.textContent).toContain(
-        "GPU Context Interrupted — Re-instantiating buffers..."
+        "GPU Context Interrupted: Re-instantiating buffers..."
       );
 
       await act(async () => {

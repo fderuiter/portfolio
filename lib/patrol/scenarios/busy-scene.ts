@@ -71,7 +71,7 @@ export const BUSY_SCENE_SCENARIO: PatrolScenario = {
       role: "Other Skier Involved in Collision",
       notes: "On their feet, visibly shaken, no obvious injury reported.",
       statement:
-        "I never saw them coming around the bend — I think I clipped their skis. I'm okay, just rattled. Is the other guest going to be alright?",
+        "I never saw them coming around the bend; I think I clipped their skis. I'm okay, just rattled. Is the other guest going to be alright?",
     },
     {
       id: "actor-morgan-partner",
@@ -79,7 +79,7 @@ export const BUSY_SCENE_SCENARIO: PatrolScenario = {
       role: "Responding Patroller",
       notes:
         "Second patroller arriving shortly after scene safety is addressed.",
-      statement: "I'm here — where do you need me first?",
+      statement: "I'm here: where do you need me first?",
     },
   ],
   initialVitals: {
@@ -163,7 +163,7 @@ export const BUSY_SCENE_SCENARIO: PatrolScenario = {
             role: "Other Skier Involved in Collision",
             notes: "On their feet, visibly shaken, no obvious injury reported.",
             statement:
-              "I never saw them coming around the bend — I think I clipped their skis. I'm okay, just rattled. Is the other guest going to be alright?",
+              "I never saw them coming around the bend; I think I clipped their skis. I'm okay, just rattled. Is the other guest going to be alright?",
           },
         ],
         patient: {
@@ -278,14 +278,14 @@ export const BUSY_SCENE_SCENARIO: PatrolScenario = {
       id: "delegate-to-morgan",
       speaker: "Morgan (Responding Patroller)",
       prompt:
-        "I'm here — what do you want me to do, the crowd or the other skier?",
+        "I'm here: what do you want me to do, the crowd or the other skier?",
       context:
         "Morgan arrives just as the crowd presses in further and Drew is still standing off to the side, visibly shaken.",
       afterActionId: "assess-scene-safety",
       options: [
         {
           id: "delegate-directive-closed-loop",
-          text: "Take the crowd — get them back past that blue trail marker, then come find me once it's clear.",
+          text: "Take the crowd: get them back past that blue trail marker, then come find me once it's clear.",
           style: "directive",
           clarity: "high",
           closesLoop: true,
@@ -307,14 +307,14 @@ export const BUSY_SCENE_SCENARIO: PatrolScenario = {
         },
         {
           id: "delegate-deferential",
-          text: "Whatever seems most urgent to you — use your judgment.",
+          text: "Whatever seems most urgent to you: use your judgment.",
           style: "deferential",
           clarity: "low",
           closesLoop: false,
           response:
             "Morgan hesitates a beat, glancing between the crowd and Drew, before picking the crowd on their own.",
           debriefNote:
-            "Handed Morgan the judgment call outright — workable with an experienced partner, but left a newer one guessing.",
+            "Handed Morgan the judgment call outright: workable with an experienced partner, but left a newer one guessing.",
         },
       ],
     },

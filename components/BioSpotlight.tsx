@@ -135,10 +135,10 @@ export const BioSpotlight: React.FC = () => {
             </h3>
 
             <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed mb-4">
-              Behind the code, clinical derivations, and side projects is
-              Duck—an English Cream Golden Retriever who started as a
-              pillow-sized puppy asleep across Fred&apos;s head and grew into an
-              80-lb pair programmer.
+              Behind the code, clinical derivations, and side projects is Duck,
+              an English Cream Golden Retriever who started as a pillow-sized
+              puppy asleep across Fred&apos;s head and grew into an 80-lb pair
+              programmer.
             </p>
 
             {/* Active Milestone Callout Box */}

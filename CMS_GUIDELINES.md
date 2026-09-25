@@ -86,7 +86,7 @@ model CaseStudyReaction {
 
 ## Blog Content Schema (`BlogPost`)
 
-Per ADR 0041, blog posts are authored as Prisma-backed rows through `/admin` — the same content pipeline as `CaseStudy`, not a separate in-repo MDX system. The primary schema:
+Per ADR 0041, blog posts are authored as Prisma-backed rows through `/admin` (the same content pipeline as `CaseStudy`), not a separate in-repo MDX system. The primary schema:
 
 ```prisma
 model BlogPost {
@@ -94,7 +94,7 @@ model BlogPost {
   slug                 String   @unique
   title                String
   dek                  String   // short standfirst/summary shown on the /blog index grid
-  body                 String   // sanitized HTML — same allowlist as CaseStudy.architectural_narrative
+  body                 String   // sanitized HTML (same allowlist as CaseStudy.architectural_narrative)
   pillar               String   // one of ADR 0041's content-pillar taxonomy
   tags                 String   // comma-separated, same convention as CaseStudy.tags
   published            Boolean  @default(false)
@@ -109,7 +109,7 @@ model BlogPost {
 
 1. **No artifact-pairing requirement**: unlike `CaseStudy`, `BlogPost` has no `github_url` / `external_platform_url` field. A post that needs one to make sense belongs in `CaseStudy` instead (ADR 0041 §2).
 2. **`pillar` is a closed taxonomy, not free text**: values come from ADR 0041's six content pillars (Clinical Data Engineering & CDISC Standards, Formal Verification & AST/Compiler Theory, Accessibility & Cognitive-Reading Engineering, Browser Graphics/Canvas & Game Engineering, Agent-First DX & Tooling, Field Notes: Make Things Better). Validate against this enum at the API boundary rather than accepting arbitrary strings.
-3. **`published` gates visibility everywhere**: identical semantics to `CaseStudy.published` — unpublished rows must never appear in `/blog`, `/blog/[slug]`, the sitemap, or the RSS feed.
+3. **`published` gates visibility everywhere**: identical semantics to `CaseStudy.published`: unpublished rows must never appear in `/blog`, `/blog/[slug]`, the sitemap, or the RSS feed.
 4. **`reading_time_minutes` is computed, not authored**: derive it from `body` word count at save time rather than trusting manual entry.
 
 ### Blog Reaction Schema (`BlogPostReaction`)
@@ -130,7 +130,7 @@ model BlogPostReaction {
 }
 ```
 
-Per ADR 0041, the blog explicitly does not have a discussion-forum-style comment system — reactions (plus the existing rate-limited `/contact` path for anything more substantive) are the full extent of reader response. Free-text feedback (`BlogPostFeedback`) is intentionally omitted to maintain this posture.
+Per ADR 0041, the blog explicitly does not have a discussion-forum-style comment system: reactions (plus the existing rate-limited `/contact` path for anything more substantive) are the full extent of reader response. Free-text feedback (`BlogPostFeedback`) is intentionally omitted to maintain this posture.
 
 ## Prototyping Workflows
 
@@ -171,4 +171,4 @@ To ensure the portfolio displays narratives with high aesthetic quality and robu
 ### 3. `BlogPost.body` Field
 
 - **Purpose:** Long-form post prose.
-- **Formatting:** Sanitized against the **exact same allowlist** as `architectural_narrative` above — no second sanitization boundary is introduced for blog content (ADR 0041 §4). The same forbidden-elements list applies.
+- **Formatting:** Sanitized against the **exact same allowlist** as `architectural_narrative` above; no second sanitization boundary is introduced for blog content (ADR 0041 §4). The same forbidden-elements list applies.

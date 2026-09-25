@@ -668,7 +668,7 @@ describe("Patrol Shift — M5 OEC Scene & Patient Interaction System", () => {
       ).toBeDefined();
       expect(
         screen.getByText(
-          /No vital signs obtained on scene — priority triage handover/i
+          /No vital signs obtained on scene: priority triage handover/i
         )
       ).toBeDefined();
       expect(

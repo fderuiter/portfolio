@@ -720,7 +720,7 @@ export const MountainMap: React.FC<MountainMapProps> = ({
           viewBox={`0 0 ${baseWidth} ${baseHeight}`}
           className="w-full h-auto max-h-[640px] select-none touch-none cursor-grab active:cursor-grabbing"
           role="group"
-          aria-label={`Welch Village Trail Map — ${
+          aria-label={`Welch Village Trail Map: ${
             activeZone === "main" ? "East & West Slopes" : "The Back Bowl"
           }`}
           onPointerDown={handlePointerDown}
@@ -733,7 +733,7 @@ export const MountainMap: React.FC<MountainMapProps> = ({
             Geospatial terrain map of Welch Village Ski Area in Welch,
             Minnesota. Showing authentic trail splines, chairlifts, POIs, and
             elevation contours. A stylized, original illustration cross-checked
-            against Welch Village&apos;s own published trail map — not an
+            against Welch Village&apos;s own published trail map, not an
             official resort map.
           </desc>
 

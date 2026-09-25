@@ -681,7 +681,7 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
           {contextStatus === "lost" || contextStatus === "restoring" ? (
             <>
               <IconRefresh className="w-3.5 h-3.5 animate-spin text-amber-400" />
-              <span>GPU Context Interrupted — Re-instantiating buffers...</span>
+              <span>GPU Context Interrupted: Re-instantiating buffers...</span>
             </>
           ) : (
             <>

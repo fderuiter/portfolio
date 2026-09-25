@@ -31,40 +31,45 @@ const TOUR_STEPS: TourStep[] = [
     id: "step_palette",
     stepNumber: 1,
     title: "1. Left Palette & 1-Click CDASH Scaffolder",
-    targetDescription: "Left Sidebar — Forms Navigator & Clinical Field Palette",
+    targetDescription: "Left Sidebar: Forms Navigator & Clinical Field Palette",
     details:
       "Explore clinical forms across your protocol or scaffold full CDASH 2.2 domains (DM, VS, AE, CM, LB, RECIST, DI, DU, DE, DA, EX, MH, DS) in 1-click. Drag or click widgets to add them to your form.",
-    actionHint: "Tip: Press ⌘K or click 'Scaffold CDASH Domain' to inject pre-configured regulatory forms.",
+    actionHint:
+      "Tip: Press ⌘K or click 'Scaffold CDASH Domain' to inject pre-configured regulatory forms.",
     position: "bottom-left",
   },
   {
     id: "step_canvas",
     stepNumber: 2,
     title: "2. Center 12-Column Responsive Canvas",
-    targetDescription: "Center Workspace — Form Canvas & Field Grid",
+    targetDescription: "Center Workspace: Form Canvas & Field Grid",
     details:
       "Design your Case Report Form on a flexible 12-column grid. Hover over any field to reveal quick width span steppers (3, 4, 6, 12 cols), click labels to edit directly, duplicate, or reorder sections.",
-    actionHint: "Tip: Switch between Desktop, Tablet, and Mobile viewport modes at the top of the canvas.",
+    actionHint:
+      "Tip: Switch between Desktop, Tablet, and Mobile viewport modes at the top of the canvas.",
     position: "center",
   },
   {
     id: "step_inspector",
     stepNumber: 3,
     title: "3. Right Inspector & Custom Options Builder",
-    targetDescription: "Right Sidebar — Field Properties, Logic Rules & CDASH Metadata",
+    targetDescription:
+      "Right Sidebar: Field Properties, Logic Rules & CDASH Metadata",
     details:
       "Configure data types, custom multiple-choice options with Quick Templates (Yes/No, Likert 5-Pt), promote options to study codelists, write AST validation formulas, and inspect SDTM variable annotations.",
-    actionHint: "Tip: Select any field to instantly load its properties in the inspector tabs.",
+    actionHint:
+      "Tip: Select any field to instantly load its properties in the inspector tabs.",
     position: "bottom-right",
   },
   {
     id: "step_modes",
     stepNumber: 4,
     title: "4. Workspace Mode Navigation",
-    targetDescription: "Top Header — Studio View Modes (1-5)",
+    targetDescription: "Top Header: Studio View Modes (1-5)",
     details:
       "Seamlessly transition between the Form Canvas, Schedule of Activities (SoA Visit Matrix), AST Rule Graph Visualizer, Live 21 CFR Part 11 EDC Simulator, and Annotated CRF (aCRF) viewer.",
-    actionHint: "Tip: Use hotkeys 1, 2, 3, 4, and 5 to rapidly switch between workspace views.",
+    actionHint:
+      "Tip: Use hotkeys 1, 2, 3, 4, and 5 to rapidly switch between workspace views.",
     position: "top-center",
   },
   {
@@ -74,7 +79,8 @@ const TOUR_STEPS: TourStep[] = [
     targetDescription: "Header Badges & Action Dropdowns",
     details:
       "Monitor CDISC SDTM/CDASH compliance in real-time with 1-click Auto-Fix remediation. Export production CDISC ODM-XML v1.3.2, Blank / Annotated PDF CRFs, Microsoft Word (.docx) protocol books, and FHIR Questionnaires.",
-    actionHint: "Tip: Click the CDISC Conformance badge to open the real-time Diagnostics Drawer.",
+    actionHint:
+      "Tip: Click the CDISC Conformance badge to open the real-time Diagnostics Drawer.",
     position: "top-center",
   },
 ];
@@ -120,7 +126,10 @@ export const SpotlightTourOverlay: React.FC<SpotlightTourOverlayProps> = ({
   };
 
   return (
-    <div ref={containerRef} className="fixed inset-0 z-50 pointer-events-auto flex items-end justify-center sm:items-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+    <div
+      ref={containerRef}
+      className="fixed inset-0 z-50 pointer-events-auto flex items-end justify-center sm:items-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+    >
       <div
         className="w-full max-w-lg bg-zinc-950 border border-brand-cyan/40 rounded-3xl shadow-2xl overflow-hidden ring-1 ring-brand-cyan/30 animate-scale-in"
         role="dialog"
@@ -160,7 +169,10 @@ export const SpotlightTourOverlay: React.FC<SpotlightTourOverlayProps> = ({
             <div className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest">
               {currentStep.targetDescription}
             </div>
-            <h3 id="tour-step-title" className="text-base font-bold text-white font-mono">
+            <h3
+              id="tour-step-title"
+              className="text-base font-bold text-white font-mono"
+            >
               {currentStep.title}
             </h3>
           </div>
@@ -186,8 +198,8 @@ export const SpotlightTourOverlay: React.FC<SpotlightTourOverlayProps> = ({
                   idx === currentStepIdx
                     ? "w-6 bg-brand-cyan"
                     : idx < currentStepIdx
-                    ? "w-2 bg-emerald-500"
-                    : "w-2 bg-zinc-800"
+                      ? "w-2 bg-emerald-500"
+                      : "w-2 bg-zinc-800"
                 }`}
                 title={s.title}
                 aria-label={`Jump to step ${idx + 1}`}
@@ -219,7 +231,11 @@ export const SpotlightTourOverlay: React.FC<SpotlightTourOverlayProps> = ({
               onClick={handleNext}
               className="inline-flex items-center gap-1 px-4 py-1.5 rounded-xl bg-brand-cyan text-black hover:bg-white text-xs font-mono font-bold transition-all shadow-md"
             >
-              <span>{currentStepIdx === TOUR_STEPS.length - 1 ? "Complete Tour" : "Next Step"}</span>
+              <span>
+                {currentStepIdx === TOUR_STEPS.length - 1
+                  ? "Complete Tour"
+                  : "Next Step"}
+              </span>
               {currentStepIdx === TOUR_STEPS.length - 1 ? (
                 <IconCheck className="w-3.5 h-3.5" />
               ) : (

@@ -525,7 +525,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
                       <div className="flex-1">
                         <div className="font-bold">Copy View Link</div>
                         <div className="text-[10px] text-zinc-500">
-                          Navigation URL only — does not include study content
+                          Navigation URL only: does not include study content
                         </div>
                       </div>
                     </button>

@@ -159,7 +159,8 @@ export const INFERENCE_RULES: RuleDefinition[] = [
     template: "P → Q, ¬Q ⊢ ¬P",
     arity: 2,
     description: "Denies consequent to infer negation of antecedent.",
-    softwareMeaning: "Proving absence of root cause by confirming no downstream fault.",
+    softwareMeaning:
+      "Proving absence of root cause by confirming no downstream fault.",
   },
   {
     id: "hs",
@@ -168,7 +169,8 @@ export const INFERENCE_RULES: RuleDefinition[] = [
     template: "P → Q, Q → R ⊢ P → R",
     arity: 2,
     description: "Chains transitive implications.",
-    softwareMeaning: "Composing end-to-end latency SLA contracts across microservices.",
+    softwareMeaning:
+      "Composing end-to-end latency SLA contracts across microservices.",
   },
   {
     id: "ds",
@@ -176,8 +178,10 @@ export const INFERENCE_RULES: RuleDefinition[] = [
     symbol: "DS",
     template: "P ∨ Q, ¬P ⊢ Q",
     arity: 2,
-    description: "Eliminates false disjunct to isolate remaining true alternative.",
-    softwareMeaning: "Consensus leader failover when primary heartbeat lease expires.",
+    description:
+      "Eliminates false disjunct to isolate remaining true alternative.",
+    softwareMeaning:
+      "Consensus leader failover when primary heartbeat lease expires.",
   },
   {
     id: "res",
@@ -195,7 +199,8 @@ export const INFERENCE_RULES: RuleDefinition[] = [
     template: "¬(P ∧ Q) ⊢ ¬P ∨ ¬Q",
     arity: 1,
     description: "Distributes negation across conjunctions/disjunctions.",
-    softwareMeaning: "Compiler condition simplification and dead branch elimination.",
+    softwareMeaning:
+      "Compiler condition simplification and dead branch elimination.",
   },
   {
     id: "and_intro",
@@ -222,11 +227,23 @@ export const INFERENCE_RULES: RuleDefinition[] = [
     template: "P → ⊥ ⊢ ¬P",
     arity: 1,
     description: "Derives negation when a proposition yields contradiction.",
-    softwareMeaning: "Proving exploit impossibility by showing attack leads to false state.",
+    softwareMeaning:
+      "Proving exploit impossibility by showing attack leads to false state.",
   },
 ];
 
-export const VALID_NODE_IDS = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+export const VALID_NODE_IDS = [
+  "A",
+  "B",
+  "C",
+  "D",
+  "E",
+  "F",
+  "G",
+  "H",
+  "I",
+  "J",
+];
 export const VALID_COMMANDS = [
   "connect",
   "disconnect",
@@ -254,7 +271,11 @@ export function parseFormula(input: string): PropAst | null {
   const cleaned = input.trim();
   if (!cleaned) return null;
 
-  if (cleaned === "⊥" || cleaned.toLowerCase() === "false" || cleaned === "bot") {
+  if (
+    cleaned === "⊥" ||
+    cleaned.toLowerCase() === "false" ||
+    cleaned === "bot"
+  ) {
     return { type: "bottom" };
   }
 
@@ -263,7 +284,9 @@ export function parseFormula(input: string): PropAst | null {
   const iffMatch = findTopLevelOp(cleaned, ["<->", "↔"]);
   if (iffMatch) {
     const left = parseFormula(cleaned.slice(0, iffMatch.index));
-    const right = parseFormula(cleaned.slice(iffMatch.index + iffMatch.op.length));
+    const right = parseFormula(
+      cleaned.slice(iffMatch.index + iffMatch.op.length)
+    );
     if (left && right) return { type: "iff", left, right };
   }
 
@@ -271,7 +294,9 @@ export function parseFormula(input: string): PropAst | null {
   const impMatch = findTopLevelOp(cleaned, ["->", "→"]);
   if (impMatch) {
     const left = parseFormula(cleaned.slice(0, impMatch.index));
-    const right = parseFormula(cleaned.slice(impMatch.index + impMatch.op.length));
+    const right = parseFormula(
+      cleaned.slice(impMatch.index + impMatch.op.length)
+    );
     if (left && right) return { type: "implies", left, right };
   }
 
@@ -279,7 +304,9 @@ export function parseFormula(input: string): PropAst | null {
   const orMatch = findTopLevelOp(cleaned, ["\\lor", "||", "|", "∨"]);
   if (orMatch) {
     const left = parseFormula(cleaned.slice(0, orMatch.index));
-    const right = parseFormula(cleaned.slice(orMatch.index + orMatch.op.length));
+    const right = parseFormula(
+      cleaned.slice(orMatch.index + orMatch.op.length)
+    );
     if (left && right) return { type: "or", left, right };
   }
 
@@ -287,7 +314,9 @@ export function parseFormula(input: string): PropAst | null {
   const andMatch = findTopLevelOp(cleaned, ["\\land", "&&", "&", "∧"]);
   if (andMatch) {
     const left = parseFormula(cleaned.slice(0, andMatch.index));
-    const right = parseFormula(cleaned.slice(andMatch.index + andMatch.op.length));
+    const right = parseFormula(
+      cleaned.slice(andMatch.index + andMatch.op.length)
+    );
     if (left && right) return { type: "and", left, right };
   }
 
@@ -375,19 +404,30 @@ export function formatFormula(ast: PropAst | null | undefined): string {
   }
 }
 
-function formatChildFormula(child: PropAst | null | undefined, parentType: string): string {
+function formatChildFormula(
+  child: PropAst | null | undefined,
+  parentType: string
+): string {
   if (!child) return "";
   const needsParens =
-    (parentType === "implies" && (child.type === "implies" || child.type === "iff")) ||
-    (parentType === "or" && (child.type === "implies" || child.type === "iff")) ||
-    (parentType === "and" && (child.type === "or" || child.type === "implies" || child.type === "iff"));
+    (parentType === "implies" &&
+      (child.type === "implies" || child.type === "iff")) ||
+    (parentType === "or" &&
+      (child.type === "implies" || child.type === "iff")) ||
+    (parentType === "and" &&
+      (child.type === "or" ||
+        child.type === "implies" ||
+        child.type === "iff"));
   return needsParens ? `(${formatFormula(child)})` : formatFormula(child);
 }
 
 /**
  * Compares two PropAst trees for structural equivalence.
  */
-export function areAstsEqual(a: PropAst | null | undefined, b: PropAst | null | undefined): boolean {
+export function areAstsEqual(
+  a: PropAst | null | undefined,
+  b: PropAst | null | undefined
+): boolean {
   if (!a || !b || typeof a !== "object" || typeof b !== "object") return false;
   if (a.type !== b.type) return false;
   switch (a.type) {
@@ -396,13 +436,18 @@ export function areAstsEqual(a: PropAst | null | undefined, b: PropAst | null | 
     case "var":
       return a.name === (b as { type: "var"; name: string }).name;
     case "not":
-      return areAstsEqual(a.operand, (b as { type: "not"; operand: PropAst }).operand);
+      return areAstsEqual(
+        a.operand,
+        (b as { type: "not"; operand: PropAst }).operand
+      );
     case "and":
     case "or":
     case "implies":
     case "iff": {
       const bBin = b as { type: typeof a.type; left: PropAst; right: PropAst };
-      return areAstsEqual(a.left, bBin.left) && areAstsEqual(a.right, bBin.right);
+      return (
+        areAstsEqual(a.left, bBin.left) && areAstsEqual(a.right, bBin.right)
+      );
     }
     default:
       return false;
@@ -431,7 +476,11 @@ export function extractVariables(ast: PropAst | null | undefined): string[] {
 /**
  * Evaluates the boolean truth value of an AST under a variable valuation.
  */
-export function evaluateAst(ast: PropAst | null | undefined, env: Record<string, boolean> = {}, depth = 0): boolean {
+export function evaluateAst(
+  ast: PropAst | null | undefined,
+  env: Record<string, boolean> = {},
+  depth = 0
+): boolean {
   if (!ast || typeof ast !== "object" || !("type" in ast) || depth > 500) {
     return false;
   }
@@ -443,13 +492,25 @@ export function evaluateAst(ast: PropAst | null | undefined, env: Record<string,
     case "not":
       return !evaluateAst(ast.operand, env, depth + 1);
     case "and":
-      return evaluateAst(ast.left, env, depth + 1) && evaluateAst(ast.right, env, depth + 1);
+      return (
+        evaluateAst(ast.left, env, depth + 1) &&
+        evaluateAst(ast.right, env, depth + 1)
+      );
     case "or":
-      return evaluateAst(ast.left, env, depth + 1) || evaluateAst(ast.right, env, depth + 1);
+      return (
+        evaluateAst(ast.left, env, depth + 1) ||
+        evaluateAst(ast.right, env, depth + 1)
+      );
     case "implies":
-      return !evaluateAst(ast.left, env, depth + 1) || evaluateAst(ast.right, env, depth + 1);
+      return (
+        !evaluateAst(ast.left, env, depth + 1) ||
+        evaluateAst(ast.right, env, depth + 1)
+      );
     case "iff":
-      return evaluateAst(ast.left, env, depth + 1) === evaluateAst(ast.right, env, depth + 1);
+      return (
+        evaluateAst(ast.left, env, depth + 1) ===
+        evaluateAst(ast.right, env, depth + 1)
+      );
     default:
       return false;
   }
@@ -458,7 +519,11 @@ export function evaluateAst(ast: PropAst | null | undefined, env: Record<string,
 /**
  * Evaluates the boolean truth value of an AST under a variable valuation and produces a hierarchical evaluation trace.
  */
-export function evaluateAstWithTrace(ast: PropAst | null | undefined, env: Record<string, boolean> = {}, depth = 0): AstTraceNode {
+export function evaluateAstWithTrace(
+  ast: PropAst | null | undefined,
+  env: Record<string, boolean> = {},
+  depth = 0
+): AstTraceNode {
   if (!ast || typeof ast !== "object" || !("type" in ast) || depth > 500) {
     return {
       ast: ast || { type: "bottom" },
@@ -564,9 +629,15 @@ export function evaluateAstWithTrace(ast: PropAst | null | undefined, env: Recor
 export function generateTruthTable(
   premises: { label: string; ast: PropAst }[],
   conclusion: { label: string; ast: PropAst }
-): { truthTable: TruthTableRow[]; variables: string[]; counterexampleValuation?: Record<string, boolean> } {
+): {
+  truthTable: TruthTableRow[];
+  variables: string[];
+  counterexampleValuation?: Record<string, boolean>;
+} {
   const varSet = new Set<string>();
-  premises.forEach((p) => extractVariables(p.ast).forEach((v) => varSet.add(v)));
+  premises.forEach((p) =>
+    extractVariables(p.ast).forEach((v) => varSet.add(v))
+  );
   extractVariables(conclusion.ast).forEach((v) => varSet.add(v));
 
   if (varSet.size === 0) {
@@ -594,7 +665,8 @@ export function generateTruthTable(
 
     const premiseValues = premises.map((p) => evaluateAst(p.ast, valuation));
     const conclusionVal = evaluateAst(conclusion.ast, valuation);
-    const allPremisesTrue = premiseValues.length > 0 ? premiseValues.every((v) => v === true) : true;
+    const allPremisesTrue =
+      premiseValues.length > 0 ? premiseValues.every((v) => v === true) : true;
     const isCounterexample = allPremisesTrue && !conclusionVal;
 
     if (isCounterexample && !firstCounterexample) {
@@ -629,8 +701,10 @@ export const THEOREMS: Record<TheoremId, TheoremDefinition> = {
     subtitle: "Affirming the Antecedent · CI/CD Quality Gate",
     category: "Foundational",
     ruleName: "Modus Ponens (P ∧ (P → Q) ⊢ Q)",
-    scenario: "Automated regression testing in continuous integration pipelines.",
-    goalDescription: "Discharge Conclusion R (Reliability is guaranteed) through test suite verification.",
+    scenario:
+      "Automated regression testing in continuous integration pipelines.",
+    goalDescription:
+      "Discharge Conclusion R (Reliability is guaranteed) through test suite verification.",
     targetNodeId: "E",
     intermediateNodeId: "C",
     intermediateRequires: ["A", "B"],
@@ -641,7 +715,8 @@ export const THEOREMS: Record<TheoremId, TheoremDefinition> = {
         label: "P",
         type: "premise",
         description: "Premise P: The test suite executes on every commit.",
-        meaning: "All automated regression tests are actively running in the pipeline.",
+        meaning:
+          "All automated regression tests are actively running in the pipeline.",
         x: 120,
         y: 130,
         ast: { type: "var", name: "P" },
@@ -650,17 +725,24 @@ export const THEOREMS: Record<TheoremId, TheoremDefinition> = {
         id: "B",
         label: "P → Q",
         type: "premise",
-        description: "Premise P → Q: If tests run on every commit, regression bugs will be caught.",
-        meaning: "High coverage test suites reliably intercept regressions before production.",
+        description:
+          "Premise P → Q: If tests run on every commit, regression bugs will be caught.",
+        meaning:
+          "High coverage test suites reliably intercept regressions before production.",
         x: 120,
         y: 290,
-        ast: { type: "implies", left: { type: "var", name: "P" }, right: { type: "var", name: "Q" } },
+        ast: {
+          type: "implies",
+          left: { type: "var", name: "P" },
+          right: { type: "var", name: "Q" },
+        },
       },
       {
         id: "C",
         label: "Q",
         type: "intermediate",
-        description: "Intermediate Conclusion Q: Regression bugs will be caught.",
+        description:
+          "Intermediate Conclusion Q: Regression bugs will be caught.",
         meaning: "Derived fact: The pipeline successfully detects defects.",
         x: 360,
         y: 210,
@@ -670,18 +752,25 @@ export const THEOREMS: Record<TheoremId, TheoremDefinition> = {
         id: "D",
         label: "Q → R",
         type: "premise",
-        description: "Premise Q → R: If bugs are caught, production reliability is guaranteed.",
-        meaning: "Intercepting defects prevents outages and guarantees system uptime.",
+        description:
+          "Premise Q → R: If bugs are caught, production reliability is guaranteed.",
+        meaning:
+          "Intercepting defects prevents outages and guarantees system uptime.",
         x: 360,
         y: 360,
-        ast: { type: "implies", left: { type: "var", name: "Q" }, right: { type: "var", name: "R" } },
+        ast: {
+          type: "implies",
+          left: { type: "var", name: "Q" },
+          right: { type: "var", name: "R" },
+        },
       },
       {
         id: "E",
         label: "R",
         type: "conclusion",
         description: "Conclusion R: Production reliability is guaranteed.",
-        meaning: "The target theorem: 100% formal confidence in deployment reliability.",
+        meaning:
+          "The target theorem: 100% formal confidence in deployment reliability.",
         x: 600,
         y: 285,
         ast: { type: "var", name: "R" },
@@ -737,8 +826,10 @@ theorem modus_ponens_pipeline (P Q R : Prop)
     subtitle: "Denying the Consequent · Memory Safety & Exploit Prevention",
     category: "Indirect Proofs",
     ruleName: "Modus Tollens ((P → Q) ∧ ¬Q ⊢ ¬P)",
-    scenario: "Proving memory safety by demonstrating the complete absence of buffer overflows.",
-    goalDescription: "Discharge Conclusion R (Exploit is impossible) via contrapositive inference.",
+    scenario:
+      "Proving memory safety by demonstrating the complete absence of buffer overflows.",
+    goalDescription:
+      "Discharge Conclusion R (Exploit is impossible) via contrapositive inference.",
     targetNodeId: "E",
     intermediateNodeId: "C",
     intermediateRequires: ["A", "B"],
@@ -748,18 +839,26 @@ theorem modus_ponens_pipeline (P Q R : Prop)
         id: "A",
         label: "P → Q",
         type: "premise",
-        description: "Premise P → Q: If buffer allocation is unbounded (P), heap overflow occurs (Q).",
-        meaning: "Unchecked pointer arithmetic inevitably triggers heap corruptions.",
+        description:
+          "Premise P → Q: If buffer allocation is unbounded (P), heap overflow occurs (Q).",
+        meaning:
+          "Unchecked pointer arithmetic inevitably triggers heap corruptions.",
         x: 120,
         y: 130,
-        ast: { type: "implies", left: { type: "var", name: "P" }, right: { type: "var", name: "Q" } },
+        ast: {
+          type: "implies",
+          left: { type: "var", name: "P" },
+          right: { type: "var", name: "Q" },
+        },
       },
       {
         id: "B",
         label: "¬Q",
         type: "premise",
-        description: "Premise ¬Q: Heap overflow did not occur (verified by AddressSanitizer).",
-        meaning: "AddressSanitizer proves the absence of heap corruption across all executions.",
+        description:
+          "Premise ¬Q: Heap overflow did not occur (verified by AddressSanitizer).",
+        meaning:
+          "AddressSanitizer proves the absence of heap corruption across all executions.",
         x: 120,
         y: 290,
         ast: { type: "not", operand: { type: "var", name: "Q" } },
@@ -768,8 +867,10 @@ theorem modus_ponens_pipeline (P Q R : Prop)
         id: "C",
         label: "¬P",
         type: "intermediate",
-        description: "Intermediate Conclusion ¬P: Buffer allocation is bounded and memory-safe.",
-        meaning: "Derived fact: Unbounded memory allocation is impossible in this runtime.",
+        description:
+          "Intermediate Conclusion ¬P: Buffer allocation is bounded and memory-safe.",
+        meaning:
+          "Derived fact: Unbounded memory allocation is impossible in this runtime.",
         x: 360,
         y: 210,
         ast: { type: "not", operand: { type: "var", name: "P" } },
@@ -778,18 +879,26 @@ theorem modus_ponens_pipeline (P Q R : Prop)
         id: "D",
         label: "¬P → R",
         type: "premise",
-        description: "Premise ¬P → R: If buffer is bounded, remote code execution exploit (R) is impossible.",
-        meaning: "Bounded buffers eliminate stack/heap smashing attack vectors.",
+        description:
+          "Premise ¬P → R: If buffer is bounded, remote code execution exploit (R) is impossible.",
+        meaning:
+          "Bounded buffers eliminate stack/heap smashing attack vectors.",
         x: 360,
         y: 360,
-        ast: { type: "implies", left: { type: "not", operand: { type: "var", name: "P" } }, right: { type: "var", name: "R" } },
+        ast: {
+          type: "implies",
+          left: { type: "not", operand: { type: "var", name: "P" } },
+          right: { type: "var", name: "R" },
+        },
       },
       {
         id: "E",
         label: "R",
         type: "conclusion",
-        description: "Conclusion R: Remote code execution exploit is impossible.",
-        meaning: "The target theorem: 100% formal memory safety guarantee achieved.",
+        description:
+          "Conclusion R: Remote code execution exploit is impossible.",
+        meaning:
+          "The target theorem: 100% formal memory safety guarantee achieved.",
         x: 600,
         y: 285,
         ast: { type: "var", name: "R" },
@@ -845,8 +954,10 @@ theorem modus_tollens_memory_safety (P Q R : Prop)
     subtitle: "Transitivity of Implication · Microservice SLA Chaining",
     category: "Distributed Systems",
     ruleName: "Hypothetical Syllogism ((P → Q) ∧ (Q → R) ⊢ P → R)",
-    scenario: "Verifying end-to-end service latency SLA across upstream and downstream microservices.",
-    goalDescription: "Discharge Conclusion S (Global 99.99% Availability SLA is satisfied).",
+    scenario:
+      "Verifying end-to-end service latency SLA across upstream and downstream microservices.",
+    goalDescription:
+      "Discharge Conclusion S (Global 99.99% Availability SLA is satisfied).",
     targetNodeId: "E",
     intermediateNodeId: "C",
     intermediateRequires: ["A", "B"],
@@ -856,43 +967,66 @@ theorem modus_tollens_memory_safety (P Q R : Prop)
         id: "A",
         label: "P → Q",
         type: "premise",
-        description: "Premise P → Q: If Auth API latency < 50ms (P), cache hits exceed 98% (Q).",
+        description:
+          "Premise P → Q: If Auth API latency < 50ms (P), cache hits exceed 98% (Q).",
         meaning: "Fast token validation maintains warm Redis cache tiers.",
         x: 120,
         y: 130,
-        ast: { type: "implies", left: { type: "var", name: "P" }, right: { type: "var", name: "Q" } },
+        ast: {
+          type: "implies",
+          left: { type: "var", name: "P" },
+          right: { type: "var", name: "Q" },
+        },
       },
       {
         id: "B",
         label: "Q → R",
         type: "premise",
-        description: "Premise Q → R: If cache hits exceed 98% (Q), database IOPS stay nominal (R).",
-        meaning: "High cache hit ratio prevents database connection pool exhaustion.",
+        description:
+          "Premise Q → R: If cache hits exceed 98% (Q), database IOPS stay nominal (R).",
+        meaning:
+          "High cache hit ratio prevents database connection pool exhaustion.",
         x: 120,
         y: 290,
-        ast: { type: "implies", left: { type: "var", name: "Q" }, right: { type: "var", name: "R" } },
+        ast: {
+          type: "implies",
+          left: { type: "var", name: "Q" },
+          right: { type: "var", name: "R" },
+        },
       },
       {
         id: "C",
         label: "P → R",
         type: "intermediate",
-        description: "Intermediate Conclusion P → R: If Auth latency < 50ms, database IOPS stay nominal.",
-        meaning: "Derived transitive chain across the distributed service topology.",
+        description:
+          "Intermediate Conclusion P → R: If Auth latency < 50ms, database IOPS stay nominal.",
+        meaning:
+          "Derived transitive chain across the distributed service topology.",
         x: 360,
         y: 210,
-        ast: { type: "implies", left: { type: "var", name: "P" }, right: { type: "var", name: "R" } },
+        ast: {
+          type: "implies",
+          left: { type: "var", name: "P" },
+          right: { type: "var", name: "R" },
+        },
       },
       {
         id: "D",
         label: "(P→R)→S",
         type: "premise",
-        description: "Premise (P → R) → S: If nominal DB IOPS is bounded by Auth, Global SLA is met (S).",
-        meaning: "System-wide architectural contract ensures 99.99% availability.",
+        description:
+          "Premise (P → R) → S: If nominal DB IOPS is bounded by Auth, Global SLA is met (S).",
+        meaning:
+          "System-wide architectural contract ensures 99.99% availability.",
         x: 360,
         y: 360,
         ast: {
           type: "implies",
-          left: { type: "implies", left: { type: "var", name: "P" }, right: { type: "var", name: "R" } },
+          left: {
+            type: "implies",
+            left: { type: "var", name: "P" },
+            right: { type: "var", name: "R" },
+          },
           right: { type: "var", name: "S" },
         },
       },
@@ -900,8 +1034,10 @@ theorem modus_tollens_memory_safety (P Q R : Prop)
         id: "E",
         label: "S",
         type: "conclusion",
-        description: "Conclusion S: Global 99.99% Availability SLA is formally verified.",
-        meaning: "The target theorem: End-to-end distributed SLA verified without bottlenecks.",
+        description:
+          "Conclusion S: Global 99.99% Availability SLA is formally verified.",
+        meaning:
+          "The target theorem: End-to-end distributed SLA verified without bottlenecks.",
         x: 600,
         y: 285,
         ast: { type: "var", name: "S" },
@@ -958,7 +1094,8 @@ theorem hypothetical_syllogism_sla (P Q R S : Prop)
     category: "Fault Tolerance",
     ruleName: "Disjunctive Syllogism ((P ∨ Q) ∧ ¬P ⊢ Q)",
     scenario: "Raft consensus leader failover and backup quorum arbitration.",
-    goalDescription: "Discharge Conclusion R (Zero downtime is guaranteed during primary partition).",
+    goalDescription:
+      "Discharge Conclusion R (Zero downtime is guaranteed during primary partition).",
     targetNodeId: "E",
     intermediateNodeId: "C",
     intermediateRequires: ["A", "B"],
@@ -968,18 +1105,25 @@ theorem hypothetical_syllogism_sla (P Q R S : Prop)
         id: "A",
         label: "P ∨ Q",
         type: "premise",
-        description: "Premise P ∨ Q: Primary node maintains lease (P) OR Standby replica takes leader quorum (Q).",
+        description:
+          "Premise P ∨ Q: Primary node maintains lease (P) OR Standby replica takes leader quorum (Q).",
         meaning: "At least one consensus coordinator is active at any epoch.",
         x: 120,
         y: 130,
-        ast: { type: "or", left: { type: "var", name: "P" }, right: { type: "var", name: "Q" } },
+        ast: {
+          type: "or",
+          left: { type: "var", name: "P" },
+          right: { type: "var", name: "Q" },
+        },
       },
       {
         id: "B",
         label: "¬P",
         type: "premise",
-        description: "Premise ¬P: Primary node heartbeat expired and failed lease renewal (¬P).",
-        meaning: "Split-brain detector confirms the primary node is unreachable.",
+        description:
+          "Premise ¬P: Primary node heartbeat expired and failed lease renewal (¬P).",
+        meaning:
+          "Split-brain detector confirms the primary node is unreachable.",
         x: 120,
         y: 290,
         ast: { type: "not", operand: { type: "var", name: "P" } },
@@ -988,7 +1132,8 @@ theorem hypothetical_syllogism_sla (P Q R S : Prop)
         id: "C",
         label: "Q",
         type: "intermediate",
-        description: "Intermediate Conclusion Q: Standby replica successfully takes leader quorum.",
+        description:
+          "Intermediate Conclusion Q: Standby replica successfully takes leader quorum.",
         meaning: "Derived fact: Failover quorum is triggered immediately.",
         x: 360,
         y: 210,
@@ -998,18 +1143,26 @@ theorem hypothetical_syllogism_sla (P Q R S : Prop)
         id: "D",
         label: "Q → R",
         type: "premise",
-        description: "Premise Q → R: If standby replica takes quorum, zero downtime (R) is maintained.",
-        meaning: "Fast failover replication guarantees uninterrupted client writes.",
+        description:
+          "Premise Q → R: If standby replica takes quorum, zero downtime (R) is maintained.",
+        meaning:
+          "Fast failover replication guarantees uninterrupted client writes.",
         x: 360,
         y: 360,
-        ast: { type: "implies", left: { type: "var", name: "Q" }, right: { type: "var", name: "R" } },
+        ast: {
+          type: "implies",
+          left: { type: "var", name: "Q" },
+          right: { type: "var", name: "R" },
+        },
       },
       {
         id: "E",
         label: "R",
         type: "conclusion",
-        description: "Conclusion R: Zero downtime consensus invariant is maintained.",
-        meaning: "The target theorem: 100% formal resilience against primary node failure.",
+        description:
+          "Conclusion R: Zero downtime consensus invariant is maintained.",
+        meaning:
+          "The target theorem: 100% formal resilience against primary node failure.",
         x: 600,
         y: 285,
         ast: { type: "var", name: "R" },
@@ -1065,8 +1218,10 @@ theorem disjunctive_syllogism_raft (P Q R : Prop)
     subtitle: "Clausal Inference · Deadlock & Invariant Conflict Detection",
     category: "Fault Tolerance",
     ruleName: "Resolution ((P ∨ Q) ∧ (¬P ∨ R) ⊢ Q ∨ R)",
-    scenario: "Automated theorem proving in database transaction wait-for graphs and lock managers.",
-    goalDescription: "Discharge Conclusion R (Deadlock resolver triggers safe rollback).",
+    scenario:
+      "Automated theorem proving in database transaction wait-for graphs and lock managers.",
+    goalDescription:
+      "Discharge Conclusion R (Deadlock resolver triggers safe rollback).",
     targetNodeId: "E",
     intermediateNodeId: "C",
     intermediateRequires: ["A", "B"],
@@ -1076,17 +1231,24 @@ theorem disjunctive_syllogism_raft (P Q R : Prop)
         id: "A",
         label: "P ∨ Q",
         type: "premise",
-        description: "Premise P ∨ Q: Transaction lock acquired (P) OR Tx enqueued in wait-graph (Q).",
-        meaning: "Concurrency control invariant: lock is held or request is queued.",
+        description:
+          "Premise P ∨ Q: Transaction lock acquired (P) OR Tx enqueued in wait-graph (Q).",
+        meaning:
+          "Concurrency control invariant: lock is held or request is queued.",
         x: 120,
         y: 130,
-        ast: { type: "or", left: { type: "var", name: "P" }, right: { type: "var", name: "Q" } },
+        ast: {
+          type: "or",
+          left: { type: "var", name: "P" },
+          right: { type: "var", name: "Q" },
+        },
       },
       {
         id: "B",
         label: "¬P ∨ R",
         type: "premise",
-        description: "Premise ¬P ∨ R: Transaction lock revoked (¬P) OR Deadlock detector triggers rollback (R).",
+        description:
+          "Premise ¬P ∨ R: Transaction lock revoked (¬P) OR Deadlock detector triggers rollback (R).",
         meaning: "If lock is not held, deadlock resolution policy is active.",
         x: 120,
         y: 290,
@@ -1100,18 +1262,26 @@ theorem disjunctive_syllogism_raft (P Q R : Prop)
         id: "C",
         label: "Q ∨ R",
         type: "intermediate",
-        description: "Intermediate Conclusion Q ∨ R: Tx is enqueued (Q) OR Deadlock resolver triggers rollback (R).",
-        meaning: "Derived resolvent clause removing the complementary literal P and ¬P.",
+        description:
+          "Intermediate Conclusion Q ∨ R: Tx is enqueued (Q) OR Deadlock resolver triggers rollback (R).",
+        meaning:
+          "Derived resolvent clause removing the complementary literal P and ¬P.",
         x: 360,
         y: 210,
-        ast: { type: "or", left: { type: "var", name: "Q" }, right: { type: "var", name: "R" } },
+        ast: {
+          type: "or",
+          left: { type: "var", name: "Q" },
+          right: { type: "var", name: "R" },
+        },
       },
       {
         id: "D",
         label: "¬Q",
         type: "premise",
-        description: "Premise ¬Q: Wait queue is empty (Tx cannot wait further due to lock timeout).",
-        meaning: "Queue boundary condition: Transaction cannot remain in wait state.",
+        description:
+          "Premise ¬Q: Wait queue is empty (Tx cannot wait further due to lock timeout).",
+        meaning:
+          "Queue boundary condition: Transaction cannot remain in wait state.",
         x: 360,
         y: 360,
         ast: { type: "not", operand: { type: "var", name: "Q" } },
@@ -1120,8 +1290,10 @@ theorem disjunctive_syllogism_raft (P Q R : Prop)
         id: "E",
         label: "R",
         type: "conclusion",
-        description: "Conclusion R: Deadlock resolver triggers safe transaction rollback.",
-        meaning: "The target theorem: Deadlock resolved without data corruption or orphan locks.",
+        description:
+          "Conclusion R: Deadlock resolver triggers safe transaction rollback.",
+        meaning:
+          "The target theorem: Deadlock resolved without data corruption or orphan locks.",
         x: 600,
         y: 285,
         ast: { type: "var", name: "R" },
@@ -1183,8 +1355,10 @@ theorem resolution_deadlock_safety (P Q R : Prop)
     subtitle: "Global Atomicity · Distributed Transaction Coordinator Safety",
     category: "Distributed Systems",
     ruleName: "2PC Consensus ((A ∧ B) ∧ ((A ∧ B) → Commit) ⊢ Commit)",
-    scenario: "Coordinating multi-shard database atomic commit across independent partitions.",
-    goalDescription: "Discharge Global Commit invariant (All shards commit atomically or all roll back).",
+    scenario:
+      "Coordinating multi-shard database atomic commit across independent partitions.",
+    goalDescription:
+      "Discharge Global Commit invariant (All shards commit atomically or all roll back).",
     targetNodeId: "E",
     intermediateNodeId: "C",
     intermediateRequires: ["A", "B"],
@@ -1214,23 +1388,34 @@ theorem resolution_deadlock_safety (P Q R : Prop)
         id: "C",
         label: "PrepA ∧ PrepB",
         type: "intermediate",
-        description: "Intermediate Conclusion: All participating shards confirmed readiness.",
+        description:
+          "Intermediate Conclusion: All participating shards confirmed readiness.",
         meaning: "Unanimous preparation milestone reached across the cluster.",
         x: 360,
         y: 210,
-        ast: { type: "and", left: { type: "var", name: "PrepA" }, right: { type: "var", name: "PrepB" } },
+        ast: {
+          type: "and",
+          left: { type: "var", name: "PrepA" },
+          right: { type: "var", name: "PrepB" },
+        },
       },
       {
         id: "D",
         label: "(PrepA ∧ PrepB) → Commit",
         type: "premise",
-        description: "Premise Protocol: Unanimous prepare triggers Global Commit directive.",
-        meaning: "2PC protocol rule ensures zero dirty reads or partial writes.",
+        description:
+          "Premise Protocol: Unanimous prepare triggers Global Commit directive.",
+        meaning:
+          "2PC protocol rule ensures zero dirty reads or partial writes.",
         x: 360,
         y: 360,
         ast: {
           type: "implies",
-          left: { type: "and", left: { type: "var", name: "PrepA" }, right: { type: "var", name: "PrepB" } },
+          left: {
+            type: "and",
+            left: { type: "var", name: "PrepA" },
+            right: { type: "var", name: "PrepB" },
+          },
           right: { type: "var", name: "Commit" },
         },
       },
@@ -1238,7 +1423,8 @@ theorem resolution_deadlock_safety (P Q R : Prop)
         id: "E",
         label: "Commit",
         type: "conclusion",
-        description: "Conclusion Commit: Atomic multi-shard transaction formally committed.",
+        description:
+          "Conclusion Commit: Atomic multi-shard transaction formally committed.",
         meaning: "ACID consistency guaranteed across distributed partitions.",
         x: 600,
         y: 285,
@@ -1293,9 +1479,12 @@ theorem two_phase_commit (PrepA PrepB Commit : Prop)
     title: "Quorum Intersection Safety",
     subtitle: "Pigeonhole Principle · Majority Overlap Invariant",
     category: "Distributed Systems",
-    ruleName: "Quorum Safety ((Q1 ∧ Q2) ∧ ((Q1 ∧ Q2) → SingleLeader) ⊢ SingleLeader)",
-    scenario: "Proving impossibility of split-brain leader elections in Raft/Paxos clusters.",
-    goalDescription: "Discharge Single Leader invariant: At most one leader can be elected in any term.",
+    ruleName:
+      "Quorum Safety ((Q1 ∧ Q2) ∧ ((Q1 ∧ Q2) → SingleLeader) ⊢ SingleLeader)",
+    scenario:
+      "Proving impossibility of split-brain leader elections in Raft/Paxos clusters.",
+    goalDescription:
+      "Discharge Single Leader invariant: At most one leader can be elected in any term.",
     targetNodeId: "E",
     intermediateNodeId: "C",
     intermediateRequires: ["A", "B"],
@@ -1305,7 +1494,8 @@ theorem two_phase_commit (PrepA PrepB Commit : Prop)
         id: "A",
         label: "MajA",
         type: "premise",
-        description: "Premise MajA: Leader A collected a strict majority quorum of votes (N/2 + 1).",
+        description:
+          "Premise MajA: Leader A collected a strict majority quorum of votes (N/2 + 1).",
         meaning: "Majority partition verified for Candidate A in term T.",
         x: 120,
         y: 130,
@@ -1315,7 +1505,8 @@ theorem two_phase_commit (PrepA PrepB Commit : Prop)
         id: "B",
         label: "MajB",
         type: "premise",
-        description: "Premise MajB: Candidate B claims a strict majority quorum in the same term T.",
+        description:
+          "Premise MajB: Candidate B claims a strict majority quorum in the same term T.",
         meaning: "Hypothetical competing election attempt.",
         x: 120,
         y: 290,
@@ -1325,8 +1516,10 @@ theorem two_phase_commit (PrepA PrepB Commit : Prop)
         id: "C",
         label: "Overlap",
         type: "intermediate",
-        description: "Intermediate Conclusion: Quorums MajA and MajB share at least one common voter node.",
-        meaning: "Pigeonhole principle: Any two majorities of size (N/2 + 1) must intersect.",
+        description:
+          "Intermediate Conclusion: Quorums MajA and MajB share at least one common voter node.",
+        meaning:
+          "Pigeonhole principle: Any two majorities of size (N/2 + 1) must intersect.",
         x: 360,
         y: 210,
         ast: { type: "var", name: "Overlap" },
@@ -1335,7 +1528,8 @@ theorem two_phase_commit (PrepA PrepB Commit : Prop)
         id: "D",
         label: "Overlap → SingleLeader",
         type: "premise",
-        description: "Premise Invariant: Intersecting node cannot vote twice in term T, forcing single leader.",
+        description:
+          "Premise Invariant: Intersecting node cannot vote twice in term T, forcing single leader.",
         meaning: "Vote idempotency prevents dual election split-brain.",
         x: 360,
         y: 360,
@@ -1349,7 +1543,8 @@ theorem two_phase_commit (PrepA PrepB Commit : Prop)
         id: "E",
         label: "SingleLeader",
         type: "conclusion",
-        description: "Conclusion SingleLeader: Exactly one legitimate leader elected per term.",
+        description:
+          "Conclusion SingleLeader: Exactly one legitimate leader elected per term.",
         meaning: "Split-brain impossibility formally proven.",
         x: 600,
         y: 285,
@@ -1404,9 +1599,12 @@ theorem quorum_overlap_safety (MajA MajB Overlap SingleLeader : Prop)
     title: "Cache Invalidation & Coherence",
     subtitle: "Write-Through Invariant · Stale Read Prevention",
     category: "Distributed Systems",
-    ruleName: "Cache Safety (Write ∧ (Write → Invalidate) ∧ (Invalidate → FreshRead) ⊢ FreshRead)",
-    scenario: "Maintaining strong consistency between high-throughput cache and primary database.",
-    goalDescription: "Discharge FreshRead invariant: Clients never observe stale dirty cache reads.",
+    ruleName:
+      "Cache Safety (Write ∧ (Write → Invalidate) ∧ (Invalidate → FreshRead) ⊢ FreshRead)",
+    scenario:
+      "Maintaining strong consistency between high-throughput cache and primary database.",
+    goalDescription:
+      "Discharge FreshRead invariant: Clients never observe stale dirty cache reads.",
     targetNodeId: "E",
     intermediateNodeId: "C",
     intermediateRequires: ["A", "B"],
@@ -1416,7 +1614,8 @@ theorem quorum_overlap_safety (MajA MajB Overlap SingleLeader : Prop)
         id: "A",
         label: "Write",
         type: "premise",
-        description: "Premise Write: Primary database successfully committed write update.",
+        description:
+          "Premise Write: Primary database successfully committed write update.",
         meaning: "Source of truth has new record state.",
         x: 120,
         y: 130,
@@ -1426,7 +1625,8 @@ theorem quorum_overlap_safety (MajA MajB Overlap SingleLeader : Prop)
         id: "B",
         label: "Write → Invalidate",
         type: "premise",
-        description: "Premise: Database commit automatically dispatches cache eviction event.",
+        description:
+          "Premise: Database commit automatically dispatches cache eviction event.",
         meaning: "Change Data Capture (CDC) stream evicts cached key.",
         x: 120,
         y: 290,
@@ -1440,7 +1640,8 @@ theorem quorum_overlap_safety (MajA MajB Overlap SingleLeader : Prop)
         id: "C",
         label: "Invalidate",
         type: "intermediate",
-        description: "Intermediate Conclusion: Cache key evicted across all edge clusters.",
+        description:
+          "Intermediate Conclusion: Cache key evicted across all edge clusters.",
         meaning: "Stale data purged from L1/L2 cache tiers.",
         x: 360,
         y: 210,
@@ -1450,7 +1651,8 @@ theorem quorum_overlap_safety (MajA MajB Overlap SingleLeader : Prop)
         id: "D",
         label: "Invalidate → FreshRead",
         type: "premise",
-        description: "Premise: Cache miss triggers synchronous fetch of canonical primary record.",
+        description:
+          "Premise: Cache miss triggers synchronous fetch of canonical primary record.",
         meaning: "Subsequent queries are routed to updated database record.",
         x: 360,
         y: 360,
@@ -1464,7 +1666,8 @@ theorem quorum_overlap_safety (MajA MajB Overlap SingleLeader : Prop)
         id: "E",
         label: "FreshRead",
         type: "conclusion",
-        description: "Conclusion FreshRead: Guaranteed zero stale data read anomalies.",
+        description:
+          "Conclusion FreshRead: Guaranteed zero stale data read anomalies.",
         meaning: "Sequential cache consistency verified.",
         x: 600,
         y: 285,
@@ -1519,8 +1722,10 @@ theorem cache_consistency_safety (Write Invalidate FreshRead : Prop)
     subtitle: "Proposal Monotonicity · Single-Decree Consensus Safety",
     category: "Distributed Systems",
     ruleName: "Paxos Synod (MajQ1 ∧ (MajQ1 → MaxVal) ⊢ MaxVal)",
-    scenario: "Single-Decree Paxos leader ballot proposal and value stability across election rounds.",
-    goalDescription: "Discharge Synod Agreement invariant (No two distinct values can ever be chosen across ballots).",
+    scenario:
+      "Single-Decree Paxos leader ballot proposal and value stability across election rounds.",
+    goalDescription:
+      "Discharge Synod Agreement invariant (No two distinct values can ever be chosen across ballots).",
     targetNodeId: "E",
     intermediateNodeId: "C",
     intermediateRequires: ["A", "B"],
@@ -1530,8 +1735,10 @@ theorem cache_consistency_safety (Write Invalidate FreshRead : Prop)
         id: "A",
         label: "MajQ1",
         type: "premise",
-        description: "Premise MajQ1: Leader gathered a majority promise quorum Q1 in ballot B.",
-        meaning: "Majority of acceptors in Q1 promised not to accept ballots older than B.",
+        description:
+          "Premise MajQ1: Leader gathered a majority promise quorum Q1 in ballot B.",
+        meaning:
+          "Majority of acceptors in Q1 promised not to accept ballots older than B.",
         x: 120,
         y: 130,
         ast: { type: "var", name: "MajQ1" },
@@ -1540,8 +1747,10 @@ theorem cache_consistency_safety (Write Invalidate FreshRead : Prop)
         id: "B",
         label: "MajQ1 → MaxVal",
         type: "premise",
-        description: "Premise: Quorum intersection forces proposer to adopt value V of highest-numbered ballot.",
-        meaning: "If Q1 intersects with previously chosen quorum, highest ballot value V is reported.",
+        description:
+          "Premise: Quorum intersection forces proposer to adopt value V of highest-numbered ballot.",
+        meaning:
+          "If Q1 intersects with previously chosen quorum, highest ballot value V is reported.",
         x: 120,
         y: 290,
         ast: {
@@ -1554,8 +1763,10 @@ theorem cache_consistency_safety (Write Invalidate FreshRead : Prop)
         id: "C",
         label: "MaxVal",
         type: "intermediate",
-        description: "Intermediate Conclusion MaxVal: Proposer binds proposal in ballot B to canonical value V.",
-        meaning: "Derived invariant: Proposer cannot propose any competing value V' ≠ V.",
+        description:
+          "Intermediate Conclusion MaxVal: Proposer binds proposal in ballot B to canonical value V.",
+        meaning:
+          "Derived invariant: Proposer cannot propose any competing value V' ≠ V.",
         x: 360,
         y: 210,
         ast: { type: "var", name: "MaxVal" },
@@ -1564,8 +1775,10 @@ theorem cache_consistency_safety (Write Invalidate FreshRead : Prop)
         id: "D",
         label: "MaxVal → SynodAgreement",
         type: "premise",
-        description: "Premise: Invariant preservation ensures all subsequent ballots only choose value V.",
-        meaning: "Inductive step: If all proposals inherit V, no split-decision value can ever be chosen.",
+        description:
+          "Premise: Invariant preservation ensures all subsequent ballots only choose value V.",
+        meaning:
+          "Inductive step: If all proposals inherit V, no split-decision value can ever be chosen.",
         x: 360,
         y: 360,
         ast: {
@@ -1578,8 +1791,10 @@ theorem cache_consistency_safety (Write Invalidate FreshRead : Prop)
         id: "E",
         label: "SynodAgreement",
         type: "conclusion",
-        description: "Conclusion SynodAgreement: Single-Decree Paxos consistency holds with mathematical certainty.",
-        meaning: "The target theorem: 100% formal safety guarantee against split-brain decisions.",
+        description:
+          "Conclusion SynodAgreement: Single-Decree Paxos consistency holds with mathematical certainty.",
+        meaning:
+          "The target theorem: 100% formal safety guarantee against split-brain decisions.",
         x: 600,
         y: 285,
         ast: { type: "var", name: "SynodAgreement" },
@@ -1634,9 +1849,12 @@ theorem paxos_synod_safety (MajQ1 MaxVal SynodAgreement : Prop)
     title: "Paxos Phase 2B Acceptor Quorum",
     subtitle: "Phase 2b Vote Aggregation · Irrevocable Consensus Commit",
     category: "Distributed Systems",
-    ruleName: "Paxos Phase 2B ((PromiseB ∧ AcceptReqB) ∧ ((PromiseB ∧ AcceptReqB) → ValueChosen) ⊢ ValueChosen)",
-    scenario: "Acceptors processing Phase 2a accept requests and committing chosen value on majority acceptance.",
-    goalDescription: "Discharge ValueChosen invariant (Value V is chosen and permanently committed across the cluster).",
+    ruleName:
+      "Paxos Phase 2B ((PromiseB ∧ AcceptReqB) ∧ ((PromiseB ∧ AcceptReqB) → ValueChosen) ⊢ ValueChosen)",
+    scenario:
+      "Acceptors processing Phase 2a accept requests and committing chosen value on majority acceptance.",
+    goalDescription:
+      "Discharge ValueChosen invariant (Value V is chosen and permanently committed across the cluster).",
     targetNodeId: "E",
     intermediateNodeId: "C",
     intermediateRequires: ["A", "B"],
@@ -1646,8 +1864,10 @@ theorem paxos_synod_safety (MajQ1 MaxVal SynodAgreement : Prop)
         id: "A",
         label: "PromiseB",
         type: "premise",
-        description: "Premise PromiseB: Acceptors promised ballot B and have seen no higher proposal.",
-        meaning: "Acceptor local promise invariant is active for ballot epoch B.",
+        description:
+          "Premise PromiseB: Acceptors promised ballot B and have seen no higher proposal.",
+        meaning:
+          "Acceptor local promise invariant is active for ballot epoch B.",
         x: 120,
         y: 130,
         ast: { type: "var", name: "PromiseB" },
@@ -1656,8 +1876,10 @@ theorem paxos_synod_safety (MajQ1 MaxVal SynodAgreement : Prop)
         id: "B",
         label: "AcceptReqB",
         type: "premise",
-        description: "Premise AcceptReqB: Leader transmits Phase 2a Accept(B, V) message matching ballot B.",
-        meaning: "Phase 2a message carries valid ballot number B and candidate value V.",
+        description:
+          "Premise AcceptReqB: Leader transmits Phase 2a Accept(B, V) message matching ballot B.",
+        meaning:
+          "Phase 2a message carries valid ballot number B and candidate value V.",
         x: 120,
         y: 290,
         ast: { type: "var", name: "AcceptReqB" },
@@ -1666,8 +1888,10 @@ theorem paxos_synod_safety (MajQ1 MaxVal SynodAgreement : Prop)
         id: "C",
         label: "PromiseB ∧ AcceptReqB",
         type: "intermediate",
-        description: "Intermediate Conclusion: Ballot compatibility verified, triggering Phase 2b Accepted(B, V).",
-        meaning: "Acceptors register accept vote and emit Phase 2b acknowledgement.",
+        description:
+          "Intermediate Conclusion: Ballot compatibility verified, triggering Phase 2b Accepted(B, V).",
+        meaning:
+          "Acceptors register accept vote and emit Phase 2b acknowledgement.",
         x: 360,
         y: 210,
         ast: {
@@ -1680,7 +1904,8 @@ theorem paxos_synod_safety (MajQ1 MaxVal SynodAgreement : Prop)
         id: "D",
         label: "(PromiseB ∧ AcceptReqB) → ValueChosen",
         type: "premise",
-        description: "Premise: Gathering majority Phase 2b accept votes permanently chooses value V.",
+        description:
+          "Premise: Gathering majority Phase 2b accept votes permanently chooses value V.",
         meaning: "Commit threshold reached: Value V is irreversibly decided.",
         x: 360,
         y: 360,
@@ -1698,8 +1923,10 @@ theorem paxos_synod_safety (MajQ1 MaxVal SynodAgreement : Prop)
         id: "E",
         label: "ValueChosen",
         type: "conclusion",
-        description: "Conclusion ValueChosen: Value V is committed across the distributed state machine.",
-        meaning: "The target theorem: 100% formal verification of Phase 2b consensus commitment.",
+        description:
+          "Conclusion ValueChosen: Value V is committed across the distributed state machine.",
+        meaning:
+          "The target theorem: 100% formal verification of Phase 2b consensus commitment.",
         x: 600,
         y: 285,
         ast: { type: "var", name: "ValueChosen" },
@@ -1754,9 +1981,12 @@ theorem paxos_phase2b_quorum (PromiseB AcceptReqB ValueChosen : Prop)
     title: "BFT 3f+1 Quorum Overlap",
     subtitle: "Pigeonhole Overlap Bound · Byzantine Equivocation Resistance",
     category: "Fault Tolerance",
-    ruleName: "BFT Quorum ((Quorum1 ∧ Quorum2) ∧ ((Quorum1 ∧ Quorum2) → HonestOverlap) ⊢ ByzantineSafety)",
-    scenario: "PBFT / Tendermint consensus safety in a 3f+1 network tolerating up to f arbitrary Byzantine faulty nodes.",
-    goalDescription: "Discharge ByzantineSafety invariant: Two conflicting blocks/values can never both receive quorum certificates.",
+    ruleName:
+      "BFT Quorum ((Quorum1 ∧ Quorum2) ∧ ((Quorum1 ∧ Quorum2) → HonestOverlap) ⊢ ByzantineSafety)",
+    scenario:
+      "PBFT / Tendermint consensus safety in a 3f+1 network tolerating up to f arbitrary Byzantine faulty nodes.",
+    goalDescription:
+      "Discharge ByzantineSafety invariant: Two conflicting blocks/values can never both receive quorum certificates.",
     targetNodeId: "E",
     intermediateNodeId: "C",
     intermediateRequires: ["A", "B"],
@@ -1766,7 +1996,8 @@ theorem paxos_phase2b_quorum (PromiseB AcceptReqB ValueChosen : Prop)
         id: "A",
         label: "Quorum1",
         type: "premise",
-        description: "Premise Quorum1: Primary quorum Q1 of 2f+1 nodes signed prepare certificate for value V1.",
+        description:
+          "Premise Quorum1: Primary quorum Q1 of 2f+1 nodes signed prepare certificate for value V1.",
         meaning: "Certificate Q1 meets 2/3 supermajority threshold in view v.",
         x: 120,
         y: 130,
@@ -1776,8 +2007,10 @@ theorem paxos_phase2b_quorum (PromiseB AcceptReqB ValueChosen : Prop)
         id: "B",
         label: "Quorum2",
         type: "premise",
-        description: "Premise Quorum2: Conflicting quorum Q2 of 2f+1 nodes attempts prepare certificate for V2.",
-        meaning: "Adversary attempts to create split-brain commit with competing quorum Q2.",
+        description:
+          "Premise Quorum2: Conflicting quorum Q2 of 2f+1 nodes attempts prepare certificate for V2.",
+        meaning:
+          "Adversary attempts to create split-brain commit with competing quorum Q2.",
         x: 120,
         y: 290,
         ast: { type: "var", name: "Quorum2" },
@@ -1786,8 +2019,10 @@ theorem paxos_phase2b_quorum (PromiseB AcceptReqB ValueChosen : Prop)
         id: "C",
         label: "HonestOverlap",
         type: "intermediate",
-        description: "Intermediate Conclusion HonestOverlap: Q1 and Q2 intersect in at least f+1 nodes (at least 1 honest node).",
-        meaning: "Pigeonhole bound: 2(2f+1) - (3f+1) = f+1; subtracting at most f faulty nodes leaves ≥ 1 honest node.",
+        description:
+          "Intermediate Conclusion HonestOverlap: Q1 and Q2 intersect in at least f+1 nodes (at least 1 honest node).",
+        meaning:
+          "Pigeonhole bound: 2(2f+1) - (3f+1) = f+1; subtracting at most f faulty nodes leaves ≥ 1 honest node.",
         x: 360,
         y: 210,
         ast: { type: "var", name: "HonestOverlap" },
@@ -1796,8 +2031,10 @@ theorem paxos_phase2b_quorum (PromiseB AcceptReqB ValueChosen : Prop)
         id: "D",
         label: "HonestOverlap → ByzantineSafety",
         type: "premise",
-        description: "Premise: Honest node strictly rejects double-signing conflicting values in view v.",
-        meaning: "Byzantine equivocation refutation: Honest validator refuses to sign two different values.",
+        description:
+          "Premise: Honest node strictly rejects double-signing conflicting values in view v.",
+        meaning:
+          "Byzantine equivocation refutation: Honest validator refuses to sign two different values.",
         x: 360,
         y: 360,
         ast: {
@@ -1810,8 +2047,10 @@ theorem paxos_phase2b_quorum (PromiseB AcceptReqB ValueChosen : Prop)
         id: "E",
         label: "ByzantineSafety",
         type: "conclusion",
-        description: "Conclusion ByzantineSafety: Byzantine agreement guaranteed, preventing blockchain forks.",
-        meaning: "The target theorem: 100% formal resilience against up to f Byzantine malicious nodes.",
+        description:
+          "Conclusion ByzantineSafety: Byzantine agreement guaranteed, preventing blockchain forks.",
+        meaning:
+          "The target theorem: 100% formal resilience against up to f Byzantine malicious nodes.",
         x: 600,
         y: 285,
         ast: { type: "var", name: "ByzantineSafety" },
@@ -1868,8 +2107,10 @@ theorem bft_3f_plus_1_quorum_safety (Quorum1 Quorum2 HonestOverlap ByzantineSafe
     subtitle: "Interactive Free-Form Propositional Prover",
     category: "Custom Studio",
     ruleName: "Custom User Proof",
-    scenario: "Author custom software propositions, assemble natural deduction proofs, and auto-solve.",
-    goalDescription: "Construct a formal natural deduction derivation for custom assertions.",
+    scenario:
+      "Author custom software propositions, assemble natural deduction proofs, and auto-solve.",
+    goalDescription:
+      "Construct a formal natural deduction derivation for custom assertions.",
     targetNodeId: "E",
     intermediateNodeId: "C",
     intermediateRequires: ["A", "B"],
@@ -1893,7 +2134,11 @@ theorem bft_3f_plus_1_quorum_safety (Quorum1 Quorum2 HonestOverlap ByzantineSafe
         meaning: "User-defined implication",
         x: 120,
         y: 290,
-        ast: { type: "implies", left: { type: "var", name: "P" }, right: { type: "var", name: "Q" } },
+        ast: {
+          type: "implies",
+          left: { type: "var", name: "P" },
+          right: { type: "var", name: "Q" },
+        },
       },
       {
         id: "C",
@@ -1913,7 +2158,11 @@ theorem bft_3f_plus_1_quorum_safety (Quorum1 Quorum2 HonestOverlap ByzantineSafe
         meaning: "User-defined target bridge",
         x: 360,
         y: 360,
-        ast: { type: "implies", left: { type: "var", name: "Q" }, right: { type: "var", name: "R" } },
+        ast: {
+          type: "implies",
+          left: { type: "var", name: "Q" },
+          right: { type: "var", name: "R" },
+        },
       },
       {
         id: "E",
@@ -1976,7 +2225,10 @@ export function isValidNode(nodeId: string): boolean {
 /**
  * Calculates inline autocomplete suggestion based on current console input and active theorem.
  */
-export function getSuggestion(inputVal: string, _theoremId: TheoremId = "modus-ponens"): string {
+export function getSuggestion(
+  inputVal: string,
+  _theoremId: TheoremId = "modus-ponens"
+): string {
   const trimmed = inputVal.trim();
   if (!inputVal) return "";
 
@@ -1985,14 +2237,19 @@ export function getSuggestion(inputVal: string, _theoremId: TheoremId = "modus-p
 
   // Typing command name
   if (tokens.length === 1 && !inputVal.endsWith(" ")) {
-    const match = VALID_COMMANDS.find((cmd) => cmd.startsWith(trimmed.toLowerCase()));
+    const match = VALID_COMMANDS.find((cmd) =>
+      cmd.startsWith(trimmed.toLowerCase())
+    );
     if (match && match !== trimmed.toLowerCase()) {
       return match;
     }
   }
 
   // Connect or Disconnect command
-  if (tokens.length > 1 && (firstWord === "connect" || firstWord === "disconnect")) {
+  if (
+    tokens.length > 1 &&
+    (firstWord === "connect" || firstWord === "disconnect")
+  ) {
     const secondWord = tokens[1]?.toUpperCase() || "";
     const thirdWord = tokens[2]?.toUpperCase() || "";
 
@@ -2021,7 +2278,17 @@ export function getSuggestion(inputVal: string, _theoremId: TheoremId = "modus-p
   // Apply rule command
   if (tokens.length > 1 && firstWord === "apply") {
     const secondWord = tokens[1]?.toLowerCase() || "";
-    const rules = ["mp", "mt", "hs", "ds", "res", "demorgan", "and_intro", "and_elim", "raa"];
+    const rules = [
+      "mp",
+      "mt",
+      "hs",
+      "ds",
+      "res",
+      "demorgan",
+      "and_intro",
+      "and_elim",
+      "raa",
+    ];
     if (tokens.length === 2 && !inputVal.endsWith(" ")) {
       const matchRule = rules.find((r) => r.startsWith(secondWord));
       if (matchRule && matchRule !== secondWord) {
@@ -2031,7 +2298,10 @@ export function getSuggestion(inputVal: string, _theoremId: TheoremId = "modus-p
   }
 
   // Switch or theorem command
-  if (tokens.length > 1 && (firstWord === "theorem" || firstWord === "switch")) {
+  if (
+    tokens.length > 1 &&
+    (firstWord === "theorem" || firstWord === "switch")
+  ) {
     const secondWord = tokens[1]?.toLowerCase() || "";
     const theoremKeys: string[] = [
       "mp",
@@ -2180,10 +2450,14 @@ export function canConnect(
   }
 
   const alreadyConnected = edges.some(
-    (e) => (e.source === s && e.target === t) || (e.source === t && e.target === s)
+    (e) =>
+      (e.source === s && e.target === t) || (e.source === t && e.target === s)
   );
   if (alreadyConnected) {
-    return { allowed: false, reason: `Node ${s} and Node ${t} are already connected.` };
+    return {
+      allowed: false,
+      reason: `Node ${s} and Node ${t} are already connected.`,
+    };
   }
 
   const isValidPair = th.validPairs.some(([p1, p2]) => p1 === s && p2 === t);
@@ -2237,7 +2511,8 @@ export function getFallacyDiagnosis(
       fallacyName: "Fallacy of Circular Reasoning (Petitio Principii)",
       formalFormula: "P ⊢ P (Tautological Self-Reference)",
       plainEnglish: `Connecting Node ${s} directly to itself creates an invalid recursive feedback loop without establishing an external premise justification.`,
-      softwareAnalogy: "Circular dependency in module imports: A depends on A, causing a runtime bootstrap deadlock.",
+      softwareAnalogy:
+        "Circular dependency in module imports: A depends on A, causing a runtime bootstrap deadlock.",
       premises,
       conclusion,
       variables,
@@ -2251,8 +2526,13 @@ export function getFallacyDiagnosis(
     const premises: FallacyFormulaAst[] = [
       {
         label: "Premise 1: P → Q",
-        ast: { type: "implies", left: { type: "var", name: "P" }, right: { type: "var", name: "Q" } },
-        description: "If the antecedent condition P occurs, consequent Q follows.",
+        ast: {
+          type: "implies",
+          left: { type: "var", name: "P" },
+          right: { type: "var", name: "Q" },
+        },
+        description:
+          "If the antecedent condition P occurs, consequent Q follows.",
       },
       {
         label: "Premise 2: Q",
@@ -2263,15 +2543,18 @@ export function getFallacyDiagnosis(
     const conclusion: FallacyFormulaAst = {
       label: "Conclusion: P",
       ast: { type: "var", name: "P" },
-      description: "Erroneously inferring that antecedent P was the sole cause.",
+      description:
+        "Erroneously inferring that antecedent P was the sole cause.",
     };
-    const { truthTable, variables, counterexampleValuation } = generateTruthTable(premises, conclusion);
+    const { truthTable, variables, counterexampleValuation } =
+      generateTruthTable(premises, conclusion);
 
     return {
       fallacyName: "Fallacy of Affirming the Consequent",
       formalFormula: "((P → Q) ∧ Q) ⊬ P",
       plainEnglish: `Assuming that because the outcome (${t}) occurred, the specific initial cause (${s}) must have been the sole trigger. Other independent factors could have caused the same outcome.`,
-      softwareAnalogy: "Observing that regression tests passed does not prove that all possible edge cases were tested — a missing test case could simply have been omitted.",
+      softwareAnalogy:
+        "Observing that regression tests passed does not prove that all possible edge cases were tested: a missing test case could simply have been omitted.",
       premises,
       conclusion,
       variables,
@@ -2285,7 +2568,11 @@ export function getFallacyDiagnosis(
     const premises: FallacyFormulaAst[] = [
       {
         label: "Premise 1: P → Q",
-        ast: { type: "implies", left: { type: "var", name: "P" }, right: { type: "var", name: "Q" } },
+        ast: {
+          type: "implies",
+          left: { type: "var", name: "P" },
+          right: { type: "var", name: "Q" },
+        },
         description: "If antecedent P occurs, consequent Q follows.",
       },
       {
@@ -2299,13 +2586,15 @@ export function getFallacyDiagnosis(
       ast: { type: "not", operand: { type: "var", name: "Q" } },
       description: "Erroneously inferring that consequent Q cannot occur.",
     };
-    const { truthTable, variables, counterexampleValuation } = generateTruthTable(premises, conclusion);
+    const { truthTable, variables, counterexampleValuation } =
+      generateTruthTable(premises, conclusion);
 
     return {
       fallacyName: "Fallacy of Denying the Antecedent",
       formalFormula: "((P → Q) ∧ ¬P) ⊬ ¬Q",
       plainEnglish: `Assuming that if the antecedent condition is not met, the consequence cannot occur. The consequence might still happen via other mechanisms.`,
-      softwareAnalogy: "If you don't run tests on commit (¬P), that doesn't mean zero bugs were caught (¬Q); an automated compiler lint or canary build could have caught them.",
+      softwareAnalogy:
+        "If you don't run tests on commit (¬P), that doesn't mean zero bugs were caught (¬Q); an automated compiler lint or canary build could have caught them.",
       premises,
       conclusion,
       variables,
@@ -2332,13 +2621,17 @@ export function getFallacyDiagnosis(
     ast: { type: "var", name: "Q" },
     description: `Unjustified deduction of Node ${t} from Node ${s}.`,
   };
-  const { truthTable, variables, counterexampleValuation } = generateTruthTable(premises, conclusion);
+  const { truthTable, variables, counterexampleValuation } = generateTruthTable(
+    premises,
+    conclusion
+  );
 
   return {
     fallacyName: "Fallacy of Incompatible Terms (Non Sequitur)",
     formalFormula: `Node ${s} ⊬ Node ${t}`,
     plainEnglish: `There is no valid deductive inference rule linking Node ${s} directly to Node ${t} in the active theorem.`,
-    softwareAnalogy: "Type mismatch in function signatures: passing an unrelated variable type into an incompatible parameter socket.",
+    softwareAnalogy:
+      "Type mismatch in function signatures: passing an unrelated variable type into an incompatible parameter socket.",
     premises,
     conclusion,
     variables,
@@ -2518,7 +2811,8 @@ export function getDeductionLedger(
       formula: nE?.label || "R",
       rule: "Modus Ponens",
       premises: "Lines [3, 4]",
-      plainEnglish: nE?.meaning || "Target conclusion proven with mathematical certainty.",
+      plainEnglish:
+        nE?.meaning || "Target conclusion proven with mathematical certainty.",
       isProven: isE_Proven,
       nodeId: nE?.id || "E",
       isDeletable: isE_Proven,
@@ -2553,7 +2847,8 @@ export function pruneStepOrNode(
   let targetNodeId: string;
   let targetStepNum: number | undefined;
 
-  const rawStr = typeof stepOrNode === "string" ? stepOrNode.trim() : String(stepOrNode);
+  const rawStr =
+    typeof stepOrNode === "string" ? stepOrNode.trim() : String(stepOrNode);
   const parsedNum = parseInt(rawStr, 10);
 
   if (!Number.isNaN(parsedNum) && String(parsedNum) === rawStr) {
@@ -2575,9 +2870,11 @@ export function pruneStepOrNode(
     targetNodeId = rawStr.toUpperCase();
     if (targetNodeId === "A") targetStepNum = 1;
     else if (targetNodeId === "B") targetStepNum = 2;
-    else if (targetNodeId === (th.intermediateNodeId || "C").toUpperCase()) targetStepNum = 3;
+    else if (targetNodeId === (th.intermediateNodeId || "C").toUpperCase())
+      targetStepNum = 3;
     else if (targetNodeId === "D") targetStepNum = 4;
-    else if (targetNodeId === (th.targetNodeId || "E").toUpperCase()) targetStepNum = 5;
+    else if (targetNodeId === (th.targetNodeId || "E").toUpperCase())
+      targetStepNum = 5;
   }
 
   const targetNode = th.nodes.find((n) => n.id.toUpperCase() === targetNodeId);
@@ -2590,7 +2887,12 @@ export function pruneStepOrNode(
     };
   }
 
-  if (targetNode.type === "premise" || targetStepNum === 1 || targetStepNum === 2 || targetStepNum === 4) {
+  if (
+    targetNode.type === "premise" ||
+    targetStepNum === 1 ||
+    targetStepNum === 2 ||
+    targetStepNum === 4
+  ) {
     return {
       success: false,
       newEdges: edges,
@@ -2637,75 +2939,159 @@ export function applyRuleToAsts(
 
   // Modus Ponens: P and P -> Q  =>  Q
   if (normRule === "mp" || normRule === "modus-ponens") {
-    if (inputs.length !== 2) return { success: false, explanation: "Modus Ponens requires exactly 2 premises (P and P → Q)." };
+    if (inputs.length !== 2)
+      return {
+        success: false,
+        explanation: "Modus Ponens requires exactly 2 premises (P and P → Q).",
+      };
     const [p1, p2] = inputs;
     if (p2.type === "implies" && areAstsEqual(p1, p2.left)) {
-      return { success: true, resultAst: p2.right, explanation: `Derived ${formatFormula(p2.right)} via Modus Ponens.` };
+      return {
+        success: true,
+        resultAst: p2.right,
+        explanation: `Derived ${formatFormula(p2.right)} via Modus Ponens.`,
+      };
     }
     if (p1.type === "implies" && areAstsEqual(p2, p1.left)) {
-      return { success: true, resultAst: p1.right, explanation: `Derived ${formatFormula(p1.right)} via Modus Ponens.` };
+      return {
+        success: true,
+        resultAst: p1.right,
+        explanation: `Derived ${formatFormula(p1.right)} via Modus Ponens.`,
+      };
     }
-    return { success: false, explanation: "Premises do not match Modus Ponens form (P and P → Q)." };
+    return {
+      success: false,
+      explanation: "Premises do not match Modus Ponens form (P and P → Q).",
+    };
   }
 
   // Modus Tollens: P -> Q and ¬Q  =>  ¬P
   if (normRule === "mt" || normRule === "modus-tollens") {
-    if (inputs.length !== 2) return { success: false, explanation: "Modus Tollens requires exactly 2 premises (P → Q and ¬Q)." };
+    if (inputs.length !== 2)
+      return {
+        success: false,
+        explanation:
+          "Modus Tollens requires exactly 2 premises (P → Q and ¬Q).",
+      };
     const [p1, p2] = inputs;
-    if (p1.type === "implies" && p2.type === "not" && areAstsEqual(p1.right, p2.operand)) {
-      return { success: true, resultAst: { type: "not", operand: p1.left }, explanation: `Derived ¬(${formatFormula(p1.left)}) via Modus Tollens.` };
+    if (
+      p1.type === "implies" &&
+      p2.type === "not" &&
+      areAstsEqual(p1.right, p2.operand)
+    ) {
+      return {
+        success: true,
+        resultAst: { type: "not", operand: p1.left },
+        explanation: `Derived ¬(${formatFormula(p1.left)}) via Modus Tollens.`,
+      };
     }
-    if (p2.type === "implies" && p1.type === "not" && areAstsEqual(p2.right, p1.operand)) {
-      return { success: true, resultAst: { type: "not", operand: p2.left }, explanation: `Derived ¬(${formatFormula(p2.left)}) via Modus Tollens.` };
+    if (
+      p2.type === "implies" &&
+      p1.type === "not" &&
+      areAstsEqual(p2.right, p1.operand)
+    ) {
+      return {
+        success: true,
+        resultAst: { type: "not", operand: p2.left },
+        explanation: `Derived ¬(${formatFormula(p2.left)}) via Modus Tollens.`,
+      };
     }
-    return { success: false, explanation: "Premises do not match Modus Tollens form (P → Q and ¬Q)." };
+    return {
+      success: false,
+      explanation: "Premises do not match Modus Tollens form (P → Q and ¬Q).",
+    };
   }
 
   // Hypothetical Syllogism: P -> Q and Q -> R  =>  P -> R
   if (normRule === "hs" || normRule === "hypothetical-syllogism") {
-    if (inputs.length !== 2) return { success: false, explanation: "Hypothetical Syllogism requires 2 implications (P → Q and Q → R)." };
+    if (inputs.length !== 2)
+      return {
+        success: false,
+        explanation:
+          "Hypothetical Syllogism requires 2 implications (P → Q and Q → R).",
+      };
     const [p1, p2] = inputs;
     if (p1.type === "implies" && p2.type === "implies") {
       if (areAstsEqual(p1.right, p2.left)) {
-        return { success: true, resultAst: { type: "implies", left: p1.left, right: p2.right }, explanation: `Derived ${formatFormula(p1.left)} → ${formatFormula(p2.right)} via Hypothetical Syllogism.` };
+        return {
+          success: true,
+          resultAst: { type: "implies", left: p1.left, right: p2.right },
+          explanation: `Derived ${formatFormula(p1.left)} → ${formatFormula(p2.right)} via Hypothetical Syllogism.`,
+        };
       }
       if (areAstsEqual(p2.right, p1.left)) {
-        return { success: true, resultAst: { type: "implies", left: p2.left, right: p1.right }, explanation: `Derived ${formatFormula(p2.left)} → ${formatFormula(p1.right)} via Hypothetical Syllogism.` };
+        return {
+          success: true,
+          resultAst: { type: "implies", left: p2.left, right: p1.right },
+          explanation: `Derived ${formatFormula(p2.left)} → ${formatFormula(p1.right)} via Hypothetical Syllogism.`,
+        };
       }
     }
-    return { success: false, explanation: "Premises do not chain transitively (P → Q and Q → R)." };
+    return {
+      success: false,
+      explanation: "Premises do not chain transitively (P → Q and Q → R).",
+    };
   }
 
   // Disjunctive Syllogism: P ∨ Q and ¬P  =>  Q
   if (normRule === "ds" || normRule === "disjunctive-syllogism") {
-    if (inputs.length !== 2) return { success: false, explanation: "Disjunctive Syllogism requires (P ∨ Q and ¬P or ¬Q)." };
+    if (inputs.length !== 2)
+      return {
+        success: false,
+        explanation: "Disjunctive Syllogism requires (P ∨ Q and ¬P or ¬Q).",
+      };
     const [p1, p2] = inputs;
     const orNode = p1.type === "or" ? p1 : p2.type === "or" ? p2 : null;
     const notNode = p1.type === "not" ? p1 : p2.type === "not" ? p2 : null;
     if (orNode && notNode) {
       if (areAstsEqual(orNode.left, notNode.operand)) {
-        return { success: true, resultAst: orNode.right, explanation: `Derived ${formatFormula(orNode.right)} via Disjunctive Syllogism.` };
+        return {
+          success: true,
+          resultAst: orNode.right,
+          explanation: `Derived ${formatFormula(orNode.right)} via Disjunctive Syllogism.`,
+        };
       }
       if (areAstsEqual(orNode.right, notNode.operand)) {
-        return { success: true, resultAst: orNode.left, explanation: `Derived ${formatFormula(orNode.left)} via Disjunctive Syllogism.` };
+        return {
+          success: true,
+          resultAst: orNode.left,
+          explanation: `Derived ${formatFormula(orNode.left)} via Disjunctive Syllogism.`,
+        };
       }
     }
-    return { success: false, explanation: "Premises do not match Disjunctive Syllogism form (P ∨ Q and ¬P)." };
+    return {
+      success: false,
+      explanation:
+        "Premises do not match Disjunctive Syllogism form (P ∨ Q and ¬P).",
+    };
   }
 
   // Conjunction Introduction: P and Q => P ∧ Q
   if (normRule === "and_intro" || normRule === "conjunction-intro") {
-    if (inputs.length !== 2) return { success: false, explanation: "Conjunction Intro requires 2 propositions." };
-    return { success: true, resultAst: { type: "and", left: inputs[0], right: inputs[1] }, explanation: `Combined into ${formatFormula(inputs[0])} ∧ ${formatFormula(inputs[1])}.` };
+    if (inputs.length !== 2)
+      return {
+        success: false,
+        explanation: "Conjunction Intro requires 2 propositions.",
+      };
+    return {
+      success: true,
+      resultAst: { type: "and", left: inputs[0], right: inputs[1] },
+      explanation: `Combined into ${formatFormula(inputs[0])} ∧ ${formatFormula(inputs[1])}.`,
+    };
   }
 
   // Clausal Resolution: A ∨ B and ¬A ∨ C => B ∨ C
   if (normRule === "res" || normRule === "resolution") {
-    if (inputs.length !== 2) return { success: false, explanation: "Resolution requires 2 disjunctive clauses." };
+    if (inputs.length !== 2)
+      return {
+        success: false,
+        explanation: "Resolution requires 2 disjunctive clauses.",
+      };
     const [c1, c2] = inputs;
     // Handle binary clauses or unit literals
     const getLiterals = (ast: PropAst): PropAst[] => {
-      if (ast.type === "or") return [...getLiterals(ast.left), ...getLiterals(ast.right)];
+      if (ast.type === "or")
+        return [...getLiterals(ast.left), ...getLiterals(ast.right)];
       return [ast];
     };
     const lits1 = getLiterals(c1);
@@ -2722,20 +3108,37 @@ export function applyRuleToAsts(
           const rem2 = lits2.filter((l) => l !== l2);
           const remaining = [...rem1, ...rem2];
           if (remaining.length === 0) {
-            return { success: true, resultAst: { type: "bottom" }, explanation: "Derived contradiction ⊥ (Empty Clause □) via Resolution Refutation." };
+            return {
+              success: true,
+              resultAst: { type: "bottom" },
+              explanation:
+                "Derived contradiction ⊥ (Empty Clause □) via Resolution Refutation.",
+            };
           }
           if (remaining.length === 1) {
-            return { success: true, resultAst: remaining[0], explanation: `Derived unit resolvent ${formatFormula(remaining[0])} via Resolution.` };
+            return {
+              success: true,
+              resultAst: remaining[0],
+              explanation: `Derived unit resolvent ${formatFormula(remaining[0])} via Resolution.`,
+            };
           }
           let resAst: PropAst = remaining[0];
           for (let i = 1; i < remaining.length; i++) {
             resAst = { type: "or", left: resAst, right: remaining[i] };
           }
-          return { success: true, resultAst: resAst, explanation: `Derived resolvent ${formatFormula(resAst)} via Resolution.` };
+          return {
+            success: true,
+            resultAst: resAst,
+            explanation: `Derived resolvent ${formatFormula(resAst)} via Resolution.`,
+          };
         }
       }
     }
-    return { success: false, explanation: "No complementary literals found across clauses for Resolution." };
+    return {
+      success: false,
+      explanation:
+        "No complementary literals found across clauses for Resolution.",
+    };
   }
 
   return { success: false, explanation: `Unknown rule '${ruleId}'.` };
@@ -2849,7 +3252,9 @@ export function getCompatibleTargets(
   edges: Edge[] = []
 ): CompatibleTargetInfo[] {
   const th = THEOREMS[theoremId] || THEOREMS["modus-ponens"];
-  const sNode = th.nodes.find((n) => n.id.toUpperCase() === sourceId.toUpperCase());
+  const sNode = th.nodes.find(
+    (n) => n.id.toUpperCase() === sourceId.toUpperCase()
+  );
   if (!sNode) return [];
 
   const results: CompatibleTargetInfo[] = [];
@@ -2858,7 +3263,8 @@ export function getCompatibleTargets(
     if (tNode.id.toUpperCase() === sourceId.toUpperCase()) continue;
 
     const isIntermediateTarget =
-      tNode.id === th.intermediateNodeId && th.intermediateRequires.includes(sNode.id);
+      tNode.id === th.intermediateNodeId &&
+      th.intermediateRequires.includes(sNode.id);
     const isConclusionTarget =
       tNode.id === th.targetNodeId && th.conclusionRequires.includes(sNode.id);
 
@@ -2876,14 +3282,20 @@ export function getCompatibleTargets(
       const parsedRuleName = th.ruleName.split("(")[0].trim();
       ruleName = parsedRuleName;
       const foundRule = INFERENCE_RULES.find(
-        (r) => r.name.toLowerCase() === parsedRuleName.toLowerCase() || r.id === theoremId
+        (r) =>
+          r.name.toLowerCase() === parsedRuleName.toLowerCase() ||
+          r.id === theoremId
       );
       if (foundRule) {
         ruleId = foundRule.id;
         ruleSymbol = foundRule.symbol;
         ruleTemplate = foundRule.template;
       } else {
-        ruleSymbol = parsedRuleName.split(" ").map((w) => w[0]).join("").toUpperCase();
+        ruleSymbol = parsedRuleName
+          .split(" ")
+          .map((w) => w[0])
+          .join("")
+          .toUpperCase();
       }
     } else if (tNode.id === th.targetNodeId) {
       ruleId = "mp";
@@ -2932,7 +3344,13 @@ export function computeMagneticSnap(
   currentY: number,
   nodeWidth: number,
   nodeHeight: number,
-  peerNodes: { id: string; x: number; y: number; width?: number; height?: number }[],
+  peerNodes: {
+    id: string;
+    x: number;
+    y: number;
+    width?: number;
+    height?: number;
+  }[],
   options: {
     gridSize?: number;
     threshold?: number;
@@ -2975,9 +3393,19 @@ export function computeMagneticSnap(
 
       // X alignment checks (Center-to-Center, Left-to-Left, Right-to-Right)
       const xChecks = [
-        { myPos: currentCenterX, peerPos: peerCenterX, snapPos: peerCenterX - nodeWidth / 2, guidePos: peerCenterX },
+        {
+          myPos: currentCenterX,
+          peerPos: peerCenterX,
+          snapPos: peerCenterX - nodeWidth / 2,
+          guidePos: peerCenterX,
+        },
         { myPos: currentX, peerPos: peer.x, snapPos: peer.x, guidePos: peer.x },
-        { myPos: currentRightX, peerPos: peerRightX, snapPos: peerRightX - nodeWidth, guidePos: peerRightX },
+        {
+          myPos: currentRightX,
+          peerPos: peerRightX,
+          snapPos: peerRightX - nodeWidth,
+          guidePos: peerRightX,
+        },
       ];
 
       for (const check of xChecks) {
@@ -2999,9 +3427,19 @@ export function computeMagneticSnap(
 
       // Y alignment checks (Center-to-Center, Top-to-Top, Bottom-to-Bottom)
       const yChecks = [
-        { myPos: currentCenterY, peerPos: peerCenterY, snapPos: peerCenterY - nodeHeight / 2, guidePos: peerCenterY },
+        {
+          myPos: currentCenterY,
+          peerPos: peerCenterY,
+          snapPos: peerCenterY - nodeHeight / 2,
+          guidePos: peerCenterY,
+        },
         { myPos: currentY, peerPos: peer.y, snapPos: peer.y, guidePos: peer.y },
-        { myPos: currentBottomY, peerPos: peerBottomY, snapPos: peerBottomY - nodeHeight, guidePos: peerBottomY },
+        {
+          myPos: currentBottomY,
+          peerPos: peerBottomY,
+          snapPos: peerBottomY - nodeHeight,
+          guidePos: peerBottomY,
+        },
       ];
 
       for (const check of yChecks) {
@@ -3062,4 +3500,3 @@ export function computeMagneticSnap(
     guides,
   };
 }
-

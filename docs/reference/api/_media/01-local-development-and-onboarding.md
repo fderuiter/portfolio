@@ -10,7 +10,7 @@ specific recurring tasks instead.
 
 - **Node.js >= 22.0.0** (Node 22 LTS and Node 24 LTS are both supported;
   CI runs Node 24)
-- **npm >= 10.0.0** (the sole supported package manager — bun, yarn, and
+- **npm >= 10.0.0** (the sole supported package manager; bun, yarn, and
   pnpm are unsupported)
 - A Postgres connection string (a free [Neon](https://neon.tech) serverless
   Postgres project works well for local development)
@@ -22,7 +22,7 @@ npm install
 ```
 
 `npm install` runs `npx prisma generate` automatically via a `postinstall`
-hook, so the Prisma client is ready immediately — `npx tsc --noEmit` and
+hook, so the Prisma client is ready immediately: `npx tsc --noEmit` and
 other type-checks work right after install with no extra step.
 
 ## 3. Configure your environment
@@ -67,7 +67,7 @@ npx prisma db seed
 ```
 
 Schema changes in this repository always ship as a checked-in Prisma
-migration — see
+migration. See
 [how-to: add an API route and Zod contract](../how-to/add-api-route-and-zod-contract.md)
 for the pattern most new routes follow, and `DATABASE_MIGRATIONS.md` at the
 repository root for the full migration workflow, production rollout order,
@@ -117,7 +117,7 @@ npm run quality
 ```
 
 `npm run quality` runs `check` (typecheck + lint), `lint:docs`,
-`check-docs-drift`, `bench:pages -- --assert`, and `verify` in sequence —
+`check-docs-drift`, `bench:pages -- --assert`, and `verify` in sequence:
 the same commands the `rigor-pipeline` GitHub Actions workflow runs against
 every pull request.
 

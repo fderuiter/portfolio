@@ -276,7 +276,7 @@ export const BaselineCompareModal: React.FC<BaselineCompareModalProps> = ({
           </label>
           {baselines.length === 0 ? (
             <span className="text-xs text-zinc-500">
-              No saved baselines yet — create one from &quot;Baselines&quot;
+              No saved baselines yet: create one from &quot;Baselines&quot;
               first.
             </span>
           ) : (
@@ -288,7 +288,7 @@ export const BaselineCompareModal: React.FC<BaselineCompareModalProps> = ({
             >
               {baselines.map((b) => (
                 <option key={b.id} value={b.id}>
-                  {b.versionTag} — {b.label}
+                  {b.versionTag}: {b.label}
                 </option>
               ))}
             </select>

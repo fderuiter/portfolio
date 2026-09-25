@@ -108,7 +108,7 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
     accentColor: "from-cyan-500/20 via-cyan-500/5 to-transparent",
     badgeBg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/30",
     objective:
-      "Work a full patrol shift at a Welch Village-inspired hill: hold the mountain between calls, take dispatches, run the scene, sled the patient down, hand off, and read your debrief. Educational simulation only — it does not teach or certify clinical care.",
+      "Work a full patrol shift at a Welch Village-inspired hill: hold the mountain between calls, take dispatches, run the scene, sled the patient down, hand off, and read your debrief. Educational simulation only: it does not teach or certify clinical care.",
     quickSummary:
       "Start your shift, patrol the map between dispatches, assess and treat on scene, run the toboggan down the fall line, hand off to EMS, then review a debrief scored across five dimensions.",
     controls: [
@@ -121,7 +121,7 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
       {
         action: "Patrol the Mountain Map",
         description:
-          "Between calls you hold the hill. Trigger ambient operations — a closed rope, debris on a trail, a guest asking directions — and resolve them, or await the next dispatch.",
+          "Between calls you hold the hill. Trigger ambient operations (a closed rope, debris on a trail, a guest asking directions) and resolve them, or await the next dispatch.",
         key: "Click Map Actions",
       },
       {
@@ -133,7 +133,7 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
       {
         action: "Run the Scene (OEC)",
         description:
-          "Assess scene safety first, then gather observations, check vitals, and execute care actions. Order matters — the debrief engine reads what you did and when.",
+          "Assess scene safety first, then gather observations, check vitals, and execute care actions. Order matters: the debrief engine reads what you did and when.",
         key: "Click Actions",
       },
       {
@@ -145,7 +145,7 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
       {
         action: "Steer the Toboggan (OET)",
         description:
-          "Hold left or right to steer across the fall line. Steering is continuous — the sled keeps turning while the key is held.",
+          "Hold left or right to steer across the fall line. Steering is continuous: the sled keeps turning while the key is held.",
         key: "A / D or ← / →",
       },
       {
@@ -189,7 +189,7 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
       {
         title: "Five Debrief Dimensions",
         detail:
-          "Every incident is read across Scene Management, Patient Care, Communication, Transportation, and Operational Judgment — each with a meter and specific written observations, not a bare score.",
+          "Every incident is read across Scene Management, Patient Care, Communication, Transportation, and Operational Judgment: each with a meter and specific written observations, not a bare score.",
         badge: "Debrief",
       },
       {
@@ -206,10 +206,10 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
       },
     ],
     proTips: [
-      "Assess scene safety before anything else — the debrief engine explicitly checks the ordering.",
+      "Assess scene safety before anything else: the debrief engine explicitly checks the ordering.",
       "Delegate. Sending your partner for equipment while you stay with the patient reads as strong scene management.",
       "Reassess vitals after an intervention; a single check early gives the debrief nothing to compare against.",
-      "On the descent, small sustained corrections beat large late ones — the comfort metric punishes abrupt input.",
+      "On the descent, small sustained corrections beat large late ones: the comfort metric punishes abrupt input.",
       "Engage the chain brake before the pitch steepens, not after you are already accelerating.",
       "Ambient events between calls are scored too: patrolling is responsibility for a place, not just waiting for injuries.",
       "Audio is muted by default and every radio call is text-first, so nothing is lost with sound off.",
@@ -217,7 +217,7 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
     lore: {
       title: "Midwest Patrol & Systems Architecture",
       story:
-        "Midwest patrolling is its own discipline: 360 feet of vertical, hard-packed man-made snow, short fast laps, and a volunteer culture where the same person sweeps the hill, runs the sled, and talks to the guest's family. This simulation models that judgment — deciding, communicating, and sequencing under mild pressure — through a headless finite state machine, data-authored scenarios, and a declarative rule engine that derives feedback from your event history rather than a scoreboard.",
+        "Midwest patrolling is its own discipline: 360 feet of vertical, hard-packed man-made snow, short fast laps, and a volunteer culture where the same person sweeps the hill, runs the sled, and talks to the guest's family. This simulation models that judgment (deciding, communicating, and sequencing under mild pressure) through a headless finite state machine, data-authored scenarios, and a declarative rule engine that derives feedback from your event history rather than a scoreboard.",
       realWorldTech: [
         "Finite State Machines",
         "Deep Modules",
@@ -386,7 +386,7 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
     lore: {
       title: "The Grassroots Legend of Submission F277",
       story:
-        "In late 2023, the Minnesota State Emblems Redesign Commission invited citizen submissions. Fred deRuiter submitted 'F277: Laser Loon'—a majestic common loon blasting twin crimson lasers across azure waters. The design became a worldwide viral sensation, featured in The New York Times, The Washington Post, and NPR. Fred released F277 into the public domain (CC0), launching a grassroots civic campaign that raised over $13,500 for the Saint Paul Public Library Foundation.",
+        "In late 2023, the Minnesota State Emblems Redesign Commission invited citizen submissions. Fred deRuiter submitted 'F277: Laser Loon': a majestic common loon blasting twin crimson lasers across azure waters. The design became a worldwide viral sensation, featured in The New York Times, The Washington Post, and NPR. Fred released F277 into the public domain (CC0), launching a grassroots civic campaign that raised over $13,500 for the Saint Paul Public Library Foundation.",
       realWorldTech: [
         "Raycast Collision Vectors",
         "Web Audio Dual-Oscillator Synthesis",
@@ -556,7 +556,7 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
     lore: {
       title: "Engineering for Wearable Hardware Constraints",
       story:
-        "Smartwatches like the Garmin Forerunner and Fenix utilize ultra-low-power Memory-in-Pixel (MIP) displays and ultra-constrained microcontrollers capable of running for 14+ days on a single charge. Developing for Garmin's Monkey C language demands relentless memory optimization—reusing object pools, avoiding dynamic closures, and managing strict byte-aligned bitmaps.",
+        "Smartwatches like the Garmin Forerunner and Fenix utilize ultra-low-power Memory-in-Pixel (MIP) displays and ultra-constrained microcontrollers capable of running for 14+ days on a single charge. Developing for Garmin's Monkey C language demands relentless memory optimization: reusing object pools, avoiding dynamic closures, and managing strict byte-aligned bitmaps.",
       realWorldTech: [
         "Garmin Connect IQ",
         "Monkey C VM",
@@ -640,7 +640,7 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
       },
     ],
     proTips: [
-      "Keep an eye on Serious Adverse Events (⚡ SAE)—they have shorter timers and grant +300 bonus points upon compliant signature.",
+      "Keep an eye on Serious Adverse Events (⚡ SAE): they have shorter timers and grant +300 bonus points upon compliant signature.",
       "Charge your 'FDA Coffee Break' lifeline by maintaining clean submission streaks; deploy it when auditor suspicion climbs above 70%.",
       "Switch to the Live SDTM Studio tab during shifts to inspect generated observation rows and export authentic CDISC ODM 1.3 XML.",
       "Toggle the procedural 8-bit synth BGM to hear dynamic tempo scaling as auditor scrutiny intensifies.",
@@ -780,7 +780,7 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
       {
         title: "Zero-score rule",
         detail:
-          "A percentage divided by the wrong population's N (FAS instead of ITT) is a fatal denominator error. While it stands, the hand's final Mult is 0 — whether or not you found it.",
+          "A percentage divided by the wrong population's N (FAS instead of ITT) is a fatal denominator error. While it stands, the hand's final Mult is 0, whether or not you found it.",
         badge: "Fatal",
       },
       {
@@ -837,7 +837,7 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
     lore: {
       title: "Why statisticians double-program tables",
       story:
-        "Before a clinical study report goes anywhere, a second programmer independently re-derives every number in every table, listing and figure against the Statistical Analysis Plan. Most discrepancies are small — a decimal place, a tie rounded the other way — but a wrong denominator changes every percentage in a column. This game is fictional teaching material, not clinical or regulatory advice.",
+        "Before a clinical study report goes anywhere, a second programmer independently re-derives every number in every table, listing and figure against the Statistical Analysis Plan. Most discrepancies are small (a decimal place, a tie rounded the other way), but a wrong denominator changes every percentage in a column. This game is fictional teaching material, not clinical or regulatory advice.",
       realWorldTech: [
         "Statistical Analysis Plans",
         "Tables, Listings & Figures",
@@ -990,14 +990,14 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
       },
     ],
     proTips: [
-      "There are no purely 'correct' choices—every decision involves deliberate trade-offs between speed, durability, and operational overhead.",
+      "There are no purely 'correct' choices: every decision involves deliberate trade-offs between speed, durability, and operational overhead.",
       "High resilience choices protect against catastrophic cascading outages during subsequent stages.",
       "Review the stage badge indicators to understand the operational context of each challenge.",
     ],
     lore: {
       title: "Staff+ and Engineering Management Decision Frameworks",
       story:
-        "Great engineering leaders don't just write clean code; they manage risk, mentor teams through high-severity outages, and make architectural decisions that compound positively over years. This interactive simulation models real-world Staff+ engineering trade-offs—from Expand-and-Contract schema migrations to blameless post-mortem cultures.",
+        "Great engineering leaders don't just write clean code; they manage risk, mentor teams through high-severity outages, and make architectural decisions that compound positively over years. This interactive simulation models real-world Staff+ engineering trade-offs: from Expand-and-Contract schema migrations to blameless post-mortem cultures.",
       realWorldTech: [
         "Expand-and-Contract Migrations",
         "SRE SLO/SLA Frameworks",

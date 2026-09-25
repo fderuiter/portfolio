@@ -79,7 +79,7 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
           </h3>
           <p className="text-[10px] font-mono text-zinc-400 mb-4 sm:mb-6 leading-relaxed">
             Share of source bytes GitHub attributes to each language across
-            these repositories — includes markup, styles, and config files
+            these repositories. This includes markup, styles, and config files
             alongside programming languages, not a claim of hand-written
             proficiency split.
           </p>

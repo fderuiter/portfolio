@@ -532,7 +532,7 @@ export const MemeVaultClient: React.FC = () => {
                       {q.tagline || q.category}
                     </span>
                     <CopyButton
-                      text={`"${q.quote}" — ${q.author}`}
+                      text={`"${q.quote}" by ${q.author}`}
                       icon={<IconCopy className="w-4 h-4" />}
                       copiedIcon={
                         <IconCheck className="w-4 h-4 text-emerald-400" />
@@ -550,9 +550,9 @@ export const MemeVaultClient: React.FC = () => {
                 </div>
 
                 <div className="flex items-center justify-between pt-3 border-t border-slate-800/60 text-xs">
-                  <span className="text-slate-400 italic text-[11px] truncate max-w-[200px] sm:max-w-xs">
-                    — {q.author}
-                  </span>
+                  <cite className="text-slate-400 text-[11px] truncate max-w-[200px] sm:max-w-xs not-italic">
+                    by {q.author}
+                  </cite>
                   <button
                     onClick={() => handleReaction(q.id)}
                     className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 text-[11px] transition-transform active:scale-95"

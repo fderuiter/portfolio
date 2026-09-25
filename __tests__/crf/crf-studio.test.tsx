@@ -411,7 +411,7 @@ describe("CRFStudioContainer Component", () => {
 
     expect(navigator.clipboard.writeText).toHaveBeenCalled();
     expect(container.textContent).toContain(
-      "not the authored study — recipients need their own copy of the study data"
+      "not the authored study; recipients need their own copy of the study data"
     );
   });
 
