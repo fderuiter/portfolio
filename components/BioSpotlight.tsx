@@ -150,7 +150,7 @@ export const BioSpotlight: React.FC = () => {
               Meet Duck: From 8-Week Fluff to 80-lb Marshmallow
             </h2>
 
-            <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed mb-4">
+            <p className="min-w-0 text-xs sm:text-sm text-zinc-300 leading-relaxed mb-4">
               Behind the code, clinical derivations, and side projects is
               Duck—an English Cream Golden Retriever who started as a
               pillow-sized puppy asleep across Fred&apos;s head and grew into an
@@ -173,14 +173,18 @@ export const BioSpotlight: React.FC = () => {
             </div>
 
             <div className="flex flex-wrap items-center gap-3 text-[11px] font-mono text-zinc-400">
-              <span className="flex items-center gap-1">
+              <span className="flex min-w-0 items-center gap-1">
                 <IconHeart className="w-3.5 h-3.5 text-rose-400" />
-                <span>Treat Approval Rate: 100%</span>
+                <span className="min-w-0 break-words">
+                  Treat Approval Rate: 100%
+                </span>
               </span>
               <span className="text-zinc-600">•</span>
-              <span>Merge Conflict Shield: Active</span>
+              <span className="min-w-0 break-words">
+                Merge Conflict Shield: Active
+              </span>
               <span className="text-zinc-600">•</span>
-              <span className="text-amber-300">
+              <span className="min-w-0 break-words text-amber-300">
                 Duck Fact #{activeIndex + 1}
               </span>
             </div>
