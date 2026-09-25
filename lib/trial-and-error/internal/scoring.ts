@@ -7,7 +7,7 @@ import type {
   SapRulebook,
   ScoreLedgerEntry,
 } from "../types";
-import { HAND_BASE_SCORES } from "./hands";
+import { leveledBase } from "./hands";
 
 /** Which findings the scoring view should see and which are corrected. */
 export interface RuleResultOptions {
@@ -104,12 +104,21 @@ function sum(values: readonly number[]): number {
 
 /**
  * Scores a hand through the pipeline pinned in #890:
- * (base hand Chips + Σ output Chips + Σ relic Chips) × (base hand Mult +
+ * (leveled base hand Chips + Σ output Chips + Σ relic Chips) × (base hand Mult +
  * Σ card and rule +Mult + Σ relic +Mult) × Π ×Mult. Any rule result with a
- * `multMultiplier` of 0 triggers the zero-score rule. Pure and deterministic.
+ * `multMultiplier` of 0 triggers the zero-score rule. The base is the hand's
+ * at `input.level` (default 1): `HAND_BASE_SCORES` plus the level bonus.
+ * Pure and deterministic.
  */
 export function evaluateHand(input: HandInput): HandEvaluation {
-  const base = HAND_BASE_SCORES[input.handType];
+  const level =
+    input.level !== undefined &&
+    Number.isInteger(input.level) &&
+    input.level > 1
+      ? input.level
+      : 1;
+  const base = leveledBase(input.handType, level);
+  const levelTag = level > 1 ? ` (Lv.${level})` : "";
   const modifiers = input.modifiers ?? [];
   const ledger: ScoreLedgerEntry[] = [];
 
@@ -118,7 +127,7 @@ export function evaluateHand(input: HandInput): HandEvaluation {
     sourceId: base.handType,
     kind: "CHIPS",
     value: base.baseChips,
-    label: `${base.handType} base Chips`,
+    label: `${base.handType} base Chips${levelTag}`,
   });
   for (const card of input.cards) {
     ledger.push({
@@ -157,7 +166,7 @@ export function evaluateHand(input: HandInput): HandEvaluation {
     sourceId: base.handType,
     kind: "PLUS_MULT",
     value: base.baseMult,
-    label: `${base.handType} base +Mult`,
+    label: `${base.handType} base +Mult${levelTag}`,
   });
   for (const card of input.cards) {
     ledger.push({
@@ -248,7 +257,8 @@ export function evaluateHand(input: HandInput): HandEvaluation {
   return {
     handType: input.handType,
     cardIds: input.cards.map((c) => c.id),
-    base: { ...base },
+    level,
+    base,
     chips: {
       base: base.baseChips,
       outputs: outputChips,

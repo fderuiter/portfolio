@@ -557,6 +557,26 @@ body {
   animation: te-crisis-slam 320ms ease-out 1 both;
 }
 
+/* Level up (T&E-UX-05): a Guidance card lifts the hand's plate a step.
+ * Loud cabinets only, transform and opacity only. */
+@keyframes te-level-up {
+  0% {
+    opacity: 0.4;
+    transform: translateY(8px) scale(0.96);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-4px) scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+[data-te-cabinet][data-te-loud="on"] .te-loud-level {
+  animation: te-level-up 420ms ease-out 1 both;
+}
+
 /* CPU pips (T&E-04): a spent pip pops off its slot. Under reduced motion
  * the pip simply empties. */
 @keyframes te-pip-pop {

@@ -97,6 +97,8 @@ The card's own value as a High Table, from revealed findings.
 
 > **base**: `object` = `HandBaseScoreSchema`
 
+The hand's base at that level: its level-1 base plus the level bonus.
+
 ##### base.baseChips
 
 > **baseChips**: `number` = `nonNegativeInt`
@@ -148,6 +150,12 @@ The card's own value as a High Table, from revealed findings.
 #### ledger
 
 > **ledger**: `object`[]
+
+#### level
+
+> **level**: `number`
+
+The hand type's level this hand was scored at.
 
 #### mult
 

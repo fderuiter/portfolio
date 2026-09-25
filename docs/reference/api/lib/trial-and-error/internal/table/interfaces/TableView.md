@@ -48,7 +48,7 @@ Everything the Card Table renders, derived purely from scenario and state.
 
 ### consumables
 
-> **consumables**: [`Consumable`](Consumable.md)[]
+> **consumables**: [`Consumable`](../type-aliases/Consumable.md)[]
 
 The consumable tray.
 
@@ -135,6 +135,14 @@ without them it would be one. Empty otherwise.
 
 ***
 
+### handLevels
+
+> **handLevels**: [`HandLevels`](../../../types/type-aliases/HandLevels.md)
+
+The run's hand levels.
+
+***
+
 ### handsAffordable
 
 > **handsAffordable**: `number`
@@ -146,6 +154,14 @@ without them it would be one. Empty otherwise.
 > **handsLeft**: `number` \| `null`
 
 Hands left under a hand limit, or null when there is none.
+
+***
+
+### handTable
+
+> **handTable**: [`HandLevelRow`](../../hands/interfaces/HandLevelRow.md)[]
+
+The run's hand table at current levels, weakest hand first, for Run Info.
 
 ***
 
@@ -217,9 +233,135 @@ Why Play Hand is refused, when a stale card is selected.
 
 ### preview
 
-> **preview**: \{ `base`: \{ `baseChips`: `number`; `baseMult`: `number`; `description`: `string`; `handType`: `"HIGH_TABLE"` \| `"TLF_PAIR"` \| `"TLF_TWO_PAIR"` \| `"POPULATION_FLUSH"` \| `"CSR_STRAIGHT"` \| `"EFFICACY_FULL_HOUSE"` \| `"MEDDRA_FIVE_OF_A_KIND"`; \}; `cardIds`: `string`[]; `chips`: \{ `base`: `number`; `outputs`: `number`; `relics`: `number`; `total`: `number`; \}; `finalMult`: `number`; `handType`: `"HIGH_TABLE"` \| `"TLF_PAIR"` \| `"TLF_TWO_PAIR"` \| `"POPULATION_FLUSH"` \| `"CSR_STRAIGHT"` \| `"EFFICACY_FULL_HOUSE"` \| `"MEDDRA_FIVE_OF_A_KIND"`; `ledger`: `object`[]; `mult`: \{ `base`: `number`; `cardsAndRules`: `number`; `relics`: `number`; `total`: `number`; \}; `ruleResults`: `object`[]; `score`: `number`; `xMult`: \{ `factors`: `object`[]; `product`: `number`; \}; `zeroRule`: \{ `ruleIds`: `string`[]; `triggered`: `boolean`; \}; \} \| `null`
+> **preview**: \{ `base`: \{ `baseChips`: `number`; `baseMult`: `number`; `description`: `string`; `handType`: `"HIGH_TABLE"` \| `"TLF_PAIR"` \| `"TLF_TWO_PAIR"` \| `"POPULATION_FLUSH"` \| `"CSR_STRAIGHT"` \| `"EFFICACY_FULL_HOUSE"` \| `"MEDDRA_FIVE_OF_A_KIND"`; \}; `cardIds`: `string`[]; `chips`: \{ `base`: `number`; `outputs`: `number`; `relics`: `number`; `total`: `number`; \}; `finalMult`: `number`; `handType`: `"HIGH_TABLE"` \| `"TLF_PAIR"` \| `"TLF_TWO_PAIR"` \| `"POPULATION_FLUSH"` \| `"CSR_STRAIGHT"` \| `"EFFICACY_FULL_HOUSE"` \| `"MEDDRA_FIVE_OF_A_KIND"`; `ledger`: `object`[]; `level`: `number`; `mult`: \{ `base`: `number`; `cardsAndRules`: `number`; `relics`: `number`; `total`: `number`; \}; `ruleResults`: `object`[]; `score`: `number`; `xMult`: \{ `factors`: `object`[]; `product`: `number`; \}; `zeroRule`: \{ `ruleIds`: `string`[]; `triggered`: `boolean`; \}; \} \| `null`
 
 Value of the selection from revealed findings only.
+
+#### Union Members
+
+##### Type Literal
+
+\{ `base`: \{ `baseChips`: `number`; `baseMult`: `number`; `description`: `string`; `handType`: `"HIGH_TABLE"` \| `"TLF_PAIR"` \| `"TLF_TWO_PAIR"` \| `"POPULATION_FLUSH"` \| `"CSR_STRAIGHT"` \| `"EFFICACY_FULL_HOUSE"` \| `"MEDDRA_FIVE_OF_A_KIND"`; \}; `cardIds`: `string`[]; `chips`: \{ `base`: `number`; `outputs`: `number`; `relics`: `number`; `total`: `number`; \}; `finalMult`: `number`; `handType`: `"HIGH_TABLE"` \| `"TLF_PAIR"` \| `"TLF_TWO_PAIR"` \| `"POPULATION_FLUSH"` \| `"CSR_STRAIGHT"` \| `"EFFICACY_FULL_HOUSE"` \| `"MEDDRA_FIVE_OF_A_KIND"`; `ledger`: `object`[]; `level`: `number`; `mult`: \{ `base`: `number`; `cardsAndRules`: `number`; `relics`: `number`; `total`: `number`; \}; `ruleResults`: `object`[]; `score`: `number`; `xMult`: \{ `factors`: `object`[]; `product`: `number`; \}; `zeroRule`: \{ `ruleIds`: `string`[]; `triggered`: `boolean`; \}; \}
+
+##### base
+
+> **base**: `object` = `HandBaseScoreSchema`
+
+The hand's base at that level: its level-1 base plus the level bonus.
+
+###### base.baseChips
+
+> **baseChips**: `number` = `nonNegativeInt`
+
+###### base.baseMult
+
+> **baseMult**: `number` = `nonNegativeInt`
+
+###### base.description
+
+> **description**: `string`
+
+###### base.handType
+
+> **handType**: `"HIGH_TABLE"` \| `"TLF_PAIR"` \| `"TLF_TWO_PAIR"` \| `"POPULATION_FLUSH"` \| `"CSR_STRAIGHT"` \| `"EFFICACY_FULL_HOUSE"` \| `"MEDDRA_FIVE_OF_A_KIND"` = `HandTypeSchema`
+
+##### cardIds
+
+> **cardIds**: `string`[]
+
+##### chips
+
+> **chips**: `object`
+
+###### chips.base
+
+> **base**: `number`
+
+###### chips.outputs
+
+> **outputs**: `number`
+
+###### chips.relics
+
+> **relics**: `number`
+
+###### chips.total
+
+> **total**: `number`
+
+##### finalMult
+
+> **finalMult**: `number`
+
+##### handType
+
+> **handType**: `"HIGH_TABLE"` \| `"TLF_PAIR"` \| `"TLF_TWO_PAIR"` \| `"POPULATION_FLUSH"` \| `"CSR_STRAIGHT"` \| `"EFFICACY_FULL_HOUSE"` \| `"MEDDRA_FIVE_OF_A_KIND"` = `HandTypeSchema`
+
+##### ledger
+
+> **ledger**: `object`[]
+
+##### level
+
+> **level**: `number`
+
+The hand type's level this hand was scored at.
+
+##### mult
+
+> **mult**: `object`
+
+###### mult.base
+
+> **base**: `number`
+
+###### mult.cardsAndRules
+
+> **cardsAndRules**: `number`
+
+###### mult.relics
+
+> **relics**: `number`
+
+###### mult.total
+
+> **total**: `number`
+
+##### ruleResults
+
+> **ruleResults**: `object`[]
+
+##### score
+
+> **score**: `number`
+
+##### xMult
+
+> **xMult**: `object`
+
+###### xMult.factors
+
+> **factors**: `object`[]
+
+###### xMult.product
+
+> **product**: `number`
+
+##### zeroRule
+
+> **zeroRule**: `object`
+
+###### zeroRule.ruleIds
+
+> **ruleIds**: `string`[]
+
+###### zeroRule.triggered
+
+> **triggered**: `boolean`
+
+***
+
+`null`
 
 ***
 

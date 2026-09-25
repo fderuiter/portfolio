@@ -13,6 +13,7 @@ import { AnimatePresence, Reorder } from "framer-motion";
 import {
   ACT_I,
   CPU_COSTS,
+  HAND_LEVEL_BONUS,
   HAND_NAMES,
   STALE_ALERT,
   advanceRun,
@@ -22,8 +23,8 @@ import {
   deriveRunView,
   previewAllocation,
   type Act,
-  type Consumable,
   type CpuAction,
+  type FootnoteSeal,
   type RunAction,
   type RunState,
   type Scenario,
@@ -31,10 +32,12 @@ import {
   type TableState,
 } from "@/lib/trial-and-error";
 import { useAnnouncer } from "@/hooks/useAnnouncer";
-import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { isAnyFocusTrapActive, useFocusTrap } from "@/hooks/useFocusTrap";
 import { FieldManualButton } from "@/components/FieldManualButton";
 import { QcDesk } from "@/components/trial-and-error/QcDesk";
 import { CrisisPanel } from "@/components/trial-and-error/CrisisPanel";
+import { LevelUpPlate } from "@/components/trial-and-error/LevelUpPlate";
+import { RunInfo } from "@/components/trial-and-error/RunInfo";
 import { CardBack } from "@/components/trial-and-error/cards/CardBack";
 import { CardDetail } from "@/components/trial-and-error/cards/CardDetail";
 import { POPULATION_LABEL } from "@/components/trial-and-error/cards/CardFace";
@@ -102,7 +105,7 @@ const BUTTON_BASE =
   "min-h-[48px] px-4 py-3 border font-mono text-xs font-bold uppercase tracking-wider touch-manipulation active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 disabled:cursor-not-allowed disabled:border-zinc-700 disabled:bg-transparent disabled:text-zinc-400";
 
 /** A seal's effect in a few words, for the tray. */
-function sealSummary({ seal }: Consumable): string {
+function sealSummary(seal: FootnoteSeal): string {
   switch (seal.effect.kind) {
     case "PLUS_CHIPS":
       return `+${seal.effect.value} Chips`;
@@ -235,11 +238,14 @@ export function CardTable({
   const [detailId, setDetailId] = useState<string | null>(null);
   // A tray seal picked up with the keyboard or a click, waiting for a card.
   const [armedId, setArmedId] = useState<string | null>(null);
-  const armed = view.consumables.find((c) => c.id === armedId) ?? null;
+  const armedItem = view.consumables.find((c) => c.id === armedId);
+  const armed = armedItem?.kind === "SEAL" ? armedItem : null;
+  const [runInfoOpen, setRunInfoOpen] = useState(false);
   const detailView = view.hand.find((h) => h.card.id === detailId);
   const activeIndex = Math.min(focusIndex, Math.max(0, view.hand.length - 1));
   const focusedCard = view.hand[activeIndex];
 
+  const sectionRef = useRef<HTMLElement>(null);
   const cardRefs = useRef(new Map<string, HTMLButtonElement>());
   const allocateRef = useRef<HTMLButtonElement>(null);
   const crisisRef = useRef<HTMLButtonElement>(null);
@@ -284,6 +290,7 @@ export function CardTable({
         ALLOCATED: ["cardFlip"],
         SEALED: ["multThunk"],
         SOLD: ["sell"],
+        LEVELED_UP: ["chipTick", "multThunk"],
         CRISIS_RESOLVED: ["cardFlip"],
       };
       cues[kind]?.forEach((cue) => sound.play(cue));
@@ -330,6 +337,24 @@ export function CardTable({
     playing,
   ]);
 
+  // Shift+R opens Run Info from anywhere in the table; a plain R on a card
+  // stays Recompile. A dialog already open keeps the key to itself.
+  const onWindowKeyDown = useEffectEvent((event: KeyboardEvent) => {
+    if (event.key !== "R" || !event.shiftKey) return;
+    if (event.metaKey || event.ctrlKey || event.altKey) return;
+    if (runInfoOpen || isAnyFocusTrapActive()) return;
+    const focused = document.activeElement;
+    if (!focused || !sectionRef.current?.contains(focused)) return;
+    if (focused.closest("input, textarea, select, [contenteditable]")) return;
+    event.preventDefault();
+    setRunInfoOpen(true);
+  });
+  useEffect(() => {
+    const listener = (event: KeyboardEvent) => onWindowKeyDown(event);
+    window.addEventListener("keydown", listener);
+    return () => window.removeEventListener("keydown", listener);
+  }, []);
+
   const play = () =>
     send({ type: "PLAY_HAND" }, { kind: "hand", index: activeIndex });
   const discard = () =>
@@ -351,7 +376,7 @@ export function CardTable({
     const next = armedId === id ? null : id;
     setArmedId(next);
     const item = view.consumables.find((c) => c.id === id);
-    if (item) {
+    if (item?.kind === "SEAL") {
       announce(
         next
           ? `${item.seal.name} picked up. Focus a card and press Enter to affix it. Escape puts it back.`
@@ -452,7 +477,7 @@ export function CardTable({
     } else if (key === "i") {
       event.preventDefault();
       inspect(cardId);
-    } else if (key === "r") {
+    } else if (key === "r" && !event.shiftKey) {
       event.preventDefault();
       recompile(cardId);
     } else if (event.key === "?") {
@@ -525,6 +550,7 @@ export function CardTable({
 
   return (
     <section
+      ref={sectionRef}
       aria-labelledby="card-table-heading"
       className="relative w-full min-w-0 bg-[color:var(--te-surface-0)] font-mono text-[color:var(--te-text)] border border-zinc-800 section-isolate"
     >
@@ -577,6 +603,16 @@ export function CardTable({
               </button>
             ))}
           </div>
+          <button
+            type="button"
+            onClick={() => setRunInfoOpen(true)}
+            aria-haspopup="dialog"
+            aria-keyshortcuts="Shift+R"
+            className="min-h-[44px] border border-zinc-600 px-3 text-[10px] font-bold uppercase tracking-wider text-zinc-200 touch-manipulation hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 active:scale-[0.98]"
+            data-testid="run-info-button"
+          >
+            Run Info [Shift+R]
+          </button>
           <FieldManualButton manualId="trial-and-error" label="Manual" />
         </div>
       </header>
@@ -594,12 +630,6 @@ export function CardTable({
             data-testid="blind-name"
           >
             {scenario.blind.name}
-          </p>
-          <p className="mt-1 text-[10px] text-zinc-400 break-words">
-            Seed{" "}
-            <span className="text-zinc-300" data-testid="run-seed">
-              {runView.seed}
-            </span>
           </p>
           {view.modifiers.map((modifier) => {
             const isBoss = modifier.id === scenario.boss?.id;
@@ -752,6 +782,68 @@ export function CardTable({
                   </span>
                 );
               }
+              const sellButton = (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (armed?.id === item.id) setArmedId(null);
+                    send({ type: "SELL_CONSUMABLE", consumableId: item.id });
+                  }}
+                  disabled={state.status !== "REVIEWING" || playing}
+                  className="min-h-[44px] border-t border-zinc-800 px-2 text-left uppercase tracking-wider text-zinc-300 touch-manipulation hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 disabled:text-zinc-500"
+                >
+                  Sell · $
+                  {item.kind === "SEAL"
+                    ? item.seal.sellValue
+                    : item.guidance.sellValue}
+                  k
+                </button>
+              );
+              if (item.kind === "GUIDANCE") {
+                const { guidance } = item;
+                const bonus = HAND_LEVEL_BONUS[guidance.handType];
+                const level = view.handLevels[guidance.handType].level;
+                return (
+                  <span
+                    key={item.id}
+                    className="flex w-44 min-w-0 flex-col border border-sky-400/60 text-[10px]"
+                    data-testid="consumable"
+                    data-kind="guidance"
+                  >
+                    <button
+                      type="button"
+                      onClick={() =>
+                        send(
+                          { type: "USE_GUIDANCE", consumableId: item.id },
+                          { kind: "hand", index: activeIndex }
+                        )
+                      }
+                      disabled={state.status !== "REVIEWING" || playing}
+                      title={`${guidance.document}. ${guidance.flavor}`}
+                      aria-label={`Use ${guidance.name}: level ${HAND_NAMES[guidance.handType]} up from Lv.${level} to Lv.${level + 1}, +${bonus.chips} Chips and +${bonus.mult} Mult.`}
+                      className="min-h-[44px] min-w-0 px-2 py-1 text-left touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 disabled:text-zinc-400"
+                    >
+                      <span className="flex items-start gap-1 font-bold uppercase tracking-wider text-sky-300">
+                        <span
+                          aria-hidden="true"
+                          className="flex h-4 w-4 shrink-0 items-center justify-center border border-sky-400 bg-sky-950 text-[7px]"
+                        >
+                          GD
+                        </span>
+                        <span className="min-w-0 break-words">
+                          {guidance.name}
+                        </span>
+                      </span>
+                      <span className="block text-zinc-300 break-words">
+                        Use: {HAND_NAMES[guidance.handType]} Lv.{level + 1} · +
+                        {bonus.chips} Chips +{bonus.mult} Mult
+                      </span>
+                    </button>
+                    {sellButton}
+                  </span>
+                );
+              }
+              const { seal } = item;
               const isArmed = armed?.id === item.id;
               return (
                 <span
@@ -769,7 +861,7 @@ export function CardTable({
                     onClick={() => toggleArmed(item.id)}
                     aria-pressed={isArmed}
                     disabled={state.status !== "REVIEWING" || playing}
-                    title={item.seal.footnote}
+                    title={seal.footnote}
                     className="min-h-[44px] min-w-0 px-2 py-1 text-left touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 disabled:text-zinc-400"
                   >
                     <span className="flex items-start gap-1 font-bold uppercase tracking-wider text-amber-300">
@@ -779,26 +871,14 @@ export function CardTable({
                       >
                         FN
                       </span>
-                      <span className="min-w-0 break-words">
-                        {item.seal.name}
-                      </span>
+                      <span className="min-w-0 break-words">{seal.name}</span>
                     </span>
                     <span className="block text-zinc-300">
-                      {sealSummary(item)}
+                      {sealSummary(seal)}
                       {isArmed ? " · pick a card" : ""}
                     </span>
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (isArmed) setArmedId(null);
-                      send({ type: "SELL_CONSUMABLE", consumableId: item.id });
-                    }}
-                    disabled={state.status !== "REVIEWING" || playing}
-                    className="min-h-[44px] border-t border-zinc-800 px-2 text-left uppercase tracking-wider text-zinc-300 touch-manipulation hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 disabled:text-zinc-500"
-                  >
-                    Sell · ${item.seal.sellValue}k
-                  </button>
+                  {sellButton}
                 </span>
               );
             })}
@@ -830,10 +910,27 @@ export function CardTable({
               className="mt-3 min-h-[13rem] border border-zinc-800 bg-[color:var(--te-surface-1)] px-3 py-2"
               data-testid="hand-preview"
             >
+              {state.lastEvent?.levelUp && (
+                <div className="mb-2">
+                  <LevelUpPlate
+                    key={state.lastEvent.sequence}
+                    levelUp={state.lastEvent.levelUp}
+                    reducedMotion={reducedMotion}
+                    loud={loudEffectsEnabled}
+                  />
+                </div>
+              )}
               <p className="text-[10px] uppercase tracking-wider text-zinc-400">
-                {view.classification
-                  ? HAND_NAMES[view.classification.handType]
-                  : `Select up to ${scenario.table.maxSelection} cards`}
+                {view.classification ? (
+                  <>
+                    {HAND_NAMES[view.classification.handType]}{" "}
+                    <span className="text-amber-300" data-testid="hand-level">
+                      Lv.{view.handLevels[view.classification.handType].level}
+                    </span>
+                  </>
+                ) : (
+                  `Select up to ${scenario.table.maxSelection} cards`
+                )}
               </p>
               {preview && (
                 <p className="mt-1 text-lg font-bold tabular-nums break-words">
@@ -964,7 +1061,7 @@ export function CardTable({
                 values={handOrder}
                 onReorder={setDragOrder}
                 role="group"
-                aria-label={`Hand of ${view.hand.length}. Arrow keys move, Space selects, Enter plays, D discards, I inspects, R recompiles a stale card, A allocates a blank shell, question mark reads the card, Alt with arrows reorders. With a footnote seal picked up, Enter affixes it and Escape puts it back.`}
+                aria-label={`Hand of ${view.hand.length}. Arrow keys move, Space selects, Enter plays, D discards, I inspects, R recompiles a stale card, A allocates a blank shell, question mark reads the card, Alt with arrows reorders. With a footnote seal picked up, Enter affixes it and Escape puts it back. Shift+R opens Run Info.`}
                 className="-mx-3 mt-1 flex overflow-x-auto px-3 pb-3 pt-7 [scrollbar-width:thin]"
                 data-testid="hand"
               >
@@ -1233,6 +1330,15 @@ export function CardTable({
           </div>,
           document.fullscreenElement ?? document.body
         )}
+
+      {runInfoOpen && (
+        <RunInfo
+          rows={view.handTable}
+          seed={runView.seed}
+          relicSlots={RELIC_SLOTS}
+          onClose={() => setRunInfoOpen(false)}
+        />
+      )}
 
       {detailView &&
         createPortal(

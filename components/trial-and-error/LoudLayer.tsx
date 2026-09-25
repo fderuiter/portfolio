@@ -10,6 +10,8 @@ export const LOUD_PRESETS = {
   sealPress: "te-loud-seal",
   /** A crisis card slams onto the table. */
   crisisSlam: "te-loud-crisis",
+  /** A Guidance card levels a hand's plate up. */
+  levelUp: "te-loud-level",
 } as const;
 
 /** Screen-shake amplitude is capped so no intensity can exceed it. */

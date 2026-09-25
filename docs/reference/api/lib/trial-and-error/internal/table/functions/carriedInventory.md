@@ -8,7 +8,7 @@
 
 > **carriedInventory**(`state`): [`Inventory`](../interfaces/Inventory.md)
 
-The tray and budget this state carries, for the next Blind.
+The tray, budget and hand levels this state carries, for the next Blind.
 
 ## Parameters
 

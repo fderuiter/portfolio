@@ -6,7 +6,7 @@
 
 # Type Alias: TableAction
 
-> **TableAction** = \{ `cardId`: `string`; `type`: `"TOGGLE_SELECT"`; \} \| \{ `type`: `"PLAY_HAND"`; \} \| \{ `type`: `"DISCARD"`; \} \| \{ `cardId`: `string`; `type`: `"INSPECT_CARD"`; \} \| \{ `type`: `"CLOSE_INSPECT"`; \} \| \{ `col`: `number`; `row`: `number`; `type`: `"INSPECT_CELL"`; \} \| \{ `findingId`: `string`; `type`: `"CORRECT_FINDING"`; \} \| \{ `cardId`: `string`; `toIndex`: `number`; `type`: `"MOVE_CARD"`; \} \| \{ `cardId`: `string`; `type`: `"RECOMPILE"`; \} \| \{ `cardId`: `string`; `population`: [`PopulationType`](../../../types/type-aliases/PopulationType.md); `type`: `"ALLOCATE"`; \} \| \{ `cardId`: `string`; `consumableId`: `string`; `type`: `"APPLY_SEAL"`; \} \| \{ `consumableId`: `string`; `type`: `"SELL_CONSUMABLE"`; \} \| \{ `choiceId`: `string`; `type`: `"RESOLVE_CRISIS"`; \} \| \{ `type`: `"RESET"`; \}
+> **TableAction** = \{ `cardId`: `string`; `type`: `"TOGGLE_SELECT"`; \} \| \{ `type`: `"PLAY_HAND"`; \} \| \{ `type`: `"DISCARD"`; \} \| \{ `cardId`: `string`; `type`: `"INSPECT_CARD"`; \} \| \{ `type`: `"CLOSE_INSPECT"`; \} \| \{ `col`: `number`; `row`: `number`; `type`: `"INSPECT_CELL"`; \} \| \{ `findingId`: `string`; `type`: `"CORRECT_FINDING"`; \} \| \{ `cardId`: `string`; `toIndex`: `number`; `type`: `"MOVE_CARD"`; \} \| \{ `cardId`: `string`; `type`: `"RECOMPILE"`; \} \| \{ `cardId`: `string`; `population`: [`PopulationType`](../../../types/type-aliases/PopulationType.md); `type`: `"ALLOCATE"`; \} \| \{ `cardId`: `string`; `consumableId`: `string`; `type`: `"APPLY_SEAL"`; \} \| \{ `consumableId`: `string`; `type`: `"SELL_CONSUMABLE"`; \} \| \{ `consumableId`: `string`; `type`: `"USE_GUIDANCE"`; \} \| \{ `choiceId`: `string`; `type`: `"RESOLVE_CRISIS"`; \} \| \{ `type`: `"RESET"`; \}
 
 Player intents the Card Table reducer accepts.
 
@@ -91,6 +91,14 @@ Affixes a footnote seal from the tray to a card. Free; uses the seal up.
 \{ `consumableId`: `string`; `type`: `"SELL_CONSUMABLE"`; \}
 
 Sells a tray consumable for its sell value.
+
+***
+
+### Type Literal
+
+\{ `consumableId`: `string`; `type`: `"USE_GUIDANCE"`; \}
+
+Uses a Guidance card from the tray: its hand levels up for the run.
 
 ***
 

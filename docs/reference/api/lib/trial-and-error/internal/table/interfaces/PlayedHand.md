@@ -38,6 +38,8 @@ The last hand played, for the result plate.
 
 > **base**: `object` = `HandBaseScoreSchema`
 
+The hand's base at that level: its level-1 base plus the level bonus.
+
 ##### base.baseChips
 
 > **baseChips**: `number` = `nonNegativeInt`
@@ -89,6 +91,12 @@ The last hand played, for the result plate.
 #### ledger
 
 > **ledger**: `object`[]
+
+#### level
+
+> **level**: `number`
+
+The hand type's level this hand was scored at.
 
 #### mult
 

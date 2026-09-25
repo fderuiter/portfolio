@@ -238,13 +238,25 @@ Re-exports [compileShell](internal/compile/functions/compileShell.md)
 
 ### Consumable
 
-Re-exports [Consumable](internal/table/interfaces/Consumable.md)
+Re-exports [Consumable](internal/table/type-aliases/Consumable.md)
 
 ***
 
 ### CONSUMABLE\_SLOTS
 
 Re-exports [CONSUMABLE_SLOTS](internal/table/variables/CONSUMABLE_SLOTS.md)
+
+***
+
+### consumableName
+
+Re-exports [consumableName](internal/table/functions/consumableName.md)
+
+***
+
+### consumableSellValue
+
+Re-exports [consumableSellValue](internal/table/functions/consumableSellValue.md)
 
 ***
 
@@ -512,9 +524,33 @@ Re-exports [FootnoteSealSchema](types/variables/FootnoteSealSchema.md)
 
 ***
 
+### GUIDANCE\_CARDS
+
+Re-exports [GUIDANCE_CARDS](internal/guidance/variables/GUIDANCE_CARDS.md)
+
+***
+
+### GuidanceCard
+
+Re-exports [GuidanceCard](types/type-aliases/GuidanceCard.md)
+
+***
+
+### GuidanceCardSchema
+
+Re-exports [GuidanceCardSchema](types/variables/GuidanceCardSchema.md)
+
+***
+
 ### HAND\_BASE\_SCORES
 
 Re-exports [HAND_BASE_SCORES](internal/hands/variables/HAND_BASE_SCORES.md)
+
+***
+
+### HAND\_LEVEL\_BONUS
+
+Re-exports [HAND_LEVEL_BONUS](internal/hands/variables/HAND_LEVEL_BONUS.md)
 
 ***
 
@@ -572,6 +608,42 @@ Re-exports [HandInputSchema](types/variables/HandInputSchema.md)
 
 ***
 
+### HandLevel
+
+Re-exports [HandLevel](types/type-aliases/HandLevel.md)
+
+***
+
+### HandLevelRow
+
+Re-exports [HandLevelRow](internal/hands/interfaces/HandLevelRow.md)
+
+***
+
+### HandLevels
+
+Re-exports [HandLevels](types/type-aliases/HandLevels.md)
+
+***
+
+### HandLevelSchema
+
+Re-exports [HandLevelSchema](types/variables/HandLevelSchema.md)
+
+***
+
+### HandLevelsSchema
+
+Re-exports [HandLevelsSchema](types/variables/HandLevelsSchema.md)
+
+***
+
+### handLevelTable
+
+Re-exports [handLevelTable](internal/hands/functions/handLevelTable.md)
+
+***
+
 ### HandType
 
 Re-exports [HandType](types/variables/HandType.md)
@@ -581,6 +653,12 @@ Re-exports [HandType](types/variables/HandType.md)
 ### HandTypeSchema
 
 Re-exports [HandTypeSchema](types/variables/HandTypeSchema.md)
+
+***
+
+### initialHandLevels
+
+Re-exports [initialHandLevels](internal/hands/functions/initialHandLevels.md)
 
 ***
 
@@ -605,6 +683,18 @@ Re-exports [Inventory](internal/table/interfaces/Inventory.md)
 ### isFreeCrisisChoice
 
 Re-exports [isFreeCrisisChoice](types/functions/isFreeCrisisChoice.md)
+
+***
+
+### leveledBase
+
+Re-exports [leveledBase](internal/hands/functions/leveledBase.md)
+
+***
+
+### LevelUp
+
+Re-exports [LevelUp](internal/table/interfaces/LevelUp.md)
 
 ***
 

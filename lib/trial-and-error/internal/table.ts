@@ -3,8 +3,11 @@ import type {
   CrisisCard,
   CrisisChoice,
   FootnoteSeal,
+  GuidanceCard,
   HandClassification,
   HandEvaluation,
+  HandLevels,
+  HandType,
   PopulationSnapshot,
   PopulationType,
   SapRulebook,
@@ -32,7 +35,14 @@ import {
   type CpuLedger,
 } from "./cpu";
 import type { DeskStatus } from "./desk";
-import { HAND_NAMES, classifyHand } from "./hands";
+import {
+  HAND_NAMES,
+  classifyHand,
+  handLevelTable,
+  initialHandLevels,
+  leveledBase,
+  type HandLevelRow,
+} from "./hands";
 import {
   correctFinding,
   createInspectionState,
@@ -73,8 +83,11 @@ export interface TableEvent {
     | "ALLOCATED"
     | "SEALED"
     | "SOLD"
+    | "LEVELED_UP"
     | "CRISIS_RESOLVED";
   message: string;
+  /** On LEVELED_UP: the hand that levelled and its base before and after. */
+  levelUp?: LevelUp;
   /** Increments on every event so repeated messages are still announced. */
   sequence: number;
 }
@@ -96,19 +109,42 @@ export interface StudyHistory {
   invalidations: SnapshotInvalidation[];
 }
 
-/** A footnote seal in the consumable tray. `id` is unique within the tray. */
-export interface Consumable {
-  id: string;
-  seal: FootnoteSeal;
+/** A hand levelling up: the Guidance card used and the hand's base either side. */
+export interface LevelUp {
+  guidanceId: string;
+  guidanceName: string;
+  handType: HandType;
+  from: { level: number; chips: number; mult: number };
+  to: { level: number; chips: number; mult: number };
+}
+
+/**
+ * A consumable in the tray: a footnote seal or a Guidance card. `id` is
+ * unique within the tray.
+ */
+export type Consumable =
+  | { id: string; kind: "SEAL"; seal: FootnoteSeal }
+  | { id: string; kind: "GUIDANCE"; guidance: GuidanceCard };
+
+/** A consumable's printed name. */
+export function consumableName(item: Consumable): string {
+  return item.kind === "SEAL" ? item.seal.name : item.guidance.name;
+}
+
+/** What selling a consumable adds to the study budget. */
+export function consumableSellValue(item: Consumable): number {
+  return item.kind === "SEAL" ? item.seal.sellValue : item.guidance.sellValue;
 }
 
 /**
  * What the player carries between Blinds besides the study: the consumable
- * tray and the study budget. The Procurement Shop spends and fills it.
+ * tray, the study budget and the run's hand levels. The Procurement Shop
+ * spends and fills it. Absent hand levels mean a fresh run's.
  */
 export interface Inventory {
   consumables: Consumable[];
   budget: number;
+  handLevels?: HandLevels;
 }
 
 /** How many consumables the tray holds. */
@@ -159,6 +195,8 @@ export interface TableState {
   consumables: Consumable[];
   /** The study budget: the shop's money. */
   budget: number;
+  /** The run's hand levels, carried from Blind to Blind. */
+  handLevels: HandLevels;
   /** The crisis drawn for this Blind, until the player answers it. */
   crisis: CrisisCard | null;
   /** How this Blind's crisis was answered, once it has been. */
@@ -197,6 +235,8 @@ export type TableAction =
   | { type: "APPLY_SEAL"; consumableId: string; cardId: string }
   /** Sells a tray consumable for its sell value. */
   | { type: "SELL_CONSUMABLE"; consumableId: string }
+  /** Uses a Guidance card from the tray: its hand levels up for the run. */
+  | { type: "USE_GUIDANCE"; consumableId: string }
   /** Answers the Blind's crisis with one of its choices. */
   | { type: "RESOLVE_CRISIS"; choiceId: string }
   | { type: "RESET" };
@@ -301,6 +341,10 @@ export interface TableView {
   consumables: Consumable[];
   consumableSlots: number;
   budget: number;
+  /** The run's hand levels. */
+  handLevels: HandLevels;
+  /** The run's hand table at current levels, weakest hand first, for Run Info. */
+  handTable: HandLevelRow[];
   /** The crisis to answer before the Blind can be played, if any. */
   crisis: CrisisView | null;
   /** Every modifier in force: the boss's, then any a crisis imposed. */
@@ -805,6 +849,7 @@ function scoreCards(
     handType,
     cards: cards.map((c) => ({ id: c.id, chips: c.chips, mult: c.mult })),
     ruleResults,
+    level: state.handLevels[handType].level,
   });
 }
 
@@ -877,8 +922,9 @@ function refill(scenario: Scenario, state: TableState): TableState {
  * Fresh Card Table state: the first hand dealt against the study's current
  * snapshot, CPU replenished to the Blind's allocation. `history` carries
  * earlier Blinds' snapshot versions; without it the study starts at the
- * scenario's own snapshot. `inventory` is the tray and budget carried in;
- * the Blind's granted seals fill any free tray slots.
+ * scenario's own snapshot. `inventory` is the tray, budget and hand levels
+ * carried in; the Blind's granted seals, then its Guidance cards, fill any
+ * free tray slots.
  */
 export function createTableState(
   scenario: Scenario,
@@ -890,10 +936,21 @@ export function createTableState(
   crisis: CrisisCard | null = null
 ): TableState {
   const consumables = [...inventory.consumables];
-  for (const seal of scenario.consumables ?? []) {
-    const id = `${seal.id}@${scenario.id}`;
+  const grants: Consumable[] = [
+    ...(scenario.consumables ?? []).map((seal): Consumable => ({
+      id: `${seal.id}@${scenario.id}`,
+      kind: "SEAL",
+      seal,
+    })),
+    ...(scenario.guidance ?? []).map((guidance): Consumable => ({
+      id: `${guidance.id}@${scenario.id}`,
+      kind: "GUIDANCE",
+      guidance,
+    })),
+  ];
+  for (const grant of grants) {
     if (consumables.length >= CONSUMABLE_SLOTS) break;
-    if (!consumables.some((c) => c.id === id)) consumables.push({ id, seal });
+    if (!consumables.some((c) => c.id === grant.id)) consumables.push(grant);
   }
   return refill(scenario, {
     scenarioId: scenario.id,
@@ -920,6 +977,7 @@ export function createTableState(
     seals: {},
     consumables,
     budget: inventory.budget,
+    handLevels: inventory.handLevels ?? initialHandLevels(),
     crisis,
     crisisResolution: null,
     modifiers: [],
@@ -937,9 +995,13 @@ export function studyHistory(state: TableState): StudyHistory {
   return { snapshots: state.snapshots, invalidations: state.invalidations };
 }
 
-/** The tray and budget this state carries, for the next Blind. */
+/** The tray, budget and hand levels this state carries, for the next Blind. */
 export function carriedInventory(state: TableState): Inventory {
-  return { consumables: state.consumables, budget: state.budget };
+  return {
+    consumables: state.consumables,
+    budget: state.budget,
+    handLevels: state.handLevels,
+  };
 }
 
 /** Removes the selected cards and pays for the action. Does not refill. */
@@ -1075,6 +1137,7 @@ const CRISIS_SAFE_ACTIONS = new Set<TableAction["type"]>([
   "TOGGLE_SELECT",
   "MOVE_CARD",
   "SELL_CONSUMABLE",
+  "USE_GUIDANCE",
   "CLOSE_INSPECT",
 ]);
 
@@ -1091,7 +1154,7 @@ function choiceRefusal(state: TableState, choice: CrisisChoice): string | null {
   if (budget < 0 && state.budget < -budget) {
     return `Needs $${-budget}k study budget; $${state.budget}k left.`;
   }
-  if (spendSeal && state.consumables.length === 0) {
+  if (spendSeal && !state.consumables.some((c) => c.kind === "SEAL")) {
     return "Needs a footnote seal in the tray.";
   }
   return null;
@@ -1130,16 +1193,22 @@ function resolveCrisis(
   }
   if (effect.budget) next = { ...next, budget: next.budget + effect.budget };
   if (effect.spendSeal) {
-    const [spent, ...rest] = next.consumables;
-    next = { ...next, consumables: rest };
-    notes.push(`${spent.seal.name} spent.`);
+    const spent = next.consumables.find((c) => c.kind === "SEAL") as Consumable;
+    next = {
+      ...next,
+      consumables: next.consumables.filter((c) => c !== spent),
+    };
+    notes.push(`${consumableName(spent)} spent.`);
   }
   if (effect.grantSeal) {
     const id = `${effect.grantSeal.id}@${crisis.id}`;
     if (next.consumables.length < CONSUMABLE_SLOTS) {
       next = {
         ...next,
-        consumables: [...next.consumables, { id, seal: effect.grantSeal }],
+        consumables: [
+          ...next.consumables,
+          { id, kind: "SEAL", seal: effect.grantSeal },
+        ],
       };
       notes.push(`${effect.grantSeal.name} added to the tray.`);
     } else {
@@ -1316,6 +1385,14 @@ export function advanceTable(
             ...state,
             roundScore: state.roundScore + evaluation.score,
             handsPlayed: state.handsPlayed + 1,
+            handLevels: {
+              ...state.handLevels,
+              [classification.handType]: {
+                ...state.handLevels[classification.handType],
+                playedCount:
+                  state.handLevels[classification.handType].playedCount + 1,
+              },
+            },
             lastPlay: {
               classification,
               evaluation,
@@ -1527,6 +1604,12 @@ export function advanceTable(
       const item = state.consumables.find((c) => c.id === action.consumableId);
       if (!item)
         return refuse(state, "That footnote seal is not in your tray.");
+      if (item.kind !== "SEAL") {
+        return refuse(
+          state,
+          `${item.guidance.name} is a Guidance card: use it to level up ${handName(item.guidance.handType)}.`
+        );
+      }
       const card = cardById(scenario, state, action.cardId);
       if (!card || !state.hand.includes(card.id)) {
         return refuse(state, "That card is not in your hand.");
@@ -1551,9 +1634,9 @@ export function advanceTable(
 
     case "SELL_CONSUMABLE": {
       const item = state.consumables.find((c) => c.id === action.consumableId);
-      if (!item)
-        return refuse(state, "That footnote seal is not in your tray.");
-      const budget = state.budget + item.seal.sellValue;
+      if (!item) return refuse(state, "That consumable is not in your tray.");
+      const value = consumableSellValue(item);
+      const budget = state.budget + value;
       return {
         ...state,
         consumables: state.consumables.filter((c) => c.id !== item.id),
@@ -1561,8 +1644,51 @@ export function advanceTable(
         lastEvent: nextEvent(
           state,
           "SOLD",
-          `Sold ${item.seal.name} for $${item.seal.sellValue}k. Study budget $${budget}k.`
+          `Sold ${consumableName(item)} for $${value}k. Study budget $${budget}k.`
         ),
+      };
+    }
+
+    case "USE_GUIDANCE": {
+      const item = state.consumables.find((c) => c.id === action.consumableId);
+      if (!item || item.kind !== "GUIDANCE") {
+        return refuse(state, "That Guidance card is not in your tray.");
+      }
+      const { guidance } = item;
+      const { handType } = guidance;
+      const current = state.handLevels[handType];
+      const before = leveledBase(handType, current.level);
+      const after = leveledBase(handType, current.level + 1);
+      const levelUp: LevelUp = {
+        guidanceId: guidance.id,
+        guidanceName: guidance.name,
+        handType,
+        from: {
+          level: current.level,
+          chips: before.baseChips,
+          mult: before.baseMult,
+        },
+        to: {
+          level: current.level + 1,
+          chips: after.baseChips,
+          mult: after.baseMult,
+        },
+      };
+      return {
+        ...state,
+        consumables: state.consumables.filter((c) => c.id !== item.id),
+        handLevels: {
+          ...state.handLevels,
+          [handType]: { ...current, level: current.level + 1 },
+        },
+        lastEvent: {
+          ...nextEvent(
+            state,
+            "LEVELED_UP",
+            `${guidance.name}: ${handName(handType)} levelled up to Lv.${levelUp.to.level}. Base ${levelUp.to.chips} Chips, +${levelUp.to.mult} Mult.`
+          ),
+          levelUp,
+        },
       };
     }
 
@@ -1792,6 +1918,8 @@ export function deriveTableView(
     emptySelected,
     consumables: state.consumables,
     consumableSlots: CONSUMABLE_SLOTS,
+    handLevels: state.handLevels,
+    handTable: handLevelTable(state.handLevels),
     budget: state.budget,
     crisis: state.crisis
       ? {

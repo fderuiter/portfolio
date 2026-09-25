@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import * as fc from "fast-check";
 import {
+  consumableName,
   ACT_I,
   ACT_I_CRISES,
   ActSchema,
@@ -453,26 +454,36 @@ describe("answering a crisis", () => {
     const state = advanceTable(BIG, before, resolve("footnote"));
     expect(state.consumables).toEqual(before.consumables.slice(1));
     expect(state.lastEvent?.message).toContain(
-      `${before.consumables[0].seal.name} spent.`
+      `${consumableName(before.consumables[0])} spent.`
     );
   });
 
   it("grants a seal into a free slot, or loses it when the tray is full", () => {
-    const granted = table(BIG, MIGRATION, resolve("freeze"));
+    // The Big Blind's Guidance card fills the second slot, so it is used first.
+    const guide = createTableState(BIG).consumables.find(
+      (c) => c.kind === "GUIDANCE"
+    )!.id;
+    const granted = table(
+      BIG,
+      MIGRATION,
+      { type: "USE_GUIDANCE", consumableId: guide },
+      resolve("freeze")
+    );
     expect(granted.consumables.map((c) => c.id)).toContain(
       "FN-DATA-CUTOFF@CR-DB-MIGRATION"
     );
     expect(granted.lastEvent?.message).toContain(
       "Data cutoff added to the tray."
     );
-    const seal = granted.consumables.at(-1)?.seal as FootnoteSeal;
+    const last = granted.consumables.at(-1);
+    const seal = (last?.kind === "SEAL" ? last.seal : null) as FootnoteSeal;
     const full = advanceTable(
       BIG,
       {
         ...table(BIG, MIGRATION),
         consumables: [
-          { id: "a", seal },
-          { id: "b", seal },
+          { id: "a", kind: "SEAL", seal },
+          { id: "b", kind: "SEAL", seal },
         ],
       },
       resolve("freeze")

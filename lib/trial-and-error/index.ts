@@ -17,10 +17,16 @@ export {
 export { roundRatio, decimalPlaces } from "./internal/rounding";
 export {
   HAND_BASE_SCORES,
+  HAND_LEVEL_BONUS,
   HAND_NAMES,
   classifyHand,
+  handLevelTable,
+  initialHandLevels,
+  leveledBase,
   type ClassifiableCard,
+  type HandLevelRow,
 } from "./internal/hands";
+export { GUIDANCE_CARDS } from "./internal/guidance";
 export { validate } from "./internal/validator";
 export {
   evaluateHand,
@@ -75,6 +81,9 @@ export {
   FIREWALL_CELL,
   type AllocationOption,
   type Consumable,
+  consumableName,
+  consumableSellValue,
+  type LevelUp,
   type CrisisChoiceView,
   type CrisisView,
   type Inventory,

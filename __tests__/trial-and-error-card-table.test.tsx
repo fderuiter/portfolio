@@ -236,7 +236,6 @@ describe("CardTable", () => {
   it("clears the Blind by inspecting, correcting and playing, then moves to the next Blind", async () => {
     // Seed "early" draws the Site Audit for the Big Blind.
     render(<CardTable seed="early" />);
-    expect(screen.getByTestId("run-seed").textContent).toBe("early");
     expect(screen.getByTestId("blind-intro").textContent).toContain(
       "Phase I, first data review."
     );

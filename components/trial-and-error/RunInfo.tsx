@@ -1,0 +1,125 @@
+"use client";
+
+import React from "react";
+import { createPortal } from "react-dom";
+import type { HandLevelRow } from "@/lib/trial-and-error";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
+
+interface RunInfoProps {
+  /** The run's hand table at current levels, from the domain view. */
+  rows: readonly HandLevelRow[];
+  seed: string;
+  /** How many relic slots the rack has. */
+  relicSlots: number;
+  onClose: () => void;
+}
+
+/**
+ * Run Info (T&E-UX-05): a focus-trapped dialog with the run's hand table
+ * (level, base Chips, base +Mult, times played), the equipped relics and the
+ * run seed. It renders the domain's rows and never adds a level bonus
+ * itself. Escape or Close dismisses it and focus returns to the trigger.
+ */
+export function RunInfo({ rows, seed, relicSlots, onClose }: RunInfoProps) {
+  const ref = useFocusTrap<HTMLDivElement>(true, { onEscape: onClose });
+  return createPortal(
+    <div
+      data-te-cabinet=""
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-0 sm:items-center sm:p-4"
+    >
+      <div
+        ref={ref}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="run-info-heading"
+        className="max-h-[90dvh] w-full max-w-2xl overflow-y-auto border border-zinc-700 bg-[color:var(--te-surface-0)] p-4 font-mono text-[color:var(--te-text)]"
+        data-testid="run-info"
+      >
+        <h2
+          id="run-info-heading"
+          className="text-sm font-bold uppercase tracking-wider"
+        >
+          Run Info
+        </h2>
+        <div className="mt-3 overflow-x-auto">
+          <table className="w-full min-w-0 border-collapse text-xs tabular-nums">
+            <caption className="mb-1 text-left text-[10px] uppercase tracking-wider text-zinc-400">
+              Hand levels this run
+            </caption>
+            <thead>
+              <tr className="border-b border-zinc-700 text-left text-[10px] uppercase tracking-wider text-zinc-400">
+                <th scope="col" className="py-1 pr-2 font-normal">
+                  Hand
+                </th>
+                <th scope="col" className="px-2 py-1 text-right font-normal">
+                  Level
+                </th>
+                <th scope="col" className="px-2 py-1 text-right font-normal">
+                  Chips
+                </th>
+                <th scope="col" className="px-2 py-1 text-right font-normal">
+                  Mult
+                </th>
+                <th scope="col" className="py-1 pl-2 text-right font-normal">
+                  Played
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr
+                  key={row.handType}
+                  className="border-b border-zinc-800"
+                  data-testid="run-info-hand"
+                >
+                  <th
+                    scope="row"
+                    className="py-1 pr-2 text-left font-normal break-words"
+                  >
+                    {row.name}
+                  </th>
+                  <td
+                    className={`px-2 py-1 text-right ${row.level > 1 ? "font-bold text-amber-300" : ""}`}
+                  >
+                    Lv.{row.level}
+                  </td>
+                  <td className="px-2 py-1 text-right text-[color:var(--te-chips)]">
+                    {row.chips}
+                  </td>
+                  <td className="px-2 py-1 text-right text-[color:var(--te-plus-mult)]">
+                    +{row.mult}
+                  </td>
+                  <td className="py-1 pl-2 text-right">{row.playedCount}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <h3 className="mt-4 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+          Relics
+        </h3>
+        <p
+          className="text-xs text-zinc-300 break-words"
+          data-testid="run-info-relics"
+        >
+          None equipped (0 of {relicSlots} slots). Relics arrive with the
+          Procurement Shop.
+        </p>
+        <h3 className="mt-4 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+          Seed
+        </h3>
+        <p className="text-xs text-zinc-300 break-all">
+          <span data-testid="run-seed">{seed}</span>
+        </p>
+        <button
+          type="button"
+          onClick={onClose}
+          className="mt-4 min-h-[48px] w-full border border-zinc-600 px-4 py-3 text-xs font-bold uppercase tracking-wider text-zinc-200 touch-manipulation hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 active:scale-[0.98]"
+        >
+          Close [Esc]
+        </button>
+      </div>
+    </div>,
+    document.fullscreenElement ?? document.body
+  );
+}
