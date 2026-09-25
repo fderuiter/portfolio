@@ -19,6 +19,10 @@ test.describe("Visual Regression & Drift Detection", () => {
         [data-testid="footer-photo-gallery"] {
           display: none !important;
         }
+        /* space-y-2 leaves margin on the item before the hidden link */
+        li:has(+ [data-testid="footer-photo-gallery"]) {
+          margin-block-end: 0 !important;
+        }
       `,
     });
 
