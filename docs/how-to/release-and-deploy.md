@@ -51,6 +51,55 @@ Recommended repository settings, available now that the repository is public:
 a ruleset on `main` that requires pull requests and the **Merge Gate**
 status check.
 
+## Environments
+
+Three environments, kept apart. This is the intended contract; #1024 tracks
+the owner's audit of the live Vercel settings against it.
+
+| | Production | Preview | Development |
+| --- | --- | --- | --- |
+| **Purpose** | The public site | Checking one PR on real infrastructure before merge | Local work |
+| **Created by** | Vercel's Git integration, on every push to `main` | An operator, deliberately, for one PR (below) | `npm run dev` or a local `npm run build` |
+| **Domain** | `deruiter.dev`; `www` redirects to the apex (AGENTS.md section 18) | Its own `*.vercel.app` URL only, never a production alias | `localhost` |
+| **Access** | Public | Vercel Deployment Protection where the plan provides it; otherwise the URL is unlisted, not private | Local machine |
+| **Database** | Production Neon branch; migrations run during the build | A non-production Neon branch (#622); Preview builds never migrate | A local or personal Neon branch |
+| **Other services** | Production Upstash, Clerk, Resend and Sentry | Upstash under the `preview:` key prefix; Clerk, Resend and Sentry unset unless a separate non-production value exists | Simulated or unset |
+| **Variable scope** | Vercel **Production** scope | Vercel **Preview** scope, with no production credential in it | `.env.local`, never production credentials |
+
+Nothing in this table may be read from production credentials outside the
+Production column. The variable-by-variable scopes are in
+[Environment Variables](#environment-variables), and the runtime flag
+`NODE_OPTIONS=--experimental-require-module` (#995) is set wherever server
+rendering runs.
+
+### Using a Preview
+
+Git deployments are off for every branch except `main` (`vercel.json`), so a
+Preview exists only when someone asks for one.
+
+1. **Request:** in the Vercel dashboard, create a deployment of the PR's
+   branch, or run `vercel deploy` (never `--prod` or `--prebuilt`) from a
+   checkout of it. Either one builds on Vercel with the Preview variables.
+2. **Verify** before trusting what it shows:
+   - Its URL is a `*.vercel.app` deployment URL, and the Domains page shows
+     no production alias on it.
+   - The Neon endpoint in its `DATABASE_URL` differs from Production's.
+     Compare the endpoint names in the dashboard; never copy values out.
+   - Its build log shows no migration step. `scripts/build.js` migrates only
+     when `VERCEL=1` and `VERCEL_ENV=production`.
+3. **Remove** it from the dashboard once the PR is merged or closed, so it
+   stops counting against storage.
+
+### Checking a Production Release
+
+A fresh deployment of `main` is correct when:
+
+- it was built from the merged `main` commit by the Git integration, not by
+  a dashboard Redeploy of an older deployment;
+- its build log shows "Production configuration preflight passed." and the
+  migration step;
+- its Deployment Check passed on **Merge Gate** before the domains moved.
+
 ## Environment Variables
 
 Every variable declared in `serverEnvSchema` or `clientEnvSchema` in
