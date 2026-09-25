@@ -100,7 +100,7 @@ describe("CardTable", () => {
     render(<CardTable />);
     expect(cards()).toHaveLength(8);
     expect(cards().filter((c) => c.tabIndex === 0)).toEqual([card(DRAFT_A)]);
-    expect(screen.getByTestId("round-target").textContent).toBe("300");
+    expect(screen.getByTestId("round-target").textContent).toBe("450");
     expect(screen.getByTestId("cpu-counter").textContent).toBe("10/10");
     expect(screen.getByTestId("hands-affordable").textContent).toBe("5");
     const rack = screen.getByTestId("relic-rack");
@@ -311,9 +311,9 @@ describe("CardTable", () => {
 
     const result = screen.getByTestId("blind-result");
     expect(result.textContent).toContain("Blind cleared");
-    expect(result.textContent).toContain("828 of 300");
+    expect(result.textContent).toContain("828 of 450");
     expect(result.textContent).toContain(
-      "Next: Big Blind: Sponsor Safety Review · target 750"
+      "Next: Big Blind: Sponsor Safety Review · target 7500"
     );
     const next = screen.getByRole("button", { name: "Next Blind" });
     expect(document.activeElement).toBe(next);
@@ -321,14 +321,14 @@ describe("CardTable", () => {
     expect(screen.getByTestId("blind-name").textContent).toBe(
       "Big Blind: Sponsor Safety Review"
     );
-    expect(screen.getByTestId("round-target").textContent).toBe("750");
+    expect(screen.getByTestId("round-target").textContent).toBe("7500");
     expect(screen.getByTestId("round-score").textContent?.trim()).toBe("0");
     expect(screen.getByTestId("cpu-counter").textContent).toBe("10/10");
     expect(screen.getByTestId("blind-intro").textContent).toContain(
       "safety physician"
     );
     expect(lastAnnouncement()).toContain(
-      "Big Blind: Sponsor Safety Review. Target 750. Crisis: Site Audit."
+      "Big Blind: Sponsor Safety Review. Target 7500. Crisis: Site Audit."
     );
     // The crisis must be answered first, so focus goes to its first choice.
     const crisis = screen.getByTestId("crisis");
@@ -412,7 +412,7 @@ describe("CardTable", () => {
     expect(screen.getByTestId("hand-limit").textContent).toBe("2 left");
     expect(screen.getByTestId("hands-affordable").textContent).toBe("2");
 
-    // Two single uninspected cards score far short of 750. A card the first
+    // Two single uninspected cards score far short of 7500. A card the first
     // hand's snapshot change staled, or an empty shell, cannot be played.
     for (const left of ["1 left", "0 left"]) {
       const playable = cards().find(

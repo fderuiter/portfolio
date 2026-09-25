@@ -66,9 +66,18 @@ const LINES: Record<string, TableAction[]> = {
     { type: "PLAY_HAND" },
   ],
   [SPONSOR_SAFETY_SCENARIO.id]: [
+    // Four corrected Safety tables and a listing make a Population Flush.
+    ...fix(SPONSOR_SAFETY_SCENARIO, "C-T14.3.1-A"),
     ...fix(SPONSOR_SAFETY_SCENARIO, "C-T14.3.3-A"),
     ...fix(SPONSOR_SAFETY_SCENARIO, "C-T14.3.2.5-A"),
-    ...select("C-T14.3.3-A", "C-L16.2.8", "C-T14.3.2.5-A", "C-L16.2.7"),
+    ...fix(SPONSOR_SAFETY_SCENARIO, "C-T14.3.1-B"),
+    ...select(
+      "C-T14.3.1-A",
+      "C-L16.2.7",
+      "C-T14.3.3-A",
+      "C-T14.3.2.5-A",
+      "C-T14.3.1-B"
+    ),
     { type: "PLAY_HAND" },
   ],
   [DOSE_ESCALATION_SCENARIO.id]: [
@@ -93,9 +102,9 @@ describe("Act I contract", () => {
   it("ships three escalating Blinds on one Phase I snapshot", () => {
     expect(ActSchema.safeParse(ACT_I).success).toBe(true);
     expect(ACT_I_BLINDS.map((b) => [b.blind.tier, b.blind.quota])).toEqual([
-      ["SMALL_BLIND", 300],
-      ["BIG_BLIND", 750],
-      ["BOSS_BLIND", 1500],
+      ["SMALL_BLIND", 450],
+      ["BIG_BLIND", 7500],
+      ["BOSS_BLIND", 8500],
     ]);
     expect(ACT_I_BLINDS.map((b) => b.blind.name)).toEqual([
       "Small Blind: Internal QC",
@@ -432,7 +441,7 @@ describe("run progression", () => {
     expect(run.blindIndex).toBe(1);
     expect(run.table.lastEvent).toEqual({
       kind: "BLIND_STARTED",
-      message: "Big Blind: Sponsor Safety Review. Target 750.",
+      message: "Big Blind: Sponsor Safety Review. Target 7500.",
       sequence: before + 1,
     });
     // CPU is the milestone's allocation: it resets for each Blind.

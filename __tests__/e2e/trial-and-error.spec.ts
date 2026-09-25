@@ -151,7 +151,7 @@ test.describe("Trial & Error: Biostat Ops Card Table", () => {
     await expect(page.getByTestId("blind-result")).toContainText(
       "Blind cleared"
     );
-    await expect(page.getByTestId("blind-result")).toContainText("828 of 300");
+    await expect(page.getByTestId("blind-result")).toContainText("828 of 450");
     await expect(
       page.getByRole("button", { name: "Next Blind" })
     ).toBeFocused();
@@ -567,7 +567,7 @@ test.describe("Trial & Error: Biostat Ops Card Table", () => {
         "Blind cleared"
       );
       await expect(page.getByTestId("blind-result")).toContainText(
-        "828 of 300"
+        "828 of 450"
       );
       const probe = await page.evaluate(
         () => (window as Window & { __te?: TeProbe }).__te!
