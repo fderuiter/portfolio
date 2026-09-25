@@ -160,8 +160,11 @@ branches must follow conventional prefixes:
 - `jules/*` - Reserved for branches opened by the Jules agent
 
 Open pull requests against `main` and squash-merge them using a Conventional
-Commit PR title. Vercel deploys the merged `main` commit to production;
-feature branches do not deploy automatically. See
+Commit PR title. Until 2026-10-01, an operator creates a Production
+deployment from the merged `main` SHA in the Vercel Dashboard; on October 1,
+restore automatic `main` deployment under [ADR 0049](./adr/0049-deploy-main-on-green-ci.md)
+unless a new decision is recorded. Feature branches do not deploy
+automatically. See
 [Release and deployment workflow](./docs/how-to/release-and-deploy.md).
 
 Generate conforming branch names interactively:

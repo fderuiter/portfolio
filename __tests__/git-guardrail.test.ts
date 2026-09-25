@@ -195,7 +195,9 @@ describe("Git Safety Guardrail Interceptor (scripts/git-guardrail.sh)", () => {
     const blockedDeploys: Array<[string, string]> = [
       ["npx vercel deploy --prebuilt", "fallback content"],
       ["vercel deploy --prod --prebuilt", "fallback content"],
-      ["npx vercel deploy --prod", "merge-to-main release path"],
+      ["npx vercel deploy --prod", "Dashboard-only"],
+      ["vercel --prod", "Dashboard-only"],
+      ["npx vercel promote dpl_example", "Dashboard-only"],
       ["vercel env rm DATABASE_URL production", "hard to undo"],
       ["vercel domains rm deruiter.dev", "detaches production traffic"],
       ["npx prisma migrate deploy", "disposable branch"],
@@ -212,17 +214,21 @@ describe("Git Safety Guardrail Interceptor (scripts/git-guardrail.sh)", () => {
       });
     });
 
-    it("names the remote build as the alternative to --prebuilt", () => {
+    it("names the manual Dashboard release path as the alternative to --prebuilt", () => {
       const result = runGuardrail("npx vercel deploy --prebuilt", { CI: "" });
-      expect(result.stderr).toContain("npx vercel deploy --prod");
+      expect(result.stderr).toContain("Create Deployment");
     });
 
-    it("leaves deliberate CI automation untouched", () => {
-      // Automation that deploys under CI carries its own verification; the
-      // guard exists to stop an unreviewed deploy from a developer machine.
-      const result = runGuardrail("npx vercel deploy --prebuilt", {
+    it("blocks CLI Production deployment even when CI is set", () => {
+      const result = runGuardrail("npx vercel deploy --prod", {
         CI: "true",
       });
+      expect(result.exitCode).toBe(2);
+      expect(result.stderr).toContain("Dashboard-only");
+    });
+
+    it("allows an ordinary remote Preview build in CI", () => {
+      const result = runGuardrail("npx vercel deploy", { CI: "true" });
       expect(result.exitCode).toBe(0);
     });
 

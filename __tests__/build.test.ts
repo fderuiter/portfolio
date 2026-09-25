@@ -32,23 +32,30 @@ describe("build.js script execution", () => {
     spawnSpy = vi
       .spyOn(child_process, "spawnSync")
       .mockImplementation(() => ({ status: 0 }) as any);
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: true,
+        status: 200,
+        json: async () => ({ result: "PONG" }),
+      }))
+    );
   });
 
   afterEach(() => {
     process.env = originalEnv;
     exitMock.mockRestore();
     spawnSpy.mockRestore();
+    vi.unstubAllGlobals();
   });
 
-  it("runs generate, check:migrations, and next build offline without prisma migrate deploy", () => {
+  it("runs generate, check:migrations, and next build offline without prisma migrate deploy", async () => {
     process.env.VERCEL_ENV = "preview";
     process.env.DATABASE_URL = "postgresql://db:5432";
 
-    try {
-      require("../scripts/build.js");
-    } catch (err: any) {
-      expect(err.message).toBe("Process exited with code 0");
-    }
+    await expect(require("../scripts/build.js")).rejects.toThrow(
+      "Process exited with code 0"
+    );
 
     // It should have called prisma generate, check:migrations, and next build
     expect(spawnSpy).toHaveBeenCalledWith(
@@ -78,16 +85,14 @@ describe("build.js script execution", () => {
     expect(exitMock).toHaveBeenCalledWith(0);
   });
 
-  it("never executes prisma migrate deploy off Vercel, even if VERCEL_ENV is production", () => {
+  it("never executes prisma migrate deploy off Vercel, even if VERCEL_ENV is production", async () => {
     delete (process.env as any).VERCEL;
     process.env.VERCEL_ENV = "production";
     process.env.DATABASE_URL = "postgresql://db:5432";
 
-    try {
-      require("../scripts/build.js");
-    } catch (err: any) {
-      expect(err.message).toBe("Process exited with code 0");
-    }
+    await expect(require("../scripts/build.js")).rejects.toThrow(
+      "Process exited with code 0"
+    );
 
     // It should have called prisma generate, generate-openapi, check:migrations, and then next build
     expect(spawnSpy).toHaveBeenCalledWith(
@@ -136,14 +141,12 @@ describe("build.js script execution", () => {
     expect(exitMock).toHaveBeenCalledWith(0);
   });
 
-  it("applies migrations on Vercel production builds, through the unpooled endpoint, before next build", () => {
+  it("applies migrations on Vercel production builds, through the unpooled endpoint, before next build", async () => {
     setProductionConfig();
 
-    try {
-      require("../scripts/build.js");
-    } catch (err: any) {
-      expect(err.message).toBe("Process exited with code 0");
-    }
+    await expect(require("../scripts/build.js")).rejects.toThrow(
+      "Process exited with code 0"
+    );
 
     const calls = spawnSpy.mock.calls.map(
       (c: any[]) => `${c[0]} ${c[1].join(" ")}`
@@ -161,16 +164,14 @@ describe("build.js script execution", () => {
     expect(exitMock).toHaveBeenCalledWith(0);
   });
 
-  it("does not migrate from a Vercel preview build", () => {
+  it("does not migrate from a Vercel preview build", async () => {
     process.env.VERCEL = "1";
     process.env.VERCEL_ENV = "preview";
     process.env.DATABASE_URL_UNPOOLED = "postgresql://unpooled.example/db";
 
-    try {
-      require("../scripts/build.js");
-    } catch (err: any) {
-      expect(err.message).toBe("Process exited with code 0");
-    }
+    await expect(require("../scripts/build.js")).rejects.toThrow(
+      "Process exited with code 0"
+    );
 
     expect(spawnSpy).not.toHaveBeenCalledWith(
       "npx",
@@ -179,17 +180,15 @@ describe("build.js script execution", () => {
     );
   });
 
-  it("stops a Vercel production build whose configuration fails the preflight before any step runs", () => {
+  it("stops a Vercel production build whose configuration fails the preflight before any step runs", async () => {
     setProductionConfig();
     delete (process.env as any).CRON_SECRET;
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
-    try {
-      require("../scripts/build.js");
-    } catch (err: any) {
-      expect(err.message).toBe("Process exited with code 1");
-    }
+    await expect(require("../scripts/build.js")).rejects.toThrow(
+      "Process exited with code 1"
+    );
 
     expect(exitMock).toHaveBeenCalledWith(1);
     // Nothing ran: no client generation, no migration, no compile, and the
@@ -203,16 +202,14 @@ describe("build.js script execution", () => {
     logSpy.mockRestore();
   });
 
-  it("fails a Vercel production build that has no unpooled endpoint", () => {
+  it("fails a Vercel production build that has no unpooled endpoint", async () => {
     setProductionConfig();
     delete (process.env as any).DATABASE_URL_UNPOOLED;
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
-    try {
-      require("../scripts/build.js");
-    } catch (err: any) {
-      expect(err.message).toBe("Process exited with code 1");
-    }
+    await expect(require("../scripts/build.js")).rejects.toThrow(
+      "Process exited with code 1"
+    );
 
     expect(exitMock).toHaveBeenCalledWith(1);
     expect(spawnSpy).not.toHaveBeenCalledWith(
@@ -223,16 +220,14 @@ describe("build.js script execution", () => {
     errorSpy.mockRestore();
   });
 
-  it("sets dummy DATABASE_URL and DIRECT_URL if none are provided", () => {
+  it("sets dummy DATABASE_URL and DIRECT_URL if none are provided", async () => {
     process.env.VERCEL_ENV = "preview";
     delete (process.env as any).DATABASE_URL;
     delete (process.env as any).DIRECT_URL;
 
-    try {
-      require("../scripts/build.js");
-    } catch (err: any) {
-      expect(err.message).toBe("Process exited with code 0");
-    }
+    await expect(require("../scripts/build.js")).rejects.toThrow(
+      "Process exited with code 0"
+    );
 
     expect(process.env.DATABASE_URL).toBe(
       "postgresql://dummy:dummy@localhost:5432/dummy"
@@ -249,17 +244,15 @@ describe("build.js script execution", () => {
     expect(process.env.DATABASE_URL).toContain("dummy");
   });
 
-  it("fails immediately if a build step fails", () => {
+  it("fails immediately if a build step fails", async () => {
     process.env.VERCEL_ENV = "preview";
 
     // Mock spawnSync to fail on prisma generate (the first call)
     spawnSpy.mockImplementationOnce(() => ({ status: 123 }) as any);
 
-    try {
-      require("../scripts/build.js");
-    } catch (err: any) {
-      expect(err.message).toBe("Process exited with code 123");
-    }
+    await expect(require("../scripts/build.js")).rejects.toThrow(
+      "Process exited with code 123"
+    );
 
     // It should have tried prisma generate
     expect(spawnSpy).toHaveBeenCalledWith(
@@ -277,5 +270,25 @@ describe("build.js script execution", () => {
 
     // It should exit with the failed code (123)
     expect(exitMock).toHaveBeenCalledWith(123);
+  });
+
+  it("stops before migration and redacts a rejected Upstash token", async () => {
+    setProductionConfig();
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({ ok: false, status: 401 }))
+    );
+
+    await expect(require("../scripts/build.js")).rejects.toThrow(
+      "Process exited with code 1"
+    );
+
+    expect(exitMock).toHaveBeenCalledWith(1);
+    expect(spawnSpy).not.toHaveBeenCalled();
+    const output = errorSpy.mock.calls.flat().join("\n");
+    expect(output).toContain("UPSTASH_REDIS_REST_TOKEN was rejected");
+    expect(output).not.toContain("tok-fake");
+    errorSpy.mockRestore();
   });
 });

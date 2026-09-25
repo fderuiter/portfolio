@@ -1,8 +1,10 @@
 # Production Deployment, Rollback & Synthetic Monitoring
 
-Production ships through Vercel's Git integration building `main`
-([ADR 0049](adr/0049-deploy-main-on-green-ci.md)). The canonical, step-by-step
-release procedure is
+Until 2026-10-01, a person starts each Production deployment from the Vercel
+Dashboard after CI passes ([ADR 0051](adr/0051-manual-production-releases.md)).
+On 2026-10-01, restore automatic `main` deployment under
+[ADR 0049](adr/0049-deploy-main-on-green-ci.md) unless a new decision is
+recorded. The canonical, step-by-step release procedure is
 [`docs/how-to/release-and-deploy.md`](docs/how-to/release-and-deploy.md). This
 guide describes the controls around that flow, the manual canary-analysis
 tooling, and the triage runbooks for the scheduled synthetic probes.
@@ -14,7 +16,7 @@ tooling, and the triage runbooks for the scheduled synthetic probes.
 | Stage                     | Control                                                                                                                | Where it lives                           |
 | ------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
 | Before merge              | **Merge Gate (Required Checks Summary)** must be green on the PR                                                       | `.github/workflows/ci.yml`               |
-| On merge                  | Vercel's Git integration builds the `main` commit with the production secrets it holds; GitHub Actions never deploys   | Vercel project, `vercel.json`            |
+| After green merge         | An operator uses Dashboard → Deployments → Create Deployment with the current `main` SHA; GitHub Actions never deploys | Vercel project, `vercel.json`, ADR 0051  |
 | During the build          | Pending migrations are applied through the unpooled Neon endpoint on Vercel production builds only, before compilation | `scripts/build.js`                       |
 | Before promotion          | A Vercel **Deployment Check** holds the domains until Merge Gate passes on that commit                                 | Vercel project settings                  |
 | After promotion           | The daily synthetic probes exercise the critical journeys against production (section 3)                               | `.github/workflows/synthetic-probes.yml` |
