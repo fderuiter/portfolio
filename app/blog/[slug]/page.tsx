@@ -1,13 +1,23 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getAllPublishedBlogPosts, getBlogPostBySlug } from "@/lib/blog";
+import {
+  getAllPublishedBlogPosts,
+  getBlogPostBySlug,
+  extractAndInjectHeadings,
+  calculateRelatedReading,
+  CONTENT_PILLAR_CATALOG,
+} from "@/lib/blog";
+import { CaseStudyService } from "@/lib/services/case-study-service";
 import { RichNarrative } from "@/components/RichNarrative";
 import { BlogPostReactions } from "@/components/blog/BlogPostReactions";
+import { TableOfContents } from "@/components/blog/TableOfContents";
+import { ReadingProgressBar } from "@/components/blog/ReadingProgressBar";
+import { RelatedReading } from "@/components/blog/RelatedReading";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
 import { PageLayout } from "@/components/PageLayout";
 import { resolveBaseUrl } from "@/lib/domain";
-import { getBreadcrumbSchema } from "@/lib/seo";
+import { getBreadcrumbSchema, getBlogPostingSchema } from "@/lib/seo";
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -71,14 +81,28 @@ export async function generateMetadata({
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params;
 
-  const [allPosts, post] = await Promise.all([
+  const [allPosts, post, allCaseStudies] = await Promise.all([
     getAllPublishedBlogPosts(),
     getBlogPostBySlug(slug),
+    CaseStudyService.getAllPublishedCaseStudies(),
   ]);
 
   if (!post) {
     notFound();
   }
+
+  const relatedItems = calculateRelatedReading(
+    {
+      slug: post.slug,
+      pillar: post.pillar,
+      tags: post.tags,
+    },
+    {
+      posts: allPosts,
+      caseStudies: allCaseStudies,
+      limit: 3,
+    }
+  );
 
   const currentIndex = allPosts.findIndex((p) => p.slug === slug);
   const prevPost =
@@ -90,11 +114,35 @@ export default async function BlogPostPage({ params }: PageProps) {
       ? allPosts[currentIndex + 1]
       : allPosts[0];
 
+  const { html: processedHtml, headings } = extractAndInjectHeadings(post.body);
+
+  const formattedDate = post.publishedAt.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+
+  const isUpdated =
+    post.updatedAt.getTime() > post.publishedAt.getTime() + 86400000;
+  const formattedUpdatedDate = isUpdated
+    ? post.updatedAt.toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+        timeZone: "UTC",
+      })
+    : null;
+
+  const pillarLabel = CONTENT_PILLAR_CATALOG[post.pillar]?.label || post.pillar;
+
   return (
     <PageLayout
       variant="standard"
       className="py-24 md:py-32 px-6 md:px-12 lg:px-24 bg-zinc-950 text-foreground flex flex-col items-center relative overflow-hidden outline-none"
     >
+      <ReadingProgressBar />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -105,16 +153,33 @@ export default async function BlogPostPage({ params }: PageProps) {
           ]),
         }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: getBlogPostingSchema(post),
+        }}
+      />
       {/* Background Blurs */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-brand-cyan/5 blur-[120px] pointer-events-none hidden sm:block" />
       <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 w-80 h-80 rounded-full bg-brand-blue/5 blur-[120px] pointer-events-none hidden sm:block" />
 
       <div className="relative z-10 w-full max-w-3xl">
         {/* Breadcrumbs Navigation */}
-        <div className="mb-8">
+        <div className="mb-6">
           <Breadcrumbs
             items={[{ label: "Blog", href: "/blog" }, { label: post.title }]}
           />
+        </div>
+
+        {/* Content Pillar Badge */}
+        <div className="mb-4">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium bg-brand-cyan/10 text-brand-cyan border border-brand-cyan/20">
+            <span
+              className="w-1.5 h-1.5 rounded-full bg-brand-cyan"
+              aria-hidden="true"
+            />
+            {pillarLabel}
+          </span>
         </div>
 
         {/* Title */}
@@ -122,27 +187,79 @@ export default async function BlogPostPage({ params }: PageProps) {
           {post.title}
         </h1>
 
-        <p className="text-lg text-muted-strong font-medium mb-8">{post.dek}</p>
+        <p className="text-lg text-muted-strong font-medium mb-6 leading-relaxed">
+          {post.dek}
+        </p>
+
+        {/* Article Metadata Row */}
+        <div className="flex flex-wrap items-center gap-y-2 gap-x-4 text-xs font-mono text-zinc-400 pb-6 border-b border-zinc-900/80">
+          <span className="text-zinc-200 font-semibold">
+            By Frederick de Ruiter
+          </span>
+          <span className="text-zinc-600" aria-hidden="true">
+            •
+          </span>
+          <time dateTime={post.publishedAt.toISOString()}>{formattedDate}</time>
+          {formattedUpdatedDate && (
+            <>
+              <span className="text-zinc-600" aria-hidden="true">
+                •
+              </span>
+              <span>Updated {formattedUpdatedDate}</span>
+            </>
+          )}
+          {typeof post.readingTimeMinutes === "number" &&
+            post.readingTimeMinutes > 0 && (
+              <>
+                <span className="text-zinc-600" aria-hidden="true">
+                  •
+                </span>
+                <span className="inline-flex items-center gap-1.5 text-zinc-300">
+                  <svg
+                    className="w-3.5 h-3.5 text-zinc-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  {post.readingTimeMinutes} min read
+                </span>
+              </>
+            )}
+        </div>
 
         {/* Tags list row */}
-        <div className="flex flex-wrap gap-2 pb-8 border-b border-zinc-900">
+        <div className="flex flex-wrap gap-2 py-4 border-b border-zinc-900">
           {post.tags.map((tag) => (
             <span
               key={tag}
               className="px-2.5 py-0.5 text-xs font-mono font-medium bg-zinc-900/60 border border-zinc-800/80 text-muted-strong rounded"
             >
-              {tag}
+              #{tag}
             </span>
           ))}
         </div>
 
+        {/* Table of Contents */}
+        <TableOfContents headings={headings} />
+
         {/* Long-form Article Narrative */}
         <article className="prose prose-invert max-w-none text-neutral-300 leading-relaxed space-y-8 mt-8">
-          <RichNarrative html={post.body} />
+          <RichNarrative html={processedHtml} />
         </article>
 
         {/* Reader Reactions Control */}
         <BlogPostReactions slug={post.slug} />
+
+        {/* Contextual Related Dispatches & Case Studies */}
+        <RelatedReading items={relatedItems} />
 
         {/* Sequential Next / Previous Dispatch Navigation */}
         {prevPost && nextPost && (

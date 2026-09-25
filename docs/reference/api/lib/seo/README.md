@@ -8,6 +8,7 @@
 
 ## Interfaces
 
+- [BlogPostingNodeOptions](interfaces/BlogPostingNodeOptions.md)
 - [BreadcrumbItem](interfaces/BreadcrumbItem.md)
 - [CollectionItem](interfaces/CollectionItem.md)
 - [VisualArtworkSchemaOptions](interfaces/VisualArtworkSchemaOptions.md)
@@ -22,6 +23,8 @@
 
 ## Functions
 
+- [getBlogPostingNode](functions/getBlogPostingNode.md)
+- [getBlogPostingSchema](functions/getBlogPostingSchema.md)
 - [getBreadcrumbNode](functions/getBreadcrumbNode.md)
 - [getBreadcrumbSchema](functions/getBreadcrumbSchema.md)
 - [getCollectionPageNode](functions/getCollectionPageNode.md)
