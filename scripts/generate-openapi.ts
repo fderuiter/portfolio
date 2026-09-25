@@ -596,7 +596,7 @@ export const openApiSpec = {
       get: {
         summary: "Run the unified daily maintenance pipeline",
         description:
-          "Authenticated Vercel Hobby cron route that drains telemetry and reaction buffers, processes a bounded email retry batch, and rolls raw telemetry older than 30 days into daily aggregates before pruning it. Returns isolated per-phase outcomes under an eight-second overall deadline.",
+          "Authenticated Vercel Hobby cron route that drains telemetry and reaction buffers, processes a bounded email retry batch, and rolls raw telemetry older than 30 days into daily aggregates before pruning it. Returns isolated per-phase outcomes; the route declares an eight-second maxDuration and gives the pipeline a seven-second deadline.",
         security: [{ CronSecretAuth: [] }],
         parameters: [
           {
@@ -617,7 +617,7 @@ export const openApiSpec = {
         responses: {
           200: {
             description:
-              "Complete or partial execution summary with isolated phase counts, durations, and errors",
+              "Complete execution summary with isolated phase counts and durations",
             content: {
               "application/json": {
                 schema: { $ref: "#/components/schemas/MaintenanceSummary" },
@@ -626,6 +626,15 @@ export const openApiSpec = {
           },
           400: { description: "Invalid batch parameters" },
           401: { description: "Unauthorized" },
+          500: {
+            description:
+              "Partial run: at least one phase failed, timed out or was skipped. The body is the same summary, naming each phase's outcome and error.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/MaintenanceSummary" },
+              },
+            },
+          },
         },
       },
     },

@@ -600,9 +600,12 @@ describe("Working With Duck - Interruption Suspension (DUCK-01)", () => {
       container.querySelectorAll('[role="dialog"]').length
     ).toBeGreaterThan(0);
 
-    // Close scrapbook
+    // Close scrapbook (scoped to its dialog: the won dialog has buttons too)
+    const scrapbookDialog = Array.from(
+      container.querySelectorAll('[role="dialog"]')
+    ).find((d) => d.textContent?.includes("Polaroid Scrapbook"));
     const closeBtn = Array.from(
-      container.querySelectorAll('[role="dialog"] button')
+      scrapbookDialog?.querySelectorAll("button") ?? []
     ).find((b) => b.querySelector("svg")) as HTMLElement;
     expect(closeBtn).not.toBeNull();
     await clickEl(closeBtn);
