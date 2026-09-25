@@ -13,6 +13,15 @@ function escapeXml(unsafe: string): string {
     .replace(/'/g, "&apos;");
 }
 
+/**
+ * Wraps markup in a CDATA section. A literal "]]>" would end the section
+ * early and make the whole feed malformed, so each one is split across two
+ * adjacent sections, which XML parsers concatenate back into the original.
+ */
+function cdata(unsafe: string): string {
+  return `<![CDATA[${unsafe.replace(/]]>/g, "]]]]><![CDATA[>")}]]>`;
+}
+
 export async function GET() {
   const baseUrl = resolveBaseUrl();
   const posts = await BlogPostService.getAllPublishedBlogPosts();
@@ -46,7 +55,7 @@ export async function GET() {
       <pubDate>${pubDate}</pubDate>
       <description>${escapeXml(post.dek || "")}</description>
       ${categoriesXml}
-      <content:encoded><![CDATA[${post.body}]]></content:encoded>
+      <content:encoded>${cdata(post.body)}</content:encoded>
     </item>`;
     })
     .join("\n");
