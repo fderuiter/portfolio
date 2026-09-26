@@ -46,6 +46,7 @@ import {
   writeRunSave,
 } from "@/components/trial-and-error/useRunSave";
 import { RunInfo } from "@/components/trial-and-error/RunInfo";
+import { ScoreLog } from "@/components/trial-and-error/ScoreLog";
 import { HandCheatSheet } from "@/components/trial-and-error/HandCheatSheet";
 import { BossIntro } from "@/components/trial-and-error/BossIntro";
 import { FirewallDialog } from "@/components/trial-and-error/FirewallDialog";
@@ -1157,6 +1158,10 @@ export function CardTable({
               </button>
             ))}
           </div>
+          <ScoreLog
+            // The hand being played joins the log once its playback ends.
+            entries={playing ? view.scoreLog.slice(0, -1) : view.scoreLog}
+          />
         </aside>
 
         <div className="min-w-0 bg-[color:var(--te-surface-0)] p-3">

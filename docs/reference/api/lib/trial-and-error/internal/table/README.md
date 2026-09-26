@@ -20,6 +20,8 @@
 - [LevelUp](interfaces/LevelUp.md)
 - [PlayBlocker](interfaces/PlayBlocker.md)
 - [PlayedHand](interfaces/PlayedHand.md)
+- [ScoreLogEffect](interfaces/ScoreLogEffect.md)
+- [ScoreLogEntry](interfaces/ScoreLogEntry.md)
 - [StudyHistory](interfaces/StudyHistory.md)
 - [TableCardView](interfaces/TableCardView.md)
 - [TableEvent](interfaces/TableEvent.md)

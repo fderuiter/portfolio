@@ -582,6 +582,15 @@ A defended encounter's relic offer, or null.
 
 ***
 
+### scoreLog
+
+> **scoreLog**: [`ScoreLogEntry`](ScoreLogEntry.md)[]
+
+Every hand played this Blind, oldest first, read from the same timeline
+the playback uses. The scores sum to the round score.
+
+***
+
 ### session
 
 > **session**: [`DmcSession`](../../blinding/type-aliases/DmcSession.md)

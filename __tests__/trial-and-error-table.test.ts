@@ -1,22 +1,33 @@
 import { describe, it, expect } from "vitest";
 import * as fc from "fast-check";
 import {
+  ACT_I,
   ACT_I_CRISES,
   DEMOGRAPHICS_SCENARIO,
   DMC_MILESTONE_SCENARIO,
+  DMC_RELICS,
   DOSE_ESCALATION_SCENARIO,
   SPONSOR_SAFETY_SCENARIO,
+  HAND_NAMES,
+  UNBLINDING_RULE_ID,
+  advanceRun,
   advanceTable,
+  carriedInventory,
   createInspectionState,
+  createRunState,
   createTableState,
   deriveTableView,
   evaluateHand,
   ruleResultsFor,
+  runBlinds,
+  scoreTimeline,
   validate,
+  type RunState,
   type Scenario,
   type TableAction,
   type TableState,
 } from "@/lib/trial-and-error";
+import { playBlind } from "./utils/trial-and-error-bot";
 
 const scenario = DEMOGRAPHICS_SCENARIO;
 const run = (
@@ -481,6 +492,222 @@ describe("play blocker (#1078)", () => {
             state = advanceTable(s, state, options[pick % options.length]);
             parity(s, state);
           }
+        }
+      ),
+      { numRuns: 60 }
+    );
+  });
+});
+
+describe("score log (#1082)", () => {
+  const PAIR: TableAction[] = [
+    ...select(DRAFT_A, DM_LISTING),
+    { type: "PLAY_HAND" },
+  ];
+
+  it("appends each hand played and totals the round score", () => {
+    const fresh = createTableState(scenario);
+    expect(fresh.plays).toEqual([]);
+    expect(deriveTableView(scenario, fresh).scoreLog).toEqual([]);
+
+    // Played unfixed, Draft A's fatal finding zeroes the pair.
+    const once = run(PAIR);
+    const twice = run([...select("C-T14.1.2"), { type: "PLAY_HAND" }], once);
+    expect(twice.handsPlayed).toBe(2);
+    expect(twice.plays).toHaveLength(2);
+    expect(twice.plays[0]).toEqual(once.lastPlay);
+    expect(twice.plays[1]).toBe(twice.lastPlay);
+
+    const log = deriveTableView(scenario, twice).scoreLog;
+    expect(log).toMatchObject([
+      {
+        handType: "TLF_PAIR",
+        name: HAND_NAMES.TLF_PAIR,
+        chips: once.lastPlay!.evaluation.chips.total,
+        mult: 0,
+        score: 0,
+        zeroLabel: "DENOMINATOR ERROR",
+      },
+      {
+        handType: "HIGH_TABLE",
+        name: HAND_NAMES.HIGH_TABLE,
+        chips: 40,
+        mult: 2,
+        score: 80,
+        zeroLabel: null,
+      },
+    ]);
+    expect(log.reduce((sum, e) => sum + e.score, 0)).toBe(twice.roundScore);
+
+    // Corrected first, the same pair scores and fires no zero rule.
+    const [clean] = deriveTableView(
+      scenario,
+      run(PAIR, fixDraftA(fresh))
+    ).scoreLog;
+    expect(clean.score).toBeGreaterThan(0);
+    expect(clean.zeroLabel).toBeNull();
+  });
+
+  it("leaves refused plays and other moves out of the log", () => {
+    const refused = run([{ type: "PLAY_HAND" }]);
+    expect(refused.plays).toEqual([]);
+    const discarded = run([...select(DRAFT_A), { type: "DISCARD" }]);
+    expect(discarded.plays).toEqual([]);
+  });
+
+  it("shows a hand played after a peek as zeroed by the unblinding", () => {
+    const dmc = DMC_MILESTONE_SCENARIO;
+    const peeked = run(
+      [{ type: "PEEK_BLINDED", cardId: "C-T14.3.3-D" }],
+      createTableState(dmc),
+      dmc
+    );
+    const played = run(
+      [...select("C-T14.1.1", "C-L16.2.4"), { type: "PLAY_HAND" }],
+      peeked,
+      dmc
+    );
+    expect(played.lastPlay?.evaluation.zeroRule.ruleIds).toContain(
+      UNBLINDING_RULE_ID
+    );
+    const [entry] = deriveTableView(dmc, played).scoreLog;
+    expect(entry.score).toBe(0);
+    expect(entry.zeroLabel).toBe("UNBLINDING");
+    expect(entry.fired).toContainEqual({
+      kind: "ZERO_RULE",
+      label: "UNBLINDING",
+      effect: "×0",
+    });
+    // Labels and effects only: rule evidence, which can quote a closed
+    // session's cells, never reaches the log.
+    for (const effect of entry.fired) {
+      expect(Object.keys(effect).sort()).toEqual(["effect", "kind", "label"]);
+    }
+  });
+
+  it("empties on RESET and when the next Blind starts", () => {
+    expect(run([...PAIR, { type: "RESET" }]).plays).toEqual([]);
+
+    const act = { ...ACT_I, crisisDeck: undefined };
+    let runState: RunState = createRunState(act, "fold-change");
+    const blind = runBlinds(act, runState)[0];
+    for (const action of playBlind(blind, runState.table, "MEDIAN").actions) {
+      if (runState.table.status !== "REVIEWING") break;
+      if (action.type === "RESET") continue;
+      runState = advanceRun(act, runState, action);
+    }
+    expect(runState.table.status).toBe("CLEARED");
+    expect(runState.table.plays.length).toBeGreaterThan(0);
+    const next = advanceRun(act, runState, { type: "NEXT_BLIND" });
+    expect(next.blindIndex).toBe(1);
+    expect(next.table.plays).toEqual([]);
+    expect(
+      deriveTableView(runBlinds(act, next)[1], next.table).scoreLog
+    ).toEqual([]);
+  });
+
+  it("agrees with each hand's score timeline in every state random play reaches", () => {
+    const scenarios = [
+      DEMOGRAPHICS_SCENARIO,
+      SPONSOR_SAFETY_SCENARIO,
+      DOSE_ESCALATION_SCENARIO,
+      DMC_MILESTONE_SCENARIO,
+    ];
+    const candidates = (s: Scenario, state: TableState): TableAction[] => [
+      ...state.hand.map((cardId): TableAction => ({
+        type: "TOGGLE_SELECT",
+        cardId,
+      })),
+      ...state.hand.map((cardId): TableAction => ({
+        type: "PEEK_BLINDED",
+        cardId,
+      })),
+      { type: "PLAY_HAND" },
+      { type: "PLAY_HAND" },
+      { type: "DISCARD" },
+      { type: "SET_SESSION", session: "CLOSED" },
+      { type: "SET_SESSION", session: "OPEN" },
+      ...(state.crisis
+        ? state.crisis.choices.map((c): TableAction => ({
+            type: "RESOLVE_CRISIS",
+            choiceId: c.id,
+          }))
+        : []),
+    ];
+    const check = (s: Scenario, state: TableState) => {
+      const view = deriveTableView(s, state);
+      expect(view.scoreLog).toHaveLength(state.handsPlayed);
+      expect(view.scoreLog.reduce((sum, e) => sum + e.score, 0)).toBe(
+        state.roundScore
+      );
+      let before = 0;
+      state.plays.forEach((play, i) => {
+        const steps = scoreTimeline(play.evaluation, {
+          roundScoreBefore: before,
+          target: s.blind.quota,
+        });
+        before += play.evaluation.score;
+        const entry = view.scoreLog[i];
+        const total = steps.find((step) => step.kind === "TOTAL")!;
+        expect(total).toMatchObject({
+          chips: entry.chips,
+          mult: entry.mult,
+          score: entry.score,
+        });
+        const fired = steps.flatMap((step) =>
+          step.kind === "RULE"
+            ? [["RULE", step.ruleId]]
+            : step.kind === "RELIC"
+              ? [["RELIC", step.relicId]]
+              : step.kind === "X_MULT"
+                ? [["X_MULT", step.source]]
+                : step.kind === "ZERO_RULE"
+                  ? [["ZERO_RULE"]]
+                  : []
+        );
+        expect(
+          entry.fired.map((e) =>
+            e.kind === "ZERO_RULE" ? [e.kind] : [e.kind, e.label]
+          )
+        ).toEqual(fired);
+        expect(entry.zeroLabel !== null).toBe(
+          play.evaluation.zeroRule.triggered
+        );
+      });
+      // The playback's timeline is the log's newest entry.
+      if (state.lastPlay) {
+        const last = view.scoreLog.at(-1)!;
+        const kinds = view
+          .lastTimeline!.filter((step) =>
+            ["RULE", "RELIC", "X_MULT", "ZERO_RULE"].includes(step.kind)
+          )
+          .map((step) => step.kind);
+        expect(last.fired.map((e) => e.kind)).toEqual(kinds);
+      }
+    };
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 0, max: scenarios.length - 1 }),
+        fc.boolean(),
+        fc.subarray([...DMC_RELICS]),
+        fc.array(fc.nat(), { maxLength: 16 }),
+        (which, withCrisis, relics, picks) => {
+          const s = scenarios[which];
+          const crisis = withCrisis
+            ? ACT_I_CRISES[which % ACT_I_CRISES.length]
+            : null;
+          const plain = createTableState(s, undefined, undefined, crisis);
+          let state = createTableState(
+            s,
+            undefined,
+            { ...carriedInventory(plain), relics },
+            crisis
+          );
+          for (const pick of picks) {
+            const options = candidates(s, state);
+            state = advanceTable(s, state, options[pick % options.length]);
+          }
+          check(s, state);
         }
       ),
       { numRuns: 60 }

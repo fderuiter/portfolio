@@ -294,6 +294,14 @@ Unauthorized unblindings the next hand played will answer for with ×0.
 
 ***
 
+### plays
+
+> **plays**: [`PlayedHand`](PlayedHand.md)[]
+
+Every hand played this Blind, oldest first. The last is `lastPlay`.
+
+***
+
 ### provenance
 
 > **provenance**: `Record`\<`string`, [`SnapshotRef`](../../../types/type-aliases/SnapshotRef.md)\>

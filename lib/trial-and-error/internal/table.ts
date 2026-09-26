@@ -76,7 +76,11 @@ import {
   snapshotRef,
   type SnapshotInvalidation,
 } from "./snapshots";
-import { scoreTimeline, type TimelineStep } from "./timeline";
+import {
+  scoreTimeline,
+  type TimelineContext,
+  type TimelineStep,
+} from "./timeline";
 import { validate } from "./validator";
 
 /** The most recent Card Table outcome, phrased for a polite announcement. */
@@ -119,6 +123,30 @@ export interface PlayedHand {
   classification: HandClassification;
   evaluation: HandEvaluation;
   cardIds: string[];
+}
+
+/** One effect that fired in a logged hand, labelled as the score timeline labels it. */
+export interface ScoreLogEffect {
+  kind: "RULE" | "RELIC" | "X_MULT" | "ZERO_RULE";
+  /** The rule or relic id, the ×Mult source, or the zero rule's slam label. */
+  label: string;
+  /** What it did, e.g. "+20 Chips" or "×0". Never a blinded cell value. */
+  effect: string;
+}
+
+/** One hand in the Blind's score log (#1082), ready to display. */
+export interface ScoreLogEntry {
+  handType: HandType;
+  /** The hand's display name. */
+  name: string;
+  level: number;
+  chips: number;
+  mult: number;
+  score: number;
+  /** Rules, relics and ×Mult factors that fired, in playback order. */
+  fired: ScoreLogEffect[];
+  /** The zero rule's label when the hand scored ×0, otherwise null. */
+  zeroLabel: string | null;
 }
 
 /**
@@ -256,6 +284,8 @@ export interface TableState {
   discards: number;
   status: DeskStatus;
   lastPlay: PlayedHand | null;
+  /** Every hand played this Blind, oldest first. The last is `lastPlay`. */
+  plays: PlayedHand[];
   lastEvent: TableEvent | null;
   /** Every population snapshot version so far, oldest first. The last is current. */
   snapshots: PopulationSnapshot[];
@@ -502,6 +532,11 @@ export interface TableView {
   inspection: TableInspectionView | null;
   /** The last played hand as an ordered scoring timeline, for playback. */
   lastTimeline: TimelineStep[] | null;
+  /**
+   * Every hand played this Blind, oldest first, read from the same timeline
+   * the playback uses. The scores sum to the round score.
+   */
+  scoreLog: ScoreLogEntry[];
   /** The current population snapshot. */
   snapshot: SnapshotRef;
   /** Selected cards that are stale, in selection order. */
@@ -1811,6 +1846,7 @@ export function createTableState(
     discards: 0,
     status: "REVIEWING",
     lastPlay: null,
+    plays: [],
     lastEvent: null,
     snapshots: [...history.snapshots],
     invalidations: [...history.invalidations],
@@ -2255,6 +2291,11 @@ export function advanceTable(
         classification.handType,
         false
       );
+      const played: PlayedHand = {
+        classification,
+        evaluation,
+        cardIds: [...state.selected],
+      };
       // The study event lands between the hand being submitted and the inbox
       // refilling, so new drafts compile against the new snapshot and the
       // cards still in hand go stale.
@@ -2276,11 +2317,8 @@ export function advanceTable(
                   state.handLevels[classification.handType].playedCount + 1,
               },
             },
-            lastPlay: {
-              classification,
-              evaluation,
-              cardIds: [...state.selected],
-            },
+            lastPlay: played,
+            plays: [...state.plays, played],
           },
           "PLAY_HAND"
         )
@@ -2861,6 +2899,102 @@ export function advanceTable(
   }
 }
 
+/** What the score timeline needs from the scenario to narrate a hand. */
+function timelineContext(
+  scenario: Scenario,
+  roundScoreBefore: number
+): TimelineContext {
+  return {
+    roundScoreBefore,
+    target: scenario.blind.quota,
+    cardNames: Object.fromEntries(scenario.deck.map((c) => [c.id, c.number])),
+    zeroRuleLabels: Object.fromEntries(
+      scenario.rulebook.rules
+        .filter((r) => r.severity === "FATAL")
+        .map((r): [string, string] => [r.id, `${r.category} ERROR`])
+        .concat([[UNBLINDING_RULE_ID, "UNBLINDING"]])
+    ),
+  };
+}
+
+const signedPart = (n: number, unit: string) =>
+  n ? `${n > 0 ? "+" : ""}${n} ${unit}` : "";
+
+/** The timeline's RULE, RELIC, X_MULT and ZERO_RULE steps as log effects. */
+function firedEffects(steps: readonly TimelineStep[]): ScoreLogEffect[] {
+  return steps.flatMap((step): ScoreLogEffect[] => {
+    switch (step.kind) {
+      case "RULE":
+        return [
+          {
+            kind: "RULE",
+            label: step.ruleId,
+            effect: [
+              signedPart(step.chipsDelta, "Chips"),
+              signedPart(step.multDelta, "Mult"),
+            ]
+              .filter(Boolean)
+              .join(", "),
+          },
+        ];
+      case "RELIC":
+        return [
+          {
+            kind: "RELIC",
+            label: step.relicId,
+            effect:
+              [
+                signedPart(step.chips, "Chips"),
+                signedPart(step.mult, "Mult"),
+                step.xMult !== 1 ? `×${step.xMult} Mult` : "",
+              ]
+                .filter(Boolean)
+                .join(", ") || "no effect",
+          },
+        ];
+      case "X_MULT":
+        return [
+          {
+            kind: "X_MULT",
+            label: step.source,
+            effect: `×${step.factor} Mult`,
+          },
+        ];
+      case "ZERO_RULE":
+        return [{ kind: "ZERO_RULE", label: step.label, effect: "×0" }];
+      default:
+        return [];
+    }
+  });
+}
+
+/**
+ * The Blind's score log: each play read through the same timeline the
+ * playback shows, so the two cannot disagree. Rule evidence is left out, so
+ * no closed-session value reaches the log.
+ */
+function scoreLogOf(
+  scenario: Scenario,
+  plays: readonly PlayedHand[]
+): ScoreLogEntry[] {
+  let before = 0;
+  return plays.map(({ evaluation }) => {
+    const steps = scoreTimeline(evaluation, timelineContext(scenario, before));
+    before += evaluation.score;
+    const zero = steps.find((step) => step.kind === "ZERO_RULE");
+    return {
+      handType: evaluation.handType,
+      name: HAND_NAMES[evaluation.handType],
+      level: evaluation.level,
+      chips: evaluation.chips.total,
+      mult: evaluation.finalMult,
+      score: evaluation.score,
+      fired: firedEffects(steps),
+      zeroLabel: zero?.kind === "ZERO_RULE" ? zero.label : null,
+    };
+  });
+}
+
 /** Derives everything the Card Table renders. Pure; safe on every render. */
 export function deriveTableView(
   scenario: Scenario,
@@ -3090,19 +3224,13 @@ export function deriveTableView(
   const discardCost = costOf("DISCARD", surcharge);
   const cpuHands = Math.floor(state.cpu.available / CPU_COSTS.PLAY_HAND);
   const lastTimeline = state.lastPlay
-    ? scoreTimeline(state.lastPlay.evaluation, {
-        roundScoreBefore: state.roundScore - state.lastPlay.evaluation.score,
-        target: scenario.blind.quota,
-        cardNames: Object.fromEntries(
-          scenario.deck.map((c) => [c.id, c.number])
-        ),
-        zeroRuleLabels: Object.fromEntries(
-          scenario.rulebook.rules
-            .filter((r) => r.severity === "FATAL")
-            .map((r): [string, string] => [r.id, `${r.category} ERROR`])
-            .concat([[UNBLINDING_RULE_ID, "UNBLINDING"]])
-        ),
-      })
+    ? scoreTimeline(
+        state.lastPlay.evaluation,
+        timelineContext(
+          scenario,
+          state.roundScore - state.lastPlay.evaluation.score
+        )
+      )
     : null;
   return {
     hand,
@@ -3132,6 +3260,7 @@ export function deriveTableView(
     canInspect: reviewing && !firewall && canAfford(state.cpu, "INSPECT"),
     inspection,
     lastTimeline,
+    scoreLog: scoreLogOf(scenario, state.plays),
     snapshot: snapshotRef(currentSnapshot(state)),
     staleSelected,
     playBlockedReason:

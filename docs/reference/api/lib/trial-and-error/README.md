@@ -1376,6 +1376,18 @@ Re-exports [ScoreLedgerEntrySchema](types/variables/ScoreLedgerEntrySchema.md)
 
 ***
 
+### ScoreLogEffect
+
+Re-exports [ScoreLogEffect](internal/table/interfaces/ScoreLogEffect.md)
+
+***
+
+### ScoreLogEntry
+
+Re-exports [ScoreLogEntry](internal/table/interfaces/ScoreLogEntry.md)
+
+***
+
 ### ScoreModifier
 
 Re-exports [ScoreModifier](types/type-aliases/ScoreModifier.md)

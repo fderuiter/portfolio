@@ -89,6 +89,8 @@ export {
   advanceTable,
   deriveTableView,
   type PlayedHand,
+  type ScoreLogEffect,
+  type ScoreLogEntry,
   type InspectionTraceView,
   type TableAction,
   type TableCardView,

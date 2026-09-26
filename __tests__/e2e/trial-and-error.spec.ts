@@ -1006,3 +1006,44 @@ test.describe("Trial & Error hand cheat sheet (#1081)", () => {
     await expect(page.getByTestId("hand-sheet")).toBeHidden();
   });
 });
+
+test.describe("Trial & Error score log (#1082)", () => {
+  /** Plays the unfixed pair, which Draft A's fatal finding zeroes. */
+  async function playZeroedPair(page: Page) {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await launch(page);
+    await card(page, DRAFT_A).click();
+    await card(page, DM_LISTING).click();
+    await page.getByRole("button", { name: /Play Hand/ }).click();
+    await expect(page.getByTestId("last-hand")).toBeVisible();
+  }
+
+  for (const width of [320, 375, 768, 1440]) {
+    test(`lists the Blind's hands at ${width}px without overflow`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 800 });
+      await playZeroedPair(page);
+      const toggle = page.getByTestId("score-log-toggle");
+      await expect(toggle).toHaveAttribute("aria-expanded", "false");
+      await expect(toggle).toContainText("1 hand");
+      await toggle.focus();
+      await page.keyboard.press("Enter");
+      await expect(toggle).toHaveAttribute("aria-expanded", "true");
+      const entry = page.getByTestId("score-log-entry");
+      await expect(entry).toHaveCount(1);
+      await expect(entry).toContainText("TLF Pair");
+      await expect(entry).toContainText("Scored zero");
+      await expectNoHorizontalOverflow(page);
+      await expectNoBlockingViolations(page, `score log at ${width}px`);
+    });
+  }
+
+  test("reflows at 200% zoom", async ({ page }) => {
+    await page.setViewportSize({ width: 640, height: 400 });
+    await playZeroedPair(page);
+    await page.getByTestId("score-log-toggle").click();
+    await expect(page.getByTestId("score-log-entry")).toHaveCount(1);
+    await expectNoHorizontalOverflow(page);
+  });
+});
