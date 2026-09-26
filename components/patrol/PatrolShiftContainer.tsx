@@ -188,7 +188,7 @@ export const PatrolShiftContainer: React.FC<PatrolShiftContainerProps> = ({
               </span>
             </div>
             <p className="text-xs font-mono text-zinc-400">
-              Welch Village Ski Patrol Judgment Simulation — Vertical Slice
+              Welch Village Ski Patrol Judgment Simulation: Vertical Slice
               (Issue #749)
             </p>
           </div>

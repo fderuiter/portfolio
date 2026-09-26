@@ -291,7 +291,7 @@ export const AMBIENT_EVENTS_CATALOG: readonly AmbientEvent[] = [
     sector: "Base Area / CH 1",
     coordinates: { x: 360, y: 470 },
     prompt:
-      "Base Dispatch calls: 'Patrol 1, Dispatch — verify current location, radio readability, and toboggan readiness for afternoon rush.'",
+      "Base Dispatch calls: 'Patrol 1, Dispatch: verify current location, radio readability, and toboggan readiness for afternoon rush.'",
     context: "Welch Village dispatch desk, 154.570 MHz CH 1 repeater check.",
     options: [
       {

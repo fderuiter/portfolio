@@ -163,7 +163,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({
             </p>
           ) : (
             <p className="text-xs font-sans text-zinc-400 italic">
-              Pending primary assessment — interview patient and examine
+              Pending primary assessment: interview patient and examine
               airway/circulation.
             </p>
           )}

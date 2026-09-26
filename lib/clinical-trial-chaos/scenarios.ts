@@ -765,7 +765,7 @@ export const AMENDMENT_PRESETS: ProtocolAmendment[] = [
     version: "Protocol v2.1",
     title: "Station Conveyor Scramble",
     description:
-      "IRB approved site workflow restructuring — station conveyor docks swapped!",
+      "IRB approved site workflow restructuring: station conveyor docks swapped!",
     type: "station-scramble",
     durationSeconds: 18,
     timeRemaining: 18,

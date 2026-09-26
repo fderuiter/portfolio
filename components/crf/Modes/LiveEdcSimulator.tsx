@@ -1065,7 +1065,7 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({
                           <div className="p-2.5 bg-zinc-900/90 border border-zinc-800 rounded-lg text-zinc-400 font-mono text-xs flex items-center gap-2">
                             <IconEyeOff className="w-4 h-4 text-indigo-400 shrink-0" />
                             <span>
-                              [MASKED PROTOCOL DATA — BLINDED TO SPONSOR]
+                              [MASKED PROTOCOL DATA: BLINDED TO SPONSOR]
                             </span>
                           </div>
                         ) : hasNullFlavor ? (

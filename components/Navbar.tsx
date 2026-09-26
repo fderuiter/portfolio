@@ -674,7 +674,7 @@ export const Navbar: React.FC = () => {
                 onClick={() => handlePersonaSelect("technical")}
                 aria-pressed={persona === "technical"}
                 aria-label="Switch to Technical Reading Mode: Deep-dive architecture and engineering details"
-                title="Technical Reading Mode — Deep-dive architecture and engineering details"
+                title="Technical Reading Mode: Deep-dive architecture and engineering details"
                 className={cn(
                   "flex items-center justify-center gap-1 px-2 md:px-2.5 py-1.5 rounded-lg font-bold transition-all duration-200 cursor-pointer min-h-8 shrink-0 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-1 focus-visible:ring-offset-zinc-950",
                   persona === "technical"
@@ -691,7 +691,7 @@ export const Navbar: React.FC = () => {
                 onClick={() => handlePersonaSelect("recruiter")}
                 aria-pressed={persona === "recruiter"}
                 aria-label="Switch to Recruiter Reading Mode: Executive summary and business impact"
-                title="Recruiter Reading Mode — Executive summary and business impact"
+                title="Recruiter Reading Mode: Executive summary and business impact"
                 className={cn(
                   "flex items-center justify-center gap-1 px-2 md:px-2.5 py-1.5 rounded-lg font-bold transition-all duration-200 cursor-pointer min-h-8 shrink-0 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:ring-offset-1 focus-visible:ring-offset-zinc-950",
                   persona === "recruiter"
@@ -915,7 +915,7 @@ export const Navbar: React.FC = () => {
                             : "text-zinc-500 hover:text-zinc-300"
                         )}
                         aria-label="Switch to Technical Reading Mode: Deep-dive architecture and engineering details"
-                        title="Technical Reading Mode — Deep-dive architecture and engineering details"
+                        title="Technical Reading Mode: Deep-dive architecture and engineering details"
                       >
                         <IconFlame className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                         <span>TECH</span>
@@ -931,7 +931,7 @@ export const Navbar: React.FC = () => {
                             : "text-zinc-500 hover:text-zinc-300"
                         )}
                         aria-label="Switch to Recruiter Reading Mode: Executive summary and business impact"
-                        title="Recruiter Reading Mode — Executive summary and business impact"
+                        title="Recruiter Reading Mode: Executive summary and business impact"
                       >
                         <IconBriefcase className="w-3.5 h-3.5 text-brand-cyan shrink-0" />
                         <span>RECRUITER</span>
@@ -1302,7 +1302,7 @@ export const Navbar: React.FC = () => {
                         : "text-zinc-400 hover:text-zinc-200 border border-transparent"
                     )}
                     aria-label="Switch to Technical Reading Mode: Deep-dive architecture and engineering details"
-                    title="Technical Reading Mode — Deep-dive architecture and engineering details"
+                    title="Technical Reading Mode: Deep-dive architecture and engineering details"
                   >
                     <IconFlame className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                     <span>TECHNICAL</span>
@@ -1318,7 +1318,7 @@ export const Navbar: React.FC = () => {
                         : "text-zinc-400 hover:text-zinc-200 border border-transparent"
                     )}
                     aria-label="Switch to Recruiter Reading Mode: Executive summary and business impact"
-                    title="Recruiter Reading Mode — Executive summary and business impact"
+                    title="Recruiter Reading Mode: Executive summary and business impact"
                   >
                     <IconBriefcase className="w-3.5 h-3.5 text-brand-cyan shrink-0" />
                     <span>RECRUITER</span>

@@ -14,7 +14,7 @@ import type { PatrolScenario } from "../types";
  */
 export const AMBIGUOUS_PATIENT_SCENARIO: PatrolScenario = {
   id: "ambiguous-glade-fall",
-  title: "Coulee Fall — Ambiguous Presentation",
+  title: "Coulee Fall: Ambiguous Presentation",
   subtitle: "Low-speed tumble; patient insists they're fine",
   description:
     "A skier took a low-speed tumble in the Coulee's wooded terrain and got up on their own before anyone reached them. They say they're fine, but a nearby skier who saw it thought they seemed briefly dazed.",
@@ -24,7 +24,7 @@ export const AMBIGUOUS_PATIENT_SCENARIO: PatrolScenario = {
   location: "The Coulee / Adam's Abyss - The Back Bowl",
   coordinates: { x: 775, y: 560, zone: "back-bowl" },
   dispatchPrompt:
-    "Patrol 6, Base Dispatch. Report of a skier down in the Coulee, reportedly up and walking. Guest reports may be minor — respond and assess.",
+    "Patrol 6, Base Dispatch. Report of a skier down in the Coulee, reportedly up and walking. Guest reports may be minor; respond and assess.",
   environment: {
     // PLACEHOLDER-CONTENT-REVIEW: needs OEC/NSP review, see #744
     weather: "Overcast, 24°F, flat light",
@@ -108,7 +108,7 @@ export const AMBIGUOUS_PATIENT_SCENARIO: PatrolScenario = {
       id: "interview-patient",
       label: "Interview the Patient",
       description:
-        "Ask what happened and how they're feeling — listen for how they describe it, not just what they say.",
+        "Ask what happened and how they're feeling; listen for how they describe it, not just what they say.",
       category: "assessment",
       costMinutes: 2,
       reveals: {
@@ -247,24 +247,24 @@ export const AMBIGUOUS_PATIENT_SCENARIO: PatrolScenario = {
       id: "escalate-to-dispatch",
       speaker: "Base Dispatch",
       prompt:
-        "Patrol 6, radio check — what's your patient status, and are you requesting additional resources?",
+        "Patrol 6, radio check: what's your patient status, and are you requesting additional resources?",
       context:
         "The findings so far are subtle enough that it isn't obvious whether this needs anything beyond a routine transport.",
       afterActionId: "reassess-patient-status",
       options: [
         {
           id: "escalate-confident-no-request",
-          text: "Patient's alert and oriented, vitals are stable — we'll self-transport, no additional resources needed.",
+          text: "Patient's alert and oriented, vitals are stable; we'll self-transport, no additional resources needed.",
           style: "directive",
           clarity: "high",
           closesLoop: false,
-          response: "Dispatch logs it and stands down — no ALS requested.",
+          response: "Dispatch logs it and stands down: no ALS requested.",
           debriefNote:
             "Reported a clear, confident status and declined backup, without mentioning the delayed responses noted on re-check.",
         },
         {
           id: "escalate-candid-request",
-          text: "Vitals are stable, but I'm seeing delayed responses on re-check and I'm not fully certain this isn't something more — can we get ALS to meet us at the base?",
+          text: "Vitals are stable, but I'm seeing delayed responses on re-check and I'm not fully certain this isn't something more. Can we get ALS to meet us at the base?",
           style: "candid",
           clarity: "high",
           closesLoop: true,
@@ -275,7 +275,7 @@ export const AMBIGUOUS_PATIENT_SCENARIO: PatrolScenario = {
         },
         {
           id: "escalate-downplay",
-          text: "Should be fine, just took a tumble — we'll bring them down and see how they're doing.",
+          text: "Should be fine, just took a tumble; we'll bring them down and see how they're doing.",
           style: "deferential",
           clarity: "low",
           closesLoop: false,

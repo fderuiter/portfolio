@@ -96,7 +96,7 @@ export const Timeline: React.FC = () => {
             onClick={() => handleGlobalToggle("reality")}
             aria-pressed={globalMode === "reality"}
             aria-label="Hands-On Reality Mode: Deep technical architecture and code implementation"
-            title="Hands-On Reality Mode — Deep technical architecture and code implementation"
+            title="Hands-On Reality Mode: Deep technical architecture and code implementation"
             className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 min-h-[44px] px-3.5 py-2 rounded-lg font-bold transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
               globalMode === "reality"
                 ? "bg-[#1f232d] text-amber-300 border border-amber-500/40 shadow-sm"
@@ -111,7 +111,7 @@ export const Timeline: React.FC = () => {
             onClick={() => handleGlobalToggle("recruiter")}
             aria-pressed={globalMode === "recruiter"}
             aria-label="Formal Summary Mode: High-level executive overview and business outcomes"
-            title="Formal Summary Mode — High-level executive overview and business outcomes"
+            title="Formal Summary Mode: High-level executive overview and business outcomes"
             className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 min-h-[44px] px-3.5 py-2 rounded-lg font-bold transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
               globalMode === "recruiter"
                 ? "bg-[#1f232d] text-cyan-300 border border-cyan-500/40 shadow-sm"

@@ -637,7 +637,7 @@ describe("Patrol Shift — M7 Contextual Debrief Engine (Issue #753)", () => {
         percentage: 70,
         grade: "C",
         rating: "developing",
-        summary: "Developing Judgment — On Track",
+        summary: "Developing Judgment: On Track",
       });
 
       expect(calculateDebriefScore(4, 10)).toEqual({

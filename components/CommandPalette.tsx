@@ -223,7 +223,7 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
         badge: "Dispatches",
         status: "Engineering Writing",
         description:
-          "Cross-project retrospectives, technique write-ups, and field notes — the long-tail arm of the search funnel and the home of the Systems Dispatch Newsletter archive.",
+          "Cross-project retrospectives, technique write-ups, and field notes: the long-tail arm of the search funnel and the home of the Systems Dispatch Newsletter archive.",
         techStack: ["Next.js 16", "Prisma", "Neon Postgres"],
         highlights: [
           "Clinical data engineering & CDISC standards",
@@ -1069,7 +1069,7 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
       return {
         id: study.id,
         title: study.title,
-        subtitle: `${study.primary_language} — ${study.tags}`,
+        subtitle: `${study.primary_language} · ${study.tags}`,
         category: "case-study",
         url: `/case-studies/${study.slug}`,
         icon: <IconFileCode className="w-4 h-4 text-brand-blue" />,

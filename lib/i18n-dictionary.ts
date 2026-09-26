@@ -33,7 +33,7 @@ const rawTimelineDetailed: TimelineItem[] = [
   {
     role: "Clinical Data Specialist",
     company: "BRIGHT Research Partners, Inc.",
-    period: "March 2023 — Present",
+    period: "March 2023 to Present",
     recruiterDescription:
       "I design eCRFs and clinical databases for GxP research from study protocols, including cross-form edit checks and validation rules. I also manage data management plans, SAE reconciliation, database locks, and investigational device accountability under 21 CFR 812.",
     realityDescription:
@@ -51,7 +51,7 @@ const rawTimelineDetailed: TimelineItem[] = [
   {
     role: "Research Program Coordinator",
     company: "Mayo Clinic",
-    period: "July 2021 — March 2023",
+    period: "July 2021 to March 2023",
     recruiterDescription:
       "I used Epic SlicerDicer and MyChart to improve recruitment, helping monthly enrollment grow from 10 to 50+ participants while screen failures fell 25%. I also built REDCap databases, processed MRI scans with FreeSurfer, created 3D-printable brain models, and prepared NIH DSMB safety reports.",
     realityDescription:
@@ -70,7 +70,7 @@ const rawTimelineDetailed: TimelineItem[] = [
   {
     role: "Clinical Research Coordinator",
     company: "Mayo Clinic",
-    period: "October 2019 — July 2021",
+    period: "October 2019 to July 2021",
     recruiterDescription:
       "I coordinated NIH-funded studies from startup to closeout, prepared IRB submissions and consent documents, and checked study data through Source Document Verification (SDV). As an Epic Super User, I trained staff and helped clinical teams troubleshoot research workflows.",
     realityDescription:
@@ -88,7 +88,7 @@ const rawTimelineDetailed: TimelineItem[] = [
   {
     role: "Desk Operations Specialist & Epic Super User",
     company: "Mayo Clinic",
-    period: "February 2018 — October 2019",
+    period: "February 2018 to October 2019",
     recruiterDescription:
       "I helped the Division of Oncology move patient orders into a new EHR, supported staff during the transition, and worked with IT analysts to test system updates.",
     realityDescription:
@@ -105,7 +105,7 @@ const rawTimelineDetailed: TimelineItem[] = [
   {
     role: "Summer Operations Coordinator & Vikings Training Camp Liaison",
     company: "Minnesota State University, Mankato",
-    period: "July 2017 — February 2018",
+    period: "July 2017 to February 2018",
     recruiterDescription:
       "I was the university liaison for Minnesota Vikings Training Camp, coordinating facilities, broadcast, and security logistics. I also managed conference billing and helped secure free menstrual products in campus facilities.",
     realityDescription:
@@ -132,7 +132,7 @@ const rawTimelineSimplified: TimelineItem[] = [
   {
     role: "Clinical Data Specialist",
     company: "BRIGHT Research Partners, Inc.",
-    period: "March 2023 — Present",
+    period: "March 2023 to Present",
     recruiterDescription:
       "I turn study protocols into electronic forms and databases, with checks that catch missing or inconsistent entries. I help manage trial data from collection through database lock and track investigational medical devices.",
     realityDescription:
@@ -148,7 +148,7 @@ const rawTimelineSimplified: TimelineItem[] = [
   {
     role: "Research Program Coordinator",
     company: "Mayo Clinic",
-    period: "July 2021 — March 2023",
+    period: "July 2021 to March 2023",
     recruiterDescription:
       "I improved recruitment using hospital records, helping monthly enrollment grow fivefold while fewer people were ruled out during screening. I also built research databases and prepared study safety reports.",
     realityDescription:
@@ -164,7 +164,7 @@ const rawTimelineSimplified: TimelineItem[] = [
   {
     role: "Clinical Research Coordinator",
     company: "Mayo Clinic",
-    period: "October 2019 — July 2021",
+    period: "October 2019 to July 2021",
     recruiterDescription:
       "I managed the day-to-day work of clinical studies, including ethics approvals, consent documents, data checks, and staff training.",
     realityDescription:
@@ -179,7 +179,7 @@ const rawTimelineSimplified: TimelineItem[] = [
   {
     role: "Desk Operations Specialist & Epic Super User",
     company: "Mayo Clinic",
-    period: "February 2018 — October 2019",
+    period: "February 2018 to October 2019",
     recruiterDescription:
       "I helped move oncology records during a hospital software transition and supported the people using the new system.",
     realityDescription:
@@ -194,7 +194,7 @@ const rawTimelineSimplified: TimelineItem[] = [
   {
     role: "Summer Operations Coordinator & Vikings Training Camp Liaison",
     company: "Minnesota State University, Mankato",
-    period: "July 2017 — February 2018",
+    period: "July 2017 to February 2018",
     recruiterDescription:
       "I coordinated Vikings training camp and summer conference logistics, managed billing, and helped make menstrual products freely available on campus.",
     realityDescription:

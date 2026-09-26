@@ -122,7 +122,7 @@ export const HandoffPanel: React.FC<HandoffPanelProps> = ({
           <div className="space-y-2 text-xs font-sans text-zinc-300">
             <div>
               <strong className="text-zinc-400 font-mono text-[11px] block">
-                M — Mechanism of Injury:
+                M (Mechanism of Injury):
               </strong>
               {hasMechanismAssessed ? (
                 <span className="text-zinc-200">
@@ -130,7 +130,7 @@ export const HandoffPanel: React.FC<HandoffPanelProps> = ({
                 </span>
               ) : (
                 <span className="text-zinc-400 italic">
-                  Mechanism unconfirmed on scene — patient found down without
+                  Mechanism unconfirmed on scene: patient found down without
                   witness statement.
                 </span>
               )}
@@ -138,7 +138,7 @@ export const HandoffPanel: React.FC<HandoffPanelProps> = ({
 
             <div>
               <strong className="text-zinc-400 font-mono text-[11px] block">
-                I — Assessed Injuries &amp; Physical Findings:
+                I (Assessed Injuries &amp; Physical Findings):
               </strong>
               {findings.length > 0 ? (
                 <ul className="mt-1 space-y-1 text-zinc-200">
@@ -197,7 +197,7 @@ export const HandoffPanel: React.FC<HandoffPanelProps> = ({
           <div className="space-y-2 text-xs font-sans text-zinc-300">
             <div>
               <strong className="text-zinc-400 font-mono text-[11px] block">
-                S — Signs &amp; Baseline Vitals:
+                S (Signs &amp; Baseline Vitals):
               </strong>
               {hasVitalsAssessed ? (
                 <div className="mt-1 grid grid-cols-2 gap-1.5 font-mono text-[11px] text-zinc-200 bg-zinc-900/90 p-2 rounded-lg border border-zinc-800">
@@ -231,7 +231,7 @@ export const HandoffPanel: React.FC<HandoffPanelProps> = ({
                 <div className="p-2 rounded bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] flex items-center gap-1.5">
                   <IconAlertTriangle className="w-3.5 h-3.5 shrink-0" />
                   <span>
-                    No vital signs obtained on scene — priority triage handover.
+                    No vital signs obtained on scene: priority triage handover.
                   </span>
                 </div>
               )}
@@ -239,7 +239,7 @@ export const HandoffPanel: React.FC<HandoffPanelProps> = ({
 
             <div>
               <strong className="text-zinc-400 font-mono text-[11px] block">
-                T — Field Treatments &amp; Packaging:
+                T (Field Treatments &amp; Packaging):
               </strong>
               {interventions.length > 0 ? (
                 <ul className="mt-1 space-y-1 text-emerald-300">

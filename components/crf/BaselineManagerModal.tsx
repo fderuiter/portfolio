@@ -57,7 +57,7 @@ export const BaselineManagerModal: React.FC<BaselineManagerModalProps> = ({
     () => `v${study.version || "1.0"}`
   );
   const [label, setLabel] = useState(
-    () => `Baseline Snapshot — ${study.protocolNumber || "Study"}`
+    () => `Baseline Snapshot: ${study.protocolNumber || "Study"}`
   );
   const [description, setDescription] = useState("");
   const [actorName, setActorName] = useState("Clinical Data Manager");
@@ -89,7 +89,7 @@ export const BaselineManagerModal: React.FC<BaselineManagerModalProps> = ({
     setActiveTab("list");
     const currentVer = study.version || "1.0";
     setVersionTag(`v${currentVer}`);
-    setLabel(`Baseline Snapshot — ${study.protocolNumber || "Study"}`);
+    setLabel(`Baseline Snapshot: ${study.protocolNumber || "Study"}`);
     setBaselines(listStudyBaselines(storage));
   } else if (!isOpen && prevIsOpen) {
     setPrevIsOpen(isOpen);

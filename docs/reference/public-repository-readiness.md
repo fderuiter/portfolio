@@ -121,7 +121,7 @@ of the repository-polish change set.
   fixtures only.
 - GitHub reported 2,820 historical workflow runs (as last verified on
   2026-09-22; this count grows with every push and is not a stable
-  invariant — treat it as a snapshot, not a target to re-derive) and zero
+  invariant: treat it as a snapshot, not a target to re-derive) and zero
   retained Actions artifacts. The pull-request, head-commit, and post-merge
   runs associated with #862 had no executed steps because the Actions
   allowance was already exhausted, corroborating #865's assessment that the
@@ -182,12 +182,12 @@ quality evidence is recorded in the
 
 PR #886's Verification checklist checked the Vercel-preview item as "not
 requested; no runtime code paths change." That statement was inaccurate: the
-merged diff (`7fb7e666`) included runtime-rendered changes — `app/globals.css`,
+merged diff (`7fb7e666`) included runtime-rendered changes (`app/globals.css`,
 `app/proof/ProofWorkspaceSkeleton.tsx`, `components/CommandPalette.tsx`,
 `components/FooterStatusTicker.tsx`, `components/Hero.tsx`,
 `components/MermaidDiagram.tsx`, `components/RichNarrative.tsx`,
-`components/UnifiedErrorLayout.tsx`, and `components/arcade/PlayCabinet.tsx`
-— and updated a Playwright visual snapshot
+`components/UnifiedErrorLayout.tsx`, and `components/arcade/PlayCabinet.tsx`)
+and updated a Playwright visual snapshot
 (`__tests__/e2e/visual.spec.ts-snapshots/home-chromium-darwin.png`). No
 Vercel preview was captured for this diff before merge.
 

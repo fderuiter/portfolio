@@ -30,9 +30,9 @@ const config = {
     "/test-results/**",
   ],
   mutate: [
-    "lib/proof-utils.ts:250-500",
-    "lib/proof-utils.ts:1970-2200",
-    "lib/proof-utils.ts:2540-2750",
+    "lib/proof-utils.ts:270-625",
+    "lib/proof-utils.ts:2218-2475",
+    "lib/proof-utils.ts:2840-3156",
     "lib/masonry.ts",
     "lib/error-sanitization.ts",
     "lib/security.ts",

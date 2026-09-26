@@ -104,7 +104,7 @@ const DIMENSION_RATING_FEEDBACK: Record<
 const OVERALL_RATING_LABEL: Record<DimensionScore["rating"], string> = {
   exemplary: "Exemplary Field Performance",
   proficient: "Proficient Patrol Response",
-  developing: "Developing Judgment — On Track",
+  developing: "Developing Judgment: On Track",
   "needs-attention": "Needs Attention Before Next Call",
 };
 
@@ -490,7 +490,7 @@ const DEBRIEF_RULES: DebriefRuleDefinition[] = [
                 : "caution",
             headline: "Descent control affected patient ride comfort.",
             detail:
-              "The descent had rough moments — reduce speed and steering inputs for a smoother, more comfortable ride for the patient.",
+              "The descent had rough moments: reduce speed and steering inputs for a smoother, more comfortable ride for the patient.",
           },
         };
       }

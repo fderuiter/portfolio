@@ -10,7 +10,12 @@ import { TerminalLog } from "./TerminalLog";
 import { CompilerLogEntry } from "@/lib/quasi-perfect/types";
 import { IconFlask, IconRotate, IconSparkles } from "@tabler/icons-react";
 
-const SANDBOX_PRESETS: { name: string; description: string; goal: ASTNode; hypotheses: ASTNode[] }[] = [
+const SANDBOX_PRESETS: {
+  name: string;
+  description: string;
+  goal: ASTNode;
+  hypotheses: ASTNode[];
+}[] = [
   {
     name: "Binomial Expansion (a + b)²",
     description: "Verify polynomial identity using ring.",
@@ -131,14 +136,18 @@ export const SandboxMode: React.FC = () => {
   const [selectedPresetIdx, setSelectedPresetIdx] = useState<number>(0);
   const currentPreset = SANDBOX_PRESETS[selectedPresetIdx];
 
-  const [currentGoal, setCurrentGoal] = useState<ASTNode>(() => cloneAST(currentPreset.goal));
+  const [currentGoal, setCurrentGoal] = useState<ASTNode>(() =>
+    cloneAST(currentPreset.goal)
+  );
   const [currentHypotheses, setCurrentHypotheses] = useState<ASTNode[]>(() =>
     currentPreset.hypotheses.map(cloneAST)
   );
 
   const [selectedTargetId, setSelectedTargetId] = useState<string | null>(null);
   const [hoveredTargetId, setHoveredTargetId] = useState<string | null>(null);
-  const [selectedTacticIndex, setSelectedTacticIndex] = useState<number | null>(null);
+  const [selectedTacticIndex, setSelectedTacticIndex] = useState<number | null>(
+    null
+  );
 
   const [logs, setLogs] = useState<CompilerLogEntry[]>([
     {
@@ -225,7 +234,8 @@ export const SandboxMode: React.FC = () => {
               </span>
             </h3>
             <p className="text-xs text-zinc-400">
-              Select a preset or experiment with formal tactics freely on AST expressions.
+              Select a preset or experiment with formal tactics freely on AST
+              expressions.
             </p>
           </div>
         </div>
@@ -258,7 +268,11 @@ export const SandboxMode: React.FC = () => {
 
       {/* Preset Details */}
       <div className="text-xs text-zinc-400 flex items-center justify-between px-1">
-        <span>Active: <strong className="text-zinc-200">{currentPreset.name}</strong> — {currentPreset.description}</span>
+        <span>
+          Active:{" "}
+          <strong className="text-zinc-200">{currentPreset.name}</strong>.{" "}
+          {currentPreset.description}
+        </span>
         {isComplete && (
           <span className="text-emerald-400 font-bold flex items-center gap-1">
             <IconSparkles className="w-3.5 h-3.5" />
@@ -298,14 +312,25 @@ export const SandboxMode: React.FC = () => {
         }}
         onCardDragStart={(idx) => setSelectedTacticIndex(idx)}
         onCardDragEnd={(idx, event) => {
-          const clientX = "clientX" in event ? event.clientX : (event as TouchEvent).changedTouches?.[0]?.clientX;
-          const clientY = "clientY" in event ? event.clientY : (event as TouchEvent).changedTouches?.[0]?.clientY;
+          const clientX =
+            "clientX" in event
+              ? event.clientX
+              : (event as TouchEvent).changedTouches?.[0]?.clientX;
+          const clientY =
+            "clientY" in event
+              ? event.clientY
+              : (event as TouchEvent).changedTouches?.[0]?.clientY;
 
           if (typeof clientX === "number" && typeof clientY === "number") {
-            const elementsUnderPoint = document.elementsFromPoint(clientX, clientY);
+            const elementsUnderPoint = document.elementsFromPoint(
+              clientX,
+              clientY
+            );
             let targetNodeId: string | null = null;
             for (const el of elementsUnderPoint) {
-              const nodeId = el.getAttribute("data-node-id") || el.closest("[data-node-id]")?.getAttribute("data-node-id");
+              const nodeId =
+                el.getAttribute("data-node-id") ||
+                el.closest("[data-node-id]")?.getAttribute("data-node-id");
               if (nodeId) {
                 targetNodeId = nodeId;
                 break;

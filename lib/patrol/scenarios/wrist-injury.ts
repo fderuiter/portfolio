@@ -70,7 +70,7 @@ export const WRIST_INJURY_SCENARIO: PatrolScenario = {
       notes:
         "Responds as a second set of hands; still building confidence on scene.",
       statement:
-        "First one on scene after you — ready to help, just say what you need.",
+        "First one on scene after you; ready to help, just say what you need.",
     },
   ],
   initialVitals: {
@@ -226,23 +226,23 @@ export const WRIST_INJURY_SCENARIO: PatrolScenario = {
       speaker: "Casey (Second-Year Patroller)",
       prompt: "What do you want me to do?",
       context:
-        "Casey jogs up with the pack right after you've secured the scene — willing to help, still building confidence on what to do without being told directly.",
+        "Casey jogs up with the pack right after you've secured the scene: willing to help, still building confidence on what to do without being told directly.",
       afterActionId: "assess-scene-safety",
       options: [
         {
           id: "delegate-directive-closed-loop",
-          text: "Grab the wrist splint kit from the pack and bring it over — repeat that back to me so I know you've got it.",
+          text: "Grab the wrist splint kit from the pack and bring it over: repeat that back to me so I know you've got it.",
           style: "directive",
           clarity: "high",
           closesLoop: true,
           response:
             'Casey repeats "splint kit from the pack" back, confirms, and returns with it in under a minute.',
           debriefNote:
-            "Gave a specific task and asked for a read-back — a clear, closed-loop handoff that left no room for guessing.",
+            "Gave a specific task and asked for a read-back: a clear, closed-loop handoff that left no room for guessing.",
         },
         {
           id: "delegate-collaborative",
-          text: "I've got the patient — can you keep the unload lane clear so nobody skis through while we work?",
+          text: "I've got the patient. Can you keep the unload lane clear so nobody skis through while we work?",
           style: "collaborative",
           clarity: "moderate",
           closesLoop: false,
@@ -260,7 +260,7 @@ export const WRIST_INJURY_SCENARIO: PatrolScenario = {
           response:
             "Casey hovers nearby, unsure whether to grab gear, manage traffic, or just watch, and ends up doing a little of each.",
           debriefNote:
-            "Left the task open-ended — Casey stayed willing to help but had no specific direction to act on.",
+            "Left the task open-ended: Casey stayed willing to help but had no specific direction to act on.",
         },
       ],
     },

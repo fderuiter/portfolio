@@ -414,7 +414,7 @@ export const SPONSOR_REQUESTS: readonly SponsorRequest[] = [
     id: "friday-455",
     from: "Chad",
     role: "VP, Clinical Operations",
-    subject: "Fri 4:55 PM — quick call?",
+    subject: "Fri 4:55 PM: quick call?",
     body: "Won't take long. Just want to 'pick your brain' about 'a few things'.",
     deadlineSeconds: 14,
     choices: [

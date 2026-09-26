@@ -6,13 +6,13 @@ Accepted on 2026-09-13. Extends ADR 0005 (Continuous Accessibility Auditing Fram
 
 ## Context
 
-Standard web typography frequently defaults to neo-grotesque sans-serifs (such as Inter, Helvetica, or Roboto) that prioritize geometric uniformity over character distinction. For readers with dyslexia and cognitive reading fatigue—including Frederick's brother—these uniform glyphs create acute perceptual friction:
+Standard web typography frequently defaults to neo-grotesque sans-serifs (such as Inter, Helvetica, or Roboto) that prioritize geometric uniformity over character distinction. For readers with dyslexia and cognitive reading fatigue (including Frederick's brother), these uniform glyphs create acute perceptual friction:
 
 1. **Character Ambiguity**: Mirrored letterforms (`b`/`d`, `p`/`q`), identical vertical stems (`I`, `l`, `1`), and circular glyphs (`0`, `O`) easily rotate or blur in mental processing.
 2. **Visual Crowding**: Tight letter tracking and dense line spacing cause line-skipping and cognitive exhaustion.
 3. **Aesthetic Alienation**: Portfolios and technical applications routinely sacrifice human readability for minimalist aesthetic tropes.
 
-The portfolio requires a typographic foundation that reflects Frederick's core philosophy—building reliable, accessible systems for the people he loves first—without compromising high-assurance engineering rigor.
+The portfolio requires a typographic foundation that reflects Frederick's core philosophy (building reliable, accessible systems for the people he loves first) without compromising high-assurance engineering rigor.
 
 ## Decision
 

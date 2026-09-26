@@ -475,3 +475,36 @@ Fictional teaching material; nothing in the game is clinical or regulatory advic
 - **Non-Reflowing Dimension Estimation**: Prioritizing non-blocking ResizeObserver entries (`entry.contentRect.width`) and cached metrics over synchronous DOM layout queries during React hydration.
 - **Route-Scoped CSS Partitioning**: Decoupling heavyweight route-specific animation and cabinet styling (such as arcade tokens, CRT scanlines, and landscape orientation media queries) into dedicated route stylesheets (`app/arcade/arcade.css`) imported by route layouts (`app/arcade/layout.tsx`), minimizing the critical render-blocking CSS payload on the root landing page (`/`).
 - **Throttled Mobile Benchmark Profile**: Standardized Chrome DevTools Protocol (CDP) emulation profile (4x CPU slowdown, 1.6 Mbps download, 750 kbps upload, 150 ms RTT) configured in page benchmarking tooling (`scripts/benchmark-pages.ts`, `lib/dx/page-bench.ts`) providing reproducible Core Web Vitals evidence under constrained mobile network and CPU conditions.
+
+## Editorial & Prose Punctuation Standard
+
+Authored reader-facing prose across the portfolio avoids em-dash punctuation. Sentences rely instead on positive syntactic structure: colons introduce explanations or subtitles, commas separate dependent clauses, semicolons join closely paired assertions, and periods mark distinct complete thoughts.
+
+### Display Contracts & Invariant Boundaries
+
+Not every horizontal bar represents prose punctuation. To prevent destructive global character replacements, maintain a strict boundary between authored prose and functional code or data artifacts:
+
+- **Missing-Value Placeholders**: Constants such as `NOT_ESTIMABLE = "—"` in clinical calculation engines, empty table cells (`| — |`) in inventory reports, and UI fallback indicators (`{value || "—"}`) are semantic display contracts. They are not prose and must remain unchanged.
+- **Syntax, Code Identifiers & Regex**: Property keys, terminal prompt formatting, and regular expressions containing unicode characters or escape sequences are out of scope.
+- **Verbatim Legal Text & Quotes**: Third-party license agreements (for example, `public/files/LICENSE.txt`) and exact historical citations remain unchanged.
+
+### Context-Sensitive Replacement Matrix
+
+When refactoring authored copy, select replacement punctuation based on the grammatical relationship and semantic intent of the sentence:
+
+| Syntactic Context                       | Target Punctuation                            | Before (Em-Dash)                                      | After (Positive Replacement)                            |
+| :-------------------------------------- | :-------------------------------------------- | :---------------------------------------------------- | :------------------------------------------------------ |
+| **Title / Subtitle & Mode Tooltips**    | Colon (`:`)                                   | `Technical Reading Mode — Deep-dive architecture`     | `Technical Reading Mode: Deep-dive architecture`        |
+| **Metadata Tags & Status Delimiters**   | Middle Dot (`·`) or Hyphen (`-`)              | `${study.primary_language} — ${study.tags}`           | `${study.primary_language} · ${study.tags}`             |
+| **Date Ranges & Temporal Spans**        | Preposition ("to")                            | `March 2023 — Present`                                | `March 2023 to Present`                                 |
+| **Dialogue & Radio Transmissions**      | Colon (`:`) or Semicolon (`;`)                | `Patrol 6, radio check — what's your status?`         | `Patrol 6, radio check: what is your status?`           |
+| **Conversational Thought Interruption** | Semicolon (`;`), Period (`.`), or Comma (`,`) | `Vitals are stable — we'll self-transport.`           | `Vitals are stable; we will self-transport.`            |
+| **Quotation Attributions**              | Typography / `<cite>` Tag                     | `"${q.quote}" — ${q.author}`                          | `"${q.quote}"` with `<cite>by ${q.author}</cite>`       |
+| **Parenthetical Elaboration**           | Parentheses or Sentence Split                 | `Tuning systems—like prompt engineering—takes rigor.` | `Tuning systems (like prompt engineering) takes rigor.` |
+
+### Editorial Governance & Workflow Invariants
+
+- **Accessible Name Parity**: In interactive navigation and toggle controls, maintain 100% semantic parity between `aria-label` descriptions and hover `title` tooltips.
+- **Documentation Synchronization**: When editing exported JSDoc comments or public API descriptions, regenerate TypeDoc markdown using `npm run compile-docs` and verify zero drift with `npm run check-docs-drift`.
+- **Database-Backed CMS Content**: Update repository-controlled seed data (`prisma/seed.ts`) and static fallbacks (`lib/fallback-blog-posts.ts`) within the pull request. For live Neon PostgreSQL records, provide an explicit record-by-record checklist for the content owner to update through the authorized `/admin` CMS flow.
+- **Verification Standard**: Verify copy changes with desktop and narrow-mobile smoke tests (320px viewport clearance) to ensure replacement punctuation introduces no text overflow or layout wrapping regressions.

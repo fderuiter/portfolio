@@ -304,7 +304,7 @@ export const LogicRulesTab: React.FC<LogicRulesTabProps> = ({
                           className="px-1.5 py-0.2 rounded bg-red-950/50 text-red-400 border border-red-800 font-bold"
                           title={rule.unsupportedExpression.reason}
                         >
-                          Unsupported expression — will not fire
+                          Unsupported expression: will not fire
                         </span>
                       )}
                     </div>

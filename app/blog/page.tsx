@@ -56,7 +56,7 @@ export default async function BlogIndexPage() {
               No dispatches published yet.
             </p>
             <p className="text-xs text-zinc-500 font-mono">
-              The first posts are on the way — in the meantime, the{" "}
+              The first posts are on the way. In the meantime, the{" "}
               <Link
                 href="/case-studies"
                 className="text-brand-cyan hover:underline"

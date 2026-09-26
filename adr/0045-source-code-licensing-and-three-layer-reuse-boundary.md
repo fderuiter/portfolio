@@ -19,7 +19,7 @@ covering the Laser Loon brand artwork. That grant is narrow by construction
 and says nothing about `app/`, `lib/`, `components/`, or anything else that
 compiles. Under default copyright, unlicensed source published to a public
 GitHub repository grants a reader the right to view and fork within GitHub,
-and nothing else — no right to run, modify, or redistribute it. A portfolio
+and nothing else: no right to run, modify, or redistribute it. A portfolio
 whose stated purpose is to be read as evidence of engineering craft cannot
 sit behind that default: the only thing a reader may legally do with the work
 is look at it.
@@ -43,7 +43,7 @@ this repository cannot afford: a wholesale clone redeployed under the
 original name is a live impersonation surface, not a licensing abstraction.
 
 **The reuse that is actually wanted is permissive.** Copyleft (GPL/AGPL)
-would deter the specific outcome this repository exists to produce — another
+would deter the specific outcome this repository exists to produce: another
 engineer lifting the CRF evaluator or the invariant-doctor pattern into their
 own work. Copyleft solves a problem this project does not have, at the cost
 of the one it does want.
@@ -54,7 +54,7 @@ of the one it does want.
 `LICENSE` carries the unmodified Apache-2.0 text with the appendix
 boilerplate completed as `Copyright 2026 Frederick de Ruiter`.
 `package.json` declares `"license": "Apache-2.0"` while remaining
-`"private": true` — the SPDX identifier is metadata for readers and tooling,
+`"private": true`; the SPDX identifier is metadata for readers and tooling,
 not an npm publication signal.
 
 Apache-2.0 over MIT for two clauses that are doing real work here:
@@ -115,7 +115,7 @@ takedown, not prevention.
 
 Apache-2.0 is one-way in practice: grants already made cannot be retracted
 from copies already distributed. Future relicensing binds only future
-releases, and only while the copyright remains single-author — accepting
+releases, and only while the copyright remains single-author. Accepting
 outside contributions under inbound = outbound makes a later license change
 require contributor consent. This is the intended trade and the reason the
 decision was worth an ADR rather than a dropped-in file.
