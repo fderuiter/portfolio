@@ -94,6 +94,26 @@ The time origin the draft's axis starts at. The SAP fixes it at 0.
 
 #### Type Literal
 
+\{ `columns`: `string`[]; `kind`: `"TABLE"`; `rows`: `object`[]; \}
+
+##### columns
+
+`string`[] = `...`
+
+One column for a pooled table (Total only), else the arms.
+
+##### kind
+
+`"TABLE"` = `...`
+
+##### rows
+
+`object`[] = `...`
+
+***
+
+#### Type Literal
+
 \{ `atRisk?`: \{ `rows`: `object`[]; `times`: `number`[]; \}; `kind`: `"FIGURE"`; `plot`: \{ `series`: `object`[]; `type`: `"KM"`; \} \| \{ `series`: `object`[]; `type`: `"SPARKLINE"`; \} \| \{ `intervals`: `object`[]; `reference`: `number`; `type`: `"FOREST"`; \}; `source?`: `string`; \}
 
 ##### atRisk?

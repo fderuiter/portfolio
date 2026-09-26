@@ -798,7 +798,8 @@ export const CardFaceSchema = z
   .discriminatedUnion("kind", [
     z.object({
       kind: z.literal("TABLE"),
-      columns: z.array(faceText).min(2).max(3),
+      /** One column for a pooled table (Total only), else the arms. */
+      columns: z.array(faceText).min(1).max(3),
       rows: z
         .array(z.object({ label: faceText, values: z.array(faceText) }))
         .min(3)

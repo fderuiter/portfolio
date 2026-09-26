@@ -15,9 +15,8 @@ face down. Stage 2 is the independent statistician's closed report: once
 Stage 1 is defended the closed session convenes, the by-arm tables and
 their Kaplan–Meier figures turn face up, and only an Efficacy Full House
 defends it. Its quota is set so that only a closed report whose figures
-reconcile clears it. Peeking early zeroes a hand. It is played on its own
-until the campaign links the acts and Act II's boss pool draws it. It
-reads Act I's fictional study data.
+reconcile clears it. Peeking early zeroes a hand. It is one of the two
+Bosses Act II's pool draws from. It reads Act I's fictional study data.
 
 ## Type Declaration
 

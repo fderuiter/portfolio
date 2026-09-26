@@ -16,12 +16,14 @@ import { writeFileSync } from "node:fs";
 import { beforeAll, describe, it, expect } from "vitest";
 import {
   ACT_I,
+  ACT_II,
   DMC_MILESTONE_SCENARIO,
   FDA_IR_SCENARIO,
   advanceRun,
   createRunState,
   createTableState,
   deriveRunView,
+  type Act,
   type RunState,
   type Scenario,
   type TableAction,
@@ -63,6 +65,18 @@ const BANDS: Record<string, Record<BotStyle, Band>> = {
     PERFECT: "ALL",
   },
   "dose-escalation-boss-blind": {
+    SLOPPY: "FEW",
+    HASTY: "FEW",
+    MEDIAN: "MOST",
+    PERFECT: "ALL",
+  },
+  "phase-two-internal-qc-small-blind": {
+    SLOPPY: "FEW",
+    HASTY: "FEW",
+    MEDIAN: "MOST",
+    PERFECT: "ALL",
+  },
+  "dmc-open-session-big-blind": {
     SLOPPY: "FEW",
     HASTY: "FEW",
     MEDIAN: "MOST",
@@ -140,12 +154,12 @@ function measure(
   return { samples, perfectLine };
 }
 
-/** Plays Act I on one seed, measuring every Blind as the run reaches it. */
-function sampleAct(seed: string): Sample[] {
+/** Plays an act on one seed, measuring every Blind as the run reaches it. */
+function sampleAct(act: Act, seed: string): Sample[] {
   const samples: Sample[] = [];
-  let run: RunState = createRunState(ACT_I, seed);
+  let run: RunState = createRunState(act, seed);
   for (;;) {
-    const view = deriveRunView(ACT_I, run);
+    const view = deriveRunView(act, run);
     const measured = measure(view.blind, run.table, seed);
     samples.push(...measured.samples);
     // The perfect line carries the run, and its tray, to the next Blind.
@@ -155,10 +169,10 @@ function sampleAct(seed: string): Sample[] {
       if (run.table.status !== "REVIEWING") break;
       // The bot never resets a table; a run has no RESET.
       if (action.type === "RESET") continue;
-      run = advanceRun(ACT_I, run, action);
+      run = advanceRun(act, run, action);
     }
     if (run.table.status !== "CLEARED" || !view.nextBlind) break;
-    run = advanceRun(ACT_I, run, { type: "NEXT_BLIND" });
+    run = advanceRun(act, run, { type: "NEXT_BLIND" });
   }
   return samples;
 }
@@ -194,7 +208,8 @@ function report(): string {
 describe("balance harness", () => {
   beforeAll(() => {
     SAMPLES = [
-      ...SEEDS.flatMap(sampleAct),
+      ...SEEDS.flatMap((seed) => sampleAct(ACT_I, seed)),
+      ...SEEDS.flatMap((seed) => sampleAct(ACT_II, seed)),
       ...measure(
         DMC_MILESTONE_SCENARIO,
         createTableState(DMC_MILESTONE_SCENARIO),
@@ -209,15 +224,20 @@ describe("balance harness", () => {
     if (process.env.TE_BALANCE_REPORT) {
       writeFileSync(process.env.TE_BALANCE_REPORT, `${report()}\n`);
     }
-  }, 120_000);
+  }, 300_000);
 
-  it("reaches every Blind in Act I on every seed, and the DMC boss", () => {
+  it("reaches every Blind in Acts I and II on every seed, and both bosses", () => {
     for (const blindId of Object.keys(BANDS)) {
       expect(SAMPLES.some((s) => s.blindId === blindId)).toBe(true);
     }
     const reached = (id: string) =>
       new Set(SAMPLES.filter((s) => s.blindId === id).map((s) => s.seed)).size;
     expect(reached("dose-escalation-boss-blind")).toBe(SEEDS.length);
+    expect(reached("dmc-open-session-big-blind")).toBe(SEEDS.length);
+    // Act II's pool draws each boss on some seeds; both are also measured
+    // on their own.
+    expect(reached("dmc-milestone-boss-blind")).toBeGreaterThan(1);
+    expect(reached("fda-information-request-boss-blind")).toBeGreaterThan(1);
   });
 
   it.each(Object.entries(BANDS))(
@@ -252,8 +272,11 @@ describe("balance harness", () => {
     }
   });
 
-  it("is deterministic from seed", { timeout: 60_000 }, () => {
-    const again = sampleAct(SEEDS[0]);
+  it("is deterministic from seed", { timeout: 150_000 }, () => {
+    const again = [
+      ...sampleAct(ACT_I, SEEDS[0]),
+      ...sampleAct(ACT_II, SEEDS[0]),
+    ];
     expect(again).toEqual(SAMPLES.filter((s) => s.seed === SEEDS[0]));
   });
 
