@@ -58,6 +58,20 @@ Face data. Draft cards derive their face from the draft table instead.
 
 \{ `columns`: `string`[]; `kind`: `"TABLE"`; `rows`: `object`[]; \}
 
+###### columns
+
+> **columns**: `string`[]
+
+One column for a pooled table (Total only), else the arms.
+
+###### kind
+
+> **kind**: `"TABLE"`
+
+###### rows
+
+> **rows**: `object`[]
+
 ***
 
 ###### Type Literal
@@ -222,6 +236,20 @@ The live mini-output printed on the card, as currently reviewed.
 ##### Type Literal
 
 \{ `columns`: `string`[]; `kind`: `"TABLE"`; `rows`: `object`[]; \}
+
+##### columns
+
+> **columns**: `string`[]
+
+One column for a pooled table (Total only), else the arms.
+
+##### kind
+
+> **kind**: `"TABLE"`
+
+##### rows
+
+> **rows**: `object`[]
 
 ***
 

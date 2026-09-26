@@ -44,6 +44,18 @@ Re-exports [ACT_I_SHOP](scenarios/variables/ACT_I_SHOP.md)
 
 ***
 
+### ACT\_II
+
+Re-exports [ACT_II](scenarios/variables/ACT_II.md)
+
+***
+
+### ACT\_II\_CRISES
+
+Re-exports [ACT_II_CRISES](scenarios/variables/ACT_II_CRISES.md)
+
+***
+
 ### ActSchema
 
 Re-exports [ActSchema](types/variables/ActSchema.md)
@@ -545,6 +557,12 @@ Re-exports [DeskView](internal/desk/interfaces/DeskView.md)
 ### DMC\_MILESTONE\_SCENARIO
 
 Re-exports [DMC_MILESTONE_SCENARIO](scenarios/variables/DMC_MILESTONE_SCENARIO.md)
+
+***
+
+### DMC\_OPEN\_SESSION\_SCENARIO
+
+Re-exports [DMC_OPEN_SESSION_SCENARIO](scenarios/variables/DMC_OPEN_SESSION_SCENARIO.md)
 
 ***
 
@@ -1079,6 +1097,12 @@ Re-exports [PackSlot](internal/run/interfaces/PackSlot.md)
 ### parseRunSave
 
 Re-exports [parseRunSave](internal/save/functions/parseRunSave.md)
+
+***
+
+### PHASE\_II\_QC\_SCENARIO
+
+Re-exports [PHASE_II_QC_SCENARIO](scenarios/variables/PHASE_II_QC_SCENARIO.md)
 
 ***
 

@@ -6,7 +6,9 @@
  * The study opens on one population snapshot; a scripted data change during
  * the sponsor review moves it to a second version. The Boss is drawn from
  * the act's Boss pool, and every Blind after the first opens on a card from
- * the crisis deck (T&E-05). All subjects, events, values and
+ * the crisis deck (T&E-05). Act II, the Phase II proof of concept, plays
+ * internal QC and the DMC's open session under a new SAP, then draws its
+ * Boss from a pool of two (#1084). All subjects, events, values and
  * rules are fictional teaching material. They supply game context only and
  * are not clinical or regulatory advice.
  */
@@ -29,6 +31,7 @@ import type {
   TlfCard,
 } from "./types";
 import { GUIDANCE_CARDS } from "./internal/guidance";
+import { roundRatio } from "./internal/rounding";
 
 const snapshotId = "SNAP-P1-v1";
 
@@ -163,13 +166,13 @@ const row = (id: string, label: string, statistic: RowStatistic): Row => ({
 const N_ROW = row("n", "Subjects, N", { kind: "POPULATION_N" });
 
 const draftOf =
-  (shellId: string, rows: Row[]) =>
+  (shellId: string, rows: Row[], cols: StagedTable["columns"] = columns) =>
   (id: string, draftLabel: string, cells: string[][]): StagedTable => ({
     id,
     shellId,
     draftLabel,
     populationSnapshotId: snapshotId,
-    columns,
+    columns: cols,
     rows,
     cells,
   });
@@ -588,18 +591,23 @@ export const DEMOGRAPHICS_SCENARIO: Scenario = {
 // Safety outputs shared by the Big and Boss Blinds.
 // ---------------------------------------------------------------------------
 
-/** A safety rulebook: Safety population, 1 dp, half-to-even. */
+/**
+ * A safety rulebook: Safety population, half-to-even, and incidence
+ * percentages to `percentPrecision` decimal places (1 unless a SAP says
+ * otherwise).
+ */
 const safetyRulebook = (
   id: string,
   title: string,
   rulePrefix: string,
-  precisionBonus: number
+  precisionBonus: number,
+  percentPrecision = 1
 ): SapRulebook => ({
   id,
   title,
   populationSuit: "SAFETY",
   populationAliases: [],
-  percentPrecision: 1,
+  percentPrecision,
   meanPrecision: 1,
   roundingMode: "HALF_EVEN",
   rules: [
@@ -618,7 +626,10 @@ const safetyRulebook = (
       id: `${rulePrefix}-02`,
       category: "PRECISION",
       severity: "MINOR",
-      statement: "Incidence percentages are reported to 1 decimal place.",
+      statement:
+        percentPrecision === 0
+          ? "Incidence percentages are reported as whole numbers, with no decimal places."
+          : `Incidence percentages are reported to ${percentPrecision} decimal place${percentPrecision === 1 ? "" : "s"}.`,
       consequence: `Inconsistent precision implies accuracy the data does not have. Redline: −1 Mult; correcting it earns +${precisionBonus} Mult.`,
       correctionMultBonus: precisionBonus,
       redlineMultPenalty: 1,
@@ -651,10 +662,11 @@ const shellOf = (
   rulebookId: string,
   id: string,
   title: string,
-  chips: number
+  chips: number,
+  tableNumber = `Table ${id.slice(2)}`
 ): TableShellSpec => ({
   id,
-  tableNumber: `Table ${id.slice(2)}`,
+  tableNumber,
   title,
   cardType: "TABLE",
   targetPopulation: "SAFETY",
@@ -735,6 +747,22 @@ const CLEAN = {
   ],
   skin: [N, ACTIVE_ONE, ACTIVE_ONE],
 };
+
+/**
+ * Reprints clean 1-dp cells at another percent precision, from each
+ * column's N (row 0 of every safety output).
+ */
+const atPrecision = (clean: string[][], precision: number): string[][] =>
+  precision === 1
+    ? clean
+    : clean.map((cells, r) =>
+        r === 0
+          ? cells
+          : cells.map((cell, c) => {
+              const n = Number(/^(\d+) \(/.exec(cell)?.[1]);
+              return `${n} (${roundRatio(n * 100, Number(clean[0][c]), precision, "HALF_EVEN")})`;
+            })
+      );
 
 /** Copies clean cells and overwrites the given `row:col` cells. */
 const withDefects = (
@@ -857,9 +885,15 @@ const SAFETY_OUTPUTS = {
 >;
 type SafetyOutput = keyof typeof SAFETY_OUTPUTS;
 
+/** Only the Total column: a pooled output shows no treatment arm. */
+const POOLED_COLUMNS = columns.filter((c) => c.arm === "TOTAL");
+
 /**
  * Builds a safety Blind's shells, staged drafts and draft cards from a list
  * of drafts: which output, which version letter, and the defective cells.
+ * `percentPrecision` reprints the clean cells for a rulebook that is not
+ * 1 dp. `pooled` keeps only the Total column, on its own shells; a defect's
+ * column is then 0. `blinded` makes the shells closed-session outputs.
  */
 function safetyDrafts(
   rulebookId: string,
@@ -868,28 +902,50 @@ function safetyDrafts(
     version: string;
     label: string;
     defects?: Record<string, string>;
-  }[]
+  }[],
+  options: {
+    percentPrecision?: number;
+    pooled?: boolean;
+    blinded?: boolean;
+  } = {}
 ) {
+  const { percentPrecision = 1, pooled = false, blinded = false } = options;
   const shells = new Map<SafetyOutput, TableShellSpec>();
   const drawPile: StagedTable[] = [];
   const cards = new Map<string, TlfCard>();
   for (const { output, version, label, defects } of drafts) {
     const spec = SAFETY_OUTPUTS[output];
-    const shell =
-      shells.get(output) ??
-      shellOf(rulebookId, spec.id, spec.title, spec.chips);
+    const shellId = pooled ? `${spec.id}-POOLED` : spec.id;
+    const shell = shells.get(output) ?? {
+      ...shellOf(
+        rulebookId,
+        shellId,
+        pooled ? `${spec.title}, pooled` : spec.title,
+        spec.chips,
+        `Table ${spec.id.slice(2)}${pooled ? " (Pooled)" : ""}`
+      ),
+      ...(blinded ? { isBlinded: true } : {}),
+    };
     shells.set(output, shell);
-    const staged = draftOf(spec.id, spec.rows)(
-      `${spec.id}-${version}`,
+    const clean = atPrecision(CLEAN[output], percentPrecision);
+    const staged = draftOf(
+      shellId,
+      spec.rows,
+      pooled ? POOLED_COLUMNS : columns
+    )(
+      `${shellId}-${version}`,
       label,
-      withDefects(CLEAN[output], defects ?? {})
+      withDefects(
+        pooled ? clean.map((cells) => cells.slice(-1)) : clean,
+        defects ?? {}
+      )
     );
     drawPile.push(staged);
     cards.set(
       `${output}-${version}`,
       draftCard(staged, shell, {
         ...spec.card,
-        title: `${spec.card.title} (Draft ${version})`,
+        title: `${spec.card.title}${pooled ? ", pooled" : ""} (Draft ${version})`,
       })
     );
   }
@@ -1677,9 +1733,8 @@ export const DMC_RELICS: Relic[] = [
  * Stage 1 is defended the closed session convenes, the by-arm tables and
  * their Kaplan–Meier figures turn face up, and only an Efficacy Full House
  * defends it. Its quota is set so that only a closed report whose figures
- * reconcile clears it. Peeking early zeroes a hand. It is played on its own
- * until the campaign links the acts and Act II's boss pool draws it. It
- * reads Act I's fictional study data.
+ * reconcile clears it. Peeking early zeroes a hand. It is one of the two
+ * Bosses Act II's pool draws from. It reads Act I's fictional study data.
  */
 export const DMC_MILESTONE_SCENARIO: Scenario & { encounter: DmcDefense } = {
   id: "dmc-milestone-boss-blind",
@@ -1800,8 +1855,8 @@ const FDA_IR_SAE = pick(FDA_IR.cards, "sae-E");
  * The response is due in 48 hours and must go in at most 2 hands; every move
  * takes hours, and the clock running out first is a Clinical Hold, which
  * ends the run. Each targeted question names the output that answers it. It
- * is played on its own until Act II's boss pool draws it (#1084). It reads
- * Act I's fictional study data.
+ * is one of the two Bosses Act II's pool draws from. It reads Act I's
+ * fictional study data.
  */
 export const FDA_IR_SCENARIO: Scenario & { encounter: FdaIr } = {
   id: "fda-information-request-boss-blind",
@@ -1867,14 +1922,354 @@ export const FDA_IR_SCENARIO: Scenario & { encounter: FdaIr } = {
   },
 };
 
+// ---------------------------------------------------------------------------
+// Act II: Phase II Proof of Concept (#1084).
+// ---------------------------------------------------------------------------
+
+/**
+ * Act II's SAP. The Phase II SAP reports incidence percentages as whole
+ * numbers, so an output carried over from Phase I, printed to 1 dp, is a
+ * precision redline until it is recompiled against this version.
+ */
+const PHASE_II_RULEBOOK = safetyRulebook(
+  "SAP-P2-001",
+  "Phase II SAP §9 Safety Outputs",
+  "SAP-P2",
+  3,
+  0
+);
+
+const P2 = { percentPrecision: 0 };
+
+const INTERNAL_QC = safetyDrafts(
+  PHASE_II_RULEBOOK.id,
+  [
+    // Carried over from Phase I: every percentage still printed to 1 dp.
+    {
+      output: "overview",
+      version: "A",
+      label: "Phase I carry-over (v0.9)",
+      defects: {
+        "1:0": "3 (50.0)",
+        "1:1": "5 (83.3)",
+        "1:2": "8 (66.7)",
+        "2:1": "2 (33.3)",
+        "4:1": "1 (16.7)",
+      },
+    },
+    { output: "sae", version: "A", label: "Draft A (v0.1)" },
+    // S-010's syncope and dizziness counted as two subjects.
+    {
+      output: "nervous",
+      version: "A",
+      label: "Draft A (v0.1)",
+      defects: { "1:1": "3 (50)", "1:2": "4 (33)" },
+    },
+    { output: "overview", version: "B", label: "Draft B (v0.2)" },
+    { output: "cardiac", version: "A", label: "Draft A (v0.1)" },
+    { output: "gi", version: "A", label: "Draft A (v0.1)" },
+    // Reruns at the bottom of the deck.
+    { output: "sae", version: "B", label: "Draft B (v0.2)" },
+    // Total column divided by the Per-Protocol N.
+    {
+      output: "general",
+      version: "A",
+      label: "Draft A (v0.1)",
+      defects: {
+        "0:2": "9",
+        "1:2": "2 (22)",
+        "2:2": "2 (22)",
+        "3:2": "1 (11)",
+      },
+    },
+  ],
+  P2
+);
+
+/**
+ * Small Blind. The study team's own QC of the first Phase II outputs, under
+ * the new SAP. The Kaplan-Meier figures now arrive in ordinary play, each
+ * drawn from a Table in the deck, so reconciling a figure against its
+ * parent pays here. Draft A of the AE overview is a Phase I carry-over,
+ * still printed to 1 dp.
+ */
+export const PHASE_II_QC_SCENARIO: Scenario = {
+  id: "phase-two-internal-qc-small-blind",
+  title: "Phase II Internal QC",
+  summary:
+    "The study team QCs the first Phase II safety outputs and their Kaplan-Meier figures under the new SAP.",
+  intro:
+    "Phase II has a new SAP: incidence percentages are whole numbers now. Anything carried over from Phase I still prints 1 dp. The Kaplan-Meier figures arrive with their parent Tables; a figure that disagrees with its Table loses Mult.",
+  blind: {
+    tier: "SMALL_BLIND",
+    name: "Small Blind: Phase II Internal QC",
+    quota: 16000,
+  },
+  handType: "HIGH_TABLE",
+  startingCpu: 6,
+  table: { startingCpu: 10, handSize: 8, maxSelection: 5 },
+  deck: [
+    pick(INTERNAL_QC.cards, "overview-A"),
+    AE_LISTING,
+    pick(INTERNAL_QC.cards, "sae-A"),
+    kmSae("C-T14.3.3-A"),
+    SAE_LISTING,
+    pick(INTERNAL_QC.cards, "nervous-A"),
+    DISPOSITION,
+    pick(INTERNAL_QC.cards, "overview-B"),
+    kmDiscontinuation("C-T14.3.1-B"),
+    DISCONTINUED_LISTING,
+    pick(INTERNAL_QC.cards, "cardiac-A"),
+    DM_LISTING,
+    pick(INTERNAL_QC.cards, "gi-A"),
+    pick(INTERNAL_QC.cards, "sae-B"),
+    pick(INTERNAL_QC.cards, "general-A"),
+  ],
+  rulebook: PHASE_II_RULEBOOK,
+  populationSnapshot: POPULATION_SNAPSHOT,
+  shells: INTERNAL_QC.shells,
+  drawPile: INTERNAL_QC.drawPile,
+};
+
+// The open report: pooled outputs, Total column only.
+const OPEN_REPORT = safetyDrafts(
+  PHASE_II_RULEBOOK.id,
+  [
+    { output: "overview", version: "A", label: "Open report (v1.0)" },
+    // S-007's nausea and vomiting counted as two subjects.
+    {
+      output: "gi",
+      version: "A",
+      label: "Open report (v1.0)",
+      defects: { "1:0": "3 (25)" },
+    },
+    { output: "nervous", version: "A", label: "Open report (v1.0)" },
+    // One SAE too many.
+    {
+      output: "sae",
+      version: "A",
+      label: "Open report (v1.0)",
+      defects: { "1:0": "4 (33)" },
+    },
+    { output: "general", version: "A", label: "Open report (v1.0)" },
+  ],
+  { ...P2, pooled: true }
+);
+
+// The closed report: by-arm outputs, face down in the open session.
+const CLOSED_REPORT = safetyDrafts(
+  PHASE_II_RULEBOOK.id,
+  [
+    { output: "overview", version: "C", label: "Closed report (v1.0)" },
+    // A 1-dp slip in the Active column.
+    {
+      output: "sae",
+      version: "C",
+      label: "Closed report (v1.0)",
+      defects: { "1:1": "2 (33.3)" },
+    },
+  ],
+  { ...P2, blinded: true }
+);
+
+/**
+ * Big Blind. The Data Monitoring Committee's open session: pooled outputs
+ * only, face up. The by-arm closed report is dealt face down, and so are the
+ * Kaplan-Meier figures drawn from it. Structural QC reads a face-down
+ * output's shape without its values; once every one in hand has had it, the
+ * DMC can convene the closed session and turn them face up. A peek before
+ * then zeroes the next hand.
+ */
+export const DMC_OPEN_SESSION_SCENARIO: Scenario = {
+  id: "dmc-open-session-big-blind",
+  title: "DMC Open Session",
+  summary:
+    "The Data Monitoring Committee's open session: pooled Phase II outputs face up, the by-arm closed report face down.",
+  intro:
+    "The DMC's open session sees pooled outputs only. The by-arm closed report and its Kaplan-Meier figures are dealt face down: run structural QC on them, then convene the closed session to turn them up. A peek before then zeroes a hand.",
+  blind: {
+    tier: "BIG_BLIND",
+    name: "Big Blind: DMC Open Session",
+    quota: 11000,
+  },
+  handType: "HIGH_TABLE",
+  startingCpu: 6,
+  table: { startingCpu: 12, handSize: 8, maxSelection: 5 },
+  deck: [
+    pick(OPEN_REPORT.cards, "overview-A"),
+    AE_LISTING,
+    pick(CLOSED_REPORT.cards, "sae-C"),
+    pick(OPEN_REPORT.cards, "gi-A"),
+    kmSae("C-T14.3.3-C"),
+    SAE_LISTING,
+    pick(OPEN_REPORT.cards, "sae-A"),
+    DISPOSITION,
+    pick(CLOSED_REPORT.cards, "overview-C"),
+    kmDiscontinuation("C-T14.3.1-C"),
+    pick(OPEN_REPORT.cards, "nervous-A"),
+    DISCONTINUED_LISTING,
+    pick(OPEN_REPORT.cards, "general-A"),
+    DM_LISTING,
+  ],
+  rulebook: PHASE_II_RULEBOOK,
+  populationSnapshot: POPULATION_SNAPSHOT,
+  shells: [...OPEN_REPORT.shells, ...CLOSED_REPORT.shells],
+  drawPile: [...OPEN_REPORT.drawPile, ...CLOSED_REPORT.drawPile],
+  dmc: { charter: "DMC Charter §5 (open and closed sessions)" },
+};
+
+/** Act II's crisis deck. Every card has one choice that costs nothing. */
+export const ACT_II_CRISES: CrisisCard[] = [
+  {
+    id: "CR-P2-FUTILITY-LOOK",
+    name: "Futility Look",
+    description:
+      "The DMC asks for an unplanned futility look before the interim. The sponsor will pay for the extra work.",
+    choices: [
+      {
+        id: "accept",
+        label: "Run the futility look",
+        consequence:
+          "Earn $2k of study budget, but this Blind allows only 3 hands.",
+        effect: {
+          budget: 2,
+          modifier: {
+            id: "CR-P2-FUTILITY-HANDS",
+            name: "Futility Look",
+            description: "The look takes the slot of one submission: 3 only.",
+            debuffType: "HAND_LIMIT",
+            maxHandsAllowed: 3,
+          },
+        },
+      },
+      {
+        id: "decline",
+        label: "Hold to the charter",
+        consequence: "Writing the DMC chair a rationale costs −1 CPU.",
+        effect: { cpu: -1 },
+      },
+    ],
+  },
+  {
+    id: "CR-P2-CRO-HANDOVER",
+    name: "CRO Handover",
+    description:
+      "Statistical programming moves to a new CRO mid-study. Their team reruns every program from a fresh checkout.",
+    choices: [
+      {
+        id: "handover",
+        label: "Hand over now",
+        consequence: "Discard costs +1 CPU for this Blind.",
+        effect: {
+          modifier: {
+            id: "CR-P2-HANDOVER-DISCARD",
+            name: "CRO Handover",
+            description: "Every rerun goes through the new team: +1 CPU.",
+            debuffType: "DISCARD_PENALTY",
+            discardCpuPenalty: 1,
+          },
+        },
+      },
+      {
+        id: "parallel",
+        label: "Run both teams in parallel",
+        consequence: "Costs $3k of study budget.",
+        effect: { budget: -3 },
+      },
+      {
+        id: "footnote",
+        label: "Document it in a footnote",
+        consequence: "Spends the first footnote seal in your tray.",
+        effect: { spendSeal: true },
+      },
+    ],
+  },
+  {
+    id: "CR-P2-PHARMACIST",
+    name: "Unblinded Pharmacist",
+    description:
+      "A site pharmacist copied the study team on a kit reassignment. The DMC wants the firewall breach reviewed before it meets.",
+    choices: [
+      {
+        id: "report",
+        label: "Report it to the DMC",
+        consequence:
+          "The DMC reviews the breach in session: this Blind allows only 3 hands.",
+        effect: {
+          modifier: {
+            id: "CR-P2-PHARMACIST-HANDS",
+            name: "Firewall Review",
+            description: "Session time goes to the breach: 3 submissions only.",
+            debuffType: "HAND_LIMIT",
+            maxHandsAllowed: 3,
+          },
+        },
+      },
+      {
+        id: "retrain",
+        label: "Retrain the site",
+        consequence: "An unscheduled monitoring visit: −2 CPU.",
+        effect: { cpu: -2 },
+      },
+    ],
+  },
+  {
+    id: "CR-P2-SUPPLY-DELAY",
+    name: "Drug Supply Delay",
+    description:
+      "The next shipment of study kits is held at customs, and the sponsor wants the package early to argue for a rush release.",
+    choices: [
+      {
+        id: "rush",
+        label: "Send the package early",
+        consequence:
+          "Earn $2k of study budget, but discard costs +1 CPU for this Blind.",
+        effect: {
+          budget: 2,
+          modifier: {
+            id: "CR-P2-SUPPLY-DISCARD",
+            name: "Early Package",
+            description: "No time to rerun: every discard costs +1 CPU.",
+            debuffType: "DISCARD_PENALTY",
+            discardCpuPenalty: 1,
+          },
+        },
+      },
+      {
+        id: "hold",
+        label: "Keep the agreed date",
+        consequence: "Negotiating the date costs −1 CPU.",
+        effect: { cpu: -1 },
+      },
+    ],
+  },
+];
+
+/**
+ * Act II: the Phase II proof-of-concept study. Internal QC under the new
+ * SAP, then the DMC's open session; the Boss is drawn by the run's seed
+ * from a pool of two: the DMC milestone review or the FDA's End-of-Phase-2
+ * Information Request. It reads the same fictional study data as Act I and
+ * shares its Procurement Shop. Until the campaign links the acts (#924) it
+ * is played on its own.
+ */
+export const ACT_II: Act = {
+  id: "act-2-phase-2",
+  title: "Act II: Phase II Proof of Concept",
+  blinds: [PHASE_II_QC_SCENARIO, DMC_OPEN_SESSION_SCENARIO],
+  bossPool: [DMC_MILESTONE_SCENARIO, FDA_IR_SCENARIO],
+  crisisDeck: ACT_II_CRISES,
+  shop: ACT_I_SHOP,
+};
+
 /** Every playable scenario, keyed by id. */
 export const SCENARIOS: Readonly<Record<string, Scenario>> = Object.freeze(
   Object.fromEntries(
     [
       ...ACT_I.blinds,
       ...(ACT_I.bossPool ?? []),
-      DMC_MILESTONE_SCENARIO,
-      FDA_IR_SCENARIO,
+      ...ACT_II.blinds,
+      ...(ACT_II.bossPool ?? []),
     ].map((scenario) => [scenario.id, scenario])
   )
 );
