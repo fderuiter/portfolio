@@ -12,6 +12,7 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, Reorder } from "framer-motion";
 import {
   ACT_I,
+  CLINICAL_HOLD,
   CPU_COSTS,
   HAND_LEVEL_BONUS,
   HAND_NAMES,
@@ -23,6 +24,7 @@ import {
   deriveRunView,
   previewAllocation,
   type Act,
+  type ClockAction,
   type CpuAction,
   type FootnoteSeal,
   type RestoredRun,
@@ -49,6 +51,7 @@ import { RunInfo } from "@/components/trial-and-error/RunInfo";
 import { ScoreLog } from "@/components/trial-and-error/ScoreLog";
 import { HandCheatSheet } from "@/components/trial-and-error/HandCheatSheet";
 import { BossIntro } from "@/components/trial-and-error/BossIntro";
+import { FdaClock } from "@/components/trial-and-error/FdaClock";
 import { FirewallDialog } from "@/components/trial-and-error/FirewallDialog";
 import { CashOut } from "@/components/trial-and-error/CashOut";
 import { Shop } from "@/components/trial-and-error/Shop";
@@ -841,6 +844,26 @@ export function CardTable({
       ([action]) =>
         `${COST_NAMES[action]} needs ${costFor(action, view.discardCost)} CPU; ${state.cpu.available} left.`
     );
+  // An FDA Information Request's clock: what each costed move takes.
+  const clock = view.clock;
+  const hoursFor = (action: ClockAction): string =>
+    clock ? ` · ${clock.costs[action]}h` : "";
+  if (clock && state.status === "REVIEWING") {
+    for (const [action, name, wanted] of [
+      ["DISCARD", "Discard", state.selected.length > 0],
+      [
+        "INSPECT",
+        "Inspect",
+        focusedCard?.inspectable && !focusedCard.inspected,
+      ],
+    ] as const) {
+      if (wanted && clock.hoursLeft < clock.costs[action]) {
+        costNotes.push(
+          `${name} takes ${clock.costs[action]} hours; ${clock.hoursLeft} left.`
+        );
+      }
+    }
+  }
   const costDescribedBy = costNotes.length > 0 ? "cpu-note" : undefined;
   const playDescribedBy =
     [view.playBlocker ? "play-blocker" : null, costDescribedBy]
@@ -1075,6 +1098,7 @@ export function CardTable({
               ))}
             </ol>
           )}
+          {clock && <FdaClock clock={clock} questions={view.questions} />}
           {runView.showIntro && (
             <p
               className="mt-2 border border-zinc-700 p-2 text-zinc-300 break-words"
@@ -1091,15 +1115,20 @@ export function CardTable({
             >
               {view.quota}
             </dd>
-            <dt className="text-zinc-400">Round</dt>
-            <dd className="text-right" data-testid="round-score">
-              {/* Padded with figure spaces so the right-aligned score keeps
-                  its position as digits arrive (no layout shift). */}
-              {String(displayedRound).padStart(
-                String(view.quota).length + 1,
-                FIGURE_SPACE
-              )}
-            </dd>
+            {/* In an FDA Information Request the clock is the counter. */}
+            {!clock && (
+              <>
+                <dt className="text-zinc-400">Round</dt>
+                <dd className="text-right" data-testid="round-score">
+                  {/* Padded with figure spaces so the right-aligned score
+                      keeps its position as digits arrive (no layout shift). */}
+                  {String(displayedRound).padStart(
+                    String(view.quota).length + 1,
+                    FIGURE_SPACE
+                  )}
+                </dd>
+              </>
+            )}
             <dt className="text-zinc-400">CPU</dt>
             <dd className="text-right" data-testid="cpu-counter">
               {state.cpu.available}/{scenario.table.startingCpu}
@@ -1599,7 +1628,8 @@ export function CardTable({
                   aria-describedby={playDescribedBy}
                   className={`${BUTTON_BASE} border-emerald-500 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20`}
                 >
-                  Play Hand · {CPU_COSTS.PLAY_HAND} CPU [Enter]
+                  Play Hand · {CPU_COSTS.PLAY_HAND} CPU{hoursFor("PLAY_HAND")}{" "}
+                  [Enter]
                 </button>
                 <button
                   type="button"
@@ -1608,7 +1638,7 @@ export function CardTable({
                   aria-describedby={costDescribedBy}
                   className={`${BUTTON_BASE} border-slate-400 text-slate-300 hover:bg-slate-400/10`}
                 >
-                  Discard · {view.discardCost} CPU [D]
+                  Discard · {view.discardCost} CPU{hoursFor("DISCARD")} [D]
                 </button>
                 <button
                   type="button"
@@ -1629,7 +1659,7 @@ export function CardTable({
                       Inspect {focusedCard?.card.number ?? ""} ·{" "}
                       {focusedCard?.inspected
                         ? "open"
-                        : `${CPU_COSTS.INSPECT} CPU`}{" "}
+                        : `${CPU_COSTS.INSPECT} CPU${hoursFor("INSPECT")}`}{" "}
                       [I]
                     </>
                   )}
@@ -1649,7 +1679,7 @@ export function CardTable({
                     Structural QC {focusedCard.card.number} ·{" "}
                     {focusedCard.structural
                       ? "done"
-                      : `${CPU_COSTS.INSPECT} CPU`}{" "}
+                      : `${CPU_COSTS.INSPECT} CPU${hoursFor("INSPECT")}`}{" "}
                     [S]
                   </button>
                 )}
@@ -1775,8 +1805,43 @@ export function CardTable({
                   : runView.phase === "BLIND_CLEARED" ||
                       runView.phase === "SHOP"
                     ? "Blind cleared"
-                    : "Blind failed · run over"}
+                    : clock?.hold
+                      ? `${CLINICAL_HOLD} · run over`
+                      : "Blind failed · run over"}
               </p>
+              {clock?.hold && (
+                <section
+                  aria-labelledby="clinical-hold-heading"
+                  className={`${LOUD_PRESETS.crisisSlam} mx-auto mt-3 max-w-md border-2 border-rose-400 bg-[color:var(--te-surface-1)] p-3 text-left text-xs break-words`}
+                  data-testid="clinical-hold"
+                >
+                  <p className="text-[10px] uppercase tracking-wider text-zinc-400">
+                    Regulatory correspondence (fictional study)
+                  </p>
+                  <h3
+                    id="clinical-hold-heading"
+                    className="mt-1 text-sm font-bold uppercase tracking-wider text-rose-300"
+                  >
+                    {CLINICAL_HOLD}
+                  </h3>
+                  <p className="mt-2 text-zinc-300">
+                    Your response to the End-of-Phase-2 Information Request was
+                    not received within {clock.totalHours} hours.{" "}
+                    {view.questions.filter((q) => !q.answered).length} of{" "}
+                    {view.questions.length} questions remain open. The program
+                    may not proceed to Phase III.
+                  </p>
+                  <ul className="mt-2 list-disc pl-5 text-zinc-400">
+                    {view.questions
+                      .filter((q) => !q.answered)
+                      .map((q) => (
+                        <li key={q.id}>
+                          {q.question} ({q.cardNumber})
+                        </li>
+                      ))}
+                  </ul>
+                </section>
+              )}
               <p className="mt-2 text-sm text-zinc-300 tabular-nums">
                 {state.roundScore} of {view.quota} · {state.handsPlayed} hand
                 {state.handsPlayed === 1 ? "" : "s"} played · {state.discards}{" "}
@@ -2005,6 +2070,7 @@ export function CardTable({
                   }
                   trace={view.inspection.trace}
                   onTrace={(row, col) => send({ type: "TRACE_CELL", row, col })}
+                  traceHours={clock?.costs.TRACE ?? null}
                   reducedMotion={reducedMotion}
                   initialFocusRef={deskFocusRef}
                 />

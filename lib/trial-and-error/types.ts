@@ -657,13 +657,67 @@ export type EncounterStage = z.infer<typeof EncounterStageSchema>;
  * the blinded study team's seat, then a closed-session package from the
  * independent statistician's seat. Defending both earns a choice of relics.
  */
-export const EncounterSchema = z.object({
+export const DmcDefenseSchema = z.object({
   kind: z.literal("DMC_DEFENSE"),
   stages: z.tuple([EncounterStageSchema, EncounterStageSchema]),
   /** The relics offered on victory; the player keeps one. */
   rewards: z.array(RelicSchema).min(2).max(3),
 });
-/** A staged Boss encounter. */
+/** The DMC milestone defense. */
+export type DmcDefense = z.infer<typeof DmcDefenseSchema>;
+
+/**
+ * One targeted question in an FDA Information Request: the output the FDA
+ * asks for, and the share of the Blind's quota answering it clears. A played
+ * hand whose scoring cards include `cardId` answers it when the hand scores
+ * at least `quota` (#921).
+ */
+export const IrQuestionSchema = z.object({
+  id: identifier,
+  /** The question as the FDA puts it. */
+  question: z.string().min(1).max(160),
+  /** The deck card that answers it. */
+  cardId: identifier,
+  quota: z.number().int().positive(),
+});
+/** One targeted question in an FDA Information Request. */
+export type IrQuestion = z.infer<typeof IrQuestionSchema>;
+
+/** The actions an FDA Information Request's clock charges hours for. */
+export const ClockActionSchema = z.enum([
+  "PLAY_HAND",
+  "DISCARD",
+  "INSPECT",
+  "TRACE",
+]);
+/** An action the clock charges hours for. */
+export type ClockAction = z.infer<typeof ClockActionSchema>;
+
+/**
+ * The End-of-Phase-2 FDA Information Request (T&E-10, #921): targeted
+ * questions answered against a deterministic clock. Every move costs hours;
+ * nothing reads the wall clock. Answering every question clears the Blind,
+ * and running out of hours first is a Clinical Hold, which ends the run.
+ */
+export const FdaIrSchema = z.object({
+  kind: z.literal("FDA_IR"),
+  /** Hours from the request to the response being due. */
+  clockHours: z.number().int().positive(),
+  /** What each move costs in hours. */
+  hours: z.record(ClockActionSchema, nonNegativeInt),
+  /** The hands the FDA accepts as a response. */
+  hands: z.array(HandTypeSchema).min(1),
+  questions: z.array(IrQuestionSchema).min(1).max(4),
+});
+/** The FDA Information Request encounter. */
+export type FdaIr = z.infer<typeof FdaIrSchema>;
+
+/** A Boss encounter: the DMC milestone defense or an FDA Information Request. */
+export const EncounterSchema = z.discriminatedUnion("kind", [
+  DmcDefenseSchema,
+  FdaIrSchema,
+]);
+/** A Boss encounter. */
 export type Encounter = z.infer<typeof EncounterSchema>;
 
 /** A milestone quota the player must reach. */
@@ -1255,7 +1309,53 @@ export const ScenarioSchema = z
     encounter: EncounterSchema.optional(),
   })
   .superRefine((scenario, ctx) => {
-    if (scenario.encounter) {
+    if (scenario.encounter?.kind === "FDA_IR") {
+      const ir = scenario.encounter;
+      const deckIds = new Set(scenario.deck.map((c) => c.id));
+      const questionIds = new Set<string>();
+      ir.questions.forEach((q, index) => {
+        if (!deckIds.has(q.cardId)) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["encounter", "questions", index, "cardId"],
+            message: "Each question must name a card in the deck",
+          });
+        }
+        if (questionIds.has(q.id)) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["encounter", "questions", index, "id"],
+            message: "Question ids must be unique",
+          });
+        }
+        questionIds.add(q.id);
+      });
+      if (
+        ir.questions.reduce((sum, q) => sum + q.quota, 0) !==
+        scenario.blind.quota
+      ) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["encounter", "questions"],
+          message: "The questions' quotas must add up to the Blind's quota",
+        });
+      }
+      if (ir.clockHours < ir.hours.PLAY_HAND) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["encounter", "clockHours"],
+          message: "The clock must leave time to play a hand",
+        });
+      }
+      if (scenario.boss?.debuffType !== "HAND_LIMIT") {
+        ctx.addIssue({
+          code: "custom",
+          path: ["encounter"],
+          message: "An FDA Information Request needs a HAND_LIMIT Boss",
+        });
+      }
+    }
+    if (scenario.encounter?.kind === "DMC_DEFENSE") {
       const [open, closed] = scenario.encounter.stages;
       if (open.session !== "OPEN" || closed.session !== "CLOSED") {
         ctx.addIssue({

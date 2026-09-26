@@ -8,4 +8,4 @@
 
 > **Encounter** = `z.infer`\<*typeof* [`EncounterSchema`](../variables/EncounterSchema.md)\>
 
-A staged Boss encounter.
+A Boss encounter.

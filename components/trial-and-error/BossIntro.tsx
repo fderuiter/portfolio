@@ -14,7 +14,8 @@ interface BossIntroProps {
 /**
  * The boss intro card (T&E-09, #1083): entering any Boss Blind names the
  * boss, its debuff, the quota and CPU, and each stage when the encounter is
- * staged, before the first card is played. It renders the view's fields
+ * staged, or the deadline and questions of an FDA Information Request (#921),
+ * before the first card is played. It renders the view's fields
  * only. Enter, Escape or the button dismisses it; the table then focuses the
  * hand.
  */
@@ -63,7 +64,21 @@ export function BossIntro({ intro, onDismiss }: BossIntroProps) {
           data-testid="boss-intro-terms"
         >
           Quota {intro.quota} · {intro.startingCpu} CPU
+          {intro.dueHours !== null && <> · due in {intro.dueHours} hours</>}
         </p>
+        {intro.questions.length > 0 && (
+          <ol
+            aria-label="The FDA's questions"
+            className="mt-2 list-decimal space-y-1 pl-5 text-xs text-zinc-300"
+            data-testid="boss-intro-questions"
+          >
+            {intro.questions.map((question) => (
+              <li key={question} className="break-words">
+                {question}
+              </li>
+            ))}
+          </ol>
+        )}
         {intro.stages.length > 0 && (
           <ol
             className="mt-2 space-y-1 text-xs text-zinc-300 tabular-nums"

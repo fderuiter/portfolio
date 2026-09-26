@@ -3,6 +3,7 @@ import {
   ACT_I,
   DMC_MILESTONE_SCENARIO,
   DOSE_ESCALATION_SCENARIO,
+  FDA_IR_SCENARIO,
   SCENARIOS,
   advanceTable,
   createTableState,
@@ -45,6 +46,8 @@ describe("boss intro view (#1083)", () => {
       quota: 8500,
       startingCpu: 10,
       stages: [],
+      dueHours: null,
+      questions: [],
     });
   });
 
@@ -54,6 +57,15 @@ describe("boss intro view (#1083)", () => {
         ({ name, session, quota }) => ({ name, session, quota })
       )
     );
+  });
+
+  it("gives the FDA Information Request its deadline and questions (#921)", () => {
+    expect(introOf(FDA_IR_SCENARIO)).toMatchObject({
+      bossName: "Two-Hand Response",
+      dueHours: 48,
+      questions: FDA_IR_SCENARIO.encounter.questions.map((q) => q.question),
+      stages: [],
+    });
   });
 
   it("describes the Blind, not the table's progress", () => {

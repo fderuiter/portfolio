@@ -13,6 +13,8 @@
 import type {
   Act,
   CrisisCard,
+  DmcDefense,
+  FdaIr,
   AdverseEvent,
   FootnoteSeal,
   Relic,
@@ -1522,11 +1524,11 @@ const kmRecords = (events: Record<string, number>, censoredAt: number) =>
   }));
 
 /**
- * Time to first serious AE, drawn from the closed SAE table: S-005 (week 6,
- * Placebo), S-008 (week 2) and S-010 (week 5, both Active). The draft's
- * Placebo at-risk row keeps S-005 at week 8 after the event.
+ * Time to first serious AE, drawn from an SAE table (`parentId`): S-005
+ * (week 6, Placebo), S-008 (week 2) and S-010 (week 5, both Active). The
+ * draft's Placebo at-risk row keeps S-005 at week 8 after the event.
  */
-const DMC_KM_SAE = card({
+const kmSae = (parentId: string): TlfCard => ({
   id: "C-F14.3.3",
   cardType: "FIGURE",
   number: "Figure 14.3.3",
@@ -1541,7 +1543,7 @@ const DMC_KM_SAE = card({
     timeUnit: "weeks",
     populationSnapshotId: snapshotId,
     parent: {
-      cardId: "C-T14.3.3-D",
+      cardId: parentId,
       atRiskRow: "Subjects, N",
       eventsRow: "Any SAE",
     },
@@ -1575,11 +1577,11 @@ const DMC_KM_SAE = card({
 });
 
 /**
- * Time to an AE leading to discontinuation, drawn from the closed AE
- * overview: S-008 (week 2, Active). The draft marks the event with a
+ * Time to an AE leading to discontinuation, drawn from an AE overview
+ * (`parentId`): S-008 (week 2, Active). The draft marks the event with a
  * censoring tick as well as a step.
  */
-const DMC_KM_DISCONTINUATION = card({
+const kmDiscontinuation = (parentId: string): TlfCard => ({
   id: "C-F14.3.1",
   cardType: "FIGURE",
   number: "Figure 14.3.1",
@@ -1594,7 +1596,7 @@ const DMC_KM_DISCONTINUATION = card({
     timeUnit: "weeks",
     populationSnapshotId: snapshotId,
     parent: {
-      cardId: "C-T14.3.1-D",
+      cardId: parentId,
       atRiskRow: "Subjects, N",
       eventsRow: "AE to discont.",
     },
@@ -1679,7 +1681,7 @@ export const DMC_RELICS: Relic[] = [
  * until the campaign links the acts and Act II's boss pool draws it. It
  * reads Act I's fictional study data.
  */
-export const DMC_MILESTONE_SCENARIO: Scenario = {
+export const DMC_MILESTONE_SCENARIO: Scenario & { encounter: DmcDefense } = {
   id: "dmc-milestone-boss-blind",
   title: "DMC Milestone Review",
   summary:
@@ -1725,10 +1727,10 @@ export const DMC_MILESTONE_SCENARIO: Scenario = {
     pick(DMC.cards, "overview-D"),
     DISPOSITION,
     pick(DMC.cards, "sae-D"),
-    DMC_KM_SAE,
+    kmSae("C-T14.3.3-D"),
     AE_LISTING,
     pick(DMC.cards, "nervous-D"),
-    DMC_KM_DISCONTINUATION,
+    kmDiscontinuation("C-T14.3.1-D"),
     DISCONTINUED_LISTING,
     SAE_LISTING,
   ],
@@ -1757,11 +1759,122 @@ export const DMC_MILESTONE_SCENARIO: Scenario = {
   },
 };
 
+// ---------------------------------------------------------------------------
+// Boss Blind: End-of-Phase-2 FDA Information Request (T&E-10).
+// ---------------------------------------------------------------------------
+
+const FDA_IR_RULEBOOK = safetyRulebook(
+  "FDA-IR-001",
+  "End-of-Phase-2 Information Request: Safety Responses",
+  "FDA-IR",
+  3
+);
+
+// The response package: reruns of the safety tables the FDA asked about.
+const FDA_IR = safetyDrafts(FDA_IR_RULEBOOK.id, [
+  // A 2-dp slip in the Active column.
+  {
+    output: "overview",
+    version: "E",
+    label: "IR response (v1.1)",
+    defects: { "1:1": "5 (83.33)" },
+  },
+  { output: "sae", version: "E", label: "IR response (v1.1)" },
+  // S-010's syncope and dizziness counted as two subjects.
+  {
+    output: "nervous",
+    version: "E",
+    label: "IR response (v1.1)",
+    defects: { "1:1": "3 (50.0)", "1:2": "4 (33.3)" },
+  },
+  { output: "cardiac", version: "E", label: "IR response (v1.1)" },
+  { output: "gi", version: "E", label: "IR response (v1.1)" },
+]);
+
+const FDA_IR_KM_DISCONTINUATION = kmDiscontinuation("C-T14.3.1-E");
+const FDA_IR_SAE = pick(FDA_IR.cards, "sae-E");
+
+/**
+ * Boss Blind: the FDA's End-of-Phase-2 Information Request, the questions
+ * that gate the move to Phase III and the only place the game has a clock.
+ * The response is due in 48 hours and must go in at most 2 hands; every move
+ * takes hours, and the clock running out first is a Clinical Hold, which
+ * ends the run. Each targeted question names the output that answers it. It
+ * is played on its own until Act II's boss pool draws it (#1084). It reads
+ * Act I's fictional study data.
+ */
+export const FDA_IR_SCENARIO: Scenario & { encounter: FdaIr } = {
+  id: "fda-information-request-boss-blind",
+  title: "FDA Information Request",
+  summary:
+    "The FDA's End-of-Phase-2 questions: answer each with the output it asks for, in two hands, before the 48-hour deadline.",
+  intro:
+    "The FDA has questions before Phase III. The response is due in 48 hours and goes in at most two hands. Every move takes time: a hand 12 hours, a discard 4, an Inspect 2, a trace 1. Run out of time and the program goes on Clinical Hold.",
+  blind: {
+    tier: "BOSS_BLIND",
+    name: "Boss Blind: FDA Information Request",
+    quota: 10000,
+  },
+  boss: {
+    id: "FDA-IR-HAND-LIMIT",
+    name: "Two-Hand Response",
+    description:
+      "Answer in at most 2 hands within 48 hours. A hand takes 12 hours, a discard 4, an Inspect 2 and a trace 1; the clock running out is a Clinical Hold.",
+    debuffType: "HAND_LIMIT",
+    maxHandsAllowed: 2,
+  },
+  handType: "HIGH_TABLE",
+  startingCpu: 6,
+  table: { startingCpu: 10, handSize: 8, maxSelection: 5 },
+  deck: [
+    pick(FDA_IR.cards, "overview-E"),
+    SAE_LISTING,
+    FDA_IR_KM_DISCONTINUATION,
+    pick(FDA_IR.cards, "nervous-E"),
+    DISCONTINUED_LISTING,
+    FDA_IR_SAE,
+    AE_LISTING,
+    pick(FDA_IR.cards, "cardiac-E"),
+    kmSae("C-T14.3.3-E"),
+    DISPOSITION,
+    pick(FDA_IR.cards, "gi-E"),
+    DM_LISTING,
+  ],
+  rulebook: FDA_IR_RULEBOOK,
+  populationSnapshot: POPULATION_SNAPSHOT,
+  shells: FDA_IR.shells,
+  drawPile: FDA_IR.drawPile,
+  encounter: {
+    kind: "FDA_IR",
+    clockHours: 48,
+    hours: { PLAY_HAND: 12, DISCARD: 4, INSPECT: 2, TRACE: 1 },
+    hands: ["TLF_PAIR", "POPULATION_FLUSH", "EFFICACY_FULL_HOUSE"],
+    questions: [
+      {
+        id: "IR-Q1",
+        question: "Serious adverse events by preferred term and arm",
+        cardId: FDA_IR_SAE.id,
+        quota: 3000,
+      },
+      {
+        id: "IR-Q2",
+        question:
+          "Time to an adverse event leading to discontinuation, by arm (Kaplan-Meier)",
+        cardId: FDA_IR_KM_DISCONTINUATION.id,
+        quota: 7000,
+      },
+    ],
+  },
+};
+
 /** Every playable scenario, keyed by id. */
 export const SCENARIOS: Readonly<Record<string, Scenario>> = Object.freeze(
   Object.fromEntries(
-    [...ACT_I.blinds, ...(ACT_I.bossPool ?? []), DMC_MILESTONE_SCENARIO].map(
-      (scenario) => [scenario.id, scenario]
-    )
+    [
+      ...ACT_I.blinds,
+      ...(ACT_I.bossPool ?? []),
+      DMC_MILESTONE_SCENARIO,
+      FDA_IR_SCENARIO,
+    ].map((scenario) => [scenario.id, scenario])
   )
 );

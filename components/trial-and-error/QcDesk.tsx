@@ -27,6 +27,8 @@ interface QcDeskProps {
   trace?: InspectionTraceView;
   /** Traces a flagged cell to its Listing rows. */
   onTrace?: (row: number, col: number) => void;
+  /** Hours a trace takes on an FDA Information Request's clock, or null. */
+  traceHours?: number | null;
   /** Suppresses the trace line's fade. */
   reducedMotion?: boolean;
   /** Receives the active grid cell so a dialog can focus it on open. */
@@ -73,6 +75,7 @@ export function QcDesk({
   onCorrect,
   trace,
   onTrace,
+  traceHours = null,
   reducedMotion = false,
   initialFocusRef,
 }: QcDeskProps) {
@@ -480,7 +483,7 @@ export function QcDesk({
                 onClick={() => pressTrace(cursor.row, cursor.col)}
                 className={`${BUTTON_BASE} mt-2 w-full border-rose-400/60 text-rose-300 hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:opacity-50`}
               >
-                Trace to Listing [T]
+                Trace to Listing{traceHours !== null && ` · ${traceHours}h`} [T]
               </button>
               {trace.blocked && (
                 <p

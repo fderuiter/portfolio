@@ -10,6 +10,7 @@
 
 - [AllocationOption](interfaces/AllocationOption.md)
 - [BossIntroView](interfaces/BossIntroView.md)
+- [ClockView](interfaces/ClockView.md)
 - [CrisisChoiceView](interfaces/CrisisChoiceView.md)
 - [CrisisView](interfaces/CrisisView.md)
 - [EncounterStageView](interfaces/EncounterStageView.md)
@@ -18,6 +19,7 @@
 - [FigureStatus](interfaces/FigureStatus.md)
 - [InspectionTraceView](interfaces/InspectionTraceView.md)
 - [Inventory](interfaces/Inventory.md)
+- [IrQuestionView](interfaces/IrQuestionView.md)
 - [LevelUp](interfaces/LevelUp.md)
 - [PlayBlocker](interfaces/PlayBlocker.md)
 - [PlayedHand](interfaces/PlayedHand.md)
@@ -38,6 +40,8 @@
 
 ## Variables
 
+- [CLINICAL\_HOLD](variables/CLINICAL_HOLD.md)
+- [CLOCK\_URGENT\_HOURS](variables/CLOCK_URGENT_HOURS.md)
 - [CONSUMABLE\_SLOTS](variables/CONSUMABLE_SLOTS.md)
 - [EMPTY\_SHELL\_ALERT](variables/EMPTY_SHELL_ALERT.md)
 - [ENROLLMENT\_AFTER\_HANDS](variables/ENROLLMENT_AFTER_HANDS.md)
@@ -60,5 +64,6 @@
 - [consumableSellValue](functions/consumableSellValue.md)
 - [createTableState](functions/createTableState.md)
 - [deriveTableView](functions/deriveTableView.md)
+- [dmcDefenseOf](functions/dmcDefenseOf.md)
 - [previewAllocation](functions/previewAllocation.md)
 - [studyHistory](functions/studyHistory.md)
