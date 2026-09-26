@@ -6,7 +6,7 @@
 
 # Interface: HandLevelRow
 
-One row of the Run Info hand table.
+One row of the hand table in Run Info and the hand cheat sheet.
 
 ## Properties
 
@@ -15,6 +15,22 @@ One row of the Run Info hand table.
 > **chips**: `number`
 
 Base Chips at this level.
+
+***
+
+### description
+
+> **description**: `string`
+
+What the hand is made of, from `HAND_BASE_SCORES`.
+
+***
+
+### example
+
+> **example**: `string`
+
+A worked example, from `HAND_EXAMPLES`.
 
 ***
 

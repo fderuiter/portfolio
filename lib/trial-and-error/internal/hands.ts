@@ -67,6 +67,25 @@ export const HAND_NAMES: Readonly<Record<HandType, string>> = Object.freeze({
 });
 
 /**
+ * One worked example of each hand, in the game's own output numbers, for the
+ * hand cheat sheet (#1081). Kept beside `HAND_NAMES` so hand wording has one
+ * source.
+ */
+export const HAND_EXAMPLES: Readonly<Record<HandType, string>> = Object.freeze({
+  HIGH_TABLE: "Table 14.1.1 played on its own",
+  TLF_PAIR: "Table 14.3.1 + Listing 16.2.7",
+  TLF_TWO_PAIR:
+    "Table 14.3.1 + Listing 16.2.7, and Table 14.1.1 + Listing 16.2.4",
+  POPULATION_FLUSH: "Five Safety outputs compiled on the same snapshot",
+  CSR_STRAIGHT:
+    "Disposition, Baseline, Primary Efficacy and Safety AE Tables + a patient Listing",
+  EFFICACY_FULL_HOUSE:
+    "Three Tables + Figures 14.3.1 and 14.3.3, each drawn from a Table in the hand",
+  MEDDRA_FIVE_OF_A_KIND:
+    "Five SOC tables, such as Table 14.3.2.1 (Cardiac Disorders)",
+});
+
+/**
  * What each level above 1 adds to a hand's base, balanced in T&E-UX-05
  * (#947). A hand at level `n` scores its base plus `n - 1` bonuses.
  */
@@ -107,7 +126,7 @@ export function initialHandLevels(): HandLevels {
   ) as HandLevels;
 }
 
-/** One row of the Run Info hand table. */
+/** One row of the hand table in Run Info and the hand cheat sheet. */
 export interface HandLevelRow {
   handType: HandType;
   name: string;
@@ -117,6 +136,10 @@ export interface HandLevelRow {
   /** Base +Mult at this level. */
   mult: number;
   playedCount: number;
+  /** What the hand is made of, from `HAND_BASE_SCORES`. */
+  description: string;
+  /** A worked example, from `HAND_EXAMPLES`. */
+  example: string;
 }
 
 /**
@@ -134,6 +157,8 @@ export function handLevelTable(levels: HandLevels): HandLevelRow[] {
       chips: base.baseChips,
       mult: base.baseMult,
       playedCount,
+      description: HAND_BASE_SCORES[handType].description,
+      example: HAND_EXAMPLES[handType],
     };
   });
 }

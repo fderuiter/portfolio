@@ -17,6 +17,7 @@
 ## Variables
 
 - [HAND\_BASE\_SCORES](variables/HAND_BASE_SCORES.md)
+- [HAND\_EXAMPLES](variables/HAND_EXAMPLES.md)
 - [HAND\_LEVEL\_BONUS](variables/HAND_LEVEL_BONUS.md)
 - [HAND\_NAMES](variables/HAND_NAMES.md)
 

@@ -960,3 +960,49 @@ test.describe("Trial & Error saved runs (#1079)", () => {
     expect(await handIds()).toEqual(hand);
   });
 });
+
+test.describe("Trial & Error hand cheat sheet (#1081)", () => {
+  for (const width of [320, 375, 768, 1440]) {
+    test(`opens mid-hand on H at ${width}px without overflow`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 800 });
+      await launch(page);
+      await card(page, DRAFT_A).click();
+      await card(page, DM_LISTING).click();
+      await card(page, DM_LISTING).focus();
+      await page.keyboard.press("h");
+      const sheet = page.getByTestId("hand-sheet");
+      await expect(sheet).toBeVisible();
+      await expect(
+        sheet.locator('[data-hand="TLF_PAIR"][data-selected]')
+      ).toContainText("Your selection");
+      await expect(page.getByTestId("hand-sheet-row")).toHaveCount(7);
+      await expectNoHorizontalOverflow(page);
+      await expectNoBlockingViolations(page, `hand sheet at ${width}px`);
+      if (width === 1440) {
+        // A side panel beside the table: it never covers the hand.
+        const panel = await sheet.boundingBox();
+        const hand = await page.getByTestId("hand").boundingBox();
+        expect(panel!.x + panel!.width).toBeLessThanOrEqual(hand!.x);
+      }
+      await page.keyboard.press("Escape");
+      await expect(sheet).toBeHidden();
+      await expect(card(page, DM_LISTING)).toBeFocused();
+    });
+  }
+
+  test("reflows at 200% zoom", async ({ page }) => {
+    await page.setViewportSize({ width: 640, height: 400 });
+    await launch(page);
+    await card(page, DRAFT_A).focus();
+    await page.keyboard.press("h");
+    await expect(page.getByTestId("hand-sheet")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /Close \[H\]/ })
+    ).toBeFocused();
+    await expectNoHorizontalOverflow(page);
+    await page.keyboard.press("h");
+    await expect(page.getByTestId("hand-sheet")).toBeHidden();
+  });
+});

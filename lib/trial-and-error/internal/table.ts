@@ -562,6 +562,11 @@ export interface TableView {
    * hand agree.
    */
   stageAccepts: HandType[] | null;
+  /**
+   * The hand types that cannot be played now because the encounter stage
+   * does not accept them, weakest first. Empty when every hand is playable.
+   */
+  refusedHands: HandType[];
   /** A defended encounter's relic offer, or null. */
   reward: { choices: Relic[]; claimed: string | null } | null;
   /** SOP relics the run has earned. */
@@ -3172,6 +3177,10 @@ export function deriveTableView(
       accepts && state.status === "REVIEWING"
         ? HandTypeSchema.options.filter((h) => accepts.includes(h))
         : null,
+    refusedHands:
+      accepts && state.status === "REVIEWING"
+        ? HandTypeSchema.options.filter((h) => !accepts.includes(h))
+        : [],
     encounter: scenario.encounter
       ? {
           current: state.stage,

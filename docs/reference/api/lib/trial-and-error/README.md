@@ -674,6 +674,12 @@ Re-exports [HAND_BASE_SCORES](internal/hands/variables/HAND_BASE_SCORES.md)
 
 ***
 
+### HAND\_EXAMPLES
+
+Re-exports [HAND_EXAMPLES](internal/hands/variables/HAND_EXAMPLES.md)
+
+***
+
 ### HAND\_LEVEL\_BONUS
 
 Re-exports [HAND_LEVEL_BONUS](internal/hands/variables/HAND_LEVEL_BONUS.md)
