@@ -46,6 +46,7 @@ import {
   writeRunSave,
 } from "@/components/trial-and-error/useRunSave";
 import { RunInfo } from "@/components/trial-and-error/RunInfo";
+import { HandCheatSheet } from "@/components/trial-and-error/HandCheatSheet";
 import { BossIntro } from "@/components/trial-and-error/BossIntro";
 import { FirewallDialog } from "@/components/trial-and-error/FirewallDialog";
 import { CashOut } from "@/components/trial-and-error/CashOut";
@@ -430,6 +431,7 @@ export function CardTable({
   const armedItem = view.consumables.find((c) => c.id === armedId);
   const armed = armedItem?.kind === "SEAL" ? armedItem : null;
   const [runInfoOpen, setRunInfoOpen] = useState(false);
+  const [handSheetOpen, setHandSheetOpen] = useState(false);
   /** The relic waiting for a sale to be confirmed, in the shop. */
   const [sellRelicId, setSellRelicId] = useState<string | null>(null);
   const shopView = runView.shop;
@@ -575,6 +577,30 @@ export function CardTable({
     window.addEventListener("keydown", listener);
     return () => window.removeEventListener("keydown", listener);
   }, []);
+
+  // H opens the hand cheat sheet from anywhere in the table. Elsewhere on the
+  // site H opens the Field Manual from a window listener; this one sits on
+  // the table itself and stops the key there, so inside the table H is the
+  // cheat sheet and ? (off a card) or the Manual button is the manual. The
+  // sheet closes itself on H.
+  const onSectionKeyDown = useEffectEvent((event: KeyboardEvent) => {
+    if (event.key.toLowerCase() !== "h" || event.shiftKey) return;
+    if (event.metaKey || event.ctrlKey || event.altKey) return;
+    const target = event.target as HTMLElement | null;
+    if (target?.closest("input, textarea, select, [contenteditable]")) return;
+    if (!handSheetOpen && isAnyFocusTrapActive()) return;
+    event.preventDefault();
+    event.stopPropagation();
+    setHandSheetOpen((open) => !open);
+  });
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    const listener = (event: KeyboardEvent) => onSectionKeyDown(event);
+    section.addEventListener("keydown", listener);
+    return () => section.removeEventListener("keydown", listener);
+    // The resume prompt renders in place of the table, so attach once it goes.
+  }, [offerResume]);
 
   const peekCard = peekId
     ? (view.hand.find((h) => h.card.id === peekId && h.faceDown) ?? null)
@@ -890,6 +916,16 @@ export function CardTable({
             data-testid="run-info-button"
           >
             Run Info [Shift+R]
+          </button>
+          <button
+            type="button"
+            onClick={() => setHandSheetOpen(true)}
+            aria-haspopup="dialog"
+            aria-keyshortcuts="H"
+            className="min-h-[44px] border border-zinc-600 px-3 text-[10px] font-bold uppercase tracking-wider text-zinc-200 touch-manipulation hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 active:scale-[0.98]"
+            data-testid="hand-sheet-button"
+          >
+            Hands [H]
           </button>
           <FieldManualButton manualId="trial-and-error" label="Manual" />
         </div>
@@ -1518,7 +1554,7 @@ export function CardTable({
                 values={handOrder}
                 onReorder={setDragOrder}
                 role="group"
-                aria-label={`Hand of ${view.hand.length}. Arrow keys move, Space selects, Enter plays, D discards, I inspects, R recompiles a stale card, S runs structural QC on a face-down card, A allocates a blank shell, question mark reads the card, Alt with arrows reorders. With a footnote seal picked up, Enter affixes it and Escape puts it back. Shift+R opens Run Info.`}
+                aria-label={`Hand of ${view.hand.length}. Arrow keys move, Space selects, Enter plays, D discards, I inspects, R recompiles a stale card, S runs structural QC on a face-down card, A allocates a blank shell, question mark reads the card, Alt with arrows reorders. With a footnote seal picked up, Enter affixes it and Escape puts it back. Shift+R opens Run Info, and H lists every hand.`}
                 className="-mx-3 mt-1 flex overflow-x-auto px-3 pb-3 pt-7 [scrollbar-width:thin]"
                 data-testid="hand"
               >
@@ -1987,6 +2023,15 @@ export function CardTable({
           accessLog={view.accessLog}
           dmc={view.dmcCharter !== null}
           onClose={() => setRunInfoOpen(false)}
+        />
+      )}
+
+      {handSheetOpen && (
+        <HandCheatSheet
+          rows={view.handTable}
+          refused={view.refusedHands}
+          selected={view.classification?.handType ?? null}
+          onClose={() => setHandSheetOpen(false)}
         />
       )}
 

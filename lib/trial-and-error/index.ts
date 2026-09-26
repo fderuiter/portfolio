@@ -20,6 +20,7 @@ export {
 export { roundRatio, decimalPlaces } from "./internal/rounding";
 export {
   HAND_BASE_SCORES,
+  HAND_EXAMPLES,
   HAND_LEVEL_BONUS,
   HAND_NAMES,
   classifyHand,

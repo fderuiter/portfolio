@@ -515,6 +515,15 @@ Any selected card is inspectable but uninspected.
 
 ***
 
+### refusedHands
+
+> **refusedHands**: (`"HIGH_TABLE"` \| `"TLF_PAIR"` \| `"TLF_TWO_PAIR"` \| `"POPULATION_FLUSH"` \| `"CSR_STRAIGHT"` \| `"EFFICACY_FULL_HOUSE"` \| `"MEDDRA_FIVE_OF_A_KIND"`)[]
+
+The hand types that cannot be played now because the encounter stage
+does not accept them, weakest first. Empty when every hand is playable.
+
+***
+
 ### relics
 
 > **relics**: `object`[]

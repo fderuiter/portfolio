@@ -7,6 +7,7 @@ import {
   GUIDANCE_CARDS,
   GuidanceCardSchema,
   HAND_BASE_SCORES,
+  HAND_EXAMPLES,
   HAND_LEVEL_BONUS,
   HandLevelsSchema,
   HandTypeSchema,
@@ -191,6 +192,8 @@ describe("hand levels", () => {
       chips: 170,
       mult: 13,
       playedCount: 3,
+      description: HAND_BASE_SCORES.CSR_STRAIGHT.description,
+      example: HAND_EXAMPLES.CSR_STRAIGHT,
     });
   });
 });

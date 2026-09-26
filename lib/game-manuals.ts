@@ -799,6 +799,12 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
           "Opens the run's hand table (level, base Chips, base +Mult and times played), the equipped relics and the run seed. Esc closes it.",
         key: "Shift + R",
       },
+      {
+        action: "Hand cheat sheet",
+        description:
+          "Lists every hand, strongest first, with its level, base Chips and +Mult, what it is made of and an example. Hands the current stage refuses are marked, and so is the hand your selection makes. Free; H or Esc closes it.",
+        key: "H",
+      },
     ],
     rules: [
       {
