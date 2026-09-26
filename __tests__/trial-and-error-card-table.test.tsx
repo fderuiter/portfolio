@@ -1091,3 +1091,53 @@ describe("CardTable DMC milestone Boss", () => {
     expect(relics.textContent).toContain("SOP-QC-12");
   });
 });
+
+describe("CardTable boss intro on every Boss Blind (#1083)", () => {
+  const intro = () => screen.queryByTestId("boss-intro");
+
+  it("opens the Act I Boss on its Safety Set Only debuff, quota and CPU", async () => {
+    render(<CardTable scenario={DOSE_ESCALATION_SCENARIO} />);
+    expect(intro()!.getAttribute("role")).toBe("dialog");
+    expect(screen.getByTestId("boss-intro-debuff").textContent).toBe(
+      `Boss: Safety Set Only${DOSE_ESCALATION_SCENARIO.boss!.description}`
+    );
+    expect(screen.getByTestId("boss-intro-terms").textContent).toBe(
+      "Quota 8500 · 10 CPU"
+    );
+    expect(screen.queryByTestId("boss-intro-stages")).toBeNull();
+    const start = screen.getByTestId("boss-intro-start");
+    await waitFor(() => expect(document.activeElement).toBe(start));
+    // Enter on the focused button takes the seat.
+    fireEvent.click(start);
+    expect(intro()).toBeNull();
+    await waitFor(() => expect(document.activeElement).toBe(cards()[0]));
+  });
+
+  it("is dismissed by Escape on the Act I Boss", async () => {
+    render(<CardTable scenario={DOSE_ESCALATION_SCENARIO} />);
+    await waitFor(() =>
+      expect(document.activeElement).toBe(
+        screen.getByTestId("boss-intro-start")
+      )
+    );
+    fireEvent.keyDown(document.activeElement!, { key: "Escape" });
+    expect(intro()).toBeNull();
+    await waitFor(() => expect(document.activeElement).toBe(cards()[0]));
+  });
+
+  it("still lists the DMC milestone's two stages", () => {
+    render(<CardTable scenario={DMC_MILESTONE_SCENARIO} />);
+    const stages = screen.getByTestId("boss-intro-stages");
+    expect(stages.querySelectorAll("li")).toHaveLength(2);
+    expect(stages.textContent).toContain("open session");
+    expect(stages.textContent).toContain("closed session");
+  });
+
+  it("never opens on a Small or Big Blind", () => {
+    for (const scenario of [DEMOGRAPHICS_SCENARIO, SPONSOR_SAFETY_SCENARIO]) {
+      const { unmount } = render(<CardTable scenario={scenario} />);
+      expect(intro()).toBeNull();
+      unmount();
+    }
+  });
+});

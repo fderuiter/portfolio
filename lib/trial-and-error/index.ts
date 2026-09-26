@@ -115,6 +115,7 @@ export {
   KM_REDLINE_PENALTY,
   KM_SYNERGY,
   type EncounterStageView,
+  type BossIntroView,
   type EncounterView,
   type FigureInspectionView,
   type FigureStatus,

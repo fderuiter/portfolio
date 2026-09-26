@@ -1,6 +1,16 @@
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { settleFooterTicker } from "./helpers/footer-ticker";
+import {
+  ACT_I,
+  advanceRun,
+  createRunState,
+  runBlinds,
+  serializeRun,
+  type LoggedAction,
+  type RunState,
+} from "../../lib/trial-and-error";
+import { playBlind } from "../utils/trial-and-error-bot";
 
 /**
  * A fixed seed makes the crisis draw repeatable (T&E-05): this one deals the
@@ -1045,5 +1055,109 @@ test.describe("Trial & Error score log (#1082)", () => {
     await page.getByTestId("score-log-toggle").click();
     await expect(page.getByTestId("score-log-entry")).toHaveCount(1);
     await expectNoHorizontalOverflow(page);
+  });
+});
+
+test.describe("Trial & Error boss intro on the Act I Boss (#1083)", () => {
+  /**
+   * A saved run at the start of the Act I Boss: the median bot clears the
+   * Small and Big Blinds for this seed, so resuming lands on the Boss.
+   */
+  function saveAtBoss(): string {
+    let run: RunState = createRunState(ACT_I, SEED);
+    const actions: LoggedAction[] = [];
+    const step = (action: LoggedAction) => {
+      run = advanceRun(ACT_I, run, action);
+      actions.push(action);
+    };
+    for (let i = 0; i < 2; i++) {
+      const blind = runBlinds(ACT_I, run)[run.blindIndex];
+      for (const action of playBlind(blind, run.table, "MEDIAN").actions) {
+        if (run.table.status !== "REVIEWING") break;
+        if (action.type === "RESET") continue;
+        step(action);
+      }
+      expect(run.table.status).toBe("CLEARED");
+      step({ type: "NEXT_BLIND" });
+    }
+    expect(runBlinds(ACT_I, run)[run.blindIndex].blind.tier).toBe("BOSS_BLIND");
+    return serializeRun({ actId: ACT_I.id, seed: SEED, actions }, new Date());
+  }
+
+  async function resumeAtBoss(page: Page) {
+    const save = saveAtBoss();
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.addInitScript(
+      ([key, value]) => {
+        if (!window.localStorage.getItem(key)) {
+          window.localStorage.setItem(key, value);
+        }
+      },
+      [`te:run-save:${ACT_I.id}`, save] as const
+    );
+    await page.goto(ROUTE, { waitUntil: "domcontentloaded" });
+    await expect(async () => {
+      const launchBtn = page.getByRole("button", { name: /Launch Cabinet/i });
+      if (await launchBtn.isVisible()) await launchBtn.click();
+      await expect(page.getByTestId("resume-run")).toBeVisible({
+        timeout: 3000,
+      });
+    }).toPass({ timeout: 30000 });
+    await page.getByRole("button", { name: "Resume run" }).click();
+  }
+
+  for (const width of [320, 1440]) {
+    test(`names the Safety Set Only debuff before the Boss is played at ${width}px`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 800 });
+      await resumeAtBoss(page);
+      const intro = page.getByTestId("boss-intro");
+      await expect(intro).toBeVisible();
+      await expect(page.getByTestId("boss-intro-debuff")).toContainText(
+        "Boss: Safety Set Only"
+      );
+      await expect(page.getByTestId("boss-intro-terms")).toHaveText(
+        "Quota 8500 · 10 CPU"
+      );
+      await expect(page.getByTestId("boss-intro-stages")).toHaveCount(0);
+      await expect(page.getByTestId("boss-intro-start")).toBeFocused();
+      await expectNoHorizontalOverflow(page);
+      await expectNoBlockingViolations(page, `Act I boss intro at ${width}px`);
+
+      await page.keyboard.press("Enter");
+      await expect(intro).toBeHidden();
+      // This seed's Boss also deals a crisis, which is answered first.
+      const migrate = page.getByRole("button", { name: /Migrate now/ });
+      await expect(migrate).toBeFocused();
+      await migrate.click();
+      await expect(page.getByTestId("blind-name")).toContainText(
+        "Dose Escalation Committee"
+      );
+      // The Boss is playable once the intro is gone: play the first card
+      // that makes a hand on its own.
+      const play = page.getByRole("button", { name: /Play Hand/ });
+      const ids = await page
+        .locator("[data-card-id]")
+        .evaluateAll((els) => els.map((el) => el.getAttribute("data-card-id")));
+      for (const id of ids) {
+        await card(page, id!).click();
+        if (await play.isEnabled()) break;
+        await card(page, id!).click();
+      }
+      await play.click();
+      await expect(page.getByTestId("last-hand")).toBeVisible();
+      await expect(intro).toBeHidden();
+    });
+  }
+
+  test("fits at 200% zoom and closes on Escape", async ({ page }) => {
+    await page.setViewportSize({ width: 640, height: 400 });
+    await resumeAtBoss(page);
+    await expect(page.getByTestId("boss-intro")).toBeVisible();
+    await expect(page.getByTestId("boss-intro-start")).toBeFocused();
+    await expectNoHorizontalOverflow(page);
+    await page.keyboard.press("Escape");
+    await expect(page.getByTestId("boss-intro")).toBeHidden();
   });
 });

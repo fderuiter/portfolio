@@ -26,6 +26,14 @@ The Blind's inspection audit log, for end-of-Blind grading.
 
 ***
 
+### bossIntro
+
+> **bossIntro**: [`BossIntroView`](BossIntroView.md) \| `null`
+
+The intro card for a Boss Blind; null for every other Blind.
+
+***
+
 ### budget
 
 > **budget**: `number`
