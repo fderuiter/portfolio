@@ -2,22 +2,29 @@
 
 import React from "react";
 import { createPortal } from "react-dom";
-import type { Scenario } from "@/lib/trial-and-error";
+import type { BossIntroView } from "@/lib/trial-and-error";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface BossIntroProps {
-  /** The Boss Blind being entered. */
-  scenario: Scenario;
+  /** The Boss Blind being entered, from the view. */
+  intro: BossIntroView;
   onDismiss: () => void;
 }
 
 /**
- * The boss intro card (T&E-09): entering a staged Boss Blind names the boss,
- * its debuff, the quota and each stage before the first card is played.
- * Enter, Escape or the button dismisses it, and focus returns to the table.
+ * The boss intro card (T&E-09, #1083): entering any Boss Blind names the
+ * boss, its debuff, the quota and CPU, and each stage when the encounter is
+ * staged, before the first card is played. It renders the view's fields
+ * only. Enter, Escape or the button dismisses it; the table then focuses the
+ * hand.
  */
-export function BossIntro({ scenario, onDismiss }: BossIntroProps) {
-  const ref = useFocusTrap<HTMLDivElement>(true, { onEscape: onDismiss });
+export function BossIntro({ intro, onDismiss }: BossIntroProps) {
+  // The table moves focus to the hand on dismiss: whatever had focus before
+  // (the previous Blind's controls) is usually gone.
+  const ref = useFocusTrap<HTMLDivElement>(true, {
+    onEscape: onDismiss,
+    returnFocus: false,
+  });
   return createPortal(
     <div
       data-te-cabinet=""
@@ -39,25 +46,30 @@ export function BossIntro({ scenario, onDismiss }: BossIntroProps) {
           id="boss-intro-heading"
           className="text-sm font-bold uppercase tracking-wider break-words"
         >
-          {scenario.title}
+          {intro.title}
         </h2>
-        {scenario.boss && (
-          <p
-            id="boss-intro-debuff"
-            className="mt-2 border border-rose-400/60 p-2 text-xs text-rose-200 break-words"
-          >
-            <span className="block font-bold uppercase tracking-wider">
-              Boss: {scenario.boss.name}
-            </span>
-            {scenario.boss.description}
-          </p>
-        )}
-        <p className="mt-2 text-xs text-zinc-300 tabular-nums">
-          Quota {scenario.blind.quota} · {scenario.table.startingCpu} CPU
+        <p
+          id="boss-intro-debuff"
+          className="mt-2 border border-rose-400/60 p-2 text-xs text-rose-200 break-words"
+          data-testid="boss-intro-debuff"
+        >
+          <span className="block font-bold uppercase tracking-wider">
+            Boss: {intro.bossName}
+          </span>
+          {intro.debuff}
         </p>
-        {scenario.encounter && (
-          <ol className="mt-2 space-y-1 text-xs text-zinc-300 tabular-nums">
-            {scenario.encounter.stages.map((stage) => (
+        <p
+          className="mt-2 text-xs text-zinc-300 tabular-nums"
+          data-testid="boss-intro-terms"
+        >
+          Quota {intro.quota} · {intro.startingCpu} CPU
+        </p>
+        {intro.stages.length > 0 && (
+          <ol
+            className="mt-2 space-y-1 text-xs text-zinc-300 tabular-nums"
+            data-testid="boss-intro-stages"
+          >
+            {intro.stages.map((stage) => (
               <li key={stage.name} className="break-words">
                 {stage.name}: {stage.session.toLowerCase()} session, quota{" "}
                 {stage.quota}

@@ -441,18 +441,35 @@ export function CardTable({
     : null;
   /** The face-down output the firewall dialog is asking about. */
   const [peekId, setPeekId] = useState<string | null>(null);
-  // A staged Boss Blind opens on its intro card until it is dismissed.
+  // Every Boss Blind opens on its intro card until it is dismissed.
   const bossIntroKey = `${runView.seed}:${runView.blindIndex}:${scenario.id}`;
   const [bossIntroSeen, setBossIntroSeen] = useState<string | null>(null);
   const showBossIntro =
-    view.encounter !== null &&
+    view.bossIntro !== null &&
     state.status === "REVIEWING" &&
     state.handsPlayed === 0 &&
     state.cpu.spent === 0 &&
     bossIntroSeen !== bossIntroKey;
   const playBossStinger = useEffectEvent(() => sound.play("bossStinger"));
+  // Dismissing the intro hands focus to the table: a crisis's first choice
+  // when one must be answered first, otherwise the first card in hand.
+  const focusTable = useEffectEvent(() => {
+    if (state.crisis) {
+      crisisRef.current?.focus();
+      return;
+    }
+    const first = state.hand[0];
+    if (first) cardRefs.current.get(first)?.focus();
+  });
+  const bossIntroOpen = useRef(false);
   useEffect(() => {
-    if (showBossIntro) playBossStinger();
+    if (showBossIntro) {
+      bossIntroOpen.current = true;
+      playBossStinger();
+    } else if (bossIntroOpen.current) {
+      bossIntroOpen.current = false;
+      focusTable();
+    }
   }, [showBossIntro]);
   const detailView = view.hand.find((h) => h.card.id === detailId);
   const activeIndex = Math.min(focusIndex, Math.max(0, view.hand.length - 1));
@@ -2040,9 +2057,9 @@ export function CardTable({
         />
       )}
 
-      {showBossIntro && (
+      {showBossIntro && view.bossIntro && (
         <BossIntro
-          scenario={scenario}
+          intro={view.bossIntro}
           onDismiss={() => setBossIntroSeen(bossIntroKey)}
         />
       )}

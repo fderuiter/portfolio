@@ -9,6 +9,7 @@
 ## Interfaces
 
 - [AllocationOption](interfaces/AllocationOption.md)
+- [BossIntroView](interfaces/BossIntroView.md)
 - [CrisisChoiceView](interfaces/CrisisChoiceView.md)
 - [CrisisView](interfaces/CrisisView.md)
 - [EncounterStageView](interfaces/EncounterStageView.md)

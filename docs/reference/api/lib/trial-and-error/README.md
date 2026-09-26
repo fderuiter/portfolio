@@ -152,6 +152,12 @@ Re-exports [BossDebuffTypeSchema](types/variables/BossDebuffTypeSchema.md)
 
 ***
 
+### BossIntroView
+
+Re-exports [BossIntroView](internal/table/interfaces/BossIntroView.md)
+
+***
+
 ### canAfford
 
 Re-exports [canAfford](internal/cpu/functions/canAfford.md)

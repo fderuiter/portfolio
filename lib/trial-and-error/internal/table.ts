@@ -590,6 +590,8 @@ export interface TableView {
   pendingViolations: string[];
   /** A staged encounter's progress, or null outside one. */
   encounter: EncounterView | null;
+  /** The intro card for a Boss Blind; null for every other Blind. */
+  bossIntro: BossIntroView | null;
   /**
    * The hand types the current encounter stage accepts, weakest first, or
    * null outside a staged encounter or once its Blind is decided. The
@@ -624,6 +626,24 @@ export interface EncounterView {
   stages: EncounterStageView[];
   /** The stage being played, from 0. */
   current: number;
+}
+
+/**
+ * The intro card for a Boss Blind (#1083): the boss, its debuff line, the
+ * quota and CPU, and the stages of a staged encounter. Built from the
+ * scenario's own data, so every Boss shows its own debuff.
+ */
+export interface BossIntroView {
+  /** The Blind's title, e.g. "Dose Escalation Committee". */
+  title: string;
+  /** The boss debuff's name, e.g. "Safety Set Only". */
+  bossName: string;
+  /** What the debuff does, in one line. */
+  debuff: string;
+  quota: number;
+  startingCpu: number;
+  /** The encounter's stages in order; empty for an unstaged Boss. */
+  stages: Pick<EncounterStage, "name" | "session" | "quota">[];
 }
 
 /** One analysis set a blank shell could be compiled on, previewed before committing. */
@@ -3310,6 +3330,18 @@ export function deriveTableView(
       accepts && state.status === "REVIEWING"
         ? HandTypeSchema.options.filter((h) => !accepts.includes(h))
         : [],
+    bossIntro: scenario.boss
+      ? {
+          title: scenario.title,
+          bossName: scenario.boss.name,
+          debuff: scenario.boss.description,
+          quota: scenario.blind.quota,
+          startingCpu: scenario.table.startingCpu,
+          stages: (scenario.encounter?.stages ?? []).map(
+            ({ name, session, quota }) => ({ name, session, quota })
+          ),
+        }
+      : null,
     encounter: scenario.encounter
       ? {
           current: state.stage,
