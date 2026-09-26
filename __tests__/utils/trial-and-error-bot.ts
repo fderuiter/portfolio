@@ -171,9 +171,15 @@ function chooseHand(d: Driver, plan: Plan): string[] | null {
     if (first.length > 0 && legal(d, first)) return first;
     return candidateHands(hand).find((ids) => legal(d, ids)) ?? null;
   }
+  const questions = d.view().questions.filter((q) => !q.answered);
   const ranked = candidateHands(hand)
-    .map((ids) => ({ ids, score: previewScore(d, ids) }))
-    .sort((a, b) => b.score - a.score);
+    .map((ids) => ({
+      ids,
+      score: previewScore(d, ids),
+      // An FDA Information Request: the open questions the hand's cards name.
+      asks: questions.filter((q) => ids.includes(q.cardId)).length,
+    }))
+    .sort((a, b) => b.asks - a.asks || b.score - a.score);
   return ranked.find((c) => legal(d, c.ids))?.ids ?? null;
 }
 

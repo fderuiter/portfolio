@@ -70,6 +70,14 @@ The intro card for a Boss Blind; null for every other Blind.
 
 ***
 
+### clock
+
+> **clock**: [`ClockView`](ClockView.md) \| `null`
+
+An FDA Information Request's clock, or null outside one.
+
+***
+
 ### consumables
 
 > **consumables**: [`Consumable`](../type-aliases/Consumable.md)[]
@@ -514,6 +522,14 @@ The hand type's level this hand was scored at.
 > **previewUnverified**: `boolean`
 
 Any selected card is inspectable but uninspected.
+
+***
+
+### questions
+
+> **questions**: [`IrQuestionView`](IrQuestionView.md)[]
+
+An FDA Information Request's targeted questions; empty outside one.
 
 ***
 

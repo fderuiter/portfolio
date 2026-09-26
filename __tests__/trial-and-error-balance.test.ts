@@ -17,6 +17,7 @@ import { beforeAll, describe, it, expect } from "vitest";
 import {
   ACT_I,
   DMC_MILESTONE_SCENARIO,
+  FDA_IR_SCENARIO,
   advanceRun,
   createRunState,
   createTableState,
@@ -73,12 +74,20 @@ const BANDS: Record<string, Record<BotStyle, Band>> = {
     MEDIAN: "MOST",
     PERFECT: "ALL",
   },
+  "fda-information-request-boss-blind": {
+    SLOPPY: "FEW",
+    HASTY: "FEW",
+    MEDIAN: "MOST",
+    PERFECT: "ALL",
+  },
 };
 
 /** The Blind with its quota lifted, to measure how far a style scores. */
 function lifted(scenario: Scenario): Scenario {
   const LIMIT = 1_000_000_000;
   const encounter = scenario.encounter;
+  // An FDA Information Request clears on its questions, not the round score.
+  if (encounter?.kind === "FDA_IR") return scenario;
   return {
     ...scenario,
     blind: { ...scenario.blind, quota: LIMIT },
@@ -189,6 +198,11 @@ describe("balance harness", () => {
       ...measure(
         DMC_MILESTONE_SCENARIO,
         createTableState(DMC_MILESTONE_SCENARIO),
+        "standalone"
+      ).samples,
+      ...measure(
+        FDA_IR_SCENARIO,
+        createTableState(FDA_IR_SCENARIO),
         "standalone"
       ).samples,
     ];

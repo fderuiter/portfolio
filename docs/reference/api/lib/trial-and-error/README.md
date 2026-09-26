@@ -266,6 +266,36 @@ Re-exports [classifyHand](internal/hands/functions/classifyHand.md)
 
 ***
 
+### CLINICAL\_HOLD
+
+Re-exports [CLINICAL_HOLD](internal/table/variables/CLINICAL_HOLD.md)
+
+***
+
+### CLOCK\_URGENT\_HOURS
+
+Re-exports [CLOCK_URGENT_HOURS](internal/table/variables/CLOCK_URGENT_HOURS.md)
+
+***
+
+### ClockAction
+
+Re-exports [ClockAction](types/type-aliases/ClockAction.md)
+
+***
+
+### ClockActionSchema
+
+Re-exports [ClockActionSchema](types/variables/ClockActionSchema.md)
+
+***
+
+### ClockView
+
+Re-exports [ClockView](internal/table/interfaces/ClockView.md)
+
+***
+
 ### ColumnArm
 
 Re-exports [ColumnArm](types/type-aliases/ColumnArm.md)
@@ -524,6 +554,18 @@ Re-exports [DMC_RELICS](scenarios/variables/DMC_RELICS.md)
 
 ***
 
+### DmcDefense
+
+Re-exports [DmcDefense](types/type-aliases/DmcDefense.md)
+
+***
+
+### DmcDefenseSchema
+
+Re-exports [DmcDefenseSchema](types/variables/DmcDefenseSchema.md)
+
+***
+
 ### DmcSession
 
 Re-exports [DmcSession](internal/blinding/type-aliases/DmcSession.md)
@@ -599,6 +641,24 @@ Re-exports [evaluateHand](internal/scoring/functions/evaluateHand.md)
 ### FACE\_KIND\_BY\_CARD\_TYPE
 
 Re-exports [FACE_KIND_BY_CARD_TYPE](types/variables/FACE_KIND_BY_CARD_TYPE.md)
+
+***
+
+### FDA\_IR\_SCENARIO
+
+Re-exports [FDA_IR_SCENARIO](scenarios/variables/FDA_IR_SCENARIO.md)
+
+***
+
+### FdaIr
+
+Re-exports [FdaIr](types/type-aliases/FdaIr.md)
+
+***
+
+### FdaIrSchema
+
+Re-exports [FdaIrSchema](types/variables/FdaIrSchema.md)
 
 ***
 
@@ -833,6 +893,24 @@ Re-exports [INTEREST_STEP](internal/shop/variables/INTEREST_STEP.md)
 ### Inventory
 
 Re-exports [Inventory](internal/table/interfaces/Inventory.md)
+
+***
+
+### IrQuestion
+
+Re-exports [IrQuestion](types/type-aliases/IrQuestion.md)
+
+***
+
+### IrQuestionSchema
+
+Re-exports [IrQuestionSchema](types/variables/IrQuestionSchema.md)
+
+***
+
+### IrQuestionView
+
+Re-exports [IrQuestionView](internal/table/interfaces/IrQuestionView.md)
 
 ***
 

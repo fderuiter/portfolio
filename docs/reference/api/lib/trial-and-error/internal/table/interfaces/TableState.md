@@ -26,6 +26,14 @@ The analysis set allocated to each blank shell in hand. Final once set.
 
 ***
 
+### answered
+
+> **answered**: `string`[]
+
+The FDA Information Request's questions answered so far, in order.
+
+***
+
 ### auditLog
 
 > **auditLog**: [`TraceRecord`](TraceRecord.md)[]
@@ -39,6 +47,14 @@ Every table cell traced to its Listing this Blind, in trace order.
 > **budget**: `number`
 
 The study budget: the shop's money.
+
+***
+
+### clock
+
+> **clock**: `number` \| `null`
+
+Hours left on an FDA Information Request's clock; null outside one.
 
 ***
 

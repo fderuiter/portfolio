@@ -26,7 +26,11 @@ import type {
   KmFigure,
   RedactedCard,
   Relic,
+  ClockAction,
+  DmcDefense,
   EncounterStage,
+  FdaIr,
+  IrQuestion,
   Site,
 } from "../types";
 import { HandTypeSchema, POPULATION_LABELS } from "../types";
@@ -327,6 +331,10 @@ export interface TableState {
   stage: number;
   /** Each encounter stage's score so far. Empty outside an encounter. */
   stageScores: number[];
+  /** Hours left on an FDA Information Request's clock; null outside one. */
+  clock: number | null;
+  /** The FDA Information Request's questions answered so far, in order. */
+  answered: string[];
   /** SOP relics the run has earned; each scores in every hand. */
   relics: Relic[];
   /** The relic taken as this Blind's encounter reward, once taken. */
@@ -590,6 +598,10 @@ export interface TableView {
   pendingViolations: string[];
   /** A staged encounter's progress, or null outside one. */
   encounter: EncounterView | null;
+  /** An FDA Information Request's clock, or null outside one. */
+  clock: ClockView | null;
+  /** An FDA Information Request's targeted questions; empty outside one. */
+  questions: IrQuestionView[];
   /** The intro card for a Boss Blind; null for every other Blind. */
   bossIntro: BossIntroView | null;
   /**
@@ -644,6 +656,33 @@ export interface BossIntroView {
   startingCpu: number;
   /** The encounter's stages in order; empty for an unstaged Boss. */
   stages: Pick<EncounterStage, "name" | "session" | "quota">[];
+  /** Hours until an FDA response is due, or null without a clock. */
+  dueHours: number | null;
+  /** An FDA Information Request's questions, in order; empty otherwise. */
+  questions: string[];
+}
+
+/**
+ * An FDA Information Request's deterministic clock (#921): hours left, what
+ * each move costs, and whether the deadline is close. It moves only when a
+ * move is made; nothing reads the wall clock.
+ */
+export interface ClockView {
+  hoursLeft: number;
+  totalHours: number;
+  /** What each move takes in hours. */
+  costs: Record<ClockAction, number>;
+  /** `CLOCK_URGENT_HOURS` or fewer are left. */
+  urgent: boolean;
+  /** The clock ran out with questions open: a Clinical Hold. */
+  hold: boolean;
+}
+
+/** One targeted question as the Blind panel lists it. */
+export interface IrQuestionView extends IrQuestion {
+  /** The required card's short name, e.g. "Figure 14.3.1". */
+  cardNumber: string;
+  answered: boolean;
 }
 
 /** One analysis set a blank shell could be compiled on, previewed before committing. */
@@ -851,6 +890,83 @@ const activeModifiers = (
 ): BossBlindModifier[] =>
   scenario.boss ? [scenario.boss, ...state.modifiers] : [...state.modifiers];
 
+/** The scenario's DMC milestone defense, if it is one. */
+export const dmcDefenseOf = (scenario: Scenario): DmcDefense | undefined =>
+  scenario.encounter?.kind === "DMC_DEFENSE" ? scenario.encounter : undefined;
+
+/** The scenario's FDA Information Request, if it is one. */
+const fdaIrOf = (scenario: Scenario): FdaIr | undefined =>
+  scenario.encounter?.kind === "FDA_IR" ? scenario.encounter : undefined;
+
+/** Hours an action takes on the clock; 0 outside an FDA Information Request. */
+const hoursFor = (scenario: Scenario, action: ClockAction): number =>
+  fdaIrOf(scenario)?.hours[action] ?? 0;
+
+const hoursText = (hours: number) => `${hours} hour${hours === 1 ? "" : "s"}`;
+
+/** Why the clock cannot pay for an action now, or null. */
+function clockRefusal(
+  scenario: Scenario,
+  state: TableState,
+  action: ClockAction,
+  verb: string
+): string | null {
+  const hours = hoursFor(scenario, action);
+  if (state.clock === null || state.clock >= hours) return null;
+  return `${verb} takes ${hoursText(hours)}; ${hoursText(state.clock)} left before the response is due.`;
+}
+
+/**
+ * An action's hours and what is left, for an announcement: "2 hours (46
+ * left)". Empty outside an FDA Information Request.
+ */
+const hoursTaken = (
+  scenario: Scenario,
+  after: TableState,
+  action: ClockAction
+): string =>
+  after.clock === null
+    ? ""
+    : `${hoursText(hoursFor(scenario, action))} (${after.clock} left)`;
+
+/** The state with an action's hours taken off the clock. */
+const tick = (
+  scenario: Scenario,
+  state: TableState,
+  action: ClockAction
+): TableState =>
+  state.clock === null
+    ? state
+    : { ...state, clock: state.clock - hoursFor(scenario, action) };
+
+/**
+ * The questions a played hand answers: each open question whose card scored,
+ * in the request's order, while the hand's score covers their shares.
+ */
+function answeredBy(
+  scenario: Scenario,
+  state: TableState,
+  scoringCardIds: readonly string[],
+  score: number
+): IrQuestion[] {
+  const ir = fdaIrOf(scenario);
+  if (!ir || score <= 0) return [];
+  const answered: IrQuestion[] = [];
+  let left = score;
+  for (const question of ir.questions) {
+    if (
+      state.answered.includes(question.id) ||
+      !scoringCardIds.includes(question.cardId) ||
+      question.quota > left
+    ) {
+      continue;
+    }
+    answered.push(question);
+    left -= question.quota;
+  }
+  return answered;
+}
+
 /** The modifier that disables this card's population, if any. */
 function disablingModifier(
   scenario: Scenario,
@@ -1014,7 +1130,7 @@ function sessionRefusal(
   if (state.session === to) {
     return `The ${to === "OPEN" ? "open" : "closed"} session is already in force.`;
   }
-  const encounter = scenario.encounter;
+  const encounter = dmcDefenseOf(scenario);
   if (encounter && to === "CLOSED" && state.stage === 0) {
     return `Premature unblinding: the DMC convenes the closed session only after ${encounter.stages[0].name} is defended.`;
   }
@@ -1051,7 +1167,10 @@ function stageHands(
   scenario: Scenario,
   state: TableState
 ): readonly HandType[] | undefined {
-  return scenario.encounter?.stages[state.stage]?.hands;
+  return (
+    fdaIrOf(scenario)?.hands ??
+    dmcDefenseOf(scenario)?.stages[state.stage]?.hands
+  );
 }
 
 /**
@@ -1148,16 +1267,25 @@ function playBlocker(
       "A"
     );
   }
-  const stage = scenario.encounter?.stages[state.stage];
+  const stage = dmcDefenseOf(scenario)?.stages[state.stage];
   const refusal = stage
     ? stageRefusal(scenario, state, stage, classification)
     : null;
   if (refusal) return refusal;
+  const ir = fdaIrOf(scenario);
+  if (ir && !ir.hands.includes(classification.handType)) {
+    return blocker(
+      `The FDA accepts ${ir.hands.map(handName).join(", ")}; this is ${handName(classification.handType)}.`,
+      `Select a ${ir.hands.map(handName).join(" or ")}`
+    );
+  }
   if (!canAfford(state.cpu, "PLAY_HAND")) {
     return blocker(
       `Play Hand needs ${CPU_COSTS.PLAY_HAND} CPU; ${state.cpu.available} left.`
     );
   }
+  const late = clockRefusal(scenario, state, "PLAY_HAND", "Play Hand");
+  if (late) return blocker(late);
   return null;
 }
 
@@ -1167,7 +1295,7 @@ function advanceStage(
   state: TableState,
   score: number
 ): Pick<TableState, "stage" | "stageScores"> {
-  const stages = scenario.encounter?.stages ?? [];
+  const stages = dmcDefenseOf(scenario)?.stages ?? [];
   const stageScores = state.stageScores.map((s, i) =>
     i === state.stage ? s + score : s
   );
@@ -1887,9 +2015,9 @@ export function createTableState(
     unblinded: [],
     pendingViolations: [],
     stage: 0,
-    stageScores: scenario.encounter
-      ? scenario.encounter.stages.map(() => 0)
-      : [],
+    stageScores: dmcDefenseOf(scenario)?.stages.map(() => 0) ?? [],
+    clock: fdaIrOf(scenario)?.clockHours ?? null,
+    answered: [],
     relics: [...(inventory.relics ?? [])],
     rewardClaimed: null,
     sites: [...(inventory.sites ?? [])],
@@ -2029,22 +2157,50 @@ function transitionTable(
   };
 }
 
+/**
+ * A Clinical Hold once the clock no longer leaves time to play a hand with
+ * questions still open; otherwise the state unchanged, with no outcome.
+ */
+function clinicalHold(
+  scenario: Scenario,
+  state: TableState
+): { state: TableState; outcome: string } {
+  const ir = fdaIrOf(scenario);
+  if (!ir || state.clock === null || state.clock >= ir.hours.PLAY_HAND) {
+    return { state, outcome: "" };
+  }
+  const open = ir.questions.length - state.answered.length;
+  return {
+    state: { ...state, status: "FAILED" },
+    outcome: `${CLINICAL_HOLD}: the ${ir.clockHours}-hour response window closed with ${open} of ${ir.questions.length} question${ir.questions.length === 1 ? "" : "s"} unanswered. The program cannot proceed to Phase III.`,
+  };
+}
+
 function settle(
   scenario: Scenario,
   state: TableState
 ): { state: TableState; outcome: string } {
-  const encounter = scenario.encounter;
-  const defended = encounter
-    ? encounter.stages.every((stage, i) => state.stageScores[i] >= stage.quota)
-    : state.roundScore >= scenario.blind.quota;
+  const encounter = dmcDefenseOf(scenario);
+  const ir = fdaIrOf(scenario);
+  const defended = ir
+    ? ir.questions.every((q) => state.answered.includes(q.id))
+    : encounter
+      ? encounter.stages.every(
+          (stage, i) => state.stageScores[i] >= stage.quota
+        )
+      : state.roundScore >= scenario.blind.quota;
   if (defended) {
     return {
       state: { ...state, status: "CLEARED" },
       outcome: encounter
         ? `${scenario.blind.name} defended. Choose an SOP relic.`
-        : `${scenario.blind.name} cleared.`,
+        : ir
+          ? `${scenario.blind.name} answered with ${hoursText(state.clock ?? 0)} to spare.`
+          : `${scenario.blind.name} cleared.`,
     };
   }
+  const hold = clinicalHold(scenario, state);
+  if (hold.outcome) return hold;
   const limit = handLimit(scenario, state);
   if (limit !== null && state.handsPlayed >= limit) {
     return {
@@ -2060,6 +2216,16 @@ function settle(
   }
   return { state, outcome: "" };
 }
+
+/**
+ * At or below this many hours the FDA clock is urgent (#921): time for one
+ * last hand at most. Below a hand's hours nothing can be submitted, so the
+ * Clinical Hold follows at once.
+ */
+export const CLOCK_URGENT_HOURS = 12;
+
+/** How a lost FDA Information Request is announced: it ends the run. */
+export const CLINICAL_HOLD = "Clinical Hold";
 
 /** Actions still allowed while a crisis waits for an answer: none play the Blind. */
 const CRISIS_SAFE_ACTIONS = new Set<TableAction["type"]>([
@@ -2175,6 +2341,32 @@ export function advanceTable(
   state: TableState,
   action: TableAction
 ): TableState {
+  const next = applyTableAction(scenario, state, action);
+  // The move that takes an FDA clock under the urgent line says so once.
+  if (
+    next.lastEvent &&
+    next.status === "REVIEWING" &&
+    state.clock !== null &&
+    next.clock !== null &&
+    state.clock > CLOCK_URGENT_HOURS &&
+    next.clock <= CLOCK_URGENT_HOURS
+  ) {
+    return {
+      ...next,
+      lastEvent: {
+        ...next.lastEvent,
+        message: `${next.lastEvent.message} ${hoursText(next.clock)} left: the response is due soon.`,
+      },
+    };
+  }
+  return next;
+}
+
+function applyTableAction(
+  scenario: Scenario,
+  state: TableState,
+  action: TableAction
+): TableState {
   if (action.type === "RESET") {
     return {
       ...createTableState(
@@ -2193,7 +2385,7 @@ export function advanceTable(
     };
   }
   if (action.type === "CLAIM_RELIC") {
-    const rewards = scenario.encounter?.rewards ?? [];
+    const rewards = dmcDefenseOf(scenario)?.rewards ?? [];
     if (state.status !== "CLEARED" || rewards.length === 0) {
       return refuse(state, "No relic is on offer.");
     }
@@ -2300,7 +2492,7 @@ export function advanceTable(
       const blocked = playBlocker(scenario, state, found);
       if (blocked) return refuse(state, blocked.reason);
       const classification = found as HandClassification;
-      const stage = scenario.encounter?.stages[state.stage];
+      const stage = dmcDefenseOf(scenario)?.stages[state.stage];
       const scoring = classification.scoringCardIds.map(
         (id) => cardById(scenario, state, id) as TlfCard
       );
@@ -2316,30 +2508,41 @@ export function advanceTable(
         evaluation,
         cardIds: [...state.selected],
       };
+      const answers = answeredBy(
+        scenario,
+        state,
+        classification.scoringCardIds,
+        evaluation.score
+      );
       // The study event lands between the hand being submitted and the inbox
       // refilling, so new drafts compile against the new snapshot and the
       // cards still in hand go stale.
       const { state: changed, message: news } = applyStudyEvents(
         scenario,
         spendSelection(
-          {
-            ...state,
-            roundScore: state.roundScore + evaluation.score,
-            handsPlayed: state.handsPlayed + 1,
-            // The violation is answered for by this hand's ×0.
-            pendingViolations: [],
-            ...(stage ? advanceStage(scenario, state, evaluation.score) : {}),
-            handLevels: {
-              ...state.handLevels,
-              [classification.handType]: {
-                ...state.handLevels[classification.handType],
-                playedCount:
-                  state.handLevels[classification.handType].playedCount + 1,
+          tick(
+            scenario,
+            {
+              ...state,
+              roundScore: state.roundScore + evaluation.score,
+              handsPlayed: state.handsPlayed + 1,
+              // The violation is answered for by this hand's ×0.
+              pendingViolations: [],
+              ...(stage ? advanceStage(scenario, state, evaluation.score) : {}),
+              handLevels: {
+                ...state.handLevels,
+                [classification.handType]: {
+                  ...state.handLevels[classification.handType],
+                  playedCount:
+                    state.handLevels[classification.handType].playedCount + 1,
+                },
               },
+              lastPlay: played,
+              plays: [...state.plays, played],
+              answered: [...state.answered, ...answers.map((q) => q.id)],
             },
-            lastPlay: played,
-            plays: [...state.plays, played],
-          },
+            "PLAY_HAND"
+          ),
           "PLAY_HAND"
         )
       );
@@ -2352,14 +2555,22 @@ export function advanceTable(
         : "";
       const defended =
         stage && settled.stage > state.stage && settled.status === "REVIEWING"
-          ? ` ${stage.name} defended: convene the closed session for ${scenario.encounter?.stages[settled.stage].name}.`
+          ? ` ${stage.name} defended: convene the closed session for ${dmcDefenseOf(scenario)?.stages[settled.stage].name}.`
+          : "";
+      const answeredText =
+        answers.length > 0
+          ? ` Answered: ${answers.map((q) => q.question).join("; ")}.`
+          : "";
+      const clockText =
+        settled.clock !== null && settled.status === "REVIEWING"
+          ? ` ${hoursText(settled.clock)} left.`
           : "";
       return {
         ...settled,
         lastEvent: nextEvent(
           state,
           "PLAYED",
-          `${handName(classification.handType)} scored ${evaluation.score} (${evaluation.chips.total} Chips × ${evaluation.finalMult} Mult).${zero} Round ${settled.roundScore} of ${scenario.blind.quota}.${defended}${outcome ? ` ${outcome}` : ""}${news ? ` ${news}` : ""}`
+          `${handName(classification.handType)} scored ${evaluation.score} (${evaluation.chips.total} Chips × ${evaluation.finalMult} Mult).${zero} Round ${settled.roundScore} of ${scenario.blind.quota}.${defended}${answeredText}${clockText}${outcome ? ` ${outcome}` : ""}${news ? ` ${news}` : ""}`
         ),
       };
     }
@@ -2375,13 +2586,19 @@ export function advanceTable(
           `Discard needs ${costOf("DISCARD", surcharge)} CPU.`
         );
       }
+      const late = clockRefusal(scenario, state, "DISCARD", "Discard");
+      if (late) return refuse(state, late);
       const count = state.selected.length;
       const { state: settled, outcome } = settle(
         scenario,
         refill(
           scenario,
           spendSelection(
-            { ...state, discards: state.discards + 1 },
+            tick(
+              scenario,
+              { ...state, discards: state.discards + 1 },
+              "DISCARD"
+            ),
             "DISCARD",
             surcharge
           )
@@ -2392,7 +2609,7 @@ export function advanceTable(
         lastEvent: nextEvent(
           state,
           "DISCARDED",
-          `Discarded ${count} card${count === 1 ? "" : "s"}.${outcome ? ` ${outcome}` : ""}`
+          `Discarded ${count} card${count === 1 ? "" : "s"}.${settled.clock !== null && settled.status === "REVIEWING" ? ` ${hoursText(settled.clock)} left.` : ""}${outcome ? ` ${outcome}` : ""}`
         ),
       };
     }
@@ -2434,18 +2651,30 @@ export function advanceTable(
       if (!canAfford(state.cpu, "INSPECT")) {
         return refuse(state, `Inspect needs ${CPU_COSTS.INSPECT} CPU.`);
       }
+      const late = clockRefusal(scenario, state, "INSPECT", "Inspect");
+      if (late) return refuse(state, late);
+      const { state: held, outcome } = clinicalHold(
+        scenario,
+        tick(
+          scenario,
+          {
+            ...state,
+            cpu: cpuReducer(state.cpu, { type: "SPEND", action: "INSPECT" }),
+            inspections: {
+              ...state.inspections,
+              [card.id]: createInspectionState(),
+            },
+            inspecting: card.id,
+          },
+          "INSPECT"
+        )
+      );
       return {
-        ...state,
-        cpu: cpuReducer(state.cpu, { type: "SPEND", action: "INSPECT" }),
-        inspections: {
-          ...state.inspections,
-          [card.id]: createInspectionState(),
-        },
-        inspecting: card.id,
+        ...held,
         lastEvent: nextEvent(
           state,
           "INSPECT_OPENED",
-          `Inspecting ${label(card)} for ${CPU_COSTS.INSPECT} CPU.`
+          `Inspecting ${label(card)} for ${CPU_COSTS.INSPECT} CPU${held.clock === null ? "" : ` and ${hoursTaken(scenario, held, "INSPECT")}`}.${outcome ? ` ${outcome}` : ""}`
         ),
       };
     }
@@ -2495,8 +2724,14 @@ export function advanceTable(
       if (!canAfford(state.cpu, "INSPECT")) {
         return refuse(state, `Structural QC needs ${CPU_COSTS.INSPECT} CPU.`);
       }
+      const late = clockRefusal(scenario, state, "INSPECT", "Structural QC");
+      if (late) return refuse(state, late);
+      const { state: held, outcome } = clinicalHold(
+        scenario,
+        tick(scenario, state, "INSPECT")
+      );
       return {
-        ...state,
+        ...held,
         cpu: cpuReducer(state.cpu, { type: "SPEND", action: "INSPECT" }),
         structuralQc: [...state.structuralQc, card.id],
         accessLog: withAccess(
@@ -2509,7 +2744,7 @@ export function advanceTable(
         lastEvent: nextEvent(
           state,
           "STRUCTURAL_QC",
-          `Structural QC of ${cardShortName(card)} for ${CPU_COSTS.INSPECT} CPU, no values read: ${summary}`
+          `Structural QC of ${cardShortName(card)} for ${CPU_COSTS.INSPECT} CPU${held.clock === null ? "" : ` and ${hoursTaken(scenario, held, "INSPECT")}`}, no values read: ${summary}${outcome ? ` ${outcome}` : ""}`
         ),
       };
     }
@@ -2905,14 +3140,22 @@ export function advanceTable(
           : "OPEN",
         superseded: false,
       };
+      // Re-reading a trace already in the audit log takes no time.
+      const late = traced
+        ? null
+        : clockRefusal(scenario, state, "TRACE", "Trace");
+      if (late) return refuse(state, late);
+      const { state: held, outcome } = traced
+        ? { state, outcome: "" }
+        : clinicalHold(scenario, tick(scenario, state, "TRACE"));
       const n = trace.matchedSubjectIds.length;
       return {
-        ...state,
+        ...held,
         auditLog: traced ? state.auditLog : [...state.auditLog, record],
         lastEvent: nextEvent(
           state,
           "TRACED",
-          `Traced ${where} of ${cardShortName(card)} to ${listing.number} on ${trace.snapshotId}: ${n} of ${trace.rows.length} subject row${trace.rows.length === 1 ? "" : "s"} counted${n > 0 ? ` (${trace.matchedSubjectIds.join(", ")})` : ""}.`
+          `Traced ${where} of ${cardShortName(card)} to ${listing.number} on ${trace.snapshotId}: ${n} of ${trace.rows.length} subject row${trace.rows.length === 1 ? "" : "s"} counted${n > 0 ? ` (${trace.matchedSubjectIds.join(", ")})` : ""}.${traced || held.clock === null ? "" : ` Took ${hoursTaken(scenario, held, "TRACE")}.`}${outcome ? ` ${outcome}` : ""}`
         ),
       };
     }
@@ -3110,6 +3353,8 @@ export function deriveTableView(
     isBlank(state, cardById(scenario, state, id) as TlfCard)
   );
   const accepts = stageHands(scenario, state);
+  const dmc = dmcDefenseOf(scenario);
+  const ir = fdaIrOf(scenario);
   const classification = classifyHand(selectedCards, accepts);
   const blocked = playBlocker(scenario, state, classification);
   const preview = classification
@@ -3276,8 +3521,13 @@ export function deriveTableView(
     canDiscard:
       reviewing &&
       state.selected.length > 0 &&
-      canAfford(state.cpu, "DISCARD", surcharge),
-    canInspect: reviewing && !firewall && canAfford(state.cpu, "INSPECT"),
+      canAfford(state.cpu, "DISCARD", surcharge) &&
+      clockRefusal(scenario, state, "DISCARD", "Discard") === null,
+    canInspect:
+      reviewing &&
+      !firewall &&
+      canAfford(state.cpu, "INSPECT") &&
+      clockRefusal(scenario, state, "INSPECT", "Inspect") === null,
     inspection,
     lastTimeline,
     scoreLog: scoreLogOf(scenario, state.plays),
@@ -3337,15 +3587,34 @@ export function deriveTableView(
           debuff: scenario.boss.description,
           quota: scenario.blind.quota,
           startingCpu: scenario.table.startingCpu,
-          stages: (scenario.encounter?.stages ?? []).map(
-            ({ name, session, quota }) => ({ name, session, quota })
-          ),
+          stages: (dmc?.stages ?? []).map(({ name, session, quota }) => ({
+            name,
+            session,
+            quota,
+          })),
+          dueHours: ir?.clockHours ?? null,
+          questions: (ir?.questions ?? []).map((q) => q.question),
         }
       : null,
-    encounter: scenario.encounter
+    clock:
+      ir && state.clock !== null
+        ? {
+            hoursLeft: state.clock,
+            totalHours: ir.clockHours,
+            costs: { ...ir.hours },
+            urgent: state.clock <= CLOCK_URGENT_HOURS,
+            hold: state.status === "FAILED" && state.clock < ir.hours.PLAY_HAND,
+          }
+        : null,
+    questions: (ir?.questions ?? []).map((q) => ({
+      ...q,
+      cardNumber: (deckCard(scenario, q.cardId) as TlfCard).number,
+      answered: state.answered.includes(q.id),
+    })),
+    encounter: dmc
       ? {
           current: state.stage,
-          stages: scenario.encounter.stages.map((stage, i) => ({
+          stages: dmc.stages.map((stage, i) => ({
             ...stage,
             score: state.stageScores[i] ?? 0,
             status:
@@ -3358,9 +3627,9 @@ export function deriveTableView(
         }
       : null,
     reward:
-      scenario.encounter && state.status === "CLEARED"
+      dmc && state.status === "CLEARED"
         ? {
-            choices: scenario.encounter.rewards,
+            choices: dmc.rewards,
             claimed: state.rewardClaimed,
           }
         : null,

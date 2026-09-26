@@ -14,6 +14,7 @@ export {
   DMC_MILESTONE_SCENARIO,
   DMC_RELICS,
   DOSE_ESCALATION_SCENARIO,
+  FDA_IR_SCENARIO,
   SCENARIOS,
   SPONSOR_SAFETY_SCENARIO,
 } from "./scenarios";
@@ -116,6 +117,10 @@ export {
   KM_SYNERGY,
   type EncounterStageView,
   type BossIntroView,
+  type ClockView,
+  type IrQuestionView,
+  CLINICAL_HOLD,
+  CLOCK_URGENT_HOURS,
   type EncounterView,
   type FigureInspectionView,
   type FigureStatus,

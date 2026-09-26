@@ -28,6 +28,22 @@ What the debuff does, in one line.
 
 ***
 
+### dueHours
+
+> **dueHours**: `number` \| `null`
+
+Hours until an FDA response is due, or null without a clock.
+
+***
+
+### questions
+
+> **questions**: `string`[]
+
+An FDA Information Request's questions, in order; empty otherwise.
+
+***
+
 ### quota
 
 > **quota**: `number`

@@ -24,6 +24,7 @@ import {
   consumableSellValue,
   createTableState,
   deriveTableView,
+  dmcDefenseOf,
   studyHistory,
   type Consumable,
   type Inventory,
@@ -280,7 +281,7 @@ function cashOutRefusal(act: Act, run: RunState): string | null {
   const blind = blinds[run.blindIndex];
   if (run.table.status !== "CLEARED") return `Clear ${blind.blind.name} first.`;
   if (run.blindIndex >= blinds.length - 1) return `${act.title} is complete.`;
-  if (blind.encounter && !run.table.rewardClaimed) {
+  if (dmcDefenseOf(blind) && !run.table.rewardClaimed) {
     return "Choose an SOP relic first.";
   }
   if (run.cashOut) return "This Blind is already cashed out.";
@@ -798,7 +799,7 @@ export function advanceRun(
       if (run.table.status !== "CLEARED") {
         return refuse(`Clear ${blind.blind.name} first.`);
       }
-      if (blind.encounter && !run.table.rewardClaimed) {
+      if (dmcDefenseOf(blind) && !run.table.rewardClaimed) {
         return refuse("Choose an SOP relic first.");
       }
       const index = run.blindIndex + 1;
