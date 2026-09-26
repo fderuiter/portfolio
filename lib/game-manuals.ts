@@ -669,9 +669,9 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
     accentColor: "from-amber-500/20 via-amber-500/5 to-transparent",
     badgeBg: "bg-amber-500/10 text-amber-300 border-amber-500/30",
     objective:
-      "Clear Act I, a Phase I safety study, in three Blinds: Internal QC (450), the Sponsor Safety Review (7,500) and the Dose Escalation Committee (8,500). Inspect suspect cards on the QC Desk before you trust them: an uncorrected fatal defect zeroes the whole hand, and losing a Blind ends the run.",
+      "Get a fictional study's reporting through its Blinds, one review at a time. The act on the table today, Act I (a Phase I safety study), runs three: Internal QC (450), the Sponsor Safety Review (7,500) and the Dose Escalation Committee (8,500). Inspect suspect cards on the QC Desk before you trust them: an uncorrected fatal defect zeroes the whole hand, and losing a Blind ends the run.",
     quickSummary:
-      "Move across the hand with ← →, select up to five cards with Space, and press Enter to play the best hand they make (2 CPU). D discards the selection (1 CPU). I opens the focused card's QC Desk (1 CPU): inspect cells with Enter or Space, correct with C, and close with Esc. R recompiles a stale card (2 CPU). A jumps to a blank shell's analysis sets, and footnote seals from the tray press onto a card with Enter.",
+      "Move across the hand with ← →, select up to five cards with Space, and press Enter to play the best hand they make (2 CPU). D discards the selection (1 CPU). I opens the focused card's QC Desk (1 CPU): inspect cells with Enter or Space, correct with C, trace a flagged cell to its Listing with T, and close with Esc. R recompiles a stale card (2 CPU), S runs structural QC on a face-down card (1 CPU), and A jumps to a blank shell's analysis sets. Between Blinds, spend the Study Budget in the shop. The run saves as you play, so a reload offers Resume run.",
     controls: [
       {
         action: "Move across the hand",
@@ -728,6 +728,36 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
         key: "I",
       },
       {
+        action: "Move around a desk",
+        description:
+          "On the QC Desk the arrows move cell by cell and Home and End jump to the ends of a row. On the Figure Desk, ↑ and ↓ move between findings.",
+        key: "← → ↑ ↓ / Home / End",
+      },
+      {
+        action: "Correct or reconcile",
+        description:
+          "On the QC Desk, corrects the focused cell's revealed finding. On the Figure Desk, reconciles the focused Kaplan–Meier finding with the parent Table. Both are free.",
+        key: "C",
+      },
+      {
+        action: "Trace a flagged cell",
+        description:
+          "On the QC Desk, traces a flagged cell to the patient Listing it was counted from and draws a line to the first subject row (free). Press T again for the next row and Shift + T for the previous one.",
+        key: "T / Shift + T",
+      },
+      {
+        action: "Structural QC",
+        description:
+          "Checks a face-down card's column balance, missing data and format for 1 CPU without reading a single value. Rerunning it on the same card is free.",
+        key: "S",
+      },
+      {
+        action: "DMC session",
+        description:
+          "Where a Blind has a data monitoring committee, the Blind panel shows the session and a button that convenes the closed session or returns to the open one. The button says why when it is not available.",
+        key: "Session",
+      },
+      {
         action: "Recompile",
         description:
           "Reruns the focused stale card against the current population snapshot for 2 CPU. Cells you corrected stay correct; defects nobody reported come back on the new data, so inspect the rerun again.",
@@ -743,13 +773,25 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
         action: "Apply a footnote seal",
         description:
           "Pick a seal up from the tray, then press Enter or Space on an eligible card to print it as a footnote (free). With a pointer, click the card or drag the seal onto it. Esc puts the seal back; Sell trades it for study budget.",
-        key: "Enter / Space",
+        key: "Enter / Space / Esc",
       },
       {
         action: "Use a Guidance card",
         description:
           "Guidance cards in the tray are named after real guidance documents. Using one (free) levels its hand up for the rest of the run, adding Chips and +Mult to that hand's base; Sell trades it for study budget instead.",
         key: "Use",
+      },
+      {
+        action: "Sell a relic",
+        description:
+          "In the shop, S or Enter on a relic in the rack offers to sell it for half what it cost.",
+        key: "S / Enter",
+      },
+      {
+        action: "Resume a run",
+        description:
+          "After a reload, Resume run puts you back on the same hand, score and CPU. New run asks before it discards the saved run.",
+        key: "Resume run",
       },
       {
         action: "Run Info",
@@ -825,6 +867,48 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
           "The Dose Escalation Committee's boss debuff disables every population except Safety: an ITT output scores 0 Chips there, however clean. Five System Organ Class tables together make a MedDRA Five of a Kind.",
         badge: "Boss",
       },
+      {
+        title: "Traces",
+        detail:
+          "With a Table open on the QC Desk, T traces a flagged cell to the Listing rows behind it, so you can see which subjects were counted. Tracing is free. A Table played with its Listing earns ×2 Mult once it has a trace into that Listing and every trace is resolved. A Listing compiled against another population snapshot blocks the trace until the stale output is recompiled.",
+        badge: "Trace",
+      },
+      {
+        title: "Kaplan–Meier figures",
+        detail:
+          "A Figure is drawn from a parent Table. Its QC checks the curve against the data: a fixed time origin, a curve that never rises, censoring ticks and the number at risk at every milestone, which must reconcile with the parent's subjects and events. Each open discrepancy costs 1 Mult. With the parent in hand, current and validated, and every finding reconciled, the Figure scores ×2 Mult; without a valid parent it scores 0 Chips. No Act I Blind deals a Figure yet.",
+        badge: "KM",
+      },
+      {
+        title: "The DMC firewall",
+        detail:
+          "Outputs that would show treatment arms before the committee meets are dealt face down in the open session: you see their structure, never their values. Structural QC checks them without unblinding. Inspecting one anyway is an unauthorized unblinding: it is logged, and the next hand played scores ×0 Mult. The closed session turns them face up, but it needs structural QC of every blinded output in hand first. No Act I Blind is blinded yet.",
+        badge: "Firewall",
+      },
+      {
+        title: "Staged Boss encounters",
+        detail:
+          "Some Bosses are defended in stages. Each stage sets its session, its quota and the hands it accepts, and the table names those hands; any other hand cannot be played. The DMC milestone defense opens with an open report (400: High Table, TLF Pair or Population Flush) and ends with a closed report (25,000: Efficacy Full House only).",
+        badge: "Stages",
+      },
+      {
+        title: "SOP relics",
+        detail:
+          "A relic is a standard operating procedure with a name, a description and one score modifier. Once you hold it, it scores in every later hand of the run. The shop sells relics, and defending a staged Boss offers a choice of one, which you must claim before the next Blind.",
+        badge: "Relic",
+      },
+      {
+        title: "Study Budget and the shop",
+        detail:
+          "Clearing a Blind cashes out Study Budget: $3k, $4k or $5k by Blind, $1k for every 2 CPU left unspent, and $1k interest per $5k already held, up to $5k. Between Blinds the shop stocks two items and two packs. A reroll costs $5k, then $1k more each time in the same visit, and anything sells for half its price, rounded down. A site from a Site Activation pack adds Chips to every later hand, and its subjects enroll after the next Blind's first hand, which stales outputs built on that population.",
+        badge: "Shop",
+      },
+      {
+        title: "Saved runs",
+        detail:
+          "The cabinet keeps the run's seed and your moves in this browser, never a blinded value, and replays them when you choose Resume run. The save is cleared when the run ends or you start a new one.",
+        badge: "Save",
+      },
     ],
     proTips: [
       "The Expected Value only counts findings you have revealed. Unreviewed cells can hide a zero.",
@@ -833,6 +917,9 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
       "In the safety Blinds, FAS and Per-Protocol drop S-008, the subject who stopped for atrial fibrillation. An N of 5 in the Active column is the tell.",
       "A Two Pair of the AE overview and the SAE table, each with its listing, is the Big Blind's workhorse.",
       "Data keeps moving during the sponsor review. If your Safety drafts go stale, sending them back to programming (discard) is cheaper than recompiling each one, and the reruns at the bottom of the deck arrive current.",
+      "Trace every flagged cell of a Table before you play it with its Listing. One unresolved trace and the pair loses its ×2.",
+      "Reconcile a Kaplan–Meier Figure before you build a Full House around it. Each open discrepancy costs Mult, and only a reconciled Figure doubles it.",
+      "Run structural QC on every face-down output before you convene the closed session. One peek costs the next hand its whole score.",
     ],
     lore: {
       title: "Why statisticians double-program tables",
