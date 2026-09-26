@@ -187,9 +187,15 @@ describe("BioSpotlight Component", () => {
       "From 8-Week Fluff to 80-lb Marshmallow"
     );
 
-    // Check step buttons exist
-    const milestoneButtons = container?.querySelectorAll("button[role='tab']");
-    expect(milestoneButtons?.length).toBeGreaterThanOrEqual(4);
+    // Milestones are independent toggle buttons with explicit pressed state.
+    const milestoneGroup = container?.querySelector(
+      '[role="group"][aria-label="Photo growth milestones"]'
+    );
+    const milestoneButtons = milestoneGroup?.querySelectorAll(
+      "button[aria-pressed]"
+    );
+    expect(milestoneButtons?.length).toBe(6);
+    expect(milestoneButtons?.[0].getAttribute("aria-pressed")).toBe("true");
 
     // Click on step 2 (Mirror Check)
     if (milestoneButtons && milestoneButtons[1]) {
@@ -199,6 +205,7 @@ describe("BioSpotlight Component", () => {
         );
       });
       expect(container?.textContent).toContain("First Week Home");
+      expect(milestoneButtons[1].getAttribute("aria-pressed")).toBe("true");
     }
   });
 });

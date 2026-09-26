@@ -270,7 +270,7 @@ export const SandboxMode: React.FC = () => {
       <div className="text-xs text-zinc-400 flex items-center justify-between px-1">
         <span>
           Active:{" "}
-          <strong className="text-zinc-200">{currentPreset.name}</strong>:{" "}
+          <strong className="text-zinc-200">{currentPreset.name}</strong>.{" "}
           {currentPreset.description}
         </span>
         {isComplete && (

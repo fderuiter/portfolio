@@ -400,7 +400,7 @@ const mode = useSyncExternalStore(
     body: `
 <h2>The document is not the control</h2>
 <p>A repository convention exists in one of three states: written down, implemented, or enforced. They are routinely confused, and an agent has no way to tell them apart: it reads the convention, assumes it holds, and builds on it.</p>
-<p>A concrete example from this repository. The branch-naming convention was documented. A <code>validateBranchName()</code> function existed. A unit test asserted it worked, and passed continuously. Nothing anywhere called it. The convention was written, implemented, tested, and unenforced for months, while every artifact suggested otherwise.</p>
+<p>A concrete example from this repository. The branch-naming convention was documented. A <code>validateBranchName()</code> function existed. A unit test asserted it worked, and passed continuously. Nothing anywhere called it. The convention was written, implemented, and tested. It was also unenforced for months, while every artifact suggested otherwise.</p>
 <p>That is the characteristic agent-first failure, and it is worse for agents than for humans. A human who has been on the team a while knows which rules are real. An agent has only the artifacts, and the artifacts said it was enforced.</p>
 
 <h2>Test that the control is invoked, not that it works</h2>
@@ -494,7 +494,7 @@ pub fn newton_step(x: Finite, fx: Finite, dfx: NonZeroFinite) -&gt; Finite { /* 
 
 <h2>When not to do this</h2>
 <p>Proof effort is superlinear in specification complexity. A property about number theory closes in an afternoon; the same rigour applied to a stateful system with I/O is a research project.</p>
-<p>Reach for proofs when the specification is small and the consequences of being wrong are large and hard to observe. Everywhere else, property-based testing plus a type system that makes illegal states unrepresentable gets most of the benefit for a fraction of the cost. Unlike a proof, your colleagues can also modify it.</p>
+<p>Reach for proofs when the specification is small and the consequences of being wrong are large and hard to observe. Everywhere else, property-based testing plus a type system that makes illegal states unrepresentable gets most of the benefit for a fraction of the cost, and, unlike a proof, your colleagues can modify it.</p>
 
 <p><a href="/case-studies/ualbf">UALBF</a> pairs Lean 4 proofs with Rust and C implementations across a number-theoretic problem; <a href="/case-studies/oxidizemath">OxidizeMath</a> covers compiling verified numerics to WebAssembly without losing the guarantees at the boundary; <a href="/case-studies/polyglot-tsp">Polyglot TSP</a> benchmarks the same algorithm across toolchains, which is how you find out what the abstraction actually cost.</p>
 `.trim(),
@@ -548,7 +548,7 @@ pub fn newton_step(x: Finite, fx: Finite, dfx: NonZeroFinite) -&gt; Finite { /* 
 </ul>
 
 <h2>The uncomfortable part</h2>
-<p>The build guard, the convention, the inventory, and the test were each a good-faith attempt to prevent exactly the class of problem they went on to conceal.</p>
+<p>Every one of these controls was built deliberately, by someone trying to be careful. The build guard, the convention, the inventory, and the test were each a good-faith attempt to prevent exactly the class of problem they went on to conceal.</p>
 <p>That is not an argument against controls. It is an argument for periodically asking of each one: what would it look like if this were broken, and would I be able to tell? For four controls here, the answer was that it would look precisely like it looked every day.</p>
 `.trim(),
   },

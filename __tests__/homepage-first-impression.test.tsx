@@ -1,14 +1,7 @@
 // @vitest-environment jsdom
 import React from "react";
 import { describe, it, expect, vi, afterEach } from "vitest";
-import {
-  render,
-  screen,
-  fireEvent,
-  waitFor,
-  cleanup,
-  act,
-} from "@testing-library/react";
+import { render, screen, cleanup } from "@testing-library/react";
 import { Hero } from "@/components/Hero";
 import { TextReveal } from "@/components/TextReveal";
 
@@ -23,14 +16,6 @@ vi.mock("framer-motion", async (importOriginal) => {
     ),
   };
 });
-
-// Mock AudioProvider
-vi.mock("@/components/providers/AudioProvider", () => ({
-  useAudio: () => ({
-    playSkillHover: vi.fn(),
-    playSuccess: vi.fn(),
-  }),
-}));
 
 // Mock AnimatedGridPattern
 vi.mock("@/components/AnimatedGridPattern", () => ({
@@ -80,7 +65,7 @@ describe("[UI/UX 01] Homepage First Impression & Architectural Hierarchy Suite",
       );
 
       // Invariant telemetry badges state honest scope rather than absolute claims
-      expect(screen.getByText(/TRY THE DEMOS/i)).toBeDefined();
+      expect(screen.queryByText(/TRY THE DEMOS/i)).toBeNull();
       expect(screen.getByText(/CLINICAL OPERATIONS EXPERIENCE/i)).toBeDefined();
       expect(screen.getByText(/SOURCE ON GITHUB/i)).toBeDefined();
 
@@ -121,156 +106,46 @@ describe("[UI/UX 01] Homepage First Impression & Architectural Hierarchy Suite",
     });
   });
 
-  describe("2. Interactive Engineering Console Telemetry & States", () => {
-    it("renders all 3 illustrative demo tabs with tablist accessibility", () => {
+  describe("2. Hero Duck BioSpotlight", () => {
+    it("shows the Duck growth story in place of the sample engineering demos", () => {
       render(<Hero />);
 
-      const tablist = screen.getByRole("tablist", {
-        name: /Interactive Systems Demos/i,
-      });
-      expect(tablist).toBeDefined();
-
-      const tabs = screen.getAllByRole("tab");
-      expect(tabs).toHaveLength(3);
-      expect(tabs[0].textContent).toContain("Logic");
-      expect(tabs[1].textContent).toContain("Clinical");
-      expect(tabs[2].textContent).toContain("Memory");
-    });
-
-    it("allows switching tabs and displays illustrative, non-absolute metrics", async () => {
-      render(<Hero />);
-
-      // Default tab: Logic
-      expect(screen.getByText(/ONE SMALL LOGIC PROOF/i)).toBeDefined();
-      expect(screen.getByText(/RULE: MODUS PONENS/i)).toBeDefined();
-
-      // Switch to Clinical tab
-      const clinicalTab = screen.getByRole("tab", { name: /Clinical/i });
-      fireEvent.click(clinicalTab);
-
-      await waitFor(() => {
-        expect(screen.getByText(/A CLINICAL FORM CHECK/i)).toBeDefined();
-      });
-      expect(screen.getByText(/DEMO RULE/i)).toBeDefined();
-
-      // Switch to Memory tab
-      const memoryTab = screen.getByRole("tab", { name: /Memory/i });
-      fireEvent.click(memoryTab);
-
-      await waitFor(() => {
-        expect(screen.getByText(/SMARTWATCH RUNTIME/i)).toBeDefined();
-      });
-      expect(screen.getByText(/32KB MEMORY BUDGET/i)).toBeDefined();
-      expect(screen.getByText(/Simulated allocation/i)).toBeDefined();
-
-      // Verify spec strip labels demo as illustrative
-      expect(screen.getByText(/ILLUSTRATIVE DEMO/i)).toBeDefined();
-      expect(screen.getByText(/TRY THE CONTROLS/i)).toBeDefined();
-    });
-
-    it("provides visible focus rings and minimum touch heights across all interactive buttons", () => {
-      render(<Hero />);
-
-      const tabs = screen.getAllByRole("tab");
-      for (const tab of tabs) {
-        expect(tab.className).toContain("focus-visible:ring-2");
-        expect(tab.className).toContain("min-h-11");
-      }
-
-      const proveBtn = screen.getByRole("button", {
-        name: /Apply the Rule/i,
-      });
-      expect(proveBtn.className).toContain("min-h-11");
-      expect(proveBtn.className).toContain("focus-visible:ring-2");
-      expect(proveBtn.className).toContain("focus-visible:ring-amber-400");
-    });
-
-    it("links each roving tab to its labelled panel and automatically selects the focused tab", () => {
-      render(<Hero />);
-
-      const logicTab = screen.getByRole("tab", { name: /Logic/i });
-      const clinicalTab = screen.getByRole("tab", { name: /Clinical/i });
-      const memoryTab = screen.getByRole("tab", { name: /Memory/i });
-
-      expect(logicTab.getAttribute("id")).toBe("hero-demo-tab-logic");
-      expect(logicTab.getAttribute("aria-controls")).toBe(
-        "hero-demo-panel-logic"
-      );
-      expect(logicTab.getAttribute("tabindex")).toBe("0");
-      expect(clinicalTab.getAttribute("tabindex")).toBe("-1");
-      expect(memoryTab.getAttribute("tabindex")).toBe("-1");
-      for (const tab of [logicTab, clinicalTab, memoryTab]) {
-        expect(
-          document.getElementById(tab.getAttribute("aria-controls") ?? "")
-        ).not.toBe(null);
-      }
+      expect(screen.getByTestId("bio-spotlight")).toBeDefined();
       expect(
-        screen
-          .getByRole("tabpanel", { name: /Logic/i })
-          .getAttribute("aria-labelledby")
-      ).toBe("hero-demo-tab-logic");
-
-      logicTab.focus();
-      fireEvent.keyDown(logicTab, { key: "ArrowRight" });
-      expect(document.activeElement).toBe(clinicalTab);
-      expect(clinicalTab.getAttribute("aria-selected")).toBe("true");
-
-      fireEvent.keyDown(clinicalTab, { key: "End" });
-      expect(document.activeElement).toBe(memoryTab);
-      expect(memoryTab.getAttribute("aria-selected")).toBe("true");
-
-      fireEvent.keyDown(memoryTab, { key: "Home" });
-      expect(document.activeElement).toBe(logicTab);
-      expect(logicTab.getAttribute("aria-selected")).toBe("true");
-    });
-
-    it("resets each illustrative demo locally and announces the reset", () => {
-      vi.useFakeTimers();
-      render(<Hero />);
-
-      fireEvent.click(screen.getByRole("button", { name: /Apply the Rule/i }));
-      expect(screen.getByText(/Illustrative result: Q follows/i)).toBeDefined();
-      fireEvent.click(
-        screen.getByRole("button", { name: /Reset Logic Demo/i })
-      );
-      expect(screen.getByText(/Awaiting inference/i)).toBeDefined();
-      expect(
-        screen.getByText(/Logic demo reset/i).getAttribute("aria-live")
-      ).toBe("polite");
-
-      fireEvent.click(screen.getByRole("tab", { name: /Clinical/i }));
-      fireEvent.click(
-        screen.getByRole("button", {
-          name: /Illustrative Integrity Rule: Active/i,
-        })
-      );
-      fireEvent.click(
-        screen.getByRole("button", { name: /Reset Clinical Demo/i })
-      );
-      expect(
-        screen.getByRole("button", {
-          name: /Illustrative Integrity Rule: Active/i,
+        screen.getByRole("heading", {
+          level: 2,
+          name: /Meet Duck: From 8-Week Fluff to 80-lb Marshmallow/i,
         })
       ).toBeDefined();
-      expect(
-        screen.getByText(/Clinical demo reset/i).getAttribute("aria-live")
-      ).toBe("polite");
+      expect(screen.queryByText(/A FEW THINGS TO TRY/i)).toBeNull();
+      expect(screen.queryByText(/ONE SMALL LOGIC PROOF/i)).toBeNull();
+      expect(screen.queryByText(/TRY THE CONTROLS · NO LIVE DATA/i)).toBeNull();
+    });
 
-      fireEvent.click(screen.getByRole("tab", { name: /Memory/i }));
-      fireEvent.click(
-        screen.getByRole("button", { name: /Clean Memory \(GC\)/i })
-      );
-      act(() => {
-        vi.advanceTimersByTime(400);
+    it("keeps the milestone controls labeled, focusable, and large enough to tap", () => {
+      render(<Hero />);
+
+      const milestoneGroup = screen.getByRole("group", {
+        name: /Photo growth milestones/i,
       });
-      fireEvent.click(
-        screen.getByRole("button", { name: /Reset Memory Demo/i })
-      );
-      expect(screen.getByText(/18\.4 KB \/ 32\.0 KB/i)).toBeDefined();
-      expect(
-        screen.getByText(/Memory demo reset/i).getAttribute("aria-live")
-      ).toBe("polite");
-      vi.useRealTimers();
+      const milestoneButtons = milestoneGroup.querySelectorAll("button");
+      expect(milestoneButtons.length).toBe(6);
+
+      for (const button of milestoneButtons) {
+        expect(button.getAttribute("aria-label")).toMatch(/milestone/i);
+        expect(button.className).toContain("min-h-11");
+        expect(button.className).toContain("focus-visible:ring-2");
+      }
+      expect(milestoneButtons[0].getAttribute("aria-pressed")).toBe("true");
+
+      for (const name of [
+        /Previous co-pilot milestone photo/i,
+        /Next co-pilot milestone photo/i,
+      ]) {
+        const navigationButton = screen.getByRole("button", { name });
+        expect(navigationButton.className).toContain("min-h-11");
+        expect(navigationButton.className).toContain("focus-visible:ring-2");
+      }
     });
   });
 

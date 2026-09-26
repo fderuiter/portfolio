@@ -115,7 +115,7 @@ takedown, not prevention.
 
 Apache-2.0 is one-way in practice: grants already made cannot be retracted
 from copies already distributed. Future relicensing binds only future
-releases, and only while the copyright remains single-author: accepting
+releases, and only while the copyright remains single-author. Accepting
 outside contributions under inbound = outbound makes a later license change
 require contributor consent. This is the intended trade and the reason the
 decision was worth an ADR rather than a dropped-in file.

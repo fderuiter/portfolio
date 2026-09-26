@@ -389,9 +389,9 @@ export function renderNewsletterWelcomeEmail(
                 You&#39;ll receive infrequent, high-density technical retrospectives covering:
               </p>
               <ul style="margin: 0 0 20px 0; padding-left: 20px; color: #a1a1aa;">
-                <li style="margin-bottom: 6px;"><strong style="color: #f4f4f6;">Formal Verification &amp; Logic ASTs</strong> — Deductive proof assistants, type theory, and constraint solvers.</li>
-                <li style="margin-bottom: 6px;"><strong style="color: #f4f4f6;">Clinical Data Systems</strong> — CDISC CDASH, ODM-XML interoperability, and 21 CFR Part 11 architectures.</li>
-                <li style="margin-bottom: 6px;"><strong style="color: #f4f4f6;">Embedded Simulators &amp; Browser Physics</strong> — Custom canvas physics, Monkey C runtimes, and WebAssembly.</li>
+                <li style="margin-bottom: 6px;"><strong style="color: #f4f4f6;">Formal Verification &amp; Logic ASTs</strong>: Deductive proof assistants, type theory, and constraint solvers.</li>
+                <li style="margin-bottom: 6px;"><strong style="color: #f4f4f6;">Clinical Data Systems</strong>: CDISC CDASH, ODM-XML interoperability, and 21 CFR Part 11 architectures.</li>
+                <li style="margin-bottom: 6px;"><strong style="color: #f4f4f6;">Embedded Simulators &amp; Browser Physics</strong>: Custom canvas physics, Monkey C runtimes, and WebAssembly.</li>
               </ul>
               <p style="margin: 0;">
                 No spam, no fluff, zero automated tracking beacons.

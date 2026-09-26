@@ -79,7 +79,7 @@ export const BUSY_SCENE_SCENARIO: PatrolScenario = {
       role: "Responding Patroller",
       notes:
         "Second patroller arriving shortly after scene safety is addressed.",
-      statement: "I'm here: where do you need me first?",
+      statement: "I'm here. Where do you need me first?",
     },
   ],
   initialVitals: {
@@ -307,7 +307,7 @@ export const BUSY_SCENE_SCENARIO: PatrolScenario = {
         },
         {
           id: "delegate-deferential",
-          text: "Whatever seems most urgent to you: use your judgment.",
+          text: "Whatever seems most urgent to you. Use your judgment.",
           style: "deferential",
           clarity: "low",
           closesLoop: false,
